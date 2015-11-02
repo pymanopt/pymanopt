@@ -1,2 +1,2 @@
 # pymanopt
-Python port of manopt, integrating Theano for automatic differentiation.
+Python port of the MATLAB package manopt, integrating Theano for automatic differentiation.
