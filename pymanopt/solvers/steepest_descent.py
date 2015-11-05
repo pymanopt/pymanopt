@@ -1,16 +1,16 @@
 # Steepest descent (gradient descent) algorithm based on steepestdescent.m
 # from the manopt MATLAB package.
 
-from ..theano_functions import comp_diff
-from ..linesearch import linesearch
-from ..solver import Solver
+from .theano_functions import comp_diff
+import linesearch
+from .solver import Solver
 
 class SteepestDescent(Solver):
     def __init__(self):
         # Set gradient descent default parameters
         # TODO: allow user to specify these
         self.minstepsize = 1e-10
-        self.maxiter = 100
+        self.maxiter = 10
         self.tolgradnorm = 1e-6
         
         self.searcher = linesearch.Linesearch()
@@ -28,7 +28,7 @@ class SteepestDescent(Solver):
             x = man.rand()
             
         cost = objective(x)
-        grad = gradient(x)
+        grad = man.egrad2rgrad(x, gradient(x))
         gradnorm = man.norm(x, grad)
         
         iter = 0
@@ -36,7 +36,7 @@ class SteepestDescent(Solver):
         print "iter\tcost\t\tgrad. norm"
         
         while iter < self.maxiter:
-            print str(iter) + "\t" + str(cost) + "\t" + str(gradnorm)
+            print "%4d" % iter + "\t" + "%.5f" % cost + "\t" + "%.5f" % gradnorm
             
             # Descent direction is minus the gradient
             desc_dir = -grad
@@ -47,8 +47,8 @@ class SteepestDescent(Solver):
             
             # Calculate new cost, grad and gradnorm
             cost = objective(x)
-            grad = gradient(x)
+            grad = man.egrad2rgrad(x, gradient(x))
             gradnorm = man.norm(x, grad)
             iter = iter + 1
             
-        print x
+        return x

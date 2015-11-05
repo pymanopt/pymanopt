@@ -21,7 +21,7 @@ class Stiefel(Manifold):
 
     def egrad2rgrad(self, X, G):
         # Project G into the tangent space
-        GNew = G - np.dot(X, np.dot(V.T, G) + np.dot(G.T, V)) / 2
+        GNew = G - np.dot(X, np.dot(X.T, G) + np.dot(G.T, X)) / 2
         return GNew
     
     def norm(self, X, G):
