@@ -2,23 +2,25 @@ language: python
 python:
   - "2.7"
 
-addons:
-  apt:
-    packages:
-    - libatlas-base-dev
-    - gfortran
-    - python-numpy
+notifications:
+  email: false
 
-# install up to date scipy, taken from
-# https://gist.github.com/debsankha/7f610a9f2a826803381a
+# Install scipy without need to compile, taken from https://gist.github.com/dan-blanchard/
+# Setup anaconda
 before_install:
-    - mkdir -p $HOME/.cache/pip/wheels    
-    # build wheel only if none present
-    - travis_wait pip wheel --find-links=$HOME/.cache/pip/wheels --use-wheel --wheel-dir=$HOME/.cache/pip/wheels scipy
-    # now install from it
-    - pip install --no-index --find-links=$HOME/.cache/pip/wheels scipy
-
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes conda
+  # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+  - sudo rm -rf /dev/shm
+  - sudo ln -s /run/shm /dev/shm
+# Install packages
 install:
-    - "pip install -r requirements.txt"
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil
+  - python setup.py install
+
+
 
 script: nosetests
