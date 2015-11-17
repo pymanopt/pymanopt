@@ -2,8 +2,14 @@ language: python
 python:
   - "2.7"
 
+# install up to date scipy, taken from
+# https://gist.github.com/debsankha/7f610a9f2a826803381a
 before_install:
-    - sudo apt-get install -qq python-numpy python-scipy
+    - mkdir -p $HOME/.cache/pip/wheels    
+    # build wheel only if none present
+    - travis_wait pip wheel --find-links=$HOME/.cache/pip/wheels --use-wheel --wheel-dir=$HOME/.cache/pip/wheels scipy
+    # now install from it
+    - pip install --no-index --find-links=$HOME/.cache/pip/wheels scipy
 
 install:
     - "pip install -r requirements.txt"
