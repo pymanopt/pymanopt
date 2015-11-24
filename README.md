@@ -4,6 +4,7 @@
 Python port of the MATLAB package manopt, using Theano for automatic differentiation.
 
 http://www.manopt.org
+
 http://deeplearning.net/software/theano/
 
 ## Manopt feature implementation
