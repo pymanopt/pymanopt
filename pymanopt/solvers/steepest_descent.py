@@ -48,7 +48,7 @@ class SteepestDescent(Solver):
                  cost, -gradnorm**2)
 
             if step_size < self.minstepsize:
-                print "Terminated — converged."
+                print "Terminated — converged after %d iterations." % iter
                 return x
         print "Terminated — max iterations."
         return x
