@@ -11,9 +11,8 @@
 # Output: A real, orthonormal matrix X of size nxp such that trace(X'*A*X)
 #         is maximized. That is, the columns of X form an orthonormal basis
 #         of a dominant subspace of dimension p of A. These span the same space
-#         as  the eigenvectors associated with the largest eigenvalues of A (in
-#         no particular order). Sign is important: 2 is deemed a larger
-#         eigenvalue than -5.
+#         as  the eigenvectors associated with the largest eigenvalues of A. 
+#         Sign is important: 2 is deemed a larger eigenvalue than -5.
 #
 # The optimization is performed on the Grassmann manifold, since only the
 # space spanned by the columns of X matters. The implementation is short to
