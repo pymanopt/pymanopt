@@ -23,4 +23,6 @@ install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose theano
   - python setup.py install
 
-script: nosetests
+script: 
+  - nosetests
+  - cd examples && python dominant_invariant_subspace.py && cd ..
