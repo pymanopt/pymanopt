@@ -1,9 +1,9 @@
 # pymanopt
 [![Build Status](https://travis-ci.org/j-towns/pymanopt.svg?branch=master)](https://travis-ci.org/j-towns/pymanopt)
 
-Python port of the MATLAB package manopt, for manifold optimization using Theano for automatic differentiation.
+Python port of the MATLAB package Manopt, for manifold optimization using Theano for automatic differentiation.
 
-This project is independent from the manopt project.
+This project is independent from the Manopt project.
 
 http://www.manopt.org
 
