@@ -3,6 +3,8 @@
 
 Python port of the MATLAB package manopt, for manifold optimization using Theano for automatic differentiation.
 
+This project is independent from the manopt project.
+
 http://www.manopt.org
 
 http://deeplearning.net/software/theano/
