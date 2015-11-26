@@ -25,7 +25,7 @@ http://deeplearning.net/software/theano/
 
 ## Installation
 ### Dependencies
-This package depends on python, numpy, scipy and Theano. Instructions for installing numpy, scipy and Theano on different operating systems can be found [here](http://deeplearning.net/software/theano/install.html).
+This package depends on python 2.7.*, numpy, scipy and Theano. Instructions for installing numpy, scipy and Theano on different operating systems can be found [here](http://deeplearning.net/software/theano/install.html).
 
 ### Installing pymanopt
 You can install pymanopt with the following command:
