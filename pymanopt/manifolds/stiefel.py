@@ -24,15 +24,12 @@ class Stiefel(Manifold):
         # Set dimension
         self._dim = self._k*(self._n*self._p - .5*self._p*(self._p+1))
 
-        # Set the name
+        # Set the name and other properties which depend on k
         if k == 1:
             self._name = "Stiefel manifold St(%d, %d)" % (self._n, self._p)
         elif k >= 2:
             self._name = "Product Stiefel manifold St(%d, %d)^%d" % (self._n,
                 self._p, self._k)
-            self.rand = self._rand_multi
-            self.retr = self._retr_multi
-            self.proj = self._proj_multi
 
     @property
     def dim(self):
@@ -52,37 +49,36 @@ class Stiefel(Manifold):
         np.tensordot(G,H, axes=G.ndim)
 
     def proj(self, X, U):
-        # Project into the tangent space. Usually the same as egrad2rgrad
-        UNew = U - np.dot(X, np.dot(X.T, U) + np.dot(U.T,X)) / 2
-        return UNew
+        if self._k == 1:
+            # Project into the tangent space. Usually the same as egrad2rgrad
+            UNew = U - np.dot(X, np.dot(X.T, U) + np.dot(U.T,X)) / 2
+            return UNew
+        else:
+            UNew = U - multiprod(X, multiprod(multitransp(X), U) +
+                    multiprod(multitransp(U), X)) / 2
+            return UNew
 
-    def _proj_multi(self, X, U):
-        UNew = U - multiprod(X, multiprod(multitransp(X), U) +
-                multiprod(multitransp(U), X)) / 2
-        return UNew
+    egrad2rgrad = proj
 
     def ehess2rhess(self, X, Hess):
         # Convert Euclidean hessian into Riemannian hessian.
         raise NotImplementedError()
 
     # Retract to the Stiefel using the qr decomposition of X + G.
-    # Default method for when k = 1
     def retr(self, X, G):
-        # Calculate 'thin' qr decomposition of X + G
-        q, r = np.linalg.qr(X + G)
-        # Unflip any flipped signs
-        XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
-        return XNew
+        if self._k == 1:
+            # Calculate 'thin' qr decomposition of X + G
+            q, r = np.linalg.qr(X + G)
+            # Unflip any flipped signs
+            XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
+            return XNew
+        else:
+            XNew = X + G
+            for i in xrange(self._k):
+                q, r = np.linalg.qr(Y[i])
+                XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
 
-    # For when k >= 2
-    def _retr_multi(self, X, G):
-        XNew = X + G
-        for i in xrange(self._k)
-            q, r = np.linalg.qr(Y[i])
-            XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
 
-
-    egrad2rgrad = proj
 
     def norm(self, X, G):
         # Norm on the tangent space of the Stiefel is simply the Euclidean
@@ -91,15 +87,13 @@ class Stiefel(Manifold):
 
     # Generate random Stiefel point using qr of random normally distributed
     # matrix.
-    # Default random generator, used when k = 1
     def rand(self):
-        X = np.random.randn(self._n,self._p)
-        q, r = np.linalg.qr(X)
-        return q
-
-    # Random generator for when k >= 2
-    def _rand_multi(self):
-        X = np.zeros((self._k, self._n, self._p))
-        for i in xrange(self._k):
-            X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
-        return X
+        if self._k == 1:
+            X = np.random.randn(self._n,self._p)
+            q, r = np.linalg.qr(X)
+            return q
+        else:
+            X = np.zeros((self._k, self._n, self._p))
+            for i in xrange(self._k):
+                X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
+            return X
