@@ -1,7 +1,9 @@
 # pymanopt
 [![Build Status](https://travis-ci.org/j-towns/pymanopt.svg?branch=master)](https://travis-ci.org/j-towns/pymanopt)
 
-Python port of the MATLAB package manopt, using Theano for automatic differentiation.
+Python port of the MATLAB package Manopt, for manifold optimization using Theano for automatic differentiation.
+
+This project is independent from the Manopt project.
 
 http://www.manopt.org
 
@@ -23,7 +25,7 @@ http://deeplearning.net/software/theano/
 
 ## Installation
 ### Dependencies
-This package depends on python, numpy, scipy and Theano. Instructions for installing numpy, scipy and Theano on different operating systems can be found [here](http://deeplearning.net/software/theano/install.html).
+This package depends on python 2.7.*, numpy, scipy and Theano. Instructions for installing numpy, scipy and Theano on different operating systems can be found [here](http://deeplearning.net/software/theano/install.html).
 
 ### Installing pymanopt
 You can install pymanopt with the following command:
