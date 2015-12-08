@@ -1,9 +1,11 @@
-# Factory class for the Stiefel manifold. Initiation requires the dimensions
-# n, p to be specified. Optional argument k allows the user to optimize over
-# the product of k Stiefels.
+"""
+Factory class for the Stiefel manifold. Initiation requires the dimensions
+n, p to be specified. Optional argument k allows the user to optimize over
+the product of k Stiefels.
 
-# Elements are represented as n x p matrices (if k == 1), and as k x n x p
-# matrices if k > 1 (Note that this is different to manopt!).
+Elements are represented as n x p matrices (if k == 1), and as k x n x p
+matrices if k > 1 (Note that this is different to manopt!).
+"""
 import numpy as np
 from pymanopt.tools.multi import multiprod, multitransp
 from manifold import Manifold
@@ -24,7 +26,7 @@ class Stiefel(Manifold):
         # Set dimension
         self._dim = self._k*(self._n*self._p - .5*self._p*(self._p+1))
 
-        # Set the name and other properties which depend on k
+        # Set the name
         if k == 1:
             self._name = "Stiefel manifold St(%d, %d)" % (self._n, self._p)
         elif k >= 2:

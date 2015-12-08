@@ -1,10 +1,12 @@
-# Factory class for the Grassmann manifold. This is the manifold of p-
-# dimensional subspaces of n dimensional real vector space. Initiation requires
-# the dimensions n, p to be specified. Optional argument k allows the user
-# to optimize over the product of k Grassmanns.
+"""
+Factory class for the Grassmann manifold. This is the manifold of p-
+dimensional subspaces of n dimensional real vector space. Initiation requires
+the dimensions n, p to be specified. Optional argument k allows the user
+to optimize over the product of k Grassmanns.
 
-# Elements are represented as n x p matrices (if k == 1), and as k x n x p
-# matrices if k > 1 (Note that this is different to manopt!).
+Elements are represented as n x p matrices (if k == 1), and as k x n x p
+matrices if k > 1 (Note that this is different to manopt!).
+"""
 import numpy as np
 from pymanopt.tools.multi import multiprod, multitransp
 from manifold import Manifold
@@ -25,7 +27,7 @@ class Grassmann(Manifold):
         # Set dimension
         self._dim = self._k*(self._n*self._p - self._p**2)
 
-        # Set the name and other properties which depend on k
+        # Set the name
         if k == 1:
             self._name = "Grassmann manifold Gr(%d, %d)" % (self._n, self._p)
         elif k >= 2:
@@ -76,7 +78,7 @@ class Grassmann(Manifold):
         raise NotImplementedError()
 
     # Retract to the Grassmann using the qr decomposition of X + G. This
-    # retraction may need to be changed — see manopt grassmannfactory.m. For now
+    # retraction may need to be changed - see manopt grassmannfactory.m. For now
     # it is identical to the Stiefel retraction.
     def retr(self, X, G):
         if self._k == 1:
