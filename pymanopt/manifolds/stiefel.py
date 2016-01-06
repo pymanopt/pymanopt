@@ -48,7 +48,7 @@ class Stiefel(Manifold):
     def inner(self, X, G, H):
         # Inner product (Riemannian metric) on the tangent space
         # For the stiefel this is the Frobenius inner product.
-        np.tensordot(G,H, axes=G.ndim)
+        return np.tensordot(G,H, axes=G.ndim)
 
     def proj(self, X, U):
         if self._k == 1:
