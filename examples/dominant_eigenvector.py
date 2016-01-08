@@ -5,7 +5,6 @@ import theano.tensor as T
 
 from pymanopt.solvers.steepest_descent import SteepestDescent
 from pymanopt.manifolds.sphere import Sphere
-from pymanopt.manifolds.grassmann import Grassmann
 
 
 def dominant_eigenvector(A):
