@@ -72,7 +72,7 @@ class SteepestDescent(Solver):
         gradient = comp_diff.gradient(obj, arg)
 
         # If no starting point is specified, generate one at random.
-        if x == None:
+        if x is None:
             x = man.rand()
 
         if self.verbosity >= 1: print "Optimizing..."
