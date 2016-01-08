@@ -3,7 +3,7 @@ import numpy.linalg as la
 import numpy.random as rnd
 
 from manifold import Manifold
-import tools
+from pymanopt import tools
 
 
 class Sphere(Manifold):

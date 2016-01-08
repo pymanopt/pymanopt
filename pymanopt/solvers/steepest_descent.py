@@ -3,9 +3,9 @@ Module containing steepest descent (gradient descent) algorithm based on
 steepestdescent.m from the manopt MATLAB package.
 """
 import time
-from pymanopt.solvers.theano_functions import comp_diff
-import linesearch
+from pymanopt.solvers import linesearch
 from pymanopt.solvers.solver import Solver
+from pymanopt.solvers.theano_functions import comp_diff
 
 class SteepestDescent(Solver):
     """

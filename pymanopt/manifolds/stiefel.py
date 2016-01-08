@@ -8,7 +8,7 @@ matrices if k > 1 (Note that this is different to manopt!).
 """
 import numpy as np
 from pymanopt.tools.multi import multiprod, multitransp
-from manifold import Manifold
+from pymanopt.manifolds.manifold import Manifold
 
 class Stiefel(Manifold):
 
