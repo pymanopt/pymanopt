@@ -36,7 +36,7 @@ if __name__ == "__main__":
     A = rnd.randn(n, n)
     A = 0.5 * (A + A.T)
 
-    # Calculate the actual solution by a convential eigenvalue decomposition.
+    # Calculate the actual solution by a conventional eigenvalue decomposition.
     w, v = la.eig(A)
     x = v[:, np.argmax(w)]
 
