@@ -28,7 +28,7 @@ class Sphere(Manifold):
 
     @property
     def dim(self):
-        return n * m - 1
+        return self._n * self._m - 1
 
     def inner(self, X, U, V):
         return float(np.tensordot(np.asmatrix(U), np.asmatrix(V)))
