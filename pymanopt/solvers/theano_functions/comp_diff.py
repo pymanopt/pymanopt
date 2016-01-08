@@ -11,4 +11,5 @@ def compile(objective, argument):
 # compiled function.
 def gradient(objective, argument):
     g = T.grad(objective, argument)
-    return theano.function([argument], g)
+    return compile(g, argument)
+
