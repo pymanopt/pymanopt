@@ -25,4 +25,4 @@ install:
 
 script: 
   - nosetests
-  - cd examples && python dominant_invariant_subspace.py && cd ..
+  - cd examples && python dominant_invariant_subspace.py && python dominant_eigenvector.py && cd ..
