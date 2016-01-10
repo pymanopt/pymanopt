@@ -42,6 +42,10 @@ class Grassmann(Manifold):
     def name(self):
         return self._name
 
+    @property
+    def typicaldist(self):
+        return np.sqrt(self._p * self._k)
+        
     # Geodesic distance for Grassmann
     def dist(self, X, Y):
         if self._k == 1:

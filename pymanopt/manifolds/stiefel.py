@@ -41,6 +41,10 @@ class Stiefel(Manifold):
     def name(self):
         return self._name
 
+    @property
+    def typicaldist(self):
+        return np.sqrt(self._p * self._k)
+
     def dist(self, X, Y):
         # Geodesic distance on the manifold
         raise NotImplementedError()

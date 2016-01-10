@@ -3,7 +3,7 @@ Module containing steepest descent (gradient descent) algorithm based on
 steepestdescent.m from the manopt MATLAB package.
 """
 import time
-from pymanopt.solvers.theano_functions import comp_diff
+from pymanopt.tools import theano_functions as tf
 import linesearch
 from pymanopt.solvers.solver import Solver
 
@@ -68,11 +68,11 @@ class SteepestDescent(Solver):
         # Compile the objective function and compute and compile its
         # gradient.
         if self.verbosity >= 1: print "Computing gradient and compiling..."
-        objective = comp_diff.compile(obj, arg)
-        gradient = comp_diff.gradient(obj, arg)
+        objective = tf.compile(obj, arg)
+        gradient = tf.gradient(obj, arg)
 
         # If no starting point is specified, generate one at random.
-        if x == None:
+        if x is None:
             x = man.rand()
 
         if self.verbosity >= 1: print "Optimizing..."

@@ -15,6 +15,12 @@ class Manifold(object):
         # Dimension of the manifold
         raise NotImplementedError()
 
+    @abc.abstractproperty
+    def typicaldist(self):
+        # Returns the "scale" of the manifold. This is used by the trust-regions
+        # solver, to determine default initial and maximal trust-region radii.
+        raise NotImplementedError()
+
     @abc.abstractmethod
     def dist(self, X, Y):
         # Geodesic distance on the manifold
