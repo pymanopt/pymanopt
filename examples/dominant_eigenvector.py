@@ -3,8 +3,8 @@ import numpy.random as rnd
 import numpy.linalg as la
 import theano.tensor as T
 
-from pymanopt.solvers.steepest_descent import SteepestDescent
 from pymanopt.manifolds.sphere import Sphere
+from pymanopt.solvers import conjugate_gradient as cg
 
 
 def dominant_eigenvector(A):
@@ -19,7 +19,7 @@ def dominant_eigenvector(A):
     assert np.allclose(np.sum(A - A.T), 0), "matrix must be symmetric"
 
     manifold = Sphere(n)
-    solver = SteepestDescent(maxiter=500, minstepsize=1e-6)
+    solver = cg.ConjugateGradient(maxiter=500, minstepsize=1e-6)
     # XXX: It'd be more straightforward to use T.vector in this case, but this
     #      doesn't work with the current solver.
     x = T.matrix()

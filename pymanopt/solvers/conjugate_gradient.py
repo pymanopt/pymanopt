@@ -1,0 +1,210 @@
+"""
+Module containing conjugate gradient algorithm based on conjugategradient.m
+from the manopt MATLAB package.
+"""
+import time
+import collections
+
+import numpy as np
+
+from pymanopt.tools import theano_functions as tf
+from pymanopt.solvers import linesearch
+from pymanopt.solvers.solver import Solver
+from pymanopt import tools
+
+
+BetaTypes = tools.make_enum(
+    "BetaTypes",
+    "FletcherReeves PolakRibiere HestenesStiefel HagerZhang".split())
+
+
+class ConjugateGradient(Solver):
+    """
+    Conjugate gradient solver class.
+    Variable attributes (defaults in brackets):
+        - beta_type (BetaTypes.HestenesStiefel)
+            Conjugate gradient beta rule used to construct the new search
+            direction
+        - orth_value (numpy.inf)
+            Parameter for Powell's restart strategy. An infinite value disables
+            this strategy. See in code formula for the specific criterion used.
+    """
+    def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
+                 *args, **kwargs):
+        super(ConjugateGradient, self).__init__(*args, **kwargs)
+
+        self._beta_type = beta_type
+        self._orth_value = orth_value
+
+        self._searcher = linesearch.LineSearchAdaptive()
+
+    def _check_stopping_criterion(self, gradnorm, iter, time0):
+        reason = None
+        if gradnorm < self._mingradnorm:
+            reason = ("Terminated - min grad norm reached after %d "
+                      "iterations, %.2f seconds." % (
+                          iter, (time.time() - time0)))
+        elif iter >= self._maxiter:
+            reason = ("Terminated - max iterations reached after "
+                      "%.2f seconds." % (time.time() - time0))
+        elif time.time() >= time0 + self._maxtime:
+            reason = ("Terminated - max time reached after %d iterations."
+                      % iter)
+        return reason
+
+    def solve(self, obj, arg, man, x=None):
+        """
+        Perform optimization using gradient descent with linesearch. Both obj
+        and arg must be theano TensorVariable objects. This method first
+        computes the gradient (derivative) of obj w.r.t. arg, and then optimizes
+        by moving in the direction of steepest descent (which is the opposite
+        direction to the gradient).
+        Arguments:
+            - obj
+                Theano TensorVariable which is the scalar cost to be optimized,
+                defined symbolically in terms of the TensorVariable arg.
+            - arg
+                Theano TensorVariable which is the matrix (or higher order
+                tensor) being optimized over.
+            - man
+                Pymanopt manifold, which is the manifold to optimize over.
+            - x=None
+                Optional parameter. Starting point on the manifold. If none then
+                a starting point will be randomly generated.
+        Returns:
+            - x
+                Local minimum of obj, or if algorithm terminated before
+                convergence x will be the point at which it terminated.
+        """
+        # Compile the objective function and compute and compile its
+        # gradient.
+        if self._verbosity >= 1:
+            print "Computing gradient and compiling..."
+        objective = tf.compile(obj, arg)
+        gradient = tf.gradient(obj, arg)
+
+        # If no starting point is specified, generate one at random.
+        if x is None:
+            x = man.rand()
+
+        # Initialize iteration counter and timer
+        iter = 0
+        stepsize = np.nan
+        time0 = time.time()
+
+        if self._verbosity >= 1:
+            print "Optimizing..."
+        if self._verbosity >= 2:
+            print " iter\t\t   cost val\t    grad. norm"
+
+        # Calculate initial cost-related quantities
+        cost = objective(x)
+        grad = man.egrad2rgrad(x, gradient(x))
+        gradnorm = man.norm(x, grad)
+        Pgrad = grad # TODO: Pgrad = precondition(x, grad)
+        gradPgrad = man.inner(x, grad, Pgrad)
+
+        # Initial descent direction is the negative gradient
+        desc_dir = man.lincomb(x, -1, Pgrad)
+
+        while True:
+            if self._verbosity >= 2:
+                print "%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm)
+
+            stop_reason = self._check_stopping_criterion(
+                gradnorm, iter + 1, time0)
+            if stop_reason is None and stepsize < self._minstepsize:
+                stop_reason = (
+                    "Terminated - min stepsize reached after %d iterations, "
+                    "%.2f seconds." % (iter, (time.time() - time0)))
+
+            if stop_reason:
+                if self._verbosity >= 1:
+                    print stop_reason
+                    print
+                break
+
+            # The line search algorithms require the directional derivative of
+            # the cost at the current point x along the search direction.
+            df0 = man.inner(x, grad, desc_dir)
+
+            # If we didn't get a descent direction: restart, i.e., switch to
+            # the negative gradient. Equivalent to resetting the CG direction
+            # to a steepest descent step, which discards the past information.
+            if df0 >= 0:
+                # Or we switch to the negative gradient direction.
+                if self._verbosity >= 3:
+                    print ("Conjugate gradient info: got an ascent direction "
+                           "(df0 = %.2f), reset to the (preconditioned) "
+                           "steepest descent direction." % df0)
+                # Reset to negative gradient: this discards the CG memory.
+                desc_dir = man.lincomb(x, -1, Pgrad)
+                df0 = -gradPgrad
+
+            # Execute line search
+            stepsize, newx = self._searcher.search(objective, man, x, desc_dir,
+                                                   cost, df0)
+
+            # Compute the new cost-related quantities for newx
+            newcost = objective(newx)
+            newgrad = man.egrad2rgrad(newx, gradient(newx))
+            newgradnorm = man.norm(newx, newgrad)
+            Pnewgrad = newgrad # TODO: precondition(xnew, newgrad)
+            newgradPnewgrad = man.inner(newx, newgrad, Pnewgrad)
+
+            # Apply the CG scheme to compute the next search direction
+            oldgrad = man.transp(x, newx, grad)
+            orth_grads = man.inner(newx, oldgrad, Pnewgrad) / newgradPnewgrad
+
+            # Powell's restart strategy (see page 12 of Hager and Zhang's
+            # survey on conjugate gradient methods, for example)
+            if abs(orth_grads) >= self._orth_value:
+                beta = 0;
+                desc_dir = man.lincomb(x, -1, Pnewgrad)
+            else:
+                desc_dir = man.transp(x, newx, desc_dir)
+
+                if self._beta_type == BetaTypes.FletcherReeves:
+                    beta = newgradPnewgrad / gradPgrad
+                elif self._beta_type == BetaTypes.PolakRibiere:
+                    diff = man.lincomb(newx, 1, newgrad, -1, oldgrad)
+                    ip_diff = man.inner(newx, Pnewgrad, diff)
+                    beta = max(0, ip_diff / gradPgrad)
+                elif self._beta_type == BetaTypes.HestenesStiefel:
+                    diff = man.lincomb(newx, 1, newgrad, -1, oldgrad)
+                    ip_diff = man.inner(newx, Pnewgrad, diff)
+                    beta = max(0, ip_diff / man.inner(newx, diff, desc_dir))
+                elif self._beta_type == BetaTypes.HagerZhang:
+                    diff = man.lincomb(newx, 1, newgrad, -1, oldgrad)
+                    Poldgrad = man.transp(x, newx, Pgrad)
+                    Pdiff = man.lincomb(newx, 1, Pnewgrad, -1, Poldgrad)
+                    deno = man.inner(newx, diff, desc_dir)
+                    numo = man.inner(newx, diff, Pnewgrad)
+                    numo -= (2 * man.inner(newx, diff, Pdiff) *
+                             man.inner(newx, desc_dir, newgrad) / deno)
+                    beta = numo / deno
+                    # Robustness (see Hager-Zhang paper mentioned above)
+                    desc_dir_norm = man.norm(newx, desc_dir)
+                    eta_HZ = -1 / (desc_dir_norm * min(0.01, gradnorm))
+                    beta = max(beta, eta_HZ)
+                else:
+                    types = ", ".join(
+                        ["BetaTypes.%s" % t for t in BetaTypes._fields])
+                    raise ValueError(
+                        "Unknown beta_type %s. Should be one of %s." % (
+                            self._beta_type, types))
+
+                desc_dir = man.lincomb(newx, -1, Pnewgrad, beta, desc_dir)
+
+            # Update the necessary variables for the next iteration.
+            x = newx
+            cost = newcost
+            grad = newgrad
+            Pgrad = Pnewgrad
+            gradnorm = newgradnorm
+            gradPgrad = newgradPnewgrad
+
+            iter += 1
+
+        return x
+

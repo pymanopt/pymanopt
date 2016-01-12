@@ -3,7 +3,6 @@ import numpy.linalg as la
 import numpy.random as rnd
 
 from manifold import Manifold
-from pymanopt import tools
 
 
 class Sphere(Manifold):
@@ -30,6 +29,10 @@ class Sphere(Manifold):
     def dim(self):
         return self._n * self._m - 1
 
+    @property
+    def typicaldist(self):
+        return np.pi
+
     def inner(self, X, U, V):
         return float(np.tensordot(np.asmatrix(U), np.asmatrix(V)))
 
@@ -38,9 +41,6 @@ class Sphere(Manifold):
 
     def dist(self, U, V):
         return np.arccos(self.inner(None, U, V)).real
-
-    def typicaldist(self):
-        return np.pi
 
     def proj(self, X, H):
         return H - self.inner(None, X, H) * X
@@ -52,13 +52,12 @@ class Sphere(Manifold):
     def ehess2rhess(self, X, egrad, ehess, U):
         return self.proj(X, ehess) - self.inner(None, X, ehess) * U
 
-    def exp(self, X, U, t=1):
-        tU = t * U
-        norm_tU = self.norm(None, tU)
-        return X * np.cos(norm_tU) + tU * np.sin(norm_tU) / norm_tU
+    def exp(self, X, U):
+        norm_U = self.norm(None, U)
+        return X * np.cos(norm_U) + U * np.sin(norm_U) / norm_U
 
-    def retr(self, X, U, t=1):
-        Y = X + t * U
+    def retr(self, X, U):
+        Y = X + U
         return self._normalize(Y)
 
     def log(self, X, Y):
@@ -78,8 +77,11 @@ class Sphere(Manifold):
         proj = self.proj(X, H)
         return self._normalize(proj)
 
-    def lincomb(self, X, a1, u1, a2=None, u2=None):
-        return tools.matrixlincomb(None, a1, u1, a2, u2)
+    def transp(self, X, Y, U):
+        return self.proj(Y, U)
+
+    def pairmean(self, X, Y):
+        return self._normalize(X + y)
 
     def _normalize(self, X):
         """
