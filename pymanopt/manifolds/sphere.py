@@ -78,6 +78,12 @@ class Sphere(Manifold):
         proj = self.proj(X, H)
         return self._normalize(proj)
 
+    def transp(self, X, Y, U):
+        return self.proj(Y, U)
+
+    def pairmean(self, X, Y):
+        return self._normalize(X + y)
+
     def _normalize(self, X):
         """
         Return a Frobenius-normalized version of the point X in the ambient
