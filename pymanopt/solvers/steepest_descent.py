@@ -12,7 +12,7 @@ class SteepestDescent(Solver):
     def __init__(self, *args, **kwargs):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 
-        self._searcher = linesearch.Linesearch()
+        self._searcher = linesearch.LineSearch()
 
     # Function to solve optimisation problem using steepest descent.
     def solve(self, obj, arg, man, x=None):

@@ -3,15 +3,18 @@ Line-search based on linesearch.m in the manopt MATLAB package.
 """
 import numpy as np
 
-class Linesearch(object):
+
+class LineSearch(object):
     def __init__(self):
-        """Initialise linesearch default parameters"""
+        """Initialise line search default parameters"""
         # TODO: allow user to initiate these
-        self.contraction_factor = .5
-        self.optimism = 1/.5
+        self.contraction_factor = 0.5
+        self.optimism = 1 / 0.5
         self.suff_decr = 1e-4
         self.max_steps = 25
         self.initial_stepsize = 1
+
+        self._oldf0 = None
 
     def search(self, objective, manifold, x, d, f0, df0):
         """
@@ -36,7 +39,13 @@ class Linesearch(object):
         # Compute the norm of the search direction
         norm_d = manifold.norm(x, d)
 
-        alpha = self.initial_stepsize/norm_d
+        if self._oldf0 is not None:
+            # Pick initial step size based on where we were last time.
+            alpha = 2 * (f0 - self._oldf0) / df0
+            # Look a little further
+            alpha *= self.optimism
+        else:
+            alpha = self.initial_stepsize / norm_d
 
         # Make the chosen step and compute the cost there.
         newx = manifold.retr(x, alpha * d)
@@ -45,7 +54,7 @@ class Linesearch(object):
 
         # Backtrack while the Armijo criterion is not satisfied
         while (newf > f0 + self.suff_decr * alpha * df0 and
-            step_count <= self.max_steps):
+               step_count <= self.max_steps):
 
             # Reduce the step size
             alpha = self.contraction_factor * alpha
@@ -63,4 +72,7 @@ class Linesearch(object):
 
         stepsize = alpha * norm_d
 
+        self._oldf0 = f0
+
         return stepsize, newx
+
