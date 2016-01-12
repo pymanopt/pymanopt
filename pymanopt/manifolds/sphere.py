@@ -30,6 +30,10 @@ class Sphere(Manifold):
     def dim(self):
         return self._n * self._m - 1
 
+    @property
+    def typicaldist(self):
+        return np.pi
+
     def inner(self, X, U, V):
         return float(np.tensordot(np.asmatrix(U), np.asmatrix(V)))
 
@@ -38,9 +42,6 @@ class Sphere(Manifold):
 
     def dist(self, U, V):
         return np.arccos(self.inner(None, U, V)).real
-
-    def typicaldist(self):
-        return np.pi
 
     def proj(self, X, H):
         return H - self.inner(None, X, H) * X
