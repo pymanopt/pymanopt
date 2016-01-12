@@ -3,7 +3,6 @@ import numpy.linalg as la
 import numpy.random as rnd
 
 from manifold import Manifold
-from pymanopt import tools
 
 
 class Sphere(Manifold):
@@ -78,9 +77,6 @@ class Sphere(Manifold):
         H = rnd.randn(self._n, self._m)
         proj = self.proj(X, H)
         return self._normalize(proj)
-
-    def lincomb(self, X, a1, u1, a2=None, u2=None):
-        return tools.matrixlincomb(None, a1, u1, a2, u2)
 
     def _normalize(self, X):
         """
