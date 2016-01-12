@@ -14,15 +14,16 @@ http://deeplearning.net/software/theano/
 
 | Manifold      | Implemented   |
 | ------------- |:-------------:|
-| Sphere | Partially |
-| Stiefel | Partially |
-| Grassmann | Partially |
+| Sphere        | Partially     |
+| Stiefel       | Partially     |
+| Grassmann     | Partially     |
 
 ### Solvers
 
 | Solver        | Implemented   |
 | ------------- |:-------------:|
 | Steepest-descent| Partially   |
+| Conjugate-gradient | Partially|
 
 ## Installation
 ### Dependencies
