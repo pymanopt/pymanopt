@@ -52,13 +52,12 @@ class Sphere(Manifold):
     def ehess2rhess(self, X, egrad, ehess, U):
         return self.proj(X, ehess) - self.inner(None, X, ehess) * U
 
-    def exp(self, X, U, t=1):
-        tU = t * U
-        norm_tU = self.norm(None, tU)
-        return X * np.cos(norm_tU) + tU * np.sin(norm_tU) / norm_tU
+    def exp(self, X, U):
+        norm_U = self.norm(None, U)
+        return X * np.cos(norm_U) + U * np.sin(norm_U) / norm_U
 
-    def retr(self, X, U, t=1):
-        Y = X + t * U
+    def retr(self, X, U):
+        Y = X + U
         return self._normalize(Y)
 
     def log(self, X, Y):
