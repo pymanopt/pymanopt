@@ -54,11 +54,11 @@ class ConjugateGradient(Solver):
 
     def solve(self, obj, arg, man, x=None):
         """
-        Perform optimization using gradient descent with linesearch. Both obj
-        and arg must be theano TensorVariable objects. This method first
-        computes the gradient (derivative) of obj w.r.t. arg, and then optimizes
-        by moving in the direction of steepest descent (which is the opposite
-        direction to the gradient).
+        Perform optimization using nonlinear conjugate gradient method with
+        linesearch. Both obj and arg must be theano TensorVariable objects.
+        This method first computes the gradient of obj w.r.t. arg, and then
+        optimizes by moving in a direction that is conjugate to all previous
+        search directions.
         Arguments:
             - obj
                 Theano TensorVariable which is the scalar cost to be optimized,
