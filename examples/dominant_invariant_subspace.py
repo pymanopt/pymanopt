@@ -21,8 +21,9 @@ Ported to pymanopt by Jamie Townsend, Nov 24, 2015
 import theano.tensor as T
 import numpy as np
 
-from pymanopt.solvers.trust_regions import TrustRegions
-from pymanopt.manifolds.grassmann import Grassmann
+from pymanopt.solvers import TrustRegions
+from pymanopt.manifolds import Grassmann
+
 
 def dominant_invariant_subspace(A, p):
     """
@@ -54,10 +55,10 @@ def dominant_invariant_subspace(A, p):
     cost = -T.dot(X.T,T.dot(A,X)).trace();
 
     # Create a solver object
-    steepest_solver = TrustRegions()
+    solver = TrustRegions()
 
     # Solve
-    Xopt = steepest_solver.solve(cost, X, Gr, Delta_bar=8*np.sqrt(p))
+    Xopt = solver.solve(cost, X, Gr, Delta_bar=8*np.sqrt(p))
 
     return Xopt
 
