@@ -66,9 +66,12 @@ class Stiefel(Manifold):
 
     egrad2rgrad = proj
 
-    def ehess2rhess(self, X, Hess):
+    def ehess2rhess(self, X, egrad, ehess, H):
         # Convert Euclidean hessian into Riemannian hessian.
-        raise NotImplementedError()
+        XtG = multiprod(multitransp(X), egrad)
+        symXtG = multisym(XtG)
+        HsymXtG = multiprod(H, symXtG)
+        return proj(X, ehess - HsymXtG)
 
     # Retract to the Stiefel using the qr decomposition of X + G.
     def retr(self, X, G):
@@ -103,3 +106,8 @@ class Stiefel(Manifold):
             for i in xrange(self._k):
                 X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
             return X
+
+    def randvec(self, X):
+        U = proj(X, np.random.randn(self._k, self._n, self._p))
+        U = U / np.linalg.norm(U)
+        return U

@@ -45,7 +45,7 @@ class Grassmann(Manifold):
     @property
     def typicaldist(self):
         return np.sqrt(self._p * self._k)
-        
+
     # Geodesic distance for Grassmann
     def dist(self, X, Y):
         if self._k == 1:
@@ -77,9 +77,12 @@ class Grassmann(Manifold):
 
     egrad2rgrad = proj
 
-    def ehess2rhess(self, X, Hess):
+    def ehess2rhess(self, X, egrad, ehess, H):
         # Convert Euclidean hessian into Riemannian hessian.
-        raise NotImplementedError()
+        PXehess = proj(X, ehess)
+        XtG = multiprod(multitransp(X), egrad)
+        HXtG = multiprod(H, XtG)
+        return PXehess - HXtG
 
     # Retract to the Grassmann using the qr decomposition of X + G. This
     # retraction may need to be changed - see manopt grassmannfactory.m. For now
@@ -113,3 +116,8 @@ class Grassmann(Manifold):
             for i in xrange(self._k):
                 X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
             return X
+
+    def randvec(self, X):
+        U = proj(X, np.random.randn(self._k, self._n, self._p))
+        U = U / np.linalg.norm(U)
+        return U
