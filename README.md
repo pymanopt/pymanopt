@@ -44,8 +44,8 @@ To do optimization with pymanopt, you will need to create a manifold object, a s
 import theano.tensor as T
 import numpy as np
 
-from pymanopt.solvers.steepest_descent import SteepestDescent
-from pymanopt.manifolds.stiefel import Stiefel
+from pymanopt.solvers import SteepestDescent
+from pymanopt.manifolds import Stiefel
 
 # ---------------------------------
 # Define cost function using Theano
