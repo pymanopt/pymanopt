@@ -64,7 +64,7 @@ class Grassmann(Manifold):
     def inner(self, X, G, H):
         # Inner product (Riemannian metric) on the tangent space
         # For the Grassmann this is the Frobenius inner product.
-        np.tensordot(G,H, axes=G.ndim)
+        return np.tensordot(G,H, axes=G.ndim)
 
     def proj(self, X, U):
         # Project into the tangent space. Usually the same as egrad2rgrad

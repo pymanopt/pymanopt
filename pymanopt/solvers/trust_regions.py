@@ -364,8 +364,6 @@ class TrustRegions(Solver):
 
 def tCG(man, x, grad, hess, eta, Delta, theta, kappa, useRand, precon,
         mininner, maxinner):
-    # Trying reimporting numpy to fix travis build
-    import numpy as np
     inner = man.inner
     lincomb = man.lincomb
 
