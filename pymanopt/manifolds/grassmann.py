@@ -8,7 +8,7 @@ Elements are represented as n x p matrices (if k == 1), and as k x n x p
 matrices if k > 1 (Note that this is different to manopt!).
 """
 import numpy as np
-from pymanopt.tools.multi import multiprod, multitransp
+from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
 class Grassmann(Manifold):
@@ -79,7 +79,7 @@ class Grassmann(Manifold):
 
     def ehess2rhess(self, X, egrad, ehess, H):
         # Convert Euclidean hessian into Riemannian hessian.
-        PXehess = proj(X, ehess)
+        PXehess = self.proj(X, ehess)
         XtG = multiprod(multitransp(X), egrad)
         HXtG = multiprod(H, XtG)
         return PXehess - HXtG

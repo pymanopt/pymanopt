@@ -54,10 +54,10 @@ def dominant_invariant_subspace(A, p):
     cost = -T.dot(X.T,T.dot(A,X)).trace();
 
     # Create a solver object
-    steepest_solver = SteepestDescent(maxiter=500, minstepsize=1e-6)
+    steepest_solver = TrustRegions()
 
     # Solve
-    Xopt = steepest_solver.solve(cost, X, Gr)
+    Xopt = steepest_solver.solve(cost, X, Gr, Delta_bar=8*np.sqrt(p))
 
     return Xopt
 

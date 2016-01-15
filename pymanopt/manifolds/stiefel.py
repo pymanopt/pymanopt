@@ -7,7 +7,7 @@ Elements are represented as n x p matrices (if k == 1), and as k x n x p
 matrices if k > 1 (Note that this is different to manopt!).
 """
 import numpy as np
-from pymanopt.tools.multi import multiprod, multitransp
+from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
 class Stiefel(Manifold):
@@ -71,7 +71,7 @@ class Stiefel(Manifold):
         XtG = multiprod(multitransp(X), egrad)
         symXtG = multisym(XtG)
         HsymXtG = multiprod(H, symXtG)
-        return proj(X, ehess - HsymXtG)
+        return self.proj(X, ehess - HsymXtG)
 
     # Retract to the Stiefel using the qr decomposition of X + G.
     def retr(self, X, G):
