@@ -1,5 +1,3 @@
-# Solver class. Empty for now.
-
 class Solver(object):
     def __init__(self, mingradnorm=1e-6, maxiter=1000, maxtime=1000,
                  minstepsize = 1e-10, verbosity=2):
@@ -24,4 +22,3 @@ class Solver(object):
         self._maxtime = maxtime
         self._minstepsize = minstepsize
         self._verbosity = verbosity
-

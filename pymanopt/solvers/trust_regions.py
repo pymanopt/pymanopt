@@ -60,7 +60,7 @@ based on tCG.m from the Manopt MATLAB package.
 """
 import time
 
-import pymanopt.tools.theano_functions as comp_diff
+from pymanopt.tools import theano_functions as comp_diff
 from pymanopt.solvers.solver import Solver
 
 import numpy as np
