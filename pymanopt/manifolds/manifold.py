@@ -2,6 +2,8 @@
 
 import abc
 
+import numpy as np
+
 class Manifold(object):
     __metaclass__ = abc.ABCMeta
 
@@ -64,6 +66,11 @@ class Manifold(object):
         # A function which returns a random point on the manifold.
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def randvec(self, X):
+        # Returns a random, unit norm vector in the tangent space at X.
+        raise NotImplementedError
+
     def lincomb(self, X, a1, u1, a2=None, u2=None):
         """
         Given a point X, two tangent vectors u1 and u2 at X, and two real
@@ -79,3 +86,8 @@ class Manifold(object):
             return y + a2 * u2
         return y
 
+    def zerovec(self, X):
+        """
+        Returns the zero tangent vector at X.
+        """
+        return np.zeros(np.shape(X))
