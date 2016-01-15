@@ -24,6 +24,7 @@ http://deeplearning.net/software/theano/
 | ------------- |:-------------:|
 | Steepest-descent| Partially   |
 | Conjugate-gradient | Partially|
+| Trust-regions | Partially     |
 
 ## Installation
 ### Dependencies
