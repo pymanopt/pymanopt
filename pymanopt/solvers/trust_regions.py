@@ -74,7 +74,7 @@ class TrustRegions(Solver):
         self.kappa = kappa
         self.theta = theta
         self.rho_prime = rho_prime
-        self.useRand = useRand
+        self.use_rand = use_rand
         self.rho_regularization = rho_regularization
 
         # TODO: implement value checks.
@@ -145,7 +145,7 @@ class TrustRegions(Solver):
             # *************************
 
             # Determine eta0
-            if not self.useRand:
+            if not self.use_rand:
                 # Pick the zero vector
                 eta = man.zerovec(x)
             else:
@@ -157,7 +157,7 @@ class TrustRegions(Solver):
 
             # Solve TR subproblem approximately
             (eta, Heta, numit, stop_inner) = tCG(man, x, fgradx, hess, eta,
-                Delta, self.theta, self.kappa, self.useRand, precon, mininner,
+                Delta, self.theta, self.kappa, self.use_rand, precon, mininner,
                 maxinner)
 
             srstr = self.tcg_stop_reason[stop_inner]
@@ -168,7 +168,7 @@ class TrustRegions(Solver):
             # eta-related quantities have been changed consistently, or none of
             # them have changed.
 
-            if self.useRand:
+            if self.use_rand:
                 used_cauchy = False
                 # Check the curvature
                 Hg = hess(x, fgradx)
@@ -335,7 +335,7 @@ class TrustRegions(Solver):
             if self._verbosity == 2:
                 print '{:.3s} {:.3s}   k: {:5d}     num_inner: {:5d}     f: {:+e}   |grad|: {:e}   {:s}'.format(accstr, trstr, k, numit, float(fx), norm_grad, srstr)
             elif self._verbosity > 2:
-                if self.useRand and used_cauchy:
+                if self.use_rand and used_cauchy:
                     print 'USED CAUCHY POINT'
                 print ('{:.3s} {:.3s}    k: {:5d}     '
                     'num_inner: {:5d}     {:s}'.format(accstr, trstr, k, numit, srstr))
@@ -360,12 +360,12 @@ class TrustRegions(Solver):
                     "{:.2f} seconds.".format(time.time() - time0))
                 return x
 
-def tCG(man, x, grad, hess, eta, Delta, theta, kappa, useRand, precon,
+def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         mininner, maxinner):
     inner = man.inner
     lincomb = man.lincomb
 
-    if not useRand: # and therefore, eta == 0
+    if not use_rand: # and therefore, eta == 0
         Heta = man.zerovec(x)
         r = grad
         e_Pe = 0
@@ -380,7 +380,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, useRand, precon,
     norm_r0 = norm_r
 
     # Precondition the residual
-    if not useRand:
+    if not use_rand:
         z = precon(x, r)
     else:
         z = r
@@ -391,7 +391,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, useRand, precon,
 
     # Initial search direction
     delta = lincomb(x, -1, z)
-    if not useRand:
+    if not use_rand:
         e_Pd = 0
     else:
         e_Pd = inner(x, eta, delta)
@@ -407,7 +407,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, useRand, precon,
 
     def model_fun(eta, Heta):
         return inner(x, eta, grad) + .5 * inner(x, eta, Heta)
-    if not useRand:
+    if not use_rand:
         model_value = 0
     else:
         model_value = model_fun(eta, Heta)
@@ -501,7 +501,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, useRand, precon,
             break
 
         # Precondition the residual.
-        if not useRand:
+        if not use_rand:
             z = precon(x, r)
         else:
             z = r
