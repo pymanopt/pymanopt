@@ -66,13 +66,11 @@ from pymanopt.solvers.solver import Solver
 import numpy as np
 
 class TrustRegions(Solver):
-    def __init__(self, miniter = 3, tolgradnorm = 1e-6, kappa = 0.1,
-        theta = 1.0, rho_prime = 0.1, useRand = False, rho_regularization = 1e3,
-        *args, **kwargs):
+    def __init__(self, miniter=3, kappa=0.1, theta=1.0, rho_prime=0.1,
+                 use_rand=False, rho_regularization=1e3, *args, **kwargs):
         super(TrustRegions, self).__init__(*args, **kwargs)
 
         self.miniter = miniter
-        self.tolgradnorm = tolgradnorm
         self.kappa = kappa
         self.theta = theta
         self.rho_prime = rho_prime
@@ -83,12 +81,12 @@ class TrustRegions(Solver):
 
     # Some strings for display
     tcg_stop_reason = ('negative curvature', 'exceeded trust region',
-                        'reached target residual-kappa (linear)',
-                        'reached target residual-theta (superlinear)',
-                        'maximum inner iterations', 'model increased');
+                       'reached target residual-kappa (linear)',
+                       'reached target residual-theta (superlinear)',
+                       'maximum inner iterations', 'model increased');
 
     def solve(self, obj, arg, man, x=None, mininner=1, maxinner=None,
-        Delta_bar=None, Delta0=None, precon = lambda x,d: d):
+              Delta_bar=None, Delta0=None, precon=lambda x, d: d):
         if maxinner is None: maxinner = man.dim
 
         # Set default Delta_bar and Delta0 separately to deal with additional
@@ -345,7 +343,7 @@ class TrustRegions(Solver):
                 print '        rho : {:e}'.format(rho)
 
             # ** CHECK STOPPING criteria
-            if norm_grad < self.tolgradnorm:
+            if norm_grad < self._mingradnorm:
                 if self._verbosity >= 1:
                     print ("Terminated - min grad norm reached after {:d} "
                         "iterations, {:.2f} seconds.").format(k, time.time() - time0)

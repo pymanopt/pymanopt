@@ -22,3 +22,4 @@ class Solver(object):
         self._maxtime = maxtime
         self._minstepsize = minstepsize
         self._verbosity = verbosity
+
