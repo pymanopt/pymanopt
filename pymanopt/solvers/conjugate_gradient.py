@@ -3,7 +3,6 @@ Module containing conjugate gradient algorithm based on conjugategradient.m
 from the manopt MATLAB package.
 """
 import time
-import collections
 
 import numpy as np
 
