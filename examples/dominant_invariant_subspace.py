@@ -21,7 +21,7 @@ Ported to pymanopt by Jamie Townsend, Nov 24, 2015
 import theano.tensor as T
 import numpy as np
 
-from pymanopt.solvers.steepest_descent import SteepestDescent
+from pymanopt.solvers.trust_regions import TrustRegions
 from pymanopt.manifolds.grassmann import Grassmann
 
 def dominant_invariant_subspace(A, p):
