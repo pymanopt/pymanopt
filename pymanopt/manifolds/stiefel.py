@@ -59,10 +59,10 @@ class Stiefel(Manifold):
             # Project into the tangent space. Usually the same as egrad2rgrad
             UNew = U - np.dot(X, np.dot(X.T, U) + np.dot(U.T,X)) / 2
             return UNew
-        else:
-            UNew = U - multiprod(X, multiprod(multitransp(X), U) +
-                    multiprod(multitransp(U), X)) / 2
-            return UNew
+
+        UNew = U - multiprod(X, multiprod(multitransp(X), U) +
+                multiprod(multitransp(U), X)) / 2
+        return UNew
 
     egrad2rgrad = proj
 
@@ -81,13 +81,12 @@ class Stiefel(Manifold):
             # Unflip any flipped signs
             XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
             return XNew
-        else:
-            XNew = X + G
-            for i in xrange(self._k):
-                q, r = np.linalg.qr(Y[i])
-                XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
 
-
+        XNew = X + G
+        for i in xrange(self._k):
+            q, r = np.linalg.qr(Y[i])
+            XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
+        return XNew
 
     def norm(self, X, G):
         # Norm on the tangent space of the Stiefel is simply the Euclidean
@@ -101,13 +100,14 @@ class Stiefel(Manifold):
             X = np.random.randn(self._n,self._p)
             q, r = np.linalg.qr(X)
             return q
-        else:
-            X = np.zeros((self._k, self._n, self._p))
-            for i in xrange(self._k):
-                X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
-            return X
+
+        X = np.zeros((self._k, self._n, self._p))
+        for i in xrange(self._k):
+            X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
+        return X
 
     def randvec(self, X):
-        U = proj(X, np.random.randn(self._k, self._n, self._p))
+        U = self.proj(X, np.random.randn(self._k, self._n, self._p))
         U = U / np.linalg.norm(U)
         return U
+
