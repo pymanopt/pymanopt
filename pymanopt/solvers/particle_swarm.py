@@ -51,12 +51,8 @@ class ParticleSwarm(Solver):
 
     def solve(self, obj, arg, man, x=None):
         """
-        Perform optimization using particle swarms. Both obj and arg must be
-        theano TensorVariable objects.
-
-        This method first computes the gradient of obj w.r.t. arg, and then
-        optimizes by moving in a direction that is conjugate to all previous
-        search directions.
+        Perform optimization using the particle swarm optimization algorithm.
+        Both obj and arg must be theano TensorVariable objects.
         Arguments:
             - obj
                 Theano TensorVariable which is the scalar cost to be optimized,
