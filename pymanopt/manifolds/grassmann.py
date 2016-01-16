@@ -53,13 +53,13 @@ class Grassmann(Manifold):
             s[s>1] = 1
             s = np.arccos(s)
             return np.linalg.norm(s)
-        else:
-            XtY = multiprod(multitransp(X), Y)
-            square_d = 0
-            for i in xrange(k):
-                u, s, v = np.linalg.svd(XtY[i])
-                square_d = square_d + np.linalg.norm(np.arccos(s))**2
-            return np.sqrt(square_d)
+
+        XtY = multiprod(multitransp(X), Y)
+        square_d = 0
+        for i in xrange(k):
+            u, s, v = np.linalg.svd(XtY[i])
+            square_d = square_d + np.linalg.norm(np.arccos(s))**2
+        return np.sqrt(square_d)
 
     def inner(self, X, G, H):
         # Inner product (Riemannian metric) on the tangent space
@@ -71,9 +71,9 @@ class Grassmann(Manifold):
         if self._k == 1:
             UNew = U - np.dot(X, np.dot(X.T, U))
             return UNew
-        else:
-            UNew = U - multiprod(X, multiprod(multitransp(X), U))
-            return UNew
+
+        UNew = U - multiprod(X, multiprod(multitransp(X), U))
+        return UNew
 
     egrad2rgrad = proj
 
@@ -85,8 +85,8 @@ class Grassmann(Manifold):
         return PXehess - HXtG
 
     # Retract to the Grassmann using the qr decomposition of X + G. This
-    # retraction may need to be changed - see manopt grassmannfactory.m. For now
-    # it is identical to the Stiefel retraction.
+    # retraction may need to be changed - see manopt grassmannfactory.m. For
+    # now it is identical to the Stiefel retraction.
     def retr(self, X, G):
         if self._k == 1:
             # Calculate 'thin' qr decomposition of X + G
@@ -94,11 +94,12 @@ class Grassmann(Manifold):
             # Unflip any flipped signs
             XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
             return XNew
-        else:
-            XNew = X + G
-            for i in xrange(self._k):
-                q, r = np.linalg.qr(Y[i])
-                XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
+
+        XNew = X + G
+        for i in xrange(self._k):
+            q, r = np.linalg.qr(Y[i])
+            XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
+        return XNew
 
     def norm(self, X, G):
         # Norm on the tangent space is simply the Euclidean norm.
@@ -111,13 +112,14 @@ class Grassmann(Manifold):
             X = np.random.randn(self._n,self._p)
             q, r = np.linalg.qr(X)
             return q
-        else:
-            X = np.zeros((self._k, self._n, self._p))
-            for i in xrange(self._k):
-                X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
-            return X
+
+        X = np.zeros((self._k, self._n, self._p))
+        for i in xrange(self._k):
+            X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
+        return X
 
     def randvec(self, X):
-        U = proj(X, np.random.randn(self._k, self._n, self._p))
+        U = self.proj(X, np.random.randn(self._k, self._n, self._p))
         U = U / np.linalg.norm(U)
         return U
+
