@@ -53,7 +53,7 @@ from pymanopt.manifolds.stiefel import Stiefel
 # Note, your cost function needs to have one (matrix) input and one (scalar) output.
 X = T.matrix()
 
-# Cost is the sum of all of the elements of the matix X.
+# Cost is the sum of all of the elements of the matrix X.
 cost = T.sum(X)
 
 # ---------------------------------
