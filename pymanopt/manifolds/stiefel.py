@@ -108,6 +108,10 @@ class Stiefel(Manifold):
             return X
 
     def randvec(self, X):
-        U = proj(X, np.random.randn(self._k, self._n, self._p))
+        if self._k == 1:
+            U = np.random.randn(self._n, self._p)
+        else:
+            U = np.random.randn(self._k, self._n, self._p)
+        U = proj(X, U)
         U = U / np.linalg.norm(U)
         return U
