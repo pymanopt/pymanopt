@@ -71,6 +71,24 @@ class Manifold(object):
         # Returns a random, unit norm vector in the tangent space at X.
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def transp(self, x1, x2, d):
+        # Transports d, which is a tangent vector at x1, into the tangent
+        # space at x2.
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def exp(self, X, U):
+        # The exponential (in the sense of Lie group theory) of a tangent
+        # vector U at X.
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def log(self, X, Y):
+        # The logarithm (in the sense of Lie group theory) of Y. This is the
+        # inverse of exp.
+        raise NotImplementedError
+
     def lincomb(self, X, a1, u1, a2=None, u2=None):
         """
         Given a point X, two tangent vectors u1 and u2 at X, and two real

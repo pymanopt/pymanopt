@@ -7,7 +7,24 @@ to optimize over the product of k Grassmanns.
 Elements are represented as n x p matrices (if k == 1), and as k x n x p
 matrices if k > 1 (Note that this is different to manopt!).
 """
+
+#   I have chaned the retraction to one using the polar decomp as am now
+#   implementing vector transport. See comment below (JT)
+
+#   April 17, 2013 (NB) :
+#       Retraction changed to the polar decomposition, so that the vector
+#       transport is now correct, in the sense that it is compatible with
+#       the retraction, i.e., transporting a tangent vector G from U to V
+#       where V = Retr(U, H) will give Z, and transporting GQ from UQ to VQ
+#       will give ZQ: there is no dependence on the representation, which
+#       is as it should be. Notice that the polar factorization requires an
+#       SVD whereas the qfactor retraction requires a QR decomposition,
+#       which is cheaper. Hence, if the retraction happens to be a
+#       bottleneck in your application and you are not using vector
+#       transports, you may want to replace the retraction with a qfactor.
+
 import numpy as np
+from scipy.linalg import svd
 from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
@@ -56,8 +73,11 @@ class Grassmann(Manifold):
         else:
             XtY = multiprod(multitransp(X), Y)
             square_d = 0
-            for i in xrange(k):
-                u, s, v = np.linalg.svd(XtY[i])
+            for i in xrange(self._k):
+                s = np.linalg.svd(XtY[i], compute_uv=False)
+                # Ensure that -1 <= s <= 1
+                s = np.fmin(s, [1])
+                s = np.fmax(s, [-1])
                 square_d = square_d + np.linalg.norm(np.arccos(s))**2
             return np.sqrt(square_d)
 
@@ -70,10 +90,9 @@ class Grassmann(Manifold):
         # Project into the tangent space. Usually the same as egrad2rgrad
         if self._k == 1:
             UNew = U - np.dot(X, np.dot(X.T, U))
-            return UNew
         else:
             UNew = U - multiprod(X, multiprod(multitransp(X), U))
-            return UNew
+        return UNew
 
     egrad2rgrad = proj
 
@@ -90,15 +109,23 @@ class Grassmann(Manifold):
     def retr(self, X, G):
         if self._k == 1:
             # Calculate 'thin' qr decomposition of X + G
-            q, r = np.linalg.qr(X + G)
-            # Unflip any flipped signs
-            XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
-            return XNew
+            # XNew, r = np.linalg.qr(X + G)
+
+            # We do not need to worry about flipping signs of columns here,
+            # since only the column space is important, not the actual
+            # columns. Compare this with the Stiefel manifold.
+
+            # Compute the polar factorization of Y = X+G
+            u, s, v = svd(X + G, full_matrices=False)
+            XNew = u.dot(v.T);
         else:
-            XNew = X + G
+            XNew = np.zeros(np.shape(X))
             for i in xrange(self._k):
-                q, r = np.linalg.qr(Y[i])
-                XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
+                # q, r = np.linalg.qr(Y[i])
+                # XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
+                u, s, vt = svd(X[i] + G[i], full_matrices=False)
+                XNew[i] = u.dot(vt)
+        return XNew
 
     def norm(self, X, G):
         # Norm on the tangent space is simply the Euclidean norm.
@@ -122,6 +149,47 @@ class Grassmann(Manifold):
             U = np.random.randn(self._n, self._p)
         else:
             U = np.random.randn(self._k, self._n, self._p)
-        U = proj(X, U)
+        U = self.proj(X, U)
         U = U / np.linalg.norm(U)
+        return U
+
+    def transp(self, x1, x2, d):
+        return self.proj(x2, d)
+
+    def exp(self, X, U):
+        if self._k == 1:
+            u, s, vt = svd(U, full_matrices=False)
+            cos_s = np.diag(np.cos(s))
+            sin_s = np.diag(np.sin(s))
+            Y = X.dot(vt.T).dot(cos_s).dot(vt) + u.dot(sin_s).dot(vt)
+            # From numerical experiments, it seems necessary to
+            # re-orthonormalize. This is overall quite expensive.
+            Y, unused = np.linalg.qr(Y)
+        else:
+            Y = np.zeros((self._k, self._n, self._p))
+            for i in xrange(self._k):
+                u, s, vt = svd(U[i], full_matrices=False)
+                cos_s = np.diag(np.cos(s))
+                sin_s = np.diag(np.sin(s))
+                Y[i] = X[i].dot(vt.T).dot(cos_s).dot(vt) + u.dot(sin_s).dot(vt)
+                # From numerical experiments, it seems necessary to
+                # re-orthonormalize. This is overall quite expensive.
+                Y[i], unused = np.linalg.qr(Y[i])
+        return Y
+
+    def log(self, X, Y):
+        if self._k == 1:
+            X = np.expand_dims(X, axis=0)
+            Y = np.expand_dims(Y, axis=0)
+        U = np.zeros((self._k, self._n, self._p))
+        for i in xrange(self._k):
+            x = X[i]
+            y = Y[i]
+            ytx = y.T.dot(x)
+            At = y.T - ytx.dot(x.T)
+            Bt = np.linalg.solve(ytx, At)
+            u, s, vt = svd(Bt.T, full_matrices=False)
+            U[i] = u.dot(np.diag(np.arctan(s))).dot(vt)
+        if self._k == 1:
+            U = U[0]
         return U
