@@ -7,6 +7,8 @@ Elements are represented as n x p matrices (if k == 1), and as k x n x p
 matrices if k > 1 (Note that this is different to manopt!).
 """
 import numpy as np
+from scipy.linalg import expm
+
 from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
@@ -87,8 +89,6 @@ class Stiefel(Manifold):
                 q, r = np.linalg.qr(Y[i])
                 XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
 
-
-
     def norm(self, X, G):
         # Norm on the tangent space of the Stiefel is simply the Euclidean
         # norm.
@@ -108,6 +108,29 @@ class Stiefel(Manifold):
             return X
 
     def randvec(self, X):
-        U = proj(X, np.random.randn(self._k, self._n, self._p))
+        if self._k == 1:
+            U = np.random.randn(self._n, self._p)
+        else:
+            U = np.random.randn(self._k, self._n, self._p)
+        U = self.proj(X, U)
         U = U / np.linalg.norm(U)
         return U
+
+    def transp(self, x1, x2, d):
+        return self.proj(x2, d)
+
+    def log(self, X, Y):
+        raise NotImplementedError
+
+    def exp(self, X, U):
+        if self._k ==1:
+            Y = (np.bmat([X, U]).dot(expm(np.bmat([[X.T.dot(U), -U.T.dot(U)],
+                 [np.eye(self._p) , X.T.dot(U)]]))).dot(np.bmat([[expm(-X.T.dot(U))],
+                 [np.zeros((self._p,self._p))]])))
+        else:
+            Y = np.zeros(np.shape(X))
+            for i in xrange(self._k):
+                Y[i] = (np.bmat([X[i], U[i]]).dot(expm(np.bmat([[X[i].T.dot(U[i]), -U[i].T.dot(U[i])],
+                        [np.eye(self._p) , X[i].T.dot(U[i])]]))).dot(np.bmat([[expm(-X[i].T.dot(U[i]))],
+                        [np.zeros((self._p,self._p))]])))
+        return Y
