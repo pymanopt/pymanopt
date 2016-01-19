@@ -104,8 +104,8 @@ class Grassmann(Manifold):
         return PXehess - HXtG
 
     # Retract to the Grassmann using the qr decomposition of X + G. This
-    # retraction may need to be changed - see manopt grassmannfactory.m. For now
-    # it is identical to the Stiefel retraction.
+    # retraction may need to be changed - see manopt grassmannfactory.m. For
+    # now it is identical to the Stiefel retraction.
     def retr(self, X, G):
         if self._k == 1:
             # Calculate 'thin' qr decomposition of X + G
@@ -138,11 +138,11 @@ class Grassmann(Manifold):
             X = np.random.randn(self._n,self._p)
             q, r = np.linalg.qr(X)
             return q
-        else:
-            X = np.zeros((self._k, self._n, self._p))
-            for i in xrange(self._k):
-                X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
-            return X
+
+        X = np.zeros((self._k, self._n, self._p))
+        for i in xrange(self._k):
+            X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
+        return X
 
     def randvec(self, X):
         if self._k == 1:
@@ -193,3 +193,4 @@ class Grassmann(Manifold):
         if self._k == 1:
             U = U[0]
         return U
+
