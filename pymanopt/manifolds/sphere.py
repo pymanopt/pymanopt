@@ -50,7 +50,7 @@ class Sphere(Manifold):
     egrad2rgrad = proj
 
     def ehess2rhess(self, X, egrad, ehess, U):
-        return self.proj(X, ehess) - self.inner(None, X, ehess) * U
+        return self.proj(X, ehess) - self.inner(None, X, egrad) * U
 
     def exp(self, X, U):
         norm_U = self.norm(None, U)
@@ -89,4 +89,3 @@ class Sphere(Manifold):
         space.
         """
         return X / self.norm(None, X)
-
