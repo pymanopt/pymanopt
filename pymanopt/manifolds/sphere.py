@@ -7,19 +7,19 @@ from manifold import Manifold
 
 class Sphere(Manifold):
     """
-    Manifold of n-by-m real matrices of unit Frobenius norm. By default, m =
-    1, which corresponds to the unit sphere in R^n. The metric is such that the
-    sphere is a Riemannian submanifold of the space of n-by-m matrices with the
+    Manifold of m-by-n real matrices of unit Frobenius norm. By default, n =
+    1, which corresponds to the unit sphere in R^m. The metric is such that the
+    sphere is a Riemannian submanifold of the space of m-by-n matrices with the
     usual trace inner product, i.e., the usual metric.
     """
-    def __init__(self, n, m=1):
-        self._n = n
+    def __init__(self, m, n=1):
         self._m = m
+        self._n = n
 
-        if m == 1:
-            self._name = "Sphere S^{:d}".format(n - 1)
+        if n == 1:
+            self._name = "Sphere S^{:d}".format(m - 1)
         else:
-            self._name = "Unit F-norm {:d}x{:d} matrices".format(n, m)
+            self._name = "Unit F-norm {:d}x{:d} matrices".format(m, n)
 
     @property
     def name(self):
@@ -69,11 +69,11 @@ class Sphere(Manifold):
         return proj
 
     def rand(self):
-        Y = rnd.randn(self._n, self._m)
+        Y = rnd.randn(self._m, self._n)
         return self._normalize(Y)
 
     def randvec(self, X):
-        H = rnd.randn(self._n, self._m)
+        H = rnd.randn(self._m, self._n)
         proj = self.proj(X, H)
         return self._normalize(proj)
 
