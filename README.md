@@ -44,6 +44,7 @@ To do optimization with pymanopt, you will need to create a manifold object, a s
 import theano.tensor as T
 import numpy as np
 
+from pymanopt import Problem
 from pymanopt.solvers import SteepestDescent
 from pymanopt.manifolds import Stiefel
 
@@ -63,11 +64,16 @@ solver = SteepestDescent()
 manifold = Stiefel(5,2)
 
 # --------------------
+# Setup problem object
+# --------------------
+problem = Problem(man = manifold, theano_cost = cost, theano_arg = X)
+
+# --------------------
 # Perform optimization
 # --------------------
 # Currently the solve function requires three inputs: the cost and input variable
 # (both defined using theano) and the manifold to optimise over.
-Xopt = solver.solve(cost, X, manifold)
+Xopt = solver.solve(problem)
 
 print Xopt
 ```
