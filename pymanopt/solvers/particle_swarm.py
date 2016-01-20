@@ -49,19 +49,16 @@ class ParticleSwarm(Solver):
                       % iter)
         return reason
 
-    def solve(self, obj, arg, man, x=None):
+    def solve(self, problem, x=None):
         """
         Perform optimization using the particle swarm optimization algorithm.
         Both obj and arg must be theano TensorVariable objects.
         Arguments:
-            - obj
-                Theano TensorVariable which is the scalar cost to be optimized,
-                defined symbolically in terms of the TensorVariable arg
-            - arg
-                Theano TensorVariable which is the matrix (or higher order
-                tensor) being optimized over
-            - man
-                Pymanopt manifold, which is the manifold to optimize over
+            - problem
+                Pymanopt problem setup using the Problem class, this must
+                have a .man attribute specifying the manifold to optimize
+                over, as well as a cost (specified using a theano graph
+                or as a python function).
             - x=None
                 Optional parameter. Initial population of elements on the
                 manifold. If None then an initial population will be randomly
@@ -71,11 +68,15 @@ class ParticleSwarm(Solver):
                 Local minimum of obj, or if algorithm terminated before
                 convergence x will be the point at which it terminated
         """
+        man = problem.man
+
         # Compile the objective function and compute and compile its
         # gradient.
         if self._verbosity >= 1:
             print "Compling objective function..."
-        objective = tf.compile(obj, arg)
+        problem.prepare()
+
+        objective = problem.cost
 
         # Choose proper default algorithm parameters. We need to know about the
         # dimension of the manifold to limit the parameter range, so we have to
@@ -190,5 +191,3 @@ class ParticleSwarm(Solver):
             costevals += self._populationsize
 
         return xbest
-
-

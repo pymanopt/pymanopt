@@ -85,8 +85,9 @@ class TrustRegions(Solver):
                        'reached target residual-theta (superlinear)',
                        'maximum inner iterations', 'model increased');
 
-    def solve(self, obj, arg, man, x=None, mininner=1, maxinner=None,
+    def solve(self, problem, x=None, mininner=1, maxinner=None,
               Delta_bar=None, Delta0=None, precon=lambda x, d: d):
+        man = problem.man
         if maxinner is None: maxinner = man.dim
 
         # Set default Delta_bar and Delta0 separately to deal with additional
@@ -102,13 +103,11 @@ class TrustRegions(Solver):
 
         if self._verbosity >= 1: print ("Computing gradient and hessian and "
             "compiling...")
-        cost = comp_diff.compile(obj, arg)
-        (egrad, ehess) = comp_diff.grad_hess(obj, arg)
-        def grad(x):
-            return man.egrad2rgrad(x, egrad(x))
+        problem.prepare(need_grad = True, need_hess = True)
 
-        def hess(x, a):
-            return man.ehess2rhess(x, egrad(x), ehess(x, a), a)
+        cost = problem.cost
+        grad = problem.grad
+        hess = problem.hess
 
         # If no starting point is specified, generate one at random.
         if x is None:

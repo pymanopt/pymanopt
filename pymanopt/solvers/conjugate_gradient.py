@@ -51,7 +51,7 @@ class ConjugateGradient(Solver):
                       % iter)
         return reason
 
-    def solve(self, obj, arg, man, x=None):
+    def solve(self, problem, x=None):
         """
         Perform optimization using nonlinear conjugate gradient method with
         linesearch. Both obj and arg must be theano TensorVariable objects.
@@ -59,14 +59,11 @@ class ConjugateGradient(Solver):
         optimizes by moving in a direction that is conjugate to all previous
         search directions.
         Arguments:
-            - obj
-                Theano TensorVariable which is the scalar cost to be optimized,
-                defined symbolically in terms of the TensorVariable arg.
-            - arg
-                Theano TensorVariable which is the matrix (or higher order
-                tensor) being optimized over.
-            - man
-                Pymanopt manifold, which is the manifold to optimize over.
+            - problem
+                Pymanopt problem setup using the Problem class, this must
+                have a .man attribute specifying the manifold to optimize
+                over, as well as a cost and enough information to compute
+                the gradient of that cost.
             - x=None
                 Optional parameter. Starting point on the manifold. If none then
                 a starting point will be randomly generated.
@@ -75,12 +72,16 @@ class ConjugateGradient(Solver):
                 Local minimum of obj, or if algorithm terminated before
                 convergence x will be the point at which it terminated.
         """
+        man = problem.man
+
         # Compile the objective function and compute and compile its
         # gradient.
         if self._verbosity >= 1:
             print "Computing gradient and compiling..."
-        objective = tf.compile(obj, arg)
-        gradient = tf.gradient(obj, arg)
+        problem.prepare(need_grad = True)
+
+        objective = problem.cost
+        gradient = problem.grad
 
         # If no starting point is specified, generate one at random.
         if x is None:
@@ -206,4 +207,3 @@ class ConjugateGradient(Solver):
             iter += 1
 
         return x
-
