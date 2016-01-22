@@ -57,11 +57,6 @@ class Stiefel(Manifold):
         return np.tensordot(G,H, axes=G.ndim)
 
     def proj(self, X, U):
-        if self._k == 1:
-            # Project into the tangent space. Usually the same as egrad2rgrad
-            UNew = U - np.dot(X, np.dot(X.T, U) + np.dot(U.T,X)) / 2
-            return UNew
-
         UNew = U - multiprod(X, multiprod(multitransp(X), U) +
                 multiprod(multitransp(U), X)) / 2
         return UNew
@@ -108,10 +103,7 @@ class Stiefel(Manifold):
         return X
 
     def randvec(self, X):
-        if self._k == 1:
-            U = np.random.randn(self._n, self._p)
-        else:
-            U = np.random.randn(self._k, self._n, self._p)
+        U = np.random.randn(np.shape(X))
         U = self.proj(X, U)
         U = U / np.linalg.norm(U)
         return U

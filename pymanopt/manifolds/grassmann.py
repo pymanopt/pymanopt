@@ -88,12 +88,7 @@ class Grassmann(Manifold):
         return np.tensordot(G, H, axes=G.ndim)
 
     def proj(self, X, U):
-        # Project into the tangent space. Usually the same as egrad2rgrad
-        if self._k == 1:
-            UNew = U - np.dot(X, np.dot(X.T, U))
-        else:
-            UNew = U - multiprod(X, multiprod(multitransp(X), U))
-        return UNew
+        return U - multiprod(X, multiprod(multitransp(X), U))
 
     egrad2rgrad = proj
 
@@ -104,9 +99,6 @@ class Grassmann(Manifold):
         HXtG = multiprod(H, XtG)
         return PXehess - HXtG
 
-    # Retract to the Grassmann using the qr decomposition of X + G. This
-    # retraction may need to be changed - see manopt grassmannfactory.m. For
-    # now it is identical to the Stiefel retraction.
     def retr(self, X, G):
         if self._k == 1:
             # Calculate 'thin' qr decomposition of X + G
@@ -146,10 +138,7 @@ class Grassmann(Manifold):
         return X
 
     def randvec(self, X):
-        if self._k == 1:
-            U = np.random.randn(self._n, self._p)
-        else:
-            U = np.random.randn(self._k, self._n, self._p)
+        U = np.random.randn(np.shape(X))
         U = self.proj(X, U)
         U = U / np.linalg.norm(U)
         return U
