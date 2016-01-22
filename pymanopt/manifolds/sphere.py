@@ -61,21 +61,21 @@ class Sphere(Manifold):
         return self._normalize(Y)
 
     def log(self, X, Y):
-        proj = self.proj(X, Y - X)
+        P = self.proj(X, Y - X)
         dist = self.dist(X, Y)
         # If the two points are "far apart", correct the norm.
         if dist > 1e-6:
-            proj *= dist / self.norm(None, proj)
-        return proj
+            P *= dist / self.norm(None, P)
+        return P
 
     def rand(self):
         Y = rnd.randn(self._m, self._n)
         return self._normalize(Y)
 
     def randvec(self, X):
-        H = rnd.randn(self._m, self._n)
-        proj = self.proj(X, H)
-        return self._normalize(proj)
+        H = rnd.randn(*X.shape)
+        P = self.proj(X, H)
+        return self._normalize(P)
 
     def transp(self, X, Y, U):
         return self.proj(Y, U)

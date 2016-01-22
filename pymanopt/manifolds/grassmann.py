@@ -138,7 +138,7 @@ class Grassmann(Manifold):
         return X
 
     def randvec(self, X):
-        U = np.random.randn(np.shape(X))
+        U = np.random.randn(*np.shape(X))
         U = self.proj(X, U)
         U = U / np.linalg.norm(U)
         return U
