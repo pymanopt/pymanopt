@@ -122,9 +122,6 @@ class Stiefel(Manifold):
     def log(self, X, Y):
         raise NotImplementedError
 
-    def zerovec(self, X):
-        return np.zeros([self._n, self._p, self._k])
-
     def exp(self, X, U):
         # TODO: Simplify these expressions.
         if self._k ==1:

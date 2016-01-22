@@ -194,6 +194,3 @@ class Grassmann(Manifold):
         if self._k == 1:
             U = U[0]
         return U
-
-    def zerovec(self, X):
-        return np.zeros([self._n, self._p, self._k])

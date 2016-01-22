@@ -68,9 +68,6 @@ class Sphere(Manifold):
             proj *= dist / self.norm(None, proj)
         return proj
 
-    def zerovec(self, x):
-        return np.zeros([self._m, self._n])
-
     def rand(self):
         Y = rnd.randn(self._m, self._n)
         return self._normalize(Y)
