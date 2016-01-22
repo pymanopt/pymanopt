@@ -2,7 +2,7 @@ import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 
-from manifold import Manifold
+from pymanopt.manifolds.manifold import Manifold
 
 
 class Sphere(Manifold):
@@ -68,6 +68,9 @@ class Sphere(Manifold):
             proj *= dist / self.norm(None, proj)
         return proj
 
+    def zerovec(self, x):
+        return np.zeros([self._m, self._n])
+
     def rand(self):
         Y = rnd.randn(self._m, self._n)
         return self._normalize(Y)
@@ -81,7 +84,7 @@ class Sphere(Manifold):
         return self.proj(Y, U)
 
     def pairmean(self, X, Y):
-        return self._normalize(X + y)
+        return self._normalize(X + Y)
 
     def _normalize(self, X):
         """

@@ -28,14 +28,15 @@ from scipy.linalg import svd
 from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
-class Grassmann(Manifold):
 
-    def __init__(self, height, width, k = 1):
+class Grassmann(Manifold):
+    def __init__(self, height, width, k=1):
         # Check that n is greater than or equal to p
-        if height < width or width < 1: raise ValueError("Need n >= p >= 1. "
-            "Values supplied were n = %d and p = %d." % (height, width))
-        if k < 1: raise ValueError("Need k >= 1. Value supplied was k = %d."
-                % k)
+        if height < width or width < 1:
+            raise ValueError("Need n >= p >= 1. "
+                "Values supplied were n = %d and p = %d." % (height, width))
+        if k < 1:
+            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
         # Set the dimensions of the Grassmann
         self._n = height
         self._p = width
@@ -84,7 +85,7 @@ class Grassmann(Manifold):
     def inner(self, X, G, H):
         # Inner product (Riemannian metric) on the tangent space
         # For the Grassmann this is the Frobenius inner product.
-        return np.tensordot(G,H, axes=G.ndim)
+        return np.tensordot(G, H, axes=G.ndim)
 
     def proj(self, X, U):
         # Project into the tangent space. Usually the same as egrad2rgrad
@@ -135,7 +136,7 @@ class Grassmann(Manifold):
     # matrix.
     def rand(self):
         if self._k == 1:
-            X = np.random.randn(self._n,self._p)
+            X = np.random.randn(self._n, self._p)
             q, r = np.linalg.qr(X)
             return q
 
@@ -193,3 +194,6 @@ class Grassmann(Manifold):
         if self._k == 1:
             U = U[0]
         return U
+
+    def zerovec(self, X):
+        return np.zeros([self._n, self._p, self._k])

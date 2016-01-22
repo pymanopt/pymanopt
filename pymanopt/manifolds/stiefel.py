@@ -12,8 +12,8 @@ from scipy.linalg import expm
 from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
-class Stiefel(Manifold):
 
+class Stiefel(Manifold):
     def __init__(self, height, width, k = 1):
         # Check that n is greater than or equal to p
         if height < width or width < 1: raise ValueError("Need n >= p >= 1. "
@@ -121,6 +121,9 @@ class Stiefel(Manifold):
 
     def log(self, X, Y):
         raise NotImplementedError
+
+    def zerovec(self, X):
+        return np.zeros([self._n, self._p, self._k])
 
     def exp(self, X, U):
         # TODO: Simplify these expressions.

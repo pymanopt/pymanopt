@@ -7,6 +7,7 @@ from pymanopt import Problem
 from pymanopt.manifolds import Sphere
 from pymanopt.solvers import ConjugateGradient
 
+
 def dominant_eigenvector(A):
     """
     Returns the dominant eigenvector of the symmetric matrix A.
@@ -26,9 +27,7 @@ def dominant_eigenvector(A):
     cost = -x.T.dot(T.dot(A, x)).trace()
 
     problem = Problem(man=manifold, theano_cost=cost, theano_arg=x)
-
     xopt = solver.solve(problem)
-
     return xopt.squeeze()
 
 if __name__ == "__main__":

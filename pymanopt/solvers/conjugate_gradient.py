@@ -78,7 +78,7 @@ class ConjugateGradient(Solver):
         # gradient.
         if self._verbosity >= 1:
             print "Computing gradient and compiling..."
-        problem.prepare(need_grad = True)
+        problem.prepare(need_grad=True)
 
         objective = problem.cost
         gradient = problem.grad

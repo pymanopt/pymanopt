@@ -65,6 +65,7 @@ from pymanopt.solvers.solver import Solver
 
 import numpy as np
 
+
 class TrustRegions(Solver):
     def __init__(self, miniter=3, kappa=0.1, theta=1.0, rho_prime=0.1,
                  use_rand=False, rho_regularization=1e3, *args, **kwargs):

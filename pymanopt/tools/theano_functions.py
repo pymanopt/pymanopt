@@ -48,3 +48,4 @@ def grad_hess(objective, argument):
 
     hess = theano.function([argument, A], R)
     return grad, hess
+
