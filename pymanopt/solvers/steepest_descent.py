@@ -44,8 +44,8 @@ class SteepestDescent(Solver):
             print "Computing gradient and compiling..."
         problem.prepare(need_grad = True)
 
-        cost = problem.cost
-        grad = problem.grad
+        objective = problem.cost
+        gradient = problem.grad
 
         # If no starting point is specified, generate one at random.
         if x is None:
