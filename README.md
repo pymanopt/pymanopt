@@ -12,23 +12,26 @@ http://deeplearning.net/software/theano/
 ## Manopt feature implementation
 ### Manifolds
 
-| Manifold      | Implemented   |
-| ------------- |:-------------:|
-| Sphere        | Partially     |
-| Stiefel       | Partially     |
-| Grassmann     | Partially     |
+| Manifold | Implemented |
+| ------------- |:-----------:|
+| Sphere | Partially |
+| Stiefel | Partially |
+| Grassmann | Partially |
+| Symmetric positive semidefinite, fixed-rank | Partially |
 
 ### Solvers
 
-| Solver        | Implemented   |
-| ------------- |:-------------:|
-| Steepest-descent| Partially   |
-| Conjugate-gradient | Partially|
-| Trust-regions | Partially     |
+| Solver | Implemented |
+| ------ |:-------------:|
+| Steepest-descent| Partially |
+| Conjugate-gradient | Partially |
+| Trust-regions | Partially |
+| Particle swarm (PSO) | Partially |
+| Nelder-Mead | Partially |
 
 ## Installation
 ### Dependencies
-This package depends on python 2.7.*, numpy, scipy and Theano. Instructions for installing numpy, scipy and Theano on different operating systems can be found [here](http://deeplearning.net/software/theano/install.html).
+This package depends on python 2.7.*, numpy, scipy and theano. Instructions for installing numpy, scipy and Theano on different operating systems can be found [here](http://deeplearning.net/software/theano/install.html).
 
 ### Installing pymanopt
 You can install pymanopt with the following command:
@@ -61,12 +64,12 @@ cost = T.sum(X)
 # Setup solver and manifold objects
 # ---------------------------------
 solver = SteepestDescent()
-manifold = Stiefel(5,2)
+manifold = Stiefel(5, 2)
 
 # --------------------
 # Setup problem object
 # --------------------
-problem = Problem(man = manifold, theano_cost = cost, theano_arg = X)
+problem = Problem(man=manifold, theano_cost=cost, theano_arg=X)
 
 # --------------------
 # Perform optimization

@@ -30,7 +30,6 @@ def low_rank_matrix_approximation(A, k):
 
 def low_rank_matrix_approximation_theano(A, k):
     manifold, solver = _bootstrap_problem(A, k)
-    print manifold.name
 
     Y = T.matrix()
     cost = T.sum((T.dot(Y, Y.T) - A) ** 2)
