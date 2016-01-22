@@ -25,8 +25,7 @@ def dominant_eigenvector(A):
     x = T.matrix()
     cost = -x.T.dot(T.dot(A, x)).trace()
 
-    problem = Problem(man = manifold, theano_arg = x,
-                      theano_cost = cost)
+    problem = Problem(man=manifold, theano_cost=cost, theano_arg=x)
 
     xopt = solver.solve(problem)
 

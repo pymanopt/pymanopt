@@ -51,12 +51,12 @@ def dominant_invariant_subspace(A, p):
     assert p<=n, 'p must be smaller than n.'
 
     # Define the cost on the Grassmann manifold
-    Gr = Grassmann(n, p);
+    Gr = Grassmann(n, p)
     X = T.matrix()
-    cost = -T.dot(X.T,T.dot(A,X)).trace();
+    cost = -T.dot(X.T, T.dot(A,X)).trace()
 
     # Setup the problem
-    problem = Problem(man = Gr, theano_arg = X, theano_cost = cost)
+    problem = Problem(man=Gr, theano_cost=cost, theano_arg=X)
 
     # Create a solver object
     solver = TrustRegions()
@@ -75,10 +75,10 @@ if __name__ == '__main__':
     """
     # Generate some random data to test the function
     print 'Generating random matrix...'
-    A = np.random.randn(128,128);
-    A = (A+A.T)/2;
+    A = np.random.randn(128,128)
+    A = (A+A.T)/2
 
-    p = 3;
+    p = 3
 
     # Test function...
     dominant_invariant_subspace(A, p)

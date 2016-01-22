@@ -130,4 +130,3 @@ class LineSearchAdaptive(object):
             self._oldalpha = 2 * alpha
 
         return stepsize, newx
-

@@ -6,4 +6,3 @@ from .particle_swarm import ParticleSwarm
 
 __all__ = ["ConjugateGradient", "SteepestDescent", "TrustRegions",
            "ParticleSwarm"]
-

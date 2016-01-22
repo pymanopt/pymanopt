@@ -123,6 +123,7 @@ class Stiefel(Manifold):
         raise NotImplementedError
 
     def exp(self, X, U):
+        # TODO: Simplify these expressions.
         if self._k ==1:
             Y = (np.bmat([X, U]).dot(expm(np.bmat([[X.T.dot(U), -U.T.dot(U)],
                  [np.eye(self._p) , X.T.dot(U)]]))).dot(np.bmat([[expm(-X.T.dot(U))],
@@ -134,4 +135,3 @@ class Stiefel(Manifold):
                         [np.eye(self._p) , X[i].T.dot(U[i])]]))).dot(np.bmat([[expm(-X[i].T.dot(U[i]))],
                         [np.zeros((self._p,self._p))]])))
         return Y
-

@@ -159,7 +159,7 @@ class ConjugateGradient(Solver):
             # Powell's restart strategy (see page 12 of Hager and Zhang's
             # survey on conjugate gradient methods, for example)
             if abs(orth_grads) >= self._orth_value:
-                beta = 0;
+                beta = 0
                 desc_dir = man.lincomb(x, -1, Pnewgrad)
             else:
                 desc_dir = man.transp(x, newx, desc_dir)

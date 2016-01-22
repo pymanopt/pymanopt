@@ -83,7 +83,7 @@ class TrustRegions(Solver):
     tcg_stop_reason = ('negative curvature', 'exceeded trust region',
                        'reached target residual-kappa (linear)',
                        'reached target residual-theta (superlinear)',
-                       'maximum inner iterations', 'model increased');
+                       'maximum inner iterations', 'model increased')
 
     def solve(self, problem, x=None, mininner=1, maxinner=None,
               Delta_bar=None, Delta0=None, precon=lambda x, d: d):

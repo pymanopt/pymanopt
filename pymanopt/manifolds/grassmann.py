@@ -117,7 +117,7 @@ class Grassmann(Manifold):
 
             # Compute the polar factorization of Y = X+G
             u, s, v = svd(X + G, full_matrices=False)
-            XNew = u.dot(v.T);
+            XNew = u.dot(v.T)
         else:
             XNew = np.zeros(np.shape(X))
             for i in xrange(self._k):
@@ -193,4 +193,3 @@ class Grassmann(Manifold):
         if self._k == 1:
             U = U[0]
         return U
-

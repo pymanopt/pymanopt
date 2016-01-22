@@ -4,9 +4,9 @@ the pymanopt package.
 
 Jamie Townsend December 2014
 """
-
 import theano.tensor as T
 import theano
+
 
 def compile(objective, argument):
     """
@@ -36,7 +36,7 @@ def grad_hess(objective, argument):
 
     # For now, this function will only work for matrix manifolds.
     A = T.matrix()
-    (n, p) =  T.shape(argument)
+    n, p =  T.shape(argument)
     try:
         # First attempt efficient 'R-op', this directly calculates the
         # directional derivative of the gradient, rather than explicitly

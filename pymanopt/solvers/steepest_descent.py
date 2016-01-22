@@ -8,6 +8,7 @@ from pymanopt.tools import theano_functions as tf
 from pymanopt.solvers import linesearch
 from pymanopt.solvers.solver import Solver
 
+
 class SteepestDescent(Solver):
     def __init__(self, *args, **kwargs):
         super(SteepestDescent, self).__init__(*args, **kwargs)

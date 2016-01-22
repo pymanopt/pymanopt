@@ -2,8 +2,8 @@
 Module containing pymanopt problem class. Use this to build a problem
 object to feed to one of the solvers.
 """
-
 from pymanopt.tools import theano_functions as tf
+
 
 class Problem:
     """
@@ -42,17 +42,17 @@ class Problem:
             (tensor) variable with respect to which you would like to
             optimize. Both must be have type TensorVariable.
     """
-    def __init__(self, man = None, cost = None, grad = None,
-                 hess = None, egrad = None, ehess = None,
-                 theano_cost = None, theano_arg = None):
-                 self.man = man
-                 self.cost = cost
-                 self.grad = grad
-                 self.hess = hess
-                 self.egrad = egrad
-                 self.ehess = ehess
-                 self.theano_cost = theano_cost
-                 self.theano_arg = theano_arg
+    def __init__(self, man=None, cost=None, grad=None,
+                 hess=None, egrad=None, ehess=None,
+                 theano_cost=None, theano_arg=None):
+        self.man = man
+        self.cost = cost
+        self.grad = grad
+        self.hess = hess
+        self.egrad = egrad
+        self.ehess = ehess
+        self.theano_cost = theano_cost
+        self.theano_arg = theano_arg
 
     def prepare(self, need_grad=False, need_hess=False):
         """
@@ -70,14 +70,17 @@ class Problem:
             if need_hess and self.hess is None:
                 # Make sure we have both egrad and ehess
                 if self.egrad is None and self.ehess is None:
-                    self.egrad, self.ehess = tf.grad_hess(self.theano_cost, self.theano_arg)
+                    self.egrad, self.ehess = tf.grad_hess(
+                        self.theano_cost, self.theano_arg)
                 elif self.ehess is None:
-                    unused, self.ehess = tf.grad_hess(self.theano_cost, self.theano_arg)
+                    unused, self.ehess = tf.grad_hess(
+                        self.theano_cost, self.theano_arg)
                 elif self.egrad is None:
                     self.egrad = tf.grad(self.theano_cost, self.theano_arg)
 
                 # Then assign hess
-                self.hess = lambda x, a: self.man.ehess2rhess(x, self.egrad(x), self.ehess(x, a), a)
+                self.hess = lambda x, a: self.man.ehess2rhess(
+                    x, self.egrad(x), self.ehess(x, a), a)
 
             if self.egrad is None:
                 self.egrad = tf.gradient(self.theano_cost, self.theano_arg)

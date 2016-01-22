@@ -1,5 +1,6 @@
-# Operations on multiple matrices.
+""" Operations on multiple matrices."""
 import numpy as np
+
 
 def multiprod(A, B):
     # Inspired by MATLAB multiprod function by Paolo de Leva. A and B are

@@ -4,4 +4,3 @@ from .stiefel import Stiefel
 
 
 __all__ = ["Grassmann", "Sphere", "Stiefel"]
-
