@@ -140,6 +140,8 @@ class SymFixedRankYYComplex(SymFixedRankYY):
     def __init__(self, *args, **kwargs):
         super(SymFixedRankYYComplex, self).__init__(*args, **kwargs)
 
+        n = self._n
+        k = self._k
         self._name = ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
                       "matrices of rank {:d}".format(n, n, k))
 
@@ -156,9 +158,9 @@ class SymFixedRankYYComplex(SymFixedRankYY):
         return np.sqrt(self.inner(Y, U, U))
 
     def dist(self, U, V):
-        [S, _, D] = la.svd(V.H.dot(U))
+        S, _, D = la.svd(V.H.dot(U))
         E = U - V.dot(S).dot(D)
-        return self.inner(None, E, E) / 2 #
+        return self.inner(None, E, E) / 2
 
     def exp(self, Y, U):
         # We only overload this to adjust the warning.
