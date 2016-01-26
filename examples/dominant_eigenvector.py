@@ -21,8 +21,6 @@ def dominant_eigenvector(A):
 
     manifold = Sphere(n)
     solver = ConjugateGradient(maxiter=500, minstepsize=1e-6)
-    # XXX: It'd be more straightforward to use T.vector in this case, but this
-    #      doesn't work with the current solver.
     x = T.matrix()
     cost = -x.T.dot(T.dot(A, x)).trace()
 

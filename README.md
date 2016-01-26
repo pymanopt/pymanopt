@@ -1,7 +1,8 @@
 # pymanopt
 [![Build Status](https://travis-ci.org/j-towns/pymanopt.svg?branch=master)](https://travis-ci.org/j-towns/pymanopt)
 
-Python port of the MATLAB package Manopt, for manifold optimization using Theano for automatic differentiation.
+Python port of the MATLAB package Manopt, for manifold optimization using
+Theano for automatic differentiation.
 
 This project is independent from the Manopt project.
 
@@ -17,21 +18,23 @@ http://deeplearning.net/software/theano/
 | Sphere | Partially |
 | Stiefel | Partially |
 | Grassmann | Partially |
-| Symmetric positive semidefinite, fixed-rank | Partially |
+| Symmetric positive semidefinite,<br>fixed-rank (complex) | Partially |
 
 ### Solvers
 
-| Solver | Implemented |
-| ------ |:-------------:|
-| Steepest-descent| Partially |
-| Conjugate-gradient | Partially |
-| Trust-regions | Partially |
-| Particle swarm (PSO) | Partially |
-| Nelder-Mead | Partially |
+| Solver | Type | Implemented |
+| ------ | :--: | :---------: |
+| Steepest-descent | First-order | Partially |
+| Conjugate-gradient | First-order | Partially |
+| Trust-regions | Second-order | Partially |
+| Particle swarm (PSO) | Derivative-free | Partially |
+| Nelder-Mead | Derivative-free | Partially |
 
 ## Installation
 ### Dependencies
-This package depends on python 2.7.*, numpy, scipy and theano. Instructions for installing numpy, scipy and Theano on different operating systems can be found [here](http://deeplearning.net/software/theano/install.html).
+This package depends on python 2.7.*, numpy, scipy and Theano. Instructions for
+installing numpy, scipy and Theano on different operating systems can be found
+[here](http://deeplearning.net/software/theano/install.html).
 
 ### Installing pymanopt
 You can install pymanopt with the following command:
@@ -40,7 +43,11 @@ pip install --user git+https://github.com/j-towns/pymanopt.git
 ```
 
 ## Basic usage
-To do optimization with pymanopt, you will need to create a manifold object, a solver object, and a cost function. Classes of manifolds and solvers are provided with pymanopt. Cost functions have to be set up using Theano. A tutorial on Theano can be found [here](http://deeplearning.net/software/theano/tutorial/index.html).
+To do optimization with pymanopt, you will need to create a manifold object, a
+solver object, and a cost function. Classes of manifolds and solvers are
+provided with pymanopt. Cost functions have to be set up using Theano. A
+tutorial on Theano can be found
+[here](http://deeplearning.net/software/theano/tutorial/index.html).
 
 ### Example code
 ```python
@@ -80,4 +87,5 @@ Xopt = solver.solve(problem)
 
 print Xopt
 ```
-See [here](https://github.com/j-towns/pymanopt/tree/master/examples) for more examples.
+See [here](https://github.com/j-towns/pymanopt/tree/master/examples) for more
+examples.

@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
@@ -61,7 +63,8 @@ class SymFixedRankYY(Manifold):
         return 10 + self._k
 
     def inner(self, Y, U, V):
-        return float(np.tensordot(np.asmatrix(U), np.asmatrix(V)))
+        # Euclidean metric on the total space.
+        return float(np.tensordot(U, V))
 
     def norm(self, Y, U):
         return la.norm(U, "fro")
@@ -72,9 +75,8 @@ class SymFixedRankYY(Manifold):
     def proj(self, Y, H):
         # Projection onto the horizontal space
         YtY = Y.T.dot(Y)
-        SS = YtY
         AS = Y.T.dot(H) - H.T.dot(Y)
-        Omega = lyap(SS, -AS)
+        Omega = lyap(YtY, -AS)
         return H - Y.dot(Omega)
 
     tangent = proj
@@ -86,7 +88,6 @@ class SymFixedRankYY(Manifold):
         return self.proj(Y, ehess)
 
     def exp(self, Y, U):
-        import warnings
         warnings.warn("Exponential map for symmetric, fixed-rank "
                       "manifold not implemented yet. Used retraction instead.",
                       RuntimeWarning)
@@ -111,3 +112,61 @@ class SymFixedRankYY(Manifold):
 
     def _normalize(self, Y):
         return Y / self.norm(None, Y)
+
+class SymFixedRankYYComplex(SymFixedRankYY):
+    """
+    Manifold of n x n complex Hermitian pos. semidefinite matrices of rank k.
+
+    Manifold of n-by-n complex Hermitian positive semidefinite matrices of
+    fixed rank k. This follows the quotient geometry described
+    in Sarod Yatawatta's 2013 paper:
+    "Radio interferometric calibration using a Riemannian manifold", ICASSP.
+
+    Paper link: http://dx.doi.org/10.1109/ICASSP.2013.6638382.
+
+    A point X on the manifold M is parameterized as YY^*, where
+    Y is a complex matrix of size nxk. For any point Y on the manifold M,
+    given any kxk complex unitary matrix U, we say Y*U  is equivalent to Y,
+    i.e., YY^* does not change. Therefore, M is the set of equivalence
+    classes and is a Riemannian quotient manifold C^{nk}/SU(k).
+    The metric is the usual real-trace inner product, that is,
+    it is the usual metric for the complex plane identified with R^2.
+
+    Notice that this manifold is not complete: if optimization leads Y to be
+    rank-deficient, the geometry will break down. Hence, this geometry should
+    only be used if it is expected that the points of interest will have rank
+    exactly k. Reduce k if that is not the case.
+    """
+    def __init__(self, *args, **kwargs):
+        super(SymFixedRankYYComplex, self).__init__(*args, **kwargs)
+
+        self._name = ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
+                      "matrices of rank {:d}".format(n, n, k))
+
+    @property
+    def dim(self):
+        n = self._n
+        k = self._k
+        return 2 * k * n - k * k
+
+    def inner(self, Y, U, V):
+        return 2 * float(np.tensordot(U, V).real)
+
+    def norm(self, Y, U):
+        return np.sqrt(self.inner(Y, U, U))
+
+    def dist(self, U, V):
+        [S, _, D] = la.svd(V.H.dot(U))
+        E = U - V.dot(S).dot(D)
+        return self.inner(None, E, E) / 2 #
+
+    def exp(self, Y, U):
+        # We only overload this to adjust the warning.
+        warnings.warn("Exponential map for symmetric, fixed-rank complex "
+                      "manifold not implemented yet. Used retraction instead.",
+                      RuntimeWarning)
+        return self.retr(Y, U)
+
+    def rand(self):
+        rand_ = super(SymFixedRankYYComplex, self)
+        return rand_() + 1j * rand_()
