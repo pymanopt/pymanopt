@@ -158,7 +158,7 @@ class SymFixedRankYYComplex(SymFixedRankYY):
         return np.sqrt(self.inner(Y, U, U))
 
     def dist(self, U, V):
-        S, _, D = la.svd(V.H.dot(U))
+        S, _, D = la.svd(V.T.conj().dot(U))
         E = U - V.dot(S).dot(D)
         return self.inner(None, E, E) / 2
 
