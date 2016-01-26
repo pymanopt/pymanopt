@@ -25,4 +25,4 @@ install:
 
 script: 
   - nosetests
-  - cd examples && for EXAMPLE in *; do python $EXAMPLE; done; && cd ..
+  - cd examples && sh run_all.sh && cd ..
