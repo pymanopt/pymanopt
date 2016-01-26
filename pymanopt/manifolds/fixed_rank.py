@@ -159,7 +159,7 @@ class SymFixedRankYYComplex(SymFixedRankYY):
 
     def dist(self, U, V):
         S, _, D = la.svd(V.T.conj().dot(U))
-        E = U - V.dot(S).dot(D)
+        E = U - V.dot(S).dot(D) # numpy's svd returns D.H
         return self.inner(None, E, E) / 2
 
     def exp(self, Y, U):
@@ -170,5 +170,5 @@ class SymFixedRankYYComplex(SymFixedRankYY):
         return self.retr(Y, U)
 
     def rand(self):
-        rand_ = super(SymFixedRankYYComplex, self)
+        rand_ = super(SymFixedRankYYComplex, self).rand
         return rand_() + 1j * rand_()
