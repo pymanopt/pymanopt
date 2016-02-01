@@ -60,10 +60,10 @@ based on tCG.m from the Manopt MATLAB package.
 """
 import time
 
+import numpy as np
+
 from pymanopt.tools import theano_functions as comp_diff
 from pymanopt.solvers.solver import Solver
-
-import numpy as np
 
 
 class TrustRegions(Solver):
@@ -150,10 +150,10 @@ class TrustRegions(Solver):
                 eta = man.zerovec(x)
             else:
                 # Random vector in T_x M (this has to be very small)
-                eta = man.lincomb(x, 1e-6, man.randvec(x))
+                eta = 1e-6 * man.randvec(x)
                 # Must be inside trust region
                 while man.norm(x, eta) > Delta:
-                    eta = man.lincomb(x, np.sqrt(np.sqrt(eps)), np.spacing(1))
+                    eta = np.sqrt(np.sqrt(eps)) * np.spacing(1)
 
             # Solve TR subproblem approximately
             (eta, Heta, numit, stop_inner) = tCG(man, x, fgradx, hess, eta,
@@ -179,15 +179,15 @@ class TrustRegions(Solver):
                     tau_c = min(norm_grad**3/(Delta*g_Hg), 1)
 
                 # and generate the Cauchy point.
-                eta_c = man.lincomb(x, -tau_c * Delta / norm_grad, fgradx)
-                Heta_c = man.lincomb(x, -tau_c * Delta / norm_grad, Hg)
+                eta_c = -tau_c * Delta / norm_grad * fgradx
+                Heta_c = -tau_c * Delta / norm_grad * Hg
 
                 # Now that we have computed the Cauchy point in addition to the
                 # returned eta, we might as well keep the best of them.
                 mdle  = (fx + man.inner(x, fgradx, eta) +
-                    .5*man.inner(x, Heta,   eta))
+                         0.5 * man.inner(x, Heta, eta))
                 mdlec = (fx + man.inner(x, fgradx, eta_c) +
-                    .5*man.inner(x, Heta_c, eta_c))
+                         0.5 * man.inner(x, Heta_c, eta_c))
                 if mdlec < mdle:
                     eta = eta_c
                     Heta = Heta_c
@@ -360,10 +360,10 @@ class TrustRegions(Solver):
                     "{:.2f} seconds.".format(time.time() - time0))
                 return x
 
+
 def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         mininner, maxinner):
     inner = man.inner
-    lincomb = man.lincomb
 
     if not use_rand: # and therefore, eta == 0
         Heta = man.zerovec(x)
@@ -372,7 +372,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
     else: # and therefore, no preconditioner
         # eta (presumably) ~= 0 was provided by the caller.
         Heta = hess(x, eta)
-        r = lincomb(x, 1, grad, 1, Heta)
+        r = grad + Heta
         e_Pe = inner(x, eta, eta)
 
     r_r = inner(x, r, r)
@@ -390,7 +390,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
     d_Pd = z_r
 
     # Initial search direction
-    delta = lincomb(x, -1, z)
+    delta = -z
     if not use_rand:
         e_Pd = 0
     else:
@@ -423,7 +423,6 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         # Compute curvature (often called kappa)
         d_Hd = inner(x, delta, Hdelta)
 
-
         # Note that if d_Hd == 0, we will exit at the next "if" anyway.
         alpha = z_r/d_Hd
         # <neweta,neweta>_P =
@@ -439,11 +438,11 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
             #  dd = <delta,delta>_prec,x
             tau = (-e_Pd + np.sqrt(e_Pd*e_Pd + d_Pd*(Delta**2-e_Pe))) / d_Pd
 
-            eta = lincomb(x, 1, eta, tau, delta)
+            eta = eta + tau * delta
 
             # If only a nonlinear Hessian approximation is available, this is
             # only approximately correct, but saves an additional Hessian call.
-            Heta = lincomb(x, 1, Heta, tau, Hdelta)
+            Heta = Heta + tau * Hdelta
 
             # Technically, we may want to verify that this new eta is indeed
             # better than the previous eta before returning it (this is always
@@ -460,11 +459,11 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
 
         # No negative curvature and eta_prop inside TR: accept it.
         e_Pe = e_Pe_new
-        new_eta  = lincomb(x, 1,  eta, alpha,  delta)
+        new_eta  = eta + alpha * delta
 
         # If only a nonlinear Hessian approximation is available, this is
         # only approximately correct, but saves an additional Hessian call.
-        new_Heta = lincomb(x, 1, Heta, alpha, Hdelta)
+        new_Heta = Heta + alpha * Hdelta
 
         # Verify that the model cost decreased in going from eta to new_eta. If
         # it did not (which can only occur if the Hessian approximation is
@@ -481,7 +480,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         model_value = new_model_value
 
         # Update the residual.
-        r = lincomb(x, 1, r, alpha, Hdelta)
+        r = r + alpha * Hdelta
 
         # Compute new norm of r.
         r_r = inner(x, r, r)
@@ -512,11 +511,11 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         z_r = inner(x, z, r)
 
         # Compute new search direction
-        beta = z_r/zold_rold
-        delta = lincomb(x, -1, z, beta, delta)
+        beta = z_r / zold_rold
+        delta = -z + beta * delta
 
         # Update new P-norms and P-dots [CGT2000, eq. 7.5.6 & 7.5.7].
-        e_Pd = beta*(e_Pd + alpha*d_Pd)
-        d_Pd = z_r + beta*beta*d_Pd
+        e_Pd = beta * (e_Pd + alpha * d_Pd)
+        d_Pd = z_r + beta * beta * d_Pd
 
     return eta, Heta, j, stop_tCG

@@ -159,14 +159,11 @@ class ParticleSwarm(Solver):
 
                 # Compute the new velocity of particle i, composed of three
                 # contributions.
-                inertia = man.lincomb(xi, w, man.transp(xiprev, xi, vi))
-                nostalgia = man.lincomb(xi, rnd.rand() * self._nostalgia,
-                                        man.log(xi, yi))
-                social = man.lincomb(xi, rnd.rand() * self._social,
-                                     man.log(xi, xbest))
+                inertia = w * man.transp(xiprev, xi, vi)
+                nostalgia = rnd.rand() * self._nostalgia * man.log(xi, yi)
+                social = rnd.rand() * self._social * man.log(xi, xbest)
 
-                v[i] = man.lincomb(xi, 1, inertia, 1,
-                                   man.lincomb(xi, 1, nostalgia, 1, social))
+                v[i] = inertia + nostalgia + social
 
             # Backup the current swarm positions.
             xprev = list(x)

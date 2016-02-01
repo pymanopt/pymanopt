@@ -105,7 +105,7 @@ class ConjugateGradient(Solver):
         gradPgrad = man.inner(x, grad, Pgrad)
 
         # Initial descent direction is the negative gradient
-        desc_dir = man.lincomb(x, -1, Pgrad)
+        desc_dir = -Pgrad
 
         while True:
             if self._verbosity >= 2:
@@ -138,7 +138,7 @@ class ConjugateGradient(Solver):
                            "(df0 = %.2f), reset to the (preconditioned) "
                            "steepest descent direction." % df0)
                 # Reset to negative gradient: this discards the CG memory.
-                desc_dir = man.lincomb(x, -1, Pgrad)
+                desc_dir = -Pgrad
                 df0 = -gradPgrad
 
             # Execute line search
@@ -160,24 +160,24 @@ class ConjugateGradient(Solver):
             # survey on conjugate gradient methods, for example)
             if abs(orth_grads) >= self._orth_value:
                 beta = 0
-                desc_dir = man.lincomb(x, -1, Pnewgrad)
+                desc_dir = -Pnewgrad
             else:
                 desc_dir = man.transp(x, newx, desc_dir)
 
                 if self._beta_type == BetaTypes.FletcherReeves:
                     beta = newgradPnewgrad / gradPgrad
                 elif self._beta_type == BetaTypes.PolakRibiere:
-                    diff = man.lincomb(newx, 1, newgrad, -1, oldgrad)
+                    diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
                     beta = max(0, ip_diff / gradPgrad)
                 elif self._beta_type == BetaTypes.HestenesStiefel:
-                    diff = man.lincomb(newx, 1, newgrad, -1, oldgrad)
+                    diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
                     beta = max(0, ip_diff / man.inner(newx, diff, desc_dir))
                 elif self._beta_type == BetaTypes.HagerZhang:
-                    diff = man.lincomb(newx, 1, newgrad, -1, oldgrad)
+                    diff = newgrad - oldgrad
                     Poldgrad = man.transp(x, newx, Pgrad)
-                    Pdiff = man.lincomb(newx, 1, Pnewgrad, -1, Poldgrad)
+                    Pdiff = Pnewgrad - Poldgrad
                     deno = man.inner(newx, diff, desc_dir)
                     numo = man.inner(newx, diff, Pnewgrad)
                     numo -= (2 * man.inner(newx, diff, Pdiff) *
@@ -194,7 +194,7 @@ class ConjugateGradient(Solver):
                         "Unknown beta_type %s. Should be one of %s." % (
                             self._beta_type, types))
 
-                desc_dir = man.lincomb(newx, -1, Pnewgrad, beta, desc_dir)
+                desc_dir = -Pnewgrad + beta * desc_dir
 
             # Update the necessary variables for the next iteration.
             x = newx
