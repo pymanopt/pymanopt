@@ -40,7 +40,7 @@ class Problem:
             gradients and hessians by hand.
             theano_cost is the (scalar) cost and theano_arg is the
             (tensor) variable with respect to which you would like to
-            optimize. Both must be have type TensorVariable.
+            optimize. Both must have type TensorVariable.
     """
     def __init__(self, man=None, cost=None, grad=None,
                  hess=None, egrad=None, ehess=None,
