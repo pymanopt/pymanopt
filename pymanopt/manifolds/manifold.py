@@ -4,6 +4,7 @@ import abc
 
 import numpy as np
 
+
 class Manifold(object):
     __metaclass__ = abc.ABCMeta
 
@@ -19,8 +20,9 @@ class Manifold(object):
 
     @abc.abstractproperty
     def typicaldist(self):
-        # Returns the "scale" of the manifold. This is used by the trust-regions
-        # solver, to determine default initial and maximal trust-region radii.
+        # Returns the "scale" of the manifold. This is used by the
+        # trust-regions solver, to determine default initial and maximal
+        # trust-region radii.
         raise NotImplementedError
 
     @abc.abstractmethod

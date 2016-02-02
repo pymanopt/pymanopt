@@ -77,6 +77,7 @@ class LineSearch(object):
 
         return stepsize, newx
 
+
 class LineSearchAdaptive(object):
     def __init__(self):
         self._contraction_factor = 0.5

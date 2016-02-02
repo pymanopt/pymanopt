@@ -42,7 +42,7 @@ class SteepestDescent(Solver):
         # gradient.
         if self._verbosity >= 1:
             print "Computing gradient and compiling..."
-        problem.prepare(need_grad = True)
+        problem.prepare(need_grad=True)
 
         objective = problem.cost
         gradient = problem.grad
@@ -51,12 +51,14 @@ class SteepestDescent(Solver):
         if x is None:
             x = man.rand()
 
-        if self._verbosity >= 1: print "Optimizing..."
+        if self._verbosity >= 1:
+            print "Optimizing..."
         # Initialize iteration counter and timer
         iter = 0
         time0 = time.time()
 
-        if self._verbosity >= 2: print " iter\t\t   cost val\t    grad. norm"
+        if self._verbosity >= 2:
+            print " iter\t\t   cost val\t    grad. norm"
         while True:
             # Calculate new cost, grad and gradnorm
             cost = objective(x)
@@ -65,7 +67,7 @@ class SteepestDescent(Solver):
             iter = iter + 1
 
             if self._verbosity >= 2:
-                print "%5d\t%+.16e\t%.8e" %(iter,cost,gradnorm)
+                print "%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm)
 
             # Descent direction is minus the gradient
             desc_dir = -grad
@@ -78,25 +80,25 @@ class SteepestDescent(Solver):
             if step_size < self._minstepsize:
                 if self._verbosity >= 1:
                     print ("Terminated - min stepsize reached after %d "
-                        "iterations, %.2f seconds."
-                        % (iter, (time.time() - time0)))
+                           "iterations, %.2f seconds." % (
+                               iter, (time.time() - time0)))
                 return x
 
             if gradnorm < self._mingradnorm:
                 if self._verbosity >= 1:
                     print ("Terminated - min grad norm reached after %d "
-                        "iterations, %.2f seconds."
-                        % (iter, (time.time() - time0)))
+                           "iterations, %.2f seconds." % (
+                               iter, (time.time() - time0)))
                 return x
 
             if iter >= self._maxiter:
                 if self._verbosity >= 1:
                     print ("Terminated - max iterations reached after "
-                    "%.2f seconds." % (time.time() - time0))
+                           "%.2f seconds." % (time.time() - time0))
                 return x
 
             if time.time() >= time0 + self._maxtime:
                 if self._verbosity >= 1:
-                    print ("Terminated - max time reached after %d iterations."
-                    % iter)
+                    print ("Terminated - max time reached after %d "
+                           "iterations." % iter)
                 return x

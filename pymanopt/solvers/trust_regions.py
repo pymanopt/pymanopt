@@ -17,8 +17,8 @@
 # An explicit, general listing of this algorithm, with preconditioning,
 # can be found in the following paper:
 #     @Article{boumal2015lowrank,
-#       Title   = {Low-rank matrix completion via preconditioned optimization on
-#                    the {G}rassmann manifold},
+#       Title   = {Low-rank matrix completion via preconditioned optimization
+#                   on the {G}rassmann manifold},
 #       Author  = {Boumal, N. and Absil, P.-A.},
 #       Journal = {Linear Algebra and its Applications},
 #       Year    = {2015},
@@ -81,15 +81,16 @@ class TrustRegions(Solver):
         # TODO: implement value checks.
 
     # Some strings for display
-    tcg_stop_reason = ('negative curvature', 'exceeded trust region',
-                       'reached target residual-kappa (linear)',
-                       'reached target residual-theta (superlinear)',
-                       'maximum inner iterations', 'model increased')
+    tcg_stop_reason = ("negative curvature", "exceeded trust region",
+                       "reached target residual-kappa (linear)",
+                       "reached target residual-theta (superlinear)",
+                       "maximum inner iterations", "model increased")
 
     def solve(self, problem, x=None, mininner=1, maxinner=None,
               Delta_bar=None, Delta0=None, precon=lambda x, d: d):
         man = problem.man
-        if maxinner is None: maxinner = man.dim
+        if maxinner is None:
+            maxinner = man.dim
 
         # Set default Delta_bar and Delta0 separately to deal with additional
         # logic: if Delta_bar is provided but not Delta0, let Delta0
@@ -102,9 +103,9 @@ class TrustRegions(Solver):
         if Delta0 is None:
             Delta0 = Delta_bar / 8
 
-        if self._verbosity >= 1: print ("Computing gradient and hessian and "
-            "compiling...")
-        problem.prepare(need_grad = True, need_hess = True)
+        if self._verbosity >= 1:
+            print ("Computing gradient and hessian and compiling...")
+        problem.prepare(need_grad=True, need_hess=True)
 
         cost = problem.cost
         grad = problem.grad
@@ -114,7 +115,7 @@ class TrustRegions(Solver):
         if x is None:
             x = man.rand()
 
-        ## Initializations
+        # Initializations
         time0 = time.time()
 
         # k counts the outer (TR) iterations. The semantic is that k counts the
@@ -135,9 +136,11 @@ class TrustRegions(Solver):
         consecutive_TRminus = 0
 
         # ** Display:
-        if self._verbosity >= 1: print 'Optimizing...'
+        if self._verbosity >= 1:
+            print "Optimizing..."
         if self._verbosity >= 2:
-            print '{:44s}f: {:+.6e}   |grad|: {:.6e}'.format(' ', float(fx), norm_grad)
+            print "{:44s}f: {:+.6e}   |grad|: {:.6e}".format(
+                " ", float(fx), norm_grad)
 
         while True:
             # *************************
@@ -156,17 +159,17 @@ class TrustRegions(Solver):
                     eta = np.sqrt(np.sqrt(eps)) * np.spacing(1)
 
             # Solve TR subproblem approximately
-            (eta, Heta, numit, stop_inner) = tCG(man, x, fgradx, hess, eta,
-                Delta, self.theta, self.kappa, self.use_rand, precon, mininner,
-                maxinner)
+            eta, Heta, numit, stop_inner = tCG(
+                man, x, fgradx, hess, eta, Delta, self.theta, self.kappa,
+                self.use_rand, precon, mininner, maxinner)
 
             srstr = self.tcg_stop_reason[stop_inner]
 
-            # If using randomized approach, compare result with the Cauchy point.
-            # Convergence proofs assume that we achieve at least (a fraction of)
-            # the reduction of the Cauchy point. After this if-block, either all
-            # eta-related quantities have been changed consistently, or none of
-            # them have changed.
+            # If using randomized approach, compare result with the Cauchy
+            # point.  Convergence proofs assume that we achieve at least (a
+            # fraction of) the reduction of the Cauchy point. After this
+            # if-block, either all eta-related quantities have been changed
+            # consistently, or none of them have changed.
 
             if self.use_rand:
                 used_cauchy = False
@@ -176,7 +179,7 @@ class TrustRegions(Solver):
                 if g_Hg <= 0:
                     tau_c = 1
                 else:
-                    tau_c = min(norm_grad**3/(Delta*g_Hg), 1)
+                    tau_c = min(norm_grad ** 3 / (Delta * g_Hg), 1)
 
                 # and generate the Cauchy point.
                 eta_c = -tau_c * Delta / norm_grad * fgradx
@@ -184,8 +187,8 @@ class TrustRegions(Solver):
 
                 # Now that we have computed the Cauchy point in addition to the
                 # returned eta, we might as well keep the best of them.
-                mdle  = (fx + man.inner(x, fgradx, eta) +
-                         0.5 * man.inner(x, Heta, eta))
+                mdle = (fx + man.inner(x, fgradx, eta) +
+                        0.5 * man.inner(x, Heta, eta))
                 mdlec = (fx + man.inner(x, fgradx, eta_c) +
                          0.5 * man.inner(x, Heta_c, eta_c))
                 if mdlec < mdle:
@@ -193,10 +196,10 @@ class TrustRegions(Solver):
                     Heta = Heta_c
                     used_cauchy = true
 
-            # This is only computed for logging purposes, because it may be useful
-            # for some user-defined stopping criteria. If this is not cheap for
-            # specific applications (compared to evaluating the cost), we should
-            # reconsider this.
+            # This is only computed for logging purposes, because it may be
+            # useful for some user-defined stopping criteria. If this is not
+            # cheap for specific applications (compared to evaluating the
+            # cost), we should reconsider this.
             norm_eta = man.norm(x, eta)
 
             # Compute the tentative next iterate (the proposal)
@@ -208,108 +211,116 @@ class TrustRegions(Solver):
             # Will we accept the proposal or not? Check the performance of the
             # quadratic model against the actual cost.
             rhonum = fx - fx_prop
-            rhoden = -man.inner(x, fgradx, eta) - .5 * man.inner(x, eta, Heta)
+            rhoden = -man.inner(x, fgradx, eta) - 0.5 * man.inner(x, eta, Heta)
 
             # rhonum could be anything.
-            # rhoden should be nonnegative, as guaranteed by tCG, baring numerical
-            # errors.
+            # rhoden should be nonnegative, as guaranteed by tCG, baring
+            # numerical errors.
 
-            # Heuristic -- added Dec. 2, 2013 (NB) to replace the former heuristic.
-            # This heuristic is documented in the book by Conn Gould and Toint on
-            # trust-region methods, section 17.4.2.
+            # Heuristic -- added Dec. 2, 2013 (NB) to replace the former
+            # heuristic.  This heuristic is documented in the book by Conn
+            # Gould and Toint on trust-region methods, section 17.4.2.
             # rhonum measures the difference between two numbers. Close to
             # convergence, these two numbers are very close to each other, so
-            # that computing their difference is numerically challenging: there may
-            # be a significant loss in accuracy. Since the acceptance or rejection
-            # of the step is conditioned on the ratio between rhonum and rhoden,
-            # large errors in rhonum result in a very large error in rho, hence in
-            # erratic acceptance / rejection. Meanwhile, close to convergence,
-            # steps are usually trustworthy and we should transition to a Newton-
-            # like method, with rho=1 consistently. The heuristic thus shifts both
-            # rhonum and rhoden by a small amount such that far from convergence,
-            # the shift is irrelevant and close to convergence, the ratio rho goes
-            # to 1, effectively promoting acceptance of the step.
-            # The rationale is that close to convergence, both rhonum and rhoden
-            # are quadratic in the distance between x and x_prop. Thus, when this
-            # distance is on the order of sqrt(eps), the value of rhonum and rhoden
-            # is on the order of eps, which is indistinguishable from the numerical
-            # error, resulting in badly estimated rho's.
-            # For abs(fx) < 1, this heuristic is invariant under offsets of f but
-            # not under scaling of f. For abs(fx) > 1, the opposite holds. This
-            # should not alarm us, as this heuristic only triggers at the very last
-            # iterations if very fine convergence is demanded.
+            # that computing their difference is numerically challenging: there
+            # may be a significant loss in accuracy. Since the acceptance or
+            # rejection of the step is conditioned on the ratio between rhonum
+            # and rhoden, large errors in rhonum result in a very large error
+            # in rho, hence in erratic acceptance / rejection. Meanwhile, close
+            # to convergence, steps are usually trustworthy and we should
+            # transition to a Newton- like method, with rho=1 consistently. The
+            # heuristic thus shifts both rhonum and rhoden by a small amount
+            # such that far from convergence, the shift is irrelevant and close
+            # to convergence, the ratio rho goes to 1, effectively promoting
+            # acceptance of the step.  The rationale is that close to
+            # convergence, both rhonum and rhoden are quadratic in the distance
+            # between x and x_prop. Thus, when this distance is on the order of
+            # sqrt(eps), the value of rhonum and rhoden is on the order of eps,
+            # which is indistinguishable from the numerical error, resulting in
+            # badly estimated rho's.
+            # For abs(fx) < 1, this heuristic is invariant under offsets of f
+            # but not under scaling of f. For abs(fx) > 1, the opposite holds.
+            # This should not alarm us, as this heuristic only triggers at the
+            # very last iterations if very fine convergence is demanded.
             rho_reg = max(1, abs(fx)) * np.spacing(1) * self.rho_regularization
             rhonum = rhonum + rho_reg
             rhoden = rhoden + rho_reg
 
-            # This is always true if a linear, symmetric operator is used for the
-            # Hessian (approximation) and if we had infinite numerical precision.
-            # In practice, nonlinear approximations of the Hessian such as the
-            # built-in finite difference approximation and finite numerical
-            # accuracy can cause the model to increase. In such scenarios, we
-            # decide to force a rejection of the step and a reduction of the
-            # trust-region radius. We test the sign of the regularized rhoden since
-            # the regularization is supposed to capture the accuracy to which
-            # rhoden is computed: if rhoden were negative before regularization but
-            # not after, that should not be (and is not) detected as a failure.
+            # This is always true if a linear, symmetric operator is used for
+            # the Hessian (approximation) and if we had infinite numerical
+            # precision.  In practice, nonlinear approximations of the Hessian
+            # such as the built-in finite difference approximation and finite
+            # numerical accuracy can cause the model to increase. In such
+            # scenarios, we decide to force a rejection of the step and a
+            # reduction of the trust-region radius. We test the sign of the
+            # regularized rhoden since the regularization is supposed to
+            # capture the accuracy to which rhoden is computed: if rhoden were
+            # negative before regularization but not after, that should not be
+            # (and is not) detected as a failure.
             #
             # Note (Feb. 17, 2015, NB): the most recent version of tCG already
             # includes a mechanism to ensure model decrease if the Cauchy step
-            # attained a decrease (which is theoretically the case under very lax
-            # assumptions). This being said, it is always possible that numerical
-            # errors will prevent this, so that it is good to keep a safeguard.
+            # attained a decrease (which is theoretically the case under very
+            # lax assumptions). This being said, it is always possible that
+            # numerical errors will prevent this, so that it is good to keep a
+            # safeguard.
             #
-            # The current strategy is that, if this should happen, then we reject
-            # the step and reduce the trust region radius. This also ensures that
-            # the actual cost values are monotonically decreasing.
+            # The current strategy is that, if this should happen, then we
+            # reject the step and reduce the trust region radius. This also
+            # ensures that the actual cost values are monotonically decreasing.
             model_decreased = (rhoden >= 0)
 
             if not model_decreased:
-                srstr = srstr + ', model did not decrease'
+                srstr = srstr + ", model did not decrease"
 
             try:
                 rho = rhonum / rhoden
             except ZeroDivisionError:
-                # Added June 30, 2015 following observation by BM.
-                # With this modification, it is guaranteed that a step rejection is
-                # always accompanied by a TR reduction. This prevents stagnation in
-                # this "corner case" (NaN's really aren't supposed to occur, but it's
-                # nice if we can handle them nonetheless).
-                print ('rho is NaN! Forcing a radius decrease. This should '
-                    'not happen.')
+                # Added June 30, 2015 following observation by BM.  With this
+                # modification, it is guaranteed that a step rejection is
+                # always accompanied by a TR reduction. This prevents
+                # stagnation in this "corner case" (NaN's really aren't
+                # supposed to occur, but it's nice if we can handle them
+                # nonetheless).
+                print ("rho is NaN! Forcing a radius decrease. This should "
+                       "not happen.")
                 rho = np.nan
 
             # Choose the new TR radius based on the model performance
-            trstr = '   '
-            # If the actual decrease is smaller than 1/4 of the predicted decrease,
-            # then reduce the TR radius.
-            if rho < 1./4 or not model_decreased or np.isnan(rho):
-                trstr = 'TR-'
-                Delta = Delta/4
+            trstr = "   "
+            # If the actual decrease is smaller than 1/4 of the predicted
+            # decrease, then reduce the TR radius.
+            if rho < 1.0 / 4 or not model_decreased or np.isnan(rho):
+                trstr = "TR-"
+                Delta = Delta / 4
                 consecutive_TRplus = 0
                 consecutive_TRminus = consecutive_TRminus + 1
                 if consecutive_TRminus >= 5 and self._verbosity >= 1:
                     consecutive_TRminus = -np.inf
-                    print ' +++ Detected many consecutive TR- (radius decreases).'
-                    print ' +++ Consider decreasing options.Delta_bar by an order of magnitude.'
-                    print (' +++ Current values: Delta_bar = '
-                        '{:g} and Delta0 = {:g}').format(Delta_bar, Delta0)
-            # If the actual decrease is at least 3/4 of the precicted decrease and
-            # the tCG (inner solve) hit the TR boundary, increase the TR radius.
-            # We also keep track of the number of consecutive trust-region radius
-            # increases. If there are many, this may indicate the need to adapt the
-            # initial and maximum radii.
-            elif rho > 3./4 and (stop_inner == 1 or stop_inner == 2):
-                trstr = 'TR+'
-                Delta = min(2*Delta, Delta_bar)
+                    print (" +++ Detected many consecutive TR- (radius "
+                           "decreases).")
+                    print (" +++ Consider decreasing options.Delta_bar by an "
+                           "order of magnitude.")
+                    print (" +++ Current values: Delta_bar = "
+                           "{:g} and Delta0 = {:g}").format(Delta_bar, Delta0)
+            # If the actual decrease is at least 3/4 of the precicted decrease
+            # and the tCG (inner solve) hit the TR boundary, increase the TR
+            # radius.  We also keep track of the number of consecutive
+            # trust-region radius increases. If there are many, this may
+            # indicate the need to adapt the initial and maximum radii.
+            elif rho > 3.0 / 4 and (stop_inner == 1 or stop_inner == 2):
+                trstr = "TR+"
+                Delta = min(2 * Delta, Delta_bar)
                 consecutive_TRminus = 0
                 consecutive_TRplus = consecutive_TRplus + 1
                 if consecutive_TRplus >= 5 and self._verbosity >= 1:
                     consecutive_TRplus = -np.inf
-                    print ' +++ Detected many consecutive TR+ (radius increases).'
-                    print ' +++ Consider increasing options.Delta_bar by an order of magnitude.'
-                    print (' +++ Current values: Delta_bar = '
-                        '{:g} and Delta0 = {:g}.').format(Delta_bar, Delta0)
+                    print (" +++ Detected many consecutive TR+ (radius "
+                           "increases).")
+                    print (" +++ Consider increasing options.Delta_bar by an "
+                           "order of magnitude.")
+                    print (" +++ Current values: Delta_bar = "
+                           "{:g} and Delta0 = {:g}.").format(Delta_bar, Delta0)
             else:
                 # Otherwise, keep the TR radius constant.
                 consecutive_TRplus = 0
@@ -319,45 +330,51 @@ class TrustRegions(Solver):
             # performance. Note the strict inequality.
             if model_decreased and rho > self.rho_prime:
                 accept = True
-                accstr = 'acc'
+                accstr = "acc"
                 x = x_prop
                 fx = fx_prop
                 fgradx = grad(x)
                 norm_grad = man.norm(x, fgradx)
             else:
                 accept = False
-                accstr = 'REJ'
+                accstr = "REJ"
 
             # k is the number of iterations we have accomplished.
             k = k + 1
 
             # ** Display:
             if self._verbosity == 2:
-                print '{:.3s} {:.3s}   k: {:5d}     num_inner: {:5d}     f: {:+e}   |grad|: {:e}   {:s}'.format(accstr, trstr, k, numit, float(fx), norm_grad, srstr)
+                print ("{:.3s} {:.3s}   k: {:5d}     num_inner: {:5d}     "
+                       "f: {:+e}   |grad|: {:e}   {:s}".format(
+                           accstr, trstr, k, numit, float(fx), norm_grad,
+                           srstr))
             elif self._verbosity > 2:
                 if self.use_rand and used_cauchy:
-                    print 'USED CAUCHY POINT'
-                print ('{:.3s} {:.3s}    k: {:5d}     '
-                    'num_inner: {:5d}     {:s}'.format(accstr, trstr, k, numit, srstr))
-                print '       f(x) : {:+e}     |grad| : {:e}'.format(fx, norm_grad)
-                print '        rho : {:e}'.format(rho)
+                    print "USED CAUCHY POINT"
+                print ("{:.3s} {:.3s}    k: {:5d}     num_inner: {:5d}     "
+                       "{:s}".format(accstr, trstr, k, numit, srstr))
+                print "       f(x) : {:+e}     |grad| : {:e}".format(
+                    fx, norm_grad)
+                print "        rho : {:e}".format(rho)
 
             # ** CHECK STOPPING criteria
             if norm_grad < self._mingradnorm:
                 if self._verbosity >= 1:
                     print ("Terminated - min grad norm reached after {:d} "
-                        "iterations, {:.2f} seconds.").format(k, time.time() - time0)
+                           "iterations, {:.2f} seconds.").format(
+                               k, time.time() - time0)
                 return x
 
             if time.time() - time0 >= self._maxtime:
                 if self._verbosity >= 1:
-                    print ("Terminated - max time reached after {:d} iterations.").format(k)
+                    print ("Terminated - max time reached after {:d} "
+                           "iterations.").format(k)
                 return x
 
             if k >= self._maxiter:
                 if self._verbosity >= 1:
                     print ("Terminated - max iterations reached after "
-                    "{:.2f} seconds.".format(time.time() - time0))
+                           "{:.2f} seconds.".format(time.time() - time0))
                 return x
 
 
@@ -365,11 +382,11 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         mininner, maxinner):
     inner = man.inner
 
-    if not use_rand: # and therefore, eta == 0
+    if not use_rand:  # and therefore, eta == 0
         Heta = man.zerovec(x)
         r = grad
         e_Pe = 0
-    else: # and therefore, no preconditioner
+    else:  # and therefore, no preconditioner
         # eta (presumably) ~= 0 was provided by the caller.
         Heta = hess(x, eta)
         r = grad + Heta
@@ -406,7 +423,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
     # model value.
 
     def model_fun(eta, Heta):
-        return inner(x, eta, grad) + .5 * inner(x, eta, Heta)
+        return inner(x, eta, grad) + 0.5 * inner(x, eta, Heta)
     if not use_rand:
         model_value = 0
     else:
@@ -424,7 +441,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         d_Hd = inner(x, delta, Hdelta)
 
         # Note that if d_Hd == 0, we will exit at the next "if" anyway.
-        alpha = z_r/d_Hd
+        alpha = z_r / d_Hd
         # <neweta,neweta>_P =
         # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
         e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha * alpha * d_Pd
@@ -436,7 +453,8 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
             #  ee = <eta,eta>_prec,x
             #  ed = <eta,delta>_prec,x
             #  dd = <delta,delta>_prec,x
-            tau = (-e_Pd + np.sqrt(e_Pd*e_Pd + d_Pd*(Delta**2-e_Pe))) / d_Pd
+            tau = ((-e_Pd +
+                    np.sqrt(e_Pd * e_Pd + d_Pd * (Delta ** 2 - e_Pe))) / d_Pd)
 
             eta = eta + tau * delta
 
@@ -459,7 +477,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
 
         # No negative curvature and eta_prop inside TR: accept it.
         e_Pe = e_Pe_new
-        new_eta  = eta + alpha * delta
+        new_eta = eta + alpha * delta
 
         # If only a nonlinear Hessian approximation is available, this is
         # only approximately correct, but saves an additional Hessian call.

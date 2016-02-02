@@ -113,6 +113,7 @@ class SymFixedRankYY(Manifold):
     def _normalize(self, Y):
         return Y / self.norm(None, Y)
 
+
 class SymFixedRankYYComplex(SymFixedRankYY):
     """
     Manifold of n x n complex Hermitian pos. semidefinite matrices of rank k.
@@ -159,7 +160,7 @@ class SymFixedRankYYComplex(SymFixedRankYY):
 
     def dist(self, U, V):
         S, _, D = la.svd(V.T.conj().dot(U))
-        E = U - V.dot(S).dot(D) # numpy's svd returns D.H
+        E = U - V.dot(S).dot(D)  # numpy's svd returns D.H
         return self.inner(None, E, E) / 2
 
     def exp(self, Y, U):

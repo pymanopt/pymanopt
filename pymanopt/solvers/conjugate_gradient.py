@@ -65,8 +65,8 @@ class ConjugateGradient(Solver):
                 over, as well as a cost and enough information to compute
                 the gradient of that cost.
             - x=None
-                Optional parameter. Starting point on the manifold. If none then
-                a starting point will be randomly generated.
+                Optional parameter. Starting point on the manifold. If none
+                then a starting point will be randomly generated.
         Returns:
             - x
                 Local minimum of obj, or if algorithm terminated before
@@ -101,7 +101,7 @@ class ConjugateGradient(Solver):
         cost = objective(x)
         grad = man.egrad2rgrad(x, gradient(x))
         gradnorm = man.norm(x, grad)
-        Pgrad = grad # TODO: Pgrad = precondition(x, grad)
+        Pgrad = grad  # TODO: Pgrad = precondition(x, grad)
         gradPgrad = man.inner(x, grad, Pgrad)
 
         # Initial descent direction is the negative gradient
@@ -149,7 +149,7 @@ class ConjugateGradient(Solver):
             newcost = objective(newx)
             newgrad = man.egrad2rgrad(newx, gradient(newx))
             newgradnorm = man.norm(newx, newgrad)
-            Pnewgrad = newgrad # TODO: precondition(xnew, newgrad)
+            Pnewgrad = newgrad  # TODO: precondition(xnew, newgrad)
             newgradPnewgrad = man.inner(newx, newgrad, Pnewgrad)
 
             # Apply the CG scheme to compute the next search direction

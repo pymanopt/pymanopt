@@ -33,8 +33,8 @@ class Grassmann(Manifold):
     def __init__(self, height, width, k=1):
         # Check that n is greater than or equal to p
         if height < width or width < 1:
-            raise ValueError("Need n >= p >= 1. "
-                "Values supplied were n = %d and p = %d." % (height, width))
+            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
+                             "and p = %d." % (height, width))
         if k < 1:
             raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
         # Set the dimensions of the Grassmann
@@ -49,8 +49,8 @@ class Grassmann(Manifold):
         if k == 1:
             self._name = "Grassmann manifold Gr(%d, %d)" % (self._n, self._p)
         elif k >= 2:
-            self._name = "Product Grassmann manifold Gr(%d, %d)^%d" % (self._n,
-                self._p, self._k)
+            self._name = "Product Grassmann manifold Gr(%d, %d)^%d" % (
+                self._n, self._p, self._k)
 
     @property
     def dim(self):
@@ -67,8 +67,8 @@ class Grassmann(Manifold):
     # Geodesic distance for Grassmann
     def dist(self, X, Y):
         if self._k == 1:
-            u, s, v = np.linalg.svd(np.dot(X.T,Y))
-            s[s>1] = 1
+            u, s, v = np.linalg.svd(np.dot(X.T, Y))
+            s[s > 1] = 1
             s = np.arccos(s)
             return np.linalg.norm(s)
         else:

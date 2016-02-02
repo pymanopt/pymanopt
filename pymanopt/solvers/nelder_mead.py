@@ -21,7 +21,7 @@ def compute_centroid(man, x):
     """
     n = len(x)
 
-    def objective(y): # weighted Frechet variance
+    def objective(y):  # weighted Frechet variance
         acc = 0
         for i in range(n):
             acc += man.dist(y, x[i]) ** 2
@@ -141,7 +141,7 @@ class NelderMead(Solver):
         # Sort simplex points by cost.
         order = np.argsort(costs)
         costs = costs[order]
-        x = [x[i] for i in order] # XXX: Probably inefficient
+        x = [x[i] for i in order]  # XXX: Probably inefficient
 
         # Iteration counter (at any point, iter is the number of fully executed
         # iterations so far).
@@ -159,7 +159,7 @@ class NelderMead(Solver):
             # Sort simplex points by cost.
             order = np.argsort(costs)
             costs = costs[order]
-            x = [x[i] for i in order] # XXX: Probably inefficient
+            x = [x[i] for i in order]  # XXX: Probably inefficient
 
             stop_reason = self._check_stopping_criterion(
                 iter, costevals, time0)
@@ -237,4 +237,3 @@ class NelderMead(Solver):
             costevals += dim
 
         return x[0]
-

@@ -1,6 +1,6 @@
 class Solver(object):
     def __init__(self, mingradnorm=1e-6, maxiter=1000, maxtime=1000,
-                 minstepsize = 1e-10, verbosity=2):
+                 minstepsize=1e-10, verbosity=2):
         """
         Generic solver base class.
         Variable attributes (defaults in brackets):

@@ -14,26 +14,28 @@ from pymanopt.manifolds.manifold import Manifold
 
 
 class Stiefel(Manifold):
-    def __init__(self, height, width, k = 1):
+    def __init__(self, height, width, k=1):
         # Check that n is greater than or equal to p
-        if height < width or width < 1: raise ValueError("Need n >= p >= 1. "
-            "Values supplied were n = %d and p = %d." % (height, width))
-        if k < 1: raise ValueError("Need k >= 1. Value supplied was k = %d."
-                % k)
+        if height < width or width < 1:
+            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
+                             "and p = %d." % (height, width))
+        if k < 1:
+            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
         # Set the dimensions of the Stiefel
         self._n = height
         self._p = width
         self._k = k
 
         # Set dimension
-        self._dim = self._k*(self._n*self._p - .5*self._p*(self._p+1))
+        self._dim = self._k * (self._n * self._p -
+                               0.5 * self._p * (self._p + 1))
 
         # Set the name
         if k == 1:
             self._name = "Stiefel manifold St(%d, %d)" % (self._n, self._p)
         elif k >= 2:
-            self._name = "Product Stiefel manifold St(%d, %d)^%d" % (self._n,
-                self._p, self._k)
+            self._name = "Product Stiefel manifold St(%d, %d)^%d" % (
+                self._n, self._p, self._k)
 
     @property
     def dim(self):
@@ -54,11 +56,11 @@ class Stiefel(Manifold):
     def inner(self, X, G, H):
         # Inner product (Riemannian metric) on the tangent space
         # For the stiefel this is the Frobenius inner product.
-        return np.tensordot(G,H, axes=G.ndim)
+        return np.tensordot(G, H, axes=G.ndim)
 
     def proj(self, X, U):
-        UNew = U - multiprod(X, multiprod(multitransp(X), U) +
-                multiprod(multitransp(U), X)) / 2
+        UNew = U - multiprod(
+            X, multiprod(multitransp(X), U) + multiprod(multitransp(U), X)) / 2
         return UNew
 
     egrad2rgrad = proj
@@ -93,7 +95,7 @@ class Stiefel(Manifold):
     # matrix.
     def rand(self):
         if self._k == 1:
-            X = np.random.randn(self._n,self._p)
+            X = np.random.randn(self._n, self._p)
             q, r = np.linalg.qr(X)
             return q
 
@@ -116,14 +118,17 @@ class Stiefel(Manifold):
 
     def exp(self, X, U):
         # TODO: Simplify these expressions.
-        if self._k ==1:
-            Y = (np.bmat([X, U]).dot(expm(np.bmat([[X.T.dot(U), -U.T.dot(U)],
-                 [np.eye(self._p) , X.T.dot(U)]]))).dot(np.bmat([[expm(-X.T.dot(U))],
-                 [np.zeros((self._p,self._p))]])))
+        if self._k == 1:
+            W = expm(np.bmat([[X.T.dot(U), -U.T.dot(U)],
+                              [np.eye(self._p), X.T.dot(U)]]))
+            Z = np.bmat([[expm(-X.T.dot(U))], [np.zeros((self._p, self._p))]])
+            Y = np.bmat([X, U]).dot(W).dot(Z)
         else:
             Y = np.zeros(np.shape(X))
             for i in xrange(self._k):
-                Y[i] = (np.bmat([X[i], U[i]]).dot(expm(np.bmat([[X[i].T.dot(U[i]), -U[i].T.dot(U[i])],
-                        [np.eye(self._p) , X[i].T.dot(U[i])]]))).dot(np.bmat([[expm(-X[i].T.dot(U[i]))],
-                        [np.zeros((self._p,self._p))]])))
+                W = expm(np.bmat([[X[i].T.dot(U[i]), -U[i].T.dot(U[i])],
+                                  [np.eye(self._p), X[i].T.dot(U[i])]]))
+                Z = np.bmat([[expm(-X[i].T.dot(U[i]))],
+                             [np.zeros((self._p, self._p))]])
+                Y[i] = np.bmat([X[i], U[i]]).dot(W).dot(Z)
         return Y
