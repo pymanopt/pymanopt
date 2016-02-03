@@ -82,7 +82,7 @@ class Stiefel(Manifold):
         else:
             XNew = X + G
             for i in xrange(self._k):
-                q, r = np.linalg.qr(Y[i])
+                q, r = np.linalg.qr(XNew[i])
                 XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
         return XNew
 
