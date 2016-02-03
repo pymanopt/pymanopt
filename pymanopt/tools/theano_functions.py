@@ -39,8 +39,7 @@ def grad_hess(objective, argument):
 
     # Create a new tensor A, which has the same type (i.e. same dimensionality)
     # as argument.
-    arg_type = argument.type
-    A = arg_type()
+    A = argument.type()
 
     try:
         # First attempt efficient 'R-op', this directly calculates the
