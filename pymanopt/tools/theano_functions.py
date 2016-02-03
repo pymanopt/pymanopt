@@ -7,6 +7,7 @@ Jamie Townsend December 2014
 import theano.tensor as T
 import theano
 
+from warnings import warn
 
 def compile(objective, argument):
     """
@@ -36,17 +37,26 @@ def grad_hess(objective, argument):
     g = T.grad(objective, argument)
     grad = compile(g, argument)
 
-    # For now, this function will only work for matrix manifolds.
-    A = T.matrix()
-    n, p = T.shape(argument)
+    # Create a new tensor A, which has the same type (i.e. same dimensionality)
+    # as argument.
+    arg_type = argument.type
+    A = arg_type()
+
     try:
         # First attempt efficient 'R-op', this directly calculates the
         # directional derivative of the gradient, rather than explicitly
         # calculating the hessian and then multiplying.
         R = T.Rop(g, argument, A)
     except NotImplementedError:
+        # This will break if the manifold is not a matrix.
+        n, p = T.shape(argument)
         H = T.jacobian(g.flatten(), argument).reshape([n, p, n, p], 4)
         R = T.tensordot(H, A)
 
-    hess = theano.function([argument, A], R)
+    try:
+        hess = theano.function([argument, A], R)
+    except theano.compile.UnusedInputError:
+        warn('Theano detected unused input - suggests hessian may be zero or '
+             'constant.')
+        hess = theano.function([argument, A], R, on_unused_input='ignore')
     return grad, hess
