@@ -81,7 +81,7 @@ class ConjugateGradient(Solver):
         problem.prepare(need_grad=True)
 
         objective = problem.cost
-        gradient = problem.grad
+        gradient = problem.egrad
 
         # If no starting point is specified, generate one at random.
         if x is None:
