@@ -99,7 +99,7 @@ class ConjugateGradient(Solver):
 
         # Calculate initial cost-related quantities
         cost = objective(x)
-        grad = man.egrad2rgrad(x, gradient(x))
+        grad = gradient(x)
         gradnorm = man.norm(x, grad)
         Pgrad = grad  # TODO: Pgrad = precondition(x, grad)
         gradPgrad = man.inner(x, grad, Pgrad)
@@ -147,7 +147,7 @@ class ConjugateGradient(Solver):
 
             # Compute the new cost-related quantities for newx
             newcost = objective(newx)
-            newgrad = man.egrad2rgrad(newx, gradient(newx))
+            newgrad = gradient(newx)
             newgradnorm = man.norm(newx, newgrad)
             Pnewgrad = newgrad  # TODO: precondition(xnew, newgrad)
             newgradPnewgrad = man.inner(newx, newgrad, Pnewgrad)

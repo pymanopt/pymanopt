@@ -62,7 +62,7 @@ class SteepestDescent(Solver):
         while True:
             # Calculate new cost, grad and gradnorm
             cost = objective(x)
-            grad = man.egrad2rgrad(x, gradient(x))
+            grad = gradient(x)
             gradnorm = man.norm(x, grad)
             iter = iter + 1
 
