@@ -21,8 +21,12 @@ before_install:
 # Install packages
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose theano
+  - pip install coveralls
   - python setup.py install
 
 script:
-  - nosetests --verbosity=2
+  - nosetests --verbosity=2 --with-coverage --cover-package=pymanopt
   - cd examples && sh run_all.sh && cd ..
+
+after_success:
+  - coveralls
