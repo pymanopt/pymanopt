@@ -17,12 +17,12 @@ before_install:
   - cd ..
   - export PATH=/home/travis/miniconda2/bin:$PATH
   - conda update --yes conda
-  
+
 # Install packages
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose theano
   - python setup.py install
 
-script: 
-  - nosetests
+script:
+  - nosetests --verbosity=2
   - cd examples && sh run_all.sh && cd ..
