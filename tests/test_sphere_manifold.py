@@ -15,11 +15,11 @@ class TestSphereManifold(unittest.TestCase):
         self.sphere = Sphere(m, n)
 
     def test_proj(self):
-        # Construct a random point X on the manifold.
+        # Construct a random point (X) on the manifold.
         X = rnd.randn(self.m, self.n)
         X /= la.norm(X, "fro")
 
-        # Construct a vector H in the ambient space.
+        # Construct a vector H) in the ambient space.
         H = rnd.randn(self.m, self.n)
 
         # Compare the projections.
