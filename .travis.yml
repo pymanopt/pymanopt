@@ -20,7 +20,7 @@ before_install:
 
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose theano
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose theano libgfortran
   - pip install coveralls
   - python setup.py install
 
