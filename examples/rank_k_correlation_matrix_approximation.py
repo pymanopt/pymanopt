@@ -25,6 +25,7 @@ def rank_k_correlation_matrix_approximation(A, k):
     problem = Problem(man=manifold, theano_cost=cost, theano_arg=X)
     return solver.solve(problem)
 
+
 if __name__ == "__main__":
     # Generate random problem data.
     n = 10

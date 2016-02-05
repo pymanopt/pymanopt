@@ -32,7 +32,7 @@ class TestMulti(unittest.TestCase):
         for i in range(self.k):
             C[i] = A[i].dot(B[i])
 
-        np_testing.assert_allclose(C, multiprod(A,B))
+        np_testing.assert_allclose(C, multiprod(A, B))
 
     def test_multitransp_singlemat(self):
         A = rnd.randn(self.m, self.n)

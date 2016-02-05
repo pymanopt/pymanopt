@@ -9,6 +9,7 @@ import theano
 
 from warnings import warn
 
+
 def compile(objective, argument):
     """
     Wrapper for the theano.function(). Compiles a theano graph into a python

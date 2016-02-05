@@ -28,6 +28,7 @@ def dominant_eigenvector(A):
     xopt = solver.solve(problem)
     return xopt.squeeze()
 
+
 if __name__ == "__main__":
     # Generate random problem data.
     n = 128

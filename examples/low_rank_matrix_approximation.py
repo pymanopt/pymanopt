@@ -16,17 +16,22 @@ def _bootstrap_problem(A, k):
     solver = TrustRegions(maxiter=500, minstepsize=1e-6)
     return manifold, solver
 
+
 def low_rank_matrix_approximation(A, k):
     manifold, solver = _bootstrap_problem(A, k)
 
     def cost(Y):
         return la.norm(Y.dot(Y.T) - A, "fro") ** 2
+
     def egrad(Y):
         return 4 * (Y.dot(Y.T) - A).dot(Y)
+
     def ehess(Y, U):
         return 4 * ((Y.dot(U.T) + U.dot(Y.T)).dot(Y) + (Y.dot(Y.T) - A).dot(U))
+
     problem = Problem(man=manifold, cost=cost, egrad=egrad, ehess=ehess)
     return solver.solve(problem)
+
 
 def low_rank_matrix_approximation_theano(A, k):
     manifold, solver = _bootstrap_problem(A, k)
@@ -36,6 +41,7 @@ def low_rank_matrix_approximation_theano(A, k):
 
     problem = Problem(man=manifold, theano_cost=cost, theano_arg=Y)
     return solver.solve(problem)
+
 
 if __name__ == "__main__":
     # Generate random problem data.

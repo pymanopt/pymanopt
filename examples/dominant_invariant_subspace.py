@@ -48,12 +48,12 @@ def dominant_invariant_subspace(A, p):
     assert np.isreal(A).all(), 'A must be real.'
     assert A.shape[1] == n, 'A must be square.'
     assert np.linalg.norm(A-A.T) < n * np.spacing(1), 'A must be symmetric.'
-    assert p<=n, 'p must be smaller than n.'
+    assert p <= n, 'p must be smaller than n.'
 
     # Define the cost on the Grassmann manifold
     Gr = Grassmann(n, p)
     X = T.matrix()
-    cost = -T.dot(X.T, T.dot(A,X)).trace()
+    cost = -T.dot(X.T, T.dot(A, X)).trace()
 
     # Setup the problem
     problem = Problem(man=Gr, theano_cost=cost, theano_arg=X)
@@ -66,6 +66,7 @@ def dominant_invariant_subspace(A, p):
 
     return Xopt
 
+
 if __name__ == '__main__':
     """
     This demo script will generate a random 128 x 128 symmetric matrix and find
@@ -75,8 +76,8 @@ if __name__ == '__main__':
     """
     # Generate some random data to test the function
     print 'Generating random matrix...'
-    A = np.random.randn(128,128)
-    A = (A+A.T)/2
+    A = np.random.randn(128, 128)
+    A = 0.5 * (A + A.T)
 
     p = 3
 

@@ -23,6 +23,7 @@ def closest_unit_norm_column_approximation(A):
     problem = Problem(man=manifold, theano_cost=cost, theano_arg=X)
     return solver.solve(problem)
 
+
 if __name__ == "__main__":
     # Generate random problem data.
     m = 5

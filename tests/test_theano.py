@@ -40,7 +40,7 @@ class TestMatrix(unittest.TestCase):
         # Then 'right multiply' H by A
         Atensor = A.reshape(1, 1, m, n)
 
-        self.correct_hess = np.sum(H * Atensor, axis=(2,3))
+        self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
 
     def test_compile(self):
         cost_compiled = compile(self.cost, self.X)

@@ -28,7 +28,6 @@ def multitransp(A):
     containing the M matrix transposes of the matrices in A, each of which
     will be P x N.
     """
-    
     # First check if we have been given just one matrix
     if len(np.shape(A)) == 2:
         return A.T
@@ -37,4 +36,4 @@ def multitransp(A):
 
 def multisym(A):
     # Inspired by MATLAB multisym function by Nicholas Boumal.
-    return .5 * (A + multitransp(A))
+    return 0.5 * (A + multitransp(A))
