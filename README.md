@@ -20,6 +20,7 @@ http://deeplearning.net/software/theano/
 | Stiefel | Partially |
 | Grassmann | Partially |
 | Symmetric positive semidefinite,<br>fixed-rank (complex) | Partially |
+| Oblique manifold | Partially |
 
 ### Solvers
 
