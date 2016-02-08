@@ -54,7 +54,6 @@ def grad_hess(objective, argument):
     try:
         hess = theano.function([argument, A], R, on_unused_input='raise')
     except theano.compile.UnusedInputError:
-        print "hello"
         warn('Theano detected unused input - suggests hessian may be zero or '
              'constant.')
         hess = theano.function([argument, A], R, on_unused_input='ignore')
