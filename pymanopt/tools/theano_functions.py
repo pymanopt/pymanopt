@@ -33,8 +33,6 @@ def grad_hess(objective, argument):
     Compute both the gradient and the directional derivative of the gradient
     (which is equal to the hessian multiplied by direction).
     """
-    # TODO: Check that the hessian calculation is correct!
-    # TODO: Make this compatible with non-matrix manifolds.
     g = T.grad(objective, argument)
     grad = compile(g, argument)
 
@@ -48,14 +46,15 @@ def grad_hess(objective, argument):
         # calculating the hessian and then multiplying.
         R = T.Rop(g, argument, A)
     except NotImplementedError:
-        # This will break if the manifold is not a matrix.
-        n, p = T.shape(argument)
-        H = T.jacobian(g.flatten(), argument).reshape([n, p, n, p], 4)
-        R = T.tensordot(H, A)
+        shp = T.shape(argument)
+        H = T.jacobian(g.flatten(), argument).reshape(
+                                        T.concatenate([shp, shp]), 2*A.ndim)
+        R = T.tensordot(H, A, A.ndim)
 
     try:
-        hess = theano.function([argument, A], R)
+        hess = theano.function([argument, A], R, on_unused_input='raise')
     except theano.compile.UnusedInputError:
+        print "hello"
         warn('Theano detected unused input - suggests hessian may be zero or '
              'constant.')
         hess = theano.function([argument, A], R, on_unused_input='ignore')
