@@ -4,7 +4,7 @@ object to feed to one of the solvers.
 """
 
 from warnings import warn
-# autodiff backend is imported in prepare()
+from pymanopt.tools.autodiff import compile
 
 
 class Problem:
@@ -66,28 +66,11 @@ class Problem:
         The arguments need_grad and need_hess are used to specify
         whether grad and hess are required by the solver.
         """
-
-        # Conditionally load autodiff backend if needed
-        if ( self.cost is None or
-            (need_grad and self.grad is None and self.egrad is None) or
-            (need_hess and self.hess is None and self.ehess is None) ):
-            if type(self.ad_cost).__name__ == 'TensorVariable':
-                from pymanopt.tools import theano_functions as ad
-            elif type(self.ad_cost).__name__ == 'function':
-                from pymanopt.tools import autograd_functions as ad
-            else:
-                warn('Cannot identify autodiff backend from ad_cost variable type.')
-
-        if self.cost is None:
-            self.cost = ad.compile(self.ad_cost, self.ad_arg)
+        compile(self, need_grad, need_hess)
 
         if need_grad and self.grad is None:
-            if self.egrad is None:
-                self.egrad = ad.gradient(self.ad_cost, self.ad_arg)
             self.grad = lambda x: self.man.egrad2rgrad(x, self.egrad(x))
-
-        if need_hess and self.hess is None:
-            if self.ehess is None:
-                self.ehess = ad.hessian(self.ad_cost, self.ad_arg)
-            self.hess = lambda x, a: self.man.ehess2rhess(
+            # Assume if hessian is needed gradient is as well
+            if need_hess and self.hess is None:
+                self.hess = lambda x, a: self.man.ehess2rhess(
                     x, self.egrad(x), self.ehess(x, a), a)

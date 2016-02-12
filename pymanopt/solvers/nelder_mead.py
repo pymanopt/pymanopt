@@ -11,7 +11,6 @@ import numpy.random as rnd
 from pymanopt import Problem
 from pymanopt.solvers.steepest_descent import SteepestDescent
 from pymanopt.solvers.solver import Solver
-from pymanopt.tools import theano_functions as tf
 
 
 def compute_centroid(man, x):
@@ -85,7 +84,6 @@ class NelderMead(Solver):
     def solve(self, problem, x=None):
         """
         Perform optimization using a Nelder-Mead minimization algorithm.
-        Both obj and arg must be theano TensorVariable objects.
         Arguments:
             - problem
                 Pymanopt problem setup using the Problem class, this must

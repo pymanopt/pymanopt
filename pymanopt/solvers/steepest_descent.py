@@ -4,7 +4,6 @@ steepestdescent.m from the manopt MATLAB package.
 """
 import time
 
-from pymanopt.tools import theano_functions as tf
 from pymanopt.solvers import linesearch
 from pymanopt.solvers.solver import Solver
 
@@ -18,11 +17,10 @@ class SteepestDescent(Solver):
     # Function to solve optimisation problem using steepest descent.
     def solve(self, problem, x=None):
         """
-        Perform optimization using gradient descent with linesearch. Both obj
-        and arg must be theano TensorVariable objects. This method first
-        computes the gradient (derivative) of obj w.r.t. arg, and then
-        optimizes by moving in the direction of steepest descent (which is the
-        opposite direction to the gradient).
+        Perform optimization using gradient descent with linesearch.
+        This method first computes the gradient (derivative) of obj
+        w.r.t. arg, and then optimizes by moving in the direction of
+        steepest descent (which is the opposite direction to the gradient).
         Arguments:
             - problem
                 Pymanopt problem setup using the Problem class, this must
