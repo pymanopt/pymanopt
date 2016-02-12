@@ -67,22 +67,12 @@ class Problem:
             self.cost = tf.compile(self.ad_cost, self.ad_arg)
 
         if need_grad and self.grad is None:
-            if need_hess and self.hess is None:
-                # Make sure we have both egrad and ehess
-                if self.egrad is None and self.ehess is None:
-                    self.egrad, self.ehess = tf.grad_hess(
-                        self.ad_cost, self.ad_arg)
-                elif self.ehess is None:
-                    unused, self.ehess = tf.grad_hess(
-                        self.ad_cost, self.ad_arg)
-                elif self.egrad is None:
-                    self.egrad = tf.grad(self.ad_cost, self.ad_arg)
-
-                # Then assign hess
-                self.hess = lambda x, a: self.man.ehess2rhess(
-                    x, self.egrad(x), self.ehess(x, a), a)
-
             if self.egrad is None:
                 self.egrad = tf.gradient(self.ad_cost, self.ad_arg)
-
             self.grad = lambda x: self.man.egrad2rgrad(x, self.egrad(x))
+
+        if need_hess and self.hess is None:
+            if self.ehess is None:
+                self.ehess = tf.hess(self.ad_cost, self.ad_arg)
+            self.hess = lambda x, a: self.man.ehess2rhess(
+                    x, self.egrad(x), self.ehess(x, a), a)
