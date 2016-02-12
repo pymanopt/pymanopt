@@ -33,26 +33,26 @@ class Problem:
             The 'Euclidean hessian', ehess(x, a) should return the
             directional derivative of egrad at x in direction a. This
             need not lie in the tangent space.
-        - theano_cost/theano_arg
+        - ad_cost/ad_arg
             These allow you to define a cost in theano whose gradient
             (and hessian if necessary) will automatically be computed.
             We recommend you take this approach rather than calculating
             gradients and hessians by hand.
-            theano_cost is the (scalar) cost and theano_arg is the
+            ad_cost is the (scalar) cost and ad_arg is the
             (tensor) variable with respect to which you would like to
             optimize. Both must have type TensorVariable.
     """
     def __init__(self, man=None, cost=None, grad=None,
                  hess=None, egrad=None, ehess=None,
-                 theano_cost=None, theano_arg=None):
+                 ad_cost=None, ad_arg=None):
         self.man = man
         self.cost = cost
         self.grad = grad
         self.hess = hess
         self.egrad = egrad
         self.ehess = ehess
-        self.theano_cost = theano_cost
-        self.theano_arg = theano_arg
+        self.ad_cost = ad_cost
+        self.ad_arg = ad_arg
 
     def prepare(self, need_grad=False, need_hess=False):
         """
@@ -64,25 +64,25 @@ class Problem:
         whether grad and hess are required by the solver.
         """
         if self.cost is None:
-            self.cost = tf.compile(self.theano_cost, self.theano_arg)
+            self.cost = tf.compile(self.ad_cost, self.ad_arg)
 
         if need_grad and self.grad is None:
             if need_hess and self.hess is None:
                 # Make sure we have both egrad and ehess
                 if self.egrad is None and self.ehess is None:
                     self.egrad, self.ehess = tf.grad_hess(
-                        self.theano_cost, self.theano_arg)
+                        self.ad_cost, self.ad_arg)
                 elif self.ehess is None:
                     unused, self.ehess = tf.grad_hess(
-                        self.theano_cost, self.theano_arg)
+                        self.ad_cost, self.ad_arg)
                 elif self.egrad is None:
-                    self.egrad = tf.grad(self.theano_cost, self.theano_arg)
+                    self.egrad = tf.grad(self.ad_cost, self.ad_arg)
 
                 # Then assign hess
                 self.hess = lambda x, a: self.man.ehess2rhess(
                     x, self.egrad(x), self.ehess(x, a), a)
 
             if self.egrad is None:
-                self.egrad = tf.gradient(self.theano_cost, self.theano_arg)
+                self.egrad = tf.gradient(self.ad_cost, self.ad_arg)
 
             self.grad = lambda x: self.man.egrad2rgrad(x, self.egrad(x))

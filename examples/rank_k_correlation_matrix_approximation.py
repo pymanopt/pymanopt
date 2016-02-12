@@ -22,7 +22,7 @@ def rank_k_correlation_matrix_approximation(A, k):
     X = T.matrix()
     cost = 0.25 * T.sum((T.dot(X.T, X) - A) ** 2)
 
-    problem = Problem(man=manifold, theano_cost=cost, theano_arg=X)
+    problem = Problem(man=manifold, ad_cost=cost, ad_arg=X)
     return solver.solve(problem)
 
 
