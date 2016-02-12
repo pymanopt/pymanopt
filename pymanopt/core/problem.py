@@ -34,13 +34,14 @@ class Problem:
             directional derivative of egrad at x in direction a. This
             need not lie in the tangent space.
         - ad_cost/ad_arg
-            These allow you to define a cost in theano whose gradient
-            (and hessian if necessary) will automatically be computed.
+            These allow you to define a cost in theano (also planned are
+            autograd and tensorflow) whose gradient (and hessian if
+            necessary) will automatically be computed.
             We recommend you take this approach rather than calculating
             gradients and hessians by hand.
-            ad_cost is the (scalar) cost and ad_arg is the
-            (tensor) variable with respect to which you would like to
-            optimize. Both must have type TensorVariable.
+            ad_cost is the (scalar) cost and ad_arg is the (tensor)
+            variable with respect to which you would like to
+            optimize. Their type define the autodiff backend used.
     """
     def __init__(self, man=None, cost=None, grad=None,
                  hess=None, egrad=None, ehess=None,
@@ -57,7 +58,7 @@ class Problem:
     def prepare(self, need_grad=False, need_hess=False):
         """
         Function to prepare the problem for solving, this will be
-        executed by the solver before optimization to compile a theano
+        executed by the solver before optimization to compile a
         cost and/or compute the grad and hess of the cost as required.
 
         The arguments need_grad and need_hess are used to specify
