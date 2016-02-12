@@ -73,6 +73,8 @@ class Problem:
             (need_hess and self.hess is None and self.ehess is None) ):
             if type(self.ad_cost).__name__ == 'TensorVariable':
                 from pymanopt.tools import theano_functions as ad
+            elif type(self.ad_cost).__name__ == 'function':
+                from pymanopt.tools import autograd_functions as ad
             else:
                 warn('Cannot identify autodiff backend from ad_cost variable type.')
 
