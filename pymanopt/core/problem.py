@@ -74,6 +74,6 @@ class Problem:
 
         if need_hess and self.hess is None:
             if self.ehess is None:
-                self.ehess = tf.hess(self.ad_cost, self.ad_arg)
+                self.ehess = tf.hessian(self.ad_cost, self.ad_arg)
             self.hess = lambda x, a: self.man.ehess2rhess(
                     x, self.egrad(x), self.ehess(x, a), a)

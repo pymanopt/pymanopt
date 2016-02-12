@@ -28,7 +28,7 @@ def gradient(objective, argument):
     return compile(g, argument)
 
 
-def hess(objective, argument):
+def hessian(objective, argument):
     """
     Compute the directional derivative of the gradient
     (which is equal to the hessian multiplied by direction).
