@@ -6,7 +6,6 @@ import time
 
 import numpy as np
 
-from pymanopt.tools import theano_functions as tf
 from pymanopt.solvers import linesearch
 from pymanopt.solvers.solver import Solver
 from pymanopt import tools
@@ -54,7 +53,7 @@ class ConjugateGradient(Solver):
     def solve(self, problem, x=None):
         """
         Perform optimization using nonlinear conjugate gradient method with
-        linesearch. Both obj and arg must be theano TensorVariable objects.
+        linesearch.
         This method first computes the gradient of obj w.r.t. arg, and then
         optimizes by moving in a direction that is conjugate to all previous
         search directions.

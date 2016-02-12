@@ -7,7 +7,6 @@ import time
 import numpy as np
 import numpy.random as rnd
 
-from pymanopt.tools import theano_functions as tf
 from pymanopt.solvers.solver import Solver
 
 
@@ -52,7 +51,6 @@ class ParticleSwarm(Solver):
     def solve(self, problem, x=None):
         """
         Perform optimization using the particle swarm optimization algorithm.
-        Both obj and arg must be theano TensorVariable objects.
         Arguments:
             - problem
                 Pymanopt problem setup using the Problem class, this must

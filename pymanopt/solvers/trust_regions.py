@@ -62,7 +62,6 @@ import time
 
 import numpy as np
 
-from pymanopt.tools import theano_functions as comp_diff
 from pymanopt.solvers.solver import Solver
 
 
