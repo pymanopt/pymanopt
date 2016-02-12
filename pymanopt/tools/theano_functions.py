@@ -28,13 +28,12 @@ def gradient(objective, argument):
     return compile(g, argument)
 
 
-def grad_hess(objective, argument):
+def hessian(objective, argument):
     """
-    Compute both the gradient and the directional derivative of the gradient
+    Compute the directional derivative of the gradient
     (which is equal to the hessian multiplied by direction).
     """
     g = T.grad(objective, argument)
-    grad = compile(g, argument)
 
     # Create a new tensor A, which has the same type (i.e. same dimensionality)
     # as argument.
@@ -57,4 +56,4 @@ def grad_hess(objective, argument):
         warn('Theano detected unused input - suggests hessian may be zero or '
              'constant.')
         hess = theano.function([argument, A], R, on_unused_input='ignore')
-    return grad, hess
+    return hess

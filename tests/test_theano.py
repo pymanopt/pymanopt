@@ -46,16 +46,13 @@ class TestVector(unittest.TestCase):
         grad = gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
-    def test_grad_hess(self):
-        grad, hess = grad_hess(self.cost, self.X)
-
-        # First test grad as above
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
+    def test_hessian(self):
+        hess = hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
-    def test_grad_hess_no_Rop(self):
+    def test_hessian_no_Rop(self):
         # Break the Rop in T.exp
         def new_Rop(x, y):
             raise NotImplementedError
@@ -67,7 +64,7 @@ class TestVector(unittest.TestCase):
         cost = T.exp(T.sum(X**2))
 
         # And check that all is still well
-        grad, hess = grad_hess(cost, X)
+        hess = hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -110,16 +107,13 @@ class TestMatrix(unittest.TestCase):
         grad = gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
-    def test_grad_hess(self):
-        grad, hess = grad_hess(self.cost, self.X)
-
-        # First test grad as above
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
+    def test_hessian(self):
+        hess = hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
-    def test_grad_hess_no_Rop(self):
+    def test_hessian_no_Rop(self):
         # Break the Rop in T.exp
         Rop = T.exp.R_op
 
@@ -132,20 +126,20 @@ class TestMatrix(unittest.TestCase):
         cost = T.exp(T.sum(X**2))
 
         # And check that all is still well
-        grad, hess = grad_hess(cost, X)
+        hess = hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
         # Fix broken Rop
         T.exp.R_op = Rop
 
-    def test_hess_nodependence(self):
+    def test_hessian_nodependence(self):
         X = T.matrix()
         cost = T.sum(X)
 
         with warnings.catch_warnings(record=True) as w:
             # The following should emit a warning
-            grad, hess = grad_hess(cost, X)
+            hess = hessian(cost, X)
 
             assert len(w) == 1
             assert "unused input" in str(w[-1].message)
@@ -189,16 +183,13 @@ class TestTensor3(unittest.TestCase):
         grad = gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
-    def test_grad_hess(self):
-        grad, hess = grad_hess(self.cost, self.X)
-
-        # First test grad as above
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
+    def test_hessian(self):
+        hess = hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
-    def test_grad_hess_no_Rop(self):
+    def test_hessian_no_Rop(self):
         # Break the Rop in T.exp
         def new_Rop(x, y):
             raise NotImplementedError
@@ -210,6 +201,6 @@ class TestTensor3(unittest.TestCase):
         cost = T.exp(T.sum(X**2))
 
         # And check that all is still well
-        grad, hess = grad_hess(cost, X)
+        hess = hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))

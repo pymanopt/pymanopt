@@ -39,7 +39,7 @@ def low_rank_matrix_approximation_theano(A, k):
     Y = T.matrix()
     cost = T.sum((T.dot(Y, Y.T) - A) ** 2)
 
-    problem = Problem(man=manifold, theano_cost=cost, theano_arg=Y)
+    problem = Problem(man=manifold, ad_cost=cost, ad_arg=Y)
     return solver.solve(problem)
 
 

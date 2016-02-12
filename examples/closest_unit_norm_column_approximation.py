@@ -20,7 +20,7 @@ def closest_unit_norm_column_approximation(A):
     X = T.matrix()
     cost = 0.5 * T.sum((X - A) ** 2)
 
-    problem = Problem(man=manifold, theano_cost=cost, theano_arg=X)
+    problem = Problem(man=manifold, ad_cost=cost, ad_arg=X)
     return solver.solve(problem)
 
 

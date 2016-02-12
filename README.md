@@ -78,13 +78,12 @@ manifold = Stiefel(5, 2)
 # --------------------
 # Setup problem object
 # --------------------
-problem = Problem(man=manifold, theano_cost=cost, theano_arg=X)
+problem = Problem(man=manifold, ad_cost=cost, ad_arg=X)
 
 # --------------------
 # Perform optimization
 # --------------------
-# Currently the solve function requires three inputs: the cost and input variable
-# (both defined using theano) and the manifold to optimise over.
+# Currently the solve function takes the problem object as input.
 Xopt = solver.solve(problem)
 
 print Xopt
