@@ -108,7 +108,7 @@ class NelderMead(Solver):
 
         # If no initial simplex x is given by the user, generate one at random.
         if x is None:
-            x = [man.rand() for i in range(dim + 1)]
+            x = [man.rand() for i in range(int(dim + 1))]
         elif not hasattr(x, "__iter__"):
             raise ValueError("The initial simplex x must be iterable")
         else:
