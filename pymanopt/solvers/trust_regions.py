@@ -58,6 +58,11 @@ Manopt MATLAB package.
 Also included is the Truncated (Steihaug-Toint) Conjugate-Gradient algorithm,
 based on tCG.m from the Manopt MATLAB package.
 """
+try:
+    xrange
+except NameError:
+    xrange = range
+
 import time
 
 import numpy as np
@@ -103,7 +108,7 @@ class TrustRegions(Solver):
             Delta0 = Delta_bar / 8
 
         if self._verbosity >= 1:
-            print ("Computing gradient and hessian and compiling...")
+            print("Computing gradient and hessian and compiling...")
         problem.prepare(need_grad=True, need_hess=True)
 
         cost = problem.cost
@@ -136,10 +141,9 @@ class TrustRegions(Solver):
 
         # ** Display:
         if self._verbosity >= 1:
-            print "Optimizing..."
+            print("Optimizing...")
         if self._verbosity >= 2:
-            print "{:44s}f: {:+.6e}   |grad|: {:.6e}".format(
-                " ", float(fx), norm_grad)
+            print("{:44s}f: {:+.6e}   |grad|: {:.6e}".format(" ", float(fx), norm_grad))
 
         while True:
             # *************************
@@ -281,8 +285,7 @@ class TrustRegions(Solver):
                 # stagnation in this "corner case" (NaN's really aren't
                 # supposed to occur, but it's nice if we can handle them
                 # nonetheless).
-                print ("rho is NaN! Forcing a radius decrease. This should "
-                       "not happen.")
+                print("rho is NaN! Forcing a radius decrease. This should not happen.")
                 rho = np.nan
 
             # Choose the new TR radius based on the model performance
@@ -296,12 +299,9 @@ class TrustRegions(Solver):
                 consecutive_TRminus = consecutive_TRminus + 1
                 if consecutive_TRminus >= 5 and self._verbosity >= 1:
                     consecutive_TRminus = -np.inf
-                    print (" +++ Detected many consecutive TR- (radius "
-                           "decreases).")
-                    print (" +++ Consider decreasing options.Delta_bar by an "
-                           "order of magnitude.")
-                    print (" +++ Current values: Delta_bar = "
-                           "{:g} and Delta0 = {:g}").format(Delta_bar, Delta0)
+                    print(" +++ Detected many consecutive TR- (radius decreases).")
+                    print(" +++ Consider decreasing options.Delta_bar by an order of magnitude.")
+                    print(" +++ Current values: Delta_bar = {:g} and Delta0 = {:g}".format(Delta_bar, Delta0))
             # If the actual decrease is at least 3/4 of the precicted decrease
             # and the tCG (inner solve) hit the TR boundary, increase the TR
             # radius.  We also keep track of the number of consecutive
@@ -314,12 +314,9 @@ class TrustRegions(Solver):
                 consecutive_TRplus = consecutive_TRplus + 1
                 if consecutive_TRplus >= 5 and self._verbosity >= 1:
                     consecutive_TRplus = -np.inf
-                    print (" +++ Detected many consecutive TR+ (radius "
-                           "increases).")
-                    print (" +++ Consider increasing options.Delta_bar by an "
-                           "order of magnitude.")
-                    print (" +++ Current values: Delta_bar = "
-                           "{:g} and Delta0 = {:g}.").format(Delta_bar, Delta0)
+                    print(" +++ Detected many consecutive TR+ (radius increases).")
+                    print(" +++ Consider increasing options.Delta_bar by an order of magnitude.")
+                    print(" +++ Current values: Delta_bar = {:g} and Delta0 = {:g}.".format(Delta_bar, Delta0))
             else:
                 # Otherwise, keep the TR radius constant.
                 consecutive_TRplus = 0
@@ -343,37 +340,30 @@ class TrustRegions(Solver):
 
             # ** Display:
             if self._verbosity == 2:
-                print ("{:.3s} {:.3s}   k: {:5d}     num_inner: {:5d}     "
-                       "f: {:+e}   |grad|: {:e}   {:s}".format(
-                           accstr, trstr, k, numit, float(fx), norm_grad,
-                           srstr))
+                print("{:.3s} {:.3s}   k: {:5d}     num_inner: {:5d}     f: {:+e}   |grad|: {:e}   {:s}".format(
+                      accstr, trstr, k, numit, float(fx), norm_grad, srstr))
             elif self._verbosity > 2:
                 if self.use_rand and used_cauchy:
-                    print "USED CAUCHY POINT"
-                print ("{:.3s} {:.3s}    k: {:5d}     num_inner: {:5d}     "
-                       "{:s}".format(accstr, trstr, k, numit, srstr))
-                print "       f(x) : {:+e}     |grad| : {:e}".format(
-                    fx, norm_grad)
-                print "        rho : {:e}".format(rho)
+                    print("USED CAUCHY POINT")
+                print("{:.3s} {:.3s}    k: {:5d}     num_inner: {:5d}     {:s}".format(accstr, trstr, k, numit, srstr))
+                print("       f(x) : {:+e}     |grad| : {:e}".format(fx, norm_grad))
+                print("        rho : {:e}".format(rho))
 
             # ** CHECK STOPPING criteria
             if norm_grad < self._mingradnorm:
                 if self._verbosity >= 1:
-                    print ("Terminated - min grad norm reached after {:d} "
-                           "iterations, {:.2f} seconds.").format(
-                               k, time.time() - time0)
+                    print("Terminated - min grad norm reached after {:d} iterations, {:.2f} seconds.".format(
+                          k, time.time() - time0))
                 return x
 
             if time.time() - time0 >= self._maxtime:
                 if self._verbosity >= 1:
-                    print ("Terminated - max time reached after {:d} "
-                           "iterations.").format(k)
+                    print("Terminated - max time reached after {:d} iterations.".format(k))
                 return x
 
             if k >= self._maxiter:
                 if self._verbosity >= 1:
-                    print ("Terminated - max iterations reached after "
-                           "{:.2f} seconds.".format(time.time() - time0))
+                    print("Terminated - max iterations reached after {:.2f} seconds.".format(time.time() - time0))
                 return x
 
 

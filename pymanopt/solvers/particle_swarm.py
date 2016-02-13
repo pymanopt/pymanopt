@@ -59,7 +59,7 @@ class ParticleSwarm(Solver):
         # Compile the objective function and compute and compile its
         # gradient.
         if self._verbosity >= 1:
-            print "Compling objective function..."
+            print("Compling objective function...")
         problem.prepare()
 
         objective = problem.cost
@@ -83,8 +83,7 @@ class ParticleSwarm(Solver):
             raise ValueError("The initial population x must be iterable")
         else:
             if len(x) != self._populationsize:
-                print ("The population size was forced to the size of the "
-                       "given initial population")
+                print("The population size was forced to the size of the given initial population")
                 self._populationsize = len(x)
 
         # Initialize personal best positions to the initial population.
@@ -116,7 +115,7 @@ class ParticleSwarm(Solver):
             iter += 1
 
             if self._verbosity >= 2:
-                print "Cost evals: %7d\tBest cost: %+.8e" % (costevals, fbest)
+                print("Cost evals: %7d\tBest cost: %+.8e" % (costevals, fbest))
 
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):
@@ -125,8 +124,8 @@ class ParticleSwarm(Solver):
                     break
             if stop_reason:
                 if self._verbosity >= 1:
-                    print stop_reason
-                    print
+                    print(stop_reason)
+                    print('')
                 break
 
             # Compute the inertia factor which we linearly decrease from 0.9 to

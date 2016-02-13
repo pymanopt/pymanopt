@@ -75,7 +75,7 @@ if __name__ == '__main__':
     eigenvalues.
     """
     # Generate some random data to test the function
-    print 'Generating random matrix...'
+    print('Generating random matrix...')
     A = np.random.randn(128, 128)
     A = 0.5 * (A + A.T)
 

@@ -92,7 +92,7 @@ class NelderMead(Solver):
         # Compile the objective function and compute and compile its
         # gradient.
         if self._verbosity >= 1:
-            print "Compling objective function..."
+            print("Compling objective function...")
         problem.prepare()
 
         objective = problem.cost
@@ -114,8 +114,7 @@ class NelderMead(Solver):
         else:
             # XXX: Is this necessary?
             if len(x) != dim + 1:
-                print ("The simplex size was adapted to the dimension of the "
-                       "manifold")
+                print("The simplex size was adapted to the dimension of the manifold")
                 x = x[:dim + 1]
 
         # Compute objective-related quantities for x, and setup a function
@@ -139,8 +138,7 @@ class NelderMead(Solver):
             iter += 1
 
             if self._verbosity >= 2:
-                print "Cost evals: %7d\tBest cost: %+.8e" % (
-                    costevals, costs[0])
+                print("Cost evals: %7d\tBest cost: %+.8e" % (costevals, costs[0]))
 
             # Sort simplex points by cost.
             order = np.argsort(costs)
@@ -150,8 +148,8 @@ class NelderMead(Solver):
             stop_reason = self._check_stopping_criterion(time0, iter=iter, costevals=costevals)
             if stop_reason:
                 if self._verbosity >= 1:
-                    print stop_reason
-                    print
+                    print(stop_reason)
+                    print('')
                 break
 
             # Compute a centroid for the dim best points.
@@ -168,7 +166,7 @@ class NelderMead(Solver):
             # If the reflected point is honorable, drop the worst point,
             # replace it by the reflected point and start a new iteration.
             if costr >= costs[0] and costr < costs[-2]:
-                print "Reflection"
+                print("Reflection")
                 costs[-1] = costr
                 x[-1] = xr
                 continue
@@ -179,12 +177,12 @@ class NelderMead(Solver):
                 coste = objective(xe)
                 costevals += 1
                 if coste < costr:
-                    print "Expansion"
+                    print("Expansion")
                     costs[-1] = coste
                     x[-1] = xe
                     continue
                 else:
-                    print "Reflection (failed expansion)"
+                    print("Reflection (failed expansion)")
                     costs[-1] = costr
                     x[-1] = xr
                     continue
@@ -198,7 +196,7 @@ class NelderMead(Solver):
                     costoc = objective(xoc)
                     costevals += 1
                     if costoc <= costr:
-                        print "Outside contraction"
+                        print("Outside contraction")
                         costs[-1] = costoc
                         x[-1] = xoc
                         continue
@@ -208,13 +206,13 @@ class NelderMead(Solver):
                     costic = objective(xic)
                     costevals += 1
                     if costic <= costs[-1]:
-                        print "Inside contraction"
+                        print("Inside contraction")
                         costs[-1] = costic
                         x[-1] = xic
                         continue
 
             # If we get here, shrink the simplex around x[0].
-            print "Shrinkage"
+            print("Shrinkage")
             x0 = x[0]
             for i in np.arange(1, dim + 1):
                 x[i] = man.pairmean(x0, x[i])

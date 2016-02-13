@@ -63,7 +63,7 @@ class ConjugateGradient(Solver):
         # Compile the objective function and compute and compile its
         # gradient.
         if self._verbosity >= 1:
-            print "Computing gradient and compiling..."
+            print("Computing gradient and compiling...")
         problem.prepare(need_grad=True)
 
         objective = problem.cost
@@ -79,9 +79,9 @@ class ConjugateGradient(Solver):
         time0 = time.time()
 
         if self._verbosity >= 1:
-            print "Optimizing..."
+            print("Optimizing...")
         if self._verbosity >= 2:
-            print " iter\t\t   cost val\t    grad. norm"
+            print(" iter\t\t   cost val\t    grad. norm")
 
         # Calculate initial cost-related quantities
         cost = objective(x)
@@ -95,14 +95,14 @@ class ConjugateGradient(Solver):
 
         while True:
             if self._verbosity >= 2:
-                print "%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm)
+                print("%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm))
 
             stop_reason = self._check_stopping_criterion(time0, gradnorm=gradnorm, iter=iter + 1, stepsize=stepsize)
 
             if stop_reason:
                 if self._verbosity >= 1:
-                    print stop_reason
-                    print
+                    print(stop_reason)
+                    print('')
                 break
 
             # The line search algorithms require the directional derivative of
@@ -115,9 +115,7 @@ class ConjugateGradient(Solver):
             if df0 >= 0:
                 # Or we switch to the negative gradient direction.
                 if self._verbosity >= 3:
-                    print ("Conjugate gradient info: got an ascent direction "
-                           "(df0 = %.2f), reset to the (preconditioned) "
-                           "steepest descent direction." % df0)
+                    print("Conjugate gradient info: got an ascent direction (df0 = %.2f), reset to the (preconditioned) steepest descent direction." % df0)
                 # Reset to negative gradient: this discards the CG memory.
                 desc_dir = -Pgrad
                 df0 = -gradPgrad

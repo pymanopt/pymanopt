@@ -49,8 +49,8 @@ if __name__ == "__main__":
         xopt = -xopt
 
     # Print information about the solution.
-    print
-    print "l2-norm of x: %f" % la.norm(x)
-    print "l2-norm of xopt: %f" % la.norm(xopt)
-    print "solution found: %s" % np.allclose(x, xopt, rtol=1e-3)
-    print "l2-error: %f" % la.norm(x - xopt)
+    print('')
+    print("l2-norm of x: %f" % la.norm(x))
+    print("l2-norm of xopt: %f" % la.norm(xopt))
+    print("solution found: %s" % np.allclose(x, xopt, rtol=1e-3))
+    print("l2-error: %f" % la.norm(x - xopt))
