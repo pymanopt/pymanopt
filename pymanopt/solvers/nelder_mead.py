@@ -218,7 +218,7 @@ class NelderMead(Solver):
             x0 = x[0]
             for i in np.arange(1, dim + 1):
                 x[i] = man.pairmean(x0, x[i])
-                costs[i] = objective(xi)
+                costs[i] = objective(x[i])
             costevals += dim
 
         return x[0]
