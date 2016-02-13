@@ -78,7 +78,7 @@ class ParticleSwarm(Solver):
         # If no initial population x is given by the user, generate one at
         # random.
         if x is None:
-            x = [man.rand() for i in range(self._populationsize)]
+            x = [man.rand() for i in range(int(self._populationsize))]
         elif not hasattr(x, "__iter__"):
             raise ValueError("The initial population x must be iterable")
         else:
