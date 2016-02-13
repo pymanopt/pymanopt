@@ -74,29 +74,12 @@ class SteepestDescent(Solver):
             step_size, x = self._searcher.search(objective, man, x, desc_dir,
                                                  cost, -gradnorm**2)
 
-            # Check stopping conditions
-            if step_size < self._minstepsize:
-                if self._verbosity >= 1:
-                    print ("Terminated - min stepsize reached after %d "
-                           "iterations, %.2f seconds." % (
-                               iter, (time.time() - time0)))
-                return x
+            stop_reason = self._check_stopping_criterion(time0, stepsize=step_size, gradnorm=gradnorm, iter=iter)
 
-            if gradnorm < self._mingradnorm:
+            if stop_reason:
                 if self._verbosity >= 1:
-                    print ("Terminated - min grad norm reached after %d "
-                           "iterations, %.2f seconds." % (
-                               iter, (time.time() - time0)))
-                return x
+                    print stop_reason
+                    print
+                break
 
-            if iter >= self._maxiter:
-                if self._verbosity >= 1:
-                    print ("Terminated - max iterations reached after "
-                           "%.2f seconds." % (time.time() - time0))
-                return x
-
-            if time.time() >= time0 + self._maxtime:
-                if self._verbosity >= 1:
-                    print ("Terminated - max time reached after %d "
-                           "iterations." % iter)
-                return x
+        return x

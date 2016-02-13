@@ -36,19 +36,6 @@ class ConjugateGradient(Solver):
 
         self._searcher = linesearch.LineSearchAdaptive()
 
-    def _check_stopping_criterion(self, gradnorm, iter, time0):
-        reason = None
-        if gradnorm < self._mingradnorm:
-            reason = ("Terminated - min grad norm reached after %d "
-                      "iterations, %.2f seconds." % (
-                          iter, (time.time() - time0)))
-        elif iter >= self._maxiter:
-            reason = ("Terminated - max iterations reached after "
-                      "%.2f seconds." % (time.time() - time0))
-        elif time.time() >= time0 + self._maxtime:
-            reason = ("Terminated - max time reached after %d iterations."
-                      % iter)
-        return reason
 
     def solve(self, problem, x=None):
         """
@@ -110,12 +97,7 @@ class ConjugateGradient(Solver):
             if self._verbosity >= 2:
                 print "%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm)
 
-            stop_reason = self._check_stopping_criterion(
-                gradnorm, iter + 1, time0)
-            if stop_reason is None and stepsize < self._minstepsize:
-                stop_reason = (
-                    "Terminated - min stepsize reached after %d iterations, "
-                    "%.2f seconds." % (iter, (time.time() - time0)))
+            stop_reason = self._check_stopping_criterion(time0, gradnorm=gradnorm, iter=iter + 1, stepsize=stepsize)
 
             if stop_reason:
                 if self._verbosity >= 1:

@@ -35,18 +35,6 @@ class ParticleSwarm(Solver):
         self._nostalgia = nostalgia
         self._social = social
 
-    def _check_stopping_criterion(self, iter, costevals, time0):
-        reason = None
-        if iter >= self._maxiter:
-            reason = ("Terminated - max iterations reached after "
-                      "%.2f seconds." % (time.time() - time0))
-        elif costevals >= self._maxcostevals:
-            reason = ("Terminated - max cost evals reached after "
-                      "%.2f seconds." % (time.time() - time0))
-        elif time.time() >= time0 + self._maxtime:
-            reason = ("Terminated - max time reached after %d iterations."
-                      % iter)
-        return reason
 
     def solve(self, problem, x=None):
         """
@@ -132,8 +120,7 @@ class ParticleSwarm(Solver):
 
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):
-                stop_reason = self._check_stopping_criterion(
-                    iter, costevals, time0)
+                stop_reason = self._check_stopping_criterion(time0, iter=iter, costevals=costevals)
                 if stop_reason is not None:
                     break
             if stop_reason:
