@@ -23,7 +23,9 @@ before_install:
 
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose theano libgfortran
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose libgfortran
+  # Install bleeding edge Theano
+  - pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git
   - pip install coveralls
   - pip install autograd
   - python setup.py install
