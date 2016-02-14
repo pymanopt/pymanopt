@@ -23,7 +23,9 @@ before_install:
 
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose theano libgfortran
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran theano
+  # Hacky fix for theano error 
+  # see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
   - pip install coveralls
   - pip install autograd
   - python setup.py install
