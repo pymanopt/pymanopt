@@ -54,7 +54,12 @@ class Sphere(Manifold):
 
     def exp(self, X, U):
         norm_U = self.norm(None, U)
-        return X * np.cos(norm_U) + U * np.sin(norm_U) / norm_U
+        # Check that norm_U isn't too tiny. If very small then
+        # sin(norm_U) / norm_U ~= 1 and retr is extremely close to exp.
+        if norm_U > 1e-3:
+            return X * np.cos(norm_U) + U * np.sin(norm_U) / norm_U
+        else:
+            return self.retr(X, U)
 
     def retr(self, X, U):
         Y = X + U
