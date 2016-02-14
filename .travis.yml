@@ -23,10 +23,10 @@ before_install:
 
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose libgfortran
-  # Install necessary six module and bleeding edge Theano
-  - pip install six
-  - pip install --upgrade --no-deps git+git://github.com/Theano/Theano.git
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy nose libgfortran theano
+  # Hacky fix for theano error 
+  # see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
+  - export THEANO_FLAGS='blas.ldflags= -lblas -lgfortran'
   - pip install coveralls
   - pip install autograd
   - python setup.py install
