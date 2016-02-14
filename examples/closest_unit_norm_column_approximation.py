@@ -37,6 +37,6 @@ if __name__ == "__main__":
     Xopt = closest_unit_norm_column_approximation(A)
 
     # Print information about the solution.
-    print
-    print "solution found: %s" % np.allclose(X, Xopt, rtol=1e-3)
-    print "Frobenius-error: %f" % la.norm(X - Xopt)
+    print('')
+    print("solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
+    print("Frobenius-error: %f" % la.norm(X - Xopt))

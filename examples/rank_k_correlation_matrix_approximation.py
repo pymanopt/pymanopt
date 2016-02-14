@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import numpy as np
 import numpy.random as rnd
 import numpy.linalg as la
@@ -6,7 +8,6 @@ import theano.tensor as T
 from pymanopt import Problem
 from pymanopt.manifolds import Oblique
 from pymanopt.solvers import TrustRegions
-
 
 def rank_k_correlation_matrix_approximation(A, k):
     """
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     [w, _] = la.eig(C)
 
     # Print information about the solution.
-    print
-    print "diagonal:", np.diag(C)
-    print "trace:", np.trace(C)
-    print "rank:", la.matrix_rank(C)
+    print('')
+    print("diagonal:", np.diag(C))
+    print("trace:", np.trace(C))
+    print("rank:", la.matrix_rank(C))

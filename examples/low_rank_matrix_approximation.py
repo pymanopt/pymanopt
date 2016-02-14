@@ -52,11 +52,11 @@ if __name__ == "__main__":
 
     # Solve the problem with pymanopt.
     Yopt = low_rank_matrix_approximation(A, k)
-    print
+    print('')
     Yopt_theano = low_rank_matrix_approximation_theano(A, k)
 
     # Print information about the solution.
-    print
-    print "rank of Y: %d" % la.matrix_rank(Y)
-    print "rank of Yopt: %d" % la.matrix_rank(Yopt)
-    print "rank of Yopt_theano: %d" % la.matrix_rank(Yopt_theano)
+    print('')
+    print("rank of Y: %d" % la.matrix_rank(Y))
+    print("rank of Yopt: %d" % la.matrix_rank(Yopt))
+    print("rank of Yopt_theano: %d" % la.matrix_rank(Yopt_theano))

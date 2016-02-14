@@ -39,7 +39,7 @@ class SteepestDescent(Solver):
         # Compile the objective function and compute and compile its
         # gradient.
         if self._verbosity >= 1:
-            print "Computing gradient and compiling..."
+            print("Computing gradient and compiling...")
         problem.prepare(need_grad=True)
 
         objective = problem.cost
@@ -50,13 +50,13 @@ class SteepestDescent(Solver):
             x = man.rand()
 
         if self._verbosity >= 1:
-            print "Optimizing..."
+            print("Optimizing...")
         # Initialize iteration counter and timer
         iter = 0
         time0 = time.time()
 
         if self._verbosity >= 2:
-            print " iter\t\t   cost val\t    grad. norm"
+            print(" iter\t\t   cost val\t    grad. norm")
         while True:
             # Calculate new cost, grad and gradnorm
             cost = objective(x)
@@ -65,7 +65,7 @@ class SteepestDescent(Solver):
             iter = iter + 1
 
             if self._verbosity >= 2:
-                print "%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm)
+                print("%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm))
 
             # Descent direction is minus the gradient
             desc_dir = -grad
@@ -78,8 +78,8 @@ class SteepestDescent(Solver):
 
             if stop_reason:
                 if self._verbosity >= 1:
-                    print stop_reason
-                    print
+                    print(stop_reason)
+                    print('')
                 break
 
         return x

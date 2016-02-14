@@ -86,7 +86,7 @@ problem = Problem(man=manifold, ad_cost=cost, ad_arg=X)
 # Currently the solve function takes the problem object as input.
 Xopt = solver.solve(problem)
 
-print Xopt
+print(Xopt)
 ```
 See [here](https://github.com/j-towns/pymanopt/tree/master/examples) for more
 examples.
