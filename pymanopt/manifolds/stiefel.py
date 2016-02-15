@@ -59,9 +59,7 @@ class Stiefel(Manifold):
         return np.tensordot(G, H, axes=G.ndim)
 
     def proj(self, X, U):
-        UNew = U - multiprod(
-            X, multiprod(multitransp(X), U) + multiprod(multitransp(U), X)) / 2
-        return UNew
+        return U - multiprod(X, multisym(multiprod(multitransp(X), U)))
 
     egrad2rgrad = proj
 
