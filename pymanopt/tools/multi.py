@@ -15,9 +15,13 @@ def multiprod(A, B):
     if len(np.shape(A)) == 2:
         return np.dot(A, B)
 
-    a = A.reshape(np.hstack([np.shape(A), [1]]))
-    b = B.reshape(np.hstack([[np.shape(B)[0]], [1], np.shape(B)[1:]]))
-    return np.sum(a * b, axis=2)
+    # Old (slower) implementation:
+    #a = A.reshape(np.hstack([np.shape(A), [1]]))
+    #b = B.reshape(np.hstack([[np.shape(B)[0]], [1], np.shape(B)[1:]]))
+    #return np.sum(a * b, axis=2)
+
+    # Approx 5x faster, only supported by numpy version >= 1.6:
+    return np.einsum('ijk,ikl->ijl', A, B)
 
 
 def multitransp(A):
