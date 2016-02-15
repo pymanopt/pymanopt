@@ -36,7 +36,6 @@ class ConjugateGradient(Solver):
 
         self._searcher = linesearch.LineSearchAdaptive()
 
-
     def solve(self, problem, x=None):
         """
         Perform optimization using nonlinear conjugate gradient method with

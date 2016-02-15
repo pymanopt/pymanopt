@@ -28,7 +28,6 @@ class Solver(object):
         self._maxcostevals = maxcostevals
         self._verbosity = verbosity
 
-
     def _check_stopping_criterion(self, time0, iter=-1, gradnorm=float('inf'), stepsize=float('inf'), costevals=-1):
         reason = None
         if time.time() >= time0 + self._maxtime:

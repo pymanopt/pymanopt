@@ -35,7 +35,6 @@ class ParticleSwarm(Solver):
         self._nostalgia = nostalgia
         self._social = social
 
-
     def solve(self, problem, x=None):
         """
         Perform optimization using the particle swarm optimization algorithm.

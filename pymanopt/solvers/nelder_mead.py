@@ -68,7 +68,6 @@ class NelderMead(Solver):
         self._expansion = expansion
         self._contraction = contraction
 
-
     def solve(self, problem, x=None):
         """
         Perform optimization using a Nelder-Mead minimization algorithm.
@@ -88,6 +87,10 @@ class NelderMead(Solver):
                 convergence x will be the point at which it terminated
         """
         man = problem.man
+
+        if not hasattr(man, "pairmean"):
+            raise AttributeError(
+                "{} provides no `pairmean` method".format(man.name))
 
         # Compile the objective function and compute and compile its
         # gradient.
