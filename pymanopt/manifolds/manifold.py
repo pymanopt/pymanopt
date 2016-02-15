@@ -91,6 +91,12 @@ class Manifold(object):
         # inverse of exp.
         pass
 
+    @abc.abstractmethod
+    def pairmean(self, X, Y):
+        # Computes the intrinsic mean of X and Y, that is, a point that lies
+        # mid-way between X and Y on the geodesic arc joining them.
+        pass
+
     def zerovec(self, X):
         """
         Returns the zero tangent vector at X.

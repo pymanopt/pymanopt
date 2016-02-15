@@ -110,6 +110,9 @@ class SymFixedRankYY(Manifold):
     def transp(self, Y, Z, U):
         return self.proj(Z, U)
 
+    def pairmean(self, X, Y):
+        raise NotImplementedError
+
     def _normalize(self, Y):
         return Y / self.norm(None, Y)
 
@@ -173,3 +176,6 @@ class SymFixedRankYYComplex(SymFixedRankYY):
     def rand(self):
         rand_ = super(SymFixedRankYYComplex, self).rand
         return rand_() + 1j * rand_()
+
+    def pairmean(self, X, Y):
+        raise NotImplementedError

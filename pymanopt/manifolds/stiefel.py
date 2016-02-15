@@ -51,7 +51,7 @@ class Stiefel(Manifold):
 
     def dist(self, X, Y):
         # Geodesic distance on the manifold
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def inner(self, X, G, H):
         # Inner product (Riemannian metric) on the tangent space
@@ -130,3 +130,6 @@ class Stiefel(Manifold):
                              [np.zeros((self._p, self._p))]])
                 Y[i] = np.bmat([X[i], U[i]]).dot(W).dot(Z)
         return Y
+
+    def pairmean(self, X, Y):
+        raise NotImplementedError

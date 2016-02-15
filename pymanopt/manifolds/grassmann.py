@@ -183,3 +183,6 @@ class Grassmann(Manifold):
         if self._k == 1:
             U = U[0]
         return U
+
+    def pairmean(self, X, Y):
+        raise NotImplementedError
