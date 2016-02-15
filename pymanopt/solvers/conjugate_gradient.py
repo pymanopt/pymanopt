@@ -96,7 +96,8 @@ class ConjugateGradient(Solver):
             if self._verbosity >= 2:
                 print("%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm))
 
-            stop_reason = self._check_stopping_criterion(time0, gradnorm=gradnorm, iter=iter + 1, stepsize=stepsize)
+            stop_reason = self._check_stopping_criterion(
+                time0, gradnorm=gradnorm, iter=iter + 1, stepsize=stepsize)
 
             if stop_reason:
                 if self._verbosity >= 1:
@@ -114,7 +115,9 @@ class ConjugateGradient(Solver):
             if df0 >= 0:
                 # Or we switch to the negative gradient direction.
                 if self._verbosity >= 3:
-                    print("Conjugate gradient info: got an ascent direction (df0 = %.2f), reset to the (preconditioned) steepest descent direction." % df0)
+                    print("Conjugate gradient info: got an ascent direction "
+                          "(df0 = %.2f), reset to the (preconditioned) "
+                          "steepest descent direction." % df0)
                 # Reset to negative gradient: this discards the CG memory.
                 desc_dir = -Pgrad
                 df0 = -gradPgrad

@@ -82,7 +82,8 @@ class ParticleSwarm(Solver):
             raise ValueError("The initial population x must be iterable")
         else:
             if len(x) != self._populationsize:
-                print("The population size was forced to the size of the given initial population")
+                print("The population size was forced to the size of "
+                      "the given initial population")
                 self._populationsize = len(x)
 
         # Initialize personal best positions to the initial population.
@@ -118,7 +119,8 @@ class ParticleSwarm(Solver):
 
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):
-                stop_reason = self._check_stopping_criterion(time0, iter=iter, costevals=costevals)
+                stop_reason = self._check_stopping_criterion(
+                    time0, iter=iter, costevals=costevals)
                 if stop_reason is not None:
                     break
             if stop_reason:

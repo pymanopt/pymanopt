@@ -16,9 +16,9 @@ def multiprod(A, B):
         return np.dot(A, B)
 
     # Old (slower) implementation:
-    #a = A.reshape(np.hstack([np.shape(A), [1]]))
-    #b = B.reshape(np.hstack([[np.shape(B)[0]], [1], np.shape(B)[1:]]))
-    #return np.sum(a * b, axis=2)
+    # a = A.reshape(np.hstack([np.shape(A), [1]]))
+    # b = B.reshape(np.hstack([[np.shape(B)[0]], [1], np.shape(B)[1:]]))
+    # return np.sum(a * b, axis=2)
 
     # Approx 5x faster, only supported by numpy version >= 1.6:
     return np.einsum('ijk,ikl->ijl', A, B)

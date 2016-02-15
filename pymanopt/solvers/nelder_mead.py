@@ -117,7 +117,8 @@ class NelderMead(Solver):
         else:
             # XXX: Is this necessary?
             if len(x) != dim + 1:
-                print("The simplex size was adapted to the dimension of the manifold")
+                print("The simplex size was adapted to the dimension "
+                      "of the manifold")
                 x = x[:dim + 1]
 
         # Compute objective-related quantities for x, and setup a function
@@ -141,14 +142,16 @@ class NelderMead(Solver):
             iter += 1
 
             if self._verbosity >= 2:
-                print("Cost evals: %7d\tBest cost: %+.8e" % (costevals, costs[0]))
+                print("Cost evals: %7d\t"
+                      "Best cost: %+.8e" % (costevals, costs[0]))
 
             # Sort simplex points by cost.
             order = np.argsort(costs)
             costs = costs[order]
             x = [x[i] for i in order]  # XXX: Probably inefficient
 
-            stop_reason = self._check_stopping_criterion(time0, iter=iter, costevals=costevals)
+            stop_reason = self._check_stopping_criterion(
+                time0, iter=iter, costevals=costevals)
             if stop_reason:
                 if self._verbosity >= 1:
                     print(stop_reason)

@@ -16,13 +16,14 @@ def compile(objective, argument):
 
 def gradient(objective, argument):
     """
-    Compute the gradient of 'objective' with respect to the first argument and return
-    as a function.
+    Compute the gradient of 'objective' with respect to the first
+    argument and return as a function.
     """
     return ad.grad(objective)
 
 
 def hessian(objective, argument):
-    #TODO: cross-check, also have a look at autograd's hessian_vector_product
-    hess = lambda x, g: np.tensordot(ad.hessian(objective)(x),g,axes=x.ndim)
+    # TODO: cross-check, also have a look at autograd's hessian_vector_product
+    def hess(x, g): return np.tensordot(ad.hessian(objective)(x),
+                                        g, axes=x.ndim)
     return hess

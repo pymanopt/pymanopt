@@ -9,6 +9,7 @@ from pymanopt import Problem
 from pymanopt.manifolds import Oblique
 from pymanopt.solvers import TrustRegions
 
+
 def rank_k_correlation_matrix_approximation(A, k):
     """
     Returns the matrix with unit-norm columns that is closests to A w.r.t. the

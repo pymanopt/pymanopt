@@ -11,6 +11,7 @@ import warnings
 
 import pymanopt.tools.autodiff._theano as tf
 
+
 class TestVector(unittest.TestCase):
     def setUp(self):
         self.X = X = T.vector()
@@ -67,6 +68,7 @@ class TestVector(unittest.TestCase):
         hess = tf.hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
+
 
 class TestMatrix(unittest.TestCase):
     def setUp(self):
@@ -143,6 +145,7 @@ class TestMatrix(unittest.TestCase):
 
             assert len(w) == 1
             assert "unused input" in str(w[-1].message)
+
 
 class TestTensor3(unittest.TestCase):
     def setUp(self):

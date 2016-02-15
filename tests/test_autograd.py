@@ -17,8 +17,8 @@ class TestVector(unittest.TestCase):
 
         n = self.n = 15
 
-        Y = self.Y = rnd.randn(1,n)
-        A = self.A = rnd.randn(1,n)
+        Y = self.Y = rnd.randn(1, n)
+        A = self.A = rnd.randn(1, n)
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
