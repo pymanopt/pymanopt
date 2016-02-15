@@ -24,7 +24,7 @@ before_install:
 # Install packages
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran theano
-  # Hacky fix for theano error 
+  # Hacky fix for theano error
   # see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
   - pip install pep8
   - pip install coveralls
@@ -33,7 +33,7 @@ install:
 
 script:
   - nosetests ./tests --verbosity=2 --with-coverage --cover-package=pymanopt
-  - find . -name \*.py -exec pep8{} +
+  - pep8 examples pymanopt tests setup.py
   - cd examples && sh run_all.sh && cd ..
 
 after_success:
