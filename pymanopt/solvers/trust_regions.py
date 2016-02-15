@@ -58,16 +58,25 @@ Manopt MATLAB package.
 Also included is the Truncated (Steihaug-Toint) Conjugate-Gradient algorithm,
 based on tCG.m from the Manopt MATLAB package.
 """
-try:
-    xrange
-except NameError:
-    xrange = range
-
 import time
 
 import numpy as np
 
 from pymanopt.solvers.solver import Solver
+
+if not hasattr(__builtins__, "xrange"):
+    xrange = range
+
+(NEGATIVE_CURVATURE, EXCEEDED_TR, REACHED_TARGET_LINEAR,
+ REACHED_TARGET_SUPERLINEAR, MAX_INNER_ITER, MODEL_INCREASED) = range(6)
+TCG_STOP_REASONS = {
+    NEGATIVE_CURVATURE: "negative curvature",
+    EXCEEDED_TR: "exceeded trust region",
+    REACHED_TARGET_LINEAR: "reached target residual-kappa (linear)",
+    REACHED_TARGET_SUPERLINEAR: "reached target residual-theta (superlinear)",
+    MAX_INNER_ITER: "maximum inner iterations",
+    MODEL_INCREASED: "model increased"
+}
 
 
 class TrustRegions(Solver):
@@ -83,12 +92,6 @@ class TrustRegions(Solver):
         self.rho_regularization = rho_regularization
 
         # TODO: implement value checks.
-
-    # Some strings for display
-    tcg_stop_reason = ("negative curvature", "exceeded trust region",
-                       "reached target residual-kappa (linear)",
-                       "reached target residual-theta (superlinear)",
-                       "maximum inner iterations", "model increased")
 
     def solve(self, problem, x=None, mininner=1, maxinner=None,
               Delta_bar=None, Delta0=None, precon=lambda x, d: d):
@@ -166,7 +169,7 @@ class TrustRegions(Solver):
                 man, x, fgradx, hess, eta, Delta, self.theta, self.kappa,
                 self.use_rand, precon, mininner, maxinner)
 
-            srstr = self.tcg_stop_reason[stop_inner]
+            srstr = TCG_STOP_REASONS[stop_inner]
 
             # If using randomized approach, compare result with the Cauchy
             # point.  Convergence proofs assume that we achieve at least (a
@@ -304,10 +307,11 @@ class TrustRegions(Solver):
                     print(" +++ Current values: Delta_bar = {:g} and Delta0 = {:g}".format(Delta_bar, Delta0))
             # If the actual decrease is at least 3/4 of the precicted decrease
             # and the tCG (inner solve) hit the TR boundary, increase the TR
-            # radius.  We also keep track of the number of consecutive
+            # radius. We also keep track of the number of consecutive
             # trust-region radius increases. If there are many, this may
             # indicate the need to adapt the initial and maximum radii.
-            elif rho > 3.0 / 4 and (stop_inner == 1 or stop_inner == 2):
+            elif rho > 3.0 / 4 and (stop_inner == NEGATIVE_CURVATURE or
+                                    stop_inner == EXCEEDED_TR):
                 trstr = "TR+"
                 Delta = min(2 * Delta, Delta_bar)
                 consecutive_TRminus = 0
@@ -419,7 +423,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         model_value = model_fun(eta, Heta)
 
     # Pre-assume termination because j == end.
-    stop_tCG = 4
+    stop_tCG = MAX_INNER_ITER
 
     # Begin inner/tCG loop.
     for j in xrange(0, int(maxinner)):
@@ -459,9 +463,9 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
             # code conciseness (if we can still hope for that), we omit this.
 
             if d_Hd <= 0:
-                stop_tCG = 0    # negative curvature
+                stop_tCG = NEGATIVE_CURVATURE
             else:
-                stop_tCG = 1    # exceeded trust region
+                stop_tCG = EXCEEDED_TR
             break
 
         # No negative curvature and eta_prop inside TR: accept it.
@@ -479,7 +483,7 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         # to the model cost). Otherwise, we accept the new eta and go on.
         new_model_value = model_fun(new_eta, new_Heta)
         if new_model_value >= model_value:
-            stop_tCG = 5
+            stop_tCG = MODEL_INCREASED
             break
 
         eta = new_eta
@@ -501,9 +505,9 @@ def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
         if j >= mininner and norm_r <= norm_r0 * min(norm_r0**theta, kappa):
             # Residual is small enough to quit
             if kappa < norm_r0 ** theta:
-                stop_tCG = 2
+                stop_tCG = REACHED_TARGET_LINEAR
             else:
-                stop_tCG = 3
+                stop_tCG = REACHED_TARGET_SUPERLINEAR
             break
 
         # Precondition the residual.
