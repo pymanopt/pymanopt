@@ -35,7 +35,7 @@ class ConjugateGradient(Solver):
         self._orth_value = orth_value
 
         if ownlinesearch is None:
-            self._searcher = linesearch.LineSearch()
+            self._searcher = linesearch.LineSearchAdaptive()
         else:
             self._searcher = ownlinesearch
 
