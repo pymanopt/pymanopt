@@ -21,12 +21,6 @@ class Oblique(Manifold):
 
         self._name = "Oblique manifold OB({:d}, {:d})".format(m, n)
 
-    def _transpose(self, X):
-        return X
-
-    def _transpose_points(self, *points):
-        return map(self._transpose, points)
-
     @property
     def name(self):
         return self._name
@@ -46,31 +40,21 @@ class Oblique(Manifold):
         return la.norm(U)
 
     def dist(self, X, Y):
-        U = np.arccos((self._transpose(X) * self._transpose(Y)).sum(0)).real
+        U = np.arccos((X * Y).sum(0)).real
         return la.norm(U)
 
-    def _proj_ex(self, X, H):
-        return H - X * ((X * H).sum(0)[np.newaxis, :])
-
     def proj(self, X, H):
-        return self._transpose(
-            self._proj_ex(*self._transpose_points(X, H)))
+        return H - X * ((X * H).sum(0)[np.newaxis, :])
 
     tangent = proj
 
     egrad2rgrad = proj
 
     def ehess2rhess(self, X, egrad, ehess, U):
-        X, egrad, ehess, U = self._transpose_points(X, egrad, ehess, U)
-
-        PXehess = self._proj_ex(X, ehess)
-        rhess = PXehess - U * ((X * egrad).sum(0)[np.newaxis, :])
-
-        return self._transpose(rhess)
+        PXehess = self.proj(X, ehess)
+        return PXehess - U * ((X * egrad).sum(0)[np.newaxis, :])
 
     def exp(self, X, U):
-        X, U = self._transpose_points(X, U)
-
         norm_U = np.sqrt((U ** 2).sum(0))[np.newaxis, :]
 
         Y = X * np.cos(norm_U) + U * (np.sin(norm_U) / norm_U)
@@ -79,18 +63,13 @@ class Oblique(Manifold):
         exclude = np.nonzero(norm_U <= 4.5e-8)[-1]
         Y[:, exclude] = self._normalize_columns(X[:, exclude] + U[:, exclude])
 
-        return self._transpose(Y)
+        return Y
 
     def retr(self, X, U):
-        X, U = self._transpose_points(X, U)
-        return self._transpose(self._normalize_columns(X + U))
+        return self._normalize_columns(X + U)
 
     def log(self, X, Y):
-        X, Y = self._transpose_points(X, Y)
-
-        # XXX: Manopt uses self.proj here which seems to be a bug since the
-        #      input already gets transposed at the beginning of the function.
-        V = self._proj_ex(X, Y - X)
+        V = self.proj(X, Y - X)
         dists = np.arccos((X * Y).sum(0))
         norms = np.sqrt((V ** 2).sum(0)).real
         factors = dists / norms
@@ -99,34 +78,22 @@ class Oblique(Manifold):
         # avoid that, we force those ratios to 1.
         factors[dists <= 1e-6] = 1
 
-        return self._transpose(V * factors)
+        return V * factors
 
     def rand(self):
-        X = self._normalize_columns(rnd.randn(self._m, self._n))
-        return self._transpose(X)
+        return self._normalize_columns(rnd.randn(self._m, self._n))
 
     def randvec(self, X):
         H = rnd.randn(*X.shape)
-        X = self._transpose(X)
-        P = self._proj_ex(X, H)
-        return self._transpose(P / self.norm(X, P))
+        P = self.proj(X, H)
+        return P / self.norm(X, P)
 
     def transp(self, X, Y, U):
         return self.proj(Y, U)
 
     def pairmean(self, X, Y):
-        Z = self._transpose(X + Y)
-        return self._transpose(self._normalize_columns(Z))
+        return self._normalize_columns(X + Y)
 
     def _normalize_columns(self, X):
         """Return an l2-column-normalized copy of the matrix X."""
         return X / la.norm(X, axis=0)[np.newaxis, :]
-
-
-class ObliqueTransposed(Oblique):
-    """
-    Manifold of matrices w/ unit-norm rows. It is the same geometry as Oblique
-    but uses a different representation.
-    """
-    def _transpose(self, X):
-        return X.T
