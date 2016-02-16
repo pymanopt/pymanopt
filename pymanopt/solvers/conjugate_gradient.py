@@ -88,7 +88,7 @@ class ConjugateGradient(Solver):
         cost = objective(x)
         grad = gradient(x)
         gradnorm = man.norm(x, grad)
-        Pgrad = grad  # TODO: Pgrad = precondition(x, grad)
+        Pgrad = problem.precon(x, grad)
         gradPgrad = man.inner(x, grad, Pgrad)
 
         # Initial descent direction is the negative gradient
@@ -132,7 +132,7 @@ class ConjugateGradient(Solver):
             newcost = objective(newx)
             newgrad = gradient(newx)
             newgradnorm = man.norm(newx, newgrad)
-            Pnewgrad = newgrad  # TODO: precondition(xnew, newgrad)
+            Pnewgrad = problem.precon(newx, newgrad)
             newgradPnewgrad = man.inner(newx, newgrad, Pnewgrad)
 
             # Apply the CG scheme to compute the next search direction

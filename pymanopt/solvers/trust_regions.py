@@ -94,7 +94,7 @@ class TrustRegions(Solver):
         # TODO: implement value checks.
 
     def solve(self, problem, x=None, mininner=1, maxinner=None,
-              Delta_bar=None, Delta0=None, precon=lambda x, d: d):
+              Delta_bar=None, Delta0=None):
         man = problem.man
         verbosity = problem.verbosity
 
@@ -168,7 +168,7 @@ class TrustRegions(Solver):
             # Solve TR subproblem approximately
             eta, Heta, numit, stop_inner = tCG(
                 man, x, fgradx, hess, eta, Delta, self.theta, self.kappa,
-                self.use_rand, precon, mininner, maxinner)
+                self.use_rand, problem.precon, mininner, maxinner)
 
             srstr = TCG_STOP_REASONS[stop_inner]
 

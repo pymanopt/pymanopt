@@ -50,7 +50,7 @@ class Problem(object):
     """
     def __init__(self, man=None, cost=None, grad=None,
                  hess=None, egrad=None, ehess=None,
-                 ad_cost=None, ad_arg=None, verbosity=2):
+                 ad_cost=None, ad_arg=None, precon=None, verbosity=2):
         self.man = man
         self.cost = cost
         self.grad = grad
@@ -59,6 +59,12 @@ class Problem(object):
         self.ehess = ehess
         self.ad_cost = ad_cost
         self.ad_arg = ad_arg
+
+        if precon is None:
+            def precon(x, d):
+                return d
+        self.precon = precon
+
         self.verbosity = verbosity
 
     def prepare(self, need_grad=False, need_hess=False):
