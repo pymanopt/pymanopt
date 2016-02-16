@@ -50,7 +50,11 @@ class Problem(object):
     def __init__(self, man=None, cost=None, grad=None, hess=None, egrad=None,
                  ehess=None, arg=None, precon=None, verbosity=2):
         self.man = man
-        self.cost = cost
+        # We keep a reference to the original cost function in case we want to
+        # call the `prepare` method twice (for instance, after switching from
+        # a first- to second-order method).
+        self.cost = None
+        self._original_cost = cost
         self.grad = grad
         self.hess = hess
         self.egrad = egrad
@@ -83,15 +87,14 @@ class Problem(object):
                     x, self.egrad(x), self.ehess(x, a), a)
 
     def _finalize(self, need_grad, need_hess):
-        # Conditionally load autodiff backend if needed.
-        if isinstance(self.cost, T.TensorVariable):
+        if isinstance(self._original_cost, T.TensorVariable):
             if not isinstance(self.arg, T.TensorVariable):
                 raise ValueError(
                     "Theano backend requires an argument with respect to "
                     "which compilation of the cost function is to be carried "
                     "out")
             backend = TheanoBackend()
-        elif callable(self.cost):
+        elif callable(self._original_cost):
             backend = AutogradBackend()
         else:
             raise ValueError("Cannot identify autodiff backend from cost "
@@ -99,16 +102,18 @@ class Problem(object):
 
         if self.verbosity >= 1:
             print("Compiling cost function...")
-        compiled_cost_function = backend.compile_function(self.cost, self.arg)
+        compiled_cost_function = backend.compile_function(
+            self._original_cost, self.arg)
 
         if need_grad and self.egrad is None and self.grad is None:
             if self.verbosity >= 1:
                 print("Computing gradient of cost function...")
-            self.egrad = backend.compute_gradient(self.cost, self.arg)
+            self.egrad = backend.compute_gradient(
+                self._original_cost, self.arg)
 
         if need_hess and self.ehess is None and self.hess is None:
             if self.verbosity >= 1:
                 print("Computing Hessian of cost function...")
-            self.ehess = backend.compute_hessian(self.cost, self.arg)
+            self.ehess = backend.compute_hessian(self._original_cost, self.arg)
 
         self.cost = compiled_cost_function

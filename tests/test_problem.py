@@ -22,7 +22,12 @@ class TestProblem(unittest.TestCase):
 
         self.man = Sphere(n)
 
-    def test_compile(self):
+    def test_prepare(self):
         problem = Problem(man=self.man, cost=self.cost)
         with self.assertRaises(ValueError):
             problem.prepare()
+
+    def test_prepare_multiple(self):
+        problem = Problem(man=self.man, cost=self.cost, arg=self.X)
+        problem.prepare(need_grad=True)
+        problem.prepare(need_grad=True, need_hess=True)
