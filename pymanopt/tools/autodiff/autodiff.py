@@ -1,3 +1,6 @@
+from warnings import warn
+
+
 def compile(problem, need_grad, need_hess):
     # Conditionally load autodiff backend if needed
     if (problem.cost is None or
