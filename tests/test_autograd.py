@@ -7,7 +7,7 @@ import numpy.testing as np_testing
 import warnings
 
 import autograd.numpy as np
-import pymanopt.tools.autodiff._autograd as ag
+from pymanopt.tools.autodiff import AutogradBackend
 
 
 class TestVector(unittest.TestCase):
@@ -37,16 +37,18 @@ class TestVector(unittest.TestCase):
         # Then 'right multiply' H by A
         self.correct_hess = np.array(Amat.dot(H))
 
+        self.backend = AutogradBackend()
+
     def test_compile(self):
-        cost_compiled = ag.compile(self.cost, self.X)
+        cost_compiled = self.backend.compile_function(self.cost, self.X)
         np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
 
     def test_grad(self):
-        grad = ag.gradient(self.cost, self.X)
+        grad = self.backend.compute_gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = ag.hessian(self.cost, self.X)
+        hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -83,16 +85,18 @@ class TestMatrix(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
 
+        self.backend = AutogradBackend()
+
     def test_compile(self):
-        cost_compiled = ag.compile(self.cost, self.X)
+        cost_compiled = self.backend.compile_function(self.cost, self.X)
         np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
 
     def test_grad(self):
-        grad = ag.gradient(self.cost, self.X)
+        grad = self.backend.compute_gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = ag.hessian(self.cost, self.X)
+        hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -129,16 +133,18 @@ class TestTensor3(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(3, 4, 5))
 
+        self.backend = AutogradBackend()
+
     def test_compile(self):
-        cost_compiled = ag.compile(self.cost, self.X)
+        cost_compiled = self.backend.compile_function(self.cost, self.X)
         np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
 
     def test_grad(self):
-        grad = ag.gradient(self.cost, self.X)
+        grad = self.backend.compute_gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = ag.hessian(self.cost, self.X)
+        hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))

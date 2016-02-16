@@ -1,3 +1,4 @@
-from .autodiff import compile
+from ._theano import TheanoBackend
+from ._autograd import AutogradBackend
 
-__all__ = ['compile']
+__all__ = ["TheanoBackend", "AutogradBackend"]

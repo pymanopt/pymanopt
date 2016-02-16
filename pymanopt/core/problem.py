@@ -2,9 +2,9 @@
 Module containing pymanopt problem class. Use this to build a problem
 object to feed to one of the solvers.
 """
+import theano.tensor as T
 
-from warnings import warn
-from pymanopt.tools import autodiff
+from pymanopt.tools.autodiff import TheanoBackend, AutogradBackend
 
 
 class Problem(object):
@@ -73,9 +73,7 @@ class Problem(object):
         The arguments need_grad and need_hess are used to specify
         whether grad and hess are required by the solver.
         """
-        # TODO: Select a backend beforehand and split up the `compile`
-        #       function.
-        autodiff.compile(self, need_grad, need_hess)
+        self._finalize(need_grad, need_hess)
 
         if need_grad and self.grad is None:
             self.grad = lambda x: self.man.egrad2rgrad(x, self.egrad(x))
@@ -83,3 +81,34 @@ class Problem(object):
             if need_hess and self.hess is None:
                 self.hess = lambda x, a: self.man.ehess2rhess(
                     x, self.egrad(x), self.ehess(x, a), a)
+
+    def _finalize(self, need_grad, need_hess):
+        # Conditionally load autodiff backend if needed.
+        if isinstance(self.cost, T.TensorVariable):
+            if not isinstance(self.arg, T.TensorVariable):
+                raise ValueError(
+                    "Theano backend requires an argument with respect to "
+                    "which compilation of the cost function is to be carried "
+                    "out")
+            backend = TheanoBackend()
+        elif callable(self.cost):
+            backend = AutogradBackend()
+        else:
+            raise ValueError("Cannot identify autodiff backend from cost "
+                             "variable.")
+
+        if self.verbosity >= 1:
+            print("Compiling cost function...")
+        compiled_cost_function = backend.compile_function(self.cost, self.arg)
+
+        if need_grad and self.egrad is None and self.grad is None:
+            if self.verbosity >= 1:
+                print("Computing gradient of cost function...")
+            self.egrad = backend.compute_gradient(self.cost, self.arg)
+
+        if need_hess and self.ehess is None and self.hess is None:
+            if self.verbosity >= 1:
+                print("Computing Hessian of cost function...")
+            self.ehess = backend.compute_hessian(self.cost, self.arg)
+
+        self.cost = compiled_cost_function

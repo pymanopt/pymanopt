@@ -9,7 +9,7 @@ import theano.tensor as T
 
 import warnings
 
-import pymanopt.tools.autodiff._theano as tf
+from pymanopt.tools.autodiff import TheanoBackend
 
 
 class TestVector(unittest.TestCase):
@@ -39,16 +39,18 @@ class TestVector(unittest.TestCase):
         # Then 'right multiply' H by A
         self.correct_hess = np.array(Amat.dot(H)).squeeze()
 
+        self.backend = TheanoBackend()
+
     def test_compile(self):
-        cost_compiled = tf.compile(self.cost, self.X)
+        cost_compiled = self.backend.compile_function(self.cost, self.X)
         np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
 
     def test_grad(self):
-        grad = tf.gradient(self.cost, self.X)
+        grad = self.backend.compute_gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = tf.hessian(self.cost, self.X)
+        hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -65,7 +67,7 @@ class TestVector(unittest.TestCase):
         cost = T.exp(T.sum(X**2))
 
         # And check that all is still well
-        hess = tf.hessian(cost, X)
+        hess = self.backend.compute_hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -101,16 +103,18 @@ class TestMatrix(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
 
+        self.backend = TheanoBackend()
+
     def test_compile(self):
-        cost_compiled = tf.compile(self.cost, self.X)
+        cost_compiled = self.backend.compile_function(self.cost, self.X)
         np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
 
     def test_grad(self):
-        grad = tf.gradient(self.cost, self.X)
+        grad = self.backend.compute_gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = tf.hessian(self.cost, self.X)
+        hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -128,7 +132,7 @@ class TestMatrix(unittest.TestCase):
         cost = T.exp(T.sum(X**2))
 
         # And check that all is still well
-        hess = tf.hessian(cost, X)
+        hess = self.backend.compute_hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -141,7 +145,7 @@ class TestMatrix(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as w:
             # The following should emit a warning
-            hess = tf.hessian(cost, X)
+            hess = self.backend.compute_hessian(cost, X)
 
             assert len(w) == 1
             assert "unused input" in str(w[-1].message)
@@ -178,16 +182,18 @@ class TestTensor3(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(3, 4, 5))
 
+        self.backend = TheanoBackend()
+
     def test_compile(self):
-        cost_compiled = tf.compile(self.cost, self.X)
+        cost_compiled = self.backend.compile_function(self.cost, self.X)
         np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
 
     def test_grad(self):
-        grad = tf.gradient(self.cost, self.X)
+        grad = self.backend.compute_gradient(self.cost, self.X)
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = tf.hessian(self.cost, self.X)
+        hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -204,6 +210,6 @@ class TestTensor3(unittest.TestCase):
         cost = T.exp(T.sum(X**2))
 
         # And check that all is still well
-        hess = tf.hessian(cost, X)
+        hess = self.backend.compute_hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
