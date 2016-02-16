@@ -38,8 +38,8 @@ def compute_centroid(man, x):
     #      This is because we cannot implement the Frechet variance with theano
     #      and compute the Hessian automatically due to dependency on the
     #      manifold-dependent distance function.
-    solver = SteepestDescent(verbosity=0, maxiter=15)
-    problem = Problem(man, cost=objective, grad=gradient)
+    solver = SteepestDescent(maxiter=15)
+    problem = Problem(man, cost=objective, grad=gradient, verbosity=0)
     return solver.solve(problem)
 
 
@@ -87,15 +87,10 @@ class NelderMead(Solver):
                 convergence x will be the point at which it terminated
         """
         man = problem.man
-
-        if not hasattr(man, "pairmean"):
-            raise AttributeError(
-                "{} provides no `pairmean` method".format(man.name))
+        verbosity = problem.verbosity
 
         # Compile the objective function and compute and compile its
         # gradient.
-        if self._verbosity >= 1:
-            print("Compling objective function...")
         problem.prepare()
 
         objective = problem.cost
@@ -141,7 +136,7 @@ class NelderMead(Solver):
         while True:
             iter += 1
 
-            if self._verbosity >= 2:
+            if verbosity >= 2:
                 print("Cost evals: %7d\t"
                       "Best cost: %+.8e" % (costevals, costs[0]))
 
@@ -153,7 +148,7 @@ class NelderMead(Solver):
             stop_reason = self._check_stopping_criterion(
                 time0, iter=iter, costevals=costevals)
             if stop_reason:
-                if self._verbosity >= 1:
+                if verbosity >= 1:
                     print(stop_reason)
                     print('')
                 break

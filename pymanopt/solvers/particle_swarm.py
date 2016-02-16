@@ -54,11 +54,10 @@ class ParticleSwarm(Solver):
                 convergence x will be the point at which it terminated
         """
         man = problem.man
+        verbosity = problem.verbosity
 
         # Compile the objective function and compute and compile its
         # gradient.
-        if self._verbosity >= 1:
-            print("Compling objective function...")
         problem.prepare()
 
         objective = problem.cost
@@ -114,7 +113,7 @@ class ParticleSwarm(Solver):
         while True:
             iter += 1
 
-            if self._verbosity >= 2:
+            if verbosity >= 2:
                 print("Cost evals: %7d\tBest cost: %+.8e" % (costevals, fbest))
 
             # Stop if any particle triggers a stopping criterion.
@@ -124,7 +123,7 @@ class ParticleSwarm(Solver):
                 if stop_reason is not None:
                     break
             if stop_reason:
-                if self._verbosity >= 1:
+                if verbosity >= 1:
                     print(stop_reason)
                     print('')
                 break

@@ -7,7 +7,7 @@ from warnings import warn
 from pymanopt.tools.autodiff import compile
 
 
-class Problem:
+class Problem(object):
     """
     Problem class for setting up a problem to feed to one of the
     pymanopt solvers.
@@ -32,22 +32,25 @@ class Problem:
             cost in the usual sense, i.e. egrad(x) need not lie in the
             tangent space.
         - ehess
-            The 'Euclidean hessian', ehess(x, a) should return the
+            The 'Euclidean Hessian', ehess(x, a) should return the
             directional derivative of egrad at x in direction a. This
             need not lie in the tangent space.
         - ad_cost/ad_arg
             These allow you to define a cost in theano (also planned are
-            autograd and tensorflow) whose gradient (and hessian if
+            autograd and tensorflow) whose gradient (and Hessian if
             necessary) will automatically be computed.
             We recommend you take this approach rather than calculating
-            gradients and hessians by hand.
+            gradients and Hessians by hand.
             ad_cost is the (scalar) cost and ad_arg is the (tensor)
             variable with respect to which you would like to
             optimize. Their type define the autodiff backend used.
+        - verbosity (2)
+            Level of information printed by the solver while it operates, 0
+            is silent, 2 is most information.
     """
     def __init__(self, man=None, cost=None, grad=None,
                  hess=None, egrad=None, ehess=None,
-                 ad_cost=None, ad_arg=None):
+                 ad_cost=None, ad_arg=None, verbosity=2):
         self.man = man
         self.cost = cost
         self.grad = grad
@@ -56,6 +59,7 @@ class Problem:
         self.ehess = ehess
         self.ad_cost = ad_cost
         self.ad_arg = ad_arg
+        self.verbosity = verbosity
 
     def prepare(self, need_grad=False, need_hess=False):
         """
@@ -70,7 +74,7 @@ class Problem:
 
         if need_grad and self.grad is None:
             self.grad = lambda x: self.man.egrad2rgrad(x, self.egrad(x))
-            # Assume if hessian is needed gradient is as well
+            # Assume if Hessian is needed gradient is as well
             if need_hess and self.hess is None:
                 self.hess = lambda x, a: self.man.ehess2rhess(
                     x, self.egrad(x), self.ehess(x, a), a)

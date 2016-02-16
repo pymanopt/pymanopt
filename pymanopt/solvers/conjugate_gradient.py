@@ -61,11 +61,10 @@ class ConjugateGradient(Solver):
                 convergence x will be the point at which it terminated.
         """
         man = problem.man
+        verbosity = problem.verbosity
 
         # Compile the objective function and compute and compile its
         # gradient.
-        if self._verbosity >= 1:
-            print("Computing gradient and compiling...")
         problem.prepare(need_grad=True)
 
         objective = problem.cost
@@ -80,9 +79,9 @@ class ConjugateGradient(Solver):
         stepsize = np.nan
         time0 = time.time()
 
-        if self._verbosity >= 1:
+        if verbosity >= 1:
             print("Optimizing...")
-        if self._verbosity >= 2:
+        if verbosity >= 2:
             print(" iter\t\t   cost val\t    grad. norm")
 
         # Calculate initial cost-related quantities
@@ -96,14 +95,14 @@ class ConjugateGradient(Solver):
         desc_dir = -Pgrad
 
         while True:
-            if self._verbosity >= 2:
+            if verbosity >= 2:
                 print("%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm))
 
             stop_reason = self._check_stopping_criterion(
                 time0, gradnorm=gradnorm, iter=iter + 1, stepsize=stepsize)
 
             if stop_reason:
-                if self._verbosity >= 1:
+                if verbosity >= 1:
                     print(stop_reason)
                     print('')
                 break
@@ -117,7 +116,7 @@ class ConjugateGradient(Solver):
             # to a steepest descent step, which discards the past information.
             if df0 >= 0:
                 # Or we switch to the negative gradient direction.
-                if self._verbosity >= 3:
+                if verbosity >= 3:
                     print("Conjugate gradient info: got an ascent direction "
                           "(df0 = %.2f), reset to the (preconditioned) "
                           "steepest descent direction." % df0)

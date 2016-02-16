@@ -3,7 +3,7 @@ import time
 
 class Solver(object):
     def __init__(self, maxtime=1000, maxiter=1000, mingradnorm=1e-6,
-                 minstepsize=1e-10, maxcostevals=5000, verbosity=2):
+                 minstepsize=1e-10, maxcostevals=5000):
         """
         Generic solver base class.
         Variable attributes (defaults in brackets):
@@ -18,16 +18,12 @@ class Solver(object):
                 this.
             - maxcostevals (5000)
                 Maximum number of allowed cost evaluations
-            - verbosity (2)
-                Level of information printed by the solver while it operates, 0
-                is silent, 2 is most information.
         """
         self._maxtime = maxtime
         self._maxiter = maxiter
         self._mingradnorm = mingradnorm
         self._minstepsize = minstepsize
         self._maxcostevals = maxcostevals
-        self._verbosity = verbosity
 
     def _check_stopping_criterion(self, time0, iter=-1, gradnorm=float('inf'),
                                   stepsize=float('inf'), costevals=-1):

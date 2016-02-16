@@ -30,8 +30,8 @@ def gradient(objective, argument):
 
 def hessian(objective, argument):
     """
-    Compute the directional derivative of the gradient
-    (which is equal to the hessian multiplied by direction).
+    Compute the directional derivative of the gradient (which is equal to the
+    Hessian multiplied by direction).
     """
     g = T.grad(objective, argument)
 
@@ -42,18 +42,18 @@ def hessian(objective, argument):
     try:
         # First attempt efficient 'R-op', this directly calculates the
         # directional derivative of the gradient, rather than explicitly
-        # calculating the hessian and then multiplying.
+        # calculating the Hessian and then multiplying.
         R = T.Rop(g, argument, A)
     except NotImplementedError:
         shp = T.shape(argument)
         H = T.jacobian(g.flatten(), argument).reshape(
-                                        T.concatenate([shp, shp]), 2*A.ndim)
+            T.concatenate([shp, shp]), 2 * A.ndim)
         R = T.tensordot(H, A, A.ndim)
 
     try:
         hess = theano.function([argument, A], R, on_unused_input='raise')
     except theano.compile.UnusedInputError:
-        warn('Theano detected unused input - suggests hessian may be zero or '
+        warn('Theano detected unused input - suggests Hessian may be zero or '
              'constant.')
         hess = theano.function([argument, A], R, on_unused_input='ignore')
     return hess

@@ -96,6 +96,8 @@ class TrustRegions(Solver):
     def solve(self, problem, x=None, mininner=1, maxinner=None,
               Delta_bar=None, Delta0=None, precon=lambda x, d: d):
         man = problem.man
+        verbosity = problem.verbosity
+
         if maxinner is None:
             maxinner = man.dim
 
@@ -110,8 +112,6 @@ class TrustRegions(Solver):
         if Delta0 is None:
             Delta0 = Delta_bar / 8
 
-        if self._verbosity >= 1:
-            print("Computing gradient and hessian and compiling...")
         problem.prepare(need_grad=True, need_hess=True)
 
         cost = problem.cost
@@ -143,9 +143,9 @@ class TrustRegions(Solver):
         consecutive_TRminus = 0
 
         # ** Display:
-        if self._verbosity >= 1:
+        if verbosity >= 1:
             print("Optimizing...")
-        if self._verbosity >= 2:
+        if verbosity >= 2:
             print("{:44s}f: {:+.6e}   |grad|: {:.6e}".format(
                 " ", float(fx), norm_grad))
 
@@ -302,7 +302,7 @@ class TrustRegions(Solver):
                 Delta = Delta / 4
                 consecutive_TRplus = 0
                 consecutive_TRminus = consecutive_TRminus + 1
-                if consecutive_TRminus >= 5 and self._verbosity >= 1:
+                if consecutive_TRminus >= 5 and verbosity >= 1:
                     consecutive_TRminus = -np.inf
                     print(" +++ Detected many consecutive TR- (radius "
                           "decreases).")
@@ -321,7 +321,7 @@ class TrustRegions(Solver):
                 Delta = min(2 * Delta, Delta_bar)
                 consecutive_TRminus = 0
                 consecutive_TRplus = consecutive_TRplus + 1
-                if consecutive_TRplus >= 5 and self._verbosity >= 1:
+                if consecutive_TRplus >= 5 and verbosity >= 1:
                     consecutive_TRplus = -np.inf
                     print(" +++ Detected many consecutive TR+ (radius "
                           "increases).")
@@ -351,12 +351,12 @@ class TrustRegions(Solver):
             k = k + 1
 
             # ** Display:
-            if self._verbosity == 2:
+            if verbosity == 2:
                 print("{:.3s} {:.3s}   k: {:5d}     num_inner: "
                       "{:5d}     f: {:+e}   |grad|: {:e}   "
                       "{:s}".format(accstr, trstr, k, numit,
                                     float(fx), norm_grad, srstr))
-            elif self._verbosity > 2:
+            elif verbosity > 2:
                 if self.use_rand and used_cauchy:
                     print("USED CAUCHY POINT")
                 print("{:.3s} {:.3s}    k: {:5d}     num_inner: "
@@ -367,20 +367,20 @@ class TrustRegions(Solver):
 
             # ** CHECK STOPPING criteria
             if norm_grad < self._mingradnorm:
-                if self._verbosity >= 1:
+                if verbosity >= 1:
                     print("Terminated - min grad norm reached after {:d} "
                           "iterations, {:.2f} seconds.".format(
                               k, time.time() - time0))
                 return x
 
             if time.time() - time0 >= self._maxtime:
-                if self._verbosity >= 1:
+                if verbosity >= 1:
                     print("Terminated - max time reached after {:d} "
                           "iterations.".format(k))
                 return x
 
             if k >= self._maxiter:
-                if self._verbosity >= 1:
+                if verbosity >= 1:
                     print("Terminated - max iterations reached after {:.2f} "
                           "seconds.".format(time.time() - time0))
                 return x

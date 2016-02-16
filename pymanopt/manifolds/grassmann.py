@@ -93,7 +93,7 @@ class Grassmann(Manifold):
     egrad2rgrad = proj
 
     def ehess2rhess(self, X, egrad, ehess, H):
-        # Convert Euclidean hessian into Riemannian hessian.
+        # Convert Euclidean into Riemannian Hessian.
         PXehess = self.proj(X, ehess)
         XtG = multiprod(multitransp(X), egrad)
         HXtG = multiprod(H, XtG)

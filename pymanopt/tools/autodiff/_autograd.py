@@ -24,6 +24,6 @@ def gradient(objective, argument):
 
 def hessian(objective, argument):
     # TODO: cross-check, also have a look at autograd's hessian_vector_product
-    def hess(x, g): return np.tensordot(ad.hessian(objective)(x),
-                                        g, axes=x.ndim)
+    def hess(x, g):
+        return np.tensordot(ad.hessian(objective)(x), g, axes=x.ndim)
     return hess

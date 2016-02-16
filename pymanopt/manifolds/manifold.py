@@ -42,7 +42,7 @@ class Manifold(object):
 
     @abc.abstractmethod
     def ehess2rhess(self, X, Hess):
-        # Convert Euclidean hessian into Riemannian hessian.
+        # Convert Euclidean into Riemannian Hessian.
         pass
 
     @abc.abstractmethod
