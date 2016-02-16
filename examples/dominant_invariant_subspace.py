@@ -56,7 +56,7 @@ def dominant_invariant_subspace(A, p):
     cost = -T.dot(X.T, T.dot(A, X)).trace()
 
     # Setup the problem
-    problem = Problem(man=Gr, ad_cost=cost, ad_arg=X)
+    problem = Problem(man=Gr, cost=cost, arg=X)
 
     # Create a solver object
     solver = TrustRegions()

@@ -5,28 +5,33 @@ from pymanopt.tools.autodiff import _theano, _autograd
 
 def compile(problem, need_grad, need_hess):
     # Conditionally load autodiff backend if needed
-    if (problem.cost is None or
-       (need_grad and problem.grad is None and problem.egrad is None) or
-       (need_hess and problem.hess is None and problem.ehess is None)):
-        if isinstance(problem.ad_cost, T.TensorVariable):
+    if ((need_grad and problem.grad is None and problem.egrad is None) or
+        (need_hess and problem.hess is None and problem.ehess is None)):
+        if isinstance(problem.cost, T.TensorVariable):
+            if not isinstance(problem.arg, T.TensorVariable):
+                raise ValueError(
+                    "Theano backend requires an argument with respect to "
+                    "which compilation of the cost function is to be carried "
+                    "out")
             backend = _theano
-        elif callable(problem.ad_cost):
+        elif callable(problem.cost):
             backend = _autograd
         else:
-            raise ValueError("Cannot identify autodiff backend from "
-                             "ad_cost variable type.")
+            raise ValueError("Cannot identify autodiff backend from cost "
+                             "variable.")
 
     if problem.verbosity >= 1:
         print("Compiling cost function...")
-    if problem.cost is None:
-        problem.cost = backend.compile(problem.ad_cost, problem.ad_arg)
+    compiled_cost_function = backend.compile(problem.cost, problem.arg)
 
     if need_grad and problem.egrad is None and problem.grad is None:
         if problem.verbosity >= 1:
             print("Computing gradient of cost function...")
-        problem.egrad = backend.gradient(problem.ad_cost, problem.ad_arg)
+        problem.egrad = backend.gradient(problem.cost, problem.arg)
         # Assume if Hessian is needed gradient is as well
         if need_hess and problem.ehess is None and problem.hess is None:
             if problem.verbosity >= 1:
                 print("Computing Hessian of cost function...")
-            problem.ehess = backend.hessian(problem.ad_cost, problem.ad_arg)
+            problem.ehess = backend.hessian(problem.cost, problem.arg)
+
+    problem.cost = compiled_cost_function

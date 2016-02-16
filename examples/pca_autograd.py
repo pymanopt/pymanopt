@@ -19,7 +19,7 @@ if __name__ == "__main__":
     manifold = Stiefel(3, 2)
 
     # Solve the problem with pymanopt
-    problem = Problem(man=manifold, ad_cost=cost)
+    problem = Problem(man=manifold, cost=cost)
     wopt = solver.solve(problem)
 
     print('The following projection matrix was found to minimise '

@@ -24,7 +24,7 @@ def dominant_eigenvector(A):
     x = T.matrix()
     cost = -x.T.dot(T.dot(A, x)).trace()
 
-    problem = Problem(man=manifold, ad_cost=cost, ad_arg=x)
+    problem = Problem(man=manifold, cost=cost, arg=x)
     xopt = solver.solve(problem)
     return xopt.squeeze()
 

@@ -4,7 +4,7 @@ object to feed to one of the solvers.
 """
 
 from warnings import warn
-from pymanopt.tools.autodiff import compile
+from pymanopt.tools import autodiff
 
 
 class Problem(object):
@@ -16,8 +16,12 @@ class Problem(object):
         - man
             Manifold to optimize over.
         - cost
-            Function which takes an element of man and returns a real
-            number. The solver will attempt to minimise this function.
+            A callable which takes an element of man and returns a real number,
+            or a symbolic Theano or TensorFlow expression. In case of a
+            symbolic expression, the gradient (and if necessary the Hessian)
+            are computed automatically if they are not explicitly given. We
+            recommend you take this approach rather than calculating gradients
+            and Hessians by hand.
         - grad
             grad(x) is the gradient of cost at x. This must take an
             element X of man and return an element of the tangent space
@@ -35,30 +39,23 @@ class Problem(object):
             The 'Euclidean Hessian', ehess(x, a) should return the
             directional derivative of egrad at x in direction a. This
             need not lie in the tangent space.
-        - ad_cost/ad_arg
-            These allow you to define a cost in theano (also planned are
-            autograd and tensorflow) whose gradient (and Hessian if
-            necessary) will automatically be computed.
-            We recommend you take this approach rather than calculating
-            gradients and Hessians by hand.
-            ad_cost is the (scalar) cost and ad_arg is the (tensor)
-            variable with respect to which you would like to
-            optimize. Their type define the autodiff backend used.
+        - arg
+            A symbolic (tensor) variable with respect to which you would like
+            to optimize. Its type (together with the type of the cost argument)
+            defines the autodiff backend used.
         - verbosity (2)
             Level of information printed by the solver while it operates, 0
             is silent, 2 is most information.
     """
-    def __init__(self, man=None, cost=None, grad=None,
-                 hess=None, egrad=None, ehess=None,
-                 ad_cost=None, ad_arg=None, precon=None, verbosity=2):
+    def __init__(self, man=None, cost=None, grad=None, hess=None, egrad=None,
+                 ehess=None, arg=None, precon=None, verbosity=2):
         self.man = man
         self.cost = cost
         self.grad = grad
         self.hess = hess
         self.egrad = egrad
         self.ehess = ehess
-        self.ad_cost = ad_cost
-        self.ad_arg = ad_arg
+        self.arg = arg
 
         if precon is None:
             def precon(x, d):
@@ -76,7 +73,9 @@ class Problem(object):
         The arguments need_grad and need_hess are used to specify
         whether grad and hess are required by the solver.
         """
-        compile(self, need_grad, need_hess)
+        # TODO: Select a backend beforehand and split up the `compile`
+        #       function.
+        autodiff.compile(self, need_grad, need_hess)
 
         if need_grad and self.grad is None:
             self.grad = lambda x: self.man.egrad2rgrad(x, self.egrad(x))
