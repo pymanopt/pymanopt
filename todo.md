@@ -3,7 +3,8 @@
 - tools
 
     - autodiff/_autograd
-        - [todo @26 (check whether hessian_vector_product should be used instead)](./pymanopt/tools/autodiff/_autograd.py#L26)
+        - Need to change to hessian_vector_product, but not working yet, due to an issue with autograd. Issue has been fixed but they haven't merged the fix into master branch yet, apparently will happen very soon (see [here](https://github.com/HIPS/autograd/issues/86)).
+        - [todo @26](./pymanopt/tools/autodiff/_autograd.py#L26)
         
 - manifolds
 
