@@ -67,19 +67,20 @@ from pymanopt.solvers.solver import Solver
 if not hasattr(__builtins__, "xrange"):
     xrange = range
 
-(NEGATIVE_CURVATURE, EXCEEDED_TR, REACHED_TARGET_LINEAR,
- REACHED_TARGET_SUPERLINEAR, MAX_INNER_ITER, MODEL_INCREASED) = range(6)
-TCG_STOP_REASONS = {
-    NEGATIVE_CURVATURE: "negative curvature",
-    EXCEEDED_TR: "exceeded trust region",
-    REACHED_TARGET_LINEAR: "reached target residual-kappa (linear)",
-    REACHED_TARGET_SUPERLINEAR: "reached target residual-theta (superlinear)",
-    MAX_INNER_ITER: "maximum inner iterations",
-    MODEL_INCREASED: "model increased"
-}
-
 
 class TrustRegions(Solver):
+    (NEGATIVE_CURVATURE, EXCEEDED_TR, REACHED_TARGET_LINEAR,
+     REACHED_TARGET_SUPERLINEAR, MAX_INNER_ITER, MODEL_INCREASED) = range(6)
+    TCG_STOP_REASONS = {
+        NEGATIVE_CURVATURE: "negative curvature",
+        EXCEEDED_TR: "exceeded trust region",
+        REACHED_TARGET_LINEAR: "reached target residual-kappa (linear)",
+        REACHED_TARGET_SUPERLINEAR: "reached target residual-theta "
+                                    "(superlinear)",
+        MAX_INNER_ITER: "maximum inner iterations",
+        MODEL_INCREASED: "model increased"
+    }
+
     def __init__(self, miniter=3, kappa=0.1, theta=1.0, rho_prime=0.1,
                  use_rand=False, rho_regularization=1e3, *args, **kwargs):
         super(TrustRegions, self).__init__(*args, **kwargs)
@@ -164,11 +165,11 @@ class TrustRegions(Solver):
                     eta = np.sqrt(np.sqrt(np.spacing(1)))
 
             # Solve TR subproblem approximately
-            eta, Heta, numit, stop_inner = tCG(
-                man, x, fgradx, hess, eta, Delta, self.theta, self.kappa,
-                self.use_rand, problem.precon, mininner, maxinner)
+            eta, Heta, numit, stop_inner = self._truncated_conjugate_gradient(
+                problem, x, fgradx, eta, Delta, self.theta, self.kappa,
+                mininner, maxinner)
 
-            srstr = TCG_STOP_REASONS[stop_inner]
+            srstr = self.TCG_STOP_REASONS[stop_inner]
 
             # If using randomized approach, compare result with the Cauchy
             # point.  Convergence proofs assume that we achieve at least (a
@@ -223,9 +224,9 @@ class TrustRegions(Solver):
             # numerical errors.
 
             # Heuristic -- added Dec. 2, 2013 (NB) to replace the former
-            # heuristic.  This heuristic is documented in the book by Conn
-            # Gould and Toint on trust-region methods, section 17.4.2.
-            # rhonum measures the difference between two numbers. Close to
+            # heuristic. This heuristic is documented in the book by Conn Gould
+            # and Toint on trust-region methods, section 17.4.2. rhonum
+            # measures the difference between two numbers. Close to
             # convergence, these two numbers are very close to each other, so
             # that computing their difference is numerically challenging: there
             # may be a significant loss in accuracy. Since the acceptance or
@@ -313,8 +314,8 @@ class TrustRegions(Solver):
             # radius. We also keep track of the number of consecutive
             # trust-region radius increases. If there are many, this may
             # indicate the need to adapt the initial and maximum radii.
-            elif rho > 3.0 / 4 and (stop_inner == NEGATIVE_CURVATURE or
-                                    stop_inner == EXCEEDED_TR):
+            elif rho > 3.0 / 4 and (stop_inner == self.NEGATIVE_CURVATURE or
+                                    stop_inner == self.EXCEEDED_TR):
                 trstr = "TR+"
                 Delta = min(2 * Delta, Delta_bar)
                 consecutive_TRminus = 0
@@ -383,163 +384,170 @@ class TrustRegions(Solver):
                           "seconds.".format(time.time() - time0))
                 return x
 
+    def _truncated_conjugate_gradient(self, problem, x, fgradx, eta, Delta,
+                                      theta, kappa, mininner, maxinner):
+        man = problem.man
+        inner = man.inner
+        hess = problem.hess
+        precon = problem.precon
 
-def tCG(man, x, grad, hess, eta, Delta, theta, kappa, use_rand, precon,
-        mininner, maxinner):
-    inner = man.inner
+        if not self.use_rand:  # and therefore, eta == 0
+            Heta = man.zerovec(x)
+            r = fgradx
+            e_Pe = 0
+        else:  # and therefore, no preconditioner
+            # eta (presumably) ~= 0 was provided by the caller.
+            Heta = hess(x, eta)
+            r = fgradx + Heta
+            e_Pe = inner(x, eta, eta)
 
-    if not use_rand:  # and therefore, eta == 0
-        Heta = man.zerovec(x)
-        r = grad
-        e_Pe = 0
-    else:  # and therefore, no preconditioner
-        # eta (presumably) ~= 0 was provided by the caller.
-        Heta = hess(x, eta)
-        r = grad + Heta
-        e_Pe = inner(x, eta, eta)
-
-    r_r = inner(x, r, r)
-    norm_r = np.sqrt(r_r)
-    norm_r0 = norm_r
-
-    # Precondition the residual
-    if not use_rand:
-        z = precon(x, r)
-    else:
-        z = r
-
-    # Compute z'*r
-    z_r = inner(x, z, r)
-    d_Pd = z_r
-
-    # Initial search direction
-    delta = -z
-    if not use_rand:
-        e_Pd = 0
-    else:
-        e_Pd = inner(x, eta, delta)
-
-    # If the Hessian or a linear Hessian approximation is in use, it is
-    # theoretically guaranteed that the model value decreases strictly
-    # with each iteration of tCG. Hence, there is no need to monitor the model
-    # value. But, when a nonlinear Hessian approximation is used (such as the
-    # built-in finite-difference approximation for example), the model may
-    # increase. It is then important to terminate the tCG iterations and return
-    # the previous (the best-so-far) iterate. The variable below will hold the
-    # model value.
-
-    def model_fun(eta, Heta):
-        return inner(x, eta, grad) + 0.5 * inner(x, eta, Heta)
-    if not use_rand:
-        model_value = 0
-    else:
-        model_value = model_fun(eta, Heta)
-
-    # Pre-assume termination because j == end.
-    stop_tCG = MAX_INNER_ITER
-
-    # Begin inner/tCG loop.
-    for j in xrange(0, int(maxinner)):
-        # This call is the computationally intensive step
-        Hdelta = hess(x, delta)
-
-        # Compute curvature (often called kappa)
-        d_Hd = inner(x, delta, Hdelta)
-
-        # Note that if d_Hd == 0, we will exit at the next "if" anyway.
-        alpha = z_r / d_Hd
-        # <neweta,neweta>_P =
-        # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
-        e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha * alpha * d_Pd
-
-        # Check against negative curvature and trust-region radius violation.
-        # If either condition triggers, we bail out.
-        if d_Hd <= 0 or e_Pe_new >= Delta**2:
-            # want
-            #  ee = <eta,eta>_prec,x
-            #  ed = <eta,delta>_prec,x
-            #  dd = <delta,delta>_prec,x
-            tau = ((-e_Pd +
-                    np.sqrt(e_Pd * e_Pd + d_Pd * (Delta ** 2 - e_Pe))) / d_Pd)
-
-            eta = eta + tau * delta
-
-            # If only a nonlinear Hessian approximation is available, this is
-            # only approximately correct, but saves an additional Hessian call.
-            Heta = Heta + tau * Hdelta
-
-            # Technically, we may want to verify that this new eta is indeed
-            # better than the previous eta before returning it (this is always
-            # the case if the Hessian approximation is linear, but I am unsure
-            # whether it is the case or not for nonlinear approximations.)
-            # At any rate, the impact should be limited, so in the interest of
-            # code conciseness (if we can still hope for that), we omit this.
-
-            if d_Hd <= 0:
-                stop_tCG = NEGATIVE_CURVATURE
-            else:
-                stop_tCG = EXCEEDED_TR
-            break
-
-        # No negative curvature and eta_prop inside TR: accept it.
-        e_Pe = e_Pe_new
-        new_eta = eta + alpha * delta
-
-        # If only a nonlinear Hessian approximation is available, this is
-        # only approximately correct, but saves an additional Hessian call.
-        new_Heta = Heta + alpha * Hdelta
-
-        # Verify that the model cost decreased in going from eta to new_eta. If
-        # it did not (which can only occur if the Hessian approximation is
-        # nonlinear or because of numerical errors), then we return the
-        # previous eta (which necessarily is the best reached so far, according
-        # to the model cost). Otherwise, we accept the new eta and go on.
-        new_model_value = model_fun(new_eta, new_Heta)
-        if new_model_value >= model_value:
-            stop_tCG = MODEL_INCREASED
-            break
-
-        eta = new_eta
-        Heta = new_Heta
-        model_value = new_model_value
-
-        # Update the residual.
-        r = r + alpha * Hdelta
-
-        # Compute new norm of r.
         r_r = inner(x, r, r)
         norm_r = np.sqrt(r_r)
+        norm_r0 = norm_r
 
-        # Check kappa/theta stopping criterion.
-        # Note that it is somewhat arbitrary whether to check this stopping
-        # criterion on the r's (the gradients) or on the z's (the
-        # preconditioned gradients). [CGT2000], page 206, mentions both as
-        # acceptable criteria.
-        if j >= mininner and norm_r <= norm_r0 * min(norm_r0**theta, kappa):
-            # Residual is small enough to quit
-            if kappa < norm_r0 ** theta:
-                stop_tCG = REACHED_TARGET_LINEAR
-            else:
-                stop_tCG = REACHED_TARGET_SUPERLINEAR
-            break
-
-        # Precondition the residual.
-        if not use_rand:
+        # Precondition the residual
+        if not self.use_rand:
             z = precon(x, r)
         else:
             z = r
 
-        # Save the old z'*r.
-        zold_rold = z_r
-        # Compute new z'*r.
+        # Compute z'*r
         z_r = inner(x, z, r)
+        d_Pd = z_r
 
-        # Compute new search direction
-        beta = z_r / zold_rold
-        delta = -z + beta * delta
+        # Initial search direction
+        delta = -z
+        if not self.use_rand:
+            e_Pd = 0
+        else:
+            e_Pd = inner(x, eta, delta)
 
-        # Update new P-norms and P-dots [CGT2000, eq. 7.5.6 & 7.5.7].
-        e_Pd = beta * (e_Pd + alpha * d_Pd)
-        d_Pd = z_r + beta * beta * d_Pd
+        # If the Hessian or a linear Hessian approximation is in use, it is
+        # theoretically guaranteed that the model value decreases strictly with
+        # each iteration of tCG. Hence, there is no need to monitor the model
+        # value. But, when a nonlinear Hessian approximation is used (such as
+        # the built-in finite-difference approximation for example), the model
+        # may increase. It is then important to terminate the tCG iterations
+        # and return the previous (the best-so-far) iterate. The variable below
+        # will hold the model value.
 
-    return eta, Heta, j, stop_tCG
+        def model_fun(eta, Heta):
+            return inner(x, eta, fgradx) + 0.5 * inner(x, eta, Heta)
+        if not self.use_rand:
+            model_value = 0
+        else:
+            model_value = model_fun(eta, Heta)
+
+        # Pre-assume termination because j == end.
+        stop_tCG = self.MAX_INNER_ITER
+
+        # Begin inner/tCG loop.
+        for j in xrange(0, int(maxinner)):
+            # This call is the computationally intensive step
+            Hdelta = hess(x, delta)
+
+            # Compute curvature (often called kappa)
+            d_Hd = inner(x, delta, Hdelta)
+
+            # Note that if d_Hd == 0, we will exit at the next "if" anyway.
+            alpha = z_r / d_Hd
+            # <neweta,neweta>_P =
+            # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
+            e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha * alpha * d_Pd
+
+            # Check against negative curvature and trust-region radius
+            # violation.  If either condition triggers, we bail out.
+            if d_Hd <= 0 or e_Pe_new >= Delta**2:
+                # want
+                #  ee = <eta,eta>_prec,x
+                #  ed = <eta,delta>_prec,x
+                #  dd = <delta,delta>_prec,x
+                tau = ((-e_Pd +
+                        np.sqrt(e_Pd * e_Pd +
+                                d_Pd * (Delta ** 2 - e_Pe))) / d_Pd)
+
+                eta = eta + tau * delta
+
+                # If only a nonlinear Hessian approximation is available, this
+                # is only approximately correct, but saves an additional
+                # Hessian call.
+                Heta = Heta + tau * Hdelta
+
+                # Technically, we may want to verify that this new eta is
+                # indeed better than the previous eta before returning it (this
+                # is always the case if the Hessian approximation is linear,
+                # but I am unsure whether it is the case or not for nonlinear
+                # approximations.) At any rate, the impact should be limited,
+                # so in the interest of code conciseness (if we can still hope
+                # for that), we omit this.
+
+                if d_Hd <= 0:
+                    stop_tCG = self.NEGATIVE_CURVATURE
+                else:
+                    stop_tCG = self.EXCEEDED_TR
+                break
+
+            # No negative curvature and eta_prop inside TR: accept it.
+            e_Pe = e_Pe_new
+            new_eta = eta + alpha * delta
+
+            # If only a nonlinear Hessian approximation is available, this is
+            # only approximately correct, but saves an additional Hessian call.
+            new_Heta = Heta + alpha * Hdelta
+
+            # Verify that the model cost decreased in going from eta to
+            # new_eta. If it did not (which can only occur if the Hessian
+            # approximation is nonlinear or because of numerical errors), then
+            # we return the previous eta (which necessarily is the best reached
+            # so far, according to the model cost). Otherwise, we accept the
+            # new eta and go on.
+            new_model_value = model_fun(new_eta, new_Heta)
+            if new_model_value >= model_value:
+                stop_tCG = self.MODEL_INCREASED
+                break
+
+            eta = new_eta
+            Heta = new_Heta
+            model_value = new_model_value
+
+            # Update the residual.
+            r = r + alpha * Hdelta
+
+            # Compute new norm of r.
+            r_r = inner(x, r, r)
+            norm_r = np.sqrt(r_r)
+
+            # Check kappa/theta stopping criterion.
+            # Note that it is somewhat arbitrary whether to check this stopping
+            # criterion on the r's (the gradients) or on the z's (the
+            # preconditioned gradients). [CGT2000], page 206, mentions both as
+            # acceptable criteria.
+            if (j >= mininner and
+               norm_r <= norm_r0 * min(norm_r0**theta, kappa)):
+                # Residual is small enough to quit
+                if kappa < norm_r0 ** theta:
+                    stop_tCG = self.REACHED_TARGET_LINEAR
+                else:
+                    stop_tCG = self.REACHED_TARGET_SUPERLINEAR
+                break
+
+            # Precondition the residual.
+            if not self.use_rand:
+                z = precon(x, r)
+            else:
+                z = r
+
+            # Save the old z'*r.
+            zold_rold = z_r
+            # Compute new z'*r.
+            z_r = inner(x, z, r)
+
+            # Compute new search direction
+            beta = z_r / zold_rold
+            delta = -z + beta * delta
+
+            # Update new P-norms and P-dots [CGT2000, eq. 7.5.6 & 7.5.7].
+            e_Pd = beta * (e_Pd + alpha * d_Pd)
+            d_Pd = z_r + beta * beta * d_Pd
+
+        return eta, Heta, j, stop_tCG
