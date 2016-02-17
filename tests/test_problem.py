@@ -23,11 +23,9 @@ class TestProblem(unittest.TestCase):
         self.man = Sphere(n)
 
     def test_prepare(self):
-        problem = Problem(man=self.man, cost=self.cost)
+        problem = Problem(self.man, self.cost)
         with self.assertRaises(ValueError):
-            problem.prepare()
-
-    def test_prepare_multiple(self):
-        problem = Problem(man=self.man, cost=self.cost, arg=self.X)
-        problem.prepare(need_grad=True)
-        problem.prepare(need_grad=True, need_hess=True)
+            # Asking for the gradient of a Theano cost function without
+            # specifying an argument for differentiation should raise an
+            # exception.
+            grad = problem.grad

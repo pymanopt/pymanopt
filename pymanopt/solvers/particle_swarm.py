@@ -55,11 +55,6 @@ class ParticleSwarm(Solver):
         """
         man = problem.man
         verbosity = problem.verbosity
-
-        # Compile the objective function and compute and compile its
-        # gradient.
-        problem.prepare()
-
         objective = problem.cost
 
         # Choose proper default algorithm parameters. We need to know about the

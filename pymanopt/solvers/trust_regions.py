@@ -112,8 +112,6 @@ class TrustRegions(Solver):
         if Delta0 is None:
             Delta0 = Delta_bar / 8
 
-        problem.prepare(need_grad=True, need_hess=True)
-
         cost = problem.cost
         grad = problem.grad
         hess = problem.hess

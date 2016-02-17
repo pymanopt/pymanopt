@@ -62,11 +62,6 @@ class ConjugateGradient(Solver):
         """
         man = problem.man
         verbosity = problem.verbosity
-
-        # Compile the objective function and compute and compile its
-        # gradient.
-        problem.prepare(need_grad=True)
-
         objective = problem.cost
         gradient = problem.grad
 
