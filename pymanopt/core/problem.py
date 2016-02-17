@@ -82,8 +82,8 @@ class Problem(object):
                 backend = AutogradBackend()
             else:
                 raise ValueError(
-                    "Cannot identify compilation backend from {:s}".format(
-                        function))
+                    "Cannot identify compilation backend from cost function "
+                    "`{:s}`".format(self._original_cost))
             self._backend = backend
         return self._backend
 
