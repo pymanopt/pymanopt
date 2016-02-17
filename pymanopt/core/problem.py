@@ -112,6 +112,7 @@ class Problem(object):
         if self._grad is None:
             # Explicit access forces computation/compilation if necessary.
             egrad = self.egrad
+
             def grad(x):
                 return self.man.egrad2rgrad(x, egrad(x))
             self._grad = grad
@@ -132,6 +133,7 @@ class Problem(object):
         if self._hess is None:
             # Explicit access forces computation if necessary.
             ehess = self.ehess
+
             def hess(x, a):
                 return self.man.ehess2rhess(
                     x, self.egrad(x), self.ehess(x, a), a)
