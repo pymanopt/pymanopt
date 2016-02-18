@@ -9,12 +9,11 @@ from pymanopt.solvers.solver import Solver
 
 
 class SteepestDescent(Solver):
-    def __init__(self, ownlinesearch=None, linesearch_params={},
-                 *args, **kwargs):
+    def __init__(self, ownlinesearch=None, *args, **kwargs):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 
         if ownlinesearch is None:
-            self._searcher = linesearch.LineSearch(**linesearch_params)
+            self._searcher = linesearch.LineSearch()
         else:
             self._searcher = ownlinesearch
 
