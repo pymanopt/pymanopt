@@ -5,14 +5,14 @@ import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
-from pymanopt.manifolds import Euclidian
+from pymanopt.manifolds import Euclidean
 
 
-class TestEuclidianManifold(unittest.TestCase):
+class TestEuclideanManifold(unittest.TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
-        self.man = Euclidian(m, n)
+        self.man = Euclidean(m, n)
 
     # def test_dim(self):
 

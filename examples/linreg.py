@@ -2,7 +2,7 @@ import autograd.numpy as np
 
 from pymanopt import Problem
 from pymanopt.solvers import TrustRegions
-from pymanopt.manifolds import Euclidian
+from pymanopt.manifolds import Euclidean
 
 
 if __name__ == "__main__":
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     solver = TrustRegions()
 
     # R^3
-    manifold = Euclidian(3, 1)
+    manifold = Euclidean(3, 1)
 
     # Solve the problem with pymanopt
     problem = Problem(man=manifold, cost=cost)

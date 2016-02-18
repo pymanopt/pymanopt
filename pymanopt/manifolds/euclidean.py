@@ -7,9 +7,9 @@ import numpy.random as rnd
 from pymanopt.manifolds.manifold import Manifold
 
 
-class Euclidian(Manifold):
+class Euclidean(Manifold):
     """
-    Euclidian manifold, i.e. the euclidian space of m-by-n matrices
+    Euclidean manifold, i.e. the euclidean space of m-by-n matrices
     equipped with the Frobenius distance and trace inner product.
     Use for solving unconstrained problems with pymanopt.
     """
@@ -17,7 +17,7 @@ class Euclidian(Manifold):
         self._m = m
         self._n = n
 
-        self._name = ("Euclidian manifold of "
+        self._name = ("Euclidean manifold of "
                       "{:d}x{:d} matrices".format(m, n))
 
     @property

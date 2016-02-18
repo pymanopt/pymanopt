@@ -18,7 +18,7 @@ Builds upon the MATLAB package [Manopt](http://manopt.org/) but is otherwise ind
 
 | Manifold | Implemented |
 | ------------- |:-----------:|
-| Euclidian | Partially |
+| Euclidean | Partially |
 | Sphere | Partially |
 | Stiefel | Partially |
 | Grassmann | Partially |
