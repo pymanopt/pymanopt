@@ -4,21 +4,17 @@
 
     - autodiff/_autograd
         - Need to change to hessian_vector_product, but not working yet, due to an issue with autograd. Issue has been fixed but they haven't merged the fix into master branch yet, apparently will happen very soon (see [here](https://github.com/HIPS/autograd/issues/86)).
-        - [todo @26](./pymanopt/tools/autodiff/_autograd.py#L26)
+        - [todo @20](./pymanopt/tools/autodiff/_autograd.py#L20)
         
 - manifolds
 
     - stiefel
-        - [todo @120 (simplify expressions)](./pymanopt/manifolds/stiefel.py#L120) Not sure if this is really possible though...
+        - [todo @118 (simplify expressions)](./pymanopt/manifolds/stiefel.py#L118) Not sure if this is really possible though...
 
-    - pairmean is required by nelder_mead hence needs to be included in manifold, fixed_rank, grassmann, stiefel. 
-      check whether tangent method is redundant
+    - check whether tangent method is redundant
     - Implement tests for manifolds
 
 - solvers
-
-    - conjugate_gradient
-        - [todo @90](./pymanopt/solvers/conjugate_gradient.py#L90), [133](./pymanopt/solvers/conjugate_gradient.py#L133) (implement precondition)
 
     - linesearch
         - [todo @11 (allow to set parameters)](./pymanopt/solvers/linesearch.py#L11)
@@ -28,7 +24,7 @@
         (comment on solver arguments)
 
     - trust_regions
-        - [todo @80 (implement value checks)](./pymanopt/solvers/trust_regions.py#L80)
+        - [todo @95 (implement value checks)](./pymanopt/solvers/trust_regions.py#L95)
         
     - Implement tests for solvers
     
