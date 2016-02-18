@@ -4,14 +4,14 @@
 [![Build Status](https://travis-ci.org/j-towns/pymanopt.svg?branch=master)](https://travis-ci.org/j-towns/pymanopt)
 [![Coverage Status](https://coveralls.io/repos/github/j-towns/pymanopt/badge.svg?branch=master)](https://coveralls.io/github/j-towns/pymanopt?branch=master)
 
-Python port of the MATLAB package Manopt, for manifold optimization using
-Theano for automatic differentiation.
+Python toolbox for manifold optimization that computes gradients and hessians automatically.
 
-This project is independent from the Manopt project.
+A documentation will be made available in the near future at https://pymanopt.github.io.
 
-http://www.manopt.org
+Currently supports [theano](http://deeplearning.net/software/theano/) and [autograd](https://github.com/HIPS/autograd) as autodiff backends.
 
-http://deeplearning.net/software/theano/
+Builds upon the MATLAB package [Manopt](http://manopt.org/) but is otherwise independent of it.
+
 
 ## Manopt feature implementation
 ### Manifolds
@@ -38,9 +38,9 @@ http://deeplearning.net/software/theano/
 
 ## Installation
 ### Dependencies
-This package depends on python 2.7.*, numpy, scipy and Theano. Instructions for
-installing numpy, scipy and Theano on different operating systems can be found
-[here](http://deeplearning.net/software/theano/install.html).
+This package depends on python 2.7.*, numpy, scipy and (theano or autograd).
+Instructions for installing numpy, scipy and theano on different operating systems can be found
+[here](http://deeplearning.net/software/theano/install.html), for installing autograd [here](https://github.com/HIPS/autograd#how-to-install).
 
 ### Installing pymanopt
 You can install pymanopt with the following command:
@@ -51,9 +51,11 @@ pip install --user git+https://github.com/j-towns/pymanopt.git
 ## Basic usage
 To do optimization with pymanopt, you will need to create a manifold object, a
 solver object, and a cost function. Classes of manifolds and solvers are
-provided with pymanopt. Cost functions have to be set up using Theano. A
-tutorial on Theano can be found
-[here](http://deeplearning.net/software/theano/tutorial/index.html).
+provided with pymanopt.
+In case you want to make use of pymanopt's autodiff functionality, cost functions have to be set up using theano or in a autograd compatible fashion.
+A tutorial on theano can be found
+[here](http://deeplearning.net/software/theano/tutorial/index.html),
+one on autograd [here](https://github.com/HIPS/autograd/blob/master/docs/tutorial.md).
 
 ### Example code
 ```python
@@ -65,7 +67,7 @@ from pymanopt.solvers import SteepestDescent
 from pymanopt.manifolds import Stiefel
 
 # ---------------------------------
-# Define cost function using Theano
+# Define cost function using theano
 # ---------------------------------
 # Note, your cost function needs to have one (matrix) input and one (scalar) output.
 X = T.matrix()
