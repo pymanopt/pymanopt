@@ -9,13 +9,13 @@ from pymanopt.solvers.solver import Solver
 
 
 class SteepestDescent(Solver):
-    def __init__(self, ownlinesearch=None, *args, **kwargs):
+    def __init__(self, linesearch=None, *args, **kwargs):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 
-        if ownlinesearch is None:
+        if linesearch is None:
             self._searcher = linesearch.LineSearch()
         else:
-            self._searcher = ownlinesearch
+            self._searcher = linesearch
 
     # Function to solve optimisation problem using steepest descent.
     def solve(self, problem, x=None):
