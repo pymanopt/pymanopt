@@ -6,14 +6,13 @@ import numpy as np
 
 
 class LineSearch(object):
-    def __init__(self):
-        """Initialise line search default parameters"""
-        # TODO: allow user to initiate these
-        self.contraction_factor = 0.5
-        self.optimism = 1 / 0.5
-        self.suff_decr = 1e-4
-        self.max_steps = 25
-        self.initial_stepsize = 1
+    def __init__(self, contraction_factor=.5, optimism=2,
+                 suff_decr=1e-4, maxiter=25, initial_stepsize=1):
+        self.contraction_factor = contraction_factor
+        self.optimism = optimism
+        self.suff_decr = suff_decr
+        self.maxiter = maxiter
+        self.initial_stepsize = initial_stepsize
 
         self._oldf0 = None
 
@@ -55,7 +54,7 @@ class LineSearch(object):
 
         # Backtrack while the Armijo criterion is not satisfied
         while (newf > f0 + self.suff_decr * alpha * df0 and
-               step_count <= self.max_steps):
+               step_count <= self.maxiter):
 
             # Reduce the step size
             alpha = self.contraction_factor * alpha
@@ -79,12 +78,12 @@ class LineSearch(object):
 
 
 class LineSearchAdaptive(object):
-    def __init__(self):
-        self._contraction_factor = 0.5
-        self._suff_decr = 0.5
-        self._max_steps = 10
-        self._initial_stepsize = 1
-
+    def __init__(self, contraction_factor=.5, suff_decr=.5, maxiter=10,
+                 initial_stepsize=1):
+        self._contraction_factor = contraction_factor
+        self._suff_decr = suff_decr
+        self._maxiter = maxiter
+        self._initial_stepsize = initial_stepsize
         self._oldalpha = None
 
     def search(self, objective, man, x, d, f0, df0):
@@ -100,7 +99,7 @@ class LineSearchAdaptive(object):
         cost_evaluations = 1
 
         while (newf > f0 + self._suff_decr * alpha * df0 and
-               cost_evaluations <= self._max_steps):
+               cost_evaluations <= self._maxiter):
             # Reduce the step size.
             alpha *= self._contraction_factor
 

@@ -16,9 +16,6 @@
 
 - solvers
 
-    - linesearch
-        - [todo @11 (allow to set parameters)](./pymanopt/solvers/linesearch.py#L11)
-
     - nelder_mead
         - [todo @55](./pymanopt/solvers/nelder_mead.py#L55), [57](./pymanopt/solvers/nelder_mead.py#L57), [59](./pymanopt/solvers/nelder_mead.py#L59) 
         (comment on solver arguments)

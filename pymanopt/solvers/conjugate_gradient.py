@@ -28,14 +28,14 @@ class ConjugateGradient(Solver):
             this strategy. See in code formula for the specific criterion used.
     """
     def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
-                 ownlinesearch=None, *args, **kwargs):
+                 ownlinesearch=None, linesearch_params={}, *args, **kwargs):
         super(ConjugateGradient, self).__init__(*args, **kwargs)
 
         self._beta_type = beta_type
         self._orth_value = orth_value
 
         if ownlinesearch is None:
-            self._searcher = linesearch.LineSearchAdaptive()
+            self._searcher = linesearch.LineSearchAdaptive(**linesearch_params)
         else:
             self._searcher = ownlinesearch
 
