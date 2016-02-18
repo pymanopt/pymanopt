@@ -46,8 +46,6 @@ class Oblique(Manifold):
     def proj(self, X, H):
         return H - X * ((X * H).sum(0)[np.newaxis, :])
 
-    tangent = proj
-
     egrad2rgrad = proj
 
     def ehess2rhess(self, X, egrad, ehess, U):

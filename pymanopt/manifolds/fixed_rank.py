@@ -79,8 +79,6 @@ class SymFixedRankYY(Manifold):
         Omega = lyap(YtY, -AS)
         return H - Y.dot(Omega)
 
-    tangent = proj
-
     def egrad2rgrad(self, Y, H):
         return H
 

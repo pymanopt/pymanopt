@@ -11,7 +11,6 @@
     - stiefel
         - [todo @118 (simplify expressions)](./pymanopt/manifolds/stiefel.py#L118) Not sure if this is really possible though...
 
-    - check whether tangent method is redundant
     - Implement tests for manifolds
 
 - solvers

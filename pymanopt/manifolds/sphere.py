@@ -45,8 +45,6 @@ class Sphere(Manifold):
     def proj(self, X, H):
         return H - self.inner(None, X, H) * X
 
-    tangent = proj
-
     egrad2rgrad = proj
 
     def ehess2rhess(self, X, egrad, ehess, U):
