@@ -18,6 +18,7 @@ http://deeplearning.net/software/theano/
 
 | Manifold | Implemented |
 | ------------- |:-----------:|
+| Euclidian | Partially |
 | Sphere | Partially |
 | Stiefel | Partially |
 | Grassmann | Partially |
