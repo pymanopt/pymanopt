@@ -84,7 +84,7 @@ manifold = Stiefel(5, 2)
 # --------------------
 # Setup problem object
 # --------------------
-problem = Problem(man=manifold, ad_cost=cost, ad_arg=X)
+problem = Problem(man=manifold, cost=cost, arg=X)
 
 # --------------------
 # Perform optimization
