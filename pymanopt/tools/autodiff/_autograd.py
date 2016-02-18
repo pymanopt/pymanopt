@@ -2,9 +2,25 @@
 Module containing functions to differentiate functions using autograd.
 """
 import autograd.numpy as np
-import autograd
+from autograd.core import grad
 
 from ._backend import Backend
+
+
+def _hessian_vector_product(fun, argnum=0):
+    """Builds a function that returns the exact Hessian-vector product.
+    The returned function has arguments (*args, vector, **kwargs). Note,
+    this function will be incorporated into autograd, with name
+    hessian_vector_product. Once it has been this function can be
+    deleted."""
+    fun_grad = grad(fun, argnum)
+
+    def vector_dot_grad(*args, **kwargs):
+        args, vector = args[:-1], args[-1]
+        return np.tensordot(fun_grad(*args, **kwargs), vector,
+                            axes=vector.ndim)
+    # Grad wrt original input.
+    return grad(vector_dot_grad, argnum)
 
 
 class AutogradBackend(Backend):
@@ -13,11 +29,7 @@ class AutogradBackend(Backend):
         Compute the gradient of 'objective' with respect to the first
         argument and return as a function.
         """
-        return autograd.grad(objective)
+        return grad(objective)
 
     def compute_hessian(self, objective, argument):
-        # TODO: cross-check, also have a look at autograd's
-        #       hessian_vector_product
-        def hess(x, g):
-            return np.tensordot(autograd.hessian(objective)(x), g, axes=x.ndim)
-        return hess
+        return _hessian_vector_product(objective)(x, g)
