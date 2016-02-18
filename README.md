@@ -22,6 +22,7 @@ http://deeplearning.net/software/theano/
 | Stiefel | Partially |
 | Grassmann | Partially |
 | Symmetric positive semidefinite,<br>fixed-rank (complex) | Partially |
+| Symmetric positive semidefinite,<br>fixed-rank with unit diagonal | Partially |
 | Oblique manifold | Partially |
 
 ### Solvers
