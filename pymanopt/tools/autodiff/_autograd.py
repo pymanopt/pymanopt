@@ -32,4 +32,4 @@ class AutogradBackend(Backend):
         return grad(objective)
 
     def compute_hessian(self, objective, argument):
-        return _hessian_vector_product(objective)(x, g)
+        return _hessian_vector_product(objective)
