@@ -8,7 +8,7 @@ import time
 
 import numpy as np
 
-from pymanopt.solvers import linesearch
+from pymanopt.solvers import linesearch as default_linesearchers
 from pymanopt.solvers.solver import Solver
 from pymanopt import tools
 
@@ -37,7 +37,7 @@ class ConjugateGradient(Solver):
         self._orth_value = orth_value
 
         if linesearch is None:
-            self._searcher = linesearch.LineSearchAdaptive()
+            self._searcher = default_linesearchers.LineSearchAdaptive()
         else:
             self._searcher = linesearch
 

@@ -6,7 +6,7 @@ from __future__ import print_function
 
 import time
 
-from pymanopt.solvers import linesearch
+from pymanopt.solvers import linesearch as default_linesearchers
 from pymanopt.solvers.solver import Solver
 
 
@@ -15,7 +15,7 @@ class SteepestDescent(Solver):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 
         if linesearch is None:
-            self._searcher = linesearch.LineSearch()
+            self._searcher = default_linesearchers.LineSearch()
         else:
             self._searcher = linesearch
 
