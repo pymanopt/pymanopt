@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/j-towns/pymanopt](https://badges.gitter.im/j-towns/pymanopt.svg)](https://gitter.im/j-towns/pymanopt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/pymanopt/pymanopt.svg?branch=master)](https://travis-ci.org/pymanopt/pymanopt)
-[![Coverage Status](https://coveralls.io/repos/github/j-towns/pymanopt/badge.svg?branch=master)](https://coveralls.io/github/j-towns/pymanopt?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/pymanopt/pymanopt/badge.svg?branch=master)](https://coveralls.io/github/pymanopt/pymanopt?branch=master)
 
 Python toolbox for manifold optimization that computes gradients and hessians automatically.
 
