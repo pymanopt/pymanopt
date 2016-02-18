@@ -2,6 +2,8 @@
 Module containing steepest descent (gradient descent) algorithm based on
 steepestdescent.m from the manopt MATLAB package.
 """
+from __future__ import print_function
+
 import time
 
 from pymanopt.solvers import linesearch

@@ -58,6 +58,8 @@ Manopt MATLAB package.
 Also included is the Truncated (Steihaug-Toint) Conjugate-Gradient algorithm,
 based on tCG.m from the Manopt MATLAB package.
 """
+from __future__ import print_function
+
 import time
 
 import numpy as np

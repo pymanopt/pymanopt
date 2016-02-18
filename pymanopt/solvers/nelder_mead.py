@@ -3,6 +3,8 @@ Module containing a Nelder-Mead minimization alglorithm for derivative-free
 minimization based on neldermead.m and centroid.m from the manopt MATLAB
 package.
 """
+from __future__ import print_function
+
 import time
 
 import numpy as np
