@@ -28,6 +28,9 @@ from scipy.linalg import svd
 from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
+if not hasattr(__builtins__, "xrange"):
+    xrange = range
+
 
 class Grassmann(Manifold):
     def __init__(self, height, width, k=1):

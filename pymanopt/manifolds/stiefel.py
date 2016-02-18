@@ -12,6 +12,9 @@ from scipy.linalg import expm
 from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
+if not hasattr(__builtins__, "xrange"):
+    xrange = range
+
 
 class Stiefel(Manifold):
     def __init__(self, height, width, k=1):
