@@ -52,11 +52,13 @@ class NelderMead(Solver):
         - maxiter (max(500, 4 * dim))
             Maximum number of allowed iterations
         - reflection (1)
-            TODO
+            Determines how far to reflect away from the worst vertex;
+            stretched (reflection > 1), compressed (0 < reflection < 1),
+            or exact (reflection = 1)
         - expansion (2)
-            TODO
+            Factor by which to expand the reflected simplex
         - contraction (0.5)
-            TODO
+            Factor by which to contract the reflected simplex
     """
     def __init__(self, maxcostevals=None, maxiter=None, reflection=1,
                  expansion=2, contraction=0.5, *args, **kwargs):
