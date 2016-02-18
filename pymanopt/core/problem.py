@@ -4,7 +4,7 @@ object to feed to one of the solvers.
 """
 import theano.tensor as T
 
-from pymanopt.tools.autodiff import TheanoBackend, AutogradBackend
+from pymanopt.tools.autodiff import AutogradBackend, TheanoBackend
 
 
 class Problem(object):
@@ -77,8 +77,12 @@ class Problem(object):
                     raise ValueError(
                         "Theano backend requires an argument with respect to "
                         "which compilation is to be carried out")
+                if not callable(TheanoBackend):
+                    raise ImportError(TheanoBackend)
                 backend = TheanoBackend()
             elif callable(self._original_cost):
+                if not callable(AutogradBackend):
+                    raise ImportError(AutogradBackend)
                 backend = AutogradBackend()
             else:
                 raise ValueError(
