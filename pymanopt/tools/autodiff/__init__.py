@@ -1,11 +1,5 @@
-try:
-    from ._theano import TheanoBackend
-except ImportError as TheanoBackend:
-    pass
+from ._theano import TheanoBackend
 
-try:
-    from ._autograd import AutogradBackend
-except ImportError as AutogradBackend:
-    pass
+from ._autograd import AutogradBackend
 
 __all__ = ["TheanoBackend", "AutogradBackend"]

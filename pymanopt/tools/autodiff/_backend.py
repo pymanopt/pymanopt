@@ -3,3 +3,5 @@ class Backend(object):
         return objective
 
     compile_function = compute_gradient = compute_hessian = __id
+
+    is_available = is_compatible = False

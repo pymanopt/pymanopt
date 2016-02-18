@@ -4,8 +4,6 @@ object to feed to one of the solvers.
 """
 from __future__ import print_function
 
-import theano.tensor as T
-
 from pymanopt.tools.autodiff import AutogradBackend, TheanoBackend
 
 
@@ -64,6 +62,7 @@ class Problem(object):
         self._grad = grad
         self._hess = hess
         self._arg = arg
+        self._backend = None
 
         if precon is None:
             def precon(x, d):
@@ -72,35 +71,39 @@ class Problem(object):
 
         self.verbosity = verbosity
 
-    def _get_backend(self):
+    @property
+    def backend(self):
         if self._backend is None:
-            if isinstance(self._original_cost, T.TensorVariable):
-                if not isinstance(self._arg, T.TensorVariable):
-                    raise ValueError(
-                        "Theano backend requires an argument with respect to "
-                        "which compilation is to be carried out")
-                if not callable(TheanoBackend):
-                    raise ImportError(TheanoBackend)
-                backend = TheanoBackend()
-            elif callable(self._original_cost):
-                if not callable(AutogradBackend):
-                    raise ImportError(AutogradBackend)
-                backend = AutogradBackend()
-            else:
+            backend_theano = TheanoBackend()
+            backend_autograd = AutogradBackend()
+            if backend_theano.is_available():
+                if backend_theano.is_compatible(self._original_cost,
+                                                self._arg):
+                    self._backend = backend_theano
+            if backend_autograd.is_available():
+                if backend_autograd.is_compatible(self._original_cost,
+                                                  self._arg):
+                    self._backend = backend_autograd
+            if self._backend is None:
                 raise ValueError(
-                    "Cannot identify compilation backend from cost function "
-                    "`{:s}`".format(self._original_cost))
-            self._backend = backend
+                    "Cannot identify an autodiff backend from cost "
+                    "function that also was successfully imported. "
+                    "TheanoBackend was%s successfully imported. " %
+                    ("" if backend_theano.is_available() else " not") +
+                    "AutogradBackend was%s successfully imported. " %
+                    ("" if backend_autograd.is_available() else " not")
+                    )
         return self._backend
 
     @property
     def cost(self):
-        if self._cost is None:
+        if self._cost is None and not callable(self._original_cost):
             if self.verbosity >= 1:
                 print("Compiling cost function...")
-            backend = self._get_backend()
-            self._cost = backend.compile_function(self._original_cost,
-                                                  self._arg)
+            self._cost = self.backend.compile_function(self._original_cost,
+                                                       self._arg)
+        elif self._cost is None and callable(self._original_cost):
+            self._cost = self._original_cost
         return self._cost
 
     @property
@@ -108,9 +111,8 @@ class Problem(object):
         if self._egrad is None:
             if self.verbosity >= 1:
                 print("Computing gradient of cost function...")
-            backend = self._get_backend()
-            self._egrad = backend.compute_gradient(self._original_cost,
-                                                   self._arg)
+            self._egrad = self.backend.compute_gradient(self._original_cost,
+                                                        self._arg)
         return self._egrad
 
     @property
@@ -129,9 +131,8 @@ class Problem(object):
         if self._ehess is None:
             if self.verbosity >= 1:
                 print("Computing Hessian of cost function...")
-            backend = self._get_backend()
-            self._ehess = backend.compute_hessian(self._original_cost,
-                                                  self._arg)
+            self._ehess = self.backend.compute_hessian(self._original_cost,
+                                                       self._arg)
         return self._ehess
 
     @property

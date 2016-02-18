@@ -4,8 +4,12 @@ the pymanopt package.
 
 Jamie Townsend December 2014
 """
-import theano
-import theano.tensor as T
+try:
+    import theano
+    import theano.tensor as T
+except ImportError:
+    theano = None
+    T = None
 
 from warnings import warn
 
@@ -13,6 +17,23 @@ from ._backend import Backend
 
 
 class TheanoBackend(Backend):
+    def is_available(self):
+        if theano is not None and T is not None:
+            return True
+        else:
+            return False
+
+    def is_compatible(self, objective, argument):
+        if isinstance(objective, T.TensorVariable):
+            if not isinstance(argument, T.TensorVariable):
+                raise ValueError(
+                    "Theano backend requires an argument with respect to "
+                    "which compilation is to be carried out")
+            else:
+                return True
+        else:
+            return False
+
     def compile_function(self, objective, argument):
         """
         Wrapper for the theano.function(). Compiles a theano graph into a
