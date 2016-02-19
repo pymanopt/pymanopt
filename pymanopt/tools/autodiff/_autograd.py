@@ -12,17 +12,15 @@ from ._backend import Backend
 
 
 class AutogradBackend(Backend):
+    @property
+    def name(self):
+        return "autograd"
+
     def is_available(self):
-        if np is not None and grad is not None:
-            return True
-        else:
-            return False
+        return np is not None and grad is not None
 
     def is_compatible(self, objective, argument):
-        if callable(objective):
-            return True
-        else:
-            return False
+        return callable(objective)
 
     def compute_gradient(self, objective, argument):
         """

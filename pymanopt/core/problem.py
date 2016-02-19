@@ -47,8 +47,6 @@ class Problem(object):
             Level of information printed by the solver while it operates, 0
             is silent, 2 is most information.
     """
-    _backend = None
-
     def __init__(self, man, cost, egrad=None, ehess=None, grad=None, hess=None,
                  arg=None, precon=None, verbosity=2):
         self.man = man
@@ -71,28 +69,22 @@ class Problem(object):
 
         self.verbosity = verbosity
 
+        self._backends = [TheanoBackend(), AutogradBackend()]
+        self._backend = None
+
     @property
     def backend(self):
         if self._backend is None:
-            backend_theano = TheanoBackend()
-            backend_autograd = AutogradBackend()
-            if backend_theano.is_available():
-                if backend_theano.is_compatible(self._original_cost,
-                                                self._arg):
-                    self._backend = backend_theano
-            if backend_autograd.is_available():
-                if backend_autograd.is_compatible(self._original_cost,
-                                                  self._arg):
-                    self._backend = backend_autograd
-            if self._backend is None:
+            for backend in self._backends:
+                if backend.is_compatible(self._original_cost, self._arg):
+                    self._backend = backend
+                    break
+            else:
+                backend_names = [backend.name for backend in self._backends]
                 raise ValueError(
-                    "Cannot identify an autodiff backend from cost "
-                    "function that also was successfully imported. "
-                    "TheanoBackend was%s successfully imported. " %
-                    ("" if backend_theano.is_available() else " not") +
-                    "AutogradBackend was%s successfully imported. " %
-                    ("" if backend_autograd.is_available() else " not")
-                    )
+                    "Cannot determine autodiff backend from cost function. "
+                    "Available backends are: {:s}".format(
+                        ", ".join(backend_names)))
         return self._backend
 
     @property

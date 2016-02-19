@@ -17,22 +17,21 @@ from ._backend import Backend
 
 
 class TheanoBackend(Backend):
+    @property
+    def name(self):
+        return "theano"
+
     def is_available(self):
-        if theano is not None and T is not None:
-            return True
-        else:
-            return False
+        return theano is not None and T is not None
 
     def is_compatible(self, objective, argument):
-        if isinstance(objective, T.TensorVariable):
+        if T is not None and isinstance(objective, T.TensorVariable):
             if not isinstance(argument, T.TensorVariable):
                 raise ValueError(
                     "Theano backend requires an argument with respect to "
                     "which compilation is to be carried out")
-            else:
-                return True
-        else:
-            return False
+            return True
+        return False
 
     def compile_function(self, objective, argument):
         """
