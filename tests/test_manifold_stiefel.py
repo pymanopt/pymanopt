@@ -6,36 +6,94 @@ import numpy.random as rnd
 import numpy.testing as np_testing
 
 from pymanopt.manifolds import Stiefel
+import pymanopt.tools.testing as testing
+from pymanopt.tools.multi import *
+from pymanopt.tools.autodiff._autograd import (_hessian_vector_product as
+                                               hessian_vector_product)
+
+import autograd.numpy as npa
+from autograd.core import grad
 
 
-class TestStiefelManifold(unittest.TestCase):
+class TestSingleStiefelManifold(unittest.TestCase):
     def setUp(self):
-        self.m = m = 100
-        self.n = n = 50
-        self.k = k = 2
+        self.m = m = 20
+        self.n = n = 2
+        self.k = k = 1
         self.man = Stiefel(m, n, k=k)
+        self.proj = lambda x, u: u - npa.dot(x, npa.dot(x.T, u) +
+                                             npa.dot(u.T, x)) / 2
 
-    # def test_dim(self):
-
+    def test_dim(self):
+        assert self.man.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
     # def test_typicaldist(self):
 
     # def test_dist(self):
 
-    # def test_inner(self):
+    def test_inner(self):
+        X = la.qr(rnd.randn(self.m, self.n))[0]
+        A, B = rnd.randn(2, self.m, self.n)
+        np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
-    # def test_proj(self):
+    def test_proj(self):
+        # Construct a random point X on the manifold.
+        X = rnd.randn(self.m, self.n)
+        X = la.qr(X)[0]
 
-    # def test_ehess2rhess(self):
+        # Construct a vector H in the ambient space.
+        H = rnd.randn(self.m, self.n)
 
-    # def test_retr(self):
+        # Compare the projections.
+        Hproj = H - X.dot(X.T.dot(H) + H.T.dot(X)) / 2
+        np_testing.assert_allclose(Hproj, self.man.proj(X, H))
+
+    def test_rand(self):
+        # Just make sure that things generated are on the manifold and that
+        # if you generate two they are not equal.
+        X = self.man.rand()
+        np_testing.assert_allclose(X.T.dot(X), np.eye(self.n), atol=1e-10)
+        Y = self.man.rand()
+        assert np.linalg.norm(X - Y) > 1e-6
+
+    def test_randvec(self):
+        # Make sure things generated are in tangent space and if you generate
+        # two then they are not equal.
+        X = self.man.rand()
+        U = self.man.randvec(X)
+        np_testing.assert_allclose(multisym(X.T.dot(U)),
+                                   np.zeros((self.n, self.n)), atol=1e-10)
+        V = self.man.randvec(X)
+        assert la.norm(U - V) > 1e-6
+
+    def test_retr(self):
+        # Test that the result is on the manifold and that for small
+        # tangent vectors it has little effect.
+        x = self.man.rand()
+        u = self.man.randvec(x)
+
+        xretru = self.man.retr(x, u)
+        np_testing.assert_allclose(xretru.T.dot(xretru), np.eye(self.n,
+                                                                self.n),
+                                   atol=1e-10)
+
+        u = u * 1e-6
+        xretru = self.man.retr(x, u)
+        np_testing.assert_allclose(xretru, x + u)
+
+    def test_ehess2rhess(self):
+        # Test this function at some randomly generated point.
+        x = self.man.rand()
+        u = self.man.randvec(x)
+        egrad = rnd.randn(self.m, self.n)
+        ehess = rnd.randn(self.m, self.n)
+
+        np_testing.assert_allclose(testing.ehess2rhess(self.proj)(x, egrad,
+                                                                  ehess, u),
+                                   self.man.ehess2rhess(x, egrad, ehess, u))
 
     # def test_egrad2rgrad(self):
 
     # def test_norm(self):
-
-    # def test_rand(self):
-
-    # def test_randvec(self):
 
     # def test_transp(self):
 
