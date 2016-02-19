@@ -13,7 +13,7 @@ except ImportError:
 
 from warnings import warn
 
-from ._backend import Backend
+from ._backend import Backend, assert_backend_available
 
 
 class TheanoBackend(Backend):
@@ -24,8 +24,9 @@ class TheanoBackend(Backend):
     def is_available(self):
         return theano is not None and T is not None
 
+    @assert_backend_available
     def is_compatible(self, objective, argument):
-        if T is not None and isinstance(objective, T.TensorVariable):
+        if isinstance(objective, T.TensorVariable):
             if not isinstance(argument, T.TensorVariable):
                 raise ValueError(
                     "Theano backend requires an argument with respect to "
@@ -33,6 +34,7 @@ class TheanoBackend(Backend):
             return True
         return False
 
+    @assert_backend_available
     def compile_function(self, objective, argument):
         """
         Wrapper for the theano.function(). Compiles a theano graph into a
@@ -40,6 +42,7 @@ class TheanoBackend(Backend):
         """
         return theano.function([argument], objective)
 
+    @assert_backend_available
     def compute_gradient(self, objective, argument):
         """
         Wrapper for theano.tensor.grad(). Computes the gradient of 'objective'
@@ -48,6 +51,7 @@ class TheanoBackend(Backend):
         g = T.grad(objective, argument)
         return self.compile_function(g, argument)
 
+    @assert_backend_available
     def compute_hessian(self, objective, argument):
         """
         Computes the directional derivative of the gradient (which is equal to

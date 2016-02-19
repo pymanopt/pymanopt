@@ -83,8 +83,9 @@ class Problem(object):
             else:
                 backend_names = [backend.name for backend in self._backends]
                 raise ValueError(
-                    "Cannot determine autodiff backend from cost function. "
-                    "Available backends are: {:s}".format(
+                    "Cannot determine autodiff backend from cost function of "
+                    "type `{:s}`. Available backends are: {:s}".format(
+                        self._original_cost.__class__.__name__,
                         ", ".join(backend_names)))
         return self._backend
 

@@ -8,7 +8,7 @@ except ImportError:
     np = None
     grad = None
 
-from ._backend import Backend
+from ._backend import Backend, assert_backend_available
 
 
 class AutogradBackend(Backend):
@@ -19,9 +19,11 @@ class AutogradBackend(Backend):
     def is_available(self):
         return np is not None and grad is not None
 
+    @assert_backend_available
     def is_compatible(self, objective, argument):
         return callable(objective)
 
+    @assert_backend_available
     def compute_gradient(self, objective, argument):
         """
         Compute the gradient of 'objective' with respect to the first
@@ -29,6 +31,7 @@ class AutogradBackend(Backend):
         """
         return grad(objective)
 
+    @assert_backend_available
     def compute_hessian(self, objective, argument):
         return _hessian_vector_product(objective)
 
