@@ -41,3 +41,7 @@ def multitransp(A):
 def multisym(A):
     # Inspired by MATLAB multisym function by Nicholas Boumal.
     return 0.5 * (A + multitransp(A))
+
+def multieye(k, n):
+    # Creates a k x n x n array containing k (n x n) identity matrices.
+    return np.tile(np.eye(n), (k, 1, 1))

@@ -55,3 +55,10 @@ class TestMulti(unittest.TestCase):
             C[i] = .5 * (A[i] + A[i].T)
 
         np.testing.assert_allclose(C, multisym(A))
+
+    def test_multieye(self):
+        A = np.zeros((self.k, self.n, self.n))
+        for i in range(self.k):
+            A[i] = np.eye(self.n)
+
+        np_testing.assert_allclose(A, multieye(self.k, self.n))
