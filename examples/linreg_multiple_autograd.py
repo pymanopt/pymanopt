@@ -9,7 +9,6 @@ if __name__ == "__main__":
     # Cost function is the squared reconstruction error
     X = np.zeros((200, 3))
     y = np.zeros((200, 3))
-    #cost = T.sum(T.sum((yT-wT.T.dot(XT))**2))
 
     def cost(w):
         return np.sum((y - np.dot(X, w)) ** 2)
@@ -20,8 +19,7 @@ if __name__ == "__main__":
     manifold = Euclidean(3, 1)
 
     # Create the problem with extra cost function arguments
-    problem = Problem(man=manifold, cost=cost,
-                       verbosity=0)
+    problem = Problem(man=manifold, cost=cost, verbosity=0)
 
     # Solve 5 instances of the same type of problem for different data input
     for k in range(0, 5):
