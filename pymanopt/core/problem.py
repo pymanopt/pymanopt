@@ -43,12 +43,14 @@ class Problem(object):
             A symbolic (tensor) variable with respect to which you would like
             to optimize. Its type (together with the type of the cost argument)
             defines the autodiff backend used.
+        - extra_args
+            List of additional cost function arguments
         - verbosity (2)
             Level of information printed by the solver while it operates, 0
             is silent, 2 is most information.
     """
     def __init__(self, man, cost, egrad=None, ehess=None, grad=None, hess=None,
-                 arg=None, precon=None, verbosity=2):
+                 arg=None, precon=None, extra_args=[], verbosity=2):
         self.man = man
         # We keep a reference to the original cost function in case we want to
         # call the `prepare` method twice (for instance, after switching from
@@ -60,7 +62,7 @@ class Problem(object):
         self._grad = grad
         self._hess = hess
         self._arg = arg
-        self._backend = None
+        self._extra_args = extra_args
 
         if precon is None:
             def precon(x, d):
@@ -94,8 +96,13 @@ class Problem(object):
         if self._cost is None and not callable(self._original_cost):
             if self.verbosity >= 1:
                 print("Compiling cost function...")
-            self._cost = self.backend.compile_function(self._original_cost,
-                                                       self._arg)
+            _cost = self.backend.compile_function(self._original_cost,
+                                                  self._arg,
+                                                  self._extra_args)
+            if self._extra_args:
+                self._cost = lambda x: _cost(x, *self._extra_args_vals)
+            else:
+                self._cost = _cost
         elif self._cost is None and callable(self._original_cost):
             self._cost = self._original_cost
         return self._cost
@@ -105,8 +112,13 @@ class Problem(object):
         if self._egrad is None:
             if self.verbosity >= 1:
                 print("Computing gradient of cost function...")
-            self._egrad = self.backend.compute_gradient(self._original_cost,
-                                                        self._arg)
+            _egrad = self.backend.compute_gradient(self._original_cost,
+                                                   self._arg,
+                                                   self._extra_args)
+            if self._extra_args:
+                self._egrad = lambda x: _egrad(x, *self._extra_args_vals)
+            else:
+                self._egrad = _egrad
         return self._egrad
 
     @property
@@ -125,8 +137,13 @@ class Problem(object):
         if self._ehess is None:
             if self.verbosity >= 1:
                 print("Computing Hessian of cost function...")
-            self._ehess = self.backend.compute_hessian(self._original_cost,
-                                                       self._arg)
+            _ehess = self.backend.compute_hessian(self._original_cost,
+                                                  self._arg,
+                                                  self._extra_args)
+            if self._extra_args:
+                self._ehess = lambda x, d: _ehess(x, d, *self._extra_args_vals)
+            else:
+                self._ehess = _ehess
         return self._ehess
 
     @property
@@ -140,3 +157,11 @@ class Problem(object):
                     x, self.egrad(x), self.ehess(x, a), a)
             self._hess = hess
         return self._hess
+
+    @property
+    def extra_args(self):
+        return self._extra_args_vals
+
+    @extra_args.setter
+    def extra_args(self, vals):
+        self._extra_args_vals = vals

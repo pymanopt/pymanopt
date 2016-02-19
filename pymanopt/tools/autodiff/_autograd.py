@@ -24,15 +24,25 @@ class AutogradBackend(Backend):
         return callable(objective)
 
     @assert_backend_available
-    def compute_gradient(self, objective, argument):
+    def compile_function(self, objective, argument, extra_args=[]):
+        if extra_args:
+            raise NotImplementedError
+        return objective
+
+    @assert_backend_available
+    def compute_gradient(self, objective, argument, extra_args=[]):
         """
         Compute the gradient of 'objective' with respect to the first
         argument and return as a function.
         """
+        if extra_args:
+            raise NotImplementedError
         return grad(objective)
 
     @assert_backend_available
-    def compute_hessian(self, objective, argument):
+    def compute_hessian(self, objective, argument, extra_args=[]):
+        if extra_args:
+            raise NotImplementedError
         return _hessian_vector_product(objective)
 
 
