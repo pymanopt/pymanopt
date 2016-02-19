@@ -12,7 +12,7 @@ if __name__ == "__main__":
     wT = T.matrix()
     yT = S.shared(np.random.randn(1,1))
     XT = S.shared(np.random.randn(1,1))
-    cost = T.sum(T.sum((yT-wT.T.dot(XT))**2))
+    cost = T.sum((yT-wT.T.dot(XT))**2)
 
     # A solver that involves the hessian
     solver = TrustRegions()
