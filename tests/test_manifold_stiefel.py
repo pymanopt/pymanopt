@@ -98,6 +98,22 @@ class TestSingleStiefelManifold(unittest.TestCase):
 
     # def test_transp(self):
 
+    def test_exp(self):
+        # Check that exp lies on the manifold and that exp of a small vector u
+        # is close to x + u.
+        s = self.man
+        x = s.rand()
+        u = s.randvec(x)
+
+        xexpu = s.exp(x, u)
+        np_testing.assert_allclose(xexpu.T.dot(xexpu), np.eye(self.n,
+                                                              self.n),
+                                   atol=1e-10)
+
+        u = u * 1e-6
+        xexpu = s.exp(x, u)
+        np_testing.assert_allclose(xexpu, x + u)
+
     # def test_exp_log_inverse(self):
         # s = self.man
         # X = s.rand()
@@ -199,6 +215,21 @@ class TestMultiStiefelManifold(unittest.TestCase):
         np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
 
     # def test_transp(self):
+
+    def test_exp(self):
+        # Check that exp lies on the manifold and that exp of a small vector u
+        # is close to x + u.
+        s = self.man
+        x = s.rand()
+        u = s.randvec(x)
+
+        xexpu = s.exp(x, u)
+        np_testing.assert_allclose(multiprod(multitransp(xexpu), xexpu),
+                                   multieye(self.k, self.n), atol=1e-10)
+
+        u = u * 1e-6
+        xexpu = s.exp(x, u)
+        np_testing.assert_allclose(xexpu, x + u)
 
     # def test_exp_log_inverse(self):
         # s = self.man
