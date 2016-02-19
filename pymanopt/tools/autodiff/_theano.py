@@ -35,24 +35,24 @@ class TheanoBackend(Backend):
         return False
 
     @assert_backend_available
-    def compile_function(self, objective, argument):
+    def compile_function(self, objective, argument, extra_args=[]):
         """
         Wrapper for the theano.function(). Compiles a theano graph into a
         python function.
         """
-        return theano.function([argument], objective)
+        return theano.function([argument]+extra_args, objective)
 
     @assert_backend_available
-    def compute_gradient(self, objective, argument):
+    def compute_gradient(self, objective, argument, extra_args=[]):
         """
         Wrapper for theano.tensor.grad(). Computes the gradient of 'objective'
         with respect to 'argument' and returns compiled version.
         """
         g = T.grad(objective, argument)
-        return self.compile_function(g, argument)
+        return self.compile_function(g, argument, extra_args)
 
     @assert_backend_available
-    def compute_hessian(self, objective, argument):
+    def compute_hessian(self, objective, argument, extra_args=[]):
         """
         Computes the directional derivative of the gradient (which is equal to
         the Hessian multiplied by direction).
@@ -75,9 +75,11 @@ class TheanoBackend(Backend):
             R = T.tensordot(H, A, A.ndim)
 
         try:
-            hess = theano.function([argument, A], R, on_unused_input="raise")
+            hess = theano.function([argument, A]+extra_args, R,
+                                   on_unused_input="raise")
         except theano.compile.UnusedInputError:
             warn("Theano detected unused input - suggests Hessian may be zero "
                  "or constant.")
-            hess = theano.function([argument, A], R, on_unused_input="ignore")
+            hess = theano.function([argument, A]+extra_args, R,
+                                   on_unused_input="ignore")
         return hess
