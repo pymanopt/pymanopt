@@ -8,11 +8,8 @@ import numpy.testing as np_testing
 from pymanopt.manifolds import Stiefel
 import pymanopt.tools.testing as testing
 from pymanopt.tools.multi import *
-from pymanopt.tools.autodiff._autograd import (_hessian_vector_product as
-                                               hessian_vector_product)
 
 import autograd.numpy as npa
-from autograd.core import grad
 
 
 class TestSingleStiefelManifold(unittest.TestCase):

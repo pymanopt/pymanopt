@@ -112,8 +112,8 @@ class Grassmann(Manifold):
             # columns. Compare this with the Stiefel manifold.
 
             # Compute the polar factorization of Y = X+G
-            u, s, v = svd(X + G, full_matrices=False)
-            XNew = u.dot(v.T)
+            u, s, vt = svd(X + G, full_matrices=False)
+            XNew = u.dot(vt)
         else:
             XNew = np.zeros(np.shape(X))
             for i in xrange(self._k):

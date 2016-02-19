@@ -40,17 +40,21 @@ class TestObliqueManifold(unittest.TestCase):
 
     def test_exp_log_inverse(self):
         s = self.man
-        X = s.rand()
-        U = s.randvec(X)
-        Uexplog = s.exp(X, s.log(X, U))
-        np_testing.assert_array_almost_equal(U, Uexplog)
+        x = s.rand()
+        y = s.rand()
+        u = s.log(x, y)
+        z = s.exp(x, u)
+        np_testing.assert_almost_equal(0, s.dist(y, z), decimal=6)
 
     def test_log_exp_inverse(self):
         s = self.man
-        X = s.rand()
-        U = s.randvec(X)
-        Ulogexp = s.log(X, s.exp(X, U))
-        np_testing.assert_array_almost_equal(U, Ulogexp)
+        x = s.rand()
+        u = s.randvec(x)
+        y = s.exp(x, u)
+        v = s.log(x, y)
+        # Check that the manifold difference between the tangent vectors u and
+        # v is 0
+        np_testing.assert_almost_equal(0, s.norm(x, u - v))
 
     def test_pairmean(self):
         s = self.man

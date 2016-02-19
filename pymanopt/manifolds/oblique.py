@@ -40,7 +40,9 @@ class Oblique(Manifold):
         return la.norm(U)
 
     def dist(self, X, Y):
-        U = np.arccos((X * Y).sum(0)).real
+        XY = (X * Y).sum(0)
+        XY[XY > 1] = 1
+        U = np.arccos(XY)
         return la.norm(U)
 
     def proj(self, X, H):
