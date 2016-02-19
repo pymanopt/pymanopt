@@ -69,7 +69,8 @@ class Problem(object):
 
         self.verbosity = verbosity
 
-        self._backends = [TheanoBackend(), AutogradBackend()]
+        self._backends = filter(lambda b: b.is_available(),
+                                [TheanoBackend(), AutogradBackend()])
         self._backend = None
 
     @property
