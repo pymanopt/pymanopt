@@ -41,10 +41,15 @@ class AutogradBackend(Backend):
     @assert_backend_available
     def compute_hessian(self, objective, argument):
         if isinstance(argument, list):
-            raise NotImplementedError("Computing the hessian on a "
-                                      "product manifold is not yet "
-                                      "implemented for the autograd "
-                                      "backend ")
+            hessians = [_hessian_vector_product(objective, argnum=k)
+                        for k in range(0, len(argument))]
+
+            def hessian(*args):
+                d = len(args)/2
+                baseargs = args[0:d]
+                args = [list(baseargs)+[args[d+k]] for k in range(0, d)]
+                return [hessians[k](*args[k]) for k in range(0, d)]
+            return hessian
         return _hessian_vector_product(objective)
 
 
