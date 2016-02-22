@@ -81,7 +81,7 @@ class TestGrassmannManifold(unittest.TestCase):
         np_testing.assert_allclose(multiprod(multitransp(X), X),
                                    multieye(self.k, self.n), atol=1e-10)
         Y = self.man.rand()
-        assert np.linalg.norm(X - Y) > 1e-6
+        assert la.norm(X - Y) > 1e-6
 
     def test_randvec(self):
         # Make sure things generated are in tangent space and if you generate
@@ -175,7 +175,7 @@ class TestSingleGrassmannManifold(unittest.TestCase):
         np_testing.assert_allclose(multiprod(multitransp(X), X),
                                    np.eye(self.n), atol=1e-10)
         Y = self.man.rand()
-        assert np.linalg.norm(X - Y) > 1e-6
+        assert la.norm(X - Y) > 1e-6
 
     # def test_randvec(self):
 

@@ -36,10 +36,10 @@ class Euclidean(Manifold):
         return float(np.tensordot(G, H, axes=G.ndim))
 
     def norm(self, X, G):
-        return la.norm(G, "fro")
+        return la.norm(G)
 
     def dist(self, X, Y):
-        return la.norm(X-Y, "fro")
+        return la.norm(X-Y)
 
     def proj(self, X, U):
         return U

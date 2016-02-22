@@ -10,40 +10,90 @@ from pymanopt.manifolds import Euclidean
 
 class TestEuclideanManifold(unittest.TestCase):
     def setUp(self):
-        self.m = m = 100
-        self.n = n = 50
+        self.m = m = 10
+        self.n = n = 5
         self.man = Euclidean(m, n)
 
-    # def test_dim(self):
+    def test_dim(self):
+        assert self.man.dim == self.m * self.n
 
-    # def test_typicaldist(self):
+    def test_typicaldist(self):
+        np_testing.assert_almost_equal(self.man.typicaldist, np.sqrt(self.m *
+                                                                     self.n))
 
-    # def test_dist(self):
+    def test_dist(self):
+        e = self.man
+        x, y = rnd.randn(2, self.m, self.n)
+        np_testing.assert_almost_equal(e.dist(x, y), la.norm(x - y))
 
-    # def test_inner(self):
+    def test_inner(self):
+        e = self.man
+        x = e.rand()
+        y = e.randvec(x)
+        z = e.randvec(x)
+        np_testing.assert_almost_equal(np.sum(y * z), e.inner(x, y, z))
 
-    # def test_proj(self):
+    def test_proj(self):
+        e = self.man
+        x = e.rand()
+        u = e.randvec(x)
+        np_testing.assert_allclose(e.proj(x, u), u)
 
-    # def test_ehess2rhess(self):
+    def test_ehess2rhess(self):
+        e = self.man
+        x = e.rand()
+        u = e.randvec(x)
+        egrad, ehess = rnd.randn(2, self.m, self.n)
+        np_testing.assert_allclose(e.ehess2rhess(x, egrad, ehess, u),
+                                   ehess)
 
-    # def test_retr(self):
+    def test_retr(self):
+        e = self.man
+        x = e.rand()
+        u = e.randvec(x)
+        np_testing.assert_allclose(e.retr(x, u), x + u)
 
-    # def test_egrad2rgrad(self):
+    def test_egrad2rgrad(self):
+        e = self.man
+        x = e.rand()
+        u = e.randvec(x)
+        np_testing.assert_allclose(e.egrad2rgrad(x, u), u)
 
-    # def test_norm(self):
+    def test_norm(self):
+        e = self.man
+        x = e.rand()
+        u = rnd.randn(self.m, self.n)
+        np_testing.assert_almost_equal(np.sqrt(np.sum(u**2)), e.norm(x, u))
 
-    # def test_rand(self):
+    def test_rand(self):
+        e = self.man
+        x = e.rand()
+        y = e.rand()
+        assert np.shape(x) == (self.m, self.n)
+        assert la.norm(x - y) > 1e-6
 
-    # def test_randvec(self):
+    def test_randvec(self):
+        e = self.man
+        x = e.rand()
+        u = e.randvec(x)
+        v = e.randvec(x)
+        assert np.shape(u) == (self.m, self.n)
+        np_testing.assert_almost_equal(la.norm(u), 1)
+        assert la.norm(u - v) > 1e-6
 
-    # def test_transp(self):
+    def test_transp(self):
+        e = self.man
+        x = e.rand()
+        y = e.rand()
+        u = e.randvec(x)
+        np_testing.assert_allclose(e.transp(x, y, u), u)
 
     def test_exp_log_inverse(self):
         s = self.man
         X = s.rand()
-        U = s.randvec(X)
-        Uexplog = s.exp(X, s.log(X, U))
-        np_testing.assert_array_almost_equal(U, Uexplog)
+        Y = s.rand()
+        Yexplog = s.exp(X, s.log(X, Y))
+        np_testing.assert_array_almost_equal(Y, Yexplog)
 
     def test_log_exp_inverse(self):
         s = self.man
