@@ -29,6 +29,10 @@ class AutogradBackend(Backend):
         Compute the gradient of 'objective' with respect to the first
         argument and return as a function.
         """
+        if isinstance(argument, list):
+            gradients = [grad(objective, argnum=k) for k in range(0, len(argument))]
+            def gradient(*args): return [gradients[k](*args) for k in range(0, len(argument))]
+            return gradient
         return grad(objective)
 
     @assert_backend_available

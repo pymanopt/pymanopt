@@ -15,7 +15,9 @@ def listpoint(func):
 
 class ListPoint(list):
     def __rmul__(self, other):
-        return [other * val for val in self]
+        return ListPoint([other * val for val in self])
+    def __neg__(self):
+        return ListPoint([ -val for val in self])
 
 
 class Product(Manifold):
@@ -55,6 +57,7 @@ class Product(Manifold):
         return [self._manifolds[k].proj(X[k], U[k])
                 for k in range(0, self._nmanifolds)]
 
+    @listpoint
     def egrad2rgrad(self, X, U):
         return [self._manifolds[k].egrad2rgrad(X[k], U[k])
                 for k in range(0, self._nmanifolds)]

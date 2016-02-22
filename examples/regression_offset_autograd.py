@@ -10,11 +10,11 @@ if __name__ == "__main__":
     Y = X[0:1,:] - 2*X[1:2,:] + np.random.randn(1,100) + 5
 
     # Cost function is the sqaured test error
-    def cost(w,b): return np.sum((Y-np.dot(w.T, X)+b)**2)
+    def cost(w,b): return np.sum((Y-np.dot(w.T, X)-b)**2)
 
     # derivative free, first-order, second-order
-    solver = ParticleSwarm()
-    #solver = SteepestDescent()
+    #solver = ParticleSwarm()
+    solver = SteepestDescent()
     #solver = TrustRegions()
 
     # R^3 x R^1

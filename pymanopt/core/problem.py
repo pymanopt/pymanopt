@@ -111,8 +111,14 @@ class Problem(object):
         if self._egrad is None:
             if self.verbosity >= 1:
                 print("Computing gradient of cost function...")
-            self._egrad = self.backend.compute_gradient(self._original_cost,
-                                                        self._arg)
+            egrad = self.backend.compute_gradient(self._original_cost,
+                                                  self._arg)
+            # If arg is a list it's a product manifold
+            if isinstance(self._arg, list):
+                def egradfunc(arglist): return egrad(*arglist)
+                self._egrad = egradfunc
+            else:
+                self._egrad = egrad
         return self._egrad
 
     @property

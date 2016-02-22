@@ -3,7 +3,7 @@ import numpy as np
 import theano.tensor as T
 
 from pymanopt import Problem
-from pymanopt.solvers import ParticleSwarm, SteepestDescent, TrustRegions
+from pymanopt.solvers import SteepestDescent, TrustRegions
 from pymanopt.manifolds import Euclidean, Product
 
 if __name__ == "__main__":
@@ -14,11 +14,10 @@ if __name__ == "__main__":
     # Cost function is the sqaured test error
     w = T.matrix()
     b = T.matrix()
-    cost = T.sum((Y-w.T.dot(X)+b[0,0])**2)
+    cost = T.sum((Y-w.T.dot(X)-b[0,0])**2)
 
-    # derivative free, first-order, second-order
-    solver = ParticleSwarm()
-    #solver = SteepestDescent()
+    # first-order, second-order
+    solver = SteepestDescent()
     #solver = TrustRegions()
 
     # R^3 x R^1
