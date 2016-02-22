@@ -27,7 +27,14 @@ class TheanoBackend(Backend):
     @assert_backend_available
     def is_compatible(self, objective, argument):
         if isinstance(objective, T.TensorVariable):
-            if not all([isinstance(arg, T.TensorVariable) for arg in argument]):
+            if isinstance(argument, list):
+                if not all([isinstance(arg, T.TensorVariable)
+                            for arg in argument]):
+                    raise ValueError(
+                        "Theano backend requires a list of arguments "
+                        "with respect to which compilation is to be "
+                        "carried out")
+            elif not isinstance(argument, T.TensorVariable):
                 raise ValueError(
                     "Theano backend requires an argument with respect to "
                     "which compilation is to be carried out")
@@ -40,7 +47,9 @@ class TheanoBackend(Backend):
         Wrapper for the theano.function(). Compiles a theano graph into a
         python function.
         """
-        return theano.function([arg for arg in argument], objective)
+        if isinstance(argument, list):
+            return theano.function([arg for arg in argument], objective)
+        return theano.function([argument], objective)
 
     @assert_backend_available
     def compute_gradient(self, objective, argument):
@@ -61,7 +70,10 @@ class TheanoBackend(Backend):
 
         # Create a new tensor A, which has the same type (i.e. same
         # dimensionality) as argument.
-        A = argument.type()
+        if isinstance(argument, list):
+            A = [arg.type() for arg in argument]
+        else:
+            A = argument.type()
 
         try:
             # First attempt efficient 'R-op', this directly calculates the
@@ -75,7 +87,12 @@ class TheanoBackend(Backend):
             R = T.tensordot(H, A, A.ndim)
 
         try:
-            hess = theano.function([argument, A], R, on_unused_input="raise")
+            if isinstance(argument, list):
+                hess = theano.function(argument + A, R,
+                                       on_unused_input="raise")
+            else:
+                hess = theano.function([argument, A], R,
+                                       on_unused_input="raise")
         except theano.compile.UnusedInputError:
             warn("Theano detected unused input - suggests Hessian may be zero "
                  "or constant.")

@@ -99,11 +99,12 @@ class Problem(object):
         elif self._cost is None and callable(self._original_cost):
             cost = self._original_cost
         # If arg is a list it's a product manifold
-        if isinstance(self._arg, list):
-            def costfunc(arglist): return cost(*arglist)
-            self._cost = costfunc
-        else:
-            self._cost = cost
+        if self._cost is None:
+            if isinstance(self._arg, list):
+                def costfunc(arglist): return cost(*arglist)
+                self._cost = costfunc
+            else:
+                self._cost = cost
         return self._cost
 
     @property
@@ -137,8 +138,23 @@ class Problem(object):
         if self._ehess is None:
             if self.verbosity >= 1:
                 print("Computing Hessian of cost function...")
-            self._ehess = self.backend.compute_hessian(self._original_cost,
-                                                       self._arg)
+            ehess = self.backend.compute_hessian(self._original_cost,
+                                                 self._arg)
+            # If arg is a list it's a product manifold
+            if isinstance(self._arg, list):
+                def ehessfunc(arglist1, arglist2):
+                    # Both arglists should be lists not numpy arrays.
+                    if not isinstance(arglist1, list):
+                        arglist1 = [arglist1[k]
+                                    for k in range(0, arglist1.shape[0])]
+                    if not isinstance(arglist2, list):
+                        arglist2 = [arglist2[k]
+                                    for k in range(0, arglist2.shape[0])]
+                    arglist = arglist1 + arglist2
+                    return ehess(*arglist)
+                self._ehess = ehessfunc
+            else:
+                self._ehess = ehess
         return self._ehess
 
     @property

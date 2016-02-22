@@ -16,8 +16,9 @@ def listpoint(func):
 class ListPoint(list):
     def __rmul__(self, other):
         return ListPoint([other * val for val in self])
+
     def __neg__(self):
-        return ListPoint([ -val for val in self])
+        return ListPoint([-val for val in self])
 
 
 class Product(Manifold):
@@ -62,6 +63,7 @@ class Product(Manifold):
         return [self._manifolds[k].egrad2rgrad(X[k], U[k])
                 for k in range(0, self._nmanifolds)]
 
+    @listpoint
     def ehess2rhess(self, X, egrad, ehess, H):
         return [self._manifolds[k].ehess2rhess(X[k], egrad[k], ehess[k], H[k])
                 for k in range(0, self._nmanifolds)]

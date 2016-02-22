@@ -30,13 +30,21 @@ class AutogradBackend(Backend):
         argument and return as a function.
         """
         if isinstance(argument, list):
-            gradients = [grad(objective, argnum=k) for k in range(0, len(argument))]
-            def gradient(*args): return [gradients[k](*args) for k in range(0, len(argument))]
+            gradients = [grad(objective, argnum=k)
+                         for k in range(0, len(argument))]
+
+            def gradient(*args): return [gradients[k](*args)
+                                         for k in range(0, len(argument))]
             return gradient
         return grad(objective)
 
     @assert_backend_available
     def compute_hessian(self, objective, argument):
+        if isinstance(argument, list):
+            raise NotImplementedError("Computing the hessian on a "
+                                      "product manifold is not yet "
+                                      "implemented for the autograd "
+                                      "backend ")
         return _hessian_vector_product(objective)
 
 
