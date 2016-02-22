@@ -7,6 +7,17 @@ import numpy.random as rnd
 from pymanopt.manifolds.manifold import Manifold
 
 
+def listpoint(func):
+    def decorated(*args, **kwargs):
+        return ListPoint(func(*args, **kwargs))
+    return decorated
+
+
+class ListPoint(list):
+    def __rmul__(self, other):
+        return [other * val for val in self]
+
+
 class Product(Manifold):
     """
     Product manifold, i.e. the cartesian product of multiple manifolds.
@@ -52,6 +63,7 @@ class Product(Manifold):
         return [self._manifolds[k].ehess2rhess(X[k], egrad[k], ehess[k], H[k])
                 for k in range(0, self._nmanifolds)]
 
+    @listpoint
     def exp(self, X, U):
         return [self._manifolds[k].exp(X[k], U[k])
                 for k in range(0, self._nmanifolds)]
@@ -60,6 +72,7 @@ class Product(Manifold):
         return [self._manifolds[k].retr(X[k], U[k])
                 for k in range(0, self._nmanifolds)]
 
+    @listpoint
     def log(self, X, U):
         return [self._manifolds[k].log(X[k], U[k])
                 for k in range(0, self._nmanifolds)]
@@ -68,11 +81,13 @@ class Product(Manifold):
         return [self._manifolds[k].rand()
                 for k in range(0, self._nmanifolds)]
 
+    @listpoint
     def randvec(self, X):
         return [1/np.sqrt(self._nmanifolds) *
                 self._manifolds[k].randvec(X[k])
                 for k in range(0, self._nmanifolds)]
 
+    @listpoint
     def transp(self, X1, X2, G):
         return [self._manifolds[k].transp(X1[k], X2[k], G[k])
                 for k in range(0, self._nmanifolds)]

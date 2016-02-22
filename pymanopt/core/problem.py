@@ -94,10 +94,16 @@ class Problem(object):
         if self._cost is None and not callable(self._original_cost):
             if self.verbosity >= 1:
                 print("Compiling cost function...")
-            self._cost = self.backend.compile_function(self._original_cost,
-                                                       self._arg)
+            cost = self.backend.compile_function(self._original_cost,
+                                                 self._arg)
         elif self._cost is None and callable(self._original_cost):
-            self._cost = self._original_cost
+            cost = self._original_cost
+        # If arg is a list it's a product manifold
+        if isinstance(self._arg, list):
+            def costfunc(arglist): return cost(*arglist)
+            self._cost = costfunc
+        else:
+            self._cost = cost
         return self._cost
 
     @property

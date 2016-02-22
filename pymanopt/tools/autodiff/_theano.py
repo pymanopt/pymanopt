@@ -27,7 +27,7 @@ class TheanoBackend(Backend):
     @assert_backend_available
     def is_compatible(self, objective, argument):
         if isinstance(objective, T.TensorVariable):
-            if not isinstance(argument, T.TensorVariable):
+            if not all([isinstance(arg, T.TensorVariable) for arg in argument]):
                 raise ValueError(
                     "Theano backend requires an argument with respect to "
                     "which compilation is to be carried out")
@@ -40,7 +40,7 @@ class TheanoBackend(Backend):
         Wrapper for the theano.function(). Compiles a theano graph into a
         python function.
         """
-        return theano.function([argument], objective)
+        return theano.function([arg for arg in argument], objective)
 
     @assert_backend_available
     def compute_gradient(self, objective, argument):
