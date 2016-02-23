@@ -91,6 +91,8 @@ class ConjugateGradient(Solver):
         # Initial descent direction is the negative gradient
         desc_dir = -Pgrad
 
+        self._start_optlog('ConjugateGradient')
+
         while True:
             if verbosity >= 2:
                 print("%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm))
@@ -186,4 +188,10 @@ class ConjugateGradient(Solver):
 
             iter += 1
 
-        return x
+        if self._logverbosity <= 0:
+            return x
+        else:
+            self._stop_optlog(x, cost, stop_reason, time0,
+                              stepsize=stepsize, gradnorm=gradnorm,
+                              iter=iter)
+            return x, self._optlog

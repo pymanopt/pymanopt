@@ -1,9 +1,11 @@
 import time
 
+from warnings import warn
+
 
 class Solver(object):
     def __init__(self, maxtime=1000, maxiter=1000, mingradnorm=1e-6,
-                 minstepsize=1e-10, maxcostevals=5000):
+                 minstepsize=1e-10, maxcostevals=5000, logverbosity=0):
         """
         Generic solver base class.
         Variable attributes (defaults in brackets):
@@ -18,12 +20,17 @@ class Solver(object):
                 this.
             - maxcostevals (5000)
                 Maximum number of allowed cost evaluations
+            - logverbosity (0)
+                Level of information logged by the solver while it operates,
+                0 is silent, 2 ist most information.
         """
         self._maxtime = maxtime
         self._maxiter = maxiter
         self._mingradnorm = mingradnorm
         self._minstepsize = minstepsize
         self._maxcostevals = maxcostevals
+        self._logverbosity = logverbosity
+        self._optlog = None
 
     def _check_stopping_criterion(self, time0, iter=-1, gradnorm=float('inf'),
                                   stepsize=float('inf'), costevals=-1):
@@ -45,3 +52,39 @@ class Solver(object):
             reason = ("Terminated - max cost evals reached after "
                       "%.2f seconds." % (time.time() - time0))
         return reason
+
+    def _start_optlog(self, name):
+        if self._optlog is not None:
+            warn('Optimisation log from previous solver run is being '
+                 'overwritten.')
+        if self._logverbosity <= 0:
+            self._optlog = None
+        else:
+            self._optlog = {'solver': name,
+                            'stoppingcriteria': {'maxtime':
+                                                 self._maxtime,
+                                                 'maxiter':
+                                                 self._maxiter,
+                                                 'mingradnorm':
+                                                 self._mingradnorm,
+                                                 'minstepsize':
+                                                 self._minstepsize,
+                                                 'maxcostevals':
+                                                 self._maxcostevals}
+                            }
+
+    def _stop_optlog(self, x, objective, stop_reason, time0,
+                     stepsize=float('inf'), gradnorm=float('inf'),
+                     iter=-1, costevals=-1):
+        self._optlog['stoppingreason'] = stop_reason
+        self._optlog['final_values'] = {'x': x,
+                                        'f(x)': objective,
+                                        'time': time.time() - time0}
+        if stepsize is not float('inf'):
+            self._optlog['final_values']['stepsize'] = stepsize
+        if gradnorm is not float('inf'):
+            self._optlog['final_values']['gradnorm'] = gradnorm
+        if iter is not -1:
+            self._optlog['final_values']['iteratios'] = iter
+        if costevals is not -1:
+            self._optlog['final_values']['costevals'] = costevals

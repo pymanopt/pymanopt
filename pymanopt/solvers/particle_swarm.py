@@ -107,6 +107,8 @@ class ParticleSwarm(Solver):
 
         time0 = time.time()
 
+        self._start_optlog('ParticleSwarm')
+
         while True:
             iter += 1
 
@@ -168,4 +170,9 @@ class ParticleSwarm(Solver):
                         xbest = xi
             costevals += self._populationsize
 
-        return xbest
+        if self._logverbosity <= 0:
+            return xbest
+        else:
+            self._stop_optlog(xbest, fbest, stop_reason, time0,
+                              costevals=costevals, iter=iter)
+            return xbest, self._optlog

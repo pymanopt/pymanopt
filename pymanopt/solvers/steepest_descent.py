@@ -55,6 +55,9 @@ class SteepestDescent(Solver):
 
         if verbosity >= 2:
             print(" iter\t\t   cost val\t    grad. norm")
+
+        self._start_optlog('SteepestDescent')
+
         while True:
             # Calculate new cost, grad and gradnorm
             cost = objective(x)
@@ -81,4 +84,10 @@ class SteepestDescent(Solver):
                     print('')
                 break
 
-        return x
+        if self._logverbosity <= 0:
+            return x
+        else:
+            self._stop_optlog(x, objective(x), stop_reason, time0,
+                              stepsize=step_size, gradnorm=gradnorm,
+                              iter=iter)
+            return x, self._optlog

@@ -150,6 +150,8 @@ class TrustRegions(Solver):
             print("{:44s}f: {:+.6e}   |grad|: {:.6e}".format(
                 " ", float(fx), norm_grad))
 
+        self._start_optlog('TrustRegions')
+
         while True:
             # *************************
             # ** Begin TR Subproblem **
@@ -367,24 +369,21 @@ class TrustRegions(Solver):
                 print("        rho : {:e}".format(rho))
 
             # ** CHECK STOPPING criteria
-            if norm_grad < self._mingradnorm:
-                if verbosity >= 1:
-                    print("Terminated - min grad norm reached after {:d} "
-                          "iterations, {:.2f} seconds.".format(
-                              k, time.time() - time0))
-                return x
+            stop_reason = self._check_stopping_criterion(
+                time0, gradnorm=norm_grad, iter=k)
 
-            if time.time() - time0 >= self._maxtime:
+            if stop_reason:
                 if verbosity >= 1:
-                    print("Terminated - max time reached after {:d} "
-                          "iterations.".format(k))
-                return x
+                    print(stop_reason)
+                    print('')
+                break
 
-            if k >= self._maxiter:
-                if verbosity >= 1:
-                    print("Terminated - max iterations reached after {:.2f} "
-                          "seconds.".format(time.time() - time0))
-                return x
+        if self._logverbosity <= 0:
+            return x
+        else:
+            self._stop_optlog(x, fx, stop_reason, time0,
+                              gradnorm=norm_grad, iter=k)
+            return x, self._optlog
 
     def _truncated_conjugate_gradient(self, problem, x, fgradx, eta, Delta,
                                       theta, kappa, mininner, maxinner):

@@ -132,6 +132,8 @@ class NelderMead(Solver):
 
         time0 = time.time()
 
+        self._start_optlog('NelderMead')
+
         while True:
             iter += 1
 
@@ -219,4 +221,9 @@ class NelderMead(Solver):
                 costs[i] = objective(x[i])
             costevals += dim
 
-        return x[0]
+        if self._logverbosity <= 0:
+            return x[0]
+        else:
+            self._stop_optlog(x[0], objective(x[0]), stop_reason, time0,
+                              costevals=costevals, iter=iter)
+            return x[0], self._optlog
