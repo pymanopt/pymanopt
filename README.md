@@ -38,7 +38,7 @@ Builds upon the MATLAB package [Manopt](http://manopt.org/) but is otherwise ind
 
 ## Installation
 ### Dependencies
-This package depends on python 2.7.*, numpy, scipy and (theano or autograd).
+This package is compatible with Python 2.7 and Python 3.3+, and depends on numpy, scipy and (theano or autograd).
 Instructions for installing numpy, scipy and theano on different operating systems can be found
 [here](http://deeplearning.net/software/theano/install.html), for installing autograd [here](https://github.com/HIPS/autograd#how-to-install).
 
