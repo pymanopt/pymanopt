@@ -57,7 +57,7 @@ class Solver(object):
                       "%.2f seconds." % (time.time() - time0))
         return reason
 
-    def _start_optlog(self, extraiterfields=None):
+    def _start_optlog(self, solverparams=None, extraiterfields=None):
         if self._optlog is not None:
             warn('Optimisation log from previous solver run is being '
                  'overwritten.')
@@ -74,7 +74,8 @@ class Solver(object):
                                                  'minstepsize':
                                                  self._minstepsize,
                                                  'maxcostevals':
-                                                 self._maxcostevals}
+                                                 self._maxcostevals},
+                            'solverparams': solverparams
                             }
         if self._logverbosity >= 2:
             if extraiterfields:

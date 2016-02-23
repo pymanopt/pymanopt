@@ -56,7 +56,8 @@ class SteepestDescent(Solver):
         if verbosity >= 2:
             print(" iter\t\t   cost val\t    grad. norm")
 
-        self._start_optlog(extraiterfields=['gradnorm'])
+        self._start_optlog(extraiterfields=['gradnorm'],
+                           solverparams={'linesearcher': self._searcher})
 
         while True:
             # Calculate new cost, grad and gradnorm
