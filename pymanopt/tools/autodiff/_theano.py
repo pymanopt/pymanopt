@@ -27,10 +27,14 @@ class TheanoBackend(Backend):
     @assert_backend_available
     def is_compatible(self, objective, argument):
         if isinstance(objective, T.TensorVariable):
-            if not isinstance(argument, T.TensorVariable):
+            if (argument is None or not
+                isinstance(argument, T.TensorVariable) and not
+                all([isinstance(arg, T.TensorVariable)
+                     for arg in argument])):
                 raise ValueError(
-                    "Theano backend requires an argument with respect to "
-                    "which compilation is to be carried out")
+                    "Theano backend requires an argument (or sequence of "
+                    "arguments) with respect to which compilation is to be "
+                    "carried out")
             return True
         return False
 
@@ -40,7 +44,12 @@ class TheanoBackend(Backend):
         Wrapper for the theano.function(). Compiles a theano graph into a
         python function.
         """
-        return theano.function([argument], objective)
+        try:
+            return theano.function([argument], objective)
+        except TypeError:
+            # Assume we are on a product manifold
+            compiled = theano.function([arg for arg in argument], objective)
+            return lambda x: compiled(*x)
 
     @assert_backend_available
     def compute_gradient(self, objective, argument):
@@ -61,7 +70,11 @@ class TheanoBackend(Backend):
 
         # Create a new tensor A, which has the same type (i.e. same
         # dimensionality) as argument.
-        A = argument.type()
+        try:
+            A = argument.type()
+        except AttributeError:
+            # Assume we are on the product manifold
+            A = [arg.type() for arg in argument]
 
         try:
             # First attempt efficient 'R-op', this directly calculates the
@@ -69,15 +82,19 @@ class TheanoBackend(Backend):
             # calculating the Hessian and then multiplying.
             R = T.Rop(g, argument, A)
         except NotImplementedError:
+            # TODO: fix this fallback for the product manifold.
             shp = T.shape(argument)
             H = T.jacobian(g.flatten(), argument).reshape(
                 T.concatenate([shp, shp]), 2 * A.ndim)
             R = T.tensordot(H, A, A.ndim)
 
         try:
-            hess = theano.function([argument, A], R, on_unused_input="raise")
-        except theano.compile.UnusedInputError:
-            warn("Theano detected unused input - suggests Hessian may be zero "
-                 "or constant.")
-            hess = theano.function([argument, A], R, on_unused_input="ignore")
+            hess = theano.function([argument, A], R, on_unused_input="warn")
+        except TypeError:
+            hess_prod = theano.function(argument + A, R,
+                                        on_unused_input="warn")
+
+            def hess(x, a):
+                return hess_prod(*(x + a))
+
         return hess

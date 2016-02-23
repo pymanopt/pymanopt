@@ -98,6 +98,7 @@ class Problem(object):
                                                        self._arg)
         elif self._cost is None and callable(self._original_cost):
             self._cost = self._original_cost
+
         return self._cost
 
     @property
@@ -105,8 +106,9 @@ class Problem(object):
         if self._egrad is None:
             if self.verbosity >= 1:
                 print("Computing gradient of cost function...")
-            self._egrad = self.backend.compute_gradient(self._original_cost,
-                                                        self._arg)
+            egrad = self.backend.compute_gradient(self._original_cost,
+                                                  self._arg)
+            self._egrad = egrad
         return self._egrad
 
     @property
@@ -125,8 +127,9 @@ class Problem(object):
         if self._ehess is None:
             if self.verbosity >= 1:
                 print("Computing Hessian of cost function...")
-            self._ehess = self.backend.compute_hessian(self._original_cost,
-                                                       self._arg)
+            ehess = self.backend.compute_hessian(self._original_cost,
+                                                 self._arg)
+            self._ehess = ehess
         return self._ehess
 
     @property

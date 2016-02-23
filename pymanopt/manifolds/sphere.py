@@ -40,7 +40,7 @@ class Sphere(Manifold):
         return la.norm(U, "fro")
 
     def dist(self, U, V):
-        return np.arccos(self.inner(None, U, V)).real
+        return np.arccos(min(self.inner(None, U, V), 1))
 
     def proj(self, X, H):
         return H - self.inner(None, X, H) * X

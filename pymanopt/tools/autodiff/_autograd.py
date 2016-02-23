@@ -46,7 +46,13 @@ def _hessian_vector_product(fun, argnum=0):
 
     def vector_dot_grad(*args, **kwargs):
         args, vector = args[:-1], args[-1]
-        return np.tensordot(fun_grad(*args, **kwargs), vector,
-                            axes=vector.ndim)
+        try:
+            return np.tensordot(fun_grad(*args, **kwargs), vector,
+                                axes=vector.ndim)
+        except AttributeError:
+            # Assume we are on the product manifold.
+            return np.sum([np.tensordot(fun_grad(*args, **kwargs)[k],
+                                        vector[k], axes=vector[k].ndim)
+                           for k in range(len(vector))])
     # Grad wrt original input.
     return grad(vector_dot_grad, argnum)
