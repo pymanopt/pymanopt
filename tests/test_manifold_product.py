@@ -52,10 +52,9 @@ class TestProductManifold(unittest.TestCase):
     def test_exp_log_inverse(self):
         s = self.man
         X = s.rand()
-        U = s.randvec(X)
-        Uexplog = s.exp(X, s.log(X, U))
-        np_testing.assert_array_almost_equal(U[0], Uexplog[0])
-        np_testing.assert_array_almost_equal(U[1], Uexplog[1])
+        Y = s.rand()
+        Yexplog = s.exp(X, s.log(X, Y))
+        np_testing.assert_almost_equal(s.dist(Y, Yexplog), 0)
 
     def test_log_exp_inverse(self):
         s = self.man
