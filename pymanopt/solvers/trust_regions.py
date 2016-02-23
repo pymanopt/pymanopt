@@ -202,7 +202,7 @@ class TrustRegions(Solver):
                 if mdlec < mdle:
                     eta = eta_c
                     Heta = Heta_c
-                    used_cauchy = true
+                    used_cauchy = True
 
             # This is only computed for logging purposes, because it may be
             # useful for some user-defined stopping criteria. If this is not

@@ -10,7 +10,7 @@ if __name__ == "__main__":
     Y = X[0:1, :] - 2*X[1:2, :] + np.random.randn(1, 100) + 5
 
     # Cost function is the sqaured test error
-    def cost(w, b): return np.sum((Y-np.dot(w.T, X)-b)**2)
+    def cost((w, b)): return np.sum((Y-np.dot(w.T, X)-b)**2)
 
     # first-order, second-order
     solver = TrustRegions()
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     manifold = Product([Euclidean(3, 1), Euclidean(1, 1)])
 
     # Solve the problem with pymanopt
-    problem = Problem(man=manifold, cost=cost, arg=[1, 1], verbosity=0)
+    problem = Problem(man=manifold, cost=cost, verbosity=0)
     wopt = solver.solve(problem)
 
     print('Weights found by pymanopt (top) / '
