@@ -7,7 +7,7 @@ import numpy.random as rnd
 from pymanopt.manifolds.manifold import Manifold
 
 
-class TangentVector(list):
+class _TangentVector(list):
     def __add__(self, other):
         assert len(self) == len(other)
         return TangentVector([self[k] + other[k] for k in range(len(self))])
@@ -62,18 +62,17 @@ class Product(Manifold):
                                for k in range(0, self._nmanifolds)]))
 
     def proj(self, X, U):
-        return [self._manifolds[k].proj(X[k], U[k])
-                for k in range(0, self._nmanifolds)]
+        return _TangentVector([self._manifolds[k].proj(X[k], U[k])
+                               for k in range(0, self._nmanifolds)])
 
     def egrad2rgrad(self, X, U):
-        return TangentVector([self._manifolds[k].egrad2rgrad(X[k], U[k])
+        return _TangentVector([self._manifolds[k].egrad2rgrad(X[k], U[k])
                               for k in range(0, self._nmanifolds)])
 
     def ehess2rhess(self, X, egrad, ehess, H):
-        self._manifolds[self._nmanifolds - 1]
-        return TangentVector([self._manifolds[k].ehess2rhess(X[k], egrad[k],
-                                                             ehess[k], H[k])
-                              for k in range(0, self._nmanifolds)])
+        return _TangentVector([self._manifolds[k].ehess2rhess(X[k], egrad[k],
+                                                              ehess[k], H[k])
+                               for k in range(0, self._nmanifolds)])
 
     def exp(self, X, U):
         return [self._manifolds[k].exp(X[k], U[k])
@@ -84,7 +83,7 @@ class Product(Manifold):
                 for k in range(0, self._nmanifolds)]
 
     def log(self, X, U):
-        return TangentVector([self._manifolds[k].log(X[k], U[k])
+        return _TangentVector([self._manifolds[k].log(X[k], U[k])
                               for k in range(0, self._nmanifolds)])
 
     def rand(self):
@@ -92,18 +91,18 @@ class Product(Manifold):
                 for k in range(0, self._nmanifolds)]
 
     def randvec(self, X):
-        return TangentVector([1/np.sqrt(self._nmanifolds) *
+        return _TangentVector([1/np.sqrt(self._nmanifolds) *
                               self._manifolds[k].randvec(X[k])
                               for k in range(0, self._nmanifolds)])
 
     def transp(self, X1, X2, G):
-        return [self._manifolds[k].transp(X1[k], X2[k], G[k])
-                for k in range(0, self._nmanifolds)]
+        return _TangentVector([self._manifolds[k].transp(X1[k], X2[k], G[k])
+                               for k in range(0, self._nmanifolds)])
 
     def pairmean(self, X, Y):
         return [self._manifolds[k].pairmean(X[k], Y[k])
                 for k in range(0, self._nmanifolds)]
 
     def zerovec(self, X):
-        return TangentVector([self._manifolds[k].zerovec(X[k])
+        return _TangentVector([self._manifolds[k].zerovec(X[k])
                               for k in range(0, self._nmanifolds)])
