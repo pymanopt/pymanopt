@@ -101,7 +101,7 @@ class Problem(object):
         # If arg is a list it's a product manifold
         if self._cost is None:
             if isinstance(self._arg, list):
-                def costfunc(arglist): return cost(arglist)
+                def costfunc(arglist): return cost(*arglist)
                 self._cost = costfunc
             else:
                 self._cost = cost
@@ -114,7 +114,12 @@ class Problem(object):
                 print("Computing gradient of cost function...")
             egrad = self.backend.compute_gradient(self._original_cost,
                                                   self._arg)
-            self._egrad = egrad
+            # If arg is a list it's a product manifold
+            if isinstance(self._arg, list):
+                def egradfunc(arglist): return egrad(*arglist)
+                self._egrad = egradfunc
+            else:
+                self._egrad = egrad
         return self._egrad
 
     @property
@@ -135,7 +140,21 @@ class Problem(object):
                 print("Computing Hessian of cost function...")
             ehess = self.backend.compute_hessian(self._original_cost,
                                                  self._arg)
-            self._ehess = ehess
+            # If arg is a list it's a product manifold
+            if isinstance(self._arg, list):
+                def ehessfunc(arglist1, arglist2):
+                    # Both arglists should be lists not numpy arrays.
+                    if not isinstance(arglist1, list):
+                        arglist1 = [arglist1[k]
+                                    for k in range(0, arglist1.shape[0])]
+                    if not isinstance(arglist2, list):
+                        arglist2 = [arglist2[k]
+                                    for k in range(0, arglist2.shape[0])]
+                    arglist = arglist1 + arglist2
+                    return ehess(*arglist)
+                self._ehess = ehessfunc
+            else:
+                self._ehess = ehess
         return self._ehess
 
     @property
