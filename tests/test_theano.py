@@ -148,7 +148,7 @@ class TestMatrix(unittest.TestCase):
             hess = self.backend.compute_hessian(cost, X)
 
             assert len(w) == 1
-            assert "unused input" in str(w[-1].message)
+            assert "not part of the computational graph" in str(w[-1].message)
 
 
 class TestTensor3(unittest.TestCase):
@@ -213,3 +213,99 @@ class TestTensor3(unittest.TestCase):
         hess = self.backend.compute_hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
+
+
+class TestMixed(unittest.TestCase):
+    # Test autograd on a tuple containing vector, matrix and tensor3.
+    def setUp(self):
+        x = T.vector()
+        y = T.matrix()
+        z = T.tensor3()
+        f = T.exp(T.sum(x**2)) + T.exp(T.sum(y**2)) + T.exp(T.sum(z**2))
+
+        self.cost = f
+        self.arg = [x, y, z]
+
+        n1 = self.n1 = 3
+        n2 = self.n2 = 4
+        n3 = self.n3 = 5
+        n4 = self.n4 = 6
+        n5 = self.n5 = 7
+        n6 = self.n6 = 8
+
+        self.y = y = (rnd.randn(n1), rnd.randn(n2, n3), rnd.randn(n4, n5, n6))
+        self.a = a = (rnd.randn(n1), rnd.randn(n2, n3), rnd.randn(n4, n5, n6))
+
+        self.correct_cost = (np.exp(np.sum(y[0]**2)) +
+                             np.exp(np.sum(y[1]**2)) +
+                             np.exp(np.sum(y[2]**2)))
+
+        # CALCULATE CORRECT GRAD
+        g1 = 2 * y[0] * np.exp(np.sum(y[0] ** 2))
+        g2 = 2 * y[1] * np.exp(np.sum(y[1] ** 2))
+        g3 = 2 * y[2] * np.exp(np.sum(y[2] ** 2))
+
+        self.correct_grad = (g1, g2, g3)
+
+        # CALCULATE CORRECT HESS
+        # 1. VECTOR
+        Ymat = np.matrix(y[0])
+        Amat = np.matrix(a[0])
+
+        diag = np.eye(n1)
+
+        H = np.exp(np.sum(y[0] ** 2)) * (4 * Ymat.T.dot(Ymat) + 2 * diag)
+
+        # Then 'left multiply' H by A
+        h1 = np.array(Amat.dot(H)).flatten()
+
+        # 2. MATRIX
+        # First form hessian tensor H (4th order)
+        Y1 = y[1].reshape(n2, n3, 1, 1)
+        Y2 = y[1].reshape(1, 1, n2, n3)
+
+        # Create an m x n x m x n array with diag[i,j,k,l] == 1 iff
+        # (i == k and j == l), this is a 'diagonal' tensor.
+        diag = np.eye(n2 * n3).reshape(n2, n3, n2, n3)
+
+        H = np.exp(np.sum(y[1] ** 2)) * (4 * Y1 * Y2 + 2 * diag)
+
+        # Then 'right multiply' H by A
+        Atensor = a[1].reshape(1, 1, n2, n3)
+
+        h2 = np.sum(H * Atensor, axis=(2, 3))
+
+        # 3. Tensor3
+        # First form hessian tensor H (6th order)
+        Y1 = y[2].reshape(n4, n5, n6, 1, 1, 1)
+        Y2 = y[2].reshape(1, 1, 1, n4, n5, n6)
+
+        # Create an n1 x n2 x n3 x n1 x n2 x n3 diagonal tensor
+        diag = np.eye(n4 * n5 * n6).reshape(n4, n5, n6, n4, n5, n6)
+
+        H = np.exp(np.sum(y[2] ** 2)) * (4 * Y1 * Y2 + 2 * diag)
+
+        # Then 'right multiply' H by A
+        Atensor = a[2].reshape(1, 1, 1, n4, n5, n6)
+
+        h3 = np.sum(H * Atensor, axis=(3, 4, 5))
+
+        self.correct_hess = (h1, h2, h3)
+        self.backend = TheanoBackend()
+
+    def test_compile(self):
+        cost_compiled = self.backend.compile_function(self.cost, self.arg)
+        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.y))
+
+    def test_grad(self):
+        grad = self.backend.compute_gradient(self.cost, self.arg)
+        for k in range(len(grad(self.y))):
+            np_testing.assert_allclose(self.correct_grad[k], grad(self.y)[k])
+
+    def test_hessian(self):
+        hess = self.backend.compute_hessian(self.cost, self.arg)
+
+        # Now test hess
+        for k in range(len(hess(self.y, self.a))):
+            np_testing.assert_allclose(self.correct_hess[k], hess(self.y,
+                                                                  self.a)[k])
