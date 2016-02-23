@@ -168,7 +168,8 @@ class NelderMead(Solver):
             # If the reflected point is honorable, drop the worst point,
             # replace it by the reflected point and start a new iteration.
             if costr >= costs[0] and costr < costs[-2]:
-                print("Reflection")
+                if verbosity >= 2:
+                    print("Reflection")
                 costs[-1] = costr
                 x[-1] = xr
                 continue
@@ -179,12 +180,14 @@ class NelderMead(Solver):
                 coste = objective(xe)
                 costevals += 1
                 if coste < costr:
-                    print("Expansion")
+                    if verbosity >= 2:
+                        print("Expansion")
                     costs[-1] = coste
                     x[-1] = xe
                     continue
                 else:
-                    print("Reflection (failed expansion)")
+                    if verbosity >= 2:
+                        print("Reflection (failed expansion)")
                     costs[-1] = costr
                     x[-1] = xr
                     continue
@@ -198,7 +201,8 @@ class NelderMead(Solver):
                     costoc = objective(xoc)
                     costevals += 1
                     if costoc <= costr:
-                        print("Outside contraction")
+                        if verbosity >= 2:
+                            print("Outside contraction")
                         costs[-1] = costoc
                         x[-1] = xoc
                         continue
@@ -208,13 +212,15 @@ class NelderMead(Solver):
                     costic = objective(xic)
                     costevals += 1
                     if costic <= costs[-1]:
-                        print("Inside contraction")
+                        if verbosity >= 2:
+                            print("Inside contraction")
                         costs[-1] = costic
                         x[-1] = xic
                         continue
 
             # If we get here, shrink the simplex around x[0].
-            print("Shrinkage")
+            if verbosity >= 2:
+                print("Shrinkage")
             x0 = x[0]
             for i in np.arange(1, dim + 1):
                 x[i] = man.pairmean(x0, x[i])
