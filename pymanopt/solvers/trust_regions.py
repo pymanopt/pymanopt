@@ -150,7 +150,7 @@ class TrustRegions(Solver):
             print("{:44s}f: {:+.6e}   |grad|: {:.6e}".format(
                 " ", float(fx), norm_grad))
 
-        self._start_optlog('TrustRegions')
+        self._start_optlog()
 
         while True:
             # *************************

@@ -132,7 +132,7 @@ class NelderMead(Solver):
 
         time0 = time.time()
 
-        self._start_optlog('NelderMead')
+        self._start_optlog()
 
         while True:
             iter += 1

@@ -107,7 +107,7 @@ class ParticleSwarm(Solver):
 
         time0 = time.time()
 
-        self._start_optlog('ParticleSwarm')
+        self._start_optlog()
 
         while True:
             iter += 1

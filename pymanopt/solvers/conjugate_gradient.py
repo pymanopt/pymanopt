@@ -91,7 +91,7 @@ class ConjugateGradient(Solver):
         # Initial descent direction is the negative gradient
         desc_dir = -Pgrad
 
-        self._start_optlog('ConjugateGradient')
+        self._start_optlog()
 
         while True:
             if verbosity >= 2:

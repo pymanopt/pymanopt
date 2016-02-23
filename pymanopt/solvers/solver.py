@@ -32,6 +32,10 @@ class Solver(object):
         self._logverbosity = logverbosity
         self._optlog = None
 
+    @property
+    def name(self):
+        return type(self).__name__
+
     def _check_stopping_criterion(self, time0, iter=-1, gradnorm=float('inf'),
                                   stepsize=float('inf'), costevals=-1):
         reason = None
@@ -53,14 +57,14 @@ class Solver(object):
                       "%.2f seconds." % (time.time() - time0))
         return reason
 
-    def _start_optlog(self, name):
+    def _start_optlog(self):
         if self._optlog is not None:
             warn('Optimisation log from previous solver run is being '
                  'overwritten.')
         if self._logverbosity <= 0:
             self._optlog = None
         else:
-            self._optlog = {'solver': name,
+            self._optlog = {'solver': self.name,
                             'stoppingcriteria': {'maxtime':
                                                  self._maxtime,
                                                  'maxiter':
