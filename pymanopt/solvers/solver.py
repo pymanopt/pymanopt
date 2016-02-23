@@ -57,7 +57,7 @@ class Solver(object):
                       "%.2f seconds." % (time.time() - time0))
         return reason
 
-    def _start_optlog(self):
+    def _start_optlog(self, extraiterfields=None):
         if self._optlog is not None:
             warn('Optimisation log from previous solver run is being '
                  'overwritten.')
@@ -76,6 +76,23 @@ class Solver(object):
                                                  'maxcostevals':
                                                  self._maxcostevals}
                             }
+        if self._logverbosity >= 2:
+            if extraiterfields:
+                self._optlog['iterations'] = {'iteration': [],
+                                              'time': [],
+                                              'x': [],
+                                              'f(x)': []}
+                for field in extraiterfields:
+                    self._optlog['iterations'][field] = []
+
+    def _append_optlog(self, iteration, x, fx, **kwargs):
+        # In case not every iteration is being logged
+        self._optlog['iterations']['iteration'].append(iteration)
+        self._optlog['iterations']['time'].append(time.time())
+        self._optlog['iterations']['x'].append(x)
+        self._optlog['iterations']['f(x)'].append(fx)
+        for key in kwargs:
+            self._optlog['iterations'][key].append(kwargs[key])
 
     def _stop_optlog(self, x, objective, stop_reason, time0,
                      stepsize=float('inf'), gradnorm=float('inf'),
