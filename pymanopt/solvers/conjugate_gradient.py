@@ -161,7 +161,11 @@ class ConjugateGradient(Solver):
                 elif self._beta_type == BetaTypes.HestenesStiefel:
                     diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
-                    beta = max(0, ip_diff / man.inner(newx, diff, desc_dir))
+                    try:
+                        beta = max(0, ip_diff / man.inner(newx, diff, desc_dir))
+                    # if ip_diff = man.inner(newx, diff, desc_dir) = 0
+                    except ZeroDivisionError:
+                        beta = 1
                 elif self._beta_type == BetaTypes.HagerZhang:
                     diff = newgrad - oldgrad
                     Poldgrad = man.transp(x, newx, Pgrad)
