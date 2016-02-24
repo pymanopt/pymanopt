@@ -162,7 +162,8 @@ class ConjugateGradient(Solver):
                     diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
                     try:
-                        beta = max(0, ip_diff / man.inner(newx, diff, desc_dir))
+                        beta = max(0,
+                                   ip_diff / man.inner(newx, diff, desc_dir))
                     # if ip_diff = man.inner(newx, diff, desc_dir) = 0
                     except ZeroDivisionError:
                         beta = 1

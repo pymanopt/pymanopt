@@ -94,8 +94,6 @@ class TrustRegions(Solver):
         self.use_rand = use_rand
         self.rho_regularization = rho_regularization
 
-        # TODO: implement value checks.
-
     def solve(self, problem, x=None, mininner=1, maxinner=None,
               Delta_bar=None, Delta0=None):
         man = problem.man
