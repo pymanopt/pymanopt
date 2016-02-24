@@ -7,27 +7,6 @@ import numpy.random as rnd
 from pymanopt.manifolds.manifold import Manifold
 
 
-class _TangentVector(list):
-    def __add__(self, other):
-        assert len(self) == len(other)
-        return TangentVector([self[k] + other[k] for k in range(len(self))])
-
-    def __sub__(self, other):
-        assert len(self) == len(other)
-        return TangentVector([self[k] - other[k] for k in range(len(self))])
-
-    def __mul__(self, other):
-        return TangentVector([other * val for val in self])
-
-    __rmul__ = __mul__
-
-    def __div__(self, other):
-        return TangentVector([val / other for val in self])
-
-    def __neg__(self):
-        return TangentVector([-val for val in self])
-
-
 class Product(Manifold):
     """
     Product manifold, i.e. the cartesian product of multiple manifolds.
@@ -106,3 +85,24 @@ class Product(Manifold):
     def zerovec(self, X):
         return _TangentVector([self._manifolds[k].zerovec(X[k])
                               for k in range(0, self._nmanifolds)])
+
+
+class _TangentVector(list):
+    def __add__(self, other):
+        assert len(self) == len(other)
+        return _TangentVector([self[k] + other[k] for k in range(len(self))])
+
+    def __sub__(self, other):
+        assert len(self) == len(other)
+        return _TangentVector([self[k] - other[k] for k in range(len(self))])
+
+    def __mul__(self, other):
+        return _TangentVector([other * val for val in self])
+
+    __rmul__ = __mul__
+
+    def __div__(self, other):
+        return _TangentVector([val / other for val in self])
+
+    def __neg__(self):
+        return _TangentVector([-val for val in self])
