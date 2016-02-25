@@ -33,7 +33,7 @@ def multitransp(A):
     will be P x N.
     """
     # First check if we have been given just one matrix
-    if len(np.shape(A)) == 2:
+    if A.ndim == 2:
         return A.T
     return np.transpose(A, (0, 2, 1))
 
@@ -46,3 +46,15 @@ def multisym(A):
 def multieye(k, n):
     # Creates a k x n x n array containing k (n x n) identity matrices.
     return np.tile(np.eye(n), (k, 1, 1))
+
+
+def multilog(A, pos_def=False):
+    # Computes the logm of each matrix in an array containing k positive
+    # definite matrices. This is much faster than scipy.linalg.logm even
+    # for a single matrix. Could potentially be improved further.
+    if pos_def:
+        l, v = np.linalg.eigh(A)
+        l = np.expand_dims(np.log(l), axis=-1)
+        return multiprod(v, l * multitransp(v))
+    else:
+        raise NotImplementedError

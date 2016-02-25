@@ -5,6 +5,8 @@ import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
+from scipy.linalg import logm
+
 from pymanopt.tools.multi import *
 
 
@@ -62,3 +64,20 @@ class TestMulti(unittest.TestCase):
             A[i] = np.eye(self.n)
 
         np_testing.assert_allclose(A, multieye(self.k, self.n))
+
+    def test_multilog_singlemat(self):
+        a = np.diag(rnd.rand(self.m))
+        q, r = la.qr(rnd.randn(self.m, self.m))
+        # A is a positive definite matrix
+        A = q.dot(a.dot(q.T))
+        np_testing.assert_allclose(multilog(A, pos_def=True), logm(A))
+
+    def test_multilog(self):
+        A = np.zeros((self.k, self.m, self.m))
+        l = np.zeros((self.k, self.m, self.m))
+        for i in range(self.k):
+            a = np.diag(rnd.rand(self.m))
+            q, r = la.qr(rnd.randn(self.m, self.m))
+            A[i] = q.dot(a.dot(q.T))
+            l[i] = logm(A[i])
+        np_testing.assert_allclose(multilog(A, pos_def=True), l)
