@@ -76,11 +76,11 @@ class SteepestDescent(Solver):
             desc_dir = -grad
 
             # Perform line-search
-            step_size, x = self._searcher.search(objective, man, x, desc_dir,
+            stepsize, x = self._searcher.search(objective, man, x, desc_dir,
                                                  cost, -gradnorm**2)
 
             stop_reason = self._check_stopping_criterion(
-                time0, stepsize=step_size, gradnorm=gradnorm, iter=iter)
+                time0, stepsize=stepsize, gradnorm=gradnorm, iter=iter)
 
             if stop_reason:
                 if verbosity >= 1:
@@ -92,6 +92,6 @@ class SteepestDescent(Solver):
             return x
         else:
             self._stop_optlog(x, objective(x), stop_reason, time0,
-                              stepsize=step_size, gradnorm=gradnorm,
+                              stepsize=stepsize, gradnorm=gradnorm,
                               iter=iter)
             return x, self._optlog
