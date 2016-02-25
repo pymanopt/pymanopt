@@ -77,7 +77,7 @@ class SteepestDescent(Solver):
 
             # Perform line-search
             stepsize, x = self._searcher.search(objective, man, x, desc_dir,
-                                                 cost, -gradnorm**2)
+                                                cost, -gradnorm**2)
 
             stop_reason = self._check_stopping_criterion(
                 time0, stepsize=stepsize, gradnorm=gradnorm, iter=iter)
