@@ -5,7 +5,7 @@ import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
-from scipy.linalg import logm
+from scipy.linalg import logm, expm
 
 from pymanopt.tools.multi import *
 
@@ -81,3 +81,16 @@ class TestMulti(unittest.TestCase):
             A[i] = q.dot(a.dot(q.T))
             l[i] = logm(A[i])
         np_testing.assert_allclose(multilog(A, pos_def=True), l)
+
+    def test_multiexp_singlemat(self):
+        # A is a positive definite matrix
+        A = rnd.randn(self.m, self.m)
+        A = A + A.T
+        np_testing.assert_allclose(multiexp(A, sym=True), expm(A))
+
+    def test_multiexp(self):
+        A = multisym(rnd.randn(self.k, self.m, self.m))
+        e = np.zeros((self.k, self.m, self.m))
+        for i in range(self.k):
+            e[i] = expm(A[i])
+        np_testing.assert_allclose(multiexp(A, sym=True), e)
