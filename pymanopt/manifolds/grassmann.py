@@ -24,7 +24,7 @@ matrices if k > 1 (Note that this is different to manopt!).
 #       transports, you may want to replace the retraction with a qfactor.
 
 import numpy as np
-from scipy.linalg import svd
+from numpy.linalg import svd
 from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
 
@@ -69,21 +69,10 @@ class Grassmann(Manifold):
 
     # Geodesic distance for Grassmann
     def dist(self, X, Y):
-        if self._k == 1:
-            u, s, v = np.linalg.svd(np.dot(X.T, Y))
-            s[s > 1] = 1
-            s = np.arccos(s)
-            return np.linalg.norm(s)
-        else:
-            XtY = multiprod(multitransp(X), Y)
-            square_d = 0
-            for i in xrange(self._k):
-                s = np.linalg.svd(XtY[i], compute_uv=False)
-                # Ensure that -1 <= s <= 1
-                s = np.fmin(s, [1])
-                s = np.fmax(s, [-1])
-                square_d = square_d + np.linalg.norm(np.arccos(s))**2
-            return np.sqrt(square_d)
+        u, s, v = svd(multiprod(multitransp(X), Y))
+        s[s > 1] = 1
+        s = np.arccos(s)
+        return np.linalg.norm(s)
 
     def inner(self, X, G, H):
         # Inner product (Riemannian metric) on the tangent space
@@ -103,25 +92,16 @@ class Grassmann(Manifold):
         return PXehess - HXtG
 
     def retr(self, X, G):
-        if self._k == 1:
-            # Calculate 'thin' qr decomposition of X + G
-            # XNew, r = np.linalg.qr(X + G)
+        # Calculate 'thin' qr decomposition of X + G
+        # XNew, r = np.linalg.qr(X + G)
 
-            # We do not need to worry about flipping signs of columns here,
-            # since only the column space is important, not the actual
-            # columns. Compare this with the Stiefel manifold.
+        # We do not need to worry about flipping signs of columns here,
+        # since only the column space is important, not the actual
+        # columns. Compare this with the Stiefel manifold.
 
-            # Compute the polar factorization of Y = X+G
-            u, s, vt = svd(X + G, full_matrices=False)
-            XNew = u.dot(vt)
-        else:
-            XNew = np.zeros(np.shape(X))
-            for i in xrange(self._k):
-                # q, r = np.linalg.qr(Y[i])
-                # XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
-                u, s, vt = svd(X[i] + G[i], full_matrices=False)
-                XNew[i] = u.dot(vt)
-        return XNew
+        # Compute the polar factorization of Y = X+G
+        u, s, vt = svd(X + G, full_matrices=False)
+        return multiprod(u, vt)
 
     def norm(self, X, G):
         # Norm on the tangent space is simply the Euclidean norm.
@@ -150,41 +130,31 @@ class Grassmann(Manifold):
         return self.proj(x2, d)
 
     def exp(self, X, U):
+        u, s, vt = svd(U, full_matrices=False)
+        cos_s = np.expand_dims(np.cos(s), -2)
+        sin_s = np.expand_dims(np.sin(s), -2)
+
+        Y = (multiprod(multiprod(X, multitransp(vt) * cos_s), vt) +
+             multiprod(u * sin_s, vt))
+
+        # From numerical experiments, it seems necessary to
+        # re-orthonormalize. This is overall quite expensive.
         if self._k == 1:
-            u, s, vt = svd(U, full_matrices=False)
-            cos_s = np.diag(np.cos(s))
-            sin_s = np.diag(np.sin(s))
-            Y = X.dot(vt.T).dot(cos_s).dot(vt) + u.dot(sin_s).dot(vt)
-            # From numerical experiments, it seems necessary to
-            # re-orthonormalize. This is overall quite expensive.
             Y, unused = np.linalg.qr(Y)
+            return Y
         else:
-            Y = np.zeros((self._k, self._n, self._p))
-            for i in xrange(self._k):
-                u, s, vt = svd(U[i], full_matrices=False)
-                cos_s = np.diag(np.cos(s))
-                sin_s = np.diag(np.sin(s))
-                Y[i] = X[i].dot(vt.T).dot(cos_s).dot(vt) + u.dot(sin_s).dot(vt)
-                # From numerical experiments, it seems necessary to
-                # re-orthonormalize. This is overall quite expensive.
+            for i in range(self._k):
                 Y[i], unused = np.linalg.qr(Y[i])
-        return Y
+            return Y
 
     def log(self, X, Y):
-        if self._k == 1:
-            X = np.expand_dims(X, axis=0)
-            Y = np.expand_dims(Y, axis=0)
-        U = np.zeros((self._k, self._n, self._p))
-        for i in xrange(self._k):
-            x = X[i]
-            y = Y[i]
-            ytx = y.T.dot(x)
-            At = y.T - ytx.dot(x.T)
-            Bt = np.linalg.solve(ytx, At)
-            u, s, vt = svd(Bt.T, full_matrices=False)
-            U[i] = u.dot(np.diag(np.arctan(s))).dot(vt)
-        if self._k == 1:
-            U = U[0]
+        ytx = multiprod(multitransp(Y), X)
+        At = multitransp(Y) - multiprod(ytx, multitransp(X))
+        Bt = np.linalg.solve(ytx, At)
+        u, s, vt = svd(multitransp(Bt), full_matrices=False)
+        arctan_s = np.expand_dims(np.arctan(s), -2)
+
+        U = multiprod(u * arctan_s, vt)
         return U
 
     def pairmean(self, X, Y):
