@@ -5,14 +5,14 @@ import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
-from pymanopt.manifolds import SymFixedRankYYComplex
+from pymanopt.manifolds import PSDFixedRank
 
 
-class TestFixedRankComplexManifold(unittest.TestCase):
+class TestFixedRankManifold(unittest.TestCase):
     def setUp(self):
         self.n = n = 50
         self.k = k = 10
-        self.man = SymFixedRankYY(n, k)
+        self.man = PSDFixedRank(n, k)
 
     # def test_dim(self):
 

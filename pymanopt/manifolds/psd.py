@@ -8,7 +8,7 @@ from scipy.linalg import solve_lyapunov as lyap
 from pymanopt.manifolds.manifold import Manifold
 
 
-class SymFixedRankYY(Manifold):
+class PSDFixedRank(Manifold):
     """
     Manifold of n-by-n symmetric positive semidefinite matrices of rank k.
 
@@ -114,7 +114,7 @@ class SymFixedRankYY(Manifold):
         return Y / self.norm(None, Y)
 
 
-class SymFixedRankYYComplex(SymFixedRankYY):
+class PSDFixedRankComplex(PSDFixedRank):
     """
     Manifold of n x n complex Hermitian pos. semidefinite matrices of rank k.
 
@@ -139,7 +139,7 @@ class SymFixedRankYYComplex(SymFixedRankYY):
     exactly k. Reduce k if that is not the case.
     """
     def __init__(self, *args, **kwargs):
-        super(SymFixedRankYYComplex, self).__init__(*args, **kwargs)
+        super(PSDFixedRankComplex, self).__init__(*args, **kwargs)
 
         n = self._n
         k = self._k
@@ -171,7 +171,7 @@ class SymFixedRankYYComplex(SymFixedRankYY):
         return self.retr(Y, U)
 
     def rand(self):
-        rand_ = super(SymFixedRankYYComplex, self).rand
+        rand_ = super(PSDFixedRankComplex, self).rand
         return rand_() + 1j * rand_()
 
     def pairmean(self, X, Y):

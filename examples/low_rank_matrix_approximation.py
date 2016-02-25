@@ -4,7 +4,7 @@ import numpy.random as rnd
 import theano.tensor as T
 
 from pymanopt import Problem
-from pymanopt.manifolds import SymFixedRankYY
+from pymanopt.manifolds import PSDFixedRank
 from pymanopt.solvers import TrustRegions
 
 
@@ -12,7 +12,7 @@ def _bootstrap_problem(A, k):
     m, n = A.shape
     assert m == n, "matrix must be square"
     assert np.allclose(np.sum(A - A.T), 0), "matrix must be symmetric"
-    manifold = SymFixedRankYY(n, k)
+    manifold = PSDFixedRank(n, k)
     solver = TrustRegions(maxiter=500, minstepsize=1e-6)
     return manifold, solver
 
