@@ -107,6 +107,6 @@ class Solver(object):
         if gradnorm is not float('inf'):
             self._optlog['final_values']['gradnorm'] = gradnorm
         if iter is not -1:
-            self._optlog['final_values']['iteratios'] = iter
+            self._optlog['final_values']['iterations'] = iter
         if costevals is not -1:
             self._optlog['final_values']['costevals'] = costevals
