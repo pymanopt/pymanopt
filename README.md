@@ -45,7 +45,7 @@ Instructions for installing numpy, scipy and theano on different operating syste
 ### Installing pymanopt
 You can install pymanopt with the following command:
 ```
-pip install --user git+https://github.com/j-towns/pymanopt.git
+pip install --user git+https://github.com/pymanopt/pymanopt.git
 ```
 
 ## Basic usage
