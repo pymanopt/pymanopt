@@ -78,7 +78,7 @@ class NelderMead(Solver):
         Arguments:
             - problem
                 Pymanopt problem setup using the Problem class, this must
-                have a .man attribute specifying the manifold to optimize
+                have a .manifold attribute specifying the manifold to optimize
                 over, as well as a cost and enough information to compute
                 the gradient of that cost.
             - x=None
@@ -90,7 +90,7 @@ class NelderMead(Solver):
                 Local minimum of obj, or if algorithm terminated before
                 convergence x will be the point at which it terminated
         """
-        man = problem.man
+        man = problem.manifold
         verbosity = problem.verbosity
         objective = problem.cost
 

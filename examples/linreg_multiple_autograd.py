@@ -19,7 +19,7 @@ if __name__ == "__main__":
     manifold = Euclidean(3, 1)
 
     # Create the problem with extra cost function arguments
-    problem = Problem(man=manifold, cost=cost, verbosity=0)
+    problem = Problem(manifold=manifold, cost=cost, verbosity=0)
 
     # Solve 5 instances of the same type of problem for different data input
     for k in range(0, 5):

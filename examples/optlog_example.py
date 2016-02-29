@@ -19,7 +19,7 @@ if __name__ == "__main__":
     manifold = Stiefel(3, 2)
 
     # Solve the problem with pymanopt
-    problem = Problem(man=manifold, cost=cost, verbosity=0)
+    problem = Problem(manifold=manifold, cost=cost, verbosity=0)
     wopt, optlog = solver.solve(problem)
 
     print('And here comes the optlog:\n\r')

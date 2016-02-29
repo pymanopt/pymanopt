@@ -20,7 +20,7 @@ if __name__ == "__main__":
     manifold = Euclidean(3, 1)
 
     # Solve the problem with pymanopt
-    problem = Problem(man=manifold, cost=cost)
+    problem = Problem(manifold=manifold, cost=cost)
     wopt = solver.solve(problem)
 
     print('The following regression weights were found to minimise the '

@@ -44,7 +44,7 @@ class ParticleSwarm(Solver):
         Arguments:
             - problem
                 Pymanopt problem setup using the Problem class, this must
-                have a .man attribute specifying the manifold to optimize
+                have a .manifold attribute specifying the manifold to optimize
                 over, as well as a cost (specified using a theano graph
                 or as a python function).
             - x=None
@@ -56,7 +56,7 @@ class ParticleSwarm(Solver):
                 Local minimum of obj, or if algorithm terminated before
                 convergence x will be the point at which it terminated
         """
-        man = problem.man
+        man = problem.manifold
         verbosity = problem.verbosity
         objective = problem.cost
 

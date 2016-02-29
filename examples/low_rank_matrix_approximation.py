@@ -29,7 +29,7 @@ def low_rank_matrix_approximation(A, k):
     def ehess(Y, U):
         return 4 * ((Y.dot(U.T) + U.dot(Y.T)).dot(Y) + (Y.dot(Y.T) - A).dot(U))
 
-    problem = Problem(man=manifold, cost=cost, egrad=egrad, ehess=ehess)
+    problem = Problem(manifold=manifold, cost=cost, egrad=egrad, ehess=ehess)
     return solver.solve(problem)
 
 
@@ -39,7 +39,7 @@ def low_rank_matrix_approximation_theano(A, k):
     Y = T.matrix()
     cost = T.sum((T.dot(Y, Y.T) - A) ** 2)
 
-    problem = Problem(man=manifold, cost=cost, arg=Y)
+    problem = Problem(manifold=manifold, cost=cost, arg=Y)
     return solver.solve(problem)
 
 

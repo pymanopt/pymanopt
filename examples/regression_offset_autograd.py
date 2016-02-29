@@ -25,7 +25,7 @@ if __name__ == "__main__":
     manifold = Product([Euclidean(3, 1), Euclidean(1, 1)])
 
     # Solve the problem with pymanopt
-    problem = Problem(man=manifold, cost=cost, verbosity=0)
+    problem = Problem(manifold=manifold, cost=cost, verbosity=0)
     wopt = solver.solve(problem)
 
     print('Weights found by pymanopt (top) / '

@@ -96,7 +96,7 @@ class TrustRegions(Solver):
 
     def solve(self, problem, x=None, mininner=1, maxinner=None,
               Delta_bar=None, Delta0=None):
-        man = problem.man
+        man = problem.manifold
         verbosity = problem.verbosity
 
         if maxinner is None:
@@ -385,7 +385,7 @@ class TrustRegions(Solver):
 
     def _truncated_conjugate_gradient(self, problem, x, fgradx, eta, Delta,
                                       theta, kappa, mininner, maxinner):
-        man = problem.man
+        man = problem.manifold
         inner = man.inner
         hess = problem.hess
         precon = problem.precon

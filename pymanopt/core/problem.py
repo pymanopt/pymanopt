@@ -13,24 +13,24 @@ class Problem(object):
     pymanopt solvers.
 
     Attributes:
-        - man
+        - manifold
             Manifold to optimize over.
         - cost
-            A callable which takes an element of man and returns a real number,
-            or a symbolic Theano or TensorFlow expression. In case of a
-            symbolic expression, the gradient (and if necessary the Hessian)
-            are computed automatically if they are not explicitly given. We
-            recommend you take this approach rather than calculating gradients
-            and Hessians by hand.
+            A callable which takes an element of manifold and returns a
+            real number, or a symbolic Theano or TensorFlow expression.
+            In case of a symbolic expression, the gradient (and if
+            necessary the Hessian) are computed automatically if they are
+            not explicitly given. We recommend you take this approach
+            rather than calculating gradients and Hessians by hand.
         - grad
             grad(x) is the gradient of cost at x. This must take an
-            element X of man and return an element of the tangent space
-            to man at X. This is usually computed automatically and
+            element X of manifold and return an element of the tangent space
+            to manifold at X. This is usually computed automatically and
             doesn't need to be set by the user.
         - hess
             hess(x, a) is the directional derivative of grad at x, in
             direction a. It should return an element of the tangent
-            space to man at x.
+            space to manifold at x.
         - egrad
             The 'Euclidean gradient', egrad(x) should return the grad of
             cost in the usual sense, i.e. egrad(x) need not lie in the
@@ -47,9 +47,9 @@ class Problem(object):
             Level of information printed by the solver while it operates, 0
             is silent, 2 is most information.
     """
-    def __init__(self, man, cost, egrad=None, ehess=None, grad=None, hess=None,
-                 arg=None, precon=None, verbosity=2):
-        self.man = man
+    def __init__(self, manifold, cost, egrad=None, ehess=None, grad=None,
+                 hess=None, arg=None, precon=None, verbosity=2):
+        self.manifold = manifold
         # We keep a reference to the original cost function in case we want to
         # call the `prepare` method twice (for instance, after switching from
         # a first- to second-order method).
@@ -119,7 +119,7 @@ class Problem(object):
             egrad = self.egrad
 
             def grad(x):
-                return self.man.egrad2rgrad(x, egrad(x))
+                return self.manifold.egrad2rgrad(x, egrad(x))
             self._grad = grad
         return self._grad
 
@@ -140,7 +140,7 @@ class Problem(object):
             ehess = self.ehess
 
             def hess(x, a):
-                return self.man.ehess2rhess(
+                return self.manifold.ehess2rhess(
                     x, self.egrad(x), self.ehess(x, a), a)
             self._hess = hess
         return self._hess
