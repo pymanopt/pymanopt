@@ -1,11 +1,3 @@
-"""
-Factory class for the Stiefel manifold. Initiation requires the dimensions
-n, p to be specified. Optional argument k allows the user to optimize over
-the product of k Stiefels.
-
-Elements are represented as n x p matrices (if k == 1), and as k x n x p
-matrices if k > 1 (Note that this is different to manopt!).
-"""
 import numpy as np
 from scipy.linalg import expm
 
@@ -17,6 +9,15 @@ if not hasattr(__builtins__, "xrange"):
 
 
 class Stiefel(Manifold):
+    """
+    Factory class for the Stiefel manifold. Initiation requires the dimensions
+    n, p to be specified. Optional argument k allows the user to optimize over
+    the product of k Stiefels.
+
+    Elements are represented as n x p matrices (if k == 1), and as k x n x p
+    matrices if k > 1 (Note that this is different to manopt!).
+    """
+
     def __init__(self, height, width, k=1):
         # Check that n is greater than or equal to p
         if height < width or width < 1:

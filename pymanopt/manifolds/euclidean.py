@@ -13,6 +13,7 @@ class Euclidean(Manifold):
     equipped with the Frobenius distance and trace inner product.
     Use for solving unconstrained problems with pymanopt.
     """
+
     def __init__(self, m, n):
         self._m = m
         self._n = n

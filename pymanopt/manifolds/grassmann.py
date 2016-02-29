@@ -1,28 +1,3 @@
-"""
-Factory class for the Grassmann manifold. This is the manifold of p-
-dimensional subspaces of n dimensional real vector space. Initiation requires
-the dimensions n, p to be specified. Optional argument k allows the user
-to optimize over the product of k Grassmanns.
-
-Elements are represented as n x p matrices (if k == 1), and as k x n x p
-matrices if k > 1 (Note that this is different to manopt!).
-"""
-
-#   I have chaned the retraction to one using the polar decomp as am now
-#   implementing vector transport. See comment below (JT)
-
-#   April 17, 2013 (NB) :
-#       Retraction changed to the polar decomposition, so that the vector
-#       transport is now correct, in the sense that it is compatible with
-#       the retraction, i.e., transporting a tangent vector G from U to V
-#       where V = Retr(U, H) will give Z, and transporting GQ from UQ to VQ
-#       will give ZQ: there is no dependence on the representation, which
-#       is as it should be. Notice that the polar factorization requires an
-#       SVD whereas the qfactor retraction requires a QR decomposition,
-#       which is cheaper. Hence, if the retraction happens to be a
-#       bottleneck in your application and you are not using vector
-#       transports, you may want to replace the retraction with a qfactor.
-
 import numpy as np
 from numpy.linalg import svd
 from pymanopt.tools.multi import multiprod, multitransp, multisym
@@ -33,6 +8,31 @@ if not hasattr(__builtins__, "xrange"):
 
 
 class Grassmann(Manifold):
+    """
+    Factory class for the Grassmann manifold. This is the manifold of p-
+    dimensional subspaces of n dimensional real vector space. Initiation
+    requires the dimensions n, p to be specified. Optional argument k
+    allows the user to optimize over the product of k Grassmanns.
+
+    Elements are represented as n x p matrices (if k == 1), and as k x n x p
+    matrices if k > 1 (Note that this is different to manopt!).
+    """
+
+    #   I have chaned the retraction to one using the polar decomp as am now
+    #   implementing vector transport. See comment below (JT)
+
+    #   April 17, 2013 (NB) :
+    #       Retraction changed to the polar decomposition, so that the vector
+    #       transport is now correct, in the sense that it is compatible with
+    #       the retraction, i.e., transporting a tangent vector G from U to V
+    #       where V = Retr(U, H) will give Z, and transporting GQ from UQ to VQ
+    #       will give ZQ: there is no dependence on the representation, which
+    #       is as it should be. Notice that the polar factorization requires an
+    #       SVD whereas the qfactor retraction requires a QR decomposition,
+    #       which is cheaper. Hence, if the retraction happens to be a
+    #       bottleneck in your application and you are not using vector
+    #       transports, you may want to replace the retraction with a qfactor.
+
     def __init__(self, height, width, k=1):
         # Check that n is greater than or equal to p
         if height < width or width < 1:

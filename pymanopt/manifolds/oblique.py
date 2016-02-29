@@ -15,6 +15,7 @@ class Oblique(Manifold):
     space of m-by-n matrices with the usual trace inner product, i.e., the
     usual metric.
     """
+
     def __init__(self, m, n):
         self._m = m
         self._n = n

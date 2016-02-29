@@ -40,6 +40,7 @@ class PSDFixedRank(Manifold):
     "Low-Rank Optimization on the Cone of Positive Semidefinite Matrices".
     Paper link: http://www.di.ens.fr/~fbach/journee2010_sdp.pdf
     """
+
     def __init__(self, n, k):
         self._n = n
         self._k = k
@@ -138,6 +139,7 @@ class PSDFixedRankComplex(PSDFixedRank):
     only be used if it is expected that the points of interest will have rank
     exactly k. Reduce k if that is not the case.
     """
+
     def __init__(self, *args, **kwargs):
         super(PSDFixedRankComplex, self).__init__(*args, **kwargs)
 
@@ -208,6 +210,7 @@ class Elliptope(Manifold):
     "Low-Rank Optimization on the Cone of Positive Semidefinite Matrices".
     Paper link: http://www.di.ens.fr/~fbach/journee2010_sdp.pdf
     """
+
     def __init__(self, n, k):
         self._n = n
         self._k = k

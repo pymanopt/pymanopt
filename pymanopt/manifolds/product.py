@@ -11,6 +11,7 @@ class Product(Manifold):
     """
     Product manifold, i.e. the cartesian product of multiple manifolds.
     """
+
     def __init__(self, manifolds):
         self._manifolds = manifolds
         self._nmanifolds = len(manifolds)

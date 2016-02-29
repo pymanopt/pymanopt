@@ -12,6 +12,7 @@ class Sphere(Manifold):
     sphere is a Riemannian submanifold of the space of m-by-n matrices with the
     usual trace inner product, i.e., the usual metric.
     """
+
     def __init__(self, m, n=1):
         self._m = m
         self._n = n
