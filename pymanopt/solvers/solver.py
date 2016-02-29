@@ -1,5 +1,5 @@
 import time
-
+import abc
 from warnings import warn
 
 
@@ -7,6 +7,8 @@ class Solver(object):
     '''
     Abstract base class setting out template for solver classes.
     '''
+
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, maxtime=1000, maxiter=1000, mingradnorm=1e-6,
                  minstepsize=1e-10, maxcostevals=5000, logverbosity=0):
@@ -38,6 +40,14 @@ class Solver(object):
     @property
     def name(self):
         return type(self).__name__
+
+    @abc.abstractmethod
+    def solve(self, problem, x=None):
+        '''
+        Solve the given problem (starting from a random initial guess if
+        the optional argument x is not provided)
+        '''
+        pass
 
     def _check_stopping_criterion(self, time0, iter=-1, gradnorm=float('inf'),
                                   stepsize=float('inf'), costevals=-1):
