@@ -51,13 +51,6 @@
 
 # Ported to pymanopt by Jamie Townsend. January 2016.
 
-"""
-Module containing trust regions algorithm based on trustregions.m from the
-Manopt MATLAB package.
-
-Also included is the Truncated (Steihaug-Toint) Conjugate-Gradient algorithm,
-based on tCG.m from the Manopt MATLAB package.
-"""
 from __future__ import print_function
 
 import time
@@ -85,6 +78,13 @@ class TrustRegions(Solver):
 
     def __init__(self, miniter=3, kappa=0.1, theta=1.0, rho_prime=0.1,
                  use_rand=False, rho_regularization=1e3, *args, **kwargs):
+        """
+        Trust regions algorithm based on trustregions.m from the
+        Manopt MATLAB package.
+
+        Also included is the Truncated (Steihaug-Toint) Conjugate-Gradient
+        algorithm, based on tCG.m from the Manopt MATLAB package.
+        """
         super(TrustRegions, self).__init__(*args, **kwargs)
 
         self.miniter = miniter

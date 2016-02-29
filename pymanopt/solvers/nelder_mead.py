@@ -1,8 +1,3 @@
-"""
-Module containing a Nelder-Mead minimization alglorithm for derivative-free
-minimization based on neldermead.m and centroid.m from the manopt MATLAB
-package.
-"""
 from __future__ import print_function
 
 import time
@@ -47,23 +42,28 @@ def compute_centroid(man, x):
 
 class NelderMead(Solver):
     """
-    Nelder-Mead method solver class.
-    Variable attributes (defaults in brackets):
-        - maxcostevals (max(5000, 2 * dim))
-            Maximum number of allowed cost evaluations
-        - maxiter (max(500, 4 * dim))
-            Maximum number of allowed iterations
-        - reflection (1)
-            Determines how far to reflect away from the worst vertex;
-            stretched (reflection > 1), compressed (0 < reflection < 1),
-            or exact (reflection = 1)
-        - expansion (2)
-            Factor by which to expand the reflected simplex
-        - contraction (0.5)
-            Factor by which to contract the reflected simplex
+    Nelder-Mead minimization alglorithm for derivative-free minimization
+    based on neldermead.m and centroid.m from the manopt MATLAB package.
     """
+
     def __init__(self, maxcostevals=None, maxiter=None, reflection=1,
                  expansion=2, contraction=0.5, *args, **kwargs):
+        """
+        Instantiate Nelder-Mead method solver class.
+        Variable attributes (defaults in brackets):
+            - maxcostevals (max(5000, 2 * dim))
+                Maximum number of allowed cost evaluations
+            - maxiter (max(500, 4 * dim))
+                Maximum number of allowed iterations
+            - reflection (1)
+                Determines how far to reflect away from the worst vertex;
+                stretched (reflection > 1), compressed (0 < reflection < 1),
+                or exact (reflection = 1)
+            - expansion (2)
+                Factor by which to expand the reflected simplex
+            - contraction (0.5)
+                Factor by which to contract the reflected simplex
+        """
         super(NelderMead, self).__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals

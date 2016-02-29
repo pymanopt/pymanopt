@@ -1,7 +1,3 @@
-"""
-Module containing steepest descent (gradient descent) algorithm based on
-steepestdescent.m from the manopt MATLAB package.
-"""
 from __future__ import print_function
 
 import time
@@ -11,6 +7,11 @@ from pymanopt.solvers.solver import Solver
 
 
 class SteepestDescent(Solver):
+    """
+    Steepest descent (gradient descent) algorithm based on
+    steepestdescent.m from the manopt MATLAB package.
+    """
+
     def __init__(self, linesearch=None, *args, **kwargs):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 

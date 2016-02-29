@@ -1,7 +1,3 @@
-"""
-Module containing conjugate gradient algorithm based on conjugategradient.m
-from the manopt MATLAB package.
-"""
 from __future__ import print_function
 
 import time
@@ -20,17 +16,25 @@ BetaTypes = tools.make_enum(
 
 class ConjugateGradient(Solver):
     """
-    Conjugate gradient solver class.
-    Variable attributes (defaults in brackets):
-        - beta_type (BetaTypes.HestenesStiefel)
-            Conjugate gradient beta rule used to construct the new search
-            direction
-        - orth_value (numpy.inf)
-            Parameter for Powell's restart strategy. An infinite value disables
-            this strategy. See in code formula for the specific criterion used.
+    Module containing conjugate gradient algorithm based on
+    conjugategradient.m from the manopt MATLAB package.
     """
+
     def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
                  linesearch=None, *args, **kwargs):
+        """
+        Instantiate gradient solver class.
+        Variable attributes (defaults in brackets):
+            - beta_type (BetaTypes.HestenesStiefel)
+                Conjugate gradient beta rule used to construct the new search
+                direction
+            - orth_value (numpy.inf)
+                Parameter for Powell's restart strategy. An infinite
+                value disables this strategy. See in code formula for
+                the specific criterion used.
+            - linesearch (None)
+                If None LineSearchAdaptive will be used.
+        """
         super(ConjugateGradient, self).__init__(*args, **kwargs)
 
         self._beta_type = beta_type

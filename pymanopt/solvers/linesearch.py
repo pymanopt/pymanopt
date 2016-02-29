@@ -1,11 +1,12 @@
-"""
-Line-search based on linesearch.m and linesearch_adaptive.m in the manopt
-MATLAB package.
-"""
 import numpy as np
 
 
 class LineSearch(object):
+    """
+    Line-search based on linesearch.m and linesearch_adaptive.m in the manopt
+    MATLAB package.
+    """
+
     def __init__(self, contraction_factor=.5, optimism=2,
                  suff_decr=1e-4, maxiter=25, initial_stepsize=1):
         self.contraction_factor = contraction_factor
@@ -78,6 +79,10 @@ class LineSearch(object):
 
 
 class LineSearchAdaptive(object):
+    '''
+    Adaptive line-search
+    '''
+
     def __init__(self, contraction_factor=.5, suff_decr=.5, maxiter=10,
                  initial_stepsize=1):
         self._contraction_factor = contraction_factor

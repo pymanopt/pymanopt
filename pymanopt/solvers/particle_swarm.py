@@ -1,7 +1,3 @@
-"""
-Module containing the particle swarm optimization method based on pso.m from
-the manopt MATLAB package.
-"""
 from __future__ import print_function
 
 import time
@@ -14,21 +10,26 @@ from pymanopt.solvers.solver import Solver
 
 class ParticleSwarm(Solver):
     """
-    Particle Swarm Optimization (PSO) solver class.
-    Variable attributes (defaults in brackets):
-        - maxcostevals (max(5000, 2 * dim))
-            Maximum number of allowed cost evaluations
-        - maxiter (max(500, 4 * dim))
-            Maximum number of allowed iterations
-        - populationsize (min(40, 10 * dim))
-            Size of the considered swarm population
-        - nostalgia (1.4)
-            Quantifies performance relative to past performances
-        - social (1.4)
-            Quantifies performance relative to neighbors
+    Particle swarm optimization method based on pso.m from the manopt
+    MATLAB package.
     """
+
     def __init__(self, maxcostevals=None, maxiter=None, populationsize=None,
                  nostalgia=1.4, social=1.4, *args, **kwargs):
+        """
+        Instantiate Particle Swarm Optimization (PSO) solver class.
+        Variable attributes (defaults in brackets):
+            - maxcostevals (max(5000, 2 * dim))
+                Maximum number of allowed cost evaluations
+            - maxiter (max(500, 4 * dim))
+                Maximum number of allowed iterations
+            - populationsize (min(40, 10 * dim))
+                Size of the considered swarm population
+            - nostalgia (1.4)
+                Quantifies performance relative to past performances
+            - social (1.4)
+                Quantifies performance relative to neighbors
+        """
         super(ParticleSwarm, self).__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals

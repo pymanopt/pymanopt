@@ -4,10 +4,13 @@ from warnings import warn
 
 
 class Solver(object):
+    '''
+    Abstract base class setting out template for solver classes.
+    '''
+
     def __init__(self, maxtime=1000, maxiter=1000, mingradnorm=1e-6,
                  minstepsize=1e-10, maxcostevals=5000, logverbosity=0):
         """
-        Generic solver base class.
         Variable attributes (defaults in brackets):
             - maxtime (1000)
                 Max time (in seconds) to run.
