@@ -18,7 +18,7 @@ class Sphere(Manifold):
         self._n = n
 
     def __str__(self):
-        if n == 1:
+        if self._n == 1:
             return "Sphere S^{:d}".format(self._m - 1)
         else:
             return "Unit F-norm {:d}x{:d} matrices".format(self._m, self._n)
