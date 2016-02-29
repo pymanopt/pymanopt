@@ -12,8 +12,7 @@ from ._backend import Backend, assert_backend_available
 
 
 class AutogradBackend(Backend):
-    @property
-    def name(self):
+    def __str__(self):
         return "autograd"
 
     def is_available(self):

@@ -17,8 +17,7 @@ from ._backend import Backend, assert_backend_available
 
 
 class TheanoBackend(Backend):
-    @property
-    def name(self):
+    def __str__(self):
         return "theano"
 
     def is_available(self):

@@ -45,12 +45,9 @@ class PSDFixedRank(Manifold):
         self._n = n
         self._k = k
 
-        self._name = ("YY' quotient manifold of {:d}x{:d} psd matrices of "
-                      "rank {:d}".format(n, n, k))
-
-    @property
-    def name(self):
-        return self._name
+    def __str__(self):
+        return ("YY' quotient manifold of {:d}x{:d} psd matrices of "
+                "rank {:d}".format(self._n, self._n, self._k))
 
     @property
     def dim(self):
@@ -145,8 +142,10 @@ class PSDFixedRankComplex(PSDFixedRank):
 
         n = self._n
         k = self._k
-        self._name = ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
-                      "matrices of rank {:d}".format(n, n, k))
+
+    def __str__(self):
+        return ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
+                "matrices of rank {:d}".format(self._n, self._n, self._k))
 
     @property
     def dim(self):
@@ -215,8 +214,7 @@ class Elliptope(Manifold):
         self._n = n
         self._k = k
 
-    @property
-    def name(self):
+    def __str__(self):
         return ("YY' quotient manifold of {:d}x{:d} psd matrices of rank {:d} "
                 "with diagonal elements being 1".format(
                     self._n, self._n, self._k))

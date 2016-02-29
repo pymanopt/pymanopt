@@ -18,12 +18,9 @@ class Euclidean(Manifold):
         self._m = m
         self._n = n
 
-        self._name = ("Euclidean manifold of "
-                      "{:d}x{:d} matrices".format(m, n))
-
-    @property
-    def name(self):
-        return self._name
+    def __str__(self):
+        return ("Euclidean manifold of "
+                "{:d}x{:d} matrices".format(self._m, self._n))
 
     @property
     def dim(self):

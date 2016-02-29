@@ -20,11 +20,8 @@ class Oblique(Manifold):
         self._m = m
         self._n = n
 
-        self._name = "Oblique manifold OB({:d}, {:d})".format(m, n)
-
-    @property
-    def name(self):
-        return self._name
+    def __str__(self):
+        return "Oblique manifold OB({:d}, {:d})".format(self._m, self._n)
 
     @property
     def dim(self):

@@ -81,7 +81,8 @@ class Problem(object):
                     self._backend = backend
                     break
             else:
-                backend_names = [backend.name for backend in self._backends]
+                backend_names = [str(backend) for backend in self._backends]
+                print(backend_names)
                 raise ValueError(
                     "Cannot determine autodiff backend from cost function of "
                     "type `{:s}`. Available backends are: {:s}".format(

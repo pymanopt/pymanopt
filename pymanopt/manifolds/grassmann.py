@@ -48,20 +48,16 @@ class Grassmann(Manifold):
         # Set dimension
         self._dim = self._k*(self._n*self._p - self._p**2)
 
-        # Set the name
-        if k == 1:
-            self._name = "Grassmann manifold Gr(%d, %d)" % (self._n, self._p)
-        elif k >= 2:
-            self._name = "Product Grassmann manifold Gr(%d, %d)^%d" % (
-                self._n, self._p, self._k)
-
     @property
     def dim(self):
         return self._dim
 
-    @property
-    def name(self):
-        return self._name
+    def __str__(self):
+        if self._k == 1:
+            return "Grassmann manifold Gr(%d, %d)" % (self._n, self._p)
+        elif self._k >= 2:
+            return "Product Grassmann manifold Gr(%d, %d)^%d" % (
+                self._n, self._p, self._k)
 
     @property
     def typicaldist(self):

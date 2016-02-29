@@ -17,14 +17,11 @@ class Sphere(Manifold):
         self._m = m
         self._n = n
 
+    def __str__(self):
         if n == 1:
-            self._name = "Sphere S^{:d}".format(m - 1)
+            return "Sphere S^{:d}".format(self._m - 1)
         else:
-            self._name = "Unit F-norm {:d}x{:d} matrices".format(m, n)
-
-    @property
-    def name(self):
-        return self._name
+            return "Unit F-norm {:d}x{:d} matrices".format(self._m, self._n)
 
     @property
     def dim(self):

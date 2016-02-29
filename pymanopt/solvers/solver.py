@@ -37,8 +37,7 @@ class Solver(object):
         self._logverbosity = logverbosity
         self._optlog = None
 
-    @property
-    def name(self):
+    def __str__(self):
         return type(self).__name__
 
     @abc.abstractmethod
@@ -77,7 +76,7 @@ class Solver(object):
         if self._logverbosity <= 0:
             self._optlog = None
         else:
-            self._optlog = {'solver': self.name,
+            self._optlog = {'solver': str(self),
                             'stoppingcriteria': {'maxtime':
                                                  self._maxtime,
                                                  'maxiter':

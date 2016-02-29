@@ -12,8 +12,7 @@ def assert_backend_available(f):
 
 
 class Backend(object):
-    @property
-    def name(self):
+    def __str__(self):
         return "<backend>"
 
     def __id(self, objective, argument):

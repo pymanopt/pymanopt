@@ -10,8 +10,8 @@ class Manifold(object):
 
     __metaclass__ = abc.ABCMeta
 
-    @abc.abstractproperty
-    def name(self):
+    @abc.abstractmethod
+    def __str__(self):
         '''
         Name of the manifold
         '''

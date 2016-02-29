@@ -15,12 +15,10 @@ class Product(Manifold):
     def __init__(self, manifolds):
         self._manifolds = manifolds
         self._nmanifolds = len(manifolds)
-        self._name = ("Product manifold: {:s}".format(
-                          " X ".join([man.name for man in manifolds])))
 
-    @property
-    def name(self):
-        return self._name
+    def __str__(self):
+        return ("Product manifold: {:s}".format(
+                " X ".join([str(man) for man in self._manifolds])))
 
     @property
     def dim(self):

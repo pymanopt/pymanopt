@@ -34,20 +34,16 @@ class Stiefel(Manifold):
         self._dim = self._k * (self._n * self._p -
                                0.5 * self._p * (self._p + 1))
 
-        # Set the name
-        if k == 1:
-            self._name = "Stiefel manifold St(%d, %d)" % (self._n, self._p)
-        elif k >= 2:
-            self._name = "Product Stiefel manifold St(%d, %d)^%d" % (
-                self._n, self._p, self._k)
-
     @property
     def dim(self):
         return self._dim
 
-    @property
-    def name(self):
-        return self._name
+    def __str__(self):
+        if self._k == 1:
+            return "Stiefel manifold St(%d, %d)" % (self._n, self._p)
+        elif self._k >= 2:
+            return "Product Stiefel manifold St(%d, %d)^%d" % (
+                self._n, self._p, self._k)
 
     @property
     def typicaldist(self):
