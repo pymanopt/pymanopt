@@ -135,7 +135,7 @@ class ConjugateGradient(Solver):
 
             # Execute line search
             stepsize, newx = linesearch.search(objective, man, x, desc_dir,
-                                                   cost, df0)
+                                               cost, df0)
 
             # Compute the new cost-related quantities for newx
             newcost = objective(newx)

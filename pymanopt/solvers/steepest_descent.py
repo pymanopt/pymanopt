@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import time
 
-from pymanopt.solvers.linesearch import *
+from pymanopt.solvers.linesearch import LineSearchBackTracking
 from pymanopt.solvers.solver import Solver
 
 
@@ -76,8 +76,8 @@ class SteepestDescent(Solver):
             desc_dir = -grad
 
             # Perform line-search
-            stepsize, x = linesearch.search(objective, man, x, desc_dir,
-                                                cost, -gradnorm**2)
+            stepsize, x = linesearch.search(objective, man, x, desc_dir, cost,
+                                            -gradnorm**2)
 
             stop_reason = self._check_stopping_criterion(
                 time0, stepsize=stepsize, gradnorm=gradnorm, iter=iter)
