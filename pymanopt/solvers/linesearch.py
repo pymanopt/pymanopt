@@ -1,10 +1,10 @@
 import numpy as np
 
 
-class LineSearch(object):
+class LineSearchBackTracking(object):
     """
-    Line-search based on linesearch.m and linesearch_adaptive.m in the manopt
-    MATLAB package.
+    Back-tracking line-search based on linesearch.m in the manopt MATLAB
+    package.
     """
 
     def __init__(self, contraction_factor=.5, optimism=2,

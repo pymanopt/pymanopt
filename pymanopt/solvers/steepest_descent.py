@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import time
 
-from pymanopt.solvers import linesearch as default_linesearchers
+from pymanopt.solvers.linesearch import *
 from pymanopt.solvers.solver import Solver
 
 
@@ -12,13 +12,10 @@ class SteepestDescent(Solver):
     steepestdescent.m from the manopt MATLAB package.
     """
 
-    def __init__(self, linesearch=None, *args, **kwargs):
+    def __init__(self, LineSearch=LineSearchBackTracking, *args, **kwargs):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 
-        if linesearch is None:
-            self._searcher = default_linesearchers.LineSearch()
-        else:
-            self._searcher = linesearch
+        self.LineSearch = LineSearch
 
     # Function to solve optimisation problem using steepest descent.
     def solve(self, problem, x=None):
@@ -46,6 +43,8 @@ class SteepestDescent(Solver):
         objective = problem.cost
         gradient = problem.grad
 
+        linesearch = self.LineSearch()
+
         # If no starting point is specified, generate one at random.
         if x is None:
             x = man.rand()
@@ -58,7 +57,7 @@ class SteepestDescent(Solver):
             print(" iter\t\t   cost val\t    grad. norm")
 
         self._start_optlog(extraiterfields=['gradnorm'],
-                           solverparams={'linesearcher': self._searcher})
+                           solverparams={'linesearcher': linesearch})
 
         while True:
             # Calculate new cost, grad and gradnorm
@@ -77,7 +76,7 @@ class SteepestDescent(Solver):
             desc_dir = -grad
 
             # Perform line-search
-            stepsize, x = self._searcher.search(objective, man, x, desc_dir,
+            stepsize, x = linesearch.search(objective, man, x, desc_dir,
                                                 cost, -gradnorm**2)
 
             stop_reason = self._check_stopping_criterion(
