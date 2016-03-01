@@ -70,9 +70,6 @@ class Solver(object):
         return reason
 
     def _start_optlog(self, solverparams=None, extraiterfields=None):
-        if self._optlog is not None:
-            warn('Optimisation log from previous solver run is being '
-                 'overwritten.')
         if self._logverbosity <= 0:
             self._optlog = None
         else:
