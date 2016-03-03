@@ -4,7 +4,7 @@ import time
 
 import numpy as np
 
-from pymanopt.solvers import linesearch as default_linesearchers
+from pymanopt.solvers.linesearch import LineSearchAdaptive
 from pymanopt.solvers.solver import Solver
 from pymanopt import tools
 
@@ -21,7 +21,7 @@ class ConjugateGradient(Solver):
     """
 
     def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
-                 linesearch=None, *args, **kwargs):
+                 linesearch=LineSearchAdaptive(), *args, **kwargs):
         """
         Instantiate gradient solver class.
         Variable attributes (defaults in brackets):
@@ -32,18 +32,15 @@ class ConjugateGradient(Solver):
                 Parameter for Powell's restart strategy. An infinite
                 value disables this strategy. See in code formula for
                 the specific criterion used.
-            - linesearch (None)
-                If None LineSearchAdaptive will be used.
+            - linesearch (LineSearchAdaptive)
+                The linesearch method to used.
         """
         super(ConjugateGradient, self).__init__(*args, **kwargs)
 
         self._beta_type = beta_type
         self._orth_value = orth_value
 
-        if linesearch is None:
-            self._searcher = default_linesearchers.LineSearchAdaptive()
-        else:
-            self._searcher = linesearch
+        self.linesearch = linesearch
 
     def solve(self, problem, x=None):
         """
@@ -70,6 +67,8 @@ class ConjugateGradient(Solver):
         verbosity = problem.verbosity
         objective = problem.cost
         gradient = problem.grad
+
+        linesearch = self.linesearch
 
         # If no starting point is specified, generate one at random.
         if x is None:
@@ -98,7 +97,7 @@ class ConjugateGradient(Solver):
         self._start_optlog(extraiterfields=['gradnorm'],
                            solverparams={'beta_type': self._beta_type,
                                          'orth_value': self._orth_value,
-                                         'linesearcher': self._searcher})
+                                         'linesearcher': linesearch})
 
         while True:
             if verbosity >= 2:
@@ -134,8 +133,8 @@ class ConjugateGradient(Solver):
                 df0 = -gradPgrad
 
             # Execute line search
-            stepsize, newx = self._searcher.search(objective, man, x, desc_dir,
-                                                   cost, df0)
+            stepsize, newx = linesearch.search(objective, man, x, desc_dir,
+                                               cost, df0)
 
             # Compute the new cost-related quantities for newx
             newcost = objective(newx)
