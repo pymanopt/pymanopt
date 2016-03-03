@@ -7,6 +7,123 @@ from scipy.linalg import solve_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import Manifold
 
+class PositiveDefinite(Manifold):
+    '''
+    Abstract base class setting out template for manifold classes.
+    '''
+    def __init__(self, n, k=1):
+        self._n = n
+        self._k = k
+
+        self._dim = k * 0.5 * n * (n + 1)
+
+    def __str__(self):
+        '''
+        Name of the manifold
+        '''
+        pass
+
+    @property
+    def dim(self):
+        '''
+        Dimension of the manifold
+        '''
+        return self._dim
+
+    @property
+    def typicaldist(self):
+        '''
+        Returns the "scale" of the manifold. This is used by the
+        trust-regions solver, to determine default initial and maximal
+        trust-region radii.
+        '''
+        pass
+
+    def dist(self, X, Y):
+        '''
+        Geodesic distance on the manifold
+        '''
+        pass
+
+    def inner(self, X, G, H):
+        '''
+        Inner product (Riemannian metric) on the tangent space
+        '''
+        pass
+
+    def proj(self, X, G):
+        '''
+        Project into the tangent space. Usually the same as egrad2rgrad
+        '''
+        pass
+
+    def ehess2rhess(self, X, Hess):
+        '''
+        Convert Euclidean into Riemannian Hessian.
+        '''
+        pass
+
+    def retr(self, X, G):
+        '''
+        A retraction mapping from the tangent space at X to the manifold.
+        See Absil for definition of retraction.
+        '''
+        pass
+
+    def egrad2rgrad(self, X, G):
+        '''
+        A mapping from the Euclidean gradient G into the tangent space
+        to the manifold at X.
+        '''
+        pass
+
+    def norm(self, X, G):
+        '''
+        Compute the norm of a tangent vector G, which is tangent to the
+        manifold at X.
+        '''
+        pass
+
+    def rand(self):
+        '''
+        A function which returns a random point on the manifold.
+        '''
+        pass
+
+    def randvec(self, X):
+        '''
+        Returns a random, unit norm vector in the tangent space at X.
+        '''
+        pass
+
+    def transp(self, x1, x2, d):
+        '''
+        Transports d, which is a tangent vector at x1, into the tangent
+        space at x2.
+        '''
+        pass
+
+    def exp(self, X, U):
+        '''
+        The exponential (in the sense of Lie group theory) of a tangent
+        vector U at X.
+        '''
+        pass
+
+    def log(self, X, Y):
+        '''
+        The logarithm (in the sense of Lie group theory) of Y. This is the
+        inverse of exp.
+        '''
+        pass
+
+    def pairmean(self, X, Y):
+        '''
+        Computes the intrinsic mean of X and Y, that is, a point that lies
+        mid-way between X and Y on the geodesic arc joining them.
+        '''
+        pass
+
 
 class PSDFixedRank(Manifold):
     """
