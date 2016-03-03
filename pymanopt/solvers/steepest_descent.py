@@ -12,10 +12,10 @@ class SteepestDescent(Solver):
     steepestdescent.m from the manopt MATLAB package.
     """
 
-    def __init__(self, LineSearch=LineSearchBackTracking, *args, **kwargs):
+    def __init__(self, linesearch=LineSearchBackTracking(), *args, **kwargs):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 
-        self.LineSearch = LineSearch
+        self.linesearch = linesearch
 
     # Function to solve optimisation problem using steepest descent.
     def solve(self, problem, x=None):
@@ -43,7 +43,7 @@ class SteepestDescent(Solver):
         objective = problem.cost
         gradient = problem.grad
 
-        linesearch = self.LineSearch()
+        linesearch = self.linesearch
 
         # If no starting point is specified, generate one at random.
         if x is None:
