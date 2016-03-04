@@ -3,9 +3,12 @@ import warnings
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
-from scipy.linalg import solve_lyapunov as lyap
+
+import scipy as sp
 
 from pymanopt.manifolds.manifold import Manifold
+from pymanopt.tools.multi import *
+
 
 class PositiveDefinite(Manifold):
     '''
@@ -16,106 +19,106 @@ class PositiveDefinite(Manifold):
         self._k = k
 
         self._dim = k * 0.5 * n * (n + 1)
+        self._typicaldist = np.sqrt(k * 0.5 * n * (n+1))
+
+        if self._k == 1:
+            self._name = ("Manifold of positive definite ({} x {}) matrices"
+                          ).format(self._n, self._n)
+        else:
+            self._name = ("Product manifold of {} ({} x {}) matrices"
+                          ).format(self._k, self._n, self._n)
 
     def __str__(self):
-        '''
-        Name of the manifold
-        '''
-        pass
+        return self._name
 
     @property
     def dim(self):
-        '''
-        Dimension of the manifold
-        '''
         return self._dim
 
     @property
     def typicaldist(self):
-        '''
-        Returns the "scale" of the manifold. This is used by the
-        trust-regions solver, to determine default initial and maximal
-        trust-region radii.
-        '''
-        pass
+        return self._typicaldist
 
-    def dist(self, X, Y):
-        '''
-        Geodesic distance on the manifold
-        '''
-        pass
+    def dist(self, x, y):
+        # Adapted from equation 6.13 of "Positive definite matrices". Chol
+        # decomp gives the same result as matrix sqrt. There may be a more
+        # efficient way to compute this!
+        c = np.linalg.cholesky(x)
+        c_inv = np.linalg.inv(c)
+        l = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
+                     pos_def=True)
+        return la.norm(multiprod(multiprod(c, l), c_inv))
 
-    def inner(self, X, G, H):
-        '''
-        Inner product (Riemannian metric) on the tangent space
-        '''
-        pass
+    def inner(self, x, u, v):
+        return np.tensordot(la.solve(x, u), la.solve(x, v), axes=x.ndim)
 
     def proj(self, X, G):
-        '''
-        Project into the tangent space. Usually the same as egrad2rgrad
-        '''
-        pass
+        return multisym(G)
 
-    def ehess2rhess(self, X, Hess):
-        '''
-        Convert Euclidean into Riemannian Hessian.
-        '''
-        pass
+    def egrad2rgrad(self, x, u):
+        # TODO: Check that this is correct
+        return multiprod(multiprod(x, multisym(u)), x)
+
+    def ehess2rhess(self, x, egrad, ehess, u):
+        # TODO: Check that this is correct
+        return (multiprod(multiprod(x, multisym(ehess)), x) +
+                multisym(multiprod(multiprod(u, multisym(egrad)), x)))
 
     def retr(self, X, G):
-        '''
-        A retraction mapping from the tangent space at X to the manifold.
-        See Absil for definition of retraction.
-        '''
-        pass
+        return self.exp(X, G)
 
-    def egrad2rgrad(self, X, G):
-        '''
-        A mapping from the Euclidean gradient G into the tangent space
-        to the manifold at X.
-        '''
-        pass
-
-    def norm(self, X, G):
-        '''
-        Compute the norm of a tangent vector G, which is tangent to the
-        manifold at X.
-        '''
-        pass
+    def norm(self, x, u):
+        return la.norm(la.solve(x, u))
 
     def rand(self):
-        '''
-        A function which returns a random point on the manifold.
-        '''
-        pass
+        # The way this is done is arbitrary. I think the space of p.d.
+        # matrices would have infinite measure w.r.t. the Riemannian metric
+        # (c.f. integral 0-inf [ln(x)] dx = inf) so impossible to have a
+        # 'uniform' distribution.
 
-    def randvec(self, X):
-        '''
-        Returns a random, unit norm vector in the tangent space at X.
-        '''
-        pass
+        # Generate eigenvalues between 1 and 2
+        d = np.ones((self._k, self._n, 1)) + rnd.rand(self._k, self._n, 1)
+
+        # Generate an orthogonal matrix. Annoyingly qr decomp isn't
+        # vectorized so need to use a for loop. Could be done using
+        # svd but this is slower for bigger matrices.
+        u = np.zeros((self._k, self._n, self._n))
+        for i in range(self._k):
+            u[i], r = la.qr(rnd.randn(self._n, self._n))
+
+        if self._k == 1:
+            return multiprod(u, d * multitransp(u))[0]
+        else:
+            return multiprod(u, d * multitransp(u))
+
+    def randvec(self, x):
+        if self._k == 1:
+            u = multisym(np.random.randn(self._n, self._n))
+        else:
+            u = multisym(np.random.randn(self._k, self._n, self._n))
+        return u / self.norm(x, u)
 
     def transp(self, x1, x2, d):
-        '''
-        Transports d, which is a tangent vector at x1, into the tangent
-        space at x2.
-        '''
-        pass
+        return d
 
-    def exp(self, X, U):
-        '''
-        The exponential (in the sense of Lie group theory) of a tangent
-        vector U at X.
-        '''
-        pass
+    def exp(self, x, u):
+        # TODO: Check which method is faster depending on n, k.
+        if self._k == 1:
+            # Use manopt method
+            return x.dot(sp.linalg.expm(sp.linalg.solve(x, u, sym_pos=True)))
+        else:
+            c = la.cholesky(x)
+            c_inv = la.inv(c)
+            e = multiexp(multiprod(multiprod(c_inv, u), multitransp(c_inv)),
+                         sym=True)
+            return multiprod(multiprod(c, e), multitransp(c))
 
-    def log(self, X, Y):
-        '''
-        The logarithm (in the sense of Lie group theory) of Y. This is the
-        inverse of exp.
-        '''
-        pass
+    def log(self, x, y):
+        c = la.cholesky(x)
+        c_inv = la.inv(c)
+        l = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
+                     pos_def=True)
+        return multiprod(multiprod(c, l), multitransp(c))
 
     def pairmean(self, X, Y):
         '''

@@ -62,7 +62,7 @@ def multilog(A, pos_def=False):
 
 def multiexp(A, sym=False):
     # Compute the expm of each matrix in an array of k symmetric matrices.
-    # Much faster than scipy.linalg.expm even for a single matrix.
+    # Sometimes faster than scipy.linalg.expm even for a single matrix.
     if sym:
         l, v = np.linalg.eigh(A)
         l = np.expand_dims(np.exp(l), axis=-1)
