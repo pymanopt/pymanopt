@@ -12,7 +12,12 @@ from pymanopt.tools.multi import *
 
 class PositiveDefinite(Manifold):
     '''
-    Abstract base class setting out template for manifold classes.
+    Manifold of (n x n)^k positive definite matrices, based on the geometry 
+    discussed in Chapter 6 of Positive Definite Matrices (Bhatia 2007). Some 
+    of the implementation is based on sympositivedefinitefactory.m from the 
+    Manopt MATLAB package. Also see "Conic geometric optimisation on the 
+    manifold of positive definite matrices" (Sra & Hosseini 2013) for more 
+    details.
     '''
     def __init__(self, n, k=1):
         self._n = n
