@@ -19,7 +19,7 @@
 - tools
 
     - add tensorflow support
-    
+
     - autodiff/_theano
         - Fix theano's no Rop fallback for the product manifold/investigate whether this no Rop fallback is really necessary
 
