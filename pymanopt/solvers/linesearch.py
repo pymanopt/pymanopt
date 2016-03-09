@@ -47,6 +47,7 @@ class LineSearchBackTracking(object):
             alpha *= self.optimism
         else:
             alpha = self.initial_stepsize / norm_d
+        alpha = float(alpha)
 
         # Make the chosen step and compute the cost there.
         newx = manifold.retr(x, alpha * d)
@@ -98,6 +99,7 @@ class LineSearchAdaptive(object):
             alpha = self._oldalpha
         else:
             alpha = self._initial_stepsize / norm_d
+        alpha = float(alpha)
 
         newx = man.retr(x, alpha * d)
         newf = objective(newx)
