@@ -5,6 +5,7 @@ import numpy.linalg as la
 import numpy.random as rnd
 
 import scipy as sp
+from scipy.linalg import solve_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools.multi import *
