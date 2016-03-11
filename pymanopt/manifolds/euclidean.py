@@ -22,7 +22,7 @@ class Euclidean(Manifold):
             self._name = "Euclidean manifold of {}-vectors".format(*shape)
         elif len(shape) == 2:
             self._name = ("Euclidean manifold of {}x{} "
-                           "matricies").format(*shape)
+                           "matrices").format(*shape)
         else:
             self._name = ("Euclidean manifold of shape " + str(shape) +
                            " tensors")
