@@ -4,8 +4,9 @@
 [![Build Status](https://travis-ci.org/pymanopt/pymanopt.svg?branch=master)](https://travis-ci.org/pymanopt/pymanopt)
 [![Coverage Status](https://coveralls.io/repos/github/pymanopt/pymanopt/badge.svg?branch=master)](https://coveralls.io/github/pymanopt/pymanopt?branch=master)
 
-Please refer to the **documentation at https://pymanopt.github.io** to get
-started with manifold optimisation using Pymanopt.
+Please refer to the **documentation at [pymanopt.github.io](https://pymanopt.github.io)**
+and this [arXiv note](http://arxiv.org/abs/1603.03236) to get started
+with manifold optimisation using Pymanopt.
 
 We encourage users and developers to report problems, request features,
 ask for help, or leave general comments either here on github,
