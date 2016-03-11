@@ -14,17 +14,25 @@ class Euclidean(Manifold):
     Use for solving unconstrained problems with pymanopt.
     """
 
-    def __init__(self, m, n):
-        self._m = m
-        self._n = n
+    def __init__(self, *shape):
+        self._shape = shape
+        if len(shape) == 0:
+            raise TypeError("Need shape parameters.")
+        elif len(shape) == 1:
+            self._name = "Euclidean manifold of {}-vectors".format(*shape)
+        elif len(shape) == 2:
+            self._name = ("Euclidean manifold of {}x{} "
+                           "matricies").format(*shape)
+        else:
+            self._name = ("Euclidean manifold of shape " + str(shape) +
+                           " tensors")
 
     def __str__(self):
-        return ("Euclidean manifold of "
-                "{:d}x{:d} matrices".format(self._m, self._n))
+        return self._name
 
     @property
     def dim(self):
-        return self._m * self._n
+        return np.prod(self._shape)
 
     @property
     def typicaldist(self):
@@ -57,7 +65,7 @@ class Euclidean(Manifold):
         return Y-X
 
     def rand(self):
-        return rnd.randn(self._m, self._n)
+        return rnd.randn(*self._shape)
 
     def randvec(self, X):
         Y = self.rand()
