@@ -109,15 +109,21 @@ class PositiveDefinite(Manifold):
 
     def exp(self, x, u):
         # TODO: Check which method is faster depending on n, k.
-        if self._k == 1:
-            # Use manopt method
-            return x.dot(sp.linalg.expm(sp.linalg.solve(x, u, sym_pos=True)))
+        x_inv_u = np.linalg.solve(x, u)
+        if self._k > 1:
+            e = np.zeros(np.shape(x))
+            for i in range(self._k):
+                e[i] = sp.linalg.expm(x_inv_u[i])
         else:
-            c = la.cholesky(x)
-            c_inv = la.inv(c)
-            e = multiexp(multiprod(multiprod(c_inv, u), multitransp(c_inv)),
-                         sym=True)
-            return multiprod(multiprod(c, e), multitransp(c))
+            e = sp.linalg.expm(x_inv_u)
+        return multiprod(x, e)
+        # This alternative implementation is sometimes faster though less
+        # stable. It can return a matrix with small negative determinant.
+        #    c = la.cholesky(x)
+        #    c_inv = la.inv(c)
+        #    e = multiexp(multiprod(multiprod(c_inv, u), multitransp(c_inv)),
+        #                 sym=True)
+        #    return multiprod(multiprod(c, e), multitransp(c))
 
     def log(self, x, y):
         c = la.cholesky(x)
