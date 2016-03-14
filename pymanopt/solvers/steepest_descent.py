@@ -15,7 +15,10 @@ class SteepestDescent(Solver):
     def __init__(self, linesearch=LineSearchBackTracking(), *args, **kwargs):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 
-        self.linesearch = linesearch
+        if linesearch is None:
+            self.linesearch = LineSearchBackTracking()
+        else:
+            self.linesearch = linesearch
 
     # Function to solve optimisation problem using steepest descent.
     def solve(self, problem, x=None):

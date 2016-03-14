@@ -21,7 +21,7 @@ class ConjugateGradient(Solver):
     """
 
     def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
-                 linesearch=LineSearchAdaptive(), *args, **kwargs):
+                 linesearch=None, *args, **kwargs):
         """
         Instantiate gradient solver class.
         Variable attributes (defaults in brackets):
@@ -40,7 +40,10 @@ class ConjugateGradient(Solver):
         self._beta_type = beta_type
         self._orth_value = orth_value
 
-        self.linesearch = linesearch
+        if linesearch is None:
+            self.linesearch = LineSearchAdaptive()
+        else:
+            self.linesearch = linesearch
 
     def solve(self, problem, x=None):
         """
