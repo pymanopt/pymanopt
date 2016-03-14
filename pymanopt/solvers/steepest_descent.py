@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import time
+from copy import deepcopy
 
 from pymanopt.solvers.linesearch import LineSearchBackTracking
 from pymanopt.solvers.solver import Solver
@@ -16,12 +17,13 @@ class SteepestDescent(Solver):
         super(SteepestDescent, self).__init__(*args, **kwargs)
 
         if linesearch is None:
-            self.linesearch = LineSearchBackTracking()
+            self._linesearch = LineSearchBackTracking()
         else:
-            self.linesearch = linesearch
+            self._linesearch = linesearch
+        self.linesearch = None
 
     # Function to solve optimisation problem using steepest descent.
-    def solve(self, problem, x=None):
+    def solve(self, problem, x=None, reuselinesearch=False):
         """
         Perform optimization using gradient descent with linesearch.
         This method first computes the gradient (derivative) of obj
@@ -36,6 +38,9 @@ class SteepestDescent(Solver):
             - x=None
                 Optional parameter. Starting point on the manifold. If none
                 then a starting point will be randomly generated.
+            - reuselinesearch=False
+                Whether to reuse the previous linesearch object. Allows to
+                use information from a previous solve run.
         Returns:
             - x
                 Local minimum of obj, or if algorithm terminated before
@@ -46,6 +51,8 @@ class SteepestDescent(Solver):
         objective = problem.cost
         gradient = problem.grad
 
+        if not reuselinesearch or self.linesearch is None:
+            self.linesearch = deepcopy(self._linesearch)
         linesearch = self.linesearch
 
         # If no starting point is specified, generate one at random.

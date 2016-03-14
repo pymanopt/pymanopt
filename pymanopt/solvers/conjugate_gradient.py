@@ -41,11 +41,12 @@ class ConjugateGradient(Solver):
         self._orth_value = orth_value
 
         if linesearch is None:
-            self.linesearch = LineSearchAdaptive()
+            self._linesearch = LineSearchAdaptive()
         else:
-            self.linesearch = linesearch
+            self._linesearch = linesearch
+        self.linesearch = None
 
-    def solve(self, problem, x=None):
+    def solve(self, problem, x=None, reuselinesearch=False):
         """
         Perform optimization using nonlinear conjugate gradient method with
         linesearch.
@@ -61,6 +62,9 @@ class ConjugateGradient(Solver):
             - x=None
                 Optional parameter. Starting point on the manifold. If none
                 then a starting point will be randomly generated.
+            - reuselinesearch=False
+                Whether to reuse the previous linesearch object. Allows to
+                use information from a previous solve run.
         Returns:
             - x
                 Local minimum of obj, or if algorithm terminated before
@@ -71,6 +75,8 @@ class ConjugateGradient(Solver):
         objective = problem.cost
         gradient = problem.grad
 
+        if not reuselinesearch or self.linesearch is None:
+            self.linesearch = deepcopy(self._linesearch)
         linesearch = self.linesearch
 
         # If no starting point is specified, generate one at random.
