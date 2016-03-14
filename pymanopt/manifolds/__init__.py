@@ -7,5 +7,5 @@ from .euclidean import Euclidean
 from .product import Product
 
 __all__ = ["Grassmann", "Sphere", "Stiefel", "PSDFixedRank",
-           "PSDFixedRankComplex", "Elliptope", "Oblique",
+           "PSDFixedRankComplex", "Elliptope", "PositiveDefinite", "Oblique",
            "Euclidean", "Product"]
