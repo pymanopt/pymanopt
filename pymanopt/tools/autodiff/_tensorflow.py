@@ -3,6 +3,7 @@ Module containing functions to differentiate functions using tensorflow.
 """
 try:
     import tensorflow as tf
+    from tensorflow.python.ops.gradients import _hessian_vector_product
 except ImportError:
     tf = None
 
@@ -74,6 +75,21 @@ class TensorflowBackend(Backend):
 
     @assert_backend_available
     def compute_hessian(self, objective, argument):
-        # TODO
-        raise NotImplementedError('Tensorflow backend does not yet '
-                                  'implement compute_hessian.')
+        if not isinstance(argument, list):
+            argA = tf.Variable(tf.zeros(tf.shape(argument)))
+            tfhess = _hessian_vector_product(objective, [argument], [argA])
+
+            def hess(x, a):
+                feed_dict = {argument: x, argA: a}
+                return self._session.run(tfhess[0], feed_dict)
+
+        else:
+            argA = [tf.Variable(tf.zeros(tf.shape(arg)))
+                    for arg in argument]
+            tfhess = _hessian_vector_product(objective, argument, argA)
+
+            def hess(x, a):
+                feed_dict = {i: d for i, d in zip(argument+argA, x+a)}
+                return self._session.run(tfhess, feed_dict)
+
+        return hess

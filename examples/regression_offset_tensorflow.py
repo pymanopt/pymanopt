@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 from pymanopt import Problem
-from pymanopt.solvers import TrustRegions, SteepestDescent
+from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Euclidean, Product
 
 if __name__ == "__main__":
@@ -17,8 +17,7 @@ if __name__ == "__main__":
     cost = tf.reduce_mean(tf.square(Y - tf.matmul(tf.transpose(w), X) - b))
 
     # first-order, second-order
-    # solver = TrustRegions()
-    solver = SteepestDescent()
+    solver = TrustRegions()
 
     # R^3 x R^1
     manifold = Product([Euclidean(3, 1), Euclidean(1, 1)])
