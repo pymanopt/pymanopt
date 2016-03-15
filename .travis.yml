@@ -40,7 +40,7 @@ install:
 script:
   - nosetests ./tests --verbosity=2 --with-coverage --cover-package=pymanopt
   - pep8 examples pymanopt tests setup.py
-  - cd examples && sh run_all.sh && cd ..
+  # - cd examples && sh run_all.sh && cd ..
 
 after_success:
   - coveralls
