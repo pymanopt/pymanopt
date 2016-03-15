@@ -38,10 +38,16 @@ class TensorflowBackend(Backend):
 
     @assert_backend_available
     def compile_function(self, objective, argument):
+        if not isinstance(argument, list):
 
-        def func(x):
-            feed_dict = {i: d for i, d in zip(argument, x)}
-            return self._session.run(objective, feed_dict)
+            def func(x):
+                feed_dict = {argument: x}
+                return self._session.run(objective, feed_dict)
+        else:
+
+            def func(x):
+                feed_dict = {i: d for i, d in zip(argument, x)}
+                return self._session.run(objective, feed_dict)
 
         return func
 
@@ -52,9 +58,17 @@ class TensorflowBackend(Backend):
         """
         tfgrad = tf.gradients(objective, argument)
 
-        def grad(x):
-            feed_dict = {i: d for i, d in zip(argument, x)}
-            return self._session.run(tfgrad, feed_dict)
+        if not isinstance(argument, list):
+
+            def grad(x):
+                feed_dict = {argument: x}
+                return self._session.run(tfgrad[0], feed_dict)
+
+        else:
+
+            def grad(x):
+                feed_dict = {i: d for i, d in zip(argument, x)}
+                return self._session.run(tfgrad, feed_dict)
 
         return grad
 
