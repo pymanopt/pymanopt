@@ -7,7 +7,7 @@ from pymanopt.manifolds.manifold import Manifold
 
 class Sphere(Manifold):
     """
-    Manifold of shape shape n1 x n2 x ... x nk tensors with unit 2-norm. The
+    Manifold of shape n1 x n2 x ... x nk tensors with unit 2-norm. The
     metric is such that the sphere is a Riemannian submanifold of Euclidean
     space. This implementation is based on spherefactory.m from the Manopt
     MATLAB package.
