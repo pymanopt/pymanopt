@@ -7,18 +7,20 @@
     - implement further manifolds
 
     - Stiefel
-        - [todo @121 (simplify expressions)](./pymanopt/manifolds/stiefel.py#L121) Not sure if this is really possible though...
+        - [todo @118 (simplify expressions)](./pymanopt/manifolds/stiefel.py#L118) Not sure if this is really possible though...
 
 - solvers
 
     - nelder_mead
-        [todo @37](./pymanopt/solvers/nelder_mead.py#L37) need to decide what to do about the TR iterations
+        [todo @32](./pymanopt/solvers/nelder_mead.py#L32) need to decide what to do about the TR iterations
 
     - implement tests for solvers
 
 - tools
 
-    - add tensorflow support
+    - autodiff/_tensorflow
+        - Implement compute_hessian [todo @62](./pymanopt/tools/autodiff/_tensorflow.py#L62)
+        - Add tests
 
     - autodiff/_theano
         - Fix theano's no Rop fallback for the product manifold/investigate whether this no Rop fallback is really necessary
