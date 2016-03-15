@@ -13,7 +13,8 @@ from ._backend import Backend, assert_backend_available
 
 class TensorflowBackend(Backend):
     def __init__(self):
-        self._session = tf.Session()
+        if tf is not None:
+            self._session = tf.Session()
 
     def __str__(self):
         return "tensorflow"
