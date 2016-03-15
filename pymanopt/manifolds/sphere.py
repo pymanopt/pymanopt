@@ -7,38 +7,49 @@ from pymanopt.manifolds.manifold import Manifold
 
 class Sphere(Manifold):
     """
-    Manifold of m-by-n real matrices of unit Frobenius norm. By default, n =
-    1, which corresponds to the unit sphere in R^m. The metric is such that the
-    sphere is a Riemannian submanifold of the space of m-by-n matrices with the
-    usual trace inner product, i.e., the usual metric.
+    Manifold of shape shape n1 x n2 x ... x nk tensors with unit 2-norm. The
+    metric is such that the sphere is a Riemannian submanifold of Euclidean
+    space. This implementation is based on spherefactory.m from the Manopt
+    MATLAB package.
+
+    Examples:
+    The 'usual' sphere S^2, the set of points lying on the surface of a ball in
+    3D space:
+    sphere = Sphere(3)
     """
 
-    def __init__(self, m, n=1):
-        self._m = m
-        self._n = n
+    def __init__(self, *shape):
+        self._shape = shape
+        if len(shape) == 0:
+            raise TypeError("Need shape parameters.")
+        elif len(shape) == 1:
+            self._name = "Sphere manifold of {}-vectors".format(*shape)
+        elif len(shape) == 2:
+            self._name = "Sphere manifold of {}x{} matrices".format(*shape)
+        else:
+            self._name = "Sphere manifold of shape " + str(shape) + " tensors"
 
     def __str__(self):
-        if self._n == 1:
-            return "Sphere S^{:d}".format(self._m - 1)
-        else:
-            return "Unit F-norm {:d}x{:d} matrices".format(self._m, self._n)
+        return self._name
 
     @property
     def dim(self):
-        return self._n * self._m - 1
+        return np.prod(self._shape) - 1
 
     @property
     def typicaldist(self):
         return np.pi
 
     def inner(self, X, U, V):
-        return float(np.tensordot(np.asmatrix(U), np.asmatrix(V)))
+        return float(np.tensordot(U, V, axes=U.ndim))
 
     def norm(self, X, U):
-        return la.norm(U, "fro")
+        return la.norm(U)
 
     def dist(self, U, V):
-        return np.arccos(min(self.inner(None, U, V), 1))
+        # Make sure inner product is between -1 and 1
+        inner = max(min(self.inner(None, U, V), 1), -1)
+        return np.arccos(inner)
 
     def proj(self, X, H):
         return H - self.inner(None, X, H) * X
@@ -70,11 +81,11 @@ class Sphere(Manifold):
         return P
 
     def rand(self):
-        Y = rnd.randn(self._m, self._n)
+        Y = rnd.randn(*self._shape)
         return self._normalize(Y)
 
     def randvec(self, X):
-        H = rnd.randn(*X.shape)
+        H = rnd.randn(*self._shape)
         P = self.proj(X, H)
         return self._normalize(P)
 

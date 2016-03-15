@@ -9,9 +9,16 @@ from pymanopt.manifolds.manifold import Manifold
 
 class Euclidean(Manifold):
     """
-    Euclidean manifold, i.e. the euclidean space of m-by-n matrices
-    equipped with the Frobenius distance and trace inner product.
-    Use for solving unconstrained problems with pymanopt.
+    Euclidean manifold of shape n1 x n2 x ... x nk tensors. Useful for
+    unconstrained optimization problems or for unconstrained hyperparameters,
+    as part of a product manifold.
+
+    Examples:
+    Create a manifold of vectors of length n:
+    manifold = Euclidean(n)
+
+    Create a manifold of m x n matrices:
+    manifold = Euclidean(m, n)
     """
 
     def __init__(self, *shape):
