@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import time
+from copy import deepcopy
 
 import numpy as np
 
