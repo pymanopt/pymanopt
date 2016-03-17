@@ -35,7 +35,7 @@ install:
   - pip install pep8
   - pip install coveralls
   - pip install autograd
-  - pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
+  - sudo pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
   - python setup.py install
 
 script:
