@@ -35,7 +35,11 @@ install:
   - pip install pep8
   - pip install coveralls
   - pip install autograd
-  - sudo pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp27-none-linux_x86_64.whl
+  - if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp27-none-linux_x86_64.whl"; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.4" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp34-none-linux_x86_64.whl"; fi
+  # If we're on python 3.3 or 3.5 then rename the tensorflow wheel so it doesn't throw error (very hacky)
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.3" ]; then wget https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp34-none-linux_x86_64.whl -O tensorflow-0.7.1-cp33-none-linux_x86_64.whl; TENSORFLOW_PACKAGE_LOC="tensorflow-0.7.1-cp33-none-linux_x86_64.whl"; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.5" ]; then wget https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp34-none-linux_x86_64.whl -O tensorflow-0.7.1-cp35-none-linux_x86_64.whl; TENSORFLOW_PACKAGE_LOC="tensorflow-0.7.1-cp35-none-linux_x86_64.whl"; fi
   - python setup.py install
 
 script:
