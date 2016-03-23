@@ -98,14 +98,14 @@ class TestMatrix(unittest.TestCase):
 
     def test_grad(self):
         grad = self.backend.compute_gradient(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y)
+        np_testing.assert_allclose(self.correct_grad, grad(self.Y),
                                    rtol=1e-4)
 
     def test_hessian(self):
         hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
-        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A)
+        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A),
                                    rtol=1e-4)
 
 
