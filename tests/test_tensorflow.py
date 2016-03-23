@@ -118,8 +118,8 @@ class TestTensor3(unittest.TestCase):
         n2 = self.n2 = 4
         n3 = self.n3 = 5
 
-        Y = self.Y = rnd.randn(n1, n2, n3).astype(float32)
-        A = self.A = rnd.randn(n1, n2, n3).astype(float32)
+        Y = self.Y = rnd.randn(n1, n2, n3).astype(float32) * 1e-3
+        A = self.A = rnd.randn(n1, n2, n3).astype(float32) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
