@@ -156,11 +156,10 @@ class TestTensor3(unittest.TestCase):
 
 
 class TestMixed(unittest.TestCase):
-
-
     # Test autograd on a tuple containing vector, matrix and tensor3.
     def setUp(self):
         np.seterr(all='raise')
+
         def f(x):
             return (np.exp(np.sum(x[0]**2)) + np.exp(np.sum(x[1]**2)) +
                     np.exp(np.sum(x[2]**2)))
