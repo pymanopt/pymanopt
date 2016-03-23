@@ -12,13 +12,14 @@ from pymanopt.tools.autodiff import AutogradBackend
 
 class TestVector(unittest.TestCase):
     def setUp(self):
+        np.seterr(all='raise')
         self.X = None
         self.cost = lambda X: np.exp(np.sum(X**2))
 
         n = self.n = 15
 
-        Y = self.Y = rnd.randn(1, n)
-        A = self.A = rnd.randn(1, n)
+        Y = self.Y = rnd.randn(n)
+        A = self.A = rnd.randn(n)
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
@@ -35,7 +36,7 @@ class TestVector(unittest.TestCase):
         H = np.exp(np.sum(Y ** 2)) * (4 * Ymat.T.dot(Ymat) + 2 * diag)
 
         # Then 'left multiply' H by A
-        self.correct_hess = np.array(Amat.dot(H))
+        self.correct_hess = np.squeeze(np.array(Amat.dot(H)))
 
         self.backend = AutogradBackend()
 
@@ -56,6 +57,8 @@ class TestVector(unittest.TestCase):
 
 class TestMatrix(unittest.TestCase):
     def setUp(self):
+        np.seterr(all='raise')
+
         self.X = None
         self.cost = lambda X: np.exp(np.sum(X**2))
 
@@ -104,6 +107,8 @@ class TestMatrix(unittest.TestCase):
 
 class TestTensor3(unittest.TestCase):
     def setUp(self):
+        np.seterr(all='raise')
+
         self.X = None
         self.cost = lambda X: np.exp(np.sum(X**2))
 
@@ -151,8 +156,11 @@ class TestTensor3(unittest.TestCase):
 
 
 class TestMixed(unittest.TestCase):
+
+
     # Test autograd on a tuple containing vector, matrix and tensor3.
     def setUp(self):
+        np.seterr(all='raise')
         def f(x):
             return (np.exp(np.sum(x[0]**2)) + np.exp(np.sum(x[1]**2)) +
                     np.exp(np.sum(x[2]**2)))
