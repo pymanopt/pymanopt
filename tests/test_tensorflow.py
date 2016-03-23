@@ -89,7 +89,6 @@ class TestMatrix(unittest.TestCase):
         Atensor = A.reshape(1, 1, m, n)
 
         self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
-        print self.correct_hess
         self.backend = TensorflowBackend()
 
     def test_compile(self):
