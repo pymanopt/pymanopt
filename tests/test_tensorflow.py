@@ -1,25 +1,27 @@
 import unittest
 
+import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
+from numpy import float32
+
+import tensorflow as tf
 
 import warnings
 
-import autograd.numpy as np
-from pymanopt.tools.autodiff import AutogradBackend
+from pymanopt.tools.autodiff import TensorflowBackend
 
 
 class TestVector(unittest.TestCase):
     def setUp(self):
-        np.seterr(all='raise')
-        self.X = None
-        self.cost = lambda X: np.exp(np.sum(X**2))
+        self.X = X = tf.Variable(tf.zeros([0]))
+        self.cost = tf.exp(tf.reduce_sum(X**2))
 
         n = self.n = 15
 
-        Y = self.Y = rnd.randn(n)
-        A = self.A = rnd.randn(n)
+        Y = self.Y = rnd.randn(n).astype(float32) * 1e-3
+        A = self.A = rnd.randn(n).astype(float32) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
@@ -27,7 +29,7 @@ class TestVector(unittest.TestCase):
 
         # ... and hess
         # First form hessian matrix H
-        # Convert Y and A into matrices (row vectors)
+        # Convert Y and A into matrices (column vectors)
         Ymat = np.matrix(Y)
         Amat = np.matrix(A)
 
@@ -35,38 +37,38 @@ class TestVector(unittest.TestCase):
 
         H = np.exp(np.sum(Y ** 2)) * (4 * Ymat.T.dot(Ymat) + 2 * diag)
 
-        # Then 'left multiply' H by A
-        self.correct_hess = np.squeeze(np.array(Amat.dot(H)))
+        # Then 'right multiply' H by A
+        self.correct_hess = np.array(Amat.dot(H)).squeeze()
 
-        self.backend = AutogradBackend()
+        self.backend = TensorflowBackend()
 
     def test_compile(self):
         cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y),
+                                   rtol=1e-4)
 
     def test_grad(self):
         grad = self.backend.compute_gradient(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
+        np_testing.assert_allclose(self.correct_grad, grad(self.Y), rtol=1e-4)
 
     def test_hessian(self):
         hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
-        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
+        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A),
+                                   rtol=1e-4)
 
 
 class TestMatrix(unittest.TestCase):
     def setUp(self):
-        np.seterr(all='raise')
-
-        self.X = None
-        self.cost = lambda X: np.exp(np.sum(X**2))
+        self.X = X = tf.Variable(tf.zeros([0]))
+        self.cost = tf.exp(tf.reduce_sum(X**2))
 
         m = self.m = 10
         n = self.n = 15
 
-        Y = self.Y = rnd.randn(m, n)
-        A = self.A = rnd.randn(m, n)
+        Y = self.Y = rnd.randn(m, n).astype(float32) * 1e-3
+        A = self.A = rnd.randn(m, n).astype(float32) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
@@ -87,37 +89,37 @@ class TestMatrix(unittest.TestCase):
         Atensor = A.reshape(1, 1, m, n)
 
         self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
-
-        self.backend = AutogradBackend()
+        self.backend = TensorflowBackend()
 
     def test_compile(self):
         cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y),
+                                   rtol=1e-4)
 
     def test_grad(self):
         grad = self.backend.compute_gradient(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
+        np_testing.assert_allclose(self.correct_grad, grad(self.Y),
+                                   rtol=1e-4)
 
     def test_hessian(self):
         hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
-        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
+        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A),
+                                   rtol=1e-4)
 
 
 class TestTensor3(unittest.TestCase):
     def setUp(self):
-        np.seterr(all='raise')
-
-        self.X = None
-        self.cost = lambda X: np.exp(np.sum(X**2))
+        self.X = X = tf.Variable(tf.zeros([0]))
+        self.cost = tf.exp(tf.reduce_sum(X**2))
 
         n1 = self.n1 = 3
         n2 = self.n2 = 4
         n3 = self.n3 = 5
 
-        Y = self.Y = rnd.randn(n1, n2, n3)
-        A = self.A = rnd.randn(n1, n2, n3)
+        Y = self.Y = rnd.randn(n1, n2, n3).astype(float32) * 1e-3
+        A = self.A = rnd.randn(n1, n2, n3).astype(float32) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
@@ -138,33 +140,36 @@ class TestTensor3(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(3, 4, 5))
 
-        self.backend = AutogradBackend()
+        self.backend = TensorflowBackend()
 
     def test_compile(self):
         cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y),
+                                   rtol=1e-4)
 
     def test_grad(self):
         grad = self.backend.compute_gradient(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
+        np_testing.assert_allclose(self.correct_grad, grad(self.Y), rtol=1e-4)
 
     def test_hessian(self):
         hess = self.backend.compute_hessian(self.cost, self.X)
 
         # Now test hess
-        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
+        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A),
+                                   rtol=1e-4)
 
 
 class TestMixed(unittest.TestCase):
     # Test autograd on a tuple containing vector, matrix and tensor3.
     def setUp(self):
-        np.seterr(all='raise')
-
-        def f(x):
-            return (np.exp(np.sum(x[0]**2)) + np.exp(np.sum(x[1]**2)) +
-                    np.exp(np.sum(x[2]**2)))
+        x = tf.Variable(tf.zeros([0]))
+        y = tf.Variable(tf.zeros([0]))
+        z = tf.Variable(tf.zeros([0]))
+        f = (tf.exp(tf.reduce_sum(x**2)) + tf.exp(tf.reduce_sum(y**2)) +
+             tf.exp(tf.reduce_sum(z**2)))
 
         self.cost = f
+        self.arg = [x, y, z]
 
         n1 = self.n1 = 3
         n2 = self.n2 = 4
@@ -173,10 +178,16 @@ class TestMixed(unittest.TestCase):
         n5 = self.n5 = 7
         n6 = self.n6 = 8
 
-        self.y = y = (rnd.randn(n1), rnd.randn(n2, n3), rnd.randn(n4, n5, n6))
-        self.a = a = (rnd.randn(n1), rnd.randn(n2, n3), rnd.randn(n4, n5, n6))
+        self.y = y = (rnd.randn(n1).astype(float32) * 1e-3,
+                      rnd.randn(n2, n3).astype(float32) * 1e-3,
+                      rnd.randn(n4, n5, n6).astype(float32) * 1e-3)
+        self.a = a = (rnd.randn(n1).astype(float32) * 1e-3,
+                      rnd.randn(n2, n3).astype(float32) * 1e-3,
+                      rnd.randn(n4, n5, n6).astype(float32) * 1e-3)
 
-        self.correct_cost = f(y)
+        self.correct_cost = (np.exp(np.sum(y[0]**2)) +
+                             np.exp(np.sum(y[1]**2)) +
+                             np.exp(np.sum(y[2]**2)))
 
         # CALCULATE CORRECT GRAD
         g1 = 2 * y[0] * np.exp(np.sum(y[0] ** 2))
@@ -229,21 +240,22 @@ class TestMixed(unittest.TestCase):
         h3 = np.sum(H * Atensor, axis=(3, 4, 5))
 
         self.correct_hess = (h1, h2, h3)
-        self.backend = AutogradBackend()
+        self.backend = TensorflowBackend()
 
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, None)
+        cost_compiled = self.backend.compile_function(self.cost, self.arg)
         np_testing.assert_allclose(self.correct_cost, cost_compiled(self.y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, None)
+        grad = self.backend.compute_gradient(self.cost, self.arg)
         for k in range(len(grad(self.y))):
-            np_testing.assert_allclose(self.correct_grad[k], grad(self.y)[k])
+            np_testing.assert_allclose(self.correct_grad[k], grad(self.y)[k],
+                                       rtol=1e-4)
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, None)
+        hess = self.backend.compute_hessian(self.cost, self.arg)
 
         # Now test hess
         for k in range(len(hess(self.y, self.a))):
-            np_testing.assert_allclose(self.correct_hess[k], hess(self.y,
-                                                                  self.a)[k])
+            np_testing.assert_allclose(self.correct_hess[k],
+                                       hess(self.y, self.a)[k], rtol=1e-4)
