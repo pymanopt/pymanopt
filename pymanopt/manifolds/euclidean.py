@@ -5,6 +5,7 @@ import numpy.linalg as la
 import numpy.random as rnd
 
 from pymanopt.manifolds.manifold import Manifold
+from pymanopt.tools.multi import multisym
 
 
 class Euclidean(Manifold):
@@ -83,3 +84,48 @@ class Euclidean(Manifold):
 
     def pairmean(self, X, Y):
         return .5*(X+Y)
+
+
+class Symmetric(Euclidean):
+    """
+    Manifold of n x n symmetric matrices, as a Riemannian submanifold of
+    Euclidean space.
+
+    If k > 1 then this is an array of shape (k, n, n) (product manifold)
+    containing k (n x n) matrices.
+    """
+
+    def __init__(self, n, k=1):
+        if k == 1:
+            self._shape = (n, n)
+            self._name = ("Manifold of {} x {} symmetric matrices."
+                          ).format(n, n)
+        else:
+            self._shape = (k, n, n)
+            self._name = ("Product manifold of {} ({} x {}) symmetric "
+                          "matrices.").format(k, n, n)
+
+        self._dim = 0.5 * k * n * (n + 1)
+
+    def __str__(self):
+        return self._name
+
+    @property
+    def dim(self):
+        return self._dim
+
+    def proj(self, X, U):
+        return multisym(U)
+
+    def egrad2rgrad(self, X, U):
+        return multisym(U)
+
+    def ehess2rhess(self, X, egrad, ehess, H):
+        return multisym(ehess)
+
+    def rand(self):
+        return multisym(rnd.randn(*self._shape))
+
+    def randvec(self, X):
+        Y = self.rand()
+        return multisym(Y / self.norm(X, Y))
