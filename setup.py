@@ -27,7 +27,8 @@ if __name__ == "__main__":
         "cmdclass": {"test": Test},
         "name": "pymanopt",
         "version": "0.1",
-        "description": "Toolbox for manifold optimization with support for automatic differentiation",
+        "description": ("Toolbox for manifold optimization with support for "
+                        "automatic differentiation"),
         "url": "https://pymanopt.github.io",
         "author": "Jamie Townsend",
         "author_email": "jamiehntownsend@gmail.com",
