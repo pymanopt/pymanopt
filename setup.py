@@ -27,12 +27,11 @@ if __name__ == "__main__":
         "cmdclass": {"test": Test},
         "name": "pymanopt",
         "version": "0.1",
-        "description": "Python port of the manopt MATLAB package with support "
-                       "for automatic differentiation via Theano",
-        "url": "https://github.com/j-towns/pymanopt",
+        "description": "Toolbox for manifold optimization with support for automatic differentiation",
+        "url": "https://github.com/pymanopt/pymanopt",
         "author": "Jamie Townsend",
         "author_email": "jamiehntownsend@gmail.com",
-        "license": "GNU2",
+        "license": "BSD",
         "packages": find_packages(),
     }
     setup(**kwargs)
