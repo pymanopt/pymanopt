@@ -28,7 +28,7 @@ if __name__ == "__main__":
         "name": "pymanopt",
         "version": "0.1",
         "description": "Toolbox for manifold optimization with support for automatic differentiation",
-        "url": "https://github.com/pymanopt/pymanopt",
+        "url": "https://pymanopt.github.io",
         "author": "Jamie Townsend",
         "author_email": "jamiehntownsend@gmail.com",
         "license": "BSD",
