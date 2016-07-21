@@ -5,7 +5,23 @@ import numpy as np
 
 class Manifold(object):
     '''
-    Abstract base class setting out template for manifold classes.
+    Abstract base class setting out a template for manifold classes. If you
+    would like to extend Pymanopt with a new manifold, then your manifold
+    should inherit from this class.
+
+    Not all methods are required by all solvers. In particular, first order
+    gradient based solvers such as
+    :py:mod:`pymanopt.solvers.steepest_descent` and
+    :py:mod:`pymanopt.solvers.conjugate_gradient` require
+    :py:func:`egrad2rgrad` to be implemented but not :py:func:`ehess2rhess`.
+    Second order solvers such as :py:mod:`pymanopt.solvers.trust_regions`
+    will require :py:func:`ehess2rhess`.
+
+    All of these methods correspond closely to methods in
+    `Manopt <http://www.manopt.org>`_. See
+    http://www.manopt.org/tutorial.html#manifolds for more details on manifolds
+    in Manopt, which are effectively identical to those in Pymanopt (all of the
+    methods in this class have equivalents in Manopt with the same name).
     '''
 
     __metaclass__ = abc.ABCMeta
