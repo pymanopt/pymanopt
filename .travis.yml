@@ -33,7 +33,8 @@ before_install:
 
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran theano six wheel
+  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran theano six wheel
+  - source activate conda-env-python$TRAVIS_PYTHON_VERSION
   # Hacky fix for theano error
   # see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
   - pip install pep8
@@ -45,7 +46,7 @@ install:
   # If we're on python 3.3 or 3.5 then rename the tensorflow wheel so it doesn't throw error (very hacky)
   - if [ "$TRAVIS_PYTHON_VERSION" == "3.3" ]; then wget https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp34-none-linux_x86_64.whl -O tensorflow-0.7.1-cp33-none-linux_x86_64.whl; TENSORFLOW_PACKAGE_LOC="tensorflow-0.7.1-cp33-none-linux_x86_64.whl"; fi
   - if [ "$TRAVIS_PYTHON_VERSION" == "3.5" ]; then wget https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp34-none-linux_x86_64.whl -O tensorflow-0.7.1-cp35-none-linux_x86_64.whl; TENSORFLOW_PACKAGE_LOC="tensorflow-0.7.1-cp35-none-linux_x86_64.whl"; fi
-  
+
   - pip install --no-deps "$TENSORFLOW_PACKAGE_LOC"
   - python setup.py install
 
