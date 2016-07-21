@@ -187,7 +187,7 @@ class TestSingleGrassmannManifold(unittest.TestCase):
         y = s.rand()
         u = s.log(x, y)
         z = s.exp(x, u)
-        np_testing.assert_almost_equal(0, self.man.dist(y, z))
+        np_testing.assert_almost_equal(0, self.man.dist(y, z), decimal=5)
 
     def test_log_exp_inverse(self):
         s = self.man
