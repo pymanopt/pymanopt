@@ -43,8 +43,9 @@ class Solver(object):
     @abc.abstractmethod
     def solve(self, problem, x=None):
         '''
-        Solve the given problem (starting from a random initial guess if
-        the optional argument x is not provided)
+        Solve the given :py:class:`pymanopt.core.problem.Problem` (starting
+        from a random initial guess if the optional argument x is not
+        provided).
         '''
         pass
 
