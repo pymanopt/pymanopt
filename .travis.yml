@@ -3,7 +3,6 @@ dist: trusty
 language: python
 python:
   - "2.7"
-  - "3.3"
   - "3.4"
   - "3.5"
 
@@ -21,21 +20,27 @@ notifications:
 # Install scipy without need to compile, taken from Theano
 # Setup anaconda
 before_install:
-# Install miniconda to avoid compiling scipy
-  - mkdir -p download
-  - cd download
-  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - cd ..
-  - export PATH=/home/travis/miniconda2/bin:$PATH
-  - conda update --yes conda
+  - sudo apt-get update
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
 
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran theano six wheel
-  # Hacky fix for theano error
-  # see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
+  # Use openblas to fix a theano error (hacky); see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
+  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran theano six wheel
+  - source activate conda-env-python$TRAVIS_PYTHON_VERSION
   - pip install pep8
   - pip install coveralls
   - pip install autograd
@@ -45,14 +50,13 @@ install:
   # If we're on python 3.3 or 3.5 then rename the tensorflow wheel so it doesn't throw error (very hacky)
   - if [ "$TRAVIS_PYTHON_VERSION" == "3.3" ]; then wget https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp34-none-linux_x86_64.whl -O tensorflow-0.7.1-cp33-none-linux_x86_64.whl; TENSORFLOW_PACKAGE_LOC="tensorflow-0.7.1-cp33-none-linux_x86_64.whl"; fi
   - if [ "$TRAVIS_PYTHON_VERSION" == "3.5" ]; then wget https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp34-none-linux_x86_64.whl -O tensorflow-0.7.1-cp35-none-linux_x86_64.whl; TENSORFLOW_PACKAGE_LOC="tensorflow-0.7.1-cp35-none-linux_x86_64.whl"; fi
-  
+
   - pip install --no-deps "$TENSORFLOW_PACKAGE_LOC"
   - python setup.py install
 
 script:
   - nosetests ./tests --nologcapture --verbosity=2 --with-coverage --cover-package=pymanopt
   - pep8 examples pymanopt tests setup.py
-  # - cd examples && sh run_all.sh && cd ..
 
 after_success:
   - coveralls
