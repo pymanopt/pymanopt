@@ -9,7 +9,7 @@ from pymanopt.manifolds import Symmetric
 from pymanopt.tools.multi import multisym
 
 
-class TestEuclideanManifold(unittest.TestCase):
+class TestSymmetricManifold(unittest.TestCase):
     def setUp(self):
         self.n = n = 10
         self.k = k = 5

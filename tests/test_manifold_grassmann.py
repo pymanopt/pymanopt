@@ -12,7 +12,92 @@ import pymanopt.tools.testing as testing
 import autograd.numpy as npa
 
 
-class TestGrassmannManifold(unittest.TestCase):
+class TestSingleGrassmannManifold(unittest.TestCase):
+    def setUp(self):
+        self.m = m = 5
+        self.n = n = 2
+        self.k = k = 1
+        self.man = Grassmann(m, n, k=k)
+
+        self.proj = lambda x, u: u - npa.dot(x, npa.dot(x.T, u))
+
+    def test_dist(self):
+        x = self.man.rand()
+        y = self.man.rand()
+        np_testing.assert_almost_equal(self.man.dist(x, y),
+                                       self.man.norm(x, self.man.log(x, y)))
+
+    def test_ehess2rhess(self):
+        # Test this function at some randomly generated point.
+        x = self.man.rand()
+        u = self.man.randvec(x)
+        egrad = rnd.randn(self.m, self.n)
+        ehess = rnd.randn(self.m, self.n)
+
+        np_testing.assert_allclose(testing.ehess2rhess(self.proj)(x, egrad,
+                                                                  ehess, u),
+                                   self.man.ehess2rhess(x, egrad, ehess, u))
+
+    def test_retr(self):
+        # Test that the result is on the manifold and that for small
+        # tangent vectors it has little effect.
+        x = self.man.rand()
+        u = self.man.randvec(x)
+
+        xretru = self.man.retr(x, u)
+
+        np_testing.assert_allclose(multiprod(multitransp(xretru), xretru),
+                                   np.eye(self.n),
+                                   atol=1e-10)
+
+        u = u * 1e-6
+        xretru = self.man.retr(x, u)
+        np_testing.assert_allclose(xretru, x + u)
+
+    # def test_egrad2rgrad(self):
+
+    # def test_norm(self):
+
+    def test_rand(self):
+        # Just make sure that things generated are on the manifold and that
+        # if you generate two they are not equal.
+        X = self.man.rand()
+        np_testing.assert_allclose(multiprod(multitransp(X), X),
+                                   np.eye(self.n), atol=1e-10)
+        Y = self.man.rand()
+        assert la.norm(X - Y) > 1e-6
+
+    # def test_randvec(self):
+
+    # def test_transp(self):
+
+    def test_exp_log_inverse(self):
+        s = self.man
+        x = s.rand()
+        y = s.rand()
+        u = s.log(x, y)
+        z = s.exp(x, u)
+        np_testing.assert_almost_equal(0, self.man.dist(y, z), decimal=5)
+
+    def test_log_exp_inverse(self):
+        s = self.man
+        x = s.rand()
+        u = s.randvec(x)
+        y = s.exp(x, u)
+        v = s.log(x, y)
+        # Check that the manifold difference between the tangent vectors u and
+        # v is 0
+        np_testing.assert_almost_equal(0, self.man.norm(x, u - v))
+
+    # def test_pairmean(self):
+        # s = self.man
+        # X = s.rand()
+        # Y = s.rand()
+        # Z = s.pairmean(X, Y)
+        # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
+
+
+class TestMultiGrassmannManifold(unittest.TestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
@@ -103,91 +188,6 @@ class TestGrassmannManifold(unittest.TestCase):
         u = s.log(x, y)
         z = s.exp(x, u)
         np_testing.assert_almost_equal(0, self.man.dist(y, z))
-
-    def test_log_exp_inverse(self):
-        s = self.man
-        x = s.rand()
-        u = s.randvec(x)
-        y = s.exp(x, u)
-        v = s.log(x, y)
-        # Check that the manifold difference between the tangent vectors u and
-        # v is 0
-        np_testing.assert_almost_equal(0, self.man.norm(x, u - v))
-
-    # def test_pairmean(self):
-        # s = self.man
-        # X = s.rand()
-        # Y = s.rand()
-        # Z = s.pairmean(X, Y)
-        # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
-
-
-class TestSingleGrassmannManifold(unittest.TestCase):
-    def setUp(self):
-        self.m = m = 5
-        self.n = n = 2
-        self.k = k = 1
-        self.man = Grassmann(m, n, k=k)
-
-        self.proj = lambda x, u: u - npa.dot(x, npa.dot(x.T, u))
-
-    def test_dist(self):
-        x = self.man.rand()
-        y = self.man.rand()
-        np_testing.assert_almost_equal(self.man.dist(x, y),
-                                       self.man.norm(x, self.man.log(x, y)))
-
-    def test_ehess2rhess(self):
-        # Test this function at some randomly generated point.
-        x = self.man.rand()
-        u = self.man.randvec(x)
-        egrad = rnd.randn(self.m, self.n)
-        ehess = rnd.randn(self.m, self.n)
-
-        np_testing.assert_allclose(testing.ehess2rhess(self.proj)(x, egrad,
-                                                                  ehess, u),
-                                   self.man.ehess2rhess(x, egrad, ehess, u))
-
-    def test_retr(self):
-        # Test that the result is on the manifold and that for small
-        # tangent vectors it has little effect.
-        x = self.man.rand()
-        u = self.man.randvec(x)
-
-        xretru = self.man.retr(x, u)
-
-        np_testing.assert_allclose(multiprod(multitransp(xretru), xretru),
-                                   np.eye(self.n),
-                                   atol=1e-10)
-
-        u = u * 1e-6
-        xretru = self.man.retr(x, u)
-        np_testing.assert_allclose(xretru, x + u)
-
-    # def test_egrad2rgrad(self):
-
-    # def test_norm(self):
-
-    def test_rand(self):
-        # Just make sure that things generated are on the manifold and that
-        # if you generate two they are not equal.
-        X = self.man.rand()
-        np_testing.assert_allclose(multiprod(multitransp(X), X),
-                                   np.eye(self.n), atol=1e-10)
-        Y = self.man.rand()
-        assert la.norm(X - Y) > 1e-6
-
-    # def test_randvec(self):
-
-    # def test_transp(self):
-
-    def test_exp_log_inverse(self):
-        s = self.man
-        x = s.rand()
-        y = s.rand()
-        u = s.log(x, y)
-        z = s.exp(x, u)
-        np_testing.assert_almost_equal(0, self.man.dist(y, z), decimal=5)
 
     def test_log_exp_inverse(self):
         s = self.man

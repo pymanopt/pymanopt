@@ -8,7 +8,7 @@ import numpy.testing as np_testing
 from pymanopt.manifolds import PSDFixedRankComplex
 
 
-class TestFixedRankComplexManifold(unittest.TestCase):
+class TestPSDFixedRankComplexManifold(unittest.TestCase):
     def setUp(self):
         self.n = n = 50
         self.k = k = 10
