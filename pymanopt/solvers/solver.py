@@ -1,6 +1,5 @@
 import time
 import abc
-from warnings import warn
 
 
 class Solver(object):

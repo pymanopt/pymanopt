@@ -143,6 +143,6 @@ class Problem(object):
 
             def hess(x, a):
                 return self.manifold.ehess2rhess(
-                    x, self.egrad(x), self.ehess(x, a), a)
+                    x, self.egrad(x), ehess(x, a), a)
             self._hess = hess
         return self._hess

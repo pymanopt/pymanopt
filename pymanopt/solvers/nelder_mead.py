@@ -3,7 +3,6 @@ from __future__ import print_function
 import time
 
 import numpy as np
-import numpy.random as rnd
 
 from pymanopt import Problem
 from pymanopt.solvers.steepest_descent import SteepestDescent
@@ -118,7 +117,6 @@ class NelderMead(Solver):
         # Compute objective-related quantities for x, and setup a function
         # evaluations counter.
         costs = np.array([objective(xi) for xi in x])
-        fy = list(costs)
         costevals = dim + 1
 
         # Sort simplex points by cost.

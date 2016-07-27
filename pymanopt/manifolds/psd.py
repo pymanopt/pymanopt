@@ -8,7 +8,7 @@ import scipy as sp
 from scipy.linalg import solve_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools.multi import *
+from pymanopt.tools.multi import multiprod, multitransp, multisym, multilog
 
 
 class PositiveDefinite(Manifold):
@@ -271,9 +271,6 @@ class PSDFixedRankComplex(PSDFixedRank):
 
     def __init__(self, *args, **kwargs):
         super(PSDFixedRankComplex, self).__init__(*args, **kwargs)
-
-        n = self._n
-        k = self._k
 
     def __str__(self):
         return ("YY' quotient manifold of Hermitian {:d}x{:d} complex "

@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.linalg import svd
-from pymanopt.tools.multi import multiprod, multitransp, multisym
+from pymanopt.tools.multi import multiprod, multitransp
 from pymanopt.manifolds.manifold import Manifold
 
 if not hasattr(__builtins__, "xrange"):

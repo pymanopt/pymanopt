@@ -10,8 +10,6 @@ import numpy as np
 
 from autograd.core import grad
 from autograd.convenience_wrappers import jacobian
-from pymanopt.tools.autodiff._autograd import (_hessian_vector_product as
-                                               hessian_vector_product)
 
 
 def rgrad(cost, proj):

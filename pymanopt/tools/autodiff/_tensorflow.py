@@ -7,8 +7,6 @@ try:
 except ImportError:
     tf = None
 
-from warnings import warn
-
 from ._backend import Backend, assert_backend_available
 
 
