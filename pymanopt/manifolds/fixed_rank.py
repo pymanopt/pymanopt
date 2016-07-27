@@ -114,7 +114,7 @@ class FixedRankEmbedded(Manifold):
         return self.dim
 
     def dist(self, X, Y):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def inner(self, X, G, H):
         # Einsum used in this way is equivalent to tensordot but slightly
@@ -153,9 +153,23 @@ class FixedRankEmbedded(Manifold):
 
         return (Up, M, Vp)
 
+    egrad2rgrad = proj
+
+    def ehess2rhess(self, X, egrad, ehess, H):
+        # Euclidean part
+        U, S, V = self.proj(X, ehess)
+
+        # Curvature part
+        T = self._apply_ambient(egrad, H[2]) / np.diag(X[1])
+        U += T - np.dot(X[0], np.dot(X[0].T, T))
+        T = self._apply_ambient_transpose(egrad, H[0]) / np.diag(X[1])
+        V += T - np.dot(X[2], np.dot(X[2].T, T))
+
+        return (U, S, V)
+
     def rand(self):
         U = self._stiefel_m.rand()
-        S = np.diag(np.sort(np.random.rand(5))[::-1])
+        S = np.diag(np.sort(np.random.rand(self._k))[::-1])
         V = self._stiefel_n.rand()
         return (U, S, V)
 
