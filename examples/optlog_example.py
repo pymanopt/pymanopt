@@ -11,7 +11,8 @@ if __name__ == "__main__":
     X = np.diag([3, 2, 1]).dot(np.random.randn(3, 200))
 
     # Cost function is the squared reconstruction error
-    def cost(w): return np.sum(np.sum((X - np.dot(w, np.dot(w.T, X)))**2))
+    def cost(w):
+        return np.sum(np.sum((X - np.dot(w, np.dot(w.T, X)))**2))
 
     solver = SteepestDescent(logverbosity=2)
 

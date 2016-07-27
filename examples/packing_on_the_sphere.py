@@ -2,15 +2,12 @@ import autograd.numpy as np
 
 from pymanopt import Problem
 from pymanopt.manifolds import Elliptope
-from pymanopt.solvers import ConjugateGradient, TrustRegions
+from pymanopt.solvers import ConjugateGradient
 
 
 def packing_on_the_sphere(n, k, epsilon):
     manifold = Elliptope(n, k)
-    # solver = TrustRegions(mingradnorm=1e-8, maxiter=500)
     solver = ConjugateGradient(mingradnorm=1e-8, maxiter=1e5)
-
-    X0 = manifold.rand()
 
     def cost(X):
         Y = np.dot(X, X.T)
