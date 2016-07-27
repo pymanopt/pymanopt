@@ -116,6 +116,43 @@ class FixedRankEmbedded(Manifold):
     def dist(self, X, Y):
         raise NotImplementedError()
 
+    def inner(self, X, G, H):
+        # Einsum used in this way is equivalent to tensordot but slightly
+        # faster.
+
+        return np.sum(np.tensordot(a, b) for (a, b) in zip(G, H))
+
+    def _apply_ambient(self, Z, W):
+        """
+        For a given ambient vector Z, given as a tuple (U, S, V) such that
+        Z = U*S*V', applies it to a matrix W to calculate the matrix product
+        ZW.
+        """
+        if isinstance(Z, tuple):
+            return np.dot(Z[0], np.dot(Z[1], np.dot(Z[2].T, W)))
+        else:
+            return np.dot(Z, W)
+
+    def _apply_ambient_transpose(self, Z, W):
+        """
+        Same as apply_ambient, but applies Z' to W.
+        """
+        if isinstance(Z, tuple):
+            return np.dot(Z[2], np.dot(Z[1], np.dot(Z[0].T, W)))
+        else:
+            return np.dot(Z.T, W)
+
+    def proj(self, X, Z):
+        ZV = self._apply_ambient(Z, X[2])
+        UtZV = np.dot(X[0].T, ZV)
+        ZtU = self._apply_ambient_transpose(Z, X[0])
+
+        Up = ZV - np.dot(X[0], UtZV)
+        M = UtZV
+        Vp = ZtU - np.dot(X[2], UtZV.T)
+
+        return (Up, M, Vp)
+
     def rand(self):
         U = self._stiefel_m.rand()
         S = np.diag(np.sort(np.random.rand(5))[::-1])
@@ -147,9 +184,3 @@ class FixedRankEmbedded(Manifold):
         nrm = self.norm(X, Z)
 
         return (Z[0]/nrm, Z[1]/nrm, Z[2]/nrm)
-
-    def inner(self, X, G, H):
-        # Einsum used in this way is equivalent to tensordot but slightly
-        # faster.
-
-        return np.sum(np.tensordot(a, b) for (a, b) in zip(G, H))
