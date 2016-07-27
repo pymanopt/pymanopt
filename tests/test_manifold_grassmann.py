@@ -6,7 +6,7 @@ import numpy.random as rnd
 import numpy.testing as np_testing
 
 from pymanopt.manifolds import Grassmann
-from pymanopt.tools.multi import *
+from pymanopt.tools.multi import multiprod, multitransp, multieye, multisym
 import pymanopt.tools.testing as testing
 
 import autograd.numpy as npa

@@ -7,7 +7,7 @@ import numpy.testing as np_testing
 
 from pymanopt.manifolds import Stiefel
 import pymanopt.tools.testing as testing
-from pymanopt.tools.multi import *
+from pymanopt.tools.multi import multisym, multiprod, multitransp, multieye
 
 import autograd.numpy as npa
 

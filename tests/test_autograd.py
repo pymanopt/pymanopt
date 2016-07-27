@@ -1,10 +1,7 @@
 import unittest
 
-import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
-
-import warnings
 
 import autograd.numpy as np
 from pymanopt.tools.autodiff import AutogradBackend
@@ -23,7 +20,7 @@ class TestVector(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian matrix H
@@ -70,7 +67,7 @@ class TestMatrix(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian tensor H (4th order)
@@ -121,7 +118,7 @@ class TestTensor3(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian tensor H (6th order)

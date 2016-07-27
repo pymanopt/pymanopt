@@ -7,15 +7,16 @@ import numpy.testing as np_testing
 
 from scipy.linalg import logm, expm
 
-from pymanopt.tools.multi import *
+from pymanopt.tools.multi import (multiprod, multitransp, multieye,
+                                  multisym, multilog, multiexp)
 
 
 class TestMulti(unittest.TestCase):
     def setUp(self):
-        self.m = m = 40
-        self.n = n = 50
-        self.p = p = 40
-        self.k = k = 10
+        self.m = 40
+        self.n = 50
+        self.p = 40
+        self.k = 10
 
     def test_multiprod_singlemat(self):
         # Two random matrices A (m x n) and B (n x p)

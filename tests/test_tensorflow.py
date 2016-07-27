@@ -1,14 +1,11 @@
 import unittest
 
 import numpy as np
-import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 from numpy import float32
 
 import tensorflow as tf
-
-import warnings
 
 from pymanopt.tools.autodiff import TensorflowBackend
 
@@ -25,7 +22,7 @@ class TestVector(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian matrix H
@@ -72,7 +69,7 @@ class TestMatrix(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian tensor H (4th order)
@@ -123,7 +120,7 @@ class TestTensor3(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian tensor H (6th order)

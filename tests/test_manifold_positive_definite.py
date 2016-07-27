@@ -8,7 +8,7 @@ import numpy.testing as np_testing
 import scipy as sp
 
 from pymanopt.manifolds import PositiveDefinite
-from pymanopt.tools.multi import *
+from pymanopt.tools.multi import multiprod, multisym
 
 
 class TestSinglePositiveDefiniteManifold(unittest.TestCase):
@@ -72,7 +72,7 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
 
     def test_dist(self):
         k = self.k
-        n = self.n
+        # n = self.n
         man = self.man
         x = man.rand()
         y = man.rand()
