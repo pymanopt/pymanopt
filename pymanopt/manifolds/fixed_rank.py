@@ -2,7 +2,10 @@
 Module containing manifolds of fixed rank matrices.
 """
 
+import numpy as np
+
 from pymanopt.manifolds.manifold import Manifold
+from pymanopt.manifolds import Stiefel
 
 
 class FixedRankEmbedded(Manifold):
@@ -96,6 +99,9 @@ class FixedRankEmbedded(Manifold):
         self._name = ("Manifold of {m}-by-{n} matrices with rank {k} and "
                       "embedded geometry".format(m=m, n=n, k=k))
 
+        self._stiefel_m = Stiefel(m, k)
+        self._stiefel_n = Stiefel(n, k)
+
     def __str__(self):
         return self._name
 
@@ -105,9 +111,45 @@ class FixedRankEmbedded(Manifold):
 
     @property
     def typicaldist(self):
-        return 10 * self._k
+        return self.dim
 
     def dist(self, X, Y):
         raise NotImplementedError()
 
+    def rand(self):
+        U = self._stiefel_m.rand()
+        S = np.diag(np.sort(np.random.rand(5))[::-1])
+        V = self._stiefel_n.rand()
+        return (U, S, V)
+
+    def _tangent(self, X, Z):
+        """
+        Given Z in tangent vector format, projects the components Up and Vp
+        such that they satisfy the tangent space constraints up to numerical
+        errors. If Z was indeed a tangent vector at X, this should barely
+        affect Z (it would not at all if we had infinite numerical accuracy).
+        """
+        Up = Z[0] - np.dot(X[0], np.dot(X[0].T, Z[0]))
+        Vp = Z[2] - np.dot(X[2], np.dot(X[2].T, Z[2]))
+
+        return (Up, Z[1], Vp)
+
+    def norm(self, X, G):
+        return np.sqrt(self.inner(X, G, G))
+
+    def randvec(self, X):
+        Up = np.random.randn(self._m, self._k)
+        Vp = np.random.randn(self._n, self._k)
+        M = np.random.randn(self._k, self._k)
+
+        Z = self._tangent(X, (Up, M, Vp))
+
+        nrm = self.norm(X, Z)
+
+        return (Z[0]/nrm, Z[1]/nrm, Z[2]/nrm)
+
     def inner(self, X, G, H):
+        # Einsum used in this way is equivalent to tensordot but slightly
+        # faster.
+
+        return np.sum(np.tensordot(a, b) for (a, b) in zip(G, H))
