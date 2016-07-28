@@ -182,14 +182,14 @@ class FixedRankEmbedded(Manifold):
         Qu, Ru = np.linalg.qr(Z[0])
         Qv, Rv = np.linalg.qr(Z[2])
 
-        T = np.bmat([[X[1] + Z[1], Rv.T],
-                     [Ru, np.zeros((self._k, self._k))]])
+        T = np.vstack((np.hstack((X[1] + Z[1], Rv.T)),
+                      np.hstack((Ru, np.zeros((self._k, self._k))))))
 
         # Numpy svd outputs St as a 1d vector, not a matrix.
         (Ut, St, Vt) = np.linalg.svd(T, full_matrices=False)
 
-        U = np.dot(np.bmat([X[0], Qu]), Ut[:, :self._k])
-        V = np.dot(np.bmat([X[2], Qv]), Vt[:, :self._k])
+        U = np.dot(np.hstack((X[0], Qu)), Ut[:, :self._k])
+        V = np.dot(np.hstack((X[2], Qv)), Vt[:, :self._k])
         S = np.diag(St[:self._k]) + np.spacing(1) * np.eye(self._k)
         return (U, S, V)
 
@@ -238,9 +238,9 @@ class FixedRankEmbedded(Manifold):
         general) orthonormal and S is not (in general) diagonal.
         (In this implementation, S is identity, but this might change.)
         """
-        U = np.bmat([np.dot(X[0], Z[1]) + Z[0], X[0]])
+        U = np.hstack((np.dot(X[0], Z[1]) + Z[0], X[0]))
         S = np.eye(2 * self._k)
-        V = np.bmat([X[2], Z[2]])
+        V = np.hstack(([X[2], Z[2]]))
         return (U, S, V)
 
     # Comment from Manopt:
