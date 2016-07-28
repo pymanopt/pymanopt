@@ -167,9 +167,23 @@ class FixedRankEmbedded(Manifold):
 
         return (U, S, V)
 
-    def retr(self):
-            # TODO: This method
-            pass
+    # This retraction is second order, following general results from
+    # Absil, Malick, "Projection-like retractions on matrix manifolds",
+    # SIAM J. Optim., 22 (2012), pp. 135-158.
+    def retr(self, X, Z):
+        Qu, Ru = np.linalg.qr(Z[0])
+        Qv, Rv = np.linalg.qr(Z[2])
+
+        T = np.bmat([[X[1] + Z[1], Rv.T],
+                     [Ru, np.zeros((self._k, self._k))]])
+
+        # Numpy svd outputs St as a 1d vector, not a matrix.
+        (Ut, St, Vt) = np.linalg.svd(T, full_matrices=False)
+
+        U = np.dot(np.bmat([X[0], Qu]), Ut)
+        V = np.dot(np.bmat([X[2], Qv]), Vt)
+        S = np.diag(St) + np.spacing(1) * np.eye(self._k)
+        return (U, S, V)
 
     def norm(self, X, G):
         return np.sqrt(self.inner(X, G, G))
