@@ -235,6 +235,7 @@ class FixedRankEmbedded(Manifold):
         V = np.bmat([X[2], Z[2]])
         return (U, S, V)
 
+    # Comment from Manopt:
     # New vector transport on June 24, 2014 (as indicated by Bart)
     # Reference: Absil, Mahony, Sepulchre 2008 section 8.1.3:
     # For Riemannian submanifolds of a Euclidean space, it is acceptable to
@@ -244,17 +245,10 @@ class FixedRankEmbedded(Manifold):
         return self.proj(X2, self.tangent2ambient(X1, G))
 
     def exp(self, X, U):
-        # TODO This method
-        pass
+        raise NotImplementedError
 
     def log(self, X, Y):
-        # TODO This method
-        pass
+        raise NotImplementedError
 
     def pairmean(self, X, Y):
-        # TODO This method
-        pass
-
-    def zerovec(self, X):
-        # TODO This method
-        pass
+        raise NotImplementedError
