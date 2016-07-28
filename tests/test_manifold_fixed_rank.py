@@ -73,6 +73,36 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         for k in xrange(len(A)):
             np_testing.assert_allclose(A[k], B[k])
 
+    def test_apply_ambient(self):
+        m = self.man
+        z = np.random.randn(self.m, self.n)
+
+        # Set u, s, v so that z = u.dot(s).dot(v.T)
+        u, s, v = np.linalg.svd(z, full_matrices=False)
+        s = np.diag(s)
+        v = v.T
+
+        w = np.random.randn(self.n, self.n)
+
+        np_testing.assert_allclose(z.dot(w), m._apply_ambient(z, w))
+        np_testing.assert_allclose(z.dot(w), m._apply_ambient((u, s, v), w))
+
+    def test_apply_ambient_transpose(self):
+        m = self.man
+        z = np.random.randn(self.n, self.m)
+
+        # Set u, s, v so that z = u.dot(s).dot(v.T)
+        u, s, v = np.linalg.svd(z, full_matrices=False)
+        s = np.diag(s)
+        v = v.T
+
+        w = np.random.randn(self.n, self.n)
+
+        np_testing.assert_allclose(z.T.dot(w),
+                                   m._apply_ambient_transpose(z, w))
+        np_testing.assert_allclose(z.T.dot(w),
+                                   m._apply_ambient_transpose((u, s, v), w))
+
 '''
     def test_ehess2rhess(self):
         e = self.man
