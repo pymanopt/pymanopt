@@ -38,14 +38,51 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         trueinner = np.sum(A*B)
         np_testing.assert_almost_equal(trueinner, e.inner(x, a, b))
 
+    def test_proj_range(self):
+        m = self.man
+        x = m.rand()
+        v = np.random.randn(self.m, self.n)
+
+        g = m.proj(x, v)
+        # Check that g is a true tangent vector
+        np_testing.assert_allclose(np.dot(g[0].T, x[0]),
+                                   np.zeros((self.k, self.k)),
+                                   atol=1e-6)
+        np_testing.assert_allclose(np.dot(g[2].T, x[2]),
+                                   np.zeros((self.k, self.k)),
+                                   atol=1e-6)
+
     def test_proj(self):
+        # Verify that proj gives the closest point within the tangent space
+        # by displacing the result slightly and checking that this increases
+        # the distance.
+        m = self.man
+        x = self.man.rand()
+        v = np.random.randn(self.m, self.n)
+
+        g = m.proj(x, v)
+        # Displace g a little
+        g_disp = g + 0.01 * m.randvec(x)
+
+        # Return to the ambient representation
+        g = m.tangent2ambient(x, g)
+        g_disp = m.tangent2ambient(x, g_disp)
+        g = g[0].dot(g[1]).dot(g[2].T)
+        g_disp = g_disp[0].dot(g_disp[1]).dot(g_disp[2].T)
+
+        assert np.linalg.norm(g - v) > np.linalg.norm(g_disp - v)
+
+    def test_proj_tangents(self):
+        # Verify that proj leaves tangent vectors unchanged
         e = self.man
         x = e.rand()
         u = e.randvec(x)
-        A = e.proj(x, u)
+        A = e.proj(x, e.tangent2ambient(x, u))
         B = u
-        diff = [A[k]-B[k] for k in xrange(len(A))]
-        np_testing.assert_almost_equal(e.norm(x, diff), 0)
+        # diff = [A[k]-B[k] for k in xrange(len(A))]
+        np_testing.assert_allclose(A[0], B[0])
+        np_testing.assert_allclose(A[1], B[1])
+        np_testing.assert_allclose(A[2], B[2])
 
     def test_norm(self):
         e = self.man
@@ -102,6 +139,18 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
                                    m._apply_ambient_transpose(z, w))
         np_testing.assert_allclose(z.T.dot(w),
                                    m._apply_ambient_transpose((u, s, v), w))
+
+    def test_tangent2ambient(self):
+        m = self.man
+        x = m.rand()
+        z = m.randvec(x)
+
+        z_ambient = (x[0].dot(z[1]).dot(x[2].T) + z[0].dot(x[2].T) +
+                     x[0].dot(z[2].T))
+
+        u, s, v = m.tangent2ambient(x, z)
+
+        np_testing.assert_allclose(z_ambient, u.dot(s).dot(v.T))
 
 '''
     def test_ehess2rhess(self):

@@ -143,6 +143,14 @@ class FixedRankEmbedded(Manifold):
             return np.dot(Z.T, W)
 
     def proj(self, X, Z):
+        """
+        Note that Z must either be an m x n matrix from the ambient space, or
+        else a tuple (Uz, Sz, Vz), where Uz * Sz * Vz is in the ambient space
+        (of low-rank matrices).
+
+        This function then returns a tangent vector parameterized as
+        (Up, M, Vp), as described in the class docstring.
+        """
         ZV = self._apply_ambient(Z, X[2])
         UtZV = np.dot(X[0].T, ZV)
         ZtU = self._apply_ambient_transpose(Z, X[0])
@@ -151,7 +159,7 @@ class FixedRankEmbedded(Manifold):
         M = UtZV
         Vp = ZtU - np.dot(X[2], UtZV.T)
 
-        return (Up, M, Vp)
+        return _TangentVector((Up, M, Vp))
 
     egrad2rgrad = proj
 
@@ -165,7 +173,7 @@ class FixedRankEmbedded(Manifold):
         T = self._apply_ambient_transpose(egrad, H[0]) / np.diag(X[1])
         V += T - np.dot(X[2], np.dot(X[2].T, T))
 
-        return (U, S, V)
+        return _TangentVector(U, S, V)
 
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
@@ -204,7 +212,7 @@ class FixedRankEmbedded(Manifold):
         Up = Z[0] - np.dot(X[0], np.dot(X[0].T, Z[0]))
         Vp = Z[2] - np.dot(X[2], np.dot(X[2].T, Z[2]))
 
-        return (Up, Z[1], Vp)
+        return _TangentVector((Up, Z[1], Vp))
 
     def randvec(self, X):
         Up = np.random.randn(self._m, self._k)
@@ -215,7 +223,7 @@ class FixedRankEmbedded(Manifold):
 
         nrm = self.norm(X, Z)
 
-        return (Z[0]/nrm, Z[1]/nrm, Z[2]/nrm)
+        return _TangentVector((Z[0]/nrm, Z[1]/nrm, Z[2]/nrm))
 
     def tangent2ambient(self, X, Z):
         """
@@ -252,3 +260,22 @@ class FixedRankEmbedded(Manifold):
 
     def pairmean(self, X, Y):
         raise NotImplementedError
+
+
+class _TangentVector(tuple):
+    def __add__(self, other):
+        return _TangentVector((s + o for (s, o) in zip(self, other)))
+
+    def __sub__(self, other):
+        return _TangentVector((s - o for (s, o) in zip(self, other)))
+
+    def __mul__(self, other):
+        return _TangentVector((other * s for s in self))
+
+    __rmul__ = __mul__
+
+    def __div__(self, other):
+        return _TangentVector((val / other for val in self))
+
+    def __neg__(self):
+        return _TangentVector((-val for val in self))
