@@ -2,7 +2,6 @@ import unittest
 
 import numpy as np
 import numpy.linalg as la
-import numpy.random as rnd
 import numpy.testing as np_testing
 
 from pymanopt.manifolds import FixedRankEmbedded
@@ -19,12 +18,13 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         assert self.man.dim == (self.m + self.n - self.k) * self.k
 
     def test_typicaldist(self):
-        assert self.man.dim == self.man.test_typicaldist
+        assert self.man.dim == self.man.typicaldist
 
     def test_dist(self):
         e = self.man
-        x = e.randvec()
-        y = e.randvec()
+        a = e.rand()
+        x = e.randvec(a)
+        y = e.randvec(a)
         with self.assertRaises(NotImplementedError):
             e.dist(x, y)
 
@@ -33,8 +33,8 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         x = e.rand()
         a = e.randvec(x)
         b = e.randvec(x)
-        A = x[0].dot(x[1].dot(x[2])) + a[0].dot(x[2].T) + x[0].dot(a[2])
-        B = x[0].dot(x[1].dot(x[2])) + b[0].dot(x[2].T) + x[0].dot(b[2])
+        A = x[0].dot(a[1].dot(x[2].T)) + a[0].dot(x[2].T) + x[0].dot(a[2].T)
+        B = x[0].dot(b[1].dot(x[2].T)) + b[0].dot(x[2].T) + x[0].dot(b[2].T)
         trueinner = np.sum(A*B)
         np_testing.assert_almost_equal(trueinner, e.inner(x, a, b))
 
@@ -42,13 +42,16 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         e = self.man
         x = e.rand()
         u = e.randvec(x)
-        np_testing.assert_allclose(e.proj(x, u), u)
+        A = e.proj(x, u)
+        B = u
+        for k in xrange(len(A)):
+            np_testing.assert_allclose(A[k], B[k])
 
     def test_norm(self):
         e = self.man
         x = e.rand()
-        u = rnd.randn(self.m, self.n)
-        np_testing.assert_almost_equal(e.inner(x, u, u), e.norm(x, u))
+        u = e.randvec(x)
+        np_testing.assert_almost_equal(np.sqrt(e.inner(x, u, u)), e.norm(x, u))
 
     def test_rand(self):
         e = self.man
@@ -56,14 +59,19 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         y = e.rand()
         assert np.shape(x[0]) == (self.m, self.k)
         assert np.shape(x[1]) == (self.k, self.k)
-        assert np.shape(x[0]) == (self.n, self.k)
-        assert la.norm(x - y) > 1e-6
+        assert np.shape(x[2]) == (self.n, self.k)
+        for k in xrange(len(x)):
+            assert la.norm(x[k] - y[k]) > 1e-6
 
     def test_transp(self):
-        e = self.man
-        x = e.rand()
-        u = e.randvec(x)
-        np_testing.assert_allclose(e.proj(x, u), e.transp(x, u))
+        s = self.man
+        x = s.rand()
+        y = s.rand()
+        u = s.randvec(x)
+        A = s.transp(x, y, u)
+        B = s.proj(y, u)
+        for k in xrange(len(A)):
+            np_testing.assert_allclose(A[k], B[k])
 
 '''
     def test_ehess2rhess(self):
