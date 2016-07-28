@@ -167,6 +167,13 @@ class FixedRankEmbedded(Manifold):
 
         return (U, S, V)
 
+    def retr(self):
+            # TODO: This method
+            pass
+
+    def norm(self, X, G):
+        return np.sqrt(self.inner(X, G, G))
+
     def rand(self):
         U = self._stiefel_m.rand()
         S = np.diag(np.sort(np.random.rand(self._k))[::-1])
@@ -185,9 +192,6 @@ class FixedRankEmbedded(Manifold):
 
         return (Up, Z[1], Vp)
 
-    def norm(self, X, G):
-        return np.sqrt(self.inner(X, G, G))
-
     def randvec(self, X):
         Up = np.random.randn(self._m, self._k)
         Vp = np.random.randn(self._n, self._k)
@@ -198,3 +202,23 @@ class FixedRankEmbedded(Manifold):
         nrm = self.norm(X, Z)
 
         return (Z[0]/nrm, Z[1]/nrm, Z[2]/nrm)
+
+    def transp(self, x1, x2, d):
+        # TODO This method
+        pass
+
+    def exp(self, X, U):
+        # TODO This method
+        pass
+
+    def log(self, X, Y):
+        # TODO This method
+        pass
+
+    def pairmean(self, X, Y):
+        # TODO This method
+        pass
+
+    def zerovec(self, X):
+        # TODO This method
+        pass
