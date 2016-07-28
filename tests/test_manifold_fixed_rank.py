@@ -44,8 +44,8 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         u = e.randvec(x)
         A = e.proj(x, u)
         B = u
-        for k in xrange(len(A)):
-            np_testing.assert_allclose(A[k], B[k])
+        diff = [A[k]-B[k] for k in xrange(len(A))]
+        np_testing.assert_almost_equal(e.norm(x, diff), 0)
 
     def test_norm(self):
         e = self.man
@@ -70,8 +70,8 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         u = s.randvec(x)
         A = s.transp(x, y, u)
         B = s.proj(y, u)
-        for k in xrange(len(A)):
-            np_testing.assert_allclose(A[k], B[k])
+        diff = [A[k]-B[k] for k in xrange(len(A))]
+        np_testing.assert_almost_equal(s.norm(y, diff), 0)
 
     def test_apply_ambient(self):
         m = self.man
