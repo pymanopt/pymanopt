@@ -165,15 +165,15 @@ class FixedRankEmbedded(Manifold):
 
     def ehess2rhess(self, X, egrad, ehess, H):
         # Euclidean part
-        U, S, V = self.proj(X, ehess)
+        Up, M, Vp = self.proj(X, ehess)
 
         # Curvature part
         T = self._apply_ambient(egrad, H[2]) / np.diag(X[1])
-        U += T - np.dot(X[0], np.dot(X[0].T, T))
+        Up += T - np.dot(X[0], np.dot(X[0].T, T))
         T = self._apply_ambient_transpose(egrad, H[0]) / np.diag(X[1])
-        V += T - np.dot(X[2], np.dot(X[2].T, T))
+        Vp += T - np.dot(X[2], np.dot(X[2].T, T))
 
-        return _TangentVector(U, S, V)
+        return _TangentVector((Up, M, Vp))
 
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
@@ -188,8 +188,8 @@ class FixedRankEmbedded(Manifold):
         # Numpy svd outputs St as a 1d vector, not a matrix.
         (Ut, St, Vt) = np.linalg.svd(T, full_matrices=False)
 
-        U = np.dot(np.bmat([X[0], Qu]), Ut)
-        V = np.dot(np.bmat([X[2], Qv]), Vt)
+        U = np.dot(np.bmat([X[0], Qu]), Ut[:, :self._k])
+        V = np.dot(np.bmat([X[2], Qv]), Vt[:, :self._k])
         S = np.diag(St[:self._k]) + np.spacing(1) * np.eye(self._k)
         return (U, S, V)
 

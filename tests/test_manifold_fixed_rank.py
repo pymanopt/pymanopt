@@ -70,7 +70,7 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         g = g[0].dot(g[1]).dot(g[2].T)
         g_disp = g_disp[0].dot(g_disp[1]).dot(g_disp[2].T)
 
-        assert np.linalg.norm(g - v) > np.linalg.norm(g_disp - v)
+        assert np.linalg.norm(g - v) < np.linalg.norm(g_disp - v)
 
     def test_proj_tangents(self):
         # Verify that proj leaves tangent vectors unchanged
@@ -97,7 +97,10 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         assert np.shape(x[0]) == (self.m, self.k)
         assert np.shape(x[1]) == (self.k, self.k)
         assert np.shape(x[2]) == (self.n, self.k)
-        for k in xrange(len(x)):
+        np_testing.assert_allclose(x[0].T.dot(x[0]), np.eye(self.k), atol=1e-6)
+        np_testing.assert_allclose(x[2].T.dot(x[2]), np.eye(self.k), atol=1e-6)
+        np_testing.assert_allclose(np.diag(np.diag(x[1])), x[1])
+        for k in range(len(x)):
             assert la.norm(x[k] - y[k]) > 1e-6
 
     def test_transp(self):
@@ -106,8 +109,8 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         y = s.rand()
         u = s.randvec(x)
         A = s.transp(x, y, u)
-        B = s.proj(y, u)
-        diff = [A[k]-B[k] for k in xrange(len(A))]
+        B = s.proj(y, s.tangent2ambient(x, u))
+        diff = [A[k]-B[k] for k in range(len(A))]
         np_testing.assert_almost_equal(s.norm(y, diff), 0)
 
     def test_apply_ambient(self):
@@ -152,54 +155,78 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
 
         np_testing.assert_allclose(z_ambient, u.dot(s).dot(v.T))
 
-'''
     def test_ehess2rhess(self):
-        e = self.man
-        x = e.rand()
-        u = e.randvec(x)
-        egrad, ehess = rnd.randn(2, self.m, self.n)
-        np_testing.assert_allclose(e.ehess2rhess(x, egrad, ehess, u),
-                                   ehess)
+        m = self.man
+        x = m.rand()
+        h = m.randvec(x)
+        egrad, ehess = np.random.randn(2, self.m, self.n)
+
+        up, M, vp = m.proj(x, ehess)
+
+        T = egrad.dot(h[2]).dot(np.linalg.inv(x[1]))
+        up += T - x[0].dot(x[0].T.dot(T))
+        T = egrad.T.dot(h[0]).dot(np.linalg.inv(x[1]))
+        vp += T - x[2].dot(x[2].T.dot(T))
+
+        rhess = m.ehess2rhess(x, egrad, ehess, h)
+
+        np_testing.assert_allclose(up, rhess[0])
+        np_testing.assert_allclose(M, rhess[1])
+        np_testing.assert_allclose(vp, rhess[2])
 
     def test_retr(self):
-        e = self.man
-        x = e.rand()
-        u = e.randvec(x)
-        np_testing.assert_allclose(e.retr(x, u), x + u)
+        # Test that the result is on the manifold and that for small
+        # tangent vectors it has little effect.
+        x = self.man.rand()
+        u = self.man.randvec(x)
+
+        y = self.man.retr(x, u)
+
+        np_testing.assert_allclose(y[0].T.dot(y[0]), np.eye(self.k), atol=1e-6)
+        np_testing.assert_allclose(y[2].T.dot(y[2]), np.eye(self.k), atol=1e-6)
+        np_testing.assert_allclose(np.diag(np.diag(y[1])), y[1])
+
+        u = u * 1e-6
+        y = self.man.retr(x, u)
+        y = y[0].dot(y[1]).dot(y[2].T)
+
+        u = self.man.tangent2ambient(x, u)
+        u = u[0].dot(u[1]).dot(u[2].T)
+        x = x[0].dot(x[1]).dot(x[2].T)
+
+        np_testing.assert_allclose(y, x + u, atol=1e-5)
 
     def test_egrad2rgrad(self):
+        # Verify that egrad2rgrad and proj are equivalent.
         e = self.man
         x = e.rand()
-        u = e.randvec(x)
-        np_testing.assert_allclose(e.egrad2rgrad(x, u), u)
+        u, s, v = np.linalg.svd(np.random.randn(self.m, self.n),
+                                full_matrices=False)
+        s = np.diag(s)
+        v = v.T
+        u = (u, s, v)
+
+        np_testing.assert_allclose(e.egrad2rgrad(x, u)[0], e.proj(x, u)[0])
+        np_testing.assert_allclose(e.egrad2rgrad(x, u)[1], e.proj(x, u)[1])
+        np_testing.assert_allclose(e.egrad2rgrad(x, u)[2], e.proj(x, u)[2])
 
     def test_randvec(self):
         e = self.man
         x = e.rand()
         u = e.randvec(x)
+
+        # Check that u is a tangent vector
+        assert np.shape(u[0]) == (self.m, self.k)
+        assert np.shape(u[1]) == (self.k, self.k)
+        assert np.shape(u[2]) == (self.n, self.k)
+        np_testing.assert_allclose(np.dot(u[0].T, x[0]),
+                                   np.zeros((self.k, self.k)),
+                                   atol=1e-6)
+        np_testing.assert_allclose(np.dot(u[2].T, x[2]),
+                                   np.zeros((self.k, self.k)),
+                                   atol=1e-6)
+
         v = e.randvec(x)
-        assert np.shape(u) == (self.m, self.n)
-        np_testing.assert_almost_equal(la.norm(u), 1)
-        assert la.norm(u - v) > 1e-6
 
-    def test_exp_log_inverse(self):
-        s = self.man
-        X = s.rand()
-        Y = s.rand()
-        Yexplog = s.exp(X, s.log(X, Y))
-        np_testing.assert_array_almost_equal(Y, Yexplog)
-
-    def test_log_exp_inverse(self):
-        s = self.man
-        X = s.rand()
-        U = s.randvec(X)
-        Ulogexp = s.log(X, s.exp(X, U))
-        np_testing.assert_array_almost_equal(U, Ulogexp)
-
-    def test_pairmean(self):
-        s = self.man
-        X = s.rand()
-        Y = s.rand()
-        Z = s.pairmean(X, Y)
-        np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
-'''
+        np_testing.assert_almost_equal(e.norm(x, u), 1)
+        assert e.norm(x, u - v) > 1e-6
