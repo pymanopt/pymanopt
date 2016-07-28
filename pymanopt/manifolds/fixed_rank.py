@@ -182,7 +182,7 @@ class FixedRankEmbedded(Manifold):
 
         U = np.dot(np.bmat([X[0], Qu]), Ut)
         V = np.dot(np.bmat([X[2], Qv]), Vt)
-        S = np.diag(St) + np.spacing(1) * np.eye(self._k)
+        S = np.diag(St[:self._k]) + np.spacing(1) * np.eye(self._k)
         return (U, S, V)
 
     def norm(self, X, G):
@@ -217,9 +217,31 @@ class FixedRankEmbedded(Manifold):
 
         return (Z[0]/nrm, Z[1]/nrm, Z[2]/nrm)
 
-    def transp(self, x1, x2, d):
-        # TODO This method
-        pass
+    def tangent2ambient(self, X, Z):
+        """
+        Transforms a tangent vector Z represented as a structure (Up, M, Vp)
+        into a structure with fields (U, S, V) that represents that same
+        tangent vector in the ambient space of mxn matrices, as U*S*V'.
+        This matrix is equal to X.U*Z.M*X.V' + Z.Up*X.V' + X.U*Z.Vp'. The
+        latter is an mxn matrix, which could be too large to build
+        explicitly, and this is why we return a low-rank representation
+        instead. Note that there are no guarantees on U, S and V other than
+        that USV' is the desired matrix. In particular, U and V are not (in
+        general) orthonormal and S is not (in general) diagonal.
+        (In this implementation, S is identity, but this might change.)
+        """
+        U = np.bmat([np.dot(X[0], Z[1]) + Z[0], X[0]])
+        S = np.eye(2 * self._k)
+        V = np.bmat([X[2], Z[2]])
+        return (U, S, V)
+
+    # New vector transport on June 24, 2014 (as indicated by Bart)
+    # Reference: Absil, Mahony, Sepulchre 2008 section 8.1.3:
+    # For Riemannian submanifolds of a Euclidean space, it is acceptable to
+    # transport simply by orthogonal projection of the tangent vector
+    # translated in the ambient space.
+    def transp(self, X1, X2, G):
+        return self.proj(X2, self.tangent2ambient(X1, G))
 
     def exp(self, X, U):
         # TODO This method
