@@ -188,6 +188,9 @@ class FixedRankEmbedded(Manifold):
         # Numpy svd outputs St as a 1d vector, not a matrix.
         (Ut, St, Vt) = np.linalg.svd(T, full_matrices=False)
 
+        # Transpose because numpy outputs it the wrong way.
+        Vt = Vt.T
+
         U = np.dot(np.hstack((X.U, Qu)), Ut[:, :self._k])
         V = np.dot(np.hstack((X.V, Qv)), Vt[:, :self._k])
         S = np.diag(St[:self._k]) + np.spacing(1) * np.eye(self._k)
