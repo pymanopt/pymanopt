@@ -151,13 +151,13 @@ class FixedRankEmbedded(Manifold):
         This function then returns a tangent vector parameterized as
         (Up, M, Vp), as described in the class docstring.
         """
-        ZV = self._apply_ambient(Z, X[2])
-        UtZV = np.dot(X[0].T, ZV)
-        ZtU = self._apply_ambient_transpose(Z, X[0])
+        ZV = self._apply_ambient(Z, X.V)
+        UtZV = np.dot(X.U.T, ZV)
+        ZtU = self._apply_ambient_transpose(Z, X.U)
 
-        Up = ZV - np.dot(X[0], UtZV)
+        Up = ZV - np.dot(X.U, UtZV)
         M = UtZV
-        Vp = ZtU - np.dot(X[2], UtZV.T)
+        Vp = ZtU - np.dot(X.V, UtZV.T)
 
         return _TangentVector((Up, M, Vp))
 
@@ -168,10 +168,10 @@ class FixedRankEmbedded(Manifold):
         Up, M, Vp = self.proj(X, ehess)
 
         # Curvature part
-        T = self._apply_ambient(egrad, H[2]) / np.diag(X[1])
-        Up += T - np.dot(X[0], np.dot(X[0].T, T))
-        T = self._apply_ambient_transpose(egrad, H[0]) / np.diag(X[1])
-        Vp += T - np.dot(X[2], np.dot(X[2].T, T))
+        T = self._apply_ambient(egrad, H[2]) / np.diag(X.S)
+        Up += T - np.dot(X.U, np.dot(X.U.T, T))
+        T = self._apply_ambient_transpose(egrad, H[0]) / np.diag(X.S)
+        Vp += T - np.dot(X.V, np.dot(X.V.T, T))
 
         return _TangentVector((Up, M, Vp))
 
@@ -182,16 +182,16 @@ class FixedRankEmbedded(Manifold):
         Qu, Ru = np.linalg.qr(Z[0])
         Qv, Rv = np.linalg.qr(Z[2])
 
-        T = np.vstack((np.hstack((X[1] + Z[1], Rv.T)),
+        T = np.vstack((np.hstack((X.S + Z[1], Rv.T)),
                       np.hstack((Ru, np.zeros((self._k, self._k))))))
 
         # Numpy svd outputs St as a 1d vector, not a matrix.
         (Ut, St, Vt) = np.linalg.svd(T, full_matrices=False)
 
-        U = np.dot(np.hstack((X[0], Qu)), Ut[:, :self._k])
-        V = np.dot(np.hstack((X[2], Qv)), Vt[:, :self._k])
+        U = np.dot(np.hstack((X.U, Qu)), Ut[:, :self._k])
+        V = np.dot(np.hstack((X.V, Qv)), Vt[:, :self._k])
         S = np.diag(St[:self._k]) + np.spacing(1) * np.eye(self._k)
-        return (U, S, V)
+        return _Point((U, S, V))
 
     def norm(self, X, G):
         return np.sqrt(self.inner(X, G, G))
@@ -200,7 +200,7 @@ class FixedRankEmbedded(Manifold):
         U = self._stiefel_m.rand()
         S = np.diag(np.sort(np.random.rand(self._k))[::-1])
         V = self._stiefel_n.rand()
-        return (U, S, V)
+        return _Point((U, S, V))
 
     def _tangent(self, X, Z):
         """
@@ -209,8 +209,8 @@ class FixedRankEmbedded(Manifold):
         errors. If Z was indeed a tangent vector at X, this should barely
         affect Z (it would not at all if we had infinite numerical accuracy).
         """
-        Up = Z[0] - np.dot(X[0], np.dot(X[0].T, Z[0]))
-        Vp = Z[2] - np.dot(X[2], np.dot(X[2].T, Z[2]))
+        Up = Z[0] - np.dot(X.U, np.dot(X.U.T, Z[0]))
+        Vp = Z[2] - np.dot(X.V, np.dot(X.V.T, Z[2]))
 
         return _TangentVector((Up, Z[1], Vp))
 
@@ -238,9 +238,9 @@ class FixedRankEmbedded(Manifold):
         general) orthonormal and S is not (in general) diagonal.
         (In this implementation, S is identity, but this might change.)
         """
-        U = np.hstack((np.dot(X[0], Z[1]) + Z[0], X[0]))
+        U = np.hstack((np.dot(X.U, Z[1]) + Z[0], X.U))
         S = np.eye(2 * self._k)
-        V = np.hstack(([X[2], Z[2]]))
+        V = np.hstack(([X.V, Z[2]]))
         return (U, S, V)
 
     # Comment from Manopt:
@@ -279,3 +279,39 @@ class _TangentVector(tuple):
 
     def __neg__(self):
         return _TangentVector((-val for val in self))
+
+
+class _Point(np.ndarray):
+    # A numpy.ndarray that computes and stores its own svd upon creation.
+    def __new__(cls, input_array, info=None):
+        if type(input_array) is tuple:
+            obj = np.dot(np.dot(input_array[0], input_array[1]),
+                         input_array[2].T).view(cls)
+            obj.U = input_array[0]
+            obj.S = input_array[1]
+            obj.V = input_array[2]
+        else:
+            # Input array is an already formed ndarray instance
+            # We first cast to be our class type
+            obj = np.asarray(input_array).view(cls)
+            # add the new attribute to the created instance
+            u, s, v = np.linalg.svd(np.array(obj))
+            s = np.diag(s)
+            v = v.T
+            obj.U = u
+            obj.S = s
+            obj.V = v
+        # Finally, we must return the newly created object:
+        return obj
+
+    def __array_finalize__(self, obj):
+        # see InfoArray.__array_finalize__ for comments
+        if obj is None:
+            return
+
+        u, s, v = np.linalg.svd(np.array(obj))
+        s = np.diag(s)
+        v = v.T
+        self.U = u
+        self.S = s
+        self.V = v

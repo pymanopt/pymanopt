@@ -94,7 +94,7 @@ class Problem(object):
 
     @property
     def cost(self):
-        if self._cost is None and not callable(self._original_cost):
+        if self._cost is None:
             if self.verbosity >= 1:
                 print("Compiling cost function...")
             self._cost = self.backend.compile_function(self._original_cost,

@@ -23,16 +23,42 @@ class AutogradBackend(Backend):
         return callable(objective)
 
     @assert_backend_available
+    def compile_function(self, objective, argument):
+        def func(x):
+            if type(x) in (list, tuple):
+                return objective([np.array(xi) for xi in x])
+            else:
+                return objective(np.array(x))
+
+        return func
+
+    @assert_backend_available
     def compute_gradient(self, objective, argument):
         """
         Compute the gradient of 'objective' with respect to the first
         argument and return as a function.
         """
-        return grad(objective)
+        g = grad(objective)
+
+        # Sometimes x will be some custom type, e.g. with the FixedRankEmbedded
+        # manifold. Therefore cast it to a numpy.array.
+        def gradient(x):
+            if type(x) in (list, tuple):
+                return g([np.array(xi) for xi in x])
+            else:
+                return g(np.array(x))
+        return gradient
 
     @assert_backend_available
     def compute_hessian(self, objective, argument):
-        return _hessian_vector_product(objective)
+        h = _hessian_vector_product(objective)
+
+        def hess_vec_prod(x, a):
+            if type(x) in (list, tuple):
+                return h([np.array(xi) for xi in x], a)
+            else:
+                return h(np.array(x), a)
+        return hess_vec_prod
 
 
 def _hessian_vector_product(fun, argnum=0):
