@@ -9,6 +9,7 @@
 - solvers
 
     - nelder_mead [@31](./pymanopt/solvers/nelder_mead.py#L31): need to decide what to do about the TR iterations
+    - solvers cast to np.array before returning
 
 - tools
 
