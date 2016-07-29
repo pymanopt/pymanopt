@@ -264,6 +264,11 @@ class FixedRankEmbedded(Manifold):
     def pairmean(self, X, Y):
         raise NotImplementedError
 
+    def zerovec(self, X):
+        return _TangentVector((np.zeros((self._m, self._k)),
+                               np.zeros((self._k, self._k)),
+                               np.zeros((self._n, self._k))))
+
 
 class _TangentVector(tuple):
     def to_ambient(self, x):
