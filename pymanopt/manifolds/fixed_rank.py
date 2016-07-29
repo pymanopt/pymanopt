@@ -10,6 +10,8 @@ from pymanopt.manifolds import Stiefel
 
 class FixedRankEmbedded(Manifold):
     """
+    Note: Only compatible with autograd autodiff backend. Should be fixed soon.
+
     Manifold struct to optimize fixed-rank matrices w/ an embedded geometry.
 
     FixedRankEmbedded(m, n, k)

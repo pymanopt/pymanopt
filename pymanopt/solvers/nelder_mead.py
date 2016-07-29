@@ -28,12 +28,12 @@ def compute_centroid(man, x):
             g -= man.log(y, x[i])
         return g
 
-    # XXX: manopt runs a few TR iterations here. For us to do this, we either
-    #      need to work out the Hessian of the Frechet variance by hand or
-    #      implement approximations for the Hessian to use in the TR solver.
-    #      This is because we cannot implement the Frechet variance with theano
-    #      and compute the Hessian automatically due to dependency on the
-    #      manifold-dependent distance function.
+    # TODO: manopt runs a few TR iterations here. For us to do this, we either
+    #       need to work out the Hessian of the Frechet variance by hand or
+    #       implement approximations for the Hessian to use in the TR solver.
+    #       This is because we cannot implement the Frechet variance with
+    #       theano and compute the Hessian automatically due to dependency on
+    #       the manifold-dependent distance function.
     solver = SteepestDescent(maxiter=15)
     problem = Problem(man, cost=objective, grad=gradient, verbosity=0)
     return solver.solve(problem)
