@@ -266,6 +266,12 @@ class FixedRankEmbedded(Manifold):
 
 
 class _TangentVector(tuple):
+    def to_ambient(self, x):
+        Z1 = x.U.dot(self[1].dot(x.V.T))
+        Z2 = self[0].dot(x.V.T)
+        Z3 = x.U.dot(self[2].T)
+        return Z1 + Z2 + Z3
+
     def __add__(self, other):
         return _TangentVector((s + o for (s, o) in zip(self, other)))
 
