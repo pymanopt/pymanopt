@@ -11,8 +11,6 @@ except ImportError:
     theano = None
     T = None
 
-from warnings import warn
-
 from ._backend import Backend, assert_backend_available
 
 

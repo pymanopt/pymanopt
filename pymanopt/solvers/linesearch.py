@@ -1,6 +1,3 @@
-import numpy as np
-
-
 class LineSearchBackTracking(object):
     """
     Back-tracking line-search based on linesearch.m in the manopt MATLAB

@@ -20,12 +20,6 @@ class TestSphereManifold(unittest.TestCase):
         # For automatic testing of ehess2rhess
         self.proj = lambda x, u: u - npa.tensordot(x, u, np.ndim(u)) * x
 
-    def test_name(self):
-        man = self.man
-        m = self.m
-        n = self.n
-        assert "Sphere manifold of " + str(m) + "x" + str(n) in str(man)
-
     def test_dim(self):
         assert self.man.dim == self.m * self.n - 1
 
@@ -149,30 +143,3 @@ class TestSphereManifold(unittest.TestCase):
         Y = s.rand()
         Z = s.pairmean(X, Y)
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
-
-
-class TestSphereManifoldVector(unittest.TestCase):
-    def setUp(self):
-        self.n = n = 50
-        self.man = Sphere(n)
-
-    def test_name(self):
-        man = self.man
-        n = self.n
-        assert "Sphere manifold of " + str(n) + "-vectors" in str(man)
-
-
-class TestSphereManifoldTensor(unittest.TestCase):
-    def setUp(self):
-        self.n1 = n1 = 100
-        self.n2 = n2 = 50
-        self.n3 = n3 = 25
-        self.man = Sphere(n1, n2, n3)
-
-    def test_name(self):
-        man = self.man
-        n1 = self.n1
-        n2 = self.n2
-        n3 = self.n3
-        assert ("Sphere manifold of shape (" + str(n1) + ", " + str(n2) +
-                ", " + str(n3)) in str(man)

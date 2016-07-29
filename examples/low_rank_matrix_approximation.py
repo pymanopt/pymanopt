@@ -1,62 +1,31 @@
-import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import theano.tensor as T
-
+from pymanopt.manifolds import FixedRankEmbedded
+import autograd.numpy as np
 from pymanopt import Problem
-from pymanopt.manifolds import PSDFixedRank
 from pymanopt.solvers import TrustRegions
 
+# Let A be a (5 x 4) matrix to be approximated
+A = np.random.randn(5, 4)
+k = 2
 
-def _bootstrap_problem(A, k):
-    m, n = A.shape
-    assert m == n, "matrix must be square"
-    assert np.allclose(np.sum(A - A.T), 0), "matrix must be symmetric"
-    manifold = PSDFixedRank(n, k)
-    solver = TrustRegions(maxiter=500, minstepsize=1e-6)
-    return manifold, solver
-
-
-def low_rank_matrix_approximation(A, k):
-    manifold, solver = _bootstrap_problem(A, k)
-
-    def cost(Y):
-        return la.norm(Y.dot(Y.T) - A, "fro") ** 2
-
-    def egrad(Y):
-        return 4 * (Y.dot(Y.T) - A).dot(Y)
-
-    def ehess(Y, U):
-        return 4 * ((Y.dot(U.T) + U.dot(Y.T)).dot(Y) + (Y.dot(Y.T) - A).dot(U))
-
-    problem = Problem(manifold=manifold, cost=cost, egrad=egrad, ehess=ehess)
-    return solver.solve(problem)
+# (a) Instantiation of a manifold
+# points on the manifold are parameterized as (U, S, V) where
+# U is an orthonormal 5 x 2 matrix,
+# S is a full rank diagonal 2 x 2 matrix,
+# V is an orthonormal 4 x 2 matrix,
+# such that U*S*V' is a 5 x 4 matrix of rank 2.
+manifold = FixedRankEmbedded(A.shape[0], A.shape[1], k)
 
 
-def low_rank_matrix_approximation_theano(A, k):
-    manifold, solver = _bootstrap_problem(A, k)
-
-    Y = T.matrix()
-    cost = T.sum((T.dot(Y, Y.T) - A) ** 2)
-
-    problem = Problem(manifold=manifold, cost=cost, arg=Y)
-    return solver.solve(problem)
+# (b) Definition of a cost function (here using autograd.numpy)
+def cost(X):
+    delta = .5
+    return np.sum(np.sqrt((X - A)**2 + delta**2) - delta)
 
 
-if __name__ == "__main__":
-    # Generate random problem data.
-    n = 1000
-    k = 5
-    Y = rnd.randn(n, k)
-    A = Y.dot(Y.T)
+# define the Pymanopt problem
+problem = Problem(manifold=manifold, cost=cost)
+# (c) Instantiation of a Pymanopt solver
+solver = TrustRegions()
 
-    # Solve the problem with pymanopt.
-    Yopt = low_rank_matrix_approximation(A, k)
-    print('')
-    Yopt_theano = low_rank_matrix_approximation_theano(A, k)
-
-    # Print information about the solution.
-    print('')
-    print("rank of Y: %d" % la.matrix_rank(Y))
-    print("rank of Yopt: %d" % la.matrix_rank(Yopt))
-    print("rank of Yopt_theano: %d" % la.matrix_rank(Yopt_theano))
+# let Pymanopt do the rest
+X = solver.solve(problem)

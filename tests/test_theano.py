@@ -1,7 +1,6 @@
 import unittest
 
 import numpy as np
-import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
@@ -24,7 +23,7 @@ class TestVector(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian matrix H
@@ -85,7 +84,7 @@ class TestMatrix(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian tensor H (4th order)
@@ -145,7 +144,7 @@ class TestMatrix(unittest.TestCase):
 
         with warnings.catch_warnings(record=True) as w:
             # The following should emit a warning
-            hess = self.backend.compute_hessian(cost, X)
+            self.backend.compute_hessian(cost, X)
 
             assert len(w) == 1
             assert "not part of the computational graph" in str(w[-1].message)
@@ -165,7 +164,7 @@ class TestTensor3(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian tensor H (6th order)

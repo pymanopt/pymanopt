@@ -109,7 +109,7 @@ class TrustRegions(Solver):
             try:
                 Delta_bar = man.typicaldist
             except NotImplementedError:
-                Delta_bar = sqrt(man.dim)
+                Delta_bar = np.sqrt(man.dim)
         if Delta0 is None:
             Delta0 = Delta_bar / 8
 
@@ -208,7 +208,7 @@ class TrustRegions(Solver):
             # useful for some user-defined stopping criteria. If this is not
             # cheap for specific applications (compared to evaluating the
             # cost), we should reconsider this.
-            norm_eta = man.norm(x, eta)
+            # norm_eta = man.norm(x, eta)
 
             # Compute the tentative next iterate (the proposal)
             x_prop = man.retr(x, eta)
@@ -338,14 +338,14 @@ class TrustRegions(Solver):
             # Choose to accept or reject the proposed step based on the model
             # performance. Note the strict inequality.
             if model_decreased and rho > self.rho_prime:
-                accept = True
+                # accept = True
                 accstr = "acc"
                 x = x_prop
                 fx = fx_prop
                 fgradx = grad(x)
                 norm_grad = man.norm(x, fgradx)
             else:
-                accept = False
+                # accept = False
                 accstr = "REJ"
 
             # k is the number of iterations we have accomplished.

@@ -1,14 +1,9 @@
 import unittest
 
-import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
-
 from pymanopt.manifolds import PSDFixedRank
 
 
-class TestFixedRankManifold(unittest.TestCase):
+class TestPSDFixedRankManifold(unittest.TestCase):
     def setUp(self):
         self.n = n = 50
         self.k = k = 10

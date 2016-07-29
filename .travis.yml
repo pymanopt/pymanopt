@@ -39,11 +39,12 @@ before_install:
 # Install packages
 install:
   # Use openblas to fix a theano error (hacky); see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
-  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran theano six wheel
+  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran six wheel
   - source activate conda-env-python$TRAVIS_PYTHON_VERSION
   - pip install pep8
   - pip install coveralls
   - pip install autograd
+  - pip install theano
   - pip install protobuf==3.0.0b2
   - if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp27-none-linux_x86_64.whl"; fi
   - if [ "$TRAVIS_PYTHON_VERSION" == "3.4" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.7.1-cp34-none-linux_x86_64.whl"; fi

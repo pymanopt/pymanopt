@@ -94,7 +94,7 @@ class Problem(object):
 
     @property
     def cost(self):
-        if self._cost is None and not callable(self._original_cost):
+        if self._cost is None:
             if self.verbosity >= 1:
                 print("Compiling cost function...")
             self._cost = self.backend.compile_function(self._original_cost,
@@ -143,6 +143,6 @@ class Problem(object):
 
             def hess(x, a):
                 return self.manifold.ehess2rhess(
-                    x, self.egrad(x), self.ehess(x, a), a)
+                    x, self.egrad(x), ehess(x, a), a)
             self._hess = hess
         return self._hess

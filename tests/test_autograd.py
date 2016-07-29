@@ -1,13 +1,13 @@
 import unittest
 
-import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
-import warnings
-
 import autograd.numpy as np
 from pymanopt.tools.autodiff import AutogradBackend
+
+# So that we can test custom classes which inherit from numpy.ndarray
+from pymanopt.manifolds.fixed_rank import _Point
 
 
 class TestVector(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestVector(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian matrix H
@@ -70,7 +70,7 @@ class TestMatrix(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian tensor H (4th order)
@@ -104,6 +104,23 @@ class TestMatrix(unittest.TestCase):
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
+    def test_compile_custom(self):
+        Y = _Point(self.Y)
+        cost_compiled = self.backend.compile_function(self.cost, self.X)
+        np_testing.assert_allclose(self.correct_cost, cost_compiled(Y))
+
+    def test_grad_custom(self):
+        Y = _Point(self.Y)
+        grad = self.backend.compute_gradient(self.cost, self.X)
+        np_testing.assert_allclose(self.correct_grad, grad(Y))
+
+    def test_hessian_custom(self):
+        Y = _Point(self.Y)
+        hess = self.backend.compute_hessian(self.cost, self.X)
+
+        # Now test hess
+        np_testing.assert_allclose(self.correct_hess, hess(Y, self.A))
+
 
 class TestTensor3(unittest.TestCase):
     def setUp(self):
@@ -121,7 +138,7 @@ class TestTensor3(unittest.TestCase):
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
 
         # ... and hess
         # First form hessian tensor H (6th order)
@@ -241,6 +258,26 @@ class TestMixed(unittest.TestCase):
             np_testing.assert_allclose(self.correct_grad[k], grad(self.y)[k])
 
     def test_hessian(self):
+        hess = self.backend.compute_hessian(self.cost, None)
+
+        # Now test hess
+        for k in range(len(hess(self.y, self.a))):
+            np_testing.assert_allclose(self.correct_hess[k], hess(self.y,
+                                                                  self.a)[k])
+
+    def test_compile_custom(self):
+        self.y = (self.y[0], _Point(self.y[1]), self.y[2])
+        cost_compiled = self.backend.compile_function(self.cost, None)
+        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.y))
+
+    def test_grad_custom(self):
+        self.y = (self.y[0], _Point(self.y[1]), self.y[2])
+        grad = self.backend.compute_gradient(self.cost, None)
+        for k in range(len(grad(self.y))):
+            np_testing.assert_allclose(self.correct_grad[k], grad(self.y)[k])
+
+    def test_hessian_custom(self):
+        self.y = (self.y[0], _Point(self.y[1]), self.y[2])
         hess = self.backend.compute_hessian(self.cost, None)
 
         # Now test hess

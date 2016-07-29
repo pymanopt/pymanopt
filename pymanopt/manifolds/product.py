@@ -1,8 +1,4 @@
-import warnings
-
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
 
 from pymanopt.manifolds.manifold import Manifold
 

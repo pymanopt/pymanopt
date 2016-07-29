@@ -11,7 +11,8 @@ if __name__ == "__main__":
     Y = np.random.randint(-5, 5, (1, 200))
 
     # Cost function is the squared error
-    def cost(w): return np.sum(np.sum((Y - np.dot(w.T, X))**2))
+    def cost(w):
+        return np.sum(np.sum((Y - np.dot(w.T, X))**2))
 
     # A solver that involves the hessian
     solver = TrustRegions()

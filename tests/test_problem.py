@@ -1,13 +1,6 @@
 import unittest
 
-import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
-
 import theano.tensor as T
-
-import warnings
 
 from pymanopt import Problem
 from pymanopt.manifolds import Sphere
@@ -28,4 +21,4 @@ class TestProblem(unittest.TestCase):
             # Asking for the gradient of a Theano cost function without
             # specifying an argument for differentiation should raise an
             # exception.
-            grad = problem.grad
+            problem.grad

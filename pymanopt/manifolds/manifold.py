@@ -71,6 +71,14 @@ class Manifold(object):
         pass
 
     @abc.abstractmethod
+    def egrad2rgrad(self, X, G):
+        '''
+        A mapping from the Euclidean gradient G into the tangent space
+        to the manifold at X.
+        '''
+        pass
+
+    @abc.abstractmethod
     def ehess2rhess(self, X, Hess):
         '''
         Convert Euclidean into Riemannian Hessian.
@@ -82,14 +90,6 @@ class Manifold(object):
         '''
         A retraction mapping from the tangent space at X to the manifold.
         See Absil for definition of retraction.
-        '''
-        pass
-
-    @abc.abstractmethod
-    def egrad2rgrad(self, X, G):
-        '''
-        A mapping from the Euclidean gradient G into the tangent space
-        to the manifold at X.
         '''
         pass
 
