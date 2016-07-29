@@ -1,11 +1,11 @@
 from pymanopt.manifolds import FixedRankEmbedded
 import autograd.numpy as np
 from pymanopt import Problem
-from pymanopt.solvers import ConjugateGradient
+from pymanopt.solvers import TrustRegions
 
 # Let A be a (5 x 4) matrix to be approximated
-A = np.array([[1., 0.], [0., 0.]])
-k = 1
+A = np.random.randn(5, 4)
+k = 2
 
 # (a) Instantiation of a manifold
 # points on the manifold are parameterized as (U, S, V) where
@@ -18,14 +18,14 @@ manifold = FixedRankEmbedded(A.shape[0], A.shape[1], k)
 
 # (b) Definition of a cost function (here using autograd.numpy)
 def cost(X):
-    # delta = .5
-    return np.linalg.norm(X - A) ** 2
+    delta = .5
+    return np.sum(np.sqrt((X - A)**2 + delta**2) - delta)
 
 
 # define the Pymanopt problem
 problem = Problem(manifold=manifold, cost=cost)
 # (c) Instantiation of a Pymanopt solver
-solver = ConjugateGradient(minstepsize=0)
+solver = TrustRegions()
 
 # let Pymanopt do the rest
 X = solver.solve(problem)
