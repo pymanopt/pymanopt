@@ -16,3 +16,4 @@
     - autodiff theano and tensorflow: FixedRankEmbedded compatibility
     - autodiff autograd: move type checking outside of compiled function
     - autodiff/_theano [@82](./pymanopt/tools/autodiff/_theano.py#L82): fix theano's no Rop fallback for the product manifold/investigate whether this no Rop fallback is really necessary
+    - autodiff/_autograd: fix product manifold when one or more of the manifolds is FixedRankEmbedded
