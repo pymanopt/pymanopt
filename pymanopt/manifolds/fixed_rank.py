@@ -176,17 +176,17 @@ class FixedRankEmbedded(Manifold):
         uutdu = np.dot(x[0], utdu)
         Up = (egrad[0] - uutdu) / x[1]
 
-        dvtv = np.dot(egrad[2], x[2].T)
-        dvtvvt = np.dot(dvtv, x[2])
-        Vp = (egrad[2] - dvtvvt) / x[1][:, np.newaxis]
+        vtdv = np.dot(x[2], egrad[2].T)
+        vvtdv = np.dot(x[2].T, vtdv)
+        Vp = (egrad[2].T - vvtdv) / x[1]
 
         i = np.eye(self._k)
         f = 1 / (x[1][np.newaxis, :]**2 - x[1][:, np.newaxis]**2 + i)
 
         M = (f * (utdu - utdu.T) * x[1] +
-             x[1][:, np.newaxis] * f * (dvtv.T - dvtv) + np.diag(egrad[1]))
+             x[1][:, np.newaxis] * f * (vtdv - vtdv.T) + np.diag(egrad[1]))
 
-        return (Up, M, Vp)
+        return _TangentVector((Up, M, Vp))
 
     def ehess2rhess(self, X, egrad, ehess, H):
         raise NotImplementedError

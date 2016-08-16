@@ -200,8 +200,8 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         M = (np.dot(f * (np.dot(u.T, du) - np.dot(du.T, u)), np.diag(s)) +
              np.dot(np.diag(s), f * (np.dot(vt, dvt.T) - np.dot(dvt, vt.T))) +
              np.diag(ds))
-        Vp = np.dot(np.dot(np.linalg.inv(np.diag(s)), dvt),
-                    np.eye(self.n) - np.dot(vt.T, vt))
+        Vp = (np.dot(np.dot(np.eye(self.n) - np.dot(vt.T, vt), dvt.T),
+                     np.linalg.inv(np.diag(s))))
 
         up, m, vp = m.egrad2rgrad(x, (du, ds, dvt))
 
