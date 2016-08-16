@@ -1,22 +1,25 @@
 from pymanopt.manifolds import FixedRankEmbedded
 import autograd.numpy as np
 from pymanopt import Problem
-from pymanopt.solvers import SteepestDescent
+from pymanopt.solvers import ConjugateGradient
 
 # Let A be a (5 x 4) matrix to be approximated
 A = np.random.randn(5, 4)
 k = 2
 
 # (a) Instantiation of a manifold
-# points on the manifold are parameterized as (U, S, V) where
-# U is an orthonormal 5 x 2 matrix,
-# S is a full rank diagonal 2 x 2 matrix,
-# V is an orthonormal 4 x 2 matrix,
-# such that U*S*V' is a 5 x 4 matrix of rank 2.
+# points on the manifold are parameterized via their singular value
+# decomposition (u, s, vt) where
+# u is a 5 x 2 matrix with orthonormal columns,
+# s is a vector of length 2,
+# vt is a 2 x 4 matrix with orthonormal rows,
+# so that u*diag(s)*vt is a 5 x 4 matrix of rank 2.
 manifold = FixedRankEmbedded(A.shape[0], A.shape[1], k)
 
 
 # (b) Definition of a cost function (here using autograd.numpy)
+#       Note that the cost must be defined in terms of u, s and vt, where
+#       X = u * diag(s) * vt.
 def cost(usv):
     delta = .5
     u = usv[0]
@@ -29,7 +32,7 @@ def cost(usv):
 # define the Pymanopt problem
 problem = Problem(manifold=manifold, cost=cost)
 # (c) Instantiation of a Pymanopt solver
-solver = SteepestDescent()
+solver = ConjugateGradient()
 
 # let Pymanopt do the rest
 X = solver.solve(problem)
