@@ -101,6 +101,7 @@ class TestMatrix(unittest.TestCase):
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
+
 class TestTensor3(unittest.TestCase):
     def setUp(self):
         np.seterr(all='raise')
