@@ -10,7 +10,8 @@ from pymanopt.manifolds import Stiefel
 
 class FixedRankEmbedded(Manifold):
     """
-    Note: Only compatible with autograd autodiff backend. Should be fixed soon.
+    Note: Currently not compatible with the second order TrustRegions solver.
+    Should be fixed soon.
 
     Manifold of m-by-n real matrices of fixed rank k. This follows the
     embedded geometry described in Bart Vandereycken's 2013 paper:
@@ -31,6 +32,20 @@ class FixedRankEmbedded(Manifold):
     >>> import pymanopt.manifolds
     >>> manifold = pymanopt.manifolds.FixedRankEmbedded(5, 4, 3)
 
+    Then the shapes will be as follows:
+    >>> x = manifold.rand()
+    >>> x[0].shape
+    (5, 3)
+    >>> x[1].shape
+    (3,)
+    >>> x[2].shape
+    (3, 4)
+
+    and the full matrix can be recovered using the matrix product
+    x[0] * diag(x[1]) * x[2]:
+    >>> import numpy as np
+    >>> X = x[0].dot(np.diag(x[1])).dot(x[2])
+
     Tangent vectors are represented as a tuple (Up, M Vp). The matrices Up
     (mxk) and Vp (mxk) obey Up'*U = 0 and Vp'*V = 0.
     The matrix M (kxk) is arbitrary. Such a structure corresponds to the
@@ -41,7 +56,7 @@ class FixedRankEmbedded(Manifold):
 
     Vectors in the ambient space are best represented as mxn matrices. If
     these are low-rank, they may also be represented as structures with
-    U, S, V fields, such that Z = U*S*V'. There are no resitrictions on what
+    U, S, V fields, such that Z = U*S*V'. There are no restrictions on what
     U, S and V are, as long as their product as indicated yields a real, mxn
     matrix.
 
@@ -64,34 +79,6 @@ class FixedRankEmbedded(Manifold):
     This file is based on fixedrankembeddedfactory from Manopt: www.manopt.org.
     Ported by: Jamie Townsend, Sebastian Weichwald
     Original author: Nicolas Boumal, Dec. 30, 2012.
-    Contributors:
-    Change log:
-
-      Feb. 20, 2014 (NB):
-          Added function tangent to work with checkgradient.
-
-      June 24, 2014 (NB):
-          A couple modifications following
-          Bart Vandereycken's feedback:
-          - The checksum (hash) was replaced for a faster alternative: it's a
-            bit less "safe" in that collisions could arise with higher
-            probability, but they're still very unlikely.
-          - The vector transport was changed.
-          The typical distance was also modified, hopefully giving the
-          trustregions method a better initial guess for the trust region
-          radius, but that should be tested for different cost functions too.
-
-       July 11, 2014 (NB):
-          Added ehess2rhess and tangent2ambient, supplied by Bart.
-
-       July 14, 2014 (NB):
-          Added vec, mat and vecmatareisometries so that hessianspectrum now
-          works with this geometry. Implemented the tangent function.
-          Made it clearer in the code and in the documentation in what format
-          ambient vectors may be supplied, and generalized some functions so
-          that they should now work with both accepted formats.
-          It is now clearly stated that for a point X represented as a
-          triplet (U, S, V), the matrix S needs to be diagonal.
     """
 
     def __init__(self, m, n, k):
