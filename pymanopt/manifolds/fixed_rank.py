@@ -47,7 +47,7 @@ class FixedRankEmbedded(Manifold):
     >>> X = x[0].dot(np.diag(x[1])).dot(x[2])
 
     Tangent vectors are represented as a tuple (Up, M Vp). The matrices Up
-    (mxk) and Vp (mxk) obey Up'*U = 0 and Vp'*V = 0.
+    (mxk) and Vp (nxk) obey Up'*U = 0 and Vp'*V = 0.
     The matrix M (kxk) is arbitrary. Such a structure corresponds to the
     following tangent vector in the ambient space of mxn matrices:
       Z = U*M*V' + Up*V' + U*Vp'
