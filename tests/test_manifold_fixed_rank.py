@@ -34,8 +34,8 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         a = e.randvec(x)
         b = e.randvec(x)
         # First embed in the ambient space
-        A = x.U.dot(a[1].dot(x.V.T)) + a[0].dot(x.V.T) + x.U.dot(a[2].T)
-        B = x.U.dot(b[1].dot(x.V.T)) + b[0].dot(x.V.T) + x.U.dot(b[2].T)
+        A = x[0].dot(a[1].dot(x[2])) + a[0].dot(x[2]) + x[0].dot(a[2].T)
+        B = x[0].dot(b[1].dot(x[2])) + b[0].dot(x[2]) + x[0].dot(b[2].T)
         trueinner = np.sum(A*B)
         np_testing.assert_almost_equal(trueinner, e.inner(x, a, b))
 
@@ -46,10 +46,10 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
 
         g = m.proj(x, v)
         # Check that g is a true tangent vector
-        np_testing.assert_allclose(np.dot(g[0].T, x.U),
+        np_testing.assert_allclose(np.dot(g[0].T, x[0]),
                                    np.zeros((self.k, self.k)),
                                    atol=1e-6)
-        np_testing.assert_allclose(np.dot(g[2].T, x.V),
+        np_testing.assert_allclose(np.dot(g[2].T, x[2].T),
                                    np.zeros((self.k, self.k)),
                                    atol=1e-6)
 
@@ -95,17 +95,15 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         e = self.man
         x = e.rand()
         y = e.rand()
-        assert np.shape(x.U) == (self.m, self.k)
-        assert np.shape(x.S) == (self.k, self.k)
-        assert np.shape(x.V) == (self.n, self.k)
-        np_testing.assert_allclose(x.U.T.dot(x.U), np.eye(self.k), atol=1e-6)
-        np_testing.assert_allclose(x.V.T.dot(x.V), np.eye(self.k), atol=1e-6)
-        np_testing.assert_allclose(np.diag(np.diag(x.S)), x.S)
-        np_testing.assert_allclose(x, x.U.dot(x.S).dot(x.V.T))
+        assert np.shape(x[0]) == (self.m, self.k)
+        assert np.shape(x[1]) == (self.k,)
+        assert np.shape(x[2]) == (self.k, self.n)
+        np_testing.assert_allclose(x[0].T.dot(x[0]), np.eye(self.k), atol=1e-6)
+        np_testing.assert_allclose(x[2].dot(x[2].T), np.eye(self.k), atol=1e-6)
 
-        assert la.norm(x.U - y.U) > 1e-6
-        assert la.norm(x.S - y.S) > 1e-6
-        assert la.norm(x.V - y.V) > 1e-6
+        assert la.norm(x[0] - y[0]) > 1e-6
+        assert la.norm(x[1] - y[1]) > 1e-6
+        assert la.norm(x[2] - y[2]) > 1e-6
 
     def test_transp(self):
         s = self.man
@@ -152,31 +150,15 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         x = m.rand()
         z = m.randvec(x)
 
-        z_ambient = (x.U.dot(z[1]).dot(x.V.T) + z[0].dot(x.V.T) +
-                     x.U.dot(z[2].T))
+        z_ambient = (x[0].dot(z[1]).dot(x[2]) + z[0].dot(x[2]) +
+                     x[0].dot(z[2].T))
 
         u, s, v = m.tangent2ambient(x, z)
 
         np_testing.assert_allclose(z_ambient, u.dot(s).dot(v.T))
 
     def test_ehess2rhess(self):
-        m = self.man
-        x = m.rand()
-        h = m.randvec(x)
-        egrad, ehess = np.random.randn(2, self.m, self.n)
-
-        up, M, vp = m.proj(x, ehess)
-
-        T = egrad.dot(h[2]).dot(np.linalg.inv(x.S))
-        up += T - x.U.dot(x.U.T.dot(T))
-        T = egrad.T.dot(h[0]).dot(np.linalg.inv(x.S))
-        vp += T - x.V.dot(x.V.T.dot(T))
-
-        rhess = m.ehess2rhess(x, egrad, ehess, h)
-
-        np_testing.assert_allclose(up, rhess[0])
-        np_testing.assert_allclose(M, rhess[1])
-        np_testing.assert_allclose(vp, rhess[2])
+        pass
 
     def test_retr(self):
         # Test that the result is on the manifold and that for small
@@ -186,33 +168,46 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
 
         y = self.man.retr(x, u)
 
-        np_testing.assert_allclose(y.U.T.dot(y.U), np.eye(self.k), atol=1e-6)
-        np_testing.assert_allclose(y.V.T.dot(y.V), np.eye(self.k), atol=1e-6)
-        np_testing.assert_allclose(np.diag(np.diag(y.S)), y.S)
+        np_testing.assert_allclose(y[0].T.dot(y[0]), np.eye(self.k), atol=1e-6)
+        np_testing.assert_allclose(y[2].dot(y[2].T), np.eye(self.k), atol=1e-6)
 
         u = u * 1e-6
         y = self.man.retr(x, u)
-        y = y.U.dot(y.S).dot(y.V.T)
+        y = y[0].dot(np.diag(y[1])).dot(y[2])
 
         u = self.man.tangent2ambient(x, u)
         u = u[0].dot(u[1]).dot(u[2].T)
-        x = x.U.dot(x.S).dot(x.V.T)
+        x = x[0].dot(np.diag(x[1])).dot(x[2])
 
         np_testing.assert_allclose(y, x + u, atol=1e-5)
 
     def test_egrad2rgrad(self):
         # Verify that egrad2rgrad and proj are equivalent.
-        e = self.man
-        x = e.rand()
-        u, s, v = np.linalg.svd(np.random.randn(self.m, self.n),
-                                full_matrices=False)
-        s = np.diag(s)
-        v = v.T
-        u = (u, s, v)
+        m = self.man
+        x = m.rand()
+        u, s, vt = x
 
-        np_testing.assert_allclose(e.egrad2rgrad(x, u)[0], e.proj(x, u)[0])
-        np_testing.assert_allclose(e.egrad2rgrad(x, u)[1], e.proj(x, u)[1])
-        np_testing.assert_allclose(e.egrad2rgrad(x, u)[2], e.proj(x, u)[2])
+        i = np.eye(self.k)
+
+        f = 1 / (s[..., np.newaxis, :]**2 - s[..., :, np.newaxis]**2 + i)
+
+        du = np.random.randn(self.m, self.k)
+        ds = np.random.randn(self.k)
+        dvt = np.random.randn(self.k, self.n)
+
+        Up = (np.dot(np.dot(np.eye(self.m) - np.dot(u, u.T), du),
+                     np.linalg.inv(np.diag(s))))
+        M = (np.dot(f * (np.dot(u.T, du) - np.dot(du.T, u)), np.diag(s)) +
+             np.dot(np.diag(s), f * (np.dot(vt, dvt.T) - np.dot(dvt, vt.T))) +
+             np.diag(ds))
+        Vp = (np.dot(np.dot(np.eye(self.n) - np.dot(vt.T, vt), dvt.T),
+                     np.linalg.inv(np.diag(s))))
+
+        up, m, vp = m.egrad2rgrad(x, (du, ds, dvt))
+
+        np_testing.assert_allclose(Up, up)
+        np_testing.assert_allclose(M, m)
+        np_testing.assert_allclose(Vp, vp)
 
     def test_randvec(self):
         e = self.man
@@ -223,10 +218,10 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         assert np.shape(u[0]) == (self.m, self.k)
         assert np.shape(u[1]) == (self.k, self.k)
         assert np.shape(u[2]) == (self.n, self.k)
-        np_testing.assert_allclose(np.dot(u[0].T, x.U),
+        np_testing.assert_allclose(np.dot(u[0].T, x[0]),
                                    np.zeros((self.k, self.k)),
                                    atol=1e-6)
-        np_testing.assert_allclose(np.dot(u[2].T, x.V),
+        np_testing.assert_allclose(np.dot(u[2].T, x[2].T),
                                    np.zeros((self.k, self.k)),
                                    atol=1e-6)
 

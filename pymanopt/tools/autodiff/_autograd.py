@@ -54,15 +54,7 @@ class AutogradBackend(Backend):
         h = _hessian_vector_product(objective)
 
         def hess_vec_prod(x, a):
-            if type(x) in (list, tuple):
-                return h([np.array(xi) for xi in x], a)
-            else:
-                # If the tangent vector is not a numpy array it is a custom
-                # tangent vector implementation and has to be converted to a
-                # point on the ambient space
-                if not isinstance(a, np.ndarray):
-                    a = a.to_ambient(x)
-                return h(np.array(x), a)
+            return h(x, a)
         return hess_vec_prod
 
 

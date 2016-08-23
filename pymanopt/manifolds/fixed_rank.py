@@ -10,11 +10,8 @@ from pymanopt.manifolds import Stiefel
 
 class FixedRankEmbedded(Manifold):
     """
-    Note: Only compatible with autograd autodiff backend. Should be fixed soon.
-
-    Manifold struct to optimize fixed-rank matrices w/ an embedded geometry.
-
-    FixedRankEmbedded(m, n, k)
+    Note: Currently not compatible with the second order TrustRegions solver.
+    Should be fixed soon.
 
     Manifold of m-by-n real matrices of fixed rank k. This follows the
     embedded geometry described in Bart Vandereycken's 2013 paper:
@@ -22,14 +19,35 @@ class FixedRankEmbedded(Manifold):
 
     Paper link: http://arxiv.org/pdf/1209.3834.pdf
 
-    A point X on the manifold is represented as a structure with three
-    fields: U, S and V. The matrices U (mxk) and V (nxk) are orthonormal,
-    while the matrix S (kxk) is any diagonal, full rank matrix.
-    Following the SVD formalism, X = U*S*V'. Note that the diagonal entries
-    of S are not constrained to be nonnegative.
+    For efficiency purposes, Pymanopt does not represent points on this
+    manifold explicitly using m x n matrices, but instead implicitly using
+    a truncated singular value decomposition. Specifically, a point is
+    represented by a tuple (u, s, vt) of three numpy arrays. The arrays u,
+    s and vt have shapes (m, k), (k,) and (k, n) respectively, and the low
+    rank matrix which they represent can be recovered by the matrix product
+    u * diag(s) * vt.
 
-    Tangent vectors are represented as a structure with three fields: Up, M
-    and Vp. The matrices Up (mxk) and Vp (mxk) obey Up'*U = 0 and Vp'*V = 0.
+    For example, to optimize over the space of 5 by 4 matrices with rank 3,
+    we would need to
+    >>> import pymanopt.manifolds
+    >>> manifold = pymanopt.manifolds.FixedRankEmbedded(5, 4, 3)
+
+    Then the shapes will be as follows:
+    >>> x = manifold.rand()
+    >>> x[0].shape
+    (5, 3)
+    >>> x[1].shape
+    (3,)
+    >>> x[2].shape
+    (3, 4)
+
+    and the full matrix can be recovered using the matrix product
+    x[0] * diag(x[1]) * x[2]:
+    >>> import numpy as np
+    >>> X = x[0].dot(np.diag(x[1])).dot(x[2])
+
+    Tangent vectors are represented as a tuple (Up, M Vp). The matrices Up
+    (mxk) and Vp (nxk) obey Up'*U = 0 and Vp'*V = 0.
     The matrix M (kxk) is arbitrary. Such a structure corresponds to the
     following tangent vector in the ambient space of mxn matrices:
       Z = U*M*V' + Up*V' + U*Vp'
@@ -38,7 +56,7 @@ class FixedRankEmbedded(Manifold):
 
     Vectors in the ambient space are best represented as mxn matrices. If
     these are low-rank, they may also be represented as structures with
-    U, S, V fields, such that Z = U*S*V'. Their are no resitrictions on what
+    U, S, V fields, such that Z = U*S*V'. There are no restrictions on what
     U, S and V are, as long as their product as indicated yields a real, mxn
     matrix.
 
@@ -46,7 +64,7 @@ class FixedRankEmbedded(Manifold):
     space R^(mxn) equipped with the usual trace (Frobenius) inner product.
 
 
-    Please cite the Manopt paper as well as the research paper:
+    Please cite the Pymanopt paper as well as the research paper:
         @Article{vandereycken2013lowrank,
           Title   = {Low-rank matrix completion by {Riemannian} optimization},
           Author  = {Vandereycken, B.},
@@ -58,39 +76,9 @@ class FixedRankEmbedded(Manifold):
           Doi     = {10.1137/110845768}
         }
 
-    See also: fixedrankfactory_2factors fixedrankfactory_3factors
-
     This file is based on fixedrankembeddedfactory from Manopt: www.manopt.org.
     Ported by: Jamie Townsend, Sebastian Weichwald
     Original author: Nicolas Boumal, Dec. 30, 2012.
-    Contributors:
-    Change log:
-
-      Feb. 20, 2014 (NB):
-          Added function tangent to work with checkgradient.
-
-      June 24, 2014 (NB):
-          A couple modifications following
-          Bart Vandereycken's feedback:
-          - The checksum (hash) was replaced for a faster alternative: it's a
-            bit less "safe" in that collisions could arise with higher
-            probability, but they're still very unlikely.
-          - The vector transport was changed.
-          The typical distance was also modified, hopefully giving the
-          trustregions method a better initial guess for the trust region
-          radius, but that should be tested for different cost functions too.
-
-       July 11, 2014 (NB):
-          Added ehess2rhess and tangent2ambient, supplied by Bart.
-
-       July 14, 2014 (NB):
-          Added vec, mat and vecmatareisometries so that hessianspectrum now
-          works with this geometry. Implemented the tangent function.
-          Made it clearer in the code and in the documentation in what format
-          ambient vectors may be supplied, and generalized some functions so
-          that they should now work with both accepted formats.
-          It is now clearly stated that for a point X represented as a
-          triplet (U, S, V), the matrix S needs to be diagonal.
     """
 
     def __init__(self, m, n, k):
@@ -119,9 +107,6 @@ class FixedRankEmbedded(Manifold):
         raise NotImplementedError
 
     def inner(self, X, G, H):
-        # Einsum used in this way is equivalent to tensordot but slightly
-        # faster.
-
         return np.sum(np.tensordot(a, b) for (a, b) in zip(G, H))
 
     def _apply_ambient(self, Z, W):
@@ -153,29 +138,45 @@ class FixedRankEmbedded(Manifold):
         This function then returns a tangent vector parameterized as
         (Up, M, Vp), as described in the class docstring.
         """
-        ZV = self._apply_ambient(Z, X.V)
-        UtZV = np.dot(X.U.T, ZV)
-        ZtU = self._apply_ambient_transpose(Z, X.U)
+        ZV = self._apply_ambient(Z, X[2].T)
+        UtZV = np.dot(X[0].T, ZV)
+        ZtU = self._apply_ambient_transpose(Z, X[0])
 
-        Up = ZV - np.dot(X.U, UtZV)
+        Up = ZV - np.dot(X[0], UtZV)
         M = UtZV
-        Vp = ZtU - np.dot(X.V, UtZV.T)
+        Vp = ZtU - np.dot(X[2].T, UtZV.T)
 
         return _TangentVector((Up, M, Vp))
 
-    egrad2rgrad = proj
+    def egrad2rgrad(self, x, egrad):
+        """
+        Assuming that the cost function being optimized has been defined
+        in terms of the low-rank singular value decomposition of X, the
+        gradient returned by the autodiff backends will have three components
+        and will be in the form of a tuple egrad = (df/dU, df/dS, df/dV).
+
+        This function correctly maps a gradient of this form into the tangent
+        space. See https://j-towns.github.io/papers/svd-derivative.pdf for a
+        derivation.
+        """
+        utdu = np.dot(x[0].T, egrad[0])
+        uutdu = np.dot(x[0], utdu)
+        Up = (egrad[0] - uutdu) / x[1]
+
+        vtdv = np.dot(x[2], egrad[2].T)
+        vvtdv = np.dot(x[2].T, vtdv)
+        Vp = (egrad[2].T - vvtdv) / x[1]
+
+        i = np.eye(self._k)
+        f = 1 / (x[1][np.newaxis, :]**2 - x[1][:, np.newaxis]**2 + i)
+
+        M = (f * (utdu - utdu.T) * x[1] +
+             x[1][:, np.newaxis] * f * (vtdv - vtdv.T) + np.diag(egrad[1]))
+
+        return _TangentVector((Up, M, Vp))
 
     def ehess2rhess(self, X, egrad, ehess, H):
-        # Euclidean part
-        Up, M, Vp = self.proj(X, ehess)
-
-        # Curvature part
-        T = self._apply_ambient(egrad, H[2]) / np.diag(X.S)
-        Up += T - np.dot(X.U, np.dot(X.U.T, T))
-        T = self._apply_ambient_transpose(egrad, H[0]) / np.diag(X.S)
-        Vp += T - np.dot(X.V, np.dot(X.V.T, T))
-
-        return _TangentVector((Up, M, Vp))
+        raise NotImplementedError
 
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
@@ -184,28 +185,28 @@ class FixedRankEmbedded(Manifold):
         Qu, Ru = np.linalg.qr(Z[0])
         Qv, Rv = np.linalg.qr(Z[2])
 
-        T = np.vstack((np.hstack((X.S + Z[1], Rv.T)),
+        T = np.vstack((np.hstack((np.diag(X[1]) + Z[1], Rv.T)),
                       np.hstack((Ru, np.zeros((self._k, self._k))))))
 
         # Numpy svd outputs St as a 1d vector, not a matrix.
-        (Ut, St, Vt) = np.linalg.svd(T, full_matrices=False)
+        Ut, St, Vt = np.linalg.svd(T, full_matrices=False)
 
         # Transpose because numpy outputs it the wrong way.
         Vt = Vt.T
 
-        U = np.dot(np.hstack((X.U, Qu)), Ut[:, :self._k])
-        V = np.dot(np.hstack((X.V, Qv)), Vt[:, :self._k])
-        S = np.diag(St[:self._k]) + np.spacing(1) * np.eye(self._k)
-        return _Point((U, S, V))
+        U = np.dot(np.hstack((X[0], Qu)), Ut[:, :self._k])
+        V = np.dot(np.hstack((X[2].T, Qv)), Vt[:, :self._k])
+        S = St[:self._k] + np.spacing(1)
+        return (U, S, V.T)
 
     def norm(self, X, G):
         return np.sqrt(self.inner(X, G, G))
 
     def rand(self):
-        U = self._stiefel_m.rand()
-        S = np.diag(np.sort(np.random.rand(self._k))[::-1])
-        V = self._stiefel_n.rand()
-        return _Point((U, S, V))
+        u = self._stiefel_m.rand()
+        s = np.sort(np.random.rand(self._k))[::-1]
+        vt = self._stiefel_n.rand().T
+        return (u, s, vt)
 
     def _tangent(self, X, Z):
         """
@@ -214,8 +215,8 @@ class FixedRankEmbedded(Manifold):
         errors. If Z was indeed a tangent vector at X, this should barely
         affect Z (it would not at all if we had infinite numerical accuracy).
         """
-        Up = Z[0] - np.dot(X.U, np.dot(X.U.T, Z[0]))
-        Vp = Z[2] - np.dot(X.V, np.dot(X.V.T, Z[2]))
+        Up = Z[0] - np.dot(X[0], np.dot(X[0].T, Z[0]))
+        Vp = Z[2] - np.dot(X[2].T, np.dot(X[2], Z[2]))
 
         return _TangentVector((Up, Z[1], Vp))
 
@@ -243,9 +244,9 @@ class FixedRankEmbedded(Manifold):
         general) orthonormal and S is not (in general) diagonal.
         (In this implementation, S is identity, but this might change.)
         """
-        U = np.hstack((np.dot(X.U, Z[1]) + Z[0], X.U))
+        U = np.hstack((np.dot(X[0], Z[1]) + Z[0], X[0]))
         S = np.eye(2 * self._k)
-        V = np.hstack(([X.V, Z[2]]))
+        V = np.hstack(([X[2].T, Z[2]]))
         return (U, S, V)
 
     # Comment from Manopt:
@@ -274,9 +275,9 @@ class FixedRankEmbedded(Manifold):
 
 class _TangentVector(tuple):
     def to_ambient(self, x):
-        Z1 = x.U.dot(self[1].dot(x.V.T))
-        Z2 = self[0].dot(x.V.T)
-        Z3 = x.U.dot(self[2].T)
+        Z1 = x[0].dot(self[1].dot(x[2]))
+        Z2 = self[0].dot(x[2])
+        Z3 = x[0].dot(self[2].T)
         return Z1 + Z2 + Z3
 
     def __add__(self, other):
@@ -295,39 +296,3 @@ class _TangentVector(tuple):
 
     def __neg__(self):
         return _TangentVector((-val for val in self))
-
-
-class _Point(np.ndarray):
-    # A numpy.ndarray that computes and stores its own svd upon creation.
-    def __new__(cls, input_array, info=None):
-        if type(input_array) is tuple:
-            obj = np.dot(np.dot(input_array[0], input_array[1]),
-                         input_array[2].T).view(cls)
-            obj.U = input_array[0]
-            obj.S = input_array[1]
-            obj.V = input_array[2]
-        else:
-            # Input array is an already formed ndarray instance
-            # We first cast to be our class type
-            obj = np.asarray(input_array).view(cls)
-            # add the new attribute to the created instance
-            u, s, v = np.linalg.svd(np.array(obj))
-            s = np.diag(s)
-            v = v.T
-            obj.U = u
-            obj.S = s
-            obj.V = v
-        # Finally, we must return the newly created object:
-        return obj
-
-    def __array_finalize__(self, obj):
-        # see InfoArray.__array_finalize__ for comments
-        if obj is None:
-            return
-
-        u, s, v = np.linalg.svd(np.array(obj))
-        s = np.diag(s)
-        v = v.T
-        self.U = u
-        self.S = s
-        self.V = v
