@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/pymanopt/pymanopt/badge.svg?branch=master)](https://coveralls.io/github/pymanopt/pymanopt?branch=master)
 
 Please refer to the **documentation at [pymanopt.github.io](https://pymanopt.github.io)**
-and this [arXiv note](http://arxiv.org/abs/1603.03236) to get started
+and this [JMLR paper](http://www.jmlr.org/papers/v17/16-177.html) to get started
 with optimization on manifolds using Pymanopt.
 
 We encourage users and developers to report problems, request features,
