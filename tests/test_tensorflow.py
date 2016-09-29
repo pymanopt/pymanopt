@@ -12,10 +12,10 @@ from pymanopt.tools.autodiff import TensorflowBackend
 
 class TestVector(unittest.TestCase):
     def setUp(self):
-        self.X = X = tf.Variable(tf.zeros([0]))
-        self.cost = tf.exp(tf.reduce_sum(X**2))
-
         n = self.n = 15
+
+        self.X = X = tf.Variable(tf.zeros([n]))
+        self.cost = tf.exp(tf.reduce_sum(X**2))
 
         Y = self.Y = rnd.randn(n).astype(float32) * 1e-3
         A = self.A = rnd.randn(n).astype(float32) * 1e-3
@@ -58,11 +58,11 @@ class TestVector(unittest.TestCase):
 
 class TestMatrix(unittest.TestCase):
     def setUp(self):
-        self.X = X = tf.Variable(tf.zeros([0]))
-        self.cost = tf.exp(tf.reduce_sum(X**2))
-
         m = self.m = 10
         n = self.n = 15
+
+        self.X = X = tf.Variable(tf.zeros([m, n]))
+        self.cost = tf.exp(tf.reduce_sum(X**2))
 
         Y = self.Y = rnd.randn(m, n).astype(float32) * 1e-3
         A = self.A = rnd.randn(m, n).astype(float32) * 1e-3
@@ -108,12 +108,12 @@ class TestMatrix(unittest.TestCase):
 
 class TestTensor3(unittest.TestCase):
     def setUp(self):
-        self.X = X = tf.Variable(tf.zeros([0]))
-        self.cost = tf.exp(tf.reduce_sum(X**2))
-
         n1 = self.n1 = 3
         n2 = self.n2 = 4
         n3 = self.n3 = 5
+
+        self.X = X = tf.Variable(tf.zeros([n1, n2, n3]))
+        self.cost = tf.exp(tf.reduce_sum(X**2))
 
         Y = self.Y = rnd.randn(n1, n2, n3).astype(float32) * 1e-3
         A = self.A = rnd.randn(n1, n2, n3).astype(float32) * 1e-3
@@ -159,21 +159,21 @@ class TestTensor3(unittest.TestCase):
 class TestMixed(unittest.TestCase):
     # Test autograd on a tuple containing vector, matrix and tensor3.
     def setUp(self):
-        x = tf.Variable(tf.zeros([0]))
-        y = tf.Variable(tf.zeros([0]))
-        z = tf.Variable(tf.zeros([0]))
-        f = (tf.exp(tf.reduce_sum(x**2)) + tf.exp(tf.reduce_sum(y**2)) +
-             tf.exp(tf.reduce_sum(z**2)))
-
-        self.cost = f
-        self.arg = [x, y, z]
-
         n1 = self.n1 = 3
         n2 = self.n2 = 4
         n3 = self.n3 = 5
         n4 = self.n4 = 6
         n5 = self.n5 = 7
         n6 = self.n6 = 8
+
+        x = tf.Variable(tf.zeros([n1]))
+        y = tf.Variable(tf.zeros([n2, n3]))
+        z = tf.Variable(tf.zeros([n4, n5, n6]))
+        f = (tf.exp(tf.reduce_sum(x**2)) + tf.exp(tf.reduce_sum(y**2)) +
+             tf.exp(tf.reduce_sum(z**2)))
+
+        self.cost = f
+        self.arg = [x, y, z]
 
         self.y = y = (rnd.randn(n1).astype(float32) * 1e-3,
                       rnd.randn(n2, n3).astype(float32) * 1e-3,
