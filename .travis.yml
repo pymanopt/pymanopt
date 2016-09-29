@@ -47,9 +47,9 @@ install:
   - pip install theano
   - pip install protobuf==3.0.0b2
 
-  - if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0rc0-cp27-none-linux_x86_64.whl"; fi
-  - if [ "$TRAVIS_PYTHON_VERSION" == "3.4" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0rc0-cp34-cp34m-linux_x86_64.whl"; fi
-  - if [ "$TRAVIS_PYTHON_VERSION" == "3.5" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0rc0-cp35-cp35m-linux_x86_64.whl"; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0-cp27-none-linux_x86_64.whl"; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.4" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0-cp34-cp34m-linux_x86_64.whl"; fi
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.5" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0-cp35-cp35m-linux_x86_64.whl"; fi
 
   - pip install --no-deps "$TENSORFLOW_PACKAGE_LOC"
   - python setup.py install
