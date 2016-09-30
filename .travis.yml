@@ -46,6 +46,9 @@ install:
   - pip install autograd
   - pip install theano
   - pip install protobuf==3.1.0
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      pip install mock;
+    fi
 
   - if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0-cp27-none-linux_x86_64.whl"; fi
   - if [ "$TRAVIS_PYTHON_VERSION" == "3.4" ]; then TENSORFLOW_PACKAGE_LOC="https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0-cp34-cp34m-linux_x86_64.whl"; fi
