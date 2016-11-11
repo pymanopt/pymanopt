@@ -205,7 +205,7 @@ class PSDFixedRank(Manifold):
         # Projection onto the horizontal space
         YtY = Y.T.dot(Y)
         AS = Y.T.dot(H) - H.T.dot(Y)
-        Omega = lyap(YtY, -AS)
+        Omega = lyap(YtY, AS)
         return H - Y.dot(Omega)
 
     def egrad2rgrad(self, Y, egrad):
