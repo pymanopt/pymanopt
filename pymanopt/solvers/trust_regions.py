@@ -51,7 +51,7 @@
 
 # Ported to pymanopt by Jamie Townsend. January 2016.
 
-from __future__ import print_function
+from __future__ import print_function, division
 
 import time
 
