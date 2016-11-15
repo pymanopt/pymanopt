@@ -1,3 +1,6 @@
+from __future__ import division
+
+
 class LineSearchBackTracking(object):
     """
     Back-tracking line-search based on linesearch.m in the manopt MATLAB
