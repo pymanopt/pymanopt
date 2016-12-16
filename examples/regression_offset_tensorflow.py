@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # Cost function is the sqaured test error
     w = tf.Variable(tf.zeros([3, 1]))
-    b = tf.Variable(tf.zeros([1]))
+    b = tf.Variable(tf.zeros([1, 1]))
     cost = tf.reduce_mean(tf.square(Y - tf.matmul(tf.transpose(w), X) - b))
 
     # first-order, second-order
