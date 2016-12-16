@@ -6,7 +6,7 @@ def assert_backend_available(f):
     def inner(backend, *args, **kwargs):
         if not backend.is_available():
             raise RuntimeError(
-                "Backend `{:s}` is not available".format(backend.name))
+                "Backend `{:s}` is not available".format(str(backend)))
         return f(backend, *args, **kwargs)
     return inner
 
