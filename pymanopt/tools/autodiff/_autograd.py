@@ -3,7 +3,7 @@ Module containing functions to differentiate functions using autograd.
 """
 try:
     import autograd.numpy as np
-    from autograd.core import grad
+    from autograd import grad
 except ImportError:
     np = None
     grad = None

@@ -8,8 +8,7 @@ that is if the projection is an orthogonal projection onto the tangent space.
 """
 import numpy as np
 
-from autograd.core import grad
-from autograd.convenience_wrappers import jacobian
+from autograd import grad, jacobian
 
 
 def rgrad(cost, proj):
