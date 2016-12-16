@@ -3,7 +3,11 @@ Module containing functions to differentiate functions using tensorflow.
 """
 try:
     import tensorflow as tf
-    from tensorflow.python.ops.gradients import _hessian_vector_product
+    try:
+        from tensorflow.python.ops.gradients import _hessian_vector_product
+    except ImportError:
+        from tensorflow.python.ops.gradients_impl import \
+            _hessian_vector_product
 except ImportError:
     tf = None
 
