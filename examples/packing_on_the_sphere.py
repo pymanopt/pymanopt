@@ -16,7 +16,7 @@ def packing_on_the_sphere(n, k, epsilon):
         s = np.triu(Y, 1).max()
         expY = np.exp((Y - s) / epsilon)
         # Zero out the diagonal
-        np.fill_diagonal(expY, np.zeros(n))
+        expY -= np.diag(np.diag(expY))
         u = np.triu(expY, 1).sum()
         return s + epsilon * np.log(u)
 
