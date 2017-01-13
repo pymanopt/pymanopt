@@ -1,5 +1,8 @@
+from __future__import division
+
 import numpy as np
 from numpy.linalg import svd
+
 from pymanopt.tools.multi import multiprod, multitransp
 from pymanopt.manifolds.manifold import Manifold
 

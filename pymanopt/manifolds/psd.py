@@ -1,9 +1,10 @@
+from __future__ import division
+
 import warnings
 
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
-
 import scipy as sp
 from scipy.linalg import solve_lyapunov as lyap
 
@@ -12,14 +13,14 @@ from pymanopt.tools.multi import multiprod, multitransp, multisym, multilog
 
 
 class PositiveDefinite(Manifold):
-    '''
+    """
     Manifold of (n x n)^k positive definite matrices, based on the geometry
     discussed in Chapter 6 of Positive Definite Matrices (Bhatia 2007). Some
     of the implementation is based on sympositivedefinitefactory.m from the
     Manopt MATLAB package. Also see "Conic geometric optimisation on the
     manifold of positive definite matrices" (Sra & Hosseini 2013) for more
     details.
-    '''
+    """
     def __init__(self, n, k=1):
         self._n = n
         self._k = k
@@ -28,11 +29,11 @@ class PositiveDefinite(Manifold):
         self._typicaldist = np.sqrt(k * 0.5 * n * (n+1))
 
         if self._k == 1:
-            self._name = ("Manifold of positive definite ({} x {}) matrices"
-                          ).format(self._n, self._n)
+            self._name = ("Manifold of positive definite ({} x {}) "
+                          "matrices").format(self._n, self._n)
         else:
-            self._name = ("Product manifold of {} ({} x {}) matrices"
-                          ).format(self._k, self._n, self._n)
+            self._name = "Product manifold of {} ({} x {}) matrices".format(
+                self._k, self._n, self._n)
 
     def __str__(self):
         return self._name
@@ -137,7 +138,7 @@ class PositiveDefinite(Manifold):
         Computes the intrinsic mean of X and Y, that is, a point that lies
         mid-way between X and Y on the geodesic arc joining them.
         '''
-        pass
+        raise NotImplementedError
 
 
 class PSDFixedRank(Manifold):

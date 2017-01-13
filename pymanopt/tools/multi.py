@@ -1,4 +1,3 @@
-""" Operations on multiple matrices."""
 import numpy as np
 
 
@@ -49,23 +48,23 @@ def multieye(k, n):
 
 
 def multilog(A, pos_def=False):
+    if not pos_def:
+        raise NotImplementedError
+
     # Computes the logm of each matrix in an array containing k positive
     # definite matrices. This is much faster than scipy.linalg.logm even
     # for a single matrix. Could potentially be improved further.
-    if pos_def:
-        l, v = np.linalg.eigh(A)
-        l = np.expand_dims(np.log(l), axis=-1)
-        return multiprod(v, l * multitransp(v))
-    else:
-        raise NotImplementedError
+    l, v = np.linalg.eigh(A)
+    l = np.expand_dims(np.log(l), axis=-1)
+    return multiprod(v, l * multitransp(v))
 
 
 def multiexp(A, sym=False):
+    if not sym:
+        raise NotImplementedError
+
     # Compute the expm of each matrix in an array of k symmetric matrices.
     # Sometimes faster than scipy.linalg.expm even for a single matrix.
-    if sym:
-        l, v = np.linalg.eigh(A)
-        l = np.expand_dims(np.exp(l), axis=-1)
-        return multiprod(v, l * multitransp(v))
-    else:
-        raise NotImplementedError
+    l, v = np.linalg.eigh(A)
+    l = np.expand_dims(np.exp(l), axis=-1)
+    return multiprod(v, l * multitransp(v))

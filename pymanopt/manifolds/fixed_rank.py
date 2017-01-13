@@ -2,6 +2,8 @@
 Module containing manifolds of fixed rank matrices.
 """
 
+from __future__ import division
+
 import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
