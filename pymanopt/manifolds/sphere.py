@@ -103,3 +103,69 @@ class Sphere(Manifold):
         space.
         """
         return X / self.norm(None, X)
+
+
+class SphereSubspaceIntersection(Sphere):
+    """
+    Manifold of n-dimensional unit 2-norm vectors intersecting the
+    r-dimensional subspace of R^n spanned by the columns of the matrix U. This
+    implementation is based on spheresubspacefactory.m from the Manopt MATLAB
+    package.
+    """
+
+    def __init__(self, n, U=None):
+        super(SphereSubspaceIntersection, self).__init__(n)
+
+        self._n = n
+        if U is None:
+            self._subspace_projector = np.eye(n)
+            self._subspace_dimension = n
+            # The name is defined in the base class.
+        else:
+            if U.shape[0] != n:
+                raise ValueError(
+                    "Number of rows in U does not match dimension of the "
+                    "ambient space.")
+            self._configure_manifold(U)
+
+    def _configure_manifold(self, U):
+        Q, _ = la.qr(U)
+        self._subspace_projector = Q.dot(Q.T)
+        self._subspace_dimension = la.matrix_rank(self._subspace_projector)
+        self._name = ("Sphere manifold of {}-dimensional vectors intersecting "
+                      "a {}-dimensional subspace".format(
+                          self._n, self._subspace_dimension))
+
+    @property
+    def dim(self):
+        return self._subspace_dimension - 1
+
+    def proj(self, X, H):
+        return H - self.inner(None, X, H) * self._subspace_projector.dot(X)
+
+    egrad2rgrad = proj
+
+    def rand(self):
+        X = super(SphereSubspaceIntersection, self).rand()
+        return self._normalize(self._subspace_projector.dot(X))
+
+    def randvec(self, X):
+        Y = super(SphereSubspaceIntersection, self).randvec(X)
+        return self._normalize(self._subspace_projector.dot(Y))
+
+
+class SphereSubspaceComplementIntersection(SphereSubspaceIntersection):
+    """
+    Manifold of n-dimensional unit 2-norm vectors which are orthogonal to the
+    r-dimensional subspace of R^n spanned by columns of the matrix U. This
+    implementation is based on spheresubspacefactory.m from the Manopt MATLAB
+    package.
+    """
+
+    def _configure_manifold(self, U):
+        Q, _ = la.qr(U)
+        self._subspace_projector = np.eye(self._n) - Q.dot(Q.T)
+        self._subspace_dimension = la.matrix_rank(self._subspace_projector)
+        self._name = ("Sphere manifold of {}-dimensional vectors orthogonal "
+                      "to a {}-dimensional subspace".format(
+                          self._n, self._subspace_dimension))
