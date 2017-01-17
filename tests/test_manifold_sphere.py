@@ -168,12 +168,11 @@ class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
 
     def test_proj(self):
         h = rnd.randn(self.n)
-        h = np.zeros(self.n)
         x = self.man.rand()
         p = self.man.proj(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
-        np_testing.assert_allclose(p, np.zeros(self.n))
+        np_testing.assert_array_almost_equal(p, np.zeros(self.n))
 
     def test_dim_1(self):
         U = np.zeros((3, 2))
@@ -216,6 +215,11 @@ class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
 
     def test_proj(self):
         h = rnd.randn(self.n)
+        x = self.man.rand()
+        p = self.man.proj(x, h)
+        # Since the manifold is 0-dimensional, the tangent at each point is
+        # simply the 0-dimensional space {0}.
+        np_testing.assert_array_almost_equal(p, np.zeros(self.n))
 
     def test_dim_rand(self):
         n = 100
