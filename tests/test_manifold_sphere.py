@@ -1,4 +1,5 @@
 import unittest
+import warnings
 
 import numpy as np
 import numpy.linalg as la
@@ -7,7 +8,8 @@ import numpy.testing as np_testing
 
 import autograd.numpy as npa
 
-from pymanopt.manifolds import Sphere
+from pymanopt.manifolds import (Sphere, SphereSubspaceIntersection,
+                                SphereSubspaceComplementIntersection)
 import pymanopt.tools.testing as testing
 
 
@@ -143,3 +145,88 @@ class TestSphereManifold(unittest.TestCase):
         Y = s.rand()
         Z = s.pairmean(X, Y)
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
+
+
+class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
+    def setUp(self):
+        self.n = 2
+        # Defines the 1-sphere intersected with the 1-dimensional subspace
+        # passing through (1, 1) / sqrt(2). This creates a 0-dimensional
+        # manifold as it only consits of isolated points in R^2.
+        self.U = np.ones((self.n, 1)) / np.sqrt(2)
+        with warnings.catch_warnings(record=True) as w:
+            self.man = SphereSubspaceIntersection(self.n, self.U)
+
+    def test_dim(self):
+        self.assertEqual(self.man.dim, 0)
+
+    def test_rand(self):
+        x = self.man.rand()
+        p = np.ones(2) / np.sqrt(2)
+        # The manifold only consists of two isolated points (cf. `setUp()`).
+        self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
+
+    def test_proj(self):
+        h = rnd.randn(self.n)
+        h = np.zeros(self.n)
+        x = self.man.rand()
+        p = self.man.proj(x, h)
+        # Since the manifold is 0-dimensional, the tangent at each point is
+        # simply the 0-dimensional space {0}.
+        np_testing.assert_allclose(p, np.zeros(self.n))
+
+    def test_dim_1(self):
+        U = np.zeros((3, 2))
+        U[0, 0] = U[1, 1] = 1
+        man = SphereSubspaceIntersection(3, U)
+        # U spans the x-y plane, therefore the manifold consists of the
+        # 1-sphere in the x-y plane, and has dimension 1.
+        self.assertEqual(man.dim, 1)
+        # Check if a random element from the manifold has vanishing
+        # z-component.
+        x = man.rand()
+        np_testing.assert_almost_equal(x[-1], 0)
+
+    def test_dim_rand(self):
+        n = 100
+        U = rnd.randn(n, n // 3)
+        dim = la.matrix_rank(U) - 1
+        man = SphereSubspaceIntersection(n, U)
+        self.assertEqual(man.dim, dim)
+
+
+class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
+    def setUp(self):
+        self.n = 2
+        # Define the 1-sphere intersected with the 1-dimensional subspace
+        # orthogonal to the line passing through (1, 1) / sqrt(2). This creates
+        # a 0-dimensional manifold as it only consits of isolated points in
+        # R^2.
+        self.U = np.ones((self.n, 1)) / np.sqrt(2)
+        with warnings.catch_warnings(record=True) as w:
+            self.man = SphereSubspaceComplementIntersection(self.n, self.U)
+
+    def test_dim(self):
+        self.assertEqual(self.man.dim, 0)
+
+    def test_rand(self):
+        x = self.man.rand()
+        p = np.array([-1, 1]) / np.sqrt(2)
+        self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
+
+    def test_proj(self):
+        h = rnd.randn(self.n)
+
+    def test_dim_rand(self):
+        n = 100
+        U = rnd.randn(n, n // 3)
+        # By the rank-nullity theorem the orthogonal complement of span(U) has
+        # dimension n - rank(U).
+        dim = n - la.matrix_rank(U) - 1
+        man = SphereSubspaceComplementIntersection(n, U)
+        self.assertEqual(man.dim, dim)
+
+        # Test if a random element really lies in the left null space of U.
+        x = man.rand()
+        np_testing.assert_almost_equal(la.norm(x), 1)
+        np_testing.assert_array_almost_equal(U.T.dot(x), np.zeros(U.shape[1]))
