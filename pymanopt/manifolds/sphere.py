@@ -1,5 +1,7 @@
 from __future__ import division
 
+import warnings
+
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
@@ -127,6 +129,10 @@ class SphereSubspaceIntersection(Sphere):
                     "Number of rows in U does not match dimension of the "
                     "ambient space.")
             self._configure_manifold(U)
+
+        if self.dim == 0:
+            warnings.warn("Manifold only consists of isolated points when "
+                          "subspace is 1-dimensional.")
 
     def _configure_manifold(self, U):
         Q, _ = la.qr(U)
