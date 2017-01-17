@@ -147,7 +147,8 @@ class SphereSubspaceIntersection(Sphere):
         return self._subspace_dimension - 1
 
     def proj(self, X, H):
-        return H - self.inner(None, X, H) * self._subspace_projector.dot(X)
+        Y = super(SphereSubspaceIntersection, self).proj(X, H)
+        return self._subspace_projector.dot(Y)
 
     egrad2rgrad = proj
 
