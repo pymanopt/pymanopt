@@ -221,6 +221,19 @@ class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
         # simply the 0-dimensional space {0}.
         np_testing.assert_array_almost_equal(p, np.zeros(self.n))
 
+    def test_dim_1(self):
+        U = np.zeros((3, 1))
+        U[-1, -1] = 1
+        man = SphereSubspaceComplementIntersection(3, U)
+        # U spans the z-axis with its orthogonal complement being the x-y
+        # plane, therefore the manifold consists of the 1-sphere in the x-y
+        # plane, and has dimension 1.
+        self.assertEqual(man.dim, 1)
+        # Check if a random element from the manifold has vanishing
+        # z-component.
+        x = man.rand()
+        np_testing.assert_almost_equal(x[-1], 0)
+
     def test_dim_rand(self):
         n = 100
         U = rnd.randn(n, n // 3)
