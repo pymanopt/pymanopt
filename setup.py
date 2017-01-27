@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pymanopt',
-    version='0.2.1',
+    version='0.2.2',
     description=("Toolbox for optimization on manifolds with support for "
                  "automatic differentiation"),
     url='https://pymanopt.github.io',
