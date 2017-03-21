@@ -73,7 +73,7 @@ class ComplexCircle(Manifold):
         di = np.arccos((x1.conj() * x2).real)
         factors = di / abs_v
         factors[di <= 1e-6] = 1
-        retrun v * factors
+        return v * factors
 
     def rand(self):
         n = self._n
