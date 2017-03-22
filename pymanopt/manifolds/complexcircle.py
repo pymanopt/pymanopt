@@ -65,7 +65,7 @@ class ComplexCircle(Manifold):
         return y
 
     def retr(self, z, v):
-        return np.sign(z + v)
+        return self._normalize(z + v)
 
     def log(self, x1, x2):
         v = self.proj(x1, x2 - x1)
@@ -77,7 +77,7 @@ class ComplexCircle(Manifold):
 
     def rand(self):
         n = self._n
-        return np.sign(rnd.randn(n) + 1j * rnd.randn(n))
+        return self._normalize(rnd.randn(n) + 1j * rnd.randn(n))
 
     def randvec(self, z):
         v = rnd.randn(self._n) * (1j * z)
@@ -87,6 +87,11 @@ class ComplexCircle(Manifold):
         return self.proj(x2, d)
 
     def pairmean(self, z1, z2):
-        return np.sign(z1 + z2)
+        return self._normalize(z1 + z2)
 
-    # XXX: Do we need to supply vec(x, u_mat) and mat(x, u_vec)?
+    @staticmethod
+    def _normalize(x):
+        """
+        Normalize the entries of x element-wise by their absolute values.
+        """
+        return x / np.abs(x)
