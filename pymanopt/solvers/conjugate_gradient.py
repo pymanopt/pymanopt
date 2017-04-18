@@ -74,7 +74,7 @@ class ConjugateGradient(Solver):
         man = problem.manifold
         verbosity = problem.verbosity
         objective = problem.cost
-        gradient = problem.grad
+        gradient = problem.egrad
 
         if not reuselinesearch or self.linesearch is None:
             self.linesearch = deepcopy(self._linesearch)
