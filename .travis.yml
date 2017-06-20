@@ -30,16 +30,13 @@ before_install:
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
+  - conda update --yes conda
+  - conda config --add channels conda-forge
 
 # Install packages
 install:
   # Use openblas to fix a theano error (hacky); see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
-  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION openblas numpy scipy nose libgfortran six wheel
+  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose libgfortran six wheel
   - source activate conda-env-python$TRAVIS_PYTHON_VERSION
   - pip install pep8
   - pip install coveralls
