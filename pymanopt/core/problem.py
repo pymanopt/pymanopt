@@ -70,9 +70,11 @@ class Problem(object):
 
         self.verbosity = verbosity
 
-        self._backends = filter(lambda b: b.is_available(),
-                                [TheanoBackend(), AutogradBackend(),
-                                 TensorflowBackend()])
+        self._backends = list(
+            filter(lambda b: b.is_available(),[
+                TheanoBackend(),
+                AutogradBackend(),
+                TensorflowBackend()]))
         self._backend = None
 
     @property
@@ -95,7 +97,8 @@ class Problem(object):
 
     @property
     def cost(self):
-        if self._cost is None and callable(self._original_cost):
+        if (self._cost is None and callable(self._original_cost)
+            and not any(self._backends)):
             self._cost = self._original_cost
 
         elif self._cost is None:
