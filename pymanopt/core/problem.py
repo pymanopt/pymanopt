@@ -98,7 +98,7 @@ class Problem(object):
     @property
     def cost(self):
         if (self._cost is None and callable(self._original_cost)
-            and not any(self._backends)):
+            and not AutogradBackend().is_available()):
             self._cost = self._original_cost
 
         elif self._cost is None:
