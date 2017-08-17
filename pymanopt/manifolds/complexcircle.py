@@ -16,7 +16,9 @@ class ComplexCircle(Manifold):
     Description of vectors z in C^n (complex) such that each component z(i)
     has unit modulus. The manifold structure is the Riemannian submanifold
     structure from the embedding space R^2 x ... x R^2, i.e., the complex
-    circle is identified with the unit circle in the real plane.
+    circle is identified with the unit circle in the real plane. This
+    implementation is based on complexcirclefactory.m from the Manopt MATLAB
+    package.
     """
 
     def __init__(self, n=1):
