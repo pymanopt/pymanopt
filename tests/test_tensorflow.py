@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import numpy.random as rnd
 import numpy.testing as np_testing
-from numpy import float32
+from numpy import float32, float64
 
 import tensorflow as tf
 
@@ -14,11 +14,11 @@ class TestVector(unittest.TestCase):
     def setUp(self):
         n = self.n = 15
 
-        self.X = X = tf.Variable(tf.zeros([n]))
+        self.X = X = tf.Variable(tf.zeros([n], dtype=float64))
         self.cost = tf.exp(tf.reduce_sum(X**2))
 
-        Y = self.Y = rnd.randn(n).astype(float32) * 1e-3
-        A = self.A = rnd.randn(n).astype(float32) * 1e-3
+        Y = self.Y = rnd.randn(n) * 1e-3
+        A = self.A = rnd.randn(n) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
