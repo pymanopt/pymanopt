@@ -43,9 +43,10 @@ from __future__ import division
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
+from scipy.misc import comb
 from scipy.linalg import expm, logm
 
-from pymanopt.tools.multi import multiprod, multitransp, multisym
+from pymanopt.tools.multi import multiprod, multitransp, multisym, multiskew
 from pymanopt.manifolds.manifold import Manifold
 
 
@@ -81,3 +82,87 @@ def randskew(n, N=1):
         Si[idxs] = rnd.randn(int(n * (n - 1) / 2))
     S = S - multitransp(S)
     return S
+
+
+class Rotations(Manifold):
+    def __init__(self, n, k=1):
+        if k == 1:
+            self._name = 'Rotations manifold SO({n})'.format(n=n)
+        elif k > 1:
+            self._name = 'Rotations manifold SO({n})^{k}'.format(n=n, k=k)
+        else:
+            raise RuntimeError("k must be an integer no less than 1.")
+
+        self._n = n
+        self._k = k
+
+    def __str__(self):
+        return self._name
+
+    @property
+    def dim(self):
+        return self._k * comb(self._n, 2)
+
+    def inner(self, X, U, V):
+        return float(np.tensordot(U, V, axes=U.ndim))
+
+    def norm(self, X, U):
+        return la.norm(U)
+
+    @property
+    def typicaldist(self):
+        return np.pi * np.sqrt(self._n * self._k)
+
+    def proj(self, X, H):
+        return multiskew(multiprod(multitransp(X), H))
+
+    def tangent(self, X, H):
+        return multiskew(H)
+
+    def tangent2ambient(self, X, U):
+        return multiprod(X, U)
+
+    egrad2rgrad = proj
+
+    def ehess2rhess(self, X, egrad, ehess, H):
+        Xt = multitransp(X)
+        Xtegrad = multiprod(Xt, egrad)
+        symXtegrad = multisym(Xtegrad)
+        Xtehess = multiprod(Xt, ehess)
+        return multiskew(Xtehess - multiprod(H, symXtegrad))
+
+    def retr(self, X, U):
+        Y = X + multiprod(X, U)
+        for i in range(self._k):
+            Q, R = la.qr(Y[i])
+            Y[i] = np.dot(Q, np.diag(np.sign(np.sign(np.diag(R)) + 0.5)))
+        return Y
+
+    def retr2(self, X, U):
+        Y = X + multiprod(X, U)
+        for i in range(self._k):
+            U, _, Vt = la.svd(Y[i])
+            #             Y[i] = np.dot(U, Vt.T.conj().T)
+            Y[i] = np.dot(U, Vt)
+        return Y
+
+    def exp(self, X, U):
+        expU = U
+        for i in range(self._k):
+            expU[i] = expm(expU[i])
+        return multiprod(X, expU)
+
+    def log(self, X, Y):
+        U = multiprod(multitransp(X), Y)
+        for i in range(self._k):
+            U[i] = np.real(logm(U[i]))
+        return multiskew(U)
+
+    def rand(self):
+        return randrot(self._n, self._k)
+
+    def transp(self, x1, x2, d):
+        return d
+
+    def dist(self, x, y):
+        return self.norm(x, self.log(x, y))
