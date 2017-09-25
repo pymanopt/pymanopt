@@ -41,6 +41,7 @@ def multisym(A):
     # Inspired by MATLAB multisym function by Nicholas Boumal.
     return 0.5 * (A + multitransp(A))
 
+
 def multiskew(A):
     # Inspired by MATLAB multisym function by Nicholas Boumal.
     return 0.5 * (A - multitransp(A))
