@@ -7,8 +7,11 @@ from .oblique import Oblique
 from .euclidean import Euclidean, Symmetric
 from .product import Product
 from .fixed_rank import FixedRankEmbedded
+from .rotations import Rotations
 
-__all__ = ["Grassmann", "Sphere", "SphereSubspaceIntersection",
-           "SphereSubspaceComplementIntersection", "Stiefel", "PSDFixedRank",
-           "PSDFixedRankComplex", "Elliptope", "PositiveDefinite", "Oblique",
-           "Euclidean", "Product", "Symmetric", "FixedRankEmbedded"]
+__all__ = [
+    "Grassmann", "Sphere", "SphereSubspaceIntersection",
+    "SphereSubspaceComplementIntersection", "Stiefel", "PSDFixedRank",
+    "PSDFixedRankComplex", "Elliptope", "PositiveDefinite", "Oblique",
+    "Euclidean", "Product", "Symmetric", "FixedRankEmbedded", "Rotations"
+]
