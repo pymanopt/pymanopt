@@ -63,8 +63,6 @@ class Stiefel(Manifold):
     def proj(self, X, U):
         return U - multiprod(X, multisym(multiprod(multitransp(X), U)))
 
-    egrad2rgrad = proj
-
     def ehess2rhess(self, X, egrad, ehess, H):
         # Convert Euclidean into Riemannian Hessian.
         XtG = multiprod(multitransp(X), egrad)

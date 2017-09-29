@@ -58,8 +58,6 @@ class Sphere(Manifold):
     def proj(self, X, H):
         return H - self.inner(None, X, H) * X
 
-    egrad2rgrad = proj
-
     def ehess2rhess(self, X, egrad, ehess, U):
         return self.proj(X, ehess) - self.inner(None, X, egrad) * U
 
@@ -149,8 +147,6 @@ class SphereSubspaceIntersection(Sphere):
     def proj(self, X, H):
         Y = super(SphereSubspaceIntersection, self).proj(X, H)
         return self._subspace_projector.dot(Y)
-
-    egrad2rgrad = proj
 
     def rand(self):
         X = super(SphereSubspaceIntersection, self).rand()
