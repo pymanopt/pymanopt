@@ -23,7 +23,7 @@ class Rotations(Manifold):
 
     Special orthogonal group (the manifold of rotations): deals with matrices
     R of size k x n x n (or n x n if k = 1, which is the default) such that
-    each n x n matrix is orthogonal, with determinant 1, i.e., 
+    each n x n matrix is orthogonal, with determinant 1, i.e.,
     dot(X.T, X) = eye(n) if k = 1, or dot(X[i].T, X[i]) = eye(n) if k > 1.
 
     This is a description of SO(n)^k with the induced metric from the
