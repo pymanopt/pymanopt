@@ -23,8 +23,8 @@ class Rotations(Manifold):
 
     Special orthogonal group (the manifold of rotations): deals with matrices
     R of size k x n x n (or n x n if k = 1, which is the default) such that
-    each n x n matrix is orthogonal, with determinant 1, i.e., X'*X = eye(n)
-    if k = 1, or X(:, :, i)' * X(:, :, i) = eye(n) for i = 1 : k if k > 1.
+    each n x n matrix is orthogonal, with determinant 1, i.e., 
+    dot(X.T, X) = eye(n) if k = 1, or dot(X[i].T, X[i]) = eye(n) if k > 1.
 
     This is a description of SO(n)^k with the induced metric from the
     embedding space (R^nxn)^k, i.e., this manifold is a Riemannian
@@ -62,7 +62,7 @@ class Rotations(Manifold):
     >>> manifold = Rotations(n)
 
     Define the cost function.
-    >>> cost = lambda X : -np.dot(X.flatten().T, ABt.flatten())
+    >>> cost = lambda X : -np.tensordot(X, ABt, axes=X.ndim)
 
     Define and solve the problem.
     >>> problem = Problem(manifold=manifold, cost=cost)
@@ -95,7 +95,7 @@ class Rotations(Manifold):
         return self._k * comb(self._n, 2)
 
     def inner(self, X, U, V):
-        return float(np.tensordot(U, V, axes=U.ndim))
+        return np.tensordot(U, V, axes=U.ndim)
 
     def norm(self, X, U):
         return la.norm(U)
@@ -123,17 +123,29 @@ class Rotations(Manifold):
         return multiskew(Xtehess - multiprod(H, symXtegrad))
 
     def retr(self, X, U):
+        def retri(Y):
+            Q, R = la.qr(Y)
+            return np.dot(Q, np.diag(np.sign(np.sign(np.diag(R)) + 0.5)))
+
         Y = X + multiprod(X, U)
-        for i in range(self._k):
-            Q, R = la.qr(Y[i])
-            Y[i] = np.dot(Q, np.diag(np.sign(np.sign(np.diag(R)) + 0.5)))
-        return Y
+        if self._k == 1:
+            return retri(Y)
+        else:
+            for i in range(self._k):
+                Y[i] = retri(Y[i])
+            return Y
 
     def retr2(self, X, U):
+        def retr2i(Y):
+            U, _, Vt = la.svd(Y)
+            return np.dot(U, Vt)
+
         Y = X + multiprod(X, U)
-        for i in range(self._k):
-            U, _, Vt = la.svd(Y[i])
-            Y[i] = np.dot(U, Vt)
+        if self._k == 1:
+            return retr2i(Y)
+        else:
+            for i in range(self._k):
+                Y[i] = retr2i(Y[i])
         return Y
 
     def exp(self, X, U):
@@ -147,8 +159,11 @@ class Rotations(Manifold):
 
     def log(self, X, Y):
         U = multiprod(multitransp(X), Y)
-        for i in range(self._k):
-            U[i] = np.real(logm(U[i]))
+        if self._k == 1:
+            return multiskew(np.real(logm(U)))
+        else:
+            for i in range(self._k):
+                U[i] = np.real(logm(U[i]))
         return multiskew(U)
 
     def rand(self):
@@ -156,11 +171,14 @@ class Rotations(Manifold):
 
     def randvec(self, X):
         U = randskew(self._n, self._k)
-        nrmU = np.sqrt(np.dot(U.flatten().T, U.flatten()))
+        nrmU = np.sqrt(np.tensordot(U, U, axes=U.ndim))
         return U / nrmU
 
     def zerovec(self, X):
-        return np.zeros((self._k, self._n, self._n))
+        if self._k == 1:
+            return np.zeros((self._n, self._n))
+        else:
+            return np.zeros((self._k, self._n, self._n))
 
     def transp(self, x1, x2, d):
         return d
