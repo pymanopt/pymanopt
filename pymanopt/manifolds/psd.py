@@ -6,7 +6,10 @@ import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 import scipy as sp
-from scipy.linalg import solve_lyapunov as lyap
+try:
+    from scipy.linalg import solve_lyapunov as lyap
+except ImportError:
+    from scipy.linalg import solve_continuous_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools.multi import multiprod, multitransp, multisym, multilog
