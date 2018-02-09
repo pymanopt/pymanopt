@@ -450,6 +450,7 @@ class TrustRegions(Solver):
 
             # Note that if d_Hd == 0, we will exit at the next "if" anyway.
             alpha = z_r / d_Hd
+            alpha = float(alpha)
             # <neweta,neweta>_P =
             # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
             e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha * alpha * d_Pd
@@ -464,6 +465,7 @@ class TrustRegions(Solver):
                 tau = ((-e_Pd +
                         np.sqrt(e_Pd * e_Pd +
                                 d_Pd * (Delta ** 2 - e_Pe))) / d_Pd)
+                tau = float(tau)
 
                 eta = eta + tau * delta
 
@@ -543,6 +545,7 @@ class TrustRegions(Solver):
 
             # Compute new search direction
             beta = z_r / zold_rold
+            beta = float(beta)
             delta = -z + beta * delta
 
             # Update new P-norms and P-dots [CGT2000, eq. 7.5.6 & 7.5.7].
