@@ -131,6 +131,7 @@ class ParticleSwarm(Solver):
             # Compute the inertia factor which we linearly decrease from 0.9 to
             # 0.4 from iter = 0 to iter = maxiter.
             w = 0.4 + 0.5 * (1 - iter / self._maxiter)
+            w = float(w)
 
             # Compute the velocities.
             for i, xi in enumerate(x):
