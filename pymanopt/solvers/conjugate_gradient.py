@@ -200,7 +200,7 @@ class ConjugateGradient(Solver):
                         "Unknown beta_type %s. Should be one of %s." % (
                             self._beta_type, types))
 
-                desc_dir = -Pnewgrad + beta * desc_dir
+                desc_dir = -Pnewgrad + desc_dir * beta
 
             # Update the necessary variables for the next iteration.
             x = newx

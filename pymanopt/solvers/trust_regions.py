@@ -452,7 +452,7 @@ class TrustRegions(Solver):
             alpha = z_r / d_Hd
             # <neweta,neweta>_P =
             # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
-            e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha * alpha * d_Pd
+            e_Pe_new = e_Pe + 2 * alpha * e_Pd + d_Pd * alpha ** 2
 
             # Check against negative curvature and trust-region radius
             # violation.  If either condition triggers, we bail out.
@@ -465,12 +465,12 @@ class TrustRegions(Solver):
                         np.sqrt(e_Pd * e_Pd +
                                 d_Pd * (Delta ** 2 - e_Pe))) / d_Pd)
 
-                eta = eta + tau * delta
+                eta = eta + delta * tau
 
                 # If only a nonlinear Hessian approximation is available, this
                 # is only approximately correct, but saves an additional
                 # Hessian call.
-                Heta = Heta + tau * Hdelta
+                Heta = Heta + Hdelta * tau
 
                 # Technically, we may want to verify that this new eta is
                 # indeed better than the previous eta before returning it (this
@@ -546,7 +546,7 @@ class TrustRegions(Solver):
             delta = -z + beta * delta
 
             # Update new P-norms and P-dots [CGT2000, eq. 7.5.6 & 7.5.7].
-            e_Pd = beta * (e_Pd + alpha * d_Pd)
-            d_Pd = z_r + beta * beta * d_Pd
+            e_Pd = (e_Pd + d_Pd * alpha) * beta
+            d_Pd = z_r + d_Pd * beta ** 2
 
         return eta, Heta, j, stop_tCG
