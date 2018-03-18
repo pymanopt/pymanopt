@@ -53,6 +53,9 @@ class Skew_Symmetric(Manifold):
     def egrad2rgrad(self, X, U):
         return self.proj(X, U)
 
+    def tangent(self, X, U):
+        return self.proj(X, U)
+
     def ehess2rhess(self, X, egrad, ehess, H):
         return self.proj(X, ehess)
 
