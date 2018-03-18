@@ -25,7 +25,7 @@ class Skew_Symmetric(Manifold):
 
         self._n = n
         self._k = k
-        self._dim = 0.5 * self._k * self._n * (self._n - 1)
+        self._dim = .5 * self._k * self._n * (self._n - 1)
 
     def __str__(self):
         return self._name
@@ -79,4 +79,4 @@ class Skew_Symmetric(Manifold):
         return d
 
     def pairmean(self, X, Y):
-        return 0.5 * (X + Y)
+        return .5 * (X + Y)
