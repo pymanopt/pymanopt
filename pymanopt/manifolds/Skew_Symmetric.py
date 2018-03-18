@@ -69,7 +69,7 @@ class Skew_Symmetric(Manifold):
     def retr(self, X, G):
         return self.exp(X, G)
 
-    def log(self,X,Y):
+    def log(self, X, Y):
         return Y - X
     
     def transp(self, x1, x2, d):
