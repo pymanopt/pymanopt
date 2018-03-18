@@ -41,7 +41,7 @@ class Skew_Symmetric(Manifold):
         return float(np.tensordot(G, H, axes = G.ndim))
     
     def dist(self, X, Y):
-        return np.linalg.norm(X-Y)
+        return np.linalg.norm(X - Y)
     
     @property
     def typicaldist(self):
@@ -51,7 +51,7 @@ class Skew_Symmetric(Manifold):
         return multiskew(U)
     
     def egrad2rgrad(self, X, U):
-        return self.proj(X,U)
+        return self.proj(X, U)
     
     def ehess2rhess(self, X, egrad, ehess, H):
         return self.proj(X, ehess)
@@ -66,8 +66,8 @@ class Skew_Symmetric(Manifold):
     def exp(self, X, G):
         return X + G
     
-    def retr(self,X,G):
-        return self.exp(X,G)
+    def retr(self, X, G):
+        return self.exp(X, G)
 
     def log(self,X,Y):
         return Y - X
