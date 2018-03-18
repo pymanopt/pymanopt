@@ -1,4 +1,7 @@
 import numpy as np
+import numpy.linalg as la
+import numpy.random as rnd
+
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools.multi import multiskew
 
@@ -35,13 +38,13 @@ class Skew_Symmetric(Manifold):
         return self._dim
 
     def norm(self, X, G):
-        return np.linalg.norm(G)
+        return la.norm(G)
 
     def inner(self, X, G, H):
         return float(np.tensordot(G, H, axes=G.ndim))
 
     def dist(self, X, Y):
-        return np.linalg.norm(X - Y)
+        return la.norm(X - Y)
 
     @property
     def typicaldist(self):
@@ -53,14 +56,11 @@ class Skew_Symmetric(Manifold):
     def egrad2rgrad(self, X, U):
         return self.proj(X, U)
 
-    def tangent(self, X, U):
-        return self.proj(X, U)
-
     def ehess2rhess(self, X, egrad, ehess, H):
         return self.proj(X, ehess)
 
     def rand(self):
-        return multiskew(np.random.randn(*self._shape))
+        return multiskew(rnd.randn(*self._shape))
 
     def randvec(self, X):
         G = self.rand()
