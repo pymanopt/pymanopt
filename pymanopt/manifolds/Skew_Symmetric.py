@@ -1,5 +1,6 @@
+from __future__ import division
+
 import numpy as np
-import numpy.linalg as la
 import numpy.random as rnd
 
 from pymanopt.manifolds import Euclidean
@@ -26,9 +27,7 @@ class Skew_Symmetric(Euclidean):
         else:
             raise RuntimeError("k must be an integer no less than 1.")
 
-        self._n = n
-        self._k = k
-        self._dim = .5 * self._k * self._n * (self._n - 1)
+        self._dim = .5 * k * n * (n - 1)
 
     def __str__(self):
         return self._name
@@ -41,10 +40,10 @@ class Skew_Symmetric(Euclidean):
         return multiskew(U)
 
     def egrad2rgrad(self, X, U):
-        return self.proj(X, U)
+        return multiskew(U)
 
     def ehess2rhess(self, X, egrad, ehess, H):
-        return self.proj(X, ehess)
+        return multiskew(ehess)
 
     def rand(self):
         return multiskew(rnd.randn(*self._shape))
