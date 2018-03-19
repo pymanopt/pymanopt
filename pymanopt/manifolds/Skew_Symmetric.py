@@ -2,11 +2,11 @@ import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 
-from pymanopt.manifolds.manifold import Manifold
+from pymanopt.manifolds import Euclidean
 from pymanopt.tools.multi import multiskew
 
 
-class Skew_Symmetric(Manifold):
+class Skew_Symmetric(Euclidean):
     """
     The Euclidean space of n-by-n skew-symmetric matrices.
 
@@ -37,19 +37,6 @@ class Skew_Symmetric(Manifold):
     def dim(self):
         return self._dim
 
-    def norm(self, X, G):
-        return la.norm(G)
-
-    def inner(self, X, G, H):
-        return float(np.tensordot(G, H, axes=G.ndim))
-
-    def dist(self, X, Y):
-        return la.norm(X - Y)
-
-    @property
-    def typicaldist(self):
-        return np.sqrt(self._k) * self._n
-
     def proj(self, X, U):
         return multiskew(U)
 
@@ -65,18 +52,3 @@ class Skew_Symmetric(Manifold):
     def randvec(self, X):
         G = self.rand()
         return multiskew(G / self.norm(X, G))
-
-    def exp(self, X, G):
-        return X + G
-
-    def retr(self, X, G):
-        return self.exp(X, G)
-
-    def log(self, X, Y):
-        return Y - X
-
-    def transp(self, x1, x2, d):
-        return d
-
-    def pairmean(self, X, Y):
-        return .5 * (X + Y)
