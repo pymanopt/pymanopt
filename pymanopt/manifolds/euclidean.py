@@ -5,8 +5,7 @@ import numpy.linalg as la
 import numpy.random as rnd
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools.multi import multisym
-from pymanopt.tools.multi import multiskew
+from pymanopt.tools.multi import multisym, multiskew
 
 
 class Euclidean(Manifold):
