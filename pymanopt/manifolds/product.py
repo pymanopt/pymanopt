@@ -80,6 +80,19 @@ class Product(Manifold):
 
 
 class _TangentVector(list):
+    # These attributes ensure that multiplication of _TangentVector instances
+    # with scalar np.float64 variables and the like is commutative. By default,
+    # multiplication of an unknown object from the right with a numpy data type
+    # causes numpy to attempt vectorization for subsequent array broadcasting.
+    # These two attributes essentially cause the output type of binary
+    # operations involving _TangentVector and ndarray to remain _TangentVector.
+    # See
+    #     https://docs.scipy.org/doc/numpy/reference/arrays.classes.html
+    #     https://github.com/pymanopt/pymanopt/issues/49
+    # for details.
+    __array_priority__ = 1000
+    __array_ufunc__ = None  # Available since numpy 1.13
+
     def __repr__(self):
         repr_ = super(_TangentVector, self).__repr__()
         return "TangentVector: " + repr_

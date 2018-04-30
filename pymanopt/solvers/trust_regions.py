@@ -174,10 +174,10 @@ class TrustRegions(Solver):
             srstr = self.TCG_STOP_REASONS[stop_inner]
 
             # If using randomized approach, compare result with the Cauchy
-            # point.  Convergence proofs assume that we achieve at least (a
+            # point. Convergence proofs assume that we achieve at least (a
             # fraction of) the reduction of the Cauchy point. After this
             # if-block, either all eta-related quantities have been changed
-            # consistently, or none of them have changed.
+            # consistently, or none of them have.
 
             if self.use_rand:
                 used_cauchy = False
