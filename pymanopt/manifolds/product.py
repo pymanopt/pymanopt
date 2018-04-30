@@ -86,11 +86,11 @@ class _TangentVector(list):
 
     def __add__(self, other):
         assert len(self) == len(other)
-        return _TangentVector([self[k] + other[k] for k in range(len(self))])
+        return _TangentVector([v + other[k] for k, v in enumerate(self)])
 
     def __sub__(self, other):
         assert len(self) == len(other)
-        return _TangentVector([self[k] - other[k] for k in range(len(self))])
+        return _TangentVector([v - other[k] for k, v in enumerate(self)])
 
     def __mul__(self, other):
         return _TangentVector([other * val for val in self])
