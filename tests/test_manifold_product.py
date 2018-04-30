@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import numpy.testing as np_testing
 
-from pymanopt.manifolds import Product, Euclidean, Sphere
+from pymanopt.manifolds import Product, Euclidean, Sphere, Grassmann
 
 
 class TestProductManifold(unittest.TestCase):
@@ -28,6 +28,13 @@ class TestProductManifold(unittest.TestCase):
                                 np.sqrt(
                                     self.euclidean.dist(X[0], Y[0])**2 +
                                     self.sphere.dist(X[1], Y[1])**2))
+
+    def test_tangent_vector_multiplication(self):
+        # Regression test for https://github.com/pymanopt/pymanopt/issues/49.
+        man = Product((Euclidean(12), Grassmann(12, 3)))
+        x = man.rand()
+        eta = man.randvec(x)
+        np.float64(1.0) * eta
 
     # def test_inner(self):
 
