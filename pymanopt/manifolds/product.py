@@ -85,6 +85,10 @@ class Product(Manifold):
 
 
 class _TangentVector(list):
+    def __repr__(self):
+        repr_ = super(_TangentVector, self).__repr__()
+        return "TangentVector: " + repr_
+
     def __add__(self, other):
         assert len(self) == len(other)
         return _TangentVector([self[k] + other[k] for k in range(len(self))])
