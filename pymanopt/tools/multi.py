@@ -59,9 +59,9 @@ def multilog(A, pos_def=False):
     # Computes the logm of each matrix in an array containing k positive
     # definite matrices. This is much faster than scipy.linalg.logm even
     # for a single matrix. Could potentially be improved further.
-    l, v = np.linalg.eigh(A)
-    l = np.expand_dims(np.log(l), axis=-1)
-    return multiprod(v, l * multitransp(v))
+    w, v = np.linalg.eigh(A)
+    w = np.expand_dims(np.log(w), axis=-1)
+    return multiprod(v, w * multitransp(v))
 
 
 def multiexp(A, sym=False):
@@ -70,6 +70,6 @@ def multiexp(A, sym=False):
 
     # Compute the expm of each matrix in an array of k symmetric matrices.
     # Sometimes faster than scipy.linalg.expm even for a single matrix.
-    l, v = np.linalg.eigh(A)
-    l = np.expand_dims(np.exp(l), axis=-1)
-    return multiprod(v, l * multitransp(v))
+    w, v = np.linalg.eigh(A)
+    w = np.expand_dims(np.exp(w), axis=-1)
+    return multiprod(v, w * multitransp(v))

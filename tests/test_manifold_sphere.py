@@ -154,7 +154,7 @@ class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
         # passing through (1, 1) / sqrt(2). This creates a 0-dimensional
         # manifold as it only consits of isolated points in R^2.
         self.U = np.ones((self.n, 1)) / np.sqrt(2)
-        with warnings.catch_warnings(record=True) as w:
+        with warnings.catch_warnings(record=True):
             self.man = SphereSubspaceIntersection(self.n, self.U)
 
     def test_dim(self):
@@ -202,7 +202,7 @@ class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
         # a 0-dimensional manifold as it only consits of isolated points in
         # R^2.
         self.U = np.ones((self.n, 1)) / np.sqrt(2)
-        with warnings.catch_warnings(record=True) as w:
+        with warnings.catch_warnings(record=True):
             self.man = SphereSubspaceComplementIntersection(self.n, self.U)
 
     def test_dim(self):

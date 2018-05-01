@@ -56,9 +56,9 @@ class PositiveDefinite(Manifold):
         # efficient way to compute this!
         c = np.linalg.cholesky(x)
         c_inv = np.linalg.inv(c)
-        l = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
-                     pos_def=True)
-        return la.norm(multiprod(multiprod(c, l), c_inv))
+        logm = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
+                        pos_def=True)
+        return la.norm(multiprod(multiprod(c, logm), c_inv))
 
     def inner(self, x, u, v):
         return np.tensordot(la.solve(x, u), la.solve(x, v), axes=x.ndim)
@@ -133,9 +133,9 @@ class PositiveDefinite(Manifold):
     def log(self, x, y):
         c = la.cholesky(x)
         c_inv = la.inv(c)
-        l = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
-                     pos_def=True)
-        return multiprod(multiprod(c, l), multitransp(c))
+        logm = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
+                        pos_def=True)
+        return multiprod(multiprod(c, logm), multitransp(c))
 
     def pairmean(self, X, Y):
         '''

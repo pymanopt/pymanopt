@@ -39,7 +39,7 @@ install:
   # Use openblas to fix a theano error (hacky); see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
   - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose libgfortran six wheel
   - source activate conda-env-python$TRAVIS_PYTHON_VERSION
-  - pip install pep8
+  - pip install flake8
   - pip install coveralls
   - pip install autograd
   - pip install theano
@@ -48,7 +48,7 @@ install:
 
 script:
   - nosetests ./tests --nologcapture --verbosity=2 --with-coverage --cover-package=pymanopt
-  - pep8 examples pymanopt tests setup.py
+  - flake8 examples pymanopt tests setup.py
 
 after_success:
   - coveralls
