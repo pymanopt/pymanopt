@@ -452,10 +452,10 @@ class TrustRegions(Solver):
             alpha = z_r / d_Hd
             # <neweta,neweta>_P =
             # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
-            e_Pe_new = e_Pe + 2 * alpha * e_Pd + d_Pd * alpha ** 2
+            e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha ** 2 * d_Pd
 
             # Check against negative curvature and trust-region radius
-            # violation.  If either condition triggers, we bail out.
+            # violation. If either condition triggers, we bail out.
             if d_Hd <= 0 or e_Pe_new >= Delta**2:
                 # want
                 #  ee = <eta,eta>_prec,x
@@ -465,12 +465,12 @@ class TrustRegions(Solver):
                         np.sqrt(e_Pd * e_Pd +
                                 d_Pd * (Delta ** 2 - e_Pe))) / d_Pd)
 
-                eta = eta + delta * tau
+                eta = eta + tau * delta
 
                 # If only a nonlinear Hessian approximation is available, this
                 # is only approximately correct, but saves an additional
                 # Hessian call.
-                Heta = Heta + Hdelta * tau
+                Heta = Heta + tau * Hdelta
 
                 # Technically, we may want to verify that this new eta is
                 # indeed better than the previous eta before returning it (this
@@ -488,11 +488,11 @@ class TrustRegions(Solver):
 
             # No negative curvature and eta_prop inside TR: accept it.
             e_Pe = e_Pe_new
-            new_eta = eta + delta * alpha
+            new_eta = eta + alpha * delta
 
             # If only a nonlinear Hessian approximation is available, this is
             # only approximately correct, but saves an additional Hessian call.
-            new_Heta = Heta + Hdelta * alpha
+            new_Heta = Heta + alpha * Hdelta
 
             # Verify that the model cost decreased in going from eta to
             # new_eta. If it did not (which can only occur if the Hessian
@@ -510,7 +510,7 @@ class TrustRegions(Solver):
             model_value = new_model_value
 
             # Update the residual.
-            r = r + Hdelta * alpha
+            r = r + alpha * Hdelta
 
             # Compute new norm of r.
             r_r = inner(x, r, r)
@@ -543,10 +543,10 @@ class TrustRegions(Solver):
 
             # Compute new search direction
             beta = z_r / zold_rold
-            delta = -z + delta * beta
+            delta = -z + beta * delta
 
             # Update new P-norms and P-dots [CGT2000, eq. 7.5.6 & 7.5.7].
-            e_Pd = (e_Pd + d_Pd * alpha) * beta
-            d_Pd = z_r + d_Pd * beta ** 2
+            e_Pd = beta * (e_Pd + alpha * d_Pd)
+            d_Pd = z_r + beta * beta * d_Pd
 
         return eta, Heta, j, stop_tCG
