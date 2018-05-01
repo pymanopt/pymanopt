@@ -29,8 +29,8 @@ class TestSinglePositiveDefiniteManifold(unittest.TestCase):
         np_testing.assert_allclose(x, multisym(x))
 
         # Check positivity of eigenvalues
-        l = la.eigvalsh(x)
-        assert (l > [0]).all()
+        w = la.eigvalsh(x)
+        assert (w > [0]).all()
 
     def test_exp(self):
         man = self.man
@@ -145,8 +145,8 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
         np_testing.assert_allclose(x, multisym(x))
 
         # Check positivity of eigenvalues
-        l = la.eigvalsh(x)
-        assert (l > [[0]]).all()
+        w = la.eigvalsh(x)
+        assert (w > [[0]]).all()
 
     def test_randvec(self):
         # Just test that randvec returns an element of the tangent space
@@ -192,8 +192,8 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
         np_testing.assert_allclose(y, multisym(y))
 
         # Check positivity of eigenvalues
-        l = la.eigvalsh(y)
-        assert (l > [[0]]).all()
+        w = la.eigvalsh(y)
+        assert (w > [[0]]).all()
 
         u = u * 1e-6
         np_testing.assert_allclose(man.retr(x, u), x + u)

@@ -1,6 +1,6 @@
 import numpy as np
 from pymanopt import Problem
-from pymanopt.solvers import TrustRegions, SteepestDescent
+from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Rotations
 
 n = 3

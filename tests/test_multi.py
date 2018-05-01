@@ -75,13 +75,13 @@ class TestMulti(unittest.TestCase):
 
     def test_multilog(self):
         A = np.zeros((self.k, self.m, self.m))
-        l = np.zeros((self.k, self.m, self.m))
+        L = np.zeros((self.k, self.m, self.m))
         for i in range(self.k):
             a = np.diag(rnd.rand(self.m))
             q, r = la.qr(rnd.randn(self.m, self.m))
             A[i] = q.dot(a.dot(q.T))
-            l[i] = logm(A[i])
-        np_testing.assert_allclose(multilog(A, pos_def=True), l)
+            L[i] = logm(A[i])
+        np_testing.assert_allclose(multilog(A, pos_def=True), L)
 
     def test_multiexp_singlemat(self):
         # A is a positive definite matrix
