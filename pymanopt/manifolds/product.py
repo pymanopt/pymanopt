@@ -91,11 +91,13 @@ class _ProductTangentVector(list, ndarraySequenceMixin):
 
     def __add__(self, other):
         assert len(self) == len(other)
-        return _ProductTangentVector([v + other[k] for k, v in enumerate(self)])
+        return _ProductTangentVector(
+            [v + other[k] for k, v in enumerate(self)])
 
     def __sub__(self, other):
         assert len(self) == len(other)
-        return _ProductTangentVector([v - other[k] for k, v in enumerate(self)])
+        return _ProductTangentVector(
+            [v - other[k] for k, v in enumerate(self)])
 
     def __mul__(self, other):
         return _ProductTangentVector([other * val for val in self])

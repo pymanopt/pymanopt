@@ -272,8 +272,8 @@ class FixedRankEmbedded(Manifold):
 
     def zerovec(self, X):
         return _FixedRankTangentVector((np.zeros((self._m, self._k)),
-                               np.zeros((self._k, self._k)),
-                               np.zeros((self._n, self._k))))
+                                        np.zeros((self._k, self._k)),
+                                        np.zeros((self._n, self._k))))
 
 
 class _FixedRankTangentVector(tuple, ndarraySequenceMixin):
