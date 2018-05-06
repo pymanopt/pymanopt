@@ -8,6 +8,7 @@ import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.manifolds import Stiefel
+from pymanopt.tools import ndarraySequenceMixin
 
 
 class FixedRankEmbedded(Manifold):
@@ -148,7 +149,7 @@ class FixedRankEmbedded(Manifold):
         M = UtZV
         Vp = ZtU - np.dot(X[2].T, UtZV.T)
 
-        return _TangentVector((Up, M, Vp))
+        return _FixedRankTangentVector((Up, M, Vp))
 
     def egrad2rgrad(self, x, egrad):
         """
@@ -175,7 +176,7 @@ class FixedRankEmbedded(Manifold):
         M = (f * (utdu - utdu.T) * x[1] +
              x[1][:, np.newaxis] * f * (vtdv - vtdv.T) + np.diag(egrad[1]))
 
-        return _TangentVector((Up, M, Vp))
+        return _FixedRankTangentVector((Up, M, Vp))
 
     def ehess2rhess(self, X, egrad, ehess, H):
         raise NotImplementedError
@@ -220,7 +221,7 @@ class FixedRankEmbedded(Manifold):
         Up = Z[0] - np.dot(X[0], np.dot(X[0].T, Z[0]))
         Vp = Z[2] - np.dot(X[2].T, np.dot(X[2], Z[2]))
 
-        return _TangentVector((Up, Z[1], Vp))
+        return _FixedRankTangentVector((Up, Z[1], Vp))
 
     def randvec(self, X):
         Up = np.random.randn(self._m, self._k)
@@ -231,7 +232,7 @@ class FixedRankEmbedded(Manifold):
 
         nrm = self.norm(X, Z)
 
-        return _TangentVector((Z[0]/nrm, Z[1]/nrm, Z[2]/nrm))
+        return _FixedRankTangentVector((Z[0]/nrm, Z[1]/nrm, Z[2]/nrm))
 
     def tangent2ambient(self, X, Z):
         """
@@ -270,12 +271,16 @@ class FixedRankEmbedded(Manifold):
         raise NotImplementedError
 
     def zerovec(self, X):
-        return _TangentVector((np.zeros((self._m, self._k)),
-                               np.zeros((self._k, self._k)),
-                               np.zeros((self._n, self._k))))
+        return _FixedRankTangentVector((np.zeros((self._m, self._k)),
+                                        np.zeros((self._k, self._k)),
+                                        np.zeros((self._n, self._k))))
 
 
-class _TangentVector(tuple):
+class _FixedRankTangentVector(tuple, ndarraySequenceMixin):
+    def __repr__(self):
+        repr_ = super(_FixedRankTangentVector, self).__repr__()
+        return "_FixedRankTangentVector: " + repr_
+
     def to_ambient(self, x):
         Z1 = x[0].dot(self[1].dot(x[2]))
         Z2 = self[0].dot(x[2])
@@ -283,18 +288,18 @@ class _TangentVector(tuple):
         return Z1 + Z2 + Z3
 
     def __add__(self, other):
-        return _TangentVector((s + o for (s, o) in zip(self, other)))
+        return _FixedRankTangentVector((s + o for (s, o) in zip(self, other)))
 
     def __sub__(self, other):
-        return _TangentVector((s - o for (s, o) in zip(self, other)))
+        return _FixedRankTangentVector((s - o for (s, o) in zip(self, other)))
 
     def __mul__(self, other):
-        return _TangentVector((other * s for s in self))
+        return _FixedRankTangentVector((other * s for s in self))
 
     __rmul__ = __mul__
 
     def __div__(self, other):
-        return _TangentVector((val / other for val in self))
+        return _FixedRankTangentVector((val / other for val in self))
 
     def __neg__(self):
-        return _TangentVector((-val for val in self))
+        return _FixedRankTangentVector((-val for val in self))

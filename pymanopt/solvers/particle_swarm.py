@@ -143,7 +143,7 @@ class ParticleSwarm(Solver):
 
                 # Compute the new velocity of particle i, composed of three
                 # contributions.
-                inertia = man.transp(xiprev, xi, vi) * w
+                inertia = w * man.transp(xiprev, xi, vi)
                 nostalgia = rnd.rand() * self._nostalgia * man.log(xi, yi)
                 social = rnd.rand() * self._social * man.log(xi, xbest)
 

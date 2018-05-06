@@ -66,5 +66,5 @@ else:
 
 # print(Xopt)
 
-print('This should be small: {error}\\n'.format(
+print('This should be small: {error}\n'.format(
     error=np.linalg.norm(Xopt - X)))

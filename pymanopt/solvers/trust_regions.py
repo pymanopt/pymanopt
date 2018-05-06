@@ -174,10 +174,10 @@ class TrustRegions(Solver):
             srstr = self.TCG_STOP_REASONS[stop_inner]
 
             # If using randomized approach, compare result with the Cauchy
-            # point.  Convergence proofs assume that we achieve at least (a
+            # point. Convergence proofs assume that we achieve at least (a
             # fraction of) the reduction of the Cauchy point. After this
             # if-block, either all eta-related quantities have been changed
-            # consistently, or none of them have changed.
+            # consistently, or none of them have.
 
             if self.use_rand:
                 used_cauchy = False
@@ -452,10 +452,10 @@ class TrustRegions(Solver):
             alpha = z_r / d_Hd
             # <neweta,neweta>_P =
             # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
-            e_Pe_new = e_Pe + 2 * alpha * e_Pd + d_Pd * alpha ** 2
+            e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha ** 2 * d_Pd
 
             # Check against negative curvature and trust-region radius
-            # violation.  If either condition triggers, we bail out.
+            # violation. If either condition triggers, we bail out.
             if d_Hd <= 0 or e_Pe_new >= Delta**2:
                 # want
                 #  ee = <eta,eta>_prec,x
@@ -465,12 +465,12 @@ class TrustRegions(Solver):
                         np.sqrt(e_Pd * e_Pd +
                                 d_Pd * (Delta ** 2 - e_Pe))) / d_Pd)
 
-                eta = eta + delta * tau
+                eta = eta + tau * delta
 
                 # If only a nonlinear Hessian approximation is available, this
                 # is only approximately correct, but saves an additional
                 # Hessian call.
-                Heta = Heta + Hdelta * tau
+                Heta = Heta + tau * Hdelta
 
                 # Technically, we may want to verify that this new eta is
                 # indeed better than the previous eta before returning it (this
@@ -546,7 +546,7 @@ class TrustRegions(Solver):
             delta = -z + beta * delta
 
             # Update new P-norms and P-dots [CGT2000, eq. 7.5.6 & 7.5.7].
-            e_Pd = (e_Pd + d_Pd * alpha) * beta
-            d_Pd = z_r + d_Pd * beta ** 2
+            e_Pd = beta * (e_Pd + alpha * d_Pd)
+            d_Pd = z_r + beta * beta * d_Pd
 
         return eta, Heta, j, stop_tCG
