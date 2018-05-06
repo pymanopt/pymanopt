@@ -56,9 +56,10 @@ class TestVector(unittest.TestCase):
 
     def test_hessian_no_Rop(self):
         # Break the Rop in T.exp
+        Rop = T.exp.R_op
+
         def new_Rop(x, y):
             raise NotImplementedError
-
         T.exp.R_op = new_Rop
 
         # Rebuild graph to force recompile
@@ -69,6 +70,9 @@ class TestVector(unittest.TestCase):
         hess = self.backend.compute_hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
+
+        # Fix broken Rop
+        T.exp.R_op = Rop
 
 
 class TestMatrix(unittest.TestCase):
@@ -199,9 +203,10 @@ class TestTensor3(unittest.TestCase):
 
     def test_hessian_no_Rop(self):
         # Break the Rop in T.exp
+        Rop = T.exp.R_op
+
         def new_Rop(x, y):
             raise NotImplementedError
-
         T.exp.R_op = new_Rop
 
         # Rebuild graph to force recompile
@@ -212,6 +217,9 @@ class TestTensor3(unittest.TestCase):
         hess = self.backend.compute_hessian(cost, X)
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
+
+        # Fix broken Rop
+        T.exp.R_op = Rop
 
 
 class TestMixed(unittest.TestCase):
@@ -308,3 +316,30 @@ class TestMixed(unittest.TestCase):
         for k in range(len(hess(self.y, self.a))):
             np_testing.assert_allclose(self.correct_hess[k], hess(self.y,
                                                                   self.a)[k])
+
+    def test_hessian_no_Rop(self):
+        # Break the Rop in T.exp
+        Rop = T.exp.R_op
+
+        def new_Rop(x, y):
+            raise NotImplementedError
+        T.exp.R_op = new_Rop
+
+        # Rebuild graph to force recompile
+        x = T.vector()
+        y = T.matrix()
+        z = T.tensor3()
+        f = T.exp(T.sum(x**2)) + T.exp(T.sum(y**2)) + T.exp(T.sum(z**2))
+
+        cost = f
+        arg = [x, y, z]
+
+        # And check that all is still well
+        hess = self.backend.compute_hessian(cost, arg)
+
+        for k in range(len(hess(self.y, self.a))):
+            np_testing.assert_allclose(self.correct_hess[k], hess(self.y,
+                                                                  self.a)[k])
+
+        # Fix broken Rop
+        T.exp.R_op = Rop

@@ -7,6 +7,7 @@ Jamie Townsend December 2014
 try:
     import theano
     import theano.tensor as T
+    from theano.gradient import disconnected_grad
 except ImportError:
     theano = None
     T = None
@@ -67,27 +68,38 @@ class TheanoBackend(Backend):
 
         # Create a new tensor A, which has the same type (i.e. same
         # dimensionality) as argument.
-        try:
+        is_product_manifold = isinstance(argument, (list, tuple))
+        if not is_product_manifold:
             A = argument.type()
-        except AttributeError:
-            # Assume we are on the product manifold
+        else:
             A = [arg.type() for arg in argument]
 
+        # First attempt efficient 'R-op', this directly calculates the
+        # directional derivative of the gradient.
         try:
-            # First attempt efficient 'R-op', this directly calculates the
-            # directional derivative of the gradient, rather than explicitly
-            # calculating the Hessian and then multiplying.
             R = T.Rop(g, argument, A)
         except NotImplementedError:
-            # TODO: fix this fallback for the product manifold.
-            shp = T.shape(argument)
-            H = T.jacobian(g.flatten(), argument).reshape(
-                T.concatenate([shp, shp]), 2 * A.ndim)
-            R = T.tensordot(H, A, A.ndim)
+            # Implementation based on
+            # tensorflow.python.ops.gradients_impl._hessian_vector_product
+            if not is_product_manifold:
+                proj = T.sum(g * disconnected_grad(A))
+                R = T.grad(proj, argument)
+            else:
+                proj = [T.sum(g_elem * disconnected_grad(a_elem))
+                        for g_elem, a_elem in zip(g, A)]
+                proj_grad = [T.grad(proj_elem, argument,
+                                    disconnected_inputs="ignore",
+                                    return_disconnected="None")
+                             for proj_elem in proj]
+                proj_grad_transpose = map(list, zip(*proj_grad))
+                proj_grad_stack = [
+                    T.stacklists([c for c in row if c is not None])
+                    for row in proj_grad_transpose]
+                R = [T.sum(stack, axis=0) for stack in proj_grad_stack]
 
-        try:
+        if not is_product_manifold:
             hess = theano.function([argument, A], R, on_unused_input="warn")
-        except TypeError:
+        else:
             hess_prod = theano.function(argument + A, R,
                                         on_unused_input="warn")
 
