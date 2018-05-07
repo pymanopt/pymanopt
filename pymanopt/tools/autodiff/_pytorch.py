@@ -65,7 +65,7 @@ class PyTorchBackend(Backend):
             v = torch.from_numpy(v)
             x.requires_grad_(True)
             fx = objective(x)
-            grad_fx, *_ = autograd.grad(fx, x, create_graph=True)
+            grad_fx = autograd.grad(fx, x, create_graph=True)[0]
             grad_fx.matmul(v).backward()
             g = x.grad
             # See above.
