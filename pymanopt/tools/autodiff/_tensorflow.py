@@ -22,7 +22,8 @@ class TensorflowBackend(Backend):
     def __str__(self):
         return "tensorflow"
 
-    def is_available(self):
+    @staticmethod
+    def is_available():
         return tf is not None
 
     @assert_backend_available
@@ -42,12 +43,10 @@ class TensorflowBackend(Backend):
     @assert_backend_available
     def compile_function(self, objective, argument):
         if not isinstance(argument, list):
-
             def func(x):
                 feed_dict = {argument: x}
                 return self._session.run(objective, feed_dict)
         else:
-
             def func(x):
                 feed_dict = {i: d for i, d in zip(argument, x)}
                 return self._session.run(objective, feed_dict)
@@ -62,13 +61,10 @@ class TensorflowBackend(Backend):
         tfgrad = tf.gradients(objective, argument)
 
         if not isinstance(argument, list):
-
             def grad(x):
                 feed_dict = {argument: x}
                 return self._session.run(tfgrad[0], feed_dict)
-
         else:
-
             def grad(x):
                 feed_dict = {i: d for i, d in zip(argument, x)}
                 return self._session.run(tfgrad, feed_dict)
@@ -84,7 +80,6 @@ class TensorflowBackend(Backend):
             def hess(x, a):
                 feed_dict = {argument: x, argA: a}
                 return self._session.run(tfhess[0], feed_dict)
-
         else:
             argA = [tf.zeros_like(arg) for arg in argument]
             tfhess = _hessian_vector_product(objective, argument, argA)

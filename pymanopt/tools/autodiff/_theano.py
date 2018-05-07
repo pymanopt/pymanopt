@@ -19,7 +19,8 @@ class TheanoBackend(Backend):
     def __str__(self):
         return "theano"
 
-    def is_available(self):
+    @staticmethod
+    def is_available():
         return theano is not None and T is not None
 
     @assert_backend_available

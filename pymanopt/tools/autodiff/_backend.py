@@ -20,7 +20,7 @@ class Backend:
 
     compile_function = compute_gradient = compute_hessian = __id
 
-    def __false(self):
+    def __false(*args, **kwargs):
         return False
 
     is_available = is_compatible = __false
