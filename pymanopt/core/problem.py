@@ -3,8 +3,7 @@ Module containing pymanopt problem class. Use this to build a problem
 object to feed to one of the solvers.
 """
 
-from pymanopt.tools.autodiff import (AutogradBackend, TheanoBackend,
-                                     TensorflowBackend)
+from pymanopt.tools.autodiff import Function
 
 
 class Problem:
@@ -49,18 +48,19 @@ class Problem:
     """
     def __init__(self, manifold, cost, egrad=None, ehess=None, grad=None,
                  hess=None, arg=None, precon=None, verbosity=2):
-        self.manifold = manifold
-        # We keep a reference to the original cost function in case we want to
-        # call the `prepare` method twice (for instance, after switching from
-        # a first- to second-order method).
         self._cost = None
+        self._egrad = None
+        self._ehess = None
+        self._grad = None
+        self._hess = None
+
+        self.manifold = manifold
         self._original_cost = cost
-        self._egrad = egrad
-        self._ehess = ehess
-        self._grad = grad
-        self._hess = hess
+        self._original_egrad = egrad
+        self._original_ehess = ehess
+        self._original_grad = grad
+        self._original_hess = hess
         self._arg = arg
-        self._backend = None
 
         if precon is None:
             def precon(x, d):
@@ -69,85 +69,56 @@ class Problem:
 
         self.verbosity = verbosity
 
-        self._backends = list(
-            filter(lambda b: b.is_available(), [
-                TheanoBackend(),
-                AutogradBackend(),
-                TensorflowBackend()
-                ]))
-        self._backend = None
-
-    @property
-    def backend(self):
-        if self._backend is None:
-            for backend in self._backends:
-                if backend.is_compatible(self._original_cost, self._arg):
-                    self._backend = backend
-                    break
-            else:
-                backend_names = [str(backend) for backend in self._backends]
-                if self.verbosity >= 1:
-                    print(backend_names)
-                raise ValueError(
-                    "Cannot determine autodiff backend from cost function of "
-                    "type `{:s}`. Available backends are: {:s}".format(
-                        self._original_cost.__class__.__name__,
-                        ", ".join(backend_names)))
-        return self._backend
-
     @property
     def cost(self):
-        if (self._cost is None and callable(self._original_cost) and
-                not AutogradBackend().is_available()):
-            self._cost = self._original_cost
-
-        elif self._cost is None:
-            if self.verbosity >= 1:
-                print("Compiling cost function...")
-            self._cost = self.backend.compile_function(self._original_cost,
-                                                       self._arg)
-
+        if self._cost is None:
+            self._cost = Function(self._original_cost, self._arg)
         return self._cost
+
+    # FIXME: Since _arg is passed to the problem class, we can't have different
+    #        types of functions/call graphs for cost, gradients and Hessians.
 
     @property
     def egrad(self):
         if self._egrad is None:
-            if self.verbosity >= 1:
-                print("Computing gradient of cost function...")
-            egrad = self.backend.compute_gradient(self._original_cost,
-                                                  self._arg)
-            self._egrad = egrad
+            if self._original_egrad is None:
+                self._egrad = self.cost.compute_gradient()
+            else:
+                self._egrad = Function(self._original_egrad, self._arg)
         return self._egrad
 
     @property
     def grad(self):
         if self._grad is None:
-            # Explicit access forces computation/compilation if necessary.
-            egrad = self.egrad
+            if self._original_grad is None:
+                egrad = self.egrad
 
-            def grad(x):
-                return self.manifold.egrad2rgrad(x, egrad(x))
-            self._grad = grad
+                def grad(x):
+                    return self.manifold.egrad2rgrad(x, egrad(x))
+                self._grad = Function(grad)
+            else:
+                self._grad = Function(self._original_grad, self._arg)
         return self._grad
 
     @property
     def ehess(self):
         if self._ehess is None:
-            if self.verbosity >= 1:
-                print("Computing Hessian of cost function...")
-            ehess = self.backend.compute_hessian(self._original_cost,
-                                                 self._arg)
-            self._ehess = ehess
+            if self._original_ehess is None:
+                self._ehess = self.cost.compute_hessian()
+            else:
+                self._ehess = Function(self._original_ehess, self._arg)
         return self._ehess
 
     @property
     def hess(self):
         if self._hess is None:
-            # Explicit access forces computation if necessary.
-            ehess = self.ehess
+            if self._original_hess is None:
+                ehess = self.ehess
 
-            def hess(x, a):
-                return self.manifold.ehess2rhess(
-                    x, self.egrad(x), ehess(x, a), a)
-            self._hess = hess
+                def hess(x, a):
+                    return self.manifold.ehess2rhess(
+                        x, self.egrad(x), ehess(x, a), a)
+                self._hess = Function(hess)
+            else:
+                self._hess = Function(self._original_hess, self._arg)
         return self._hess
