@@ -28,6 +28,8 @@ class PyTorchBackend(Backend):
     def is_compatible(self, objective, argument):
         return callable(objective)
 
+    # TODO: Add support for product manifolds.
+
     @assert_backend_available
     def compile_function(self, objective, argument):
         def func(x):

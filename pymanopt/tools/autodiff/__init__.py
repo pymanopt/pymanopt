@@ -28,7 +28,8 @@ class Function(object):
             if not backend.is_compatible(function, argument):
                 raise ValueError("Backend `{:s}' not compatible with cost "
                                  "function of type `{:s}'".format(
-                                     str(backend), function.__class__.__name__))
+                                     str(backend),
+                                     function.__class__.__name__))
         else:
             # We can only auto-detect theano and tensorflow since autograd and
             # pytorch functions are regular callables. In case we get passed a
