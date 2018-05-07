@@ -1,6 +1,8 @@
-from pymanopt.manifolds import FixedRankEmbedded
 import autograd.numpy as np
+
 from pymanopt import Problem
+from pymanopt.tools import decorators
+from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.solvers import ConjugateGradient
 
 # Let A be a (5 x 4) matrix to be approximated
@@ -20,6 +22,7 @@ manifold = FixedRankEmbedded(A.shape[0], A.shape[1], k)
 # (b) Definition of a cost function (here using autograd.numpy)
 #       Note that the cost must be defined in terms of u, s and vt, where
 #       X = u * diag(s) * vt.
+@decorators.autograd
 def cost(usv):
     delta = .5
     u = usv[0]
