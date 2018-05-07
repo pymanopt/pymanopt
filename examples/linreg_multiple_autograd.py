@@ -1,6 +1,7 @@
 import autograd.numpy as np
 
 from pymanopt import Problem
+from pymanopt.tools import decorators
 from pymanopt.manifolds import Euclidean
 from pymanopt.solvers import TrustRegions
 
@@ -10,6 +11,7 @@ if __name__ == "__main__":
     X = np.zeros((200, 3))
     y = np.zeros((200, 3))
 
+    @decorators.autograd
     def cost(w):
         return np.sum((y - np.dot(X, w)) ** 2)
     # A solver that involves the hessian
