@@ -18,6 +18,10 @@ class TensorflowBackend(Backend):
     def __init__(self):
         if tf is not None:
             self._session = tf.Session()
+            if hasattr(tf, 'global_variables_initializer'):
+                self._session.run(tf.global_variables_initializer())
+            elif hasattr(tf, 'initialize_all_variables'):
+                self._session.run(tf.initialize_all_variables())
 
     def __str__(self):
         return "tensorflow"
