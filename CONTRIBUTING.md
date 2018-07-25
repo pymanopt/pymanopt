@@ -12,7 +12,7 @@ or executing the test suite via [nose][nose]:
 
     nosetests
 
-Note that we also run the [pep8][pep8] utility on every python file in the
+Note that we also run the [flake8][flake8] utility on every python file in the
 package to verify coding style consistency. As such, failure to comply to the
 [style guide][style] will result in a failing travis-ci build.
 
@@ -34,14 +34,14 @@ To make your certification explicit we borrow the "sign-off" procedure
 from the Linux kernel project, i.e., each commit message should contain
 a line saying
 
-    Signed-off-by: Name Sirname <name.sirname@example.org>
+    Signed-off-by: Name Surname <name.surname@example.org>
 
 using your real name and email address. Running the git-commit command
 with the -s option automatically adds this line.
 
 [fork]: https://help.github.com/articles/cloning-a-repository/
 [nose]: https://nose.readthedocs.org/en/latest/
-[pep8]: http://pep8.readthedocs.org/en/latest/
+[flake8]: http://flake8.pycqa.org/en/latest/
 [style]: https://www.python.org/dev/peps/pep-0008/
 [pr]: https://github.com/j-towns/pymanopt/compare
 [commits]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
