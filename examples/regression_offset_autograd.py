@@ -9,7 +9,7 @@ if __name__ == "__main__":
     X = np.random.randn(3, 100)
     Y = X[0:1, :] - 2*X[1:2, :] + np.random.randn(1, 100) + 5
 
-    # Cost function is the sqaured test error
+    # Cost function is the squared test error
     # Note, weights is a tuple/list containing both weight vector w and bias b.
     # This is necessary for autograd to calculate the gradient w.r.t. both
     # arguments in one go.
@@ -33,6 +33,7 @@ if __name__ == "__main__":
 
     print(wopt[0].T)
     print(wopt[1])
+    print()
 
     X1 = np.concatenate((X, np.ones((1, 100))), axis=0)
     wclosed = np.linalg.inv(X1.dot(X1.T)).dot(X1).dot(Y.T)

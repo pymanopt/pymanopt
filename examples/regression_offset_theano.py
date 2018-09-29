@@ -11,12 +11,12 @@ if __name__ == "__main__":
     X = np.random.randn(3, 100)
     Y = X[0:1, :] - 2*X[1:2, :] + np.random.randn(1, 100) + 5
 
-    # Cost function is the sqaured test error
+    # Cost function is the squared test error
     w = T.matrix()
     b = T.matrix()
     cost = T.sum((Y-w.T.dot(X)-b[0, 0])**2)
 
-    # A solver that involves the hessian
+    # A solver that involves the Hessian
     solver = TrustRegions()
 
     # R^3 x R^1
@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
     print(wopt[0].T)
     print(wopt[1])
+    print()
 
     X1 = np.concatenate((X, np.ones((1, 100))), axis=0)
     wclosed = np.linalg.inv(X1.dot(X1.T)).dot(X1).dot(Y.T)
