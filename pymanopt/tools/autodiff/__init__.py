@@ -4,4 +4,6 @@ from ._autograd import AutogradBackend
 
 from ._tensorflow import TensorflowBackend
 
-__all__ = ["TheanoBackend", "AutogradBackend", "TensorflowBackend"]
+from ._pytorch import PytorchBackend
+
+__all__ = ["TheanoBackend", "PytorchBackend", "AutogradBackend", "TensorflowBackend"]

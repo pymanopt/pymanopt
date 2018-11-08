@@ -5,7 +5,7 @@ object to feed to one of the solvers.
 from __future__ import print_function
 
 from pymanopt.tools.autodiff import (AutogradBackend, TheanoBackend,
-                                     TensorflowBackend)
+                                     TensorflowBackend, PytorchBackend)
 
 
 class Problem(object):
@@ -73,6 +73,7 @@ class Problem(object):
         self._backends = list(
             filter(lambda b: b.is_available(), [
                 TheanoBackend(),
+                PytorchBackend(),
                 AutogradBackend(),
                 TensorflowBackend()
                 ]))
