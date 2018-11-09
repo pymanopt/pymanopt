@@ -6,4 +6,5 @@ from ._tensorflow import TensorflowBackend
 
 from ._pytorch import PytorchBackend
 
-__all__ = ["TheanoBackend", "PytorchBackend", "AutogradBackend", "TensorflowBackend"]
+__all__ = ["AutogradBackend", "PytorchBackend",
+           "TensorflowBackend", "TheanoBackend"]
