@@ -8,11 +8,11 @@ from pymanopt.manifolds import Stiefel
 
 if __name__ == "__main__":
     # Generate random data with highest variance in first 2 dimensions
-    X = torch.from_numpy( np.diag([3, 2, 1]).dot(np.random.randn(3, 200)) )
+    X = torch.from_numpy(np.diag([3, 2, 1]).dot(np.random.randn(3, 200)))
 
     # Cost function is the squared reconstruction error
     def cost(w):
-        return (X - w @ w.t() @ X).pow(2).sum()
+        return (X - w.matmul(w.t()).matmul(X)).pow(2).sum()
 
     # A solver that involves the hessian
     solver = TrustRegions()

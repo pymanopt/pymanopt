@@ -12,7 +12,7 @@ if __name__ == "__main__":
     y = torch.from_numpy(np.zeros((200, 3)))
 
     def cost(w):
-        return (y - X @ w).pow(2).sum()
+        return (y - X.matmul(w)).pow(2).sum()
 
     # A solver that involves the hessian
     solver = TrustRegions()
@@ -21,7 +21,8 @@ if __name__ == "__main__":
     manifold = Euclidean(3, 1)
 
     # Create the problem with extra cost function arguments
-    problem = Problem(manifold=manifold, cost=cost, verbosity=0, arg=torch.Tensor())
+    problem = Problem(manifold=manifold, cost=cost,
+                      verbosity=0, arg=torch.Tensor())
 
     # Solve 5 instances of the same type of problem for different data input
     for k in range(0, 5):

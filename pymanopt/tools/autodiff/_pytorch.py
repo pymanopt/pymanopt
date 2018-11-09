@@ -17,7 +17,7 @@ from ._backend import Backend, assert_backend_available
 # its gradient, or its hessian. Therefore it is important to
 # cache previous computations with the same x.
 
-    
+
 class PytorchBackend(Backend):
     def __str__(self):
         return "pytorch"
@@ -28,88 +28,96 @@ class PytorchBackend(Backend):
     @assert_backend_available
     def is_compatible(self, objective, arg):
         """
-        To select the pytorch backend, use 'Problem(manifold=..,cost=...,arg=torch.Tensor())'
-        The tensor passed as argument is used as a python object to cache recent calls
-        to the cost, egrad, or ehess functions
+        To select the pytorch backend, use
+        'Problem(manifold=..,cost=...,arg=torch.Tensor())'
+        The tensor passed as argument is used as a python object
+        to cache recent calls to the cost, egrad, or ehess functions
         """
-        return callable(objective) and isinstance(arg,torch.Tensor) and arg.nelement()==0
+        return callable(objective) and \
+            isinstance(arg, torch.Tensor) and arg.nelement() == 0
 
     @assert_backend_available
     def _compile(self, objective, cache):
-        if hasattr(cache,'cost'):
+        if hasattr(cache, 'cost'):
             return cache
-        cache.x = None   #  list with torch copies of input np.arrays
-        cache.ids = None #  list with ids of the input np.arrays passed to cost/egrad/ehess
-        cache.f = None   #  scalar tensor with cost function (with tree for grad computation)
-        cache.df = None  #  list of gradient tensors (with tree for hessian vector computation)
-        
+        cache.x = None    # list woith torch copies of input np.arrays
+        cache.ids = None  # list with ids of the input np.arrays
+        cache.f = None    # scalar tensor with cost function
+        cache.df = None   # list of gradient tensors
+
         def _astensor(x):
-            return x.detach() if isinstance(x,torch.Tensor) else torch.from_numpy(np.array(x))
+            return x.detach() if isinstance(x, torch.Tensor) \
+                else torch.from_numpy(np.array(x))
 
         def _asiterable(x):
-            return (x, True) if type(x) in (list,tuple) else ([x],False)
-        
-        def _notcached(x,cache):
+            return (x, True) if type(x) in (list, tuple) \
+                else ([x], False)
+
+        def _notcached(x, cache):
             if not cache.ids:
                 return True
             if len(x) != len(cache.ids):
                 return True
-            for (xi,cachex,cacheid) in zip(x,cache.x,cache.ids):
+            for (xi, cachex, cacheid) in zip(x, cache.x, cache.ids):
                 if (id(xi) != cacheid):
                     return True
                 if not (_astensor(xi) == _astensor(cachex)).all().item():
                     return True
             return False
 
-        def _updatex(x,cache):
-            if _notcached(x,cache):
+        def _updatex(x, cache):
+            if _notcached(x, cache):
                 cache.x = [_astensor(xi).clone().requires_grad_() for xi in x]
                 cache.ids = [id(xi) for xi in x]
                 cache.f = None
                 cache.df = None
-        
-        def _updatef(seqp,cache):
+
+        def _updatef(seqp, cache):
             if not cache.f:
                 cache.f = objective(cache.x) if seqp else objective(cache.x[0])
                 if not torch.is_tensor(cache.f) or len(cache.f.size()) > 0:
-                    raise ValueError("Pytorch backend wants a functions that returns a zerodim tensor(scalar)")
+                    raise ValueError("Pytorch backend wants a functions "
+                                     "that returns a zerodim tensor(scalar)")
+
         def cost(x):
-            xx,seqp = _asiterable(x)
-            _updatex(xx,cache)
-            _updatef(seqp,cache)
+            xx, seqp = _asiterable(x)
+            _updatex(xx, cache)
+            _updatef(seqp, cache)
             return cache.f.item()
 
-        def _updatedf(seqp,cache):
+        def _updatedf(seqp, cache):
             if not cache.df:
-                _updatef(seqp,cache)
+                _updatef(seqp, cache)
                 cache.f.backward(create_graph=True)
-                cache.df = [ xi.grad for xi in cache.x ]
+                cache.df = [xi.grad for xi in cache.x]
 
         def egrad(x):
-            xx,seqp = _asiterable(x)
-            _updatex(xx,cache)
-            _updatedf(seqp,cache)
-            return [di.detach().numpy() for di in cache.df] if seqp else cache.df[0].detach().numpy()
+            xx, seqp = _asiterable(x)
+            _updatex(xx, cache)
+            _updatedf(seqp, cache)
+            return [di.detach().numpy() for di in cache.df] if seqp \
+                else cache.df[0].detach().numpy()
 
-        def ehess(x,u):
-            xx,seqp = _asiterable(x)
-            uu,sequ = _asiterable(u)
+        def ehess(x, u):
+            xx, seqp = _asiterable(x)
+            uu, sequ = _asiterable(u)
             if seqp != sequ or len(xx) != len(uu):
                 raise ValueError("Incompatible lists in ehess")
-            _updatex(xx,cache)
-            _updatedf(seqp,cache)
+            _updatex(xx, cache)
+            _updatedf(seqp, cache)
             r = 0
-            for (di,ui) in zip(cache.df,uu):
+            for (di, ui) in zip(cache.df, uu):
                 n = di.nelement()
                 r = r + torch.dot(di.view(n), _astensor(ui).view(n))
-            h = torch.autograd.grad([r],cache.x,retain_graph=True,allow_unused=True)
+            h = torch.autograd.grad([r], cache.x,
+                                    retain_graph=True, allow_unused=True)
             return [hi.numpy() for hi in h] if seqp else h[0].numpy()
 
         cache.cost = cost
         cache.egrad = egrad
         cache.ehess = ehess
         return cache
-    
+
     @assert_backend_available
     def compile_function(self, objective, argument):
         return self._compile(objective, argument).cost
@@ -117,7 +125,7 @@ class PytorchBackend(Backend):
     @assert_backend_available
     def compute_gradient(self, objective, argument):
         return self._compile(objective, argument).egrad
-    
+
     @assert_backend_available
     def compute_hessian(self, objective, argument):
         return self._compile(objective, argument).ehess
