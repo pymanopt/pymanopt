@@ -8,8 +8,8 @@ from pymanopt.solvers import TrustRegions
 
 if __name__ == "__main__":
     # Cost function is the squared reconstruction error
-    X = torch.zeros((200, 3))
-    y = torch.zeros((200, 3))
+    X = torch.from_numpy(np.zeros((200, 3)))
+    y = torch.from_numpy(np.zeros((200, 3)))
 
     def cost(w):
         return (y - X @ w).pow(2).sum()
