@@ -36,4 +36,3 @@ if __name__ == "__main__":
               'closed form solution (bottom)')
         print(wopt)
         print(np.linalg.inv(X.numpy().T.dot(X)).dot(X.numpy().T).dot(y))
-        print('')
