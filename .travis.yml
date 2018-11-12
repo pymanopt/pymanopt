@@ -44,7 +44,7 @@ install:
   - pip install autograd
   - pip install theano
   - pip install tensorflow
-  - pip install torch 
+  - conda install pytorch -c pytorch
   - python setup.py install
 
 script:
