@@ -160,12 +160,13 @@ class TestMixed(unittest.TestCase):
         np.seterr(all='raise')
 
         def torchf(x):
-            return (torch.exp(torch.sum(x[0]**2)) + torch.exp(torch.sum(x[1]**2)) +
+            return (torch.exp(torch.sum(x[0]**2)) +
+                    torch.exp(torch.sum(x[1]**2)) +
                     torch.exp(torch.sum(x[2]**2)))
+
         def npf(x):
             return (np.exp(np.sum(x[0]**2)) + np.exp(np.sum(x[1]**2)) +
                     np.exp(np.sum(x[2]**2)))
-        
 
         self.cost = torchf
 
@@ -234,7 +235,7 @@ class TestMixed(unittest.TestCase):
         self.correct_hess = (h1, h2, h3)
         self.backend = PytorchBackend()
         self.arg = torch.Tensor()
-        
+
     def test_compile(self):
         cost_compiled = self.backend.compile_function(self.cost, self.arg)
         np_testing.assert_allclose(self.correct_cost, cost_compiled(self.y))
