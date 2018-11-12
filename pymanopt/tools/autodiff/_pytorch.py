@@ -38,6 +38,7 @@ class PytorchBackend(Backend):
 
     @assert_backend_available
     def _compile(self, objective, cache):
+        assert isinstance(cache, torch.Tensor) and cache.nelement() == 0
         if hasattr(cache, 'cost'):
             return cache
         cache.x = None    # list woith torch copies of input np.arrays
@@ -88,8 +89,9 @@ class PytorchBackend(Backend):
         def _updatedf(seqp, cache):
             if not cache.df:
                 _updatef(seqp, cache)
-                cache.f.backward(create_graph=True)
-                cache.df = [xi.grad for xi in cache.x]
+                cache.df = torch.autograd.grad(cache.f, cache.x,
+                                               create_graph=True,
+                                               allow_unused=True)
 
         def egrad(x):
             xx, seqp = _asiterable(x)
