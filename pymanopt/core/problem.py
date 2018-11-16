@@ -100,7 +100,8 @@ class Problem(object):
     @property
     def cost(self):
         if (self._cost is None and callable(self._original_cost) and
-                not AutogradBackend().is_available()):
+                not AutogradBackend().is_available() and
+                not PytorchBackend().is_available() ):
             self._cost = self._original_cost
 
         elif self._cost is None:
