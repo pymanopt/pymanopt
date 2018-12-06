@@ -22,7 +22,7 @@ class Function(object):
             raise ValueError("Backend `{:s}' is not compatible with cost "
                              "function of type `{:s}'".format(
                                  str(self._backend),
-                                 function.__class__.__name__))
+                                 self._function.__class__.__name__))
 
     def _compile(self):
         assert self._backend is not None
