@@ -69,6 +69,7 @@ class Problem:
     def grad(self):
         if self._grad is None:
             egrad = self.egrad
+
             def grad(x):
                 return self.manifold.egrad2rgrad(x, egrad(x))
             self._grad = CallableFunction(grad)
@@ -84,6 +85,7 @@ class Problem:
     def hess(self):
         if self._hess is None:
             ehess = self.ehess
+
             def hess(x, a):
                 return self.manifold.ehess2rhess(
                     x, self.egrad(x), ehess(x, a), a)

@@ -1,8 +1,11 @@
-from ._callable import CallableBackend
 from ._autograd import AutogradBackend
+from ._callable import CallableBackend
 from ._pytorch import PyTorchBackend
-from ._theano import TheanoBackend
 from ._tensorflow import TensorflowBackend
+from ._theano import TheanoBackend
+
+__all__ = ["AutogradBackend", "CallableBackend", "PyTorchBackend",
+           "TensorflowBackend", "TheanoBackend"]
 
 
 class Function(object):
