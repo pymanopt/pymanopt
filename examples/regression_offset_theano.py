@@ -2,7 +2,7 @@ import numpy as np
 
 import theano.tensor as T
 
-from pymanopt import Problem
+from pymanopt import Problem, TheanoFunction
 from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Euclidean, Product
 
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     # Cost function is the squared test error
     w = T.matrix()
     b = T.matrix()
-    cost = T.sum((Y-w.T.dot(X)-b[0, 0])**2)
+    cost = TheanoFunction(T.sum((Y-w.T.dot(X)-b[0, 0])**2), [w, b])
 
     # A solver that involves the Hessian
     solver = TrustRegions()
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     manifold = Product([Euclidean(3, 1), Euclidean(1, 1)])
 
     # Solve the problem with pymanopt
-    problem = Problem(manifold=manifold, cost=cost, arg=[w, b], verbosity=0)
+    problem = Problem(manifold=manifold, cost=cost, verbosity=0)
     wopt = solver.solve(problem)
 
     print('Weights found by pymanopt (top) / '

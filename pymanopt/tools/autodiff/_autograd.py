@@ -39,6 +39,7 @@ class AutogradBackend(Backend):
         Compute the gradient of 'objective' with respect to the first
         argument and return as a function.
         """
+        assert grad is not None
         g = grad(objective)
 
         # Sometimes x will be some custom type, e.g. with the FixedRankEmbedded
@@ -65,6 +66,7 @@ def _hessian_vector_product(fun, argnum=0):
     this function will be incorporated into autograd, with name
     hessian_vector_product. Once it has been this function can be
     deleted."""
+    assert grad is not None
     fun_grad = grad(fun, argnum)
 
     def vector_dot_grad(*args, **kwargs):

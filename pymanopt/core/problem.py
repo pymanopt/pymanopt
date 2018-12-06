@@ -3,7 +3,7 @@ Module containing pymanopt problem class. Use this to build a problem
 object to feed to one of the solvers.
 """
 
-from pymanopt.tools.autodiff import Function
+from pymanopt.tools._functions import CallableFunction
 
 
 class Problem:
@@ -38,29 +38,19 @@ class Problem:
             The 'Euclidean Hessian', ehess(x, a) should return the
             directional derivative of egrad at x in direction a. This
             need not lie in the tangent space.
-        - arg
-            A symbolic (tensor) variable with respect to which you would like
-            to optimize. Its type (together with the type of the cost argument)
-            defines the autodiff backend used.
         - verbosity (2)
             Level of information printed by the solver while it operates, 0
             is silent, 2 is most information.
     """
     def __init__(self, manifold, cost, egrad=None, ehess=None, grad=None,
-                 hess=None, arg=None, precon=None, verbosity=2):
-        self._cost = None
-        self._egrad = None
-        self._ehess = None
-        self._grad = None
-        self._hess = None
-
+                 hess=None, precon=None, verbosity=2):
         self.manifold = manifold
-        self._original_cost = cost
-        self._original_egrad = egrad
-        self._original_ehess = ehess
-        self._original_grad = grad
-        self._original_hess = hess
-        self._arg = arg
+        self.cost = cost
+
+        self._egrad = egrad
+        self._ehess = ehess
+        self._grad = grad
+        self._hess = hess
 
         if precon is None:
             def precon(x, d):
@@ -70,55 +60,32 @@ class Problem:
         self.verbosity = verbosity
 
     @property
-    def cost(self):
-        if self._cost is None:
-            self._cost = Function(self._original_cost, self._arg)
-        return self._cost
-
-    # FIXME: Since _arg is passed to the problem class, we can't have different
-    #        types of functions/call graphs for cost, gradients and Hessians.
-
-    @property
     def egrad(self):
         if self._egrad is None:
-            if self._original_egrad is None:
-                self._egrad = self.cost.compute_gradient()
-            else:
-                self._egrad = Function(self._original_egrad, self._arg)
+            self._egrad = self.cost.compute_gradient()
         return self._egrad
 
     @property
     def grad(self):
         if self._grad is None:
-            if self._original_grad is None:
-                egrad = self.egrad
-
-                def grad(x):
-                    return self.manifold.egrad2rgrad(x, egrad(x))
-                self._grad = Function(grad)
-            else:
-                self._grad = Function(self._original_grad, self._arg)
+            egrad = self.egrad
+            def grad(x):
+                return self.manifold.egrad2rgrad(x, egrad(x))
+            self._grad = CallableFunction(grad)
         return self._grad
 
     @property
     def ehess(self):
         if self._ehess is None:
-            if self._original_ehess is None:
-                self._ehess = self.cost.compute_hessian()
-            else:
-                self._ehess = Function(self._original_ehess, self._arg)
+            self._ehess = self.cost.compute_hessian()
         return self._ehess
 
     @property
     def hess(self):
         if self._hess is None:
-            if self._original_hess is None:
-                ehess = self.ehess
-
-                def hess(x, a):
-                    return self.manifold.ehess2rhess(
-                        x, self.egrad(x), ehess(x, a), a)
-                self._hess = Function(hess)
-            else:
-                self._hess = Function(self._original_hess, self._arg)
+            ehess = self.ehess
+            def hess(x, a):
+                return self.manifold.ehess2rhess(
+                    x, self.egrad(x), ehess(x, a), a)
+            self._hess = CallableFunction(hess)
         return self._hess

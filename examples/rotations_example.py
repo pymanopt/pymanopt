@@ -1,5 +1,5 @@
 import numpy as np
-from pymanopt import Problem
+from pymanopt import Problem, CallableFunction
 from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import SpecialOrthogonalGroup
 
@@ -20,14 +20,17 @@ else:
 manifold = SpecialOrthogonalGroup(n, k)
 
 
+@CallableFunction
 def cost(X):
     return -np.tensordot(X, ABt, axes=X.ndim)
 
 
+@CallableFunction
 def egrad(X):
     return -ABt
 
 
+@CallableFunction
 def ehess(X, S):
     return manifold.zerovec(X)
 

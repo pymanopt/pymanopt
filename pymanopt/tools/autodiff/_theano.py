@@ -101,7 +101,7 @@ class TheanoBackend(Backend):
         if not is_product_manifold:
             hess = theano.function([argument, A], R, on_unused_input="warn")
         else:
-            hess_prod = theano.function(argument + A, R,
+            hess_prod = theano.function(list(argument) + A, R,
                                         on_unused_input="warn")
 
             def hess(x, a):

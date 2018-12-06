@@ -15,10 +15,10 @@ class Backend:
     def __str__(self):
         return "<backend>"
 
-    def __id(self, objective, argument):
-        return objective
+    def __not_implemented(self, objective, argument):
+        raise NotImplementedError
 
-    compile_function = compute_gradient = compute_hessian = __id
+    compile_function = compute_gradient = compute_hessian = __not_implemented
 
     def __false(*args, **kwargs):
         return False

@@ -1,7 +1,6 @@
 import autograd.numpy as np
 
-from pymanopt import Problem
-from pymanopt.tools import decorators
+from pymanopt import Problem, AutogradFunction
 from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Euclidean, Product
 
@@ -14,7 +13,7 @@ if __name__ == "__main__":
     # Note, weights is a tuple/list containing both weight vector w and bias b.
     # This is necessary for autograd to calculate the gradient w.r.t. both
     # arguments in one go.
-    @decorators.autograd
+    @AutogradFunction
     def cost(weights):
         w = weights[0]
         b = weights[1]

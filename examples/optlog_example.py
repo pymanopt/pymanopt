@@ -1,7 +1,6 @@
 import autograd.numpy as np
 
-from pymanopt import Problem
-from pymanopt.tools import decorators
+from pymanopt import Problem, AutogradFunction
 from pymanopt.solvers import SteepestDescent
 from pymanopt.manifolds import Stiefel
 
@@ -12,7 +11,7 @@ if __name__ == "__main__":
     X = np.diag([3, 2, 1]).dot(np.random.randn(3, 200))
 
     # Cost function is the squared reconstruction error
-    @decorators.autograd
+    @AutogradFunction
     def cost(w):
         return np.sum(np.sum((X - np.dot(w, np.dot(w.T, X)))**2))
 

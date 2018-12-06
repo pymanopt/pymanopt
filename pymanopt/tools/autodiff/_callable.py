@@ -20,6 +20,6 @@ class CallableBackend(Backend):
     @assert_backend_available
     def __not_implemented(self, objective, argument):
         raise NotImplementedError("No autodiff support available for the "
-                                  "canonical backend")
+                                  "canonical callable backend")
 
     compute_gradient = compute_hessian = __not_implemented

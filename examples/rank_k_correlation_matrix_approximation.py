@@ -3,7 +3,7 @@ import numpy.random as rnd
 import numpy.linalg as la
 import theano.tensor as T
 
-from pymanopt import Problem
+from pymanopt import Problem, TheanoFunction
 from pymanopt.manifolds import Oblique
 from pymanopt.solvers import TrustRegions
 
@@ -20,9 +20,9 @@ def rank_k_correlation_matrix_approximation(A, k):
     manifold = Oblique(k, n)
     solver = TrustRegions()
     X = T.matrix()
-    cost = 0.25 * T.sum((T.dot(X.T, X) - A) ** 2)
+    cost = TheanoFunction(0.25 * T.sum((T.dot(X.T, X) - A) ** 2), X)
 
-    problem = Problem(manifold=manifold, cost=cost, arg=X)
+    problem = Problem(manifold=manifold, cost=cost)
     return solver.solve(problem)
 
 
