@@ -32,16 +32,13 @@ class Function(object):
         self._compiled_function = self._backend.compile_function(
             self._function, self._arg)
 
-    def _perform_differentiation(self, attr):
-        assert self._backend is not None
-        method = getattr(self._backend, attr)
-        return method(self._function, self._arg)
-
     def compute_gradient(self):
-        return self._perform_differentiation("compute_gradient")
+        assert self._backend is not None
+        return self._backend.compute_gradient(self._function, self._arg)
 
     def compute_hessian(self):
-        return self._perform_differentiation("compute_hessian")
+        assert self._backend is not None
+        return self._backend.compute_hessian(self._function, self._arg)
 
     def __call__(self, *args, **kwargs):
         assert self._compiled_function is not None
