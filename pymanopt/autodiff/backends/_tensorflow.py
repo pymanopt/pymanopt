@@ -12,6 +12,7 @@ except ImportError:
     tf = None
 
 from ._backend import Backend, assert_backend_available
+from .. import make_function_decorator_with_argument
 
 
 class TensorflowBackend(Backend):
@@ -89,3 +90,6 @@ class TensorflowBackend(Backend):
                 return self._session.run(tfhess, feed_dict)
 
         return hess
+
+
+Tensorflow = make_function_decorator_with_argument(TensorflowBackend)

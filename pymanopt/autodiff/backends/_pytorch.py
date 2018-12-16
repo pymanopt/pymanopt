@@ -9,6 +9,7 @@ else:
     from torch import autograd
 
 from ._backend import Backend, assert_backend_available
+from .. import make_function_decorator
 
 
 class PyTorchBackend(Backend):
@@ -75,3 +76,6 @@ class PyTorchBackend(Backend):
                 pass
             return g
         return hess
+
+
+PyTorch = make_function_decorator(PyTorchBackend)

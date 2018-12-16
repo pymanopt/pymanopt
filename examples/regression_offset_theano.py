@@ -2,19 +2,23 @@ import numpy as np
 
 import theano.tensor as T
 
-from pymanopt import Problem, TheanoFunction
+from pymanopt import Problem, Theano
 from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Euclidean, Product
+
 
 if __name__ == "__main__":
     # Generate random data
     X = np.random.randn(3, 100)
-    Y = X[0:1, :] - 2*X[1:2, :] + np.random.randn(1, 100) + 5
+    Y = X[0:1, :] - 2 * X[1:2, :] + np.random.randn(1, 100) + 5
 
     # Cost function is the squared test error
     w = T.matrix()
     b = T.matrix()
-    cost = TheanoFunction(T.sum((Y-w.T.dot(X)-b[0, 0])**2), [w, b])
+
+    @Theano(w, b)
+    def cost(w, b):
+        return T.sum((Y - w.T.dot(X) - b[0, 0]) ** 2)
 
     # A solver that involves the Hessian
     solver = TrustRegions()

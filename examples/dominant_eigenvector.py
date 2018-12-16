@@ -3,7 +3,7 @@ import numpy.random as rnd
 import numpy.linalg as la
 import theano.tensor as T
 
-from pymanopt import Problem, TheanoFunction
+from pymanopt import Problem, Theano
 from pymanopt.manifolds import Sphere
 from pymanopt.solvers import ConjugateGradient
 
@@ -22,7 +22,10 @@ def dominant_eigenvector(A):
     manifold = Sphere(n)
     solver = ConjugateGradient(maxiter=500, minstepsize=1e-6)
     x = T.vector()
-    cost = TheanoFunction(-x.T.dot(T.dot(A, x)), x)
+
+    @Theano(x)
+    def cost(x):
+        return -x.T.dot(T.dot(A, x))
 
     problem = Problem(manifold=manifold, cost=cost)
     xopt = solver.solve(problem)
@@ -43,7 +46,7 @@ if __name__ == "__main__":
     xopt = dominant_eigenvector(A)
 
     # Make sure both vectors have the same direction. Both are valid
-    # eigenvectors, of course, but for comparison we need to get rid of the
+    # eigenvectors, but for comparison we need to get rid of the sign
     # ambiguity.
     if np.sign(x[0]) != np.sign(xopt[0]):
         xopt = -xopt
@@ -52,5 +55,4 @@ if __name__ == "__main__":
     print('')
     print("l2-norm of x: %f" % la.norm(x))
     print("l2-norm of xopt: %f" % la.norm(xopt))
-    print("solution found: %s" % np.allclose(x, xopt, rtol=1e-3))
     print("l2-error: %f" % la.norm(x - xopt))

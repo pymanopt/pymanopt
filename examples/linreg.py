@@ -1,6 +1,6 @@
 import autograd.numpy as np
 
-from pymanopt import Problem, AutogradFunction
+from pymanopt import Problem, Autograd
 from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Euclidean
 
@@ -11,9 +11,9 @@ if __name__ == "__main__":
     Y = np.random.randint(-5, 5, (1, 200))
 
     # Cost function is the squared error
-    @AutogradFunction
+    @Autograd
     def cost(w):
-        return np.sum(np.sum((Y - np.dot(w.T, X))**2))
+        return np.sum(np.sum((Y - np.dot(w.T, X)) ** 2))
 
     # A solver that involves the hessian
     solver = TrustRegions()

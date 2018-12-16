@@ -21,7 +21,7 @@ Ported to pymanopt by Jamie Townsend, Nov 24, 2015
 import theano.tensor as T
 import numpy as np
 
-from pymanopt import Problem, TheanoFunction
+from pymanopt import Problem, Theano
 from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Grassmann
 
@@ -53,7 +53,10 @@ def dominant_invariant_subspace(A, p):
     # Define the cost on the Grassmann manifold
     Gr = Grassmann(n, p)
     X = T.matrix()
-    cost = TheanoFunction(-T.dot(X.T, T.dot(A, X)).trace(), X)
+
+    @Theano(X)
+    def cost(X):
+        return -T.dot(X.T, T.dot(A, X)).trace()
 
     # Setup the problem
     problem = Problem(manifold=Gr, cost=cost)

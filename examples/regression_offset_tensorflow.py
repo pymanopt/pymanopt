@@ -3,7 +3,7 @@
 import tensorflow as tf
 import numpy as np
 
-from pymanopt import Problem, TensorflowFunction
+from pymanopt import Problem, Tensorflow
 from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Euclidean, Product
 
@@ -11,15 +11,16 @@ from pymanopt.manifolds import Euclidean, Product
 if __name__ == "__main__":
     # Generate random data
     X = np.random.randn(3, 100).astype('float32')
-    Y = (X[0:1, :] - 2*X[1:2, :] + np.random.randn(1, 100) + 5).astype(
+    Y = (X[0:1, :] - 2 * X[1:2, :] + np.random.randn(1, 100) + 5).astype(
         'float32')
 
     # Cost function is the squared test error
     w = tf.Variable(tf.zeros([3, 1]))
     b = tf.Variable(tf.zeros([1, 1]))
-    cost = TensorflowFunction(
-        tf.reduce_mean(tf.square(Y - tf.matmul(tf.transpose(w), X) - b)),
-        (w, b))
+
+    @Tensorflow(w, b)
+    def cost(w, b):
+        return tf.reduce_mean(tf.square(Y - tf.matmul(tf.transpose(w), X) - b))
 
     # first-order, second-order
     solver = TrustRegions()

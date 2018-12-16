@@ -3,8 +3,6 @@ Module containing pymanopt problem class. Use this to build a problem
 object to feed to one of the solvers.
 """
 
-from pymanopt.tools._functions import CallableFunction
-
 
 class Problem:
     """
@@ -45,10 +43,12 @@ class Problem:
     def __init__(self, manifold, cost, egrad=None, ehess=None, grad=None,
                  hess=None, precon=None, verbosity=2):
         self.manifold = manifold
+
         self.cost = cost
 
-        self._egrad = egrad
         self._ehess = ehess
+        self._egrad = egrad
+
         self._grad = grad
         self._hess = hess
 
@@ -72,7 +72,7 @@ class Problem:
 
             def grad(x):
                 return self.manifold.egrad2rgrad(x, egrad(x))
-            self._grad = CallableFunction(grad)
+            self._grad = grad
         return self._grad
 
     @property
@@ -89,5 +89,5 @@ class Problem:
             def hess(x, a):
                 return self.manifold.ehess2rhess(
                     x, self.egrad(x), ehess(x, a), a)
-            self._hess = CallableFunction(hess)
+            self._hess = hess
         return self._hess

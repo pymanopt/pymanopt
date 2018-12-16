@@ -1,6 +1,6 @@
 import autograd.numpy as np
 
-from pymanopt import Problem, AutogradFunction
+from pymanopt import Problem, Autograd
 from pymanopt.manifolds import Elliptope
 from pymanopt.solvers import ConjugateGradient
 
@@ -9,7 +9,7 @@ def packing_on_the_sphere(n, k, epsilon):
     manifold = Elliptope(n, k)
     solver = ConjugateGradient(mingradnorm=1e-8, maxiter=1e5)
 
-    @AutogradFunction
+    @Autograd
     def cost(X):
         Y = np.dot(X, X.T)
         # Shift the exponentials by the maximum value to reduce numerical

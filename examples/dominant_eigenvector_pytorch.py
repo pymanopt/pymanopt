@@ -3,7 +3,7 @@ import numpy.random as rnd
 import numpy.linalg as la
 import torch
 
-from pymanopt import Problem, PyTorchFunction
+from pymanopt import Problem, PyTorch
 from pymanopt.manifolds import Sphere
 from pymanopt.solvers import TrustRegions
 
@@ -22,11 +22,9 @@ def dominant_eigenvector(A):
     manifold = Sphere(n)
     solver = TrustRegions()
 
-    A_ = torch.from_numpy(A)
-
-    @PyTorchFunction
+    @PyTorch
     def cost(x):
-        return -x.matmul(A_.matmul(x))
+        return -x.matmul(torch.from_numpy(A).matmul(x))
 
     problem = Problem(manifold=manifold, cost=cost)
     xopt = solver.solve(problem)

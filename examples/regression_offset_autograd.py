@@ -1,23 +1,22 @@
 import autograd.numpy as np
 
-from pymanopt import Problem, AutogradFunction
+from pymanopt import Problem, Autograd
 from pymanopt.solvers import TrustRegions
 from pymanopt.manifolds import Euclidean, Product
+
 
 if __name__ == "__main__":
     # Generate random data
     X = np.random.randn(3, 100)
-    Y = X[0:1, :] - 2*X[1:2, :] + np.random.randn(1, 100) + 5
+    Y = X[0:1, :] - 2 * X[1:2, :] + np.random.randn(1, 100) + 5
 
     # Cost function is the squared test error
     # Note, weights is a tuple/list containing both weight vector w and bias b.
     # This is necessary for autograd to calculate the gradient w.r.t. both
     # arguments in one go.
-    @AutogradFunction
-    def cost(weights):
-        w = weights[0]
-        b = weights[1]
-        return np.sum((Y-np.dot(w.T, X)-b)**2)
+    @Autograd
+    def cost(w, b):
+        return np.sum((Y - np.dot(w.T, X) - b) ** 2)
 
     # first-order, second-order
     solver = TrustRegions()

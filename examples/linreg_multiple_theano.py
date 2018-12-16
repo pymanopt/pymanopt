@@ -2,7 +2,7 @@ import theano.tensor as T
 import theano.compile.sharedvalue as S
 import numpy as np
 
-from pymanopt import Problem, TheanoFunction
+from pymanopt import Problem, Theano
 from pymanopt.manifolds import Euclidean
 from pymanopt.solvers import TrustRegions
 
@@ -12,7 +12,10 @@ if __name__ == "__main__":
     wT = T.matrix()
     yT = S.shared(np.random.randn(1, 1))
     XT = S.shared(np.random.randn(1, 1))
-    cost = TheanoFunction(T.sum((yT-wT.T.dot(XT))**2), wT)
+
+    @Theano(wT)
+    def cost(wT):
+        return T.sum((yT - wT.T.dot(XT)) ** 2)
 
     # A solver that involves the hessian
     solver = TrustRegions()

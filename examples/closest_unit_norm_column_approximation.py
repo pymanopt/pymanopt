@@ -3,7 +3,7 @@ import numpy.random as rnd
 import numpy.linalg as la
 import theano.tensor as T
 
-from pymanopt import Problem, TheanoFunction
+from pymanopt import Problem, Theano
 from pymanopt.manifolds import Oblique
 from pymanopt.solvers import ConjugateGradient
 
@@ -18,7 +18,10 @@ def closest_unit_norm_column_approximation(A):
     manifold = Oblique(m, n)
     solver = ConjugateGradient()
     X = T.matrix()
-    cost = TheanoFunction(0.5 * T.sum((X - A) ** 2), X)
+
+    @Theano(X)
+    def cost(X):
+        return 0.5 * T.sum((X - A) ** 2)
 
     problem = Problem(manifold=manifold, cost=cost)
     return solver.solve(problem)

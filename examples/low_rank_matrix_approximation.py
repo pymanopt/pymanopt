@@ -1,6 +1,7 @@
+from theano import tensor as T
 import autograd.numpy as np
 
-from pymanopt import Problem, AutogradFunction
+from pymanopt import Problem, Autograd, Theano
 from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.solvers import ConjugateGradient
 
@@ -21,15 +22,14 @@ manifold = FixedRankEmbedded(A.shape[0], A.shape[1], k)
 # (b) Definition of a cost function (here using autograd.numpy)
 #       Note that the cost must be defined in terms of u, s and vt, where
 #       X = u * diag(s) * vt.
-@AutogradFunction
+@Autograd
 def cost(usv):
-    delta = .5
+    delta = 0.5
     u = usv[0]
     s = usv[1]
     vt = usv[2]
     X = np.dot(np.dot(u, np.diag(s)), vt)
-    return np.sum(np.sqrt((X - A)**2 + delta**2) - delta)
-
+    return np.sum(np.sqrt((X - A) ** 2 + delta ** 2) - delta)
 
 # define the Pymanopt problem
 problem = Problem(manifold=manifold, cost=cost)
@@ -37,4 +37,23 @@ problem = Problem(manifold=manifold, cost=cost)
 solver = ConjugateGradient()
 
 # let Pymanopt do the rest
+# print("Solving with autograd:\n")
+# XXX: The autograd backend is currently broken.
+# X = solver.solve(problem)
+
+# TODO: Verify the solution.
+
+U = T.matrix()
+S = T.vector()
+Vt = T.matrix()
+
+@Theano((U, S, Vt))
+def cost(U, S, Vt):
+    delta = 0.5
+    X = T.dot(T.dot(U, T.diag(S)), Vt)
+    return T.sum(T.sqrt((X - A) ** 2 + delta ** 2) - delta)
+
+problem = Problem(manifold=manifold, cost=cost)
+
+print("Solving with theano:\n")
 X = solver.solve(problem)

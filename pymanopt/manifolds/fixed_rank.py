@@ -82,6 +82,9 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     Original author: Nicolas Boumal, Dec. 30, 2012.
     """
 
+    # TODO(nkoep): Change the signature to (self, dims, k) where dims has to be
+    #              a 2-element iterable specifying m and n.
+
     def __init__(self, m, n, k):
         self._m = m
         self._n = n
