@@ -157,8 +157,12 @@ class TestArity(unittest.TestCase):
 
 class TestVector(unittest.TestCase):
     def setUp(self):
-        self.X = X = T.vector()
-        self.cost = T.exp(T.sum(X**2))
+        X = T.vector()
+
+        @Theano(X)
+        def cost(X):
+            return T.exp(T.sum(X**2))
+        self.cost = cost
 
         n = self.n = 15
 
@@ -182,18 +186,15 @@ class TestVector(unittest.TestCase):
         # Then 'right multiply' H by A
         self.correct_hess = np.array(Amat.dot(H)).squeeze()
 
-        self.backend = TheanoBackend()
-
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, self.X)
+        grad = self.cost.compute_gradient()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, self.X)
+        hess = self.cost.compute_hessian()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -208,10 +209,13 @@ class TestVector(unittest.TestCase):
 
         # Rebuild graph to force recompile
         X = T.vector()
-        cost = T.exp(T.sum(X**2))
+
+        @Theano(X)
+        def cost(X):
+            return T.exp(T.sum(X ** 2))
 
         # And check that all is still well
-        hess = self.backend.compute_hessian(cost, X)
+        hess = cost.compute_hessian()
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -221,8 +225,12 @@ class TestVector(unittest.TestCase):
 
 class TestMatrix(unittest.TestCase):
     def setUp(self):
-        self.X = X = T.matrix()
-        self.cost = T.exp(T.sum(X**2))
+        X = T.matrix()
+
+        @Theano(X)
+        def cost(X):
+            return T.exp(T.sum(X**2))
+        self.cost = cost
 
         m = self.m = 10
         n = self.n = 15
@@ -250,18 +258,15 @@ class TestMatrix(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
 
-        self.backend = TheanoBackend()
-
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, self.X)
+        grad = self.cost.compute_gradient()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, self.X)
+        hess = self.cost.compute_hessian()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -276,10 +281,13 @@ class TestMatrix(unittest.TestCase):
 
         # Rebuild graph to force recompile
         X = T.matrix()
-        cost = T.exp(T.sum(X**2))
+
+        @Theano(X)
+        def cost(X):
+            return T.exp(T.sum(X**2))
 
         # And check that all is still well
-        hess = self.backend.compute_hessian(cost, X)
+        hess = cost.compute_hessian()
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -288,11 +296,14 @@ class TestMatrix(unittest.TestCase):
 
     def test_hessian_nodependence(self):
         X = T.matrix()
-        cost = T.sum(X)
+
+        @Theano(X)
+        def cost(X):
+            return T.sum(X)
 
         with warnings.catch_warnings(record=True) as w:
             # The following should emit a warning
-            self.backend.compute_hessian(cost, X)
+            cost.compute_hessian()
 
             assert len(w) == 1
             assert "not part of the computational graph" in str(w[-1].message)
@@ -300,8 +311,12 @@ class TestMatrix(unittest.TestCase):
 
 class TestTensor3(unittest.TestCase):
     def setUp(self):
-        self.X = X = T.tensor3()
-        self.cost = T.exp(T.sum(X**2))
+        X = T.tensor3()
+
+        @Theano(X)
+        def cost(X):
+            return T.exp(T.sum(X**2))
+        self.cost = cost
 
         n1 = self.n1 = 3
         n2 = self.n2 = 4
@@ -329,18 +344,15 @@ class TestTensor3(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(3, 4, 5))
 
-        self.backend = TheanoBackend()
-
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, self.X)
+        grad = self.cost.compute_gradient()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, self.X)
+        hess = self.cost.compute_hessian()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -355,10 +367,13 @@ class TestTensor3(unittest.TestCase):
 
         # Rebuild graph to force recompile
         X = T.tensor3()
-        cost = T.exp(T.sum(X**2))
+
+        @Theano(X)
+        def cost(X):
+            return T.exp(T.sum(X**2))
 
         # And check that all is still well
-        hess = self.backend.compute_hessian(cost, X)
+        hess = cost.compute_hessian()
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -374,8 +389,10 @@ class TestMixed(unittest.TestCase):
         z = T.tensor3()
         f = T.exp(T.sum(x**2)) + T.exp(T.sum(y**2)) + T.exp(T.sum(z**2))
 
-        self.cost = f
-        self.arg = [x, y, z]
+        @Theano(x, y, z)
+        def cost(x, y, z):
+            return f
+        self.cost = cost
 
         n1 = self.n1 = 3
         n2 = self.n2 = 4
@@ -442,23 +459,21 @@ class TestMixed(unittest.TestCase):
         h3 = np.sum(H * Atensor, axis=(3, 4, 5))
 
         self.correct_hess = (h1, h2, h3)
-        self.backend = TheanoBackend()
 
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, self.arg)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.y))
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, self.arg)
-        for k in range(len(grad(self.y))):
-            np_testing.assert_allclose(self.correct_grad[k], grad(self.y)[k])
+        grad = self.cost.compute_gradient()
+        g = grad(self.y)
+        for k in range(len(g)):
+            np_testing.assert_allclose(self.correct_grad[k], g[k])
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, self.arg)
-        evaluated_hessian = hess(self.y, self.a)
-        for k in range(len(evaluated_hessian)):
-            np_testing.assert_allclose(self.correct_hess[k],
-                                       evaluated_hessian[k])
+        hess = self.cost.compute_hessian()
+        h = hess(self.y, self.a)
+        for k in range(len(h)):
+            np_testing.assert_allclose(self.correct_hess[k], h[k])
 
     def test_hessian_no_Rop(self):
         # Break the Rop in T.exp
@@ -474,16 +489,15 @@ class TestMixed(unittest.TestCase):
         z = T.tensor3()
         f = T.exp(T.sum(x**2)) + T.exp(T.sum(y**2)) + T.exp(T.sum(z**2))
 
-        cost = f
-        arg = [x, y, z]
+        # Alternative use of `Theano' in decorator notation.
+        cost = Theano(x, y, z)(lambda x, y, z: f)
 
         # And check that all is still well
-        hess = self.backend.compute_hessian(cost, arg)
+        hess = cost.compute_hessian()
 
-        evaluated_hessian = hess(self.y, self.a)
-        for k in range(len(evaluated_hessian)):
-            np_testing.assert_allclose(self.correct_hess[k],
-                                       evaluated_hessian[k])
+        h = hess(self.y, self.a)
+        for k in range(len(h)):
+            np_testing.assert_allclose(self.correct_hess[k], h[k])
 
         # Fix broken Rop
         T.exp.R_op = Rop
