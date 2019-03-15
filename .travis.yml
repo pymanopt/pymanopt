@@ -36,8 +36,13 @@ before_install:
 
 # Install packages
 install:
+  # pip install tensorflow fails with python 3.4 because of uncorrect numpy version, trying to force
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then
+      conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION numpy=1.15 scipy nose libgfortran six wheel
+    else
+      conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose libgfortran six wheel
+    fi
   # Use openblas to fix a theano error (hacky); see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
-  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose libgfortran six wheel
   - source activate conda-env-python$TRAVIS_PYTHON_VERSION
   - pip install flake8
   - pip install coveralls
@@ -48,7 +53,12 @@ install:
 
 script:
   - nosetests ./tests --nologcapture --verbosity=2 --with-coverage --cover-package=pymanopt
-  - flake8 examples pymanopt tests setup.py
+  # flake8 fails with Python-2.7 for int comparison, ok with later version
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      flake8 --ignore=F632 examples pymanopt tests setup.py
+    else
+      flake8 examples pymanopt tests setup.py
+    fi
 
 after_success:
   - coveralls
