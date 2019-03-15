@@ -43,12 +43,9 @@ install:
   - pip install coveralls
   - pip install autograd
   - pip install theano
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then
-      pip install 'numpy==1.15.4';
-      pip install 'tensorflow==1.12.0';
-    else
-      pip install tensorflow;
-    fi
+  # Avoid compiling and failing to compile version of numpy with Python 3.4
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then pip install 'numpy==1.15.4'; fi
+  - pip install tensorflow
   - python setup.py install
 
 script:
