@@ -87,8 +87,6 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
         np_testing.assert_equal(man.typicaldist, np.sqrt(man.dim))
 
     def test_dist(self):
-        k = self.k
-        # n = self.n
         man = self.man
         x = man.rand()
         y = man.rand()
