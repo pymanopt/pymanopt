@@ -39,7 +39,7 @@ class TestSinglePositiveDefiniteManifold(unittest.TestCase):
 
         # Test separability
         np_testing.assert_almost_equal(man.dist(x, x), 0.)
-        
+
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
 
@@ -47,7 +47,7 @@ class TestSinglePositiveDefiniteManifold(unittest.TestCase):
         # from Eq 6.14 of "Positive definite matrices"
         d = np.sqrt((np.log(sp.linalg.eigvalsh(x, y))**2).sum())
         np_testing.assert_almost_equal(man.dist(x, y), d)
-        
+
     def test_exp(self):
         man = self.man
         x = man.rand()
@@ -80,7 +80,7 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
         man = self.man
         n = self.n
         k = self.k
-        np_testing.assert_equal(man.dim, 0.5 * k * n * (n+1))
+        np_testing.assert_equal(man.dim, 0.5 * k * n * (n + 1))
 
     def test_typicaldist(self):
         man = self.man
@@ -95,7 +95,7 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
 
         # Test separability
         np_testing.assert_almost_equal(man.dist(x, x), 0.)
-        
+
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
 
@@ -132,7 +132,7 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
         u = man.randvec(x)
 
         Hess = (multiprod(multiprod(x, multisym(ehess)), x) +
-                2*multisym(multiprod(multiprod(u, multisym(egrad)), x)))
+                2 * multisym(multiprod(multiprod(u, multisym(egrad)), x)))
 
         # Correction factor for the non-constant metric
         Hess = Hess - multisym(multiprod(multiprod(u, multisym(egrad)), x))
