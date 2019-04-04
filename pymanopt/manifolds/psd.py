@@ -54,8 +54,8 @@ class PositiveDefinite(Manifold):
         # Adapted from equation 6.13 of "Positive definite matrices". Chol
         # decomp gives the same result as matrix sqrt. There may be a more
         # efficient way to compute this!
-        c = np.linalg.cholesky(x)
-        c_inv = np.linalg.inv(c)
+        c = la.cholesky(x)
+        c_inv = la.inv(c)
         logm = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
                         pos_def=True)
         return la.norm(multiprod(multiprod(c, logm), c_inv))
