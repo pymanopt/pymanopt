@@ -58,7 +58,7 @@ class PositiveDefinite(Manifold):
         c_inv = la.inv(c)
         logm = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
                         pos_def=True)
-        return la.norm(multiprod(multiprod(c, logm), c_inv))
+        return la.norm(logm)
 
     def inner(self, x, u, v):
         return np.tensordot(la.solve(x, u), la.solve(x, v), axes=x.ndim)
