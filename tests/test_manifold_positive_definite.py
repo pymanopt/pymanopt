@@ -32,6 +32,22 @@ class TestSinglePositiveDefiniteManifold(unittest.TestCase):
         w = la.eigvalsh(x)
         assert (w > [0]).all()
 
+    def test_dist(self):
+        man = self.man
+        x = man.rand()
+        y = man.rand()
+
+        # Test separability
+        np_testing.assert_almost_equal(man.dist(x, x), 0.)
+
+        # Test symmetry
+        np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
+
+        # Test alternative implementation
+        # from Eq 6.14 of "Positive definite matrices"
+        d = np.sqrt((np.log(sp.linalg.eigvalsh(x, y))**2).sum())
+        np_testing.assert_almost_equal(man.dist(x, y), d)
+
     def test_exp(self):
         man = self.man
         x = man.rand()
@@ -77,13 +93,12 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
         x = man.rand()
         y = man.rand()
 
-        # Compare to the implementation in manopt
-        d = la.solve(x, y)
-        for i in range(k):
-            d[i] = sp.linalg.logm(d[i])
+        # Test separability
+        np_testing.assert_almost_equal(man.dist(x, x), 0.)
 
-        np_testing.assert_almost_equal(man.dist(x, y), la.norm(d))
-
+        # Test symmetry
+        np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
+        
     def test_inner(self):
         man = self.man
         k = self.k
