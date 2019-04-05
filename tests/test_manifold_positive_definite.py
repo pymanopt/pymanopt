@@ -87,7 +87,6 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
         np_testing.assert_equal(man.typicaldist, np.sqrt(man.dim))
 
     def test_dist(self):
-        k = self.k
         # n = self.n
         man = self.man
         x = man.rand()
@@ -98,7 +97,7 @@ class TestMultiPositiveDefiniteManifold(unittest.TestCase):
 
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
-        
+
     def test_inner(self):
         man = self.man
         k = self.k
