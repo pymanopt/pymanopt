@@ -79,7 +79,9 @@ class PositiveDefinite(Manifold):
         return self.exp(X, G)
 
     def norm(self, x, u):
-        return la.norm(la.solve(x, u))
+        c = np.linalg.cholesky(x)
+        c_inv = np.linalg.inv(c)
+        return la.norm(multiprod(multiprod(c_inv, u), multitransp(c_inv)))
 
     def rand(self):
         # The way this is done is arbitrary. I think the space of p.d.
