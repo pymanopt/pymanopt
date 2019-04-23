@@ -8,7 +8,7 @@ import numpy.testing as np_testing
 import scipy as sp
 
 from pymanopt.manifolds import PositiveDefinite
-from pymanopt.tools.multi import multiprod, multisym
+from pymanopt.tools.multi import multiprod, multisym, multitransp
 
 
 class TestSinglePositiveDefiniteManifold(unittest.TestCase):
@@ -51,6 +51,16 @@ class TestSinglePositiveDefiniteManifold(unittest.TestCase):
         # check that dist is consistent with log
         np_testing.assert_almost_equal(man.dist(x, y),
                                        man.norm(x, man.log(x, y)))
+
+        # Test invariance under inversion
+        np_testing.assert_almost_equal(man.dist(x, y),
+                                       man.dist(la.inv(y), la.inv(x)))
+
+        # Test congruence-invariance
+        a = rnd.randn(self.n, self.n)  # must be invertible
+        axa = multiprod(multiprod(a, x), multitransp(a))
+        aya = multiprod(multiprod(a, y), multitransp(a))
+        np_testing.assert_almost_equal(man.dist(x, y), man.dist(axa, aya))
 
     def test_exp(self):
         man = self.man
