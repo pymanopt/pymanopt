@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
-import scipy as sp
+import scipy.linalg as sl
 # Workaround for SciPy bug: https://github.com/scipy/scipy/pull/8082
 try:
     from scipy.linalg import solve_continuous_lyapunov as lyap
@@ -79,8 +79,8 @@ class PositiveDefinite(Manifold):
         return self.exp(X, G)
 
     def norm(self, x, u):
-        c = np.linalg.cholesky(x)
-        c_inv = np.linalg.inv(c)
+        c = la.cholesky(x)
+        c_inv = la.inv(c)
         return la.norm(multiprod(multiprod(c_inv, u), multitransp(c_inv)))
 
     def rand(self):
@@ -106,9 +106,9 @@ class PositiveDefinite(Manifold):
 
     def randvec(self, x):
         if self._k == 1:
-            u = multisym(np.random.randn(self._n, self._n))
+            u = multisym(rnd.randn(self._n, self._n))
         else:
-            u = multisym(np.random.randn(self._k, self._n, self._n))
+            u = multisym(rnd.randn(self._k, self._n, self._n))
         return u / self.norm(x, u)
 
     def transp(self, x1, x2, d):
@@ -116,13 +116,13 @@ class PositiveDefinite(Manifold):
 
     def exp(self, x, u):
         # TODO: Check which method is faster depending on n, k.
-        x_inv_u = np.linalg.solve(x, u)
+        x_inv_u = la.solve(x, u)
         if self._k > 1:
             e = np.zeros(np.shape(x))
             for i in range(self._k):
-                e[i] = sp.linalg.expm(x_inv_u[i])
+                e[i] = sl.expm(x_inv_u[i])
         else:
-            e = sp.linalg.expm(x_inv_u)
+            e = sl.expm(x_inv_u)
         return multiprod(x, e)
         # This alternative implementation is sometimes faster though less
         # stable. It can return a matrix with small negative determinant.
