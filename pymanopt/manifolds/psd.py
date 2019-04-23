@@ -80,8 +80,8 @@ class PositiveDefinite(Manifold):
 
     def norm(self, x, u):
         # This implementation is as fast as np.linalg.solve_triangular and is
-        # more stable, as the solver tends to output non positive definite
-        # results.
+        # more stable, as the above solver tends to output non positive
+        # definite results.
         c = la.cholesky(x)
         c_inv = la.inv(c)
         return la.norm(multiprod(multiprod(c_inv, u), multitransp(c_inv)))
