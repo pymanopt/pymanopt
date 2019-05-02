@@ -58,7 +58,7 @@ script:
     fi
 
 after_success:
-  - if [[ "$TRAVIS_BUILD_STAGE_NAME" == "Test" ]]; then coveralls; fi
+  - if [[ "$TRAVIS_BUILD_STAGE_NAME" == "Test" || "$TRAVIS_BUILD_STAGE_NAME" == "" ]]; then coveralls; fi
 
 
 jobs:
