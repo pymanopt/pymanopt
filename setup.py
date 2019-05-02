@@ -41,4 +41,12 @@ setup(
     install_requires=['numpy>=1.10', 'scipy>=0.17'],
     long_description=long_description,
     long_description_content_type='text/markdown',
+    data_files=[
+        'CONTRIBUTING.md',
+        'CONTRIBUTORS',
+        'LICENSE',
+        'MAINTAINERS',
+        'README.md',
+        'VERSION',
+    ],
 )
