@@ -76,5 +76,5 @@ jobs:
         - set -e
         - if [ "$TRAVIS_TAG" != "`cat VERSION`" ]; then travis_terminate; fi
         - python setup.py sdist bdist_wheel
-        - twine upload dist/* -u $TWINE_USER -p $TWINE_PW --skip-existing --repository-url https://test.pypi.org/legacy/
+        - twine upload dist/* -u $TWINE_USER -p $TWINE_PW --skip-existing >/dev/null 2>&1
       if: fork = false AND tag =~ ^[0-9]+\.[0-9]+\.[0-9]+$
