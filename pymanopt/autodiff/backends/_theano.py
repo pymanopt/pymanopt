@@ -28,26 +28,26 @@ class TheanoBackend(Backend):
         return theano is not None
 
     @assert_backend_available
-    def is_compatible(self, objective, argument):
+    def is_compatible(self, func, argument):
         args = flatten_args(argument)
         return all([isinstance(arg, T.TensorVariable) for arg in args])
 
     @assert_backend_available
-    def compile_function(self, objective, argument):
+    def compile_function(self, func, argument):
         """
         Wrapper for theano.function(). Compiles a theano graph into a python
         function.
         """
         args = flatten_args(argument)
-        func = theano.function(inputs=args, outputs=objective)
+        f = theano.function(inputs=args, outputs=func)
         if len(args) == 1:
-            return func
-        return unpack_arguments(func)
+            return f
+        return unpack_arguments(f)
 
     @assert_backend_available
-    def compute_gradient(self, objective, argument):
+    def compute_gradient(self, func, argument):
         """
-        Returns a compiled function computing the gradient of 'objective' with
+        Returns a compiled function computing the gradient of 'func' with
         respect to 'argument'.
         """
         args = flatten_args(argument)
@@ -55,14 +55,15 @@ class TheanoBackend(Backend):
         # the gradient evaluated at some point as a singleton tuple.
         if len(args) == 1:
             (arg,) = args
-            g = T.grad(objective, arg)
+            g = T.grad(func, arg)
             return theano.function(args, g)
 
-        g = T.grad(objective, args)
+        g = T.grad(func, args)
         grad = theano.function(args, g)
         return group_return_values(unpack_arguments(grad), argument)
 
-    def _compute_unary_hvp(self, g, argument):
+    @staticmethod
+    def _compute_unary_hvp(g, argument):
         """
         Returns a function accepting two arguments to compute a Hessian-vector
         product of a scalar-valued unary function.
@@ -75,7 +76,8 @@ class TheanoBackend(Backend):
             R = T.grad(proj, argument)
         return theano.function([argument, u], R, on_unused_input="warn")
 
-    def _compute_nary_hvp(self, g, args):
+    @staticmethod
+    def _compute_nary_hvp(g, args):
         """
         Returns a function accepting 2 * len(args) arguments to compute a
         Hessian-vector product of a multivariate function defined on a product
@@ -102,7 +104,7 @@ class TheanoBackend(Backend):
                                on_unused_input="warn")
 
     @assert_backend_available
-    def compute_hessian(self, objective, argument):
+    def compute_hessian(self, func, argument):
         """
         Computes the directional derivative of the gradient (which is equal to
         the Hessian multiplied by direction).
@@ -111,10 +113,10 @@ class TheanoBackend(Backend):
         args = flatten_args(argument)
         if len(args) == 1:
             (arg,) = args
-            g = T.grad(objective, arg)
+            g = T.grad(func, arg)
             return self._compute_unary_hvp(g, arg)
 
-        g = T.grad(objective, args)
+        g = T.grad(func, args)
         hess = self._compute_nary_hvp(g, args)
         def wrapper(x, u):
             return hess(*itertools.chain(flatten_args(x), flatten_args(u)))

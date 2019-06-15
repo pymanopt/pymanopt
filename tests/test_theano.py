@@ -382,7 +382,8 @@ class TestTensor3(unittest.TestCase):
 
 
 class TestMixed(unittest.TestCase):
-    # Test autograd on a tuple containing vector, matrix and tensor3.
+    # Test autograd on a tuple containing vector, matrix and tensor3, i.e.,
+    # test a cost function defined on a product manifold.
     def setUp(self):
         x = T.vector()
         y = T.matrix()
