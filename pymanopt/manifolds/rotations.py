@@ -7,8 +7,8 @@ from __future__ import division
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
-from scipy.misc import comb
 from scipy.linalg import expm, logm
+from scipy.special import comb
 
 from pymanopt.tools.multi import multiprod, multitransp, multisym, multiskew
 from pymanopt.manifolds.manifold import Manifold
