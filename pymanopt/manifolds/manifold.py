@@ -65,7 +65,11 @@ class Manifold(object):
         to the manifold at X. For embedded manifolds, this is simply the
         projection of G on the tangent space at X.
         """
-        raise NotImplementedError
+        # TODO(nkoep): Raise a NotImplementedError here instead. Then add a
+        #              base class for submanifolds embedded in Rn for which the
+        #              conversion of the Euclidean to the Riemannian gradient
+        #              is just a projection on the tangent space.
+        return self.proj(X, G)
 
     def ehess2rhess(self, X, Hess):
         """
