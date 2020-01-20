@@ -32,16 +32,26 @@ script:
     --with-coverage
     --cover-package=pymanopt
   - flake8 examples pymanopt tests setup.py
+  - sphinx-build -b html docs docs/_build/html
 
 after_success:
   - coveralls
 
 deploy:
-  provider: pypi
-  user: $TWINE_USER
-  password: $TWINE_PW
-  on:
-    tags: true
-    repo: pymanopt/pymanopt
-  distributions: "sdist bdist_wheel"
-  skip_existing: true
+  - provider: pypi
+    user: $TWINE_USER
+    password: $TWINE_PW
+    on:
+      repo: pymanopt/pymanopt
+      tags: true
+    distributions: "sdist bdist_wheel"
+    skip_existing: true
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_PAGES_TOKEN
+    keep-history: true
+    on:
+      branch: master
+      repo: pymanopt/pymanopt
+      # tags: true
+    local_dir: docs/_build/html/
