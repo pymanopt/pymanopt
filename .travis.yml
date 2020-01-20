@@ -21,8 +21,8 @@ addons:
     update: true
 
 before_install:
-  - wget \
-    https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+  - |
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
     -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -30,9 +30,9 @@ before_install:
   - conda config --add channels conda-forge
 
 install:
-  - conda create \
-    --yes \
-    --name python-$TRAVIS_PYTHON_VERSION \
+  - | conda create
+    --yes
+    --name python-$TRAVIS_PYTHON_VERSION
     python=$TRAVIS_PYTHON_VERSION libgfortran
   - source activate python-$TRAVIS_PYTHON_VERSION
   - pip install --upgrade pip setuptools wheel
@@ -40,10 +40,11 @@ install:
   - pip install -q -r requirements.txt
 
 script:
-  - nosetests tests \
-    --nologcapture \
-    --verbosity=2 \
-    --with-coverage \
+  - |
+    nosetests tests
+    --nologcapture
+    --verbosity=2
+    --with-coverage
     --cover-package=pymanopt
   - flake8 examples pymanopt tests setup.py
 
@@ -52,7 +53,6 @@ after_success:
 
 jobs:
   include:
-    # deploy if a non-fork tag
     - stage: deploy
       python: 3.6
       sudo: required
