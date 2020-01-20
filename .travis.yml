@@ -6,8 +6,6 @@ python:
   - "3.6"
   - "3.7"
 
-sudo: required
-
 notifications:
   email: false
   webhooks:
@@ -17,10 +15,13 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: never     # options: [always|never|change] default: always
 
+addons:
+  apt:
+    update: true
+
 # Install scipy without need to compile, taken from Theano
 # Setup anaconda
 before_install:
-  - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
