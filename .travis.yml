@@ -11,7 +11,6 @@ notifications:
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/601eba4ae3738ceb2406
-    # options: [always|never|change] default: always
     on_success: change
     on_failure: always
     on_start: never
@@ -37,19 +36,12 @@ script:
 after_success:
   - coveralls
 
-jobs:
-  include:
-    - stage: deploy
-      python: 3.6
-      sudo: required
-      install:
-        - python setup.py install
-        - pip install -e .
-        - pip install twine
-        - sudo apt-get install pandoc
-      script:
-        - set -e
-        - if [ "$TRAVIS_TAG" != "`cat VERSION`" ]; then travis_terminate; fi
-        - python setup.py sdist bdist_wheel
-        - twine upload dist/* -u $TWINE_USER -p $TWINE_PW --skip-existing >/dev/null 2>&1
-      if: fork = false AND tag =~ ^([1-9][0-9]*\!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?$
+deploy:
+  provider: pypi
+  user: $TWINE_USER
+  password: $TWINE_PW
+  on:
+    tags: true
+    repo: pymanopt/pymanopt
+  distributions: "sdist bdist_wheel"
+  skip_existing: true
