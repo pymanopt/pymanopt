@@ -1,3 +1,3 @@
-from .core.problem import Problem
+__version__ = "0.2.4"
 
-__all__ = ["Problem"]
+from pymanopt.core.problem import Problem
