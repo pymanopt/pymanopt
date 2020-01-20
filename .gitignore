@@ -62,3 +62,6 @@ target/
 manopt-*
 
 examples/.ipynb_checkpoints
+
+# pyenv
+.python-version
