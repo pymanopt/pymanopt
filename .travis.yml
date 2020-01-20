@@ -48,7 +48,7 @@ script:
   - flake8 examples pymanopt tests setup.py
 
 after_success:
-  - if [[ "$TRAVIS_BUILD_STAGE_NAME" == "Test" || "$TRAVIS_BUILD_STAGE_NAME" == "" ]]; then coveralls; fi
+  - coveralls
 
 jobs:
   include:
