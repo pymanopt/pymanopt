@@ -1,11 +1,10 @@
-dist: trusty
+dist: xenial
 
 language: python
 python:
-  - "2.7"
-  - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
 
 sudo: required
 
@@ -24,11 +23,7 @@ before_install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - conda update --yes conda
@@ -43,23 +38,15 @@ install:
   - pip install coveralls
   - pip install autograd
   - pip install theano
-  # Avoid compiling and failing to compile version of numpy with Python 3.4
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then pip install 'numpy==1.15.4'; fi
   - pip install tensorflow
   - python setup.py install
 
 script:
   - nosetests ./tests --nologcapture --verbosity=2 --with-coverage --cover-package=pymanopt
-  # flake8 fails with Python-2.7 for int comparison, ok with later version
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      flake8 --extend-ignore=F632 examples pymanopt tests setup.py;
-    else
-      flake8 examples pymanopt tests setup.py;
-    fi
+  - flake8 examples pymanopt tests setup.py;
 
 after_success:
   - if [[ "$TRAVIS_BUILD_STAGE_NAME" == "Test" || "$TRAVIS_BUILD_STAGE_NAME" == "" ]]; then coveralls; fi
-
 
 jobs:
   include:
