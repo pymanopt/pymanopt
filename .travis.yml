@@ -32,7 +32,7 @@ script:
     --with-coverage
     --cover-package=pymanopt
   - flake8 examples pymanopt tests setup.py
-  - sphinx-build -b html docs docs/_build/html
+  - PYTHONPATH=. sphinx-build -b html docs docs/_build/html
 
 after_success:
   - coveralls
