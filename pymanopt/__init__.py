@@ -1,3 +1,2 @@
-__version__ = "0.2.4"
-
+from pymanopt._version import __version__
 from pymanopt.core.problem import Problem  # NOQA

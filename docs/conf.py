@@ -3,14 +3,14 @@ import runpy
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-pymanopt = runpy.run_path(
-    os.path.abspath(os.path.join(BASE_DIR, "..", "pymanopt", "__init__.py")))
+version = runpy.run_path(
+    os.path.abspath(os.path.join(BASE_DIR, "..", "pymanopt", "_version.py")))
 
 # Package information
 project = "Pymanopt"
 author = "Jamie Townsend, Niklas Koep, Sebastian Weichwald"
 copyright = "2016-2020, {:s}".format(author)
-release = version = pymanopt["__version__"]
+release = version = version["__version__"]
 
 # Build settings
 extensions = [
