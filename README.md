@@ -14,7 +14,7 @@ ask for help, or leave general comments either here on github,
 [gitter](https://gitter.im/pymanopt/pymanopt), or via email to one of the
 [maintainers](MAINTAINERS).
 
-Please refer to the [dev documentation](https://pymanopt.org/doc/)
+Please refer to the [dev documentation](https://pymanopt.org/docs/)
 and the [CONTRIBUTING.md](CONTRIBUTING.md) file if you wish to extend
 Pymanopt's functionality and/or contribute to the project.
 

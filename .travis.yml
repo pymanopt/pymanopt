@@ -32,7 +32,7 @@ script:
     --with-coverage
     --cover-package=pymanopt
   - flake8 examples pymanopt tests setup.py
-  - PYTHONPATH=. sphinx-build -b html docs docs/_build/html
+  - PYTHONPATH=. sphinx-build -b html docs website/docs
 
 after_success:
   - coveralls
@@ -49,9 +49,13 @@ deploy:
   - provider: pages
     skip_cleanup: true
     github_token: $GITHUB_PAGES_TOKEN
-    keep-history: true
+    keep_history: true
+    repo: pymanopt/pymanopt.github.io
+    target_branch: deploy
+    fqdn: www.pymanopt.org
+    project_name: pymanopt
     on:
       branch: master
       repo: pymanopt/pymanopt
       # tags: true
-    local_dir: docs/_build/html/
+    local_dir: website

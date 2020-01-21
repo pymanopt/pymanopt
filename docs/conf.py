@@ -14,7 +14,6 @@ release = version = pymanopt.__version__
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
-    "sphinx.ext.githubpages",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode"
 ]
@@ -26,5 +25,5 @@ exclude_patterns = ["build", "*.egg*"]
 # Output options
 html_theme = "sphinx_rtd_theme"
 html_show_sphinx = False
-html_baseurl = "pymanopt.org"
+html_baseurl = "www.pymanopt.org"
 htmlhelp_basename = "pymanoptdoc"

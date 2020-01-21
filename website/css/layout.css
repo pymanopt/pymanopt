@@ -1,0 +1,42 @@
+html {
+  font-family: Helvetica, Arial, Sans-Serif;
+}
+
+ol.alpha {
+  list-style-type: lower-alpha;
+}
+
+div.container {
+  padding-top: 20px;
+}
+
+div.row {
+  border-top-color: rgb(238, 238, 238);
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top: 1px solid #eee;
+  margin-bottom: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+code.table-code-decl{
+  line-height: 1.85;
+  margin-left: 0px;
+}
+
+pre.table-code-block{
+  margin-bottom: 3.5px;
+  margin-top: 5px;
+}
+
+pre.prettyprint {
+  padding: 0em 0em 0em 0em ;
+  vertical-align: top;
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+pre.prettyprint a, code.prettyprint a {
+  text-decoration: none;
+}
