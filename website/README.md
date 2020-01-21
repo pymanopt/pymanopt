@@ -1,4 +1,5 @@
 # pymanopt.org
 
 This repository contains the auto-generated website and documentation of
-*pymanopt*. Refer to the pymanopt/pymanopt repository for the source code.
+**pymanopt**. Refer to github.com/pymanopt/pymanopt for the source code
+generating the contents of this repository.
