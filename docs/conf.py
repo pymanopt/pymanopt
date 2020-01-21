@@ -27,3 +27,4 @@ html_theme = "sphinx_rtd_theme"
 html_show_sphinx = False
 html_baseurl = "www.pymanopt.org"
 htmlhelp_basename = "pymanoptdoc"
+html_last_updated_fmt = ""
