@@ -27,15 +27,21 @@ install:
 script:
   - >
     nosetests tests
-    --nologcapture
-    --verbosity=2
-    --with-coverage
-    --cover-package=pymanopt
-  - flake8 examples pymanopt tests setup.py
-  - PYTHONPATH=. sphinx-build -b html docs website/docs
+      --nologcapture
+      --verbosity=2
+      --with-coverage
+      --cover-package=pymanopt
+    - flake8 examples pymanopt tests setup.py
 
 after_success:
   - coveralls
+  - >
+    PYTHONPATH=. sphinx-build
+      -b html
+      -D version=dev
+      -D release=dev
+      docs
+      website/docs
 
 deploy:
   - provider: pypi
@@ -58,5 +64,4 @@ deploy:
       condition: $TRAVIS_PYTHON_VERSION = "3.7"
       branch: master
       repo: pymanopt/pymanopt
-      # tags: true
     local_dir: website
