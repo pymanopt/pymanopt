@@ -5,7 +5,6 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
-  - "3.8"
 
 notifications:
   email: false
@@ -56,7 +55,7 @@ deploy:
     fqdn: www.pymanopt.org
     project_name: pymanopt
     on:
-      condition: $TRAVIS_PYTHON_VERSION = "3.8"
+      condition: $TRAVIS_PYTHON_VERSION = "3.7"
       branch: master
       repo: pymanopt/pymanopt
       # tags: true
