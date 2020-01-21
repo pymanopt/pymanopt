@@ -51,7 +51,7 @@ deploy:
     github_token: $GITHUB_PAGES_TOKEN
     keep_history: true
     repo: pymanopt/pymanopt.github.io
-    target_branch: deploy
+    target_branch: master
     fqdn: www.pymanopt.org
     project_name: pymanopt
     on:
