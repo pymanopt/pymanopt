@@ -1,5 +1,5 @@
 autograd
-numpy
+numpy>=1.16
 scipy
 tensorflow==1.15
 theano
