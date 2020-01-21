@@ -27,21 +27,21 @@ install:
 script:
   - >
     nosetests tests
-      --nologcapture
-      --verbosity=2
-      --with-coverage
-      --cover-package=pymanopt
-    - flake8 examples pymanopt tests setup.py
+    --nologcapture
+    --verbosity=2
+    --with-coverage
+    --cover-package=pymanopt
+  - flake8 examples pymanopt tests setup.py
 
 after_success:
   - coveralls
   - >
     PYTHONPATH=. sphinx-build
-      -b html
-      -D version=dev
-      -D release=dev
-      docs
-      website/docs
+    -b html
+    -D version=dev
+    -D release=dev
+    docs
+    website/docs
 
 deploy:
   - provider: pypi
