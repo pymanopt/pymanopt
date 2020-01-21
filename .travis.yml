@@ -55,6 +55,7 @@ deploy:
     fqdn: www.pymanopt.org
     project_name: pymanopt
     on:
+      condition: $TRAVIS_PYTHON_VERSION = "3.7"
       branch: master
       repo: pymanopt/pymanopt
       # tags: true
