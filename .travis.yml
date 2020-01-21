@@ -1,80 +1,62 @@
-dist: trusty
+dist: xenial
 
 language: python
 python:
-  - "2.7"
-  - "3.4"
   - "3.5"
   - "3.6"
-
-sudo: required
+  - "3.7"
 
 notifications:
   email: false
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/601eba4ae3738ceb2406
-    on_success: change  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: never     # options: [always|never|change] default: always
+    on_success: change
+    on_failure: always
+    on_start: never
 
-# Install scipy without need to compile, taken from Theano
-# Setup anaconda
-before_install:
-  - sudo apt-get update
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda update --yes conda
-  - conda config --add channels conda-forge
+addons:
+  apt:
+    update: true
 
-# Install packages
 install:
-  # Use openblas to fix a theano error (hacky); see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
-  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose libgfortran six wheel
-  - source activate conda-env-python$TRAVIS_PYTHON_VERSION
-  - pip install flake8
-  - pip install coveralls
-  - pip install autograd
-  - pip install theano
-  # Avoid compiling and failing to compile version of numpy with Python 3.4
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then pip install 'numpy==1.15.4'; fi
-  - pip install tensorflow
-  - python setup.py install
+  - pip install --upgrade pip setuptools wheel
+  - pip install -q -r dev-requirements.txt
+  - pip install -q -r requirements.txt
 
 script:
-  - nosetests ./tests --nologcapture --verbosity=2 --with-coverage --cover-package=pymanopt
-  # flake8 fails with Python-2.7 for int comparison, ok with later version
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      flake8 --extend-ignore=F632 examples pymanopt tests setup.py;
-    else
-      flake8 examples pymanopt tests setup.py;
-    fi
+  - >
+    nosetests tests
+    --nologcapture
+    --verbosity=2
+    --with-coverage
+    --cover-package=pymanopt
+  - flake8 examples pymanopt tests setup.py
+  - PYTHONPATH=. sphinx-build -b html docs website/docs
 
 after_success:
-  - if [[ "$TRAVIS_BUILD_STAGE_NAME" == "Test" || "$TRAVIS_BUILD_STAGE_NAME" == "" ]]; then coveralls; fi
+  - coveralls
 
-
-jobs:
-  include:
-    # deploy if a non-fork tag
-    - stage: deploy
-      python: 3.6
-      sudo: required
-      install:
-        - python setup.py install
-        - pip install -e .
-        - pip install twine
-        - sudo apt-get install pandoc
-      script:
-        - set -e
-        - if [ "$TRAVIS_TAG" != "`cat VERSION`" ]; then travis_terminate; fi
-        - python setup.py sdist bdist_wheel
-        - twine upload dist/* -u $TWINE_USER -p $TWINE_PW --skip-existing >/dev/null 2>&1
-      if: fork = false AND tag =~ ^([1-9][0-9]*\!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?$
+deploy:
+  - provider: pypi
+    user: $TWINE_USER
+    password: $TWINE_PW
+    on:
+      repo: pymanopt/pymanopt
+      tags: true
+    distributions: "sdist bdist_wheel"
+    skip_existing: true
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_PAGES_TOKEN
+    keep_history: true
+    repo: pymanopt/pymanopt.github.io
+    target_branch: deploy
+    fqdn: www.pymanopt.org
+    project_name: pymanopt
+    on:
+      condition: $TRAVIS_PYTHON_VERSION = "3.7"
+      branch: master
+      repo: pymanopt/pymanopt
+      # tags: true
+    local_dir: website
