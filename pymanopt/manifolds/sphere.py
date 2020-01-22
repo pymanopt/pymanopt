@@ -4,39 +4,40 @@ import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 
-from pymanopt.manifolds.manifold import Manifold
+from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
 
-class Sphere(Manifold):
-    """
-    Manifold of shape n1 x n2 x ... x nk tensors with unit 2-norm. The
+class _Sphere(EuclideanEmbeddedSubmanifold):
+    """Manifold of shape n1 x n2 x ... x nk tensors with unit 2-norm. The
     metric is such that the sphere is a Riemannian submanifold of Euclidean
-    space. This implementation is based on spherefactory.m from the Manopt
-    MATLAB package.
+    space.
 
-    Examples:
-    The 'usual' sphere S^2, the set of points lying on the surface of a ball in
-    3D space:
-    sphere = Sphere(3)
+    Notes
+    -----
+    The implementation of the Weingarten map is taken from [1]_.
+
+    References
+    ----------
+    .. [1] Absil, P-A., Robert Mahony, and Jochen Trumpf. "An extrinsic look at
+       the Riemannian Hessian." International Conference on Geometric Science
+       of Information. Springer, Berlin, Heidelberg, 2013.
     """
 
-    def __init__(self, *shape):
+    def __init__(self, *shape, name=None, dimension=None):
         self._shape = shape
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
-        elif len(shape) == 1:
-            self._name = "Sphere manifold of {}-vectors".format(*shape)
-        elif len(shape) == 2:
-            self._name = "Sphere manifold of {}x{} matrices".format(*shape)
-        else:
-            self._name = "Sphere manifold of shape " + str(shape) + " tensors"
 
-    def __str__(self):
-        return self._name
-
-    @property
-    def dim(self):
-        return np.prod(self._shape) - 1
+        if name is None:
+            if len(shape) == 1:
+                name = "Sphere manifold of {}-vectors".format(*shape)
+            elif len(shape) == 2:
+                name = "Sphere manifold of {}x{} matrices".format(*shape)
+            else:
+                name = "Sphere manifold of shape " + str(shape) + " tensors"
+        if dimension is None:
+            dimension = np.prod(shape) - 1
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
@@ -56,8 +57,8 @@ class Sphere(Manifold):
     def proj(self, X, H):
         return H - self.inner(None, X, H) * X
 
-    def ehess2rhess(self, X, egrad, ehess, U):
-        return self.proj(X, ehess) - self.inner(None, X, egrad) * U
+    def weingarten(self, X, U, V):
+        return -self.inner(X, X, V) * U
 
     def exp(self, X, U):
         norm_U = self.norm(None, U)
@@ -95,6 +96,9 @@ class Sphere(Manifold):
     def pairmean(self, X, Y):
         return self._normalize(X + Y)
 
+    def zerovec(self, X):
+        return np.zeros(self._shape)
+
     def _normalize(self, X):
         """
         Return a Frobenius-normalized version of the point X in the ambient
@@ -103,70 +107,77 @@ class Sphere(Manifold):
         return X / self.norm(None, X)
 
 
-class SphereSubspaceIntersection(Sphere):
-    """
-    Manifold of n-dimensional unit 2-norm vectors intersecting the
+class Sphere(_Sphere):
+    __doc__ = _Sphere.__doc__
+
+    def __init__(self, *shape):
+        super().__init__(*shape)
+
+
+class _SphereSubspaceIntersectionManifold(_Sphere):
+    def __init__(self, projector, name, dimension):
+        m, n = projector.shape
+        assert m == n, "projection matrix is not square"
+        if dimension == 0:
+            warnings.warn("Manifold only consists of isolated points when "
+                          "subspace is 1-dimensional.")
+        self._subspace_projector = projector
+        super().__init__(n, name=name, dimension=dimension)
+
+    def _validate_span_matrix(self, U):
+        if len(U.shape) != 2:
+            raise ValueError("Array 'U' must be 2-dimensional")
+        m, n = U.shape
+        if m < n:
+            raise ValueError("The matrix 'U' must have more rows than columns")
+
+    def proj(self, X, H):
+        Y = super().proj(X, H)
+        return self._subspace_projector.dot(Y)
+
+    def rand(self):
+        X = super().rand()
+        return self._normalize(self._subspace_projector.dot(X))
+
+    def randvec(self, X):
+        Y = super().randvec(X)
+        return self._normalize(self._subspace_projector.dot(Y))
+
+
+class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
+    """Manifold of n-dimensional unit 2-norm vectors intersecting the
     r-dimensional subspace of R^n spanned by the columns of the matrix U. This
     implementation is based on spheresubspacefactory.m from the Manopt MATLAB
     package.
     """
 
-    def __init__(self, n, U=None):
-        super(SphereSubspaceIntersection, self).__init__(n)
-
-        self._n = n
-        if U is None:
-            self._subspace_projector = np.eye(n)
-            self._subspace_dimension = n
-            # The name is defined in the base class.
-        else:
-            if U.shape[0] != n:
-                raise ValueError(
-                    "Number of rows in U does not match dimension of the "
-                    "ambient space.")
-            self._configure_manifold(U)
-
-        if self.dim == 0:
-            warnings.warn("Manifold only consists of isolated points when "
-                          "subspace is 1-dimensional.")
-
-    def _configure_manifold(self, U):
+    def __init__(self, U):
+        self._validate_span_matrix(U)
+        m = U.shape[0]
         Q, _ = la.qr(U)
-        self._subspace_projector = Q.dot(Q.T)
-        self._subspace_dimension = la.matrix_rank(self._subspace_projector)
-        self._name = ("Sphere manifold of {}-dimensional vectors intersecting "
-                      "a {}-dimensional subspace".format(
-                          self._n, self._subspace_dimension))
-
-    @property
-    def dim(self):
-        return self._subspace_dimension - 1
-
-    def proj(self, X, H):
-        Y = super(SphereSubspaceIntersection, self).proj(X, H)
-        return self._subspace_projector.dot(Y)
-
-    def rand(self):
-        X = super(SphereSubspaceIntersection, self).rand()
-        return self._normalize(self._subspace_projector.dot(X))
-
-    def randvec(self, X):
-        Y = super(SphereSubspaceIntersection, self).randvec(X)
-        return self._normalize(self._subspace_projector.dot(Y))
+        projector = Q.dot(Q.T)
+        subspace_dimension = la.matrix_rank(projector)
+        name = ("Sphere manifold of {}-dimensional vectors intersecting a "
+                "{}-dimensional subspace".format(m, subspace_dimension))
+        dimension = subspace_dimension - 1
+        super().__init__(projector, name, dimension)
 
 
-class SphereSubspaceComplementIntersection(SphereSubspaceIntersection):
-    """
-    Manifold of n-dimensional unit 2-norm vectors which are orthogonal to the
-    r-dimensional subspace of R^n spanned by columns of the matrix U. This
+class SphereSubspaceComplementIntersection(
+        _SphereSubspaceIntersectionManifold):
+    """Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
+    the r-dimensional subspace of R^n spanned by columns of the matrix U. This
     implementation is based on spheresubspacefactory.m from the Manopt MATLAB
     package.
     """
 
-    def _configure_manifold(self, U):
+    def __init__(self, U):
+        self._validate_span_matrix(U)
+        m = U.shape[0]
         Q, _ = la.qr(U)
-        self._subspace_projector = np.eye(self._n) - Q.dot(Q.T)
-        self._subspace_dimension = la.matrix_rank(self._subspace_projector)
-        self._name = ("Sphere manifold of {}-dimensional vectors orthogonal "
-                      "to a {}-dimensional subspace".format(
-                          self._n, self._subspace_dimension))
+        projector = np.eye(m) - Q.dot(Q.T)
+        subspace_dimension = la.matrix_rank(projector)
+        name = ("Sphere manifold of {}-dimensional vectors orthogonal "
+                "to a {}-dimensional subspace".format(m, subspace_dimension))
+        dimension = subspace_dimension - 1
+        super().__init__(projector, name, dimension)
