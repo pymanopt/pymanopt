@@ -28,3 +28,11 @@ html_show_sphinx = False
 html_baseurl = "www.pymanopt.org"
 htmlhelp_basename = "pymanoptdoc"
 html_last_updated_fmt = ""
+
+# autodoc
+autodoc_default_options = {
+    "member-order": "bysource",
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True
+}
