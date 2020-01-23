@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.linalg import svd
 
-from pymanopt.tools.multi import multiprod, multitransp
 from pymanopt.manifolds.manifold import Manifold
+from pymanopt.tools.multi import multiprod, multitransp
 
 
 class Grassmann(Manifold):
@@ -31,31 +31,24 @@ class Grassmann(Manifold):
     #       bottleneck in your application and you are not using vector
     #       transports, you may want to replace the retraction with a qfactor.
 
-    def __init__(self, height, width, k=1):
-        # Check that n is greater than or equal to p
-        if height < width or width < 1:
-            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
-                             "and p = %d." % (height, width))
-        if k < 1:
-            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
-        # Set the dimensions of the Grassmann
-        self._n = height
-        self._p = width
+    def __init__(self, n, p, k=1):
+        self._n = n
+        self._p = p
         self._k = k
 
-        # Set dimension
-        self._dim = self._k*(self._n*self._p - self._p**2)
+        if n < p or p < 1:
+            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
+                             "and p = %d." % (n, p))
+        if k < 1:
+            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
 
-    @property
-    def dim(self):
-        return self._dim
-
-    def __str__(self):
-        if self._k == 1:
-            return "Grassmann manifold Gr(%d, %d)" % (self._n, self._p)
-        elif self._k >= 2:
-            return "Product Grassmann manifold Gr(%d, %d)^%d" % (
-                self._n, self._p, self._k)
+        if k == 1:
+            name = "Grassmann manifold Gr({:d}, {:d})".format(n, p)
+        elif k >= 2:
+            name = "Product Grassmann manifold Gr({:d}, {:d})^{:d}".format(
+                n, p, k)
+        dimension = int(k * (n * p - p ** 2))
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
@@ -149,5 +142,7 @@ class Grassmann(Manifold):
         U = multiprod(u * arctan_s, vt)
         return U
 
-    def pairmean(self, X, Y):
-        raise NotImplementedError
+    def zerovec(self):
+        if self._k == 1:
+            return np.zeros((self._n, self._p))
+        return np.zeros((self._k, self._n, self._p))
