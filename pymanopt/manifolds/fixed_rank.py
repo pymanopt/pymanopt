@@ -5,7 +5,7 @@ Module containing manifolds of fixed rank matrices.
 import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.manifolds import Stiefel
+from pymanopt.manifolds.stiefel import Stiefel
 from pymanopt.tools import ndarraySequenceMixin
 
 

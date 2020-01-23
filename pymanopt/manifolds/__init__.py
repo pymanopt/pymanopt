@@ -1,17 +1,11 @@
-from .grassmann import Grassmann
-from .sphere import (Sphere, SphereSubspaceIntersection,
-                     SphereSubspaceComplementIntersection)
 from .complexcircle import ComplexCircle
-from .stiefel import Stiefel
-from .psd import PSDFixedRank, PSDFixedRankComplex, Elliptope, PositiveDefinite
-from .oblique import Oblique
-from .euclidean import Euclidean, Symmetric, SkewSymmetric
-from .product import Product
+from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
+from .grassmann import Grassmann
+from .oblique import Oblique
+from .product import Product
+from .psd import Elliptope, PositiveDefinite, PSDFixedRank, PSDFixedRankComplex
 from .rotations import Rotations
-
-__all__ = ["Grassmann", "Sphere", "SphereSubspaceIntersection",
-           "ComplexCircle", "SphereSubspaceComplementIntersection", "Stiefel",
-           "PSDFixedRank", "PSDFixedRankComplex", "Elliptope",
-           "PositiveDefinite", "Oblique", "Euclidean", "Product", "Symmetric",
-           "FixedRankEmbedded", "Rotations", "SkewSymmetric"]
+from .sphere import (Sphere, SphereSubspaceComplementIntersection,
+                     SphereSubspaceIntersection)
+from .stiefel import Stiefel
