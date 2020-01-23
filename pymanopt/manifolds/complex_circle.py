@@ -2,10 +2,10 @@ import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 
-from pymanopt.manifolds.manifold import Manifold
+from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
 
-class ComplexCircle(Manifold):
+class ComplexCircle(EuclideanEmbeddedSubmanifold):
     """
     The manifold of complex numbers with unit-modulus.
 
@@ -18,12 +18,12 @@ class ComplexCircle(Manifold):
     """
 
     def __init__(self, dimension=1):
+        self._dimension = dimension
         if dimension == 1:
             name = "Complex circle S^1"
         else:
             name = "Complex circle (S^1)^{:d}".format(dimension)
         super().__init__(name, dimension)
-        self._dimension = dimension
 
     def inner(self, z, v, w):
         return v.conj().dot(w).real
