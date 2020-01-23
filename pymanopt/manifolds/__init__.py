@@ -4,7 +4,8 @@ from .fixed_rank import FixedRankEmbedded
 from .grassmann import Grassmann
 from .oblique import Oblique
 from .product import Product
-from .psd import Elliptope, PositiveDefinite, PSDFixedRank, PSDFixedRankComplex
+from .psd import (Elliptope, SymmetricPositiveDefinite, PSDFixedRank,
+                  PSDFixedRankComplex)
 from .rotations import Rotations
 from .sphere import (Sphere, SphereSubspaceComplementIntersection,
                      SphereSubspaceIntersection)

@@ -45,8 +45,8 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
 
     def dist(self, X, Y):
         raise NotImplementedError(
-            "The 'Stiefel' manifold currently provides no implementation of "
-            "the 'dist' method")
+            "The manifold '{:s}' currently provides no implementation of "
+            "the 'dist' method".format(self._get_class_name()))
 
     def proj(self, X, U):
         return U - multiprod(X, multisym(multiprod(multitransp(X), U)))

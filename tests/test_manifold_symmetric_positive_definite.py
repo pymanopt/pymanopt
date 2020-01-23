@@ -7,14 +7,14 @@ import numpy.testing as np_testing
 
 import scipy as sp
 
-from pymanopt.manifolds import PositiveDefinite
+from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiprod, multisym, multitransp
 
 
-class TestSinglePositiveDefiniteManifold(unittest.TestCase):
+class TestSingleSymmetricPositiveDefiniteManifold(unittest.TestCase):
     def setUp(self):
         self.n = n = 15
-        self.man = PositiveDefinite(n)
+        self.man = SymmetricPositiveDefinite(n)
 
     def test_rand(self):
         # Just test that rand returns a point on the manifold and two
@@ -103,11 +103,11 @@ class TestSinglePositiveDefiniteManifold(unittest.TestCase):
         np_testing.assert_allclose(man.log(x, y), u)
 
 
-class TestMultiPositiveDefiniteManifold(unittest.TestCase):
+class TestMultiSymmetricPositiveDefiniteManifold(unittest.TestCase):
     def setUp(self):
         self.n = n = 10
         self.k = k = 3
-        self.man = PositiveDefinite(n, k)
+        self.man = SymmetricPositiveDefinite(n, k)
 
     def test_dim(self):
         man = self.man
