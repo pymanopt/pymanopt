@@ -1,6 +1,8 @@
 import abc
 import functools
 
+import numpy as np
+
 
 class Manifold(metaclass=abc.ABCMeta):
     """
@@ -24,6 +26,8 @@ class Manifold(metaclass=abc.ABCMeta):
     """
 
     def __init__(self, name, dimension):
+        assert isinstance(dimension, (int, np.integer)), \
+                "dimension must be an integer"
         self._name = name
         self._dimension = dimension
 
