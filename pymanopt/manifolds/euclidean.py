@@ -2,11 +2,11 @@ import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 
-from pymanopt.manifolds.manifold import Manifold
+from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.tools.multi import multisym, multiskew
 
 
-class Euclidean(Manifold):
+class Euclidean(EuclideanEmbeddedSubmanifold):
     """
     Euclidean manifold of shape n1 x n2 x ... x nk tensors. Useful for
     unconstrained optimization problems or for unconstrained hyperparameters,
@@ -23,22 +23,15 @@ class Euclidean(Manifold):
     def __init__(self, *shape):
         self._shape = shape
         if len(shape) == 0:
-            raise TypeError("Need shape parameters.")
-        elif len(shape) == 1:
-            self._name = "Euclidean manifold of {}-vectors".format(*shape)
+            raise TypeError("Need shape parameters")
+        if len(shape) == 1:
+            name = "Euclidean manifold of {}-vectors".format(*shape)
         elif len(shape) == 2:
-            self._name = ("Euclidean manifold of {}x{} "
-                          "matrices").format(*shape)
+            name = ("Euclidean manifold of {}x{} matrices").format(*shape)
         else:
-            self._name = ("Euclidean manifold of shape " + str(shape) +
-                          " tensors")
-
-    def __str__(self):
-        return self._name
-
-    @property
-    def dim(self):
-        return np.prod(self._shape)
+            name = ("Euclidean manifold of shape " + str(shape) + " tensors")
+        dimension = np.prod(shape)
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
@@ -51,24 +44,21 @@ class Euclidean(Manifold):
         return la.norm(G)
 
     def dist(self, X, Y):
-        return la.norm(X-Y)
+        return la.norm(X - Y)
 
     def proj(self, X, U):
-        return U
-
-    def egrad2rgrad(self, X, U):
         return U
 
     def ehess2rhess(self, X, egrad, ehess, H):
         return ehess
 
     def exp(self, X, U):
-        return X+U
+        return X + U
 
     retr = exp
 
     def log(self, X, Y):
-        return Y-X
+        return Y - X
 
     def rand(self):
         return rnd.randn(*self._shape)
@@ -81,7 +71,10 @@ class Euclidean(Manifold):
         return G
 
     def pairmean(self, X, Y):
-        return .5*(X+Y)
+        return 0.5 * (X + Y)
+
+    def zerovec(self):
+        return np.zeros(self._shape)
 
 
 class Symmetric(Euclidean):
@@ -96,28 +89,17 @@ class Symmetric(Euclidean):
     def __init__(self, n, k=1):
         if k == 1:
             self._shape = (n, n)
-            self._name = ("Manifold of {} x {} symmetric matrices."
-                          ).format(n, n)
+            name = ("Manifold of {} x {} symmetric matrices").format(n, n)
         elif k > 1:
             self._shape = (k, n, n)
-            self._name = ("Product manifold of {} ({} x {}) symmetric "
-                          "matrices.").format(k, n, n)
+            name = ("Product manifold of {} ({} x {}) symmetric "
+                    "matrices").format(k, n, n)
         else:
-            raise ValueError("k must be an integer no less than 1.")
-
-        self._dim = 0.5 * k * n * (n + 1)
-
-    def __str__(self):
-        return self._name
-
-    @property
-    def dim(self):
-        return self._dim
+            raise ValueError("k must be an integer no less than 1")
+        dimension = int(k * n * (n + 1) / 2)
+        super().__init__(name, dimension)
 
     def proj(self, X, U):
-        return multisym(U)
-
-    def egrad2rgrad(self, X, U):
         return multisym(U)
 
     def ehess2rhess(self, X, egrad, ehess, H):
@@ -142,28 +124,18 @@ class SkewSymmetric(Euclidean):
     def __init__(self, n, k=1):
         if k == 1:
             self._shape = (n, n)
-            self._name = ("Manifold of {} x {} skew-symmetric matrices."
-                          ).format(n, n)
+            name = ("Manifold of {} x {} skew-symmetric "
+                    "matrices").format(n, n)
         elif k > 1:
             self._shape = (k, n, n)
-            self._name = ("Product manifold of {} ({} x {}) skew-symmetric "
-                          "matrices.").format(k, n, n)
+            name = ("Product manifold of {} ({} x {}) skew-symmetric "
+                    "matrices").format(k, n, n)
         else:
-            raise ValueError("k must be an integer no less than 1.")
-
-        self._dim = .5 * k * n * (n - 1)
-
-    def __str__(self):
-        return self._name
-
-    @property
-    def dim(self):
-        return self._dim
+            raise ValueError("k must be an integer no less than 1")
+        dimension = int(k * n * (n - 1) / 2)
+        super().__init__(name, dimension)
 
     def proj(self, X, U):
-        return multiskew(U)
-
-    def egrad2rgrad(self, X, U):
         return multiskew(U)
 
     def ehess2rhess(self, X, egrad, ehess, H):
