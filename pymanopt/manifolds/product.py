@@ -79,8 +79,7 @@ class Product(Manifold):
 
 class _ProductTangentVector(list, ndarraySequenceMixin):
     def __repr__(self):
-        repr_ = super(_ProductTangentVector, self).__repr__()
-        return "_ProductTangentVector: " + repr_
+        return "_ProductTangentVector: " + super().__repr__()
 
     def __add__(self, other):
         assert len(self) == len(other)

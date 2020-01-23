@@ -262,8 +262,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
 class _FixedRankTangentVector(tuple, ndarraySequenceMixin):
     def __repr__(self):
-        repr_ = super(_FixedRankTangentVector, self).__repr__()
-        return "_FixedRankTangentVector: " + repr_
+        return "_FixedRankTangentVector: " + super().__repr__()
 
     def to_ambient(self, x):
         Z1 = x[0].dot(self[1].dot(x[2]))
