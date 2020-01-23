@@ -175,15 +175,9 @@ class _PSDFixedRank(Manifold):
     Paper link: http://www.di.ens.fr/~fbach/journee2010_sdp.pdf
     """
 
-    def __init__(self, n, k, name=None, dimension=None):
+    def __init__(self, n, k, name, dimension):
         self._n = n
         self._k = k
-
-        if name is None:
-            name = ("YY' quotient manifold of {:d}x{:d} psd matrices of "
-                    "rank {:d}".format(self._n, self._n, self._k))
-        if dimension is None:
-            dimension = int(k * n - k * (k - 1) / 2)
         super().__init__(name, dimension)
 
     @property
@@ -245,6 +239,12 @@ class _PSDFixedRank(Manifold):
 class PSDFixedRank(_PSDFixedRank):
     __doc__ = _PSDFixedRank.__doc__
 
+    def __init__(self, n, k):
+        name = ("YY' quotient manifold of {:d}x{:d} psd matrices of "
+                "rank {:d}".format(n, n, k))
+        dimension = int(k * n - k * (k - 1) / 2)
+        super().__init__(n, k, name, dimension)
+
 
 class PSDFixedRankComplex(_PSDFixedRank):
     """
@@ -273,12 +273,10 @@ class PSDFixedRankComplex(_PSDFixedRank):
     """
 
     def __init__(self, n, k):
-        self._n = n
-        self._k = k
         name = ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
                 "matrices of rank {:d}".format(n, n, k))
         dimension = 2 * k * n - k * k
-        super().__init__(n, k, name=name, dimension=dimension)
+        super().__init__(n, k, name, dimension)
 
     def inner(self, Y, U, V):
         return 2 * float(np.tensordot(U, V).real)
@@ -288,7 +286,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
 
     def dist(self, U, V):
         S, _, D = la.svd(V.T.conj().dot(U))
-        E = U - V.dot(S).dot(D)  # numpy's svd returns D.H
+        E = U - V.dot(S).dot(D)
         return self.inner(None, E, E) / 2
 
     def exp(self, Y, U):
