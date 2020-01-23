@@ -2,7 +2,7 @@ import time
 import abc
 
 
-class Solver(object):
+class Solver:
     '''
     Abstract base class setting out template for solver classes.
     '''

@@ -1,4 +1,4 @@
-class LineSearchBackTracking(object):
+class LineSearchBackTracking:
     """
     Back-tracking line-search based on linesearch.m in the manopt MATLAB
     package.
@@ -76,7 +76,7 @@ class LineSearchBackTracking(object):
         return stepsize, newx
 
 
-class LineSearchAdaptive(object):
+class LineSearchAdaptive:
     '''
     Adaptive line-search
     '''

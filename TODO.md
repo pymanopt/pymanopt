@@ -23,8 +23,6 @@
   - autodiff/_autograd: fix product manifold when one or more of the manifolds is FixedRankEmbedded
 
 - Misc:
-  - remove all xrange refs
-  - never inherit from object
   - get rid of py2k super(Bla, self).__meth__() calls
   - always use "".format rather than "%s" % "bla"
   - set up pre-commit hook to run flake8 tests (also add this to contrib.md)

@@ -7,7 +7,7 @@ from pymanopt.tools.autodiff import (AutogradBackend, TheanoBackend,
                                      TensorflowBackend)
 
 
-class Problem(object):
+class Problem:
     """
     Problem class for setting up a problem to feed to one of the
     pymanopt solvers.

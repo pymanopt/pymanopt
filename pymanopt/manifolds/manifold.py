@@ -3,7 +3,7 @@ import abc
 import numpy as np
 
 
-class Manifold(object):
+class Manifold:
     """
     Abstract base class setting out a template for manifold classes. If you
     would like to extend Pymanopt with a new manifold, then your manifold

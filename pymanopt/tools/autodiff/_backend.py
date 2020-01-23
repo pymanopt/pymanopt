@@ -11,7 +11,7 @@ def assert_backend_available(f):
     return inner
 
 
-class Backend(object):
+class Backend:
     def __str__(self):
         return "<backend>"
 
