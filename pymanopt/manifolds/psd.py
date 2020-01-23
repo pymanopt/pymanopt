@@ -142,7 +142,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 #              psd matrices, or in fixed_rank. Alternatively, move this one and
 #              the next class to a dedicated 'psd_fixed_rank' module.
 
-class PSDFixedRank(Manifold):
+class _PSDFixedRank(Manifold):
     """
     Manifold of n-by-n symmetric positive semidefinite matrices of rank k.
 
@@ -175,13 +175,15 @@ class PSDFixedRank(Manifold):
     Paper link: http://www.di.ens.fr/~fbach/journee2010_sdp.pdf
     """
 
-    def __init__(self, n, k):
+    def __init__(self, n, k, name=None, dimension=None):
         self._n = n
         self._k = k
 
-        name = ("YY' quotient manifold of {:d}x{:d} psd matrices of "
-                "rank {:d}".format(self._n, self._n, self._k))
-        dimension = int(k * n - k * (k - 1) / 2)
+        if name is None:
+            name = ("YY' quotient manifold of {:d}x{:d} psd matrices of "
+                    "rank {:d}".format(self._n, self._n, self._k))
+        if dimension is None:
+            dimension = int(k * n - k * (k - 1) / 2)
         super().__init__(name, dimension)
 
     @property
@@ -240,7 +242,11 @@ class PSDFixedRank(Manifold):
         return np.zeros((self._n, self._k))
 
 
-class PSDFixedRankComplex(PSDFixedRank):
+class PSDFixedRank(_PSDFixedRank):
+    __doc__ = _PSDFixedRank.__doc__
+
+
+class PSDFixedRankComplex(_PSDFixedRank):
     """
     Manifold of n x n complex Hermitian pos. semidefinite matrices of rank k.
 
@@ -267,12 +273,12 @@ class PSDFixedRankComplex(PSDFixedRank):
     """
 
     def __init__(self, n, k):
+        self._n = n
+        self._k = k
         name = ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
-                "matrices of rank {:d}".format(self._n, self._n, self._k))
-        n = self._n
-        k = self._k
-        dim = 2 * k * n - k * k
-        super().__init__(name, dim)
+                "matrices of rank {:d}".format(n, n, k))
+        dimension = 2 * k * n - k * k
+        super().__init__(n, k, name=name, dimension=dimension)
 
     def inner(self, Y, U, V):
         return 2 * float(np.tensordot(U, V).real)
@@ -293,7 +299,7 @@ class PSDFixedRankComplex(PSDFixedRank):
         return self.retr(Y, U)
 
     def rand(self):
-        rand_ = super(PSDFixedRankComplex, self).rand
+        rand_ = super().rand
         return rand_() + 1j * rand_()
 
 
