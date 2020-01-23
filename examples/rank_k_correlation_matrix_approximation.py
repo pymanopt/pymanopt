@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import numpy as np
 import numpy.random as rnd
 import numpy.linalg as la
