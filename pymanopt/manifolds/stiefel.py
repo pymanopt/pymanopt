@@ -2,64 +2,57 @@ import numpy as np
 from scipy.linalg import expm
 
 from pymanopt.tools.multi import multiprod, multitransp, multisym
-from pymanopt.manifolds.manifold import Manifold
+from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
 
-class Stiefel(Manifold):
+class Stiefel(EuclideanEmbeddedSubmanifold):
     """
-    Factory class for the Stiefel manifold. Initiation requires the dimensions
-    n, p to be specified. Optional argument k allows the user to optimize over
-    the product of k Stiefels.
+    Factory class for the Stiefel manifold. Instantiation requires the
+    dimensions n, p to be specified. Optional argument k allows the user to
+    optimize over the product of k Stiefels.
 
     Elements are represented as n x p matrices (if k == 1), and as k x n x p
     matrices if k > 1 (Note that this is different to manopt!).
     """
 
-    def __init__(self, height, width, k=1):
-        # Check that n is greater than or equal to p
-        if height < width or width < 1:
-            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
-                             "and p = %d." % (height, width))
-        if k < 1:
-            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
-        # Set the dimensions of the Stiefel
-        self._n = height
-        self._p = width
+    def __init__(self, n, p, k=1):
+        self._n = n
+        self._p = p
         self._k = k
 
-        # Set dimension
-        self._dim = self._k * (self._n * self._p -
-                               0.5 * self._p * (self._p + 1))
+        # Check that n is greater than or equal to p
+        if n < p or p < 1:
+            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
+                             "and p = %d." % (n, p))
+        if k < 1:
+            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
 
-    @property
-    def dim(self):
-        return self._dim
-
-    def __str__(self):
-        if self._k == 1:
-            return "Stiefel manifold St(%d, %d)" % (self._n, self._p)
-        elif self._k >= 2:
-            return "Product Stiefel manifold St(%d, %d)^%d" % (
-                self._n, self._p, self._k)
+        if k == 1:
+            name = "Stiefel manifold St(%d, %d)" % (n, p)
+        elif k >= 2:
+            name = "Product Stiefel manifold St(%d, %d)^%d" % (n, p, k)
+        dimension = int(k * (n * p - p * (p + 1) / 2))
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
         return np.sqrt(self._p * self._k)
-
-    def dist(self, X, Y):
-        # Geodesic distance on the manifold
-        raise NotImplementedError
 
     def inner(self, X, G, H):
         # Inner product (Riemannian metric) on the tangent space
         # For the stiefel this is the Frobenius inner product.
         return np.tensordot(G, H, axes=G.ndim)
 
+    def dist(self, X, Y):
+        raise NotImplementedError(
+            "The 'Stiefel' manifold currently provides no implementation of "
+            "the 'dist' method")
+
     def proj(self, X, U):
         return U - multiprod(X, multisym(multiprod(multitransp(X), U)))
 
+    # TODO(nkoep): Implement the weingarten map instead.
     def ehess2rhess(self, X, egrad, ehess, H):
-        # Convert Euclidean into Riemannian Hessian.
         XtG = multiprod(multitransp(X), egrad)
         symXtG = multisym(XtG)
         HsymXtG = multiprod(H, symXtG)
@@ -71,12 +64,13 @@ class Stiefel(Manifold):
             # Calculate 'thin' qr decomposition of X + G
             q, r = np.linalg.qr(X + G)
             # Unflip any flipped signs
-            XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
+            XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r)) + 0.5)))
         else:
             XNew = X + G
             for i in range(self._k):
                 q, r = np.linalg.qr(XNew[i])
-                XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
+                XNew[i] = np.dot(
+                    q, np.diag(np.sign(np.sign(np.diag(r)) + 0.5)))
         return XNew
 
     def norm(self, X, G):
@@ -106,9 +100,6 @@ class Stiefel(Manifold):
     def transp(self, x1, x2, d):
         return self.proj(x2, d)
 
-    def log(self, X, Y):
-        raise NotImplementedError
-
     def exp(self, X, U):
         # TODO: Simplify these expressions.
         if self._k == 1:
@@ -126,5 +117,7 @@ class Stiefel(Manifold):
                 Y[i] = np.bmat([X[i], U[i]]).dot(W).dot(Z)
         return Y
 
-    def pairmean(self, X, Y):
-        raise NotImplementedError
+    def zerovec(self):
+        if self._k == 1:
+            return self.zeros((self._n, self._p))
+        return self.zeros((self._k, self._n, self._p))
