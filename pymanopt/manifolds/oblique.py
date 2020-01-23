@@ -2,10 +2,10 @@ import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 
-from pymanopt.manifolds.manifold import Manifold
+from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
 
-class Oblique(Manifold):
+class Oblique(EuclideanEmbeddedSubmanifold):
     """
     Manifold of matrices w/ unit-norm columns.
 
@@ -19,13 +19,9 @@ class Oblique(Manifold):
     def __init__(self, m, n):
         self._m = m
         self._n = n
-
-    def __str__(self):
-        return "Oblique manifold OB({:d}, {:d})".format(self._m, self._n)
-
-    @property
-    def dim(self):
-        return (self._m - 1) * self._n
+        name = "Oblique manifold OB({:d}, {:d})".format(m, n)
+        dimension = (m - 1) * n
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
@@ -48,6 +44,8 @@ class Oblique(Manifold):
 
     def ehess2rhess(self, X, egrad, ehess, U):
         PXehess = self.proj(X, ehess)
+        # TODO(nkoep): Move the second summand to the 'weingarten' method
+        #              instead.
         return PXehess - U * ((X * egrad).sum(0)[np.newaxis, :])
 
     def exp(self, X, U):
@@ -89,6 +87,9 @@ class Oblique(Manifold):
 
     def pairmean(self, X, Y):
         return self._normalize_columns(X + Y)
+
+    def zerovec(self):
+        return np.zeros((self._m, self._n))
 
     def _normalize_columns(self, X):
         """Return an l2-column-normalized copy of the matrix X."""
