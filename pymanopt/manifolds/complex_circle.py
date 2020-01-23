@@ -17,19 +17,13 @@ class ComplexCircle(Manifold):
     package.
     """
 
-    def __init__(self, n=1):
-        if n == 1:
-            self._name = "Complex circle S^1"
+    def __init__(self, dimension=1):
+        if dimension == 1:
+            name = "Complex circle S^1"
         else:
-            self._name = "Complex circle (S^1)^{:d}".format(n)
-        self._n = n
-
-    def __str__(self):
-        return self._name
-
-    @property
-    def dim(self):
-        return self._n
+            name = "Complex circle (S^1)^{:d}".format(dimension)
+        super().__init__(name, dimension)
+        self._dimension = dimension
 
     def inner(self, z, v, w):
         return v.conj().dot(w).real
@@ -42,7 +36,7 @@ class ComplexCircle(Manifold):
 
     @property
     def typicaldist(self):
-        return np.pi * np.sqrt(self._n)
+        return np.pi * np.sqrt(self._dimension)
 
     def proj(self, z, u):
         return u - (u.conj() * z).real * z
@@ -53,7 +47,7 @@ class ComplexCircle(Manifold):
         return self.proj(z, (z * egrad.conj()).real * zdot)
 
     def exp(self, z, v):
-        y = np.zeros(self._n)
+        y = np.zeros(self._dimension)
         abs_v = np.abs(v)
         mask = abs_v > 0
         not_mask = np.logical_not(mask)
@@ -74,11 +68,12 @@ class ComplexCircle(Manifold):
         return v * factors
 
     def rand(self):
-        n = self._n
-        return self._normalize(rnd.randn(n) + 1j * rnd.randn(n))
+        dimension = self._dimension
+        return self._normalize(
+            rnd.randn(dimension) + 1j * rnd.randn(dimension))
 
     def randvec(self, z):
-        v = rnd.randn(self._n) * (1j * z)
+        v = rnd.randn(self._dimension) * (1j * z)
         return v / self.norm(z, v)
 
     def transp(self, x1, x2, d):
@@ -87,9 +82,10 @@ class ComplexCircle(Manifold):
     def pairmean(self, z1, z2):
         return self._normalize(z1 + z2)
 
+    def zerovec(self):
+        return np.zeros(self._dimension)
+
     @staticmethod
     def _normalize(x):
-        """
-        Normalize the entries of x element-wise by their absolute values.
-        """
+        """Normalize the entries of x element-wise by their absolute values."""
         return x / np.abs(x)

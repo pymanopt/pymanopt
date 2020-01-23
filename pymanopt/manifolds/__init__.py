@@ -1,4 +1,4 @@
-from .complexcircle import ComplexCircle
+from .complex_circle import ComplexCircle
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
 from .grassmann import Grassmann
