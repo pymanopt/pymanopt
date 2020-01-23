@@ -14,6 +14,19 @@ from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold, Manifold
 from pymanopt.tools.multi import multiprod, multitransp, multisym, multilog
 
 
+class _RetrAsExpMixin:
+    """Mixin class which defers calls to the exponential map to the retraction
+    and issues a warning.
+    """
+
+    def exp(self, Y, U):
+        warnings.warn(
+            "Exponential map for manifold '{:s}' not implemented yet. Using "
+            "retraction instead.".format(self._get_class_name()),
+            RuntimeWarning)
+        return self.retr(Y, U)
+
+
 class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
     """Manifold of (n x n)^k symmetric positive definite matrices, based on the
     geometry discussed in Chapter 6 of Positive Definite Matrices (Bhatia
@@ -142,7 +155,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 #              psd matrices, or in fixed_rank. Alternatively, move this one and
 #              the next class to a dedicated 'psd_fixed_rank' module.
 
-class _PSDFixedRank(Manifold):
+class _PSDFixedRank(Manifold, _RetrAsExpMixin):
     """
     Manifold of n-by-n symmetric positive semidefinite matrices of rank k.
 
@@ -208,12 +221,6 @@ class _PSDFixedRank(Manifold):
 
     def ehess2rhess(self, Y, egrad, ehess, U):
         return self.proj(Y, ehess)
-
-    def exp(self, Y, U):
-        warnings.warn("Exponential map for symmetric, fixed-rank "
-                      "manifold not implemented yet. Used retraction instead.",
-                      RuntimeWarning)
-        return self.retr(Y, U)
 
     def retr(self, Y, U):
         return Y + U
@@ -289,19 +296,12 @@ class PSDFixedRankComplex(_PSDFixedRank):
         E = U - V.dot(S).dot(D)
         return self.inner(None, E, E) / 2
 
-    def exp(self, Y, U):
-        # We only overload this to adjust the warning.
-        warnings.warn("Exponential map for symmetric, fixed-rank complex "
-                      "manifold not implemented yet. Used retraction instead.",
-                      RuntimeWarning)
-        return self.retr(Y, U)
-
     def rand(self):
         rand_ = super().rand
         return rand_() + 1j * rand_()
 
 
-class Elliptope(Manifold):
+class Elliptope(Manifold, _RetrAsExpMixin):
     """
     Manifold of n-by-n psd matrices of rank k with unit diagonal elements.
 
@@ -378,19 +378,13 @@ class Elliptope(Manifold):
         return self._project_rows(Y, egrad)
 
     def ehess2rhess(self, Y, egrad, ehess, U):
-        scaling_grad = (egrad * Y).sum(1)
+        scaling_grad = (egrad * Y).sum(axis=1)
         hess = ehess - U * scaling_grad[:, np.newaxis]
 
-        scaling_hess = (U * egrad + Y * ehess).sum(1)
+        scaling_hess = (U * egrad + Y * ehess).sum(axis=1)
         hess -= Y * scaling_hess[:, np.newaxis]
 
         return self.proj(Y, hess)
-
-    def exp(self, Y, U):
-        warnings.warn("Exponential map for fixed-rank elliptope manifold "
-                      "not implemented yet. Used retraction instead.",
-                      RuntimeWarning)
-        return self.retr(Y, U)
 
     def rand(self):
         return self._normalize_rows(rnd.randn(self._n, self._k))
@@ -411,7 +405,7 @@ class Elliptope(Manifold):
     def _project_rows(self, Y, H):
         # Compute the inner product between each vector H[i, :] with its root
         # point Y[i, :], i.e., Y[i, :].T * H[i, :]. Returns a row vector.
-        inners = (Y * H).sum(1)
+        inners = (Y * H).sum(axis=1)
         return H - Y * inners[:, np.newaxis]
 
     def zerovec(self):
