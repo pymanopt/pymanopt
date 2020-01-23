@@ -12,10 +12,12 @@ with optimization on manifolds using Pymanopt.
 We encourage users and developers to report problems, request features,
 ask for help, or leave general comments either here on github,
 [gitter](https://gitter.im/pymanopt/pymanopt), or via email to one of the
-[maintainers](MAINTAINERS).
+[maintainers](https://github.com/pymanopt/pymanopt/blob/master/MAINTAINERS).
 
-Please refer to the [dev documentation](https://pymanopt.org/docs/)
-and the [CONTRIBUTING.md](CONTRIBUTING.md) file if you wish to extend
-Pymanopt's functionality and/or contribute to the project.
+Please refer to the [dev documentation](https://pymanopt.org/docs/) and the
+[CONTRIBUTING.md](https://github.com/pymanopt/pymanopt/blob/master/CONTRIBUTING.md)
+file if you wish to extend Pymanopt's functionality and/or contribute to the
+project.
 
-Pymanopt is distributed under the open source [3-clause BSD license](LICENSE).
+Pymanopt is distributed under the open source [3-clause BSD
+license](https://github.com/pymanopt/pymanopt/blob/master/).
