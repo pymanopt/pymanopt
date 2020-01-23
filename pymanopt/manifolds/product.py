@@ -5,24 +5,19 @@ from pymanopt.tools import ndarraySequenceMixin
 
 
 class Product(Manifold):
-    """
-    Product manifold, i.e. the cartesian product of multiple manifolds.
-    """
+    """Product manifold, i.e., the cartesian product of multiple manifolds."""
 
     def __init__(self, manifolds):
         self._manifolds = manifolds
-
-    def __str__(self):
-        return ("Product manifold: {:s}".format(
+        name = ("Product manifold: {:s}".format(
                 " X ".join([str(man) for man in self._manifolds])))
-
-    @property
-    def dim(self):
-        return np.sum([man.dim for man in self._manifolds])
+        dimension = np.sum([man.dim for man in self._manifolds])
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
-        return np.sqrt(np.sum([man.typicaldist**2 for man in self._manifolds]))
+        return np.sqrt(np.sum([man.typicaldist ** 2
+                               for man in self._manifolds]))
 
     def inner(self, X, G, H):
         return np.sum([man.inner(X[k], G[k], H[k])
@@ -32,7 +27,7 @@ class Product(Manifold):
         return np.sqrt(self.inner(X, G, G))
 
     def dist(self, X, Y):
-        return np.sqrt(np.sum([man.dist(X[k], Y[k])**2
+        return np.sqrt(np.sum([man.dist(X[k], Y[k]) ** 2
                                for k, man in enumerate(self._manifolds)]))
 
     def proj(self, X, U):
