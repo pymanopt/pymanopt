@@ -1,3 +1,4 @@
+os: linux
 dist: xenial
 
 language: python
@@ -45,7 +46,7 @@ after_success:
 
 deploy:
   - provider: pypi
-    user: $TWINE_USER
+    username: $TWINE_USER
     password: $TWINE_PW
     on:
       repo: pymanopt/pymanopt
@@ -54,14 +55,15 @@ deploy:
     skip_existing: true
   - provider: pages
     skip_cleanup: true
-    github_token: $GITHUB_PAGES_TOKEN
+    token: $GITHUB_PAGES_TOKEN
     keep_history: true
     repo: pymanopt/pymanopt.github.io
     target_branch: master
     fqdn: www.pymanopt.org
     project_name: pymanopt
     on:
-      condition: $TRAVIS_PYTHON_VERSION = "3.7"
-      branch: master
+      condition: >
+                 $TRAVIS_PYTHON_VERSION = "3.7" &&
+                 ($TRAVIS_BRANCH = "master" || -n $TRAVIS_TAG)
       repo: pymanopt/pymanopt
     local_dir: website
