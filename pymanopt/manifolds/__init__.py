@@ -10,3 +10,24 @@ from .rotations import Rotations
 from .sphere import (Sphere, SphereSubspaceComplementIntersection,
                      SphereSubspaceIntersection)
 from .stiefel import Stiefel
+
+
+__all__ = (
+    "ComplexCircle",
+    "Euclidean",
+    "SkewSymmetric",
+    "Symmetric",
+    "FixedRankEmbedded",
+    "Grassmann",
+    "Oblique",
+    "Product",
+    "Elliptope",
+    "SymmetricPositiveDefinite",
+    "PSDFixedRank",
+    "PSDFixedRankComplex",
+    "Rotations",
+    "Sphere",
+    "SphereSubspaceComplementIntersection",
+    "SphereSubspaceIntersection",
+    "Stiefel"
+)
