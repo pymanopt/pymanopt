@@ -40,8 +40,8 @@ The Manifolds of Positive Semidefinite Matrices
 
 .. automodule:: pymanopt.manifolds.psd
 
-The Hypersphere Manifold
-~~~~~~~~~~~~~~~~~~~~~~~~
+The Sphere Manifold
+~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: pymanopt.manifolds.sphere
 
