@@ -11,4 +11,6 @@ repos:
         args:
           - --fix=no
       - id: no-commit-to-branch
+        args:
+          - --branch=master
       - id: trailing-whitespace
