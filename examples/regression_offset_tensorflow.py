@@ -1,11 +1,11 @@
 # XXX: This example is broken.
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 
-from pymanopt import Problem, Tensorflow
-from pymanopt.solvers import TrustRegions
+import pymanopt
 from pymanopt.manifolds import Euclidean, Product
+from pymanopt.solvers import TrustRegions
 
 
 if __name__ == "__main__":
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     w = tf.Variable(tf.zeros([3, 1]))
     b = tf.Variable(tf.zeros([1, 1]))
 
-    @Tensorflow(w, b)
+    @pymanopt.function.Tensorflow(w, b)
     def cost(w, b):
         return tf.reduce_mean(tf.square(Y - tf.matmul(tf.transpose(w), X) - b))
 
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     manifold = Product([Euclidean(3, 1), Euclidean(1, 1)])
 
     # Solve the problem with pymanopt
-    problem = Problem(manifold=manifold, cost=cost, verbosity=0)
+    problem = pymanopt.Problem(manifold, cost, verbosity=0)
     wopt = solver.solve(problem)
 
     print('Weights found by pymanopt (top) / '

@@ -1,7 +1,8 @@
 import numpy as np
-from pymanopt import Problem, Callable
-from pymanopt.solvers import TrustRegions
+
+import pymanopt
 from pymanopt.manifolds import SpecialOrthogonalGroup
+from pymanopt.solvers import TrustRegions
 
 
 def main():
@@ -19,21 +20,21 @@ def main():
     else:
         ABt = np.array([Ak.dot(Bk.T) for Ak, Bk in zip(A, B)])
 
-    manifold = Rotations(n, k)
+    manifold = SpecialOrthogonalGroup(n, k)
 
-    @Callable
+    @pymanopt.function.Callable
     def cost(X):
         return -np.tensordot(X, ABt, axes=X.ndim)
 
-    @Callable
+    @pymanopt.function.Callable
     def egrad(X):
         return -ABt
 
-    @Callable
+    @pymanopt.function.Callable
     def ehess(X, S):
         return manifold.zerovec(X)
 
-    problem = Problem(manifold=manifold, cost=cost, egrad=egrad, ehess=ehess)
+    problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
 
     solver = TrustRegions()
 

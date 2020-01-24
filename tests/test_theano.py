@@ -8,7 +8,7 @@ import theano.tensor as T
 
 import warnings
 
-from pymanopt import Theano
+from pymanopt.function import Theano
 
 
 class TestArity(unittest.TestCase):
@@ -106,9 +106,7 @@ class TestArity(unittest.TestCase):
             return T.sum(x ** 2 + y + z ** 3)
 
         n = 10
-        x = rnd.randn(n)
-        y = rnd.randn(n)
-        z = rnd.randn(n)
+        x, y, z = [rnd.randn(n) for _ in range(3)]
 
         # The signature of the cost function now implies that we are on the
         # product manifold, so we mimic the behavior of solvers by calling the
@@ -134,9 +132,7 @@ class TestArity(unittest.TestCase):
         np_testing.assert_allclose(g_z, 3 * z ** 2)
 
         # Test the Hessian.
-        u = rnd.randn(n)
-        v = rnd.randn(n)
-        w = rnd.randn(n)
+        u, v, w = [rnd.randn(n) for _ in range(3)]
 
         ehess = cost.compute_hessian()
         h = ehess(((x, y), z), ((u, v), w))

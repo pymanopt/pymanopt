@@ -1,9 +1,10 @@
-import numpy as np
 from numpy import linalg as la
+import numpy as np
 
-from pymanopt import Problem
-from pymanopt.solvers import ConjugateGradient
+import pymanopt
 from pymanopt.manifolds import Euclidean, Product
+from pymanopt.solvers import ConjugateGradient
+
 
 if __name__ == "__main__":
     # Generate random data
@@ -14,10 +15,12 @@ if __name__ == "__main__":
 
     # Cost function is the squared test error. We use the ones vector for
     # emphasis that the offset b is a scalar, not a vector.
+    @pymanopt.function.Callable
     def cost(x):
         w, b = x
         return la.norm(Y - np.dot(X, w) - b * ones) ** 2
 
+    @pymanopt.function.Callable
     def egrad(x):
         w, b = x
         egrad_w = -2 * np.dot(X.T, Y - np.dot(X, w) - b * ones)
@@ -33,7 +36,7 @@ if __name__ == "__main__":
     manifold = Product([Euclidean(3, 1), Euclidean(1, 1)])
 
     # Solve the problem with pymanopt
-    problem = Problem(manifold=manifold, cost=cost, egrad=egrad, verbosity=0)
+    problem = pymanopt.Problem(manifold, cost, egrad=egrad, verbosity=0)
     wopt = solver.solve(problem)
 
     print('Weights found by pymanopt (top) / '

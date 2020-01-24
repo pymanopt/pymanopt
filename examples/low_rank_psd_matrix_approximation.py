@@ -1,9 +1,8 @@
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
 import theano.tensor as T
+from numpy import linalg as la, random as rnd
 
-from pymanopt import Problem, Callable, Theano
+import pymanopt
 from pymanopt.manifolds import PSDFixedRank
 from pymanopt.solvers import TrustRegions
 
@@ -20,19 +19,19 @@ def _bootstrap_problem(A, k):
 def low_rank_matrix_approximation(A, k):
     manifold, solver = _bootstrap_problem(A, k)
 
-    @Callable
+    @pymanopt.function.Callable
     def cost(Y):
         return la.norm(Y.dot(Y.T) - A, "fro") ** 2
 
-    @Callable
+    @pymanopt.function.Callable
     def egrad(Y):
         return 4 * (Y.dot(Y.T) - A).dot(Y)
 
-    @Callable
+    @pymanopt.function.Callable
     def ehess(Y, U):
         return 4 * ((Y.dot(U.T) + U.dot(Y.T)).dot(Y) + (Y.dot(Y.T) - A).dot(U))
 
-    problem = Problem(manifold=manifold, cost=cost, egrad=egrad, ehess=ehess)
+    problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
     return solver.solve(problem)
 
 
@@ -41,11 +40,11 @@ def low_rank_matrix_approximation_theano(A, k):
 
     Y = T.matrix()
 
-    @Theano(Y)
+    @pymanopt.function.Theano(Y)
     def cost(Y):
         return T.sum((T.dot(Y, Y.T) - A) ** 2)
 
-    problem = Problem(manifold=manifold, cost=cost)
+    problem = pymanopt.Problem(manifold, cost)
     return solver.solve(problem)
 
 

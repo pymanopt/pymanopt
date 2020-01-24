@@ -1,8 +1,8 @@
 import autograd.numpy as np
 
-from pymanopt import Problem, Autograd
-from pymanopt.solvers import TrustRegions
+import pymanopt
 from pymanopt.manifolds import Euclidean
+from pymanopt.solvers import TrustRegions
 
 
 if __name__ == "__main__":
@@ -11,7 +11,7 @@ if __name__ == "__main__":
     Y = np.random.randint(-5, 5, (1, 200))
 
     # Cost function is the squared error
-    @Autograd
+    @pymanopt.function.Autograd
     def cost(w):
         return np.sum(np.sum((Y - np.dot(w.T, X)) ** 2))
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     manifold = Euclidean(3, 1)
 
     # Solve the problem with pymanopt
-    problem = Problem(manifold=manifold, cost=cost)
+    problem = pymanopt.Problem(manifold, cost)
     wopt = solver.solve(problem)
 
     print('The following regression weights were found to minimise the '

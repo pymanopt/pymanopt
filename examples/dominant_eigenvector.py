@@ -3,7 +3,7 @@ import numpy.random as rnd
 import numpy.linalg as la
 import theano.tensor as T
 
-from pymanopt import Problem, Theano
+import pymanopt
 from pymanopt.manifolds import Sphere
 from pymanopt.solvers import ConjugateGradient
 
@@ -23,11 +23,11 @@ def dominant_eigenvector(A):
     solver = ConjugateGradient(maxiter=500, minstepsize=1e-6)
     x = T.vector()
 
-    @Theano(x)
+    @pymanopt.function.Theano(x)
     def cost(x):
         return -x.T.dot(T.dot(A, x))
 
-    problem = Problem(manifold=manifold, cost=cost)
+    problem = pymanopt.Problem(manifold, cost)
     xopt = solver.solve(problem)
     return xopt.squeeze()
 

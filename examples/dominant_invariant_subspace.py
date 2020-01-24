@@ -18,12 +18,12 @@ Main author: Nicolas Boumal, July 5, 2013
 
 Ported to pymanopt by Jamie Townsend, Nov 24, 2015
 """
-import theano.tensor as T
 import numpy as np
+import theano.tensor as T
 
-from pymanopt import Problem, Theano
-from pymanopt.solvers import TrustRegions
+import pymanopt
 from pymanopt.manifolds import Grassmann
+from pymanopt.solvers import TrustRegions
 
 
 def dominant_invariant_subspace(A, p):
@@ -54,12 +54,12 @@ def dominant_invariant_subspace(A, p):
     Gr = Grassmann(n, p)
     X = T.matrix()
 
-    @Theano(X)
+    @pymanopt.function.Theano(X)
     def cost(X):
         return -T.dot(X.T, T.dot(A, X)).trace()
 
     # Setup the problem
-    problem = Problem(manifold=Gr, cost=cost)
+    problem = pymanopt.Problem(Gr, cost)
 
     # Create a solver object
     solver = TrustRegions()
