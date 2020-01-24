@@ -1,4 +1,5 @@
 coveralls
 flake8
+nose
 sphinx
 sphinx_rtd_theme
