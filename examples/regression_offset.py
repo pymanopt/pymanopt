@@ -29,7 +29,6 @@ if __name__ == "__main__":
         egrad_b = -2 * np.sum((Y - np.dot(X, w) - b * ones))
         return (egrad_w, egrad_b)
 
-    # A solver that involves the Hessian
     solver = ConjugateGradient()
 
     # R^3 x R^1

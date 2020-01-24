@@ -2,38 +2,38 @@ import time
 
 import numpy as np
 
-from pymanopt import Problem
+import pymanopt
 from pymanopt.solvers.steepest_descent import SteepestDescent
 from pymanopt.solvers.solver import Solver
 
 
-def compute_centroid(man, x):
-    """
-    Compute the centroid as Karcher mean of points x belonging to the manifold
-    man.
-    """
-    n = len(x)
+def compute_centroid(manifold, points):
+    """Compute the centroid of `points` on the `manifold` as Karcher mean."""
+    num_points = len(points)
 
-    def objective(y):  # weighted Frechet variance
-        acc = 0
-        for i in range(n):
-            acc += man.dist(y, x[i]) ** 2
-        return acc / 2
+    @pymanopt.function.Callable
+    def objective(y):
+        accumulator = 0
+        for i in range(num_points):
+            accumulator += manifold.dist(y, points[i]) ** 2
+        return accumulator / 2
 
+    @pymanopt.function.Callable
     def gradient(y):
-        g = man.zerovec(y)
-        for i in range(n):
-            g -= man.log(y, x[i])
+        g = manifold.zerovec(y)
+        for i in range(num_points):
+            g -= manifold.log(y, points[i])
         return g
 
-    # TODO: manopt runs a few TR iterations here. For us to do this, we either
-    #       need to work out the Hessian of the Frechet variance by hand or
-    #       implement approximations for the Hessian to use in the TR solver.
-    #       This is because we cannot implement the Frechet variance with
-    #       theano and compute the Hessian automatically due to dependency on
-    #       the manifold-dependent distance function.
+    # XXX: Manopt runs a few TR iterations here. For us to do this, we either
+    #      need to work out the Hessian of the Karcher mean by hand or
+    #      implement approximations for the Hessian to use in the TR solver as
+    #      Manopt. This is because we cannot implement the Karcher mean with
+    #      Theano, say, and compute the Hessian automatically due to dependence
+    #      on the manifold-dependent distance function, which is written in
+    #      numpy.
     solver = SteepestDescent(maxiter=15)
-    problem = Problem(man, cost=objective, grad=gradient, verbosity=0)
+    problem = pymanopt.Problem(manifold, objective, grad=gradient, verbosity=0)
     return solver.solve(problem)
 
 
