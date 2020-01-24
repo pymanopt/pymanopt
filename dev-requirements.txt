@@ -1,5 +1,6 @@
 coveralls
 flake8
 nose
+pre-commit
 sphinx
 sphinx_rtd_theme
