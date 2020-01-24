@@ -88,7 +88,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def pairmean(self, X, Y):
         return self._normalize_columns(X + Y)
 
-    def zerovec(self):
+    def zerovec(self, X):
         return np.zeros((self._m, self._n))
 
     def _normalize_columns(self, X):

@@ -144,7 +144,7 @@ class Grassmann(Manifold):
         U = multiprod(u * arctan_s, vt)
         return U
 
-    def zerovec(self):
+    def zerovec(self, X):
         if self._k == 1:
             return np.zeros((self._n, self._p))
         return np.zeros((self._k, self._n, self._p))

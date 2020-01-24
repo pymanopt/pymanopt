@@ -82,7 +82,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     def pairmean(self, z1, z2):
         return self._normalize(z1 + z2)
 
-    def zerovec(self):
+    def zerovec(self, x):
         return np.zeros(self._dimension)
 
     @staticmethod

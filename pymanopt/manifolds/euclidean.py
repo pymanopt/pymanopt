@@ -53,7 +53,7 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def pairmean(self, X, Y):
         return (X + Y) / 2
 
-    def zerovec(self):
+    def zerovec(self, X):
         return np.zeros(self._shape)
 
 

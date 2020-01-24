@@ -117,7 +117,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
                 Y[i] = np.bmat([X[i], U[i]]).dot(W).dot(Z)
         return Y
 
-    def zerovec(self):
+    def zerovec(self, X):
         if self._k == 1:
             return self.zeros((self._n, self._p))
         return self.zeros((self._k, self._n, self._p))
