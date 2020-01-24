@@ -10,8 +10,8 @@ except ImportError:
     autograd = None
 
 from ._backend import Backend, assert_backend_available
-from .. import make_function_decorator
-from ...tools import unpack_arguments
+from .. import make_tracing_backend_decorator
+from ...tools import unpack_arguments, flatten_args, group_return_values
 
 
 class AutogradBackend(Backend):
@@ -24,7 +24,8 @@ class AutogradBackend(Backend):
 
     @assert_backend_available
     def is_compatible(self, objective, argument):
-        return callable(objective) and not all(argument)
+        return (callable(objective) and isinstance(argument, (list, tuple)) and
+                len(argument) > 0)
 
     def _normalize_input(self, f, num_args):
         if num_args > 1:
@@ -34,7 +35,7 @@ class AutogradBackend(Backend):
         def inner(x):
             # Sometimes x will be some custom type, e.g. with the
             # FixedRankEmbedded manifold. Therefore we need to cast it to a
-            # numpy.array.
+            # numpy.ndarray.
             if isinstance(x, (list, tuple)):
                 return f(list(x))
             return f(np.array(x))
@@ -82,4 +83,4 @@ class AutogradBackend(Backend):
         return self._hessian_vector_product(objective)
 
 
-Autograd = make_function_decorator(AutogradBackend)
+Autograd = make_tracing_backend_decorator(AutogradBackend)

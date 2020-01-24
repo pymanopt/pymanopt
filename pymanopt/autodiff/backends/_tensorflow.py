@@ -12,7 +12,7 @@ except ImportError:
     tf = None
 
 from ._backend import Backend, assert_backend_available
-from .. import make_function_decorator_with_argument
+from .. import make_graph_backend_decorator
 
 
 class TensorflowBackend(Backend):
@@ -92,4 +92,4 @@ class TensorflowBackend(Backend):
         return hess
 
 
-Tensorflow = make_function_decorator_with_argument(TensorflowBackend)
+Tensorflow = make_graph_backend_decorator(TensorflowBackend)

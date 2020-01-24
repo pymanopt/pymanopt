@@ -15,7 +15,7 @@ except ImportError:
     T = None
 
 from ._backend import Backend, assert_backend_available
-from .. import make_function_decorator_with_argument
+from .. import make_graph_backend_decorator
 from ...tools import unpack_arguments, flatten_args, group_return_values
 
 
@@ -123,4 +123,4 @@ class TheanoBackend(Backend):
         return group_return_values(wrapper, argument)
 
 
-Theano = make_function_decorator_with_argument(TheanoBackend)
+Theano = make_graph_backend_decorator(TheanoBackend)

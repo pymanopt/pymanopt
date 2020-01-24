@@ -9,7 +9,7 @@ else:
     from torch import autograd
 
 from ._backend import Backend, assert_backend_available
-from .. import make_function_decorator
+from .. import make_tracing_backend_decorator
 
 
 class PyTorchBackend(Backend):
@@ -78,4 +78,4 @@ class PyTorchBackend(Backend):
         return hess
 
 
-PyTorch = make_function_decorator(PyTorchBackend)
+PyTorch = make_tracing_backend_decorator(PyTorchBackend)

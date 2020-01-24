@@ -1,5 +1,5 @@
 from ._backend import Backend, assert_backend_available
-from .. import make_function_decorator
+from .. import make_tracing_backend_decorator
 
 
 class CallableBackend(Backend):
@@ -26,4 +26,4 @@ class CallableBackend(Backend):
     compute_gradient = compute_hessian = __not_implemented
 
 
-Callable = make_function_decorator(CallableBackend)
+Callable = make_tracing_backend_decorator(CallableBackend)
