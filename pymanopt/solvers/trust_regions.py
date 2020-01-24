@@ -51,16 +51,11 @@
 
 # Ported to pymanopt by Jamie Townsend. January 2016.
 
-from __future__ import print_function, division
-
 import time
 
 import numpy as np
 
 from pymanopt.solvers.solver import Solver
-
-if not hasattr(__builtins__, "xrange"):
-    xrange = range
 
 
 class TrustRegions(Solver):
@@ -441,7 +436,7 @@ class TrustRegions(Solver):
         stop_tCG = self.MAX_INNER_ITER
 
         # Begin inner/tCG loop.
-        for j in xrange(0, int(maxinner)):
+        for j in range(int(maxinner)):
             # This call is the computationally intensive step
             Hdelta = hess(x, delta)
 

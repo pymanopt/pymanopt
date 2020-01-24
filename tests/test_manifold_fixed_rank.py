@@ -80,7 +80,7 @@ class TestFixedRankEmbeddedManifold(unittest.TestCase):
         u = e.randvec(x)
         A = e.proj(x, e.tangent2ambient(x, u))
         B = u
-        # diff = [A[k]-B[k] for k in xrange(len(A))]
+        # diff = [A[k]-B[k] for k in range(len(A))]
         np_testing.assert_allclose(A[0], B[0])
         np_testing.assert_allclose(A[1], B[1])
         np_testing.assert_allclose(A[2], B[2])

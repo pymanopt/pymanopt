@@ -1,5 +1,3 @@
-from __future__ import print_function, division
-
 import time
 from copy import deepcopy
 

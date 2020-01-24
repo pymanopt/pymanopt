@@ -1,13 +1,8 @@
-from __future__ import division
-
 import numpy as np
 from numpy.linalg import svd
 
 from pymanopt.tools.multi import multiprod, multitransp
 from pymanopt.manifolds.manifold import Manifold
-
-if not hasattr(__builtins__, "xrange"):
-    xrange = range
 
 
 class Grassmann(Manifold):
@@ -113,7 +108,7 @@ class Grassmann(Manifold):
             return q
 
         X = np.zeros((self._k, self._n, self._p))
-        for i in xrange(self._k):
+        for i in range(self._k):
             X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
         return X
 

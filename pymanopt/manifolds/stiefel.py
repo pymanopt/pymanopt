@@ -1,13 +1,8 @@
-from __future__ import division
-
 import numpy as np
 from scipy.linalg import expm
 
 from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import Manifold
-
-if not hasattr(__builtins__, "xrange"):
-    xrange = range
 
 
 class Stiefel(Manifold):
@@ -79,7 +74,7 @@ class Stiefel(Manifold):
             XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
         else:
             XNew = X + G
-            for i in xrange(self._k):
+            for i in range(self._k):
                 q, r = np.linalg.qr(XNew[i])
                 XNew[i] = np.dot(q, np.diag(np.sign(np.sign(np.diag(r))+.5)))
         return XNew
@@ -98,7 +93,7 @@ class Stiefel(Manifold):
             return q
 
         X = np.zeros((self._k, self._n, self._p))
-        for i in xrange(self._k):
+        for i in range(self._k):
             X[i], r = np.linalg.qr(np.random.randn(self._n, self._p))
         return X
 
@@ -123,7 +118,7 @@ class Stiefel(Manifold):
             Y = np.bmat([X, U]).dot(W).dot(Z)
         else:
             Y = np.zeros(np.shape(X))
-            for i in xrange(self._k):
+            for i in range(self._k):
                 W = expm(np.bmat([[X[i].T.dot(U[i]), -U[i].T.dot(U[i])],
                                   [np.eye(self._p), X[i].T.dot(U[i])]]))
                 Z = np.bmat([[expm(-X[i].T.dot(U[i]))],

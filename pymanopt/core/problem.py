@@ -2,13 +2,12 @@
 Module containing pymanopt problem class. Use this to build a problem
 object to feed to one of the solvers.
 """
-from __future__ import print_function
 
 from pymanopt.tools.autodiff import (AutogradBackend, TheanoBackend,
                                      TensorflowBackend)
 
 
-class Problem(object):
+class Problem:
     """
     Problem class for setting up a problem to feed to one of the
     pymanopt solvers.
