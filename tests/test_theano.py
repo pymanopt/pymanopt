@@ -1,12 +1,8 @@
 import unittest
 
 import numpy as np
-import numpy.random as rnd
-import numpy.testing as np_testing
-
 import theano.tensor as T
-
-import warnings
+from numpy import random as rnd, testing as np_testing
 
 from pymanopt.function import Theano
 
@@ -289,20 +285,6 @@ class TestMatrix(unittest.TestCase):
 
         # Fix broken Rop
         T.exp.R_op = Rop
-
-    def test_hessian_nodependence(self):
-        X = T.matrix()
-
-        @Theano(X)
-        def cost(X):
-            return T.sum(X)
-
-        with warnings.catch_warnings(record=True) as w:
-            # The following should emit a warning
-            cost.compute_hessian()
-
-            assert len(w) == 1
-            assert "not part of the computational graph" in str(w[-1].message)
 
 
 class TestTensor3(unittest.TestCase):
