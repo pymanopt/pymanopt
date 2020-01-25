@@ -7,6 +7,8 @@ from pymanopt.solvers.steepest_descent import SteepestDescent
 from pymanopt.solvers.solver import Solver
 
 
+# TODO(nkoep): Check if a suitable autodiff backend is available, and solve the
+#              problem using the TR solver if so.
 def compute_centroid(manifold, points):
     """Compute the centroid of `points` on the `manifold` as Karcher mean."""
     num_points = len(points)
@@ -157,7 +159,7 @@ class NelderMead(Solver):
             vec = man.log(xbar, x[-1])
 
             # Reflection step
-            xr = man.exp(xbar, -self._reflection * vec)
+            xr = man.retr(xbar, -self._reflection * vec)
             costr = objective(xr)
             costevals += 1
 
@@ -172,7 +174,7 @@ class NelderMead(Solver):
 
             # If the reflected point is better than the best point, expand.
             if costr < costs[0]:
-                xe = man.exp(xbar, -self._expansion * vec)
+                xe = man.retr(xbar, -self._expansion * vec)
                 coste = objective(xe)
                 costevals += 1
                 if coste < costr:
@@ -193,7 +195,7 @@ class NelderMead(Solver):
             if costr >= costs[-2]:
                 if costr < costs[-1]:
                     # do an outside contraction
-                    xoc = man.exp(xbar, -self._contraction * vec)
+                    xoc = man.retr(xbar, -self._contraction * vec)
                     costoc = objective(xoc)
                     costevals += 1
                     if costoc <= costr:
@@ -204,7 +206,7 @@ class NelderMead(Solver):
                         continue
                 else:
                     # do an inside contraction
-                    xic = man.exp(xbar, self._contraction * vec)
+                    xic = man.retr(xbar, self._contraction * vec)
                     costic = objective(xic)
                     costevals += 1
                     if costic <= costs[-1]:
