@@ -2,7 +2,7 @@ from ._backend import Backend, assert_backend_available
 from .. import make_tracing_backend_decorator
 
 
-class CallableBackend(Backend):
+class _CallableBackend(Backend):
     def __str__(self):
         return "callable"
 
@@ -18,12 +18,11 @@ class CallableBackend(Backend):
     def compile_function(self, objective, argument):
         return objective
 
-    @assert_backend_available
-    def __not_implemented(self, objective, argument):
+    def _raise_not_implemented_error(self, objective, argument):
         raise NotImplementedError("No autodiff support available for the "
-                                  "canonical callable backend")
+                                  "canonical 'Callable' backend")
 
-    compute_gradient = compute_hessian = __not_implemented
+    compute_gradient = compute_hessian = _raise_not_implemented_error
 
 
-Callable = make_tracing_backend_decorator(CallableBackend)
+Callable = make_tracing_backend_decorator(_CallableBackend)
