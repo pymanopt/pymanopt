@@ -6,7 +6,7 @@ from .oblique import Oblique
 from .product import Product
 from .psd import (Elliptope, SymmetricPositiveDefinite, PSDFixedRank,
                   PSDFixedRankComplex)
-from .rotations import Rotations
+from .special_orthogonal_group import SpecialOrthogonalGroup
 from .sphere import (Sphere, SphereSubspaceComplementIntersection,
                      SphereSubspaceIntersection)
 from .stiefel import Stiefel
@@ -14,20 +14,20 @@ from .stiefel import Stiefel
 
 __all__ = (
     "ComplexCircle",
+    "Elliptope",
     "Euclidean",
-    "SkewSymmetric",
-    "Symmetric",
     "FixedRankEmbedded",
     "Grassmann",
     "Oblique",
-    "Product",
-    "Elliptope",
-    "SymmetricPositiveDefinite",
     "PSDFixedRank",
     "PSDFixedRankComplex",
-    "Rotations",
+    "Product",
+    "SkewSymmetric",
+    "SpecialOrthogonalGroup",
     "Sphere",
     "SphereSubspaceComplementIntersection",
     "SphereSubspaceIntersection",
-    "Stiefel"
+    "Stiefel",
+    "Symmetric",
+    "SymmetricPositiveDefinite"
 )

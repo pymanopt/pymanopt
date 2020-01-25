@@ -12,9 +12,7 @@ from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.tools.multi import multiprod, multitransp, multisym, multiskew
 
 
-# TODO(nkoep): Rename this to SpecialOrthogonalGroup.
-
-class Rotations(EuclideanEmbeddedSubmanifold):
+class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     """
     Returns a manifold structure to optimize over rotation matrices.
 
