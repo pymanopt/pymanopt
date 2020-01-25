@@ -8,35 +8,12 @@ from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
 
 class _Sphere(EuclideanEmbeddedSubmanifold):
-    """Manifold of shape n1 x n2 x ... x nk tensors with unit 2-norm. The
-    metric is such that the sphere is a Riemannian submanifold of Euclidean
-    space.
+    """Base class for tensors with unit Frobenius norm."""
 
-    Notes
-    -----
-    The implementation of the Weingarten map is taken from [1]_.
-
-    References
-    ----------
-    .. [1] Absil, P-A., Robert Mahony, and Jochen Trumpf. "An extrinsic look at
-       the Riemannian Hessian." International Conference on Geometric Science
-       of Information. Springer, Berlin, Heidelberg, 2013.
-    """
-
-    def __init__(self, *shape, name=None, dimension=None):
-        self._shape = shape
+    def __init__(self, *shape, name, dimension):
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
-
-        if name is None:
-            if len(shape) == 1:
-                name = "Sphere manifold of {}-vectors".format(*shape)
-            elif len(shape) == 2:
-                name = "Sphere manifold of {}x{} matrices".format(*shape)
-            else:
-                name = "Sphere manifold of shape " + str(shape) + " tensors"
-        if dimension is None:
-            dimension = np.prod(shape) - 1
+        self._shape = shape
         super().__init__(name, dimension)
 
     @property
@@ -108,10 +85,32 @@ class _Sphere(EuclideanEmbeddedSubmanifold):
 
 
 class Sphere(_Sphere):
-    __doc__ = _Sphere.__doc__
+    """Manifold of shape n1 x n2 x ... x nk tensors with unit 2-norm. The
+    metric is such that the sphere is a Riemannian submanifold of Euclidean
+    space.
+
+    Notes
+    -----
+    The implementation of the Weingarten map is taken from [1]_.
+
+    References
+    ----------
+    .. [1] Absil, P-A., Robert Mahony, and Jochen Trumpf. "An extrinsic look at
+       the Riemannian Hessian." International Conference on Geometric Science
+       of Information. Springer, Berlin, Heidelberg, 2013.
+    """
 
     def __init__(self, *shape):
-        super().__init__(*shape)
+        if len(shape) == 0:
+            raise TypeError("Need shape parameters.")
+        if len(shape) == 1:
+            name = "Sphere manifold of {}-vectors".format(*shape)
+        elif len(shape) == 2:
+            name = "Sphere manifold of {}x{} matrices".format(*shape)
+        else:
+            name = "Sphere manifold of shape " + str(shape) + " tensors"
+        dimension = np.prod(shape) - 1
+        super().__init__(*shape, name=name, dimension=dimension)
 
 
 class _SphereSubspaceIntersectionManifold(_Sphere):
