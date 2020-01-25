@@ -119,5 +119,5 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
 
     def zerovec(self, X):
         if self._k == 1:
-            return self.zeros((self._n, self._p))
-        return self.zeros((self._k, self._n, self._p))
+            return np.zeros((self._n, self._p))
+        return np.zeros((self._k, self._n, self._p))
