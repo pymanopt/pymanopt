@@ -158,11 +158,46 @@ class Rotations(EuclideanEmbeddedSubmanifold):
             U[i] = np.real(logm(U[i]))
         return multiskew(U)
 
+    @staticmethod
+    def _randrot(n, N=1):
+        if n == 1:
+            return np.ones((N, 1, 1))
+
+        R = np.zeros((N, n, n))
+        for i in range(N):
+            # Generated as such, Q is uniformly distributed over O(n), the
+            # group of orthogonal n-by-n matrices.
+            A = rnd.randn(n, n)
+            Q, RR = la.qr(A)
+            Q = np.dot(Q, np.diag(np.sign(np.diag(RR))))  # Mezzadri 2007
+
+            # If Q is in O(n) but not in SO(n), we permute the two first
+            # columns of Q such that det(new Q) = -det(Q), hence the new Q will
+            # be in SO(n), uniformly distributed.
+            if la.det(Q) < 0:
+                Q[:, [0, 1]] = Q[:, [1, 0]]
+            R[i] = Q
+
+        if N == 1:
+            return R.reshape(n, n)
+        return R
+
     def rand(self):
-        return randrot(self._n, self._k)
+        return self._randrot(self._n, self._k)
+
+    @staticmethod
+    def _randskew(n, N=1):
+        idxs = np.triu_indices(n, 1)
+        S = np.zeros((N, n, n))
+        for i in range(N):
+            S[i][idxs] = rnd.randn(int(n * (n - 1) / 2))
+            S = S - multitransp(S)
+        if N == 1:
+            return S.reshape(n, n)
+        return S
 
     def randvec(self, X):
-        U = randskew(self._n, self._k)
+        U = self._randskew(self._n, self._k)
         nrmU = np.sqrt(np.tensordot(U, U, axes=U.ndim))
         return U / nrmU
 
@@ -181,43 +216,3 @@ class Rotations(EuclideanEmbeddedSubmanifold):
 
     def dist(self, x, y):
         return self.norm(x, self.log(x, y))
-
-
-# TODO(nkoep): Move these two functions into the Rotations class.
-
-def randrot(n, N=1):
-    if n == 1:
-        return np.ones((N, 1, 1))
-
-    R = np.zeros((N, n, n))
-
-    for i in range(N):
-        # Generated as such, Q is uniformly distributed over O(n), the group
-        # of orthogonal n-by-n matrices.
-        A = rnd.randn(n, n)
-        Q, RR = la.qr(A)
-        Q = np.dot(Q, np.diag(np.sign(np.diag(RR))))  # Mezzadri 2007
-
-        # If Q is in O(n) but not in SO(n), we permute the two first
-        # columns of Q such that det(new Q) = -det(Q), hence the new Q will
-        # be in SO(n), uniformly distributed.
-        if la.det(Q) < 0:
-            Q[:, [0, 1]] = Q[:, [1, 0]]
-
-        R[i] = Q
-
-    if N == 1:
-        R = R.reshape(n, n)
-
-    return R
-
-
-def randskew(n, N=1):
-    idxs = np.triu_indices(n, 1)
-    S = np.zeros((N, n, n))
-    for i in range(N):
-        S[i][idxs] = rnd.randn(int(n * (n - 1) / 2))
-        S = S - multitransp(S)
-    if N == 1:
-        return S.reshape(n, n)
-    return S
