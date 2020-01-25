@@ -118,17 +118,20 @@ class _SphereSubspaceIntersectionManifold(_Sphere):
         m, n = projector.shape
         assert m == n, "projection matrix is not square"
         if dimension == 0:
-            warnings.warn("Manifold only consists of isolated points when "
-                          "subspace is 1-dimensional.")
+            warnings.warn(
+                "Intersected subspace is 1-dimensional! The manifold '{:s}' "
+                "therefore has dimension 0 as it only consists of isolated "
+                "points".format(self._get_class_name()))
         self._subspace_projector = projector
         super().__init__(n, name=name, dimension=dimension)
 
     def _validate_span_matrix(self, U):
         if len(U.shape) != 2:
-            raise ValueError("Array 'U' must be 2-dimensional")
-        m, n = U.shape
-        if m < n:
-            raise ValueError("The matrix 'U' must have more rows than columns")
+            raise ValueError("Input array must be 2-dimensional")
+        num_rows, num_columns = U.shape
+        if num_rows < num_columns:
+            raise ValueError(
+                "The span matrix cannot have fewer rows than columns")
 
     def proj(self, X, H):
         Y = super().proj(X, H)
