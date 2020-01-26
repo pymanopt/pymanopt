@@ -1,4 +1,4 @@
-# XXX: This example is broken.
+# XXX: This example is currently broken.
 
 import numpy as np
 import tensorflow as tf
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     w = tf.Variable(tf.zeros([3, 1]))
     b = tf.Variable(tf.zeros([1, 1]))
 
-    @pymanopt.function.Tensorflow(w, b)
+    @pymanopt.function.TensorFlow(w, b)
     def cost(w, b):
         return tf.reduce_mean(tf.square(Y - tf.matmul(tf.transpose(w), X) - b))
 

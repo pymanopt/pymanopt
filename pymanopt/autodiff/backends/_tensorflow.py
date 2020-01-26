@@ -17,10 +17,19 @@ from .. import make_graph_backend_decorator
 
 
 class _TensorFlowBackend(Backend):
-    def __init__(self):
-        if tf is not None:
-            self._session = tf.Session()
+    def __init__(self, **kwargs):
+        self._own_session = None
+
+        if self.is_available():
+            self._session = kwargs.get("session")
+            if self._session is None:
+                self._own_session = self._session = tf.Session()
         super().__init__("TensorFlow")
+
+    def __del__(self):
+        if self._own_session is not None:
+            self._own_session.close()
+            self._session = self._own_session = None
 
     @staticmethod
     def is_available():

@@ -94,9 +94,9 @@ def make_tracing_backend_decorator(Backend):
 
 
 def make_graph_backend_decorator(Backend):
-    def decorator(*args):
+    def decorator(*args, **kwargs):
         def inner(function):
             graph = function(*flatten_args(args))
-            return Function(graph, args=args, backend=Backend())
+            return Function(graph, args=args, backend=Backend(**kwargs))
         return inner
     return decorator
