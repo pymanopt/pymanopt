@@ -8,11 +8,11 @@ import numpy.random as rnd
 from scipy.linalg import expm, logm
 from scipy.special import comb
 
+from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.tools.multi import multiprod, multitransp, multisym, multiskew
-from pymanopt.manifolds.manifold import Manifold
 
 
-class Rotations(Manifold):
+class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     """
     Returns a manifold structure to optimize over rotation matrices.
 
@@ -75,22 +75,17 @@ class Rotations(Manifold):
     """
 
     def __init__(self, n, k=1):
-        if k == 1:
-            self._name = 'Rotations manifold SO({n})'.format(n=n)
-        elif k > 1:
-            self._name = 'Rotations manifold SO({n})^{k}'.format(n=n, k=k)
-        else:
-            raise RuntimeError("k must be an integer no less than 1.")
-
         self._n = n
         self._k = k
 
-    def __str__(self):
-        return self._name
-
-    @property
-    def dim(self):
-        return self._k * comb(self._n, 2)
+        if k == 1:
+            name = "Rotations manifold SO({n})".format(n=n)
+        elif k > 1:
+            name = "Rotations manifold SO({n})^{k}".format(n=n, k=k)
+        else:
+            raise ValueError("k must be an integer no less than 1.")
+        dimension = int(k * comb(n, 2))
+        super().__init__(name, dimension)
 
     def inner(self, X, U, V):
         return np.tensordot(U, V, axes=U.ndim)
@@ -110,8 +105,6 @@ class Rotations(Manifold):
 
     def tangent2ambient(self, X, U):
         return multiprod(X, U)
-
-    egrad2rgrad = proj
 
     def ehess2rhess(self, X, egrad, ehess, H):
         Xt = multitransp(X)
@@ -159,24 +152,57 @@ class Rotations(Manifold):
         U = multiprod(multitransp(X), Y)
         if self._k == 1:
             return multiskew(np.real(logm(U)))
-        else:
-            for i in range(self._k):
-                U[i] = np.real(logm(U[i]))
+        for i in range(self._k):
+            U[i] = np.real(logm(U[i]))
         return multiskew(U)
 
+    @staticmethod
+    def _randrot(n, N=1):
+        if n == 1:
+            return np.ones((N, 1, 1))
+
+        R = np.zeros((N, n, n))
+        for i in range(N):
+            # Generated as such, Q is uniformly distributed over O(n), the
+            # group of orthogonal n-by-n matrices.
+            A = rnd.randn(n, n)
+            Q, RR = la.qr(A)
+            Q = np.dot(Q, np.diag(np.sign(np.diag(RR))))  # Mezzadri 2007
+
+            # If Q is in O(n) but not in SO(n), we permute the two first
+            # columns of Q such that det(new Q) = -det(Q), hence the new Q will
+            # be in SO(n), uniformly distributed.
+            if la.det(Q) < 0:
+                Q[:, [0, 1]] = Q[:, [1, 0]]
+            R[i] = Q
+
+        if N == 1:
+            return R.reshape(n, n)
+        return R
+
     def rand(self):
-        return randrot(self._n, self._k)
+        return self._randrot(self._n, self._k)
+
+    @staticmethod
+    def _randskew(n, N=1):
+        idxs = np.triu_indices(n, 1)
+        S = np.zeros((N, n, n))
+        for i in range(N):
+            S[i][idxs] = rnd.randn(int(n * (n - 1) / 2))
+            S = S - multitransp(S)
+        if N == 1:
+            return S.reshape(n, n)
+        return S
 
     def randvec(self, X):
-        U = randskew(self._n, self._k)
+        U = self._randskew(self._n, self._k)
         nrmU = np.sqrt(np.tensordot(U, U, axes=U.ndim))
         return U / nrmU
 
     def zerovec(self, X):
         if self._k == 1:
             return np.zeros((self._n, self._n))
-        else:
-            return np.zeros((self._k, self._n, self._n))
+        return np.zeros((self._k, self._n, self._n))
 
     def transp(self, x1, x2, d):
         return d
@@ -188,42 +214,3 @@ class Rotations(Manifold):
 
     def dist(self, x, y):
         return self.norm(x, self.log(x, y))
-
-
-def randrot(n, N=1):
-
-    if n == 1:
-        return np.ones((N, 1, 1))
-
-    R = np.zeros((N, n, n))
-
-    for i in range(N):
-        # Generated as such, Q is uniformly distributed over O(n), the set
-        # of orthogonal matrices.
-        A = rnd.randn(n, n)
-        Q, RR = la.qr(A)
-        Q = np.dot(Q, np.diag(np.sign(np.diag(RR))))  # Mezzadri 2007
-
-        # If Q is in O(n) but not in SO(n), we permute the two first
-        # columns of Q such that det(new Q) = -det(Q), hence the new Q will
-        # be in SO(n), uniformly distributed.
-        if la.det(Q) < 0:
-            Q[:, [0, 1]] = Q[:, [1, 0]]
-
-        R[i] = Q
-
-    if N == 1:
-        R = R.reshape(n, n)
-
-    return R
-
-
-def randskew(n, N=1):
-    idxs = np.triu_indices(n, 1)
-    S = np.zeros((N, n, n))
-    for i in range(N):
-        S[i][idxs] = rnd.randn(int(n * (n - 1) / 2))
-        S = S - multitransp(S)
-    if N == 1:
-        return S.reshape(n, n)
-    return S

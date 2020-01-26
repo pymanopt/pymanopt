@@ -1,7 +1,7 @@
 import numpy as np
 from pymanopt import Problem
 from pymanopt.solvers import TrustRegions
-from pymanopt.manifolds import Rotations
+from pymanopt.manifolds import SpecialOrthogonalGroup
 
 n = 3
 m = 10
@@ -17,8 +17,7 @@ if k == 1:
 else:
     ABt = np.array([Ak.dot(Bk.T) for Ak, Bk in zip(A, B)])
 
-manifold = Rotations(n, k)
-# manifold.retr = manifold.retr2
+manifold = SpecialOrthogonalGroup(n, k)
 
 
 def cost(X):

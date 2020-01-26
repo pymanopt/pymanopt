@@ -39,8 +39,8 @@ after_success:
   - >
     PYTHONPATH=. sphinx-build
     -b html
-    -D version=dev
-    -D release=dev
+    -D version=latest
+    -D release=latest
     docs
     website/docs
 

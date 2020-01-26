@@ -4,10 +4,10 @@ from pymanopt.manifolds import PSDFixedRankComplex
 
 
 class TestPSDFixedRankComplexManifold(unittest.TestCase):
-    def setUp(self):
-        self.n = n = 50
-        self.k = k = 10
-        self.man = PSDFixedRankComplex(n, k)
+    def test_constructor(self):
+        n = 50
+        k = 10
+        PSDFixedRankComplex(n, k)
 
     # def test_dim(self):
 

@@ -4,10 +4,10 @@ from pymanopt.manifolds import Elliptope
 
 
 class TestElliptopeManifold(unittest.TestCase):
-    def setUp(self):
-        self.n = n = 50
-        self.k = k = 10
-        self.man = Elliptope(n, k)
+    def test_constructor(self):
+        n = 50
+        k = 10
+        Elliptope(n, k)
 
     # def test_dim(self):
 

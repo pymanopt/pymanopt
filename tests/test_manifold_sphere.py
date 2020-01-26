@@ -155,7 +155,7 @@ class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
         # manifold as it only consits of isolated points in R^2.
         self.U = np.ones((self.n, 1)) / np.sqrt(2)
         with warnings.catch_warnings(record=True):
-            self.man = SphereSubspaceIntersection(self.n, self.U)
+            self.man = SphereSubspaceIntersection(self.U)
 
     def test_dim(self):
         self.assertEqual(self.man.dim, 0)
@@ -177,7 +177,7 @@ class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
     def test_dim_1(self):
         U = np.zeros((3, 2))
         U[0, 0] = U[1, 1] = 1
-        man = SphereSubspaceIntersection(3, U)
+        man = SphereSubspaceIntersection(U)
         # U spans the x-y plane, therefore the manifold consists of the
         # 1-sphere in the x-y plane, and has dimension 1.
         self.assertEqual(man.dim, 1)
@@ -190,7 +190,7 @@ class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
         n = 100
         U = rnd.randn(n, n // 3)
         dim = la.matrix_rank(U) - 1
-        man = SphereSubspaceIntersection(n, U)
+        man = SphereSubspaceIntersection(U)
         self.assertEqual(man.dim, dim)
 
 
@@ -203,7 +203,7 @@ class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
         # R^2.
         self.U = np.ones((self.n, 1)) / np.sqrt(2)
         with warnings.catch_warnings(record=True):
-            self.man = SphereSubspaceComplementIntersection(self.n, self.U)
+            self.man = SphereSubspaceComplementIntersection(self.U)
 
     def test_dim(self):
         self.assertEqual(self.man.dim, 0)
@@ -224,7 +224,7 @@ class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
     def test_dim_1(self):
         U = np.zeros((3, 1))
         U[-1, -1] = 1
-        man = SphereSubspaceComplementIntersection(3, U)
+        man = SphereSubspaceComplementIntersection(U)
         # U spans the z-axis with its orthogonal complement being the x-y
         # plane, therefore the manifold consists of the 1-sphere in the x-y
         # plane, and has dimension 1.
@@ -240,7 +240,7 @@ class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
         # By the rank-nullity theorem the orthogonal complement of span(U) has
         # dimension n - rank(U).
         dim = n - la.matrix_rank(U) - 1
-        man = SphereSubspaceComplementIntersection(n, U)
+        man = SphereSubspaceComplementIntersection(U)
         self.assertEqual(man.dim, dim)
 
         # Test if a random element really lies in the left null space of U.
