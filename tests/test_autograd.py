@@ -1,17 +1,160 @@
 import unittest
 
+import autograd.numpy as np
 import numpy.random as rnd
 import numpy.testing as np_testing
 
-import autograd.numpy as np
-from pymanopt.tools.autodiff import AutogradBackend
+from pymanopt.function import Autograd
+
+
+class TestArity(unittest.TestCase):
+    def test_unary_parameter(self):
+        """
+        Test cost function, gradient and Hessian for a simple unary function.
+        """
+        @Autograd
+        def cost(x):
+            return np.sum(x ** 2)
+
+        n = 10
+        x = rnd.randn(n)
+
+        # Test whether cost function accepts single argument.
+        self.assertAlmostEqual(np.sum(x ** 2), cost(x))
+
+        # Test whether gradient accepts single argument.
+        egrad = cost.compute_gradient()
+        np_testing.assert_allclose(2 * x, egrad(x))
+
+        # Test the Hessian.
+        u = rnd.randn(n)
+
+        # Test whether Hessian accepts two regular arguments.
+        ehess = cost.compute_hessian()
+        # Test whether Hessian-vector product is correct.
+        np_testing.assert_allclose(2 * u, ehess(x, u))
+
+    def test_unary_nary_parameter(self):
+        """
+        Test cost function, gradient and Hessian when multiple arguments are
+        grouped into a single element. This situation arises e.g. when
+        optimizing over the FixedRankEmbedded manifold where points on the
+        manifold are represented as a 3-tuple making up a truncated SVD.
+        """
+        @Autograd(("x", "y"))
+        def cost(x, y):
+            return np.dot(x, y)
+
+        n = 10
+        x = rnd.randn(n)
+        y = rnd.randn(n)
+
+        # The argument signature of the cost function implies we are NOT on the
+        # product manifold so solvers would call the wrapped cost function with
+        # one argument, in this case a tuple of vectors.
+        self.assertAlmostEqual(np.dot(x, y), cost((x, y)))
+
+        egrad = cost.compute_gradient()
+        g = egrad((x, y))
+        # Since we treat the tuple (x, y) as one argument, we expect the result
+        # of a call to the gradient function to be a tuple with two elements.
+        self.assertIsInstance(g, (list, tuple))
+        self.assertEqual(len(g), 2)
+        for gi in g:
+            self.assertIsInstance(gi, np.ndarray)
+        g_x, g_y = g
+        np_testing.assert_allclose(g_x, y)
+        np_testing.assert_allclose(g_y, x)
+
+        # Test the Hessian-vector product.
+        u = rnd.randn(n)
+        v = rnd.randn(n)
+
+        ehess = cost.compute_hessian()
+        h = ehess((x, y), (u, v))
+        self.assertIsInstance(h, (list, tuple))
+        self.assertEqual(len(h), 2)
+        for hi in h:
+            self.assertIsInstance(hi, np.ndarray)
+
+        # Test whether the Hessian-vector product is correct.
+        h_x, h_y = h
+        np_testing.assert_allclose(h_x, v)
+        np_testing.assert_allclose(h_y, u)
+
+    def test_nary_parameter_grouping(self):
+        """
+        Test cost function, gradient and Hessian for a complex cost function
+        one would define on product manifolds where one of the underlying
+        manifolds represents points as a tuple of numpy.ndarrays.
+        """
+        @Autograd(("x", "y"), "z")
+        def cost(x, y, z):
+            return np.sum(x ** 2 + y + z ** 3)
+
+        n = 10
+        x = rnd.randn(n)
+        y = rnd.randn(n)
+        z = rnd.randn(n)
+
+        # The signature of the cost function now implies that we are on the
+        # product manifold, so we mimic the behavior of solvers by calling the
+        # cost function with a single argument: a tuple containing a tuple (x,
+        # y) and a single vector z.
+        self.assertAlmostEqual(np.sum(x ** 2 + y + z ** 3), cost(((x, y), z)))
+
+        egrad = cost.compute_gradient()
+        g = egrad(((x, y), z))
+
+        print(g, len(g))
+
+        # We defined the cost function signature to treat the first two
+        # arguments as one parameter, so a call to the gradient must produce
+        # two elements.
+        self.assertIsInstance(g, (list, tuple))
+        self.assertEqual(len(g), 2)
+        g_xy, g_z = g
+        self.assertIsInstance(g_xy, (list, tuple))
+        self.assertEqual(len(g_xy), 2)
+        self.assertIsInstance(g_z, np.ndarray)
+
+        # Verify correctness of the gradient.
+        np_testing.assert_allclose(g_xy[0], 2 * x)
+        np_testing.assert_allclose(g_xy[1], 1)
+        np_testing.assert_allclose(g_z, 3 * z ** 2)
+
+        # Test the Hessian.
+        u = rnd.randn(n)
+        v = rnd.randn(n)
+        w = rnd.randn(n)
+
+        return
+
+        ehess = cost.compute_hessian()
+        h = ehess(((x, y), z), ((u, v), w))
+
+        # Test the type composition of the return value.
+        self.assertIsInstance(h, (list, tuple))
+        self.assertEqual(len(h), 2)
+        h_xy, h_z = h
+        self.assertIsInstance(h_xy, (list, tuple))
+        self.assertEqual(len(h_xy), 2)
+        self.assertIsInstance(h_z, np.ndarray)
+
+        # Test whether the Hessian-vector product is correct.
+        np_testing.assert_allclose(h_xy[0], 2 * u)
+        np_testing.assert_allclose(h_xy[1], 0)
+        np_testing.assert_allclose(h_z, 6 * z * w)
 
 
 class TestVector(unittest.TestCase):
     def setUp(self):
         np.seterr(all='raise')
-        self.X = None
-        self.cost = lambda X: np.exp(np.sum(X**2))
+
+        @Autograd
+        def cost(X):
+            return np.exp(np.sum(X ** 2))
+        self.cost = cost
 
         n = self.n = 15
 
@@ -35,18 +178,15 @@ class TestVector(unittest.TestCase):
         # Then 'left multiply' H by A
         self.correct_hess = np.squeeze(np.array(Amat.dot(H)))
 
-        self.backend = AutogradBackend()
-
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, self.X)
+        grad = self.cost.compute_gradient()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, self.X)
+        hess = self.cost.compute_hessian()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -56,8 +196,10 @@ class TestMatrix(unittest.TestCase):
     def setUp(self):
         np.seterr(all='raise')
 
-        self.X = None
-        self.cost = lambda X: np.exp(np.sum(X**2))
+        @Autograd
+        def cost(X):
+            return np.exp(np.sum(X ** 2))
+        self.cost = cost
 
         m = self.m = 10
         n = self.n = 15
@@ -85,18 +227,15 @@ class TestMatrix(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
 
-        self.backend = AutogradBackend()
-
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, self.X)
+        grad = self.cost.compute_gradient()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, self.X)
+        hess = self.cost.compute_hessian()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -106,8 +245,10 @@ class TestTensor3(unittest.TestCase):
     def setUp(self):
         np.seterr(all='raise')
 
-        self.X = None
-        self.cost = lambda X: np.exp(np.sum(X**2))
+        @Autograd
+        def cost(X):
+            return np.exp(np.sum(X ** 2))
+        self.cost = cost
 
         n1 = self.n1 = 3
         n2 = self.n2 = 4
@@ -135,18 +276,15 @@ class TestTensor3(unittest.TestCase):
 
         self.correct_hess = np.sum(H * Atensor, axis=(3, 4, 5))
 
-        self.backend = AutogradBackend()
-
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, self.X)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.Y))
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, self.X)
+        grad = self.cost.compute_gradient()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, self.X)
+        hess = self.cost.compute_hessian()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -157,10 +295,10 @@ class TestMixed(unittest.TestCase):
     def setUp(self):
         np.seterr(all='raise')
 
-        def f(x):
-            return (np.exp(np.sum(x[0]**2)) + np.exp(np.sum(x[1]**2)) +
-                    np.exp(np.sum(x[2]**2)))
-
+        @Autograd
+        def f(x, y, z):
+            return (np.exp(np.sum(x ** 2)) + np.exp(np.sum(y ** 2)) +
+                    np.exp(np.sum(z ** 2)))
         self.cost = f
 
         n1 = self.n1 = 3
@@ -175,15 +313,15 @@ class TestMixed(unittest.TestCase):
 
         self.correct_cost = f(y)
 
-        # CALCULATE CORRECT GRAD
+        # Calculate correct grad
         g1 = 2 * y[0] * np.exp(np.sum(y[0] ** 2))
         g2 = 2 * y[1] * np.exp(np.sum(y[1] ** 2))
         g3 = 2 * y[2] * np.exp(np.sum(y[2] ** 2))
 
         self.correct_grad = (g1, g2, g3)
 
-        # CALCULATE CORRECT HESS
-        # 1. VECTOR
+        # Calculate correct hess
+        # 1. Vector
         Ymat = np.matrix(y[0])
         Amat = np.matrix(a[0])
 
@@ -226,21 +364,20 @@ class TestMixed(unittest.TestCase):
         h3 = np.sum(H * Atensor, axis=(3, 4, 5))
 
         self.correct_hess = (h1, h2, h3)
-        self.backend = AutogradBackend()
 
     def test_compile(self):
-        cost_compiled = self.backend.compile_function(self.cost, None)
-        np_testing.assert_allclose(self.correct_cost, cost_compiled(self.y))
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.y))
 
     def test_grad(self):
-        grad = self.backend.compute_gradient(self.cost, None)
-        for k in range(len(grad(self.y))):
-            np_testing.assert_allclose(self.correct_grad[k], grad(self.y)[k])
+        grad = self.cost.compute_gradient()
+        g = grad(self.y)
+        for k in range(len(g)):
+            np_testing.assert_allclose(self.correct_grad[k], g[k])
 
     def test_hessian(self):
-        hess = self.backend.compute_hessian(self.cost, None)
+        hess = self.cost.compute_hessian()
 
         # Now test hess
-        for k in range(len(hess(self.y, self.a))):
-            np_testing.assert_allclose(self.correct_hess[k], hess(self.y,
-                                                                  self.a)[k])
+        h = hess(self.y, self.a)
+        for k in range(len(h)):
+            np_testing.assert_allclose(self.correct_hess[k], h[k])

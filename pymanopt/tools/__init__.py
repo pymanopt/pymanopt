@@ -19,59 +19,76 @@ class ndarraySequenceMixin:
     __array_ufunc__ = None  # Available since numpy 1.13
 
 
-# TODO(nkoep): rename this to flatten_arguments
-def flatten_args(args):
-    """
-    Takes a sequence of arguments containing tuples/lists of arguments or
-    unary arguments and returns a flattened tuple of arguments, e.g.
-    `flatten_args((1, 2), 3)' produces the tuple `(1, 2, 3)'.
-    """
-    flattened_args = []
-    for arg in args:
-        if isinstance(arg, (list, tuple)):
-            flattened_args.extend(arg)
+def _flatten_arguments_from_signature(arguments, signature):
+    flattened_arguments = []
+    for i, group in enumerate(signature):
+        if isinstance(group, (list, tuple)):
+            flattened_arguments.extend(arguments[i])
         else:
-            flattened_args.append(arg)
-    return tuple(flattened_args)
+            flattened_arguments.append(arguments[i])
+    return tuple(flattened_arguments)
 
 
-def unpack_arguments(f):
+# TODO(nkoep): rename this to flatten_arguments
+def flatten_args(arguments, signature=None):
+    """Takes a sequence of arguments containing tuples/lists of arguments or
+    unary arguments and returns a flattened tuple of arguments, e.g.
+    `flatten_args([1, 2], 3)' produces the tuple `(1, 2, 3)'.
     """
-    Wraps a function accepting a single sequence of arguments and calls the
-    function with unpacked arguments.
+    if signature is not None:
+        return _flatten_arguments_from_signature(arguments, signature)
+
+    flattened_arguments = []
+    for argument in arguments:
+        if isinstance(argument, (list, tuple)):
+            flattened_arguments.extend(argument)
+        else:
+            flattened_arguments.append(argument)
+    return tuple(flattened_arguments)
+
+
+def unpack_arguments(function, signature=None):
+    """A decorator which wraps a function accepting a single sequence of
+    arguments and calls the function with unpacked arguments. If given, the
+    call arguments are unpacked according to the `signature' which is a string
+    representation of the argument grouping/nesting, e.g. `(("x", "y"), "z")'.
     """
-    @functools.wraps(f)
-    def inner(args):
-        return f(*flatten_args(args))
+    @functools.wraps(function)
+    def inner(arguments):
+        return function(*flatten_args(arguments, signature=signature))
     return inner
 
 
-def group_return_values(f, args):
-    if len(args) == 1:
-        @functools.wraps(f)
+def group_return_values(function, arguments):
+    """Returns a wrapped version of `function' which groups the return values
+    of the function in the same way as defined by the signature defined by
+    `arguments'.
+    """
+    if len(arguments) == 1:
+        @functools.wraps(function)
         def inner(*args):
-            return f(*args)
+            return function(*args)
         return inner
 
-    signature = []
-    for arg in args:
-        if isinstance(arg, (list, tuple)):
-            signature.append(len(arg))
+    group_sizes = []
+    for argument in arguments:
+        if isinstance(argument, (list, tuple)):
+            group_sizes.append(len(argument))
         else:
-            signature.append(1)
+            group_sizes.append(1)
 
-    @functools.wraps(f)
+    @functools.wraps(function)
     def inner(*args):
-        # TODO(nkoep): The function might be hot. Come up with a more elegant
-        #              implementation.
-        returns = f(*args)
+        # TODO(nkoep): This function might be hot. Can we come up with a more
+        #              elegant implementation?
+        return_values = function(*args)
         groups = []
         i = 0
-        for n in signature:
+        for n in group_sizes:
             if n == 1:
-                groups.append(returns[i])
+                groups.append(return_values[i])
             else:
-                groups.append(returns[i : i + n])
+                groups.append(return_values[i:i+n])
             i += n
         return groups
     return inner

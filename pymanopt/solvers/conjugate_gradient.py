@@ -8,6 +8,7 @@ from pymanopt.solvers.solver import Solver
 from pymanopt import tools
 
 
+# TODO: Use Python's enum module.
 BetaTypes = tools.make_enum(
     "BetaTypes",
     "FletcherReeves PolakRibiere HestenesStiefel HagerZhang".split())

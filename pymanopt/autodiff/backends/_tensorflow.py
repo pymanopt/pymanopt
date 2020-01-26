@@ -1,6 +1,7 @@
 """
 Module containing functions to differentiate functions using tensorflow.
 """
+
 try:
     import tensorflow as tf
     try:
@@ -11,23 +12,21 @@ try:
 except ImportError:
     tf = None
 
-from ._backend import Backend, assert_backend_available
+from ._backend import Backend
 from .. import make_graph_backend_decorator
 
 
-class TensorflowBackend(Backend):
+class _TensorFlowBackend(Backend):
     def __init__(self):
         if tf is not None:
             self._session = tf.Session()
-
-    def __str__(self):
-        return "tensorflow"
+        super().__init__("TensorFlow")
 
     @staticmethod
     def is_available():
         return tf is not None
 
-    @assert_backend_available
+    @Backend._assert_backend_available
     def is_compatible(self, objective, argument):
         if isinstance(objective, tf.Tensor):
             if (argument is None or not
@@ -41,7 +40,7 @@ class TensorflowBackend(Backend):
             return True
         return False
 
-    @assert_backend_available
+    @Backend._assert_backend_available
     def compile_function(self, objective, argument):
         if not isinstance(argument, list):
             def func(x):
@@ -54,7 +53,7 @@ class TensorflowBackend(Backend):
 
         return func
 
-    @assert_backend_available
+    @Backend._assert_backend_available
     def compute_gradient(self, objective, argument):
         """
         Compute the gradient of 'objective' and return as a function.
@@ -72,7 +71,7 @@ class TensorflowBackend(Backend):
 
         return grad
 
-    @assert_backend_available
+    @Backend._assert_backend_available
     def compute_hessian(self, objective, argument):
         if not isinstance(argument, list):
             argA = tf.zeros_like(argument)
@@ -92,4 +91,4 @@ class TensorflowBackend(Backend):
         return hess
 
 
-Tensorflow = make_graph_backend_decorator(TensorflowBackend)
+TensorFlow = make_graph_backend_decorator(_TensorFlowBackend)

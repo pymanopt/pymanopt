@@ -5,7 +5,7 @@ from ..tools import flatten_args
 
 class Function(object):
     def __str__(self):
-        return "Function <{:s}>".format(str(self._backend))
+        return "Function <{}>".format(self._backend)
 
     def __init__(self, function, args, backend):
         self._function = function
@@ -21,12 +21,12 @@ class Function(object):
 
     def _validate_backend(self):
         if not self._backend.is_available():
-            raise ValueError("Backend `{:s}' is not available".format(
-                str(self._backend)))
+            raise ValueError("Backend `{}' is not available".format(
+                self._backend))
         if not self._backend.is_compatible(self._function, self._args):
-            raise ValueError("Backend `{:s}' is not compatible with cost "
+            raise ValueError("Backend `{}' is not compatible with cost "
                              "function of type `{:s}'".format(
-                                 str(self._backend),
+                                 self._backend,
                                  self._function.__class__.__name__))
 
     def _compile(self):
@@ -73,27 +73,30 @@ def make_tracing_backend_decorator(Backend):
     """
     def decorator(*args):
         if len(args) == 1 and callable(args[0]):
-            (f,) = args
-            argspec = inspect.getfullargspec(f)
+            (function,) = args
+            argspec = inspect.getfullargspec(function)
             if argspec.varargs or argspec.varkw or argspec.kwonlyargs:
                 raise ValueError(
-                    "Decorated function should only accept positional "
+                    "Decorated function must only accept positional "
                     "arguments")
             # We use the function signature to signal to the backend how many
             # arguments a function requires. We do this as early as possible so
-            # as not to lose the information when wrapping `f' in one of our
-            # various wrapper functions which often accept varargs and kwargs.
-            return Function(f, args=tuple(argspec.args), backend=Backend())
-        def inner(f):
-            return Function(f, args=args, backend=Backend())
+            # as not to lose the information when wrapping `function` in one of
+            # our various wrapper functions which often accept varargs and
+            # kwargs.
+            return Function(function, args=tuple(argspec.args),
+                            backend=Backend())
+
+        def inner(function):
+            return Function(function, args=args, backend=Backend())
         return inner
     return decorator
 
 
 def make_graph_backend_decorator(Backend):
     def decorator(*args):
-        def inner(f):
-            graph = f(*flatten_args(args))
+        def inner(function):
+            graph = function(*flatten_args(args))
             return Function(graph, args=args, backend=Backend())
         return inner
     return decorator

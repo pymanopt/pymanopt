@@ -8,28 +8,29 @@ except ImportError:
     theano = None
     T = None
 
-from ._backend import Backend, assert_backend_available
+from ._backend import Backend
 from .. import make_graph_backend_decorator
 from ...tools import unpack_arguments, flatten_args, group_return_values
 
 
 class _TheanoBackend(Backend):
-    def __str__(self):
-        return "theano"
+    def __init__(self):
+        super().__init__("Theano")
 
     @staticmethod
     def is_available():
         return theano is not None
 
-    @assert_backend_available
-    def is_compatible(self, func, argument):
-        args = flatten_args(argument)
-        return all([isinstance(arg, T.TensorVariable) for arg in args])
+    @Backend._assert_backend_available
+    def is_compatible(self, function, arguments):
+        flattened_arguments = flatten_args(arguments)
+        return all([isinstance(argument, T.TensorVariable)
+                    for argument in flattened_arguments])
 
     def _compile_function_without_warnings(self, *args, **kwargs):
         return theano.function(*args, **kwargs, on_unused_input="ignore")
 
-    @assert_backend_available
+    @Backend._assert_backend_available
     def compile_function(self, function, arguments):
         """Compiles a Theano graph into a python function."""
         flattened_arguments = flatten_args(arguments)
@@ -39,7 +40,7 @@ class _TheanoBackend(Backend):
             return compiled_function
         return unpack_arguments(compiled_function)
 
-    @assert_backend_available
+    @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
         """Returns a compiled function computing the gradient of 'function'
         with respect to 'arguments'.
@@ -100,7 +101,7 @@ class _TheanoBackend(Backend):
         return self._compile_function_without_warnings(
             list(itertools.chain(arguments, argument_types)), Rop)
 
-    @assert_backend_available
+    @Backend._assert_backend_available
     def compute_hessian(self, function, arguments):
         """Computes the directional derivative of the gradient, which is
         equivalent to computing a Hessian-vector product with the direction
