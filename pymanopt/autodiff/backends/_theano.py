@@ -26,12 +26,15 @@ class _TheanoBackend(Backend):
         args = flatten_args(argument)
         return all([isinstance(arg, T.TensorVariable) for arg in args])
 
+    def _compile_function_without_warnings(self, *args, **kwargs):
+        return theano.function(*args, **kwargs, on_unused_input="ignore")
+
     @assert_backend_available
     def compile_function(self, function, arguments):
         """Compiles a Theano graph into a python function."""
         flattened_arguments = flatten_args(arguments)
-        compiled_function = theano.function(inputs=flattened_arguments,
-                                            outputs=function)
+        compiled_function = self._compile_function_without_warnings(
+            flattened_arguments, function)
         if len(flattened_arguments) == 1:
             return compiled_function
         return unpack_arguments(compiled_function)
@@ -47,15 +50,16 @@ class _TheanoBackend(Backend):
         if len(flattened_arguments) == 1:
             (argument,) = flattened_arguments
             gradient = T.grad(function, argument)
-            return theano.function(flattened_arguments, gradient)
+            return self._compile_function_without_warnings(
+                flattened_arguments, gradient)
 
         gradient = T.grad(function, flattened_arguments)
-        compiled_gradient = theano.function(flattened_arguments, gradient)
+        compiled_gradient = self._compile_function_without_warnings(
+            flattened_arguments, gradient)
         return group_return_values(
             unpack_arguments(compiled_gradient), arguments)
 
-    @staticmethod
-    def _compute_unary_hessian_vector_product(gradient, argument):
+    def _compute_unary_hessian_vector_product(self, gradient, argument):
         """Returns a function accepting two arguments to compute a
         Hessian-vector product of a scalar-valued unary function.
         """
@@ -65,11 +69,10 @@ class _TheanoBackend(Backend):
         except NotImplementedError:
             proj = T.sum(gradient * disconnected_grad(argument_type))
             Rop = T.grad(proj, argument)
-        return theano.function([argument, argument_type], Rop,
-                               on_unused_input="ignore")
+        return self._compile_function_without_warnings(
+            [argument, argument_type], Rop)
 
-    @staticmethod
-    def _compute_nary_hessian_vector_product(gradients, arguments):
+    def _compute_nary_hessian_vector_product(self, gradients, arguments):
         """Returns a function accepting `2 * len(arguments)` arguments to
         compute a Hessian-vector product of a multivariate function.
 
@@ -94,9 +97,8 @@ class _TheanoBackend(Backend):
                 T.stacklists([c for c in row if c is not None])
                 for row in proj_grad_transpose]
             Rop = [T.sum(stack, axis=0) for stack in proj_grad_stack]
-        return theano.function(
-            list(itertools.chain(arguments, argument_types)), Rop,
-            on_unused_input="warn")
+        return self._compile_function_without_warnings(
+            list(itertools.chain(arguments, argument_types)), Rop)
 
     @assert_backend_available
     def compute_hessian(self, function, arguments):
