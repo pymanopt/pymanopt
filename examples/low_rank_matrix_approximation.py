@@ -1,4 +1,5 @@
 import autograd.numpy as np
+import numpy.linalg as la
 from theano import tensor as T
 
 import pymanopt
@@ -23,12 +24,9 @@ def main():
     # (b) Definition of a cost function (here using autograd.numpy)
     #       Note that the cost must be defined in terms of u, s and vt, where
     #       X = u * diag(s) * vt.
-    @pymanopt.function.Autograd
-    def cost(usv):
+    @pymanopt.function.Autograd(("u", "s", "vt"))
+    def cost(u, s, vt):
         delta = 0.5
-        u = usv[0]
-        s = usv[1]
-        vt = usv[2]
         X = np.dot(np.dot(u, np.diag(s)), vt)
         return np.sum(np.sqrt((X - A) ** 2 + delta ** 2) - delta)
 
@@ -38,12 +36,10 @@ def main():
     solver = ConjugateGradient()
 
     # let Pymanopt do the rest
-    # print("Solving with autograd:")
-    # print()
-    # XXX: The autograd backend is currently broken.
-    # X = solver.solve(problem)
-
-    # TODO: Verify the solution.
+    print("Solving with autograd:")
+    print()
+    u, s, vt = solver.solve(problem)
+    X_autograd = u @ np.diag(s) @ vt
 
     U = T.matrix()
     S = T.vector()
@@ -59,7 +55,17 @@ def main():
 
     print("Solving with theano:")
     print()
-    X = solver.solve(problem)
+    u, s, vt = solver.solve(problem)
+    X_theano = u @ np.diag(s) @ vt
+
+    print("autograd solution:")
+    print(X_autograd)
+    print()
+    print("theano solution:")
+    print(X_theano)
+    print()
+    print("norm error between autograd and theano solution",
+          la.norm(X_autograd - X_theano))
 
 
 if __name__ == "__main__":

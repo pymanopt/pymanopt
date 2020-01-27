@@ -1,3 +1,4 @@
+import functools
 import itertools
 
 try:
@@ -10,7 +11,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_graph_backend_decorator
-from ...tools import unpack_arguments, flatten_args, group_return_values
+from ...tools import unpack_arguments, flatten_arguments, group_return_values
 
 
 class _TheanoBackend(Backend):
@@ -23,7 +24,7 @@ class _TheanoBackend(Backend):
 
     @Backend._assert_backend_available
     def is_compatible(self, function, arguments):
-        flattened_arguments = flatten_args(arguments)
+        flattened_arguments = flatten_arguments(arguments)
         return all([isinstance(argument, T.TensorVariable)
                     for argument in flattened_arguments])
 
@@ -33,7 +34,7 @@ class _TheanoBackend(Backend):
     @Backend._assert_backend_available
     def compile_function(self, function, arguments):
         """Compiles a Theano graph into a python function."""
-        flattened_arguments = flatten_args(arguments)
+        flattened_arguments = flatten_arguments(arguments)
         compiled_function = self._compile_function_without_warnings(
             flattened_arguments, function)
         if len(flattened_arguments) == 1:
@@ -45,9 +46,9 @@ class _TheanoBackend(Backend):
         """Returns a compiled function computing the gradient of 'function'
         with respect to 'arguments'.
         """
-        flattened_arguments = flatten_args(arguments)
-        # For cost functions expecting one argument, make sure we don't return
-        # the gradient evaluated at some point as a singleton tuple.
+        flattened_arguments = flatten_arguments(arguments)
+        # For functions expecting one argument, make sure we don't return the
+        # gradient evaluated at some point as a singleton tuple.
         if len(flattened_arguments) == 1:
             (argument,) = flattened_arguments
             gradient = T.grad(function, argument)
@@ -107,7 +108,7 @@ class _TheanoBackend(Backend):
         equivalent to computing a Hessian-vector product with the direction
         vector.
         """
-        flattened_arguments = flatten_args(arguments)
+        flattened_arguments = flatten_arguments(arguments)
         if len(flattened_arguments) == 1:
             (argument,) = flattened_arguments
             gradient = T.grad(function, argument)
@@ -118,9 +119,10 @@ class _TheanoBackend(Backend):
         hessian_vector_product = self._compute_nary_hessian_vector_product(
             gradients, flattened_arguments)
 
+        @functools.wraps(hessian_vector_product)
         def wrapper(point, vector):
-            return hessian_vector_product(
-                *itertools.chain(flatten_args(point), flatten_args(vector)))
+            return hessian_vector_product(*flatten_arguments(point),
+                                          *flatten_arguments(vector))
 
         return group_return_values(wrapper, arguments)
 

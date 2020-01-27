@@ -29,11 +29,12 @@ def _flatten_arguments_from_signature(arguments, signature):
     return tuple(flattened_arguments)
 
 
-# TODO(nkoep): rename this to flatten_arguments
-def flatten_args(arguments, signature=None):
-    """Takes a sequence of arguments containing tuples/lists of arguments or
+def flatten_arguments(arguments, signature=None):
+    """Takes a sequence `arguments` containing tuples/lists of arguments or
     unary arguments and returns a flattened tuple of arguments, e.g.
-    `flatten_args([1, 2], 3)' produces the tuple `(1, 2, 3)'.
+    `flatten_arguments([1, 2], 3)` produces the tuple `(1, 2, 3)`. If the
+    nesting cannot be inferred from the types of objects contained in
+    `arguments` itself, one may pass the optional argument `signature` instead.
     """
     if signature is not None:
         return _flatten_arguments_from_signature(arguments, signature)
@@ -55,25 +56,25 @@ def unpack_arguments(function, signature=None):
     """
     @functools.wraps(function)
     def inner(arguments):
-        return function(*flatten_args(arguments, signature=signature))
+        return function(*flatten_arguments(arguments, signature=signature))
     return inner
 
 
-def group_return_values(function, arguments):
-    """Returns a wrapped version of `function' which groups the return values
-    of the function in the same way as defined by the signature defined by
-    `arguments'.
+def group_return_values(function, signature):
+    """Returns a wrapped version of `function` which groups the return values
+    of the function in the same way as defined by the signature given by
+    `signature`.
     """
-    if len(arguments) == 1:
+    if len(signature) == 1:
         @functools.wraps(function)
         def inner(*args):
             return function(*args)
         return inner
 
     group_sizes = []
-    for argument in arguments:
-        if isinstance(argument, (list, tuple)):
-            group_sizes.append(len(argument))
+    for element in signature:
+        if isinstance(element, (list, tuple)):
+            group_sizes.append(len(element))
         else:
             group_sizes.append(1)
 

@@ -106,8 +106,6 @@ class TestArity(unittest.TestCase):
         egrad = cost.compute_gradient()
         g = egrad(((x, y), z))
 
-        print(g, len(g))
-
         # We defined the cost function signature to treat the first two
         # arguments as one parameter, so a call to the gradient must produce
         # two elements.
@@ -127,8 +125,6 @@ class TestArity(unittest.TestCase):
         u = rnd.randn(n)
         v = rnd.randn(n)
         w = rnd.randn(n)
-
-        return
 
         ehess = cost.compute_hessian()
         h = ehess(((x, y), z), ((u, v), w))

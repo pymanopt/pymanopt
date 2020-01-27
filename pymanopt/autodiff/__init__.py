@@ -1,6 +1,6 @@
 import inspect
 
-from ..tools import flatten_args
+from ..tools import flatten_arguments
 
 
 class Function(object):
@@ -96,7 +96,7 @@ def make_tracing_backend_decorator(Backend):
 def make_graph_backend_decorator(Backend):
     def decorator(*args, **kwargs):
         def inner(function):
-            graph = function(*flatten_args(args))
+            graph = function(*flatten_arguments(args))
             return Function(graph, args=args, backend=Backend(**kwargs))
         return inner
     return decorator

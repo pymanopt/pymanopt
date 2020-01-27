@@ -11,7 +11,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
-from ...tools import unpack_arguments, flatten_args
+from ...tools import flatten_arguments, group_return_values, unpack_arguments
 
 
 class _AutogradBackend(Backend):
@@ -27,84 +27,74 @@ class _AutogradBackend(Backend):
         return (callable(objective) and isinstance(argument, (list, tuple)) and
                 len(argument) > 0)
 
-    def _normalize_input(self, f, num_args):
-        if num_args > 1:
-            return unpack_arguments(f)
-
-        @functools.wraps(f)
-        def inner(x):
-            # Sometimes x will be some custom type, e.g. with the
-            # FixedRankEmbedded manifold. Therefore we need to cast it to a
-            # numpy.ndarray.
-            if isinstance(x, (list, tuple)):
-                return f(list(x))
-            return f(np.array(x))
-        return inner
+    @Backend._assert_backend_available
+    def compile_function(self, function, arguments):
+        flattened_arguments = flatten_arguments(arguments)
+        if len(flattened_arguments) == 1:
+            return function
+        return unpack_arguments(function)
 
     @Backend._assert_backend_available
-    def compile_function(self, func, argument):
-        args = flatten_args(argument)
-        if len(args) == 1:
-            return func
-        return unpack_arguments(func)
+    def compute_gradient(self, function, arguments):
+        flattened_arguments = flatten_arguments(arguments)
+        if len(flattened_arguments) == 1:
+            return autograd.grad(function)
+        if len(arguments) == 1:
+            # TODO(nkoep): unpack_arguments should be able to handle this so we
+            #              can merge the two paths.
+            @functools.wraps(function)
+            def unary_function(arguments):
+                return function(*arguments)
+            return autograd.grad(unary_function)
 
-    @Backend._assert_backend_available
-    def compute_gradient(self, func, argument):
-        """
-        Compute the gradient of 'func' with respect to the first
-        argument and return as a function.
-        """
-        args = flatten_args(argument)
-        if len(args) == 1:
-            return autograd.grad(func)
-
-        # Turn `func' into a function accepting a single argument which gets
-        # unpacked and passed to `func' when called. This is necessary so we
-        # can compute the gradient for multiple arguments at once by computing
-        # the gradient of the wrapper function instead. In order to unpack
-        # arguments appropriately, we need a signature hint in the form of
-        # `argument'. This is because autograd wraps tuples and lists in a
-        # `SequenceBox' which is not a subclass of tuple or list so we cannot
-        # detect nested tuples as call arguments without a signature hint.
-        unary_func = unpack_arguments(func, signature=argument)
-        grad = autograd.grad(unary_func)
-        return grad
+        # Turn `function` into a function accepting a single argument which
+        # gets unpacked when the function is called. This is necessary for
+        # autograd to compute and return the gradient for each input in the
+        # input tuple/list.
+        # In order to unpack arguments correctly, we also need a signature hint
+        # in the form of `arguments`. This is because autograd wraps tuples and
+        # lists in a `SequenceBox' which is not a subclass of tuple or list so
+        # we cannot detect nested tuples as call arguments.
+        unary_function = unpack_arguments(function, signature=arguments)
+        return autograd.grad(unary_function)
 
     @staticmethod
-    def _compute_unary_hvp(func):
-        """
-        Builds a function that returns the exact Hessian-vector product for a
-        regular unary function.
-        """
-        grad = autograd.grad(func)
+    def _compute_nary_hessian_vector_product(function):
+        gradient = autograd.grad(function)
 
         def vector_dot_grad(*args):
-            args, vector = args[:-1], args[-1]
-            return np.tensordot(grad(*args), vector, axes=vector.ndim)
-        return autograd.grad(vector_dot_grad)
-
-    @staticmethod
-    def _compute_nary_hvp(func, argument):
-        """
-        Builds a function that returns the exact Hessian-vector product for a
-        function accepting one or more (possibly nested) arguments.
-        """
-        grad = autograd.grad(func)
-
-        def vector_dot_grad(*args):
-            args, vectors = args[:-1], args[-1]
-            g = grad(*args)
+            arguments, vectors = args[:-1], args[-1]
+            gradients = gradient(*arguments)
             return np.sum(
-                [np.tensordot(g[k], vector, axes=vector.ndim)
-                 for k, vector in enumerate(vectors)])
+                [np.tensordot(gradients[i], vector, axes=vector.ndim)
+                 for i, vector in enumerate(vectors)])
+
         return autograd.grad(vector_dot_grad)
 
     @Backend._assert_backend_available
-    def compute_hessian(self, func, argument):
-        args = flatten_args(argument)
-        if len(args) == 1:
-            return self._compute_unary_hvp(func)
-        return self._compute_nary_hvp(func, argument)
+    def compute_hessian(self, function, arguments):
+        flattened_arguments = flatten_arguments(arguments)
+        if len(flattened_arguments) == 1:
+            return autograd.hessian_tensor_product(function)
+        if len(arguments) == 1:
+            @functools.wraps(function)
+            def unary_function(arguments):
+                return function(*arguments)
+            return autograd.hessian_tensor_product(unary_function)
+
+        @functools.wraps(function)
+        def unary_function(arguments):
+            return function(*arguments)
+        hessian_vector_product = self._compute_nary_hessian_vector_product(
+            unary_function)
+
+        @functools.wraps(hessian_vector_product)
+        def wrapper(point, vector):
+            return hessian_vector_product(
+                flatten_arguments(point, signature=arguments),
+                flatten_arguments(vector, signature=arguments))
+
+        return group_return_values(wrapper, arguments)
 
 
 Autograd = make_tracing_backend_decorator(_AutogradBackend)
