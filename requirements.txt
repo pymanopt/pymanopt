@@ -2,5 +2,5 @@ autograd>=1.2
 numpy>=1.16
 scipy
 tensorflow==1.15
-torch==0.4.1.post2
+torch>=1.0
 theano
