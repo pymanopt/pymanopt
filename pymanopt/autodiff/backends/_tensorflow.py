@@ -78,12 +78,11 @@ class _TensorFlowBackend(Backend):
                 return self._session.run(gradient[0], feed_dict)
             return unary_gradient
 
-        def nary_gradient(arguments):
-            flattened_inputs = flatten_arguments(arguments)
+        def nary_gradient(points):
             feed_dict = {
-                argument: array
-                for argument, array in zip(flattened_arguments,
-                                           flattened_inputs)
+                argument: point
+                for argument, point in zip(flattened_arguments,
+                                           flatten_arguments(points))
             }
             return self._session.run(gradient, feed_dict)
         return group_return_values(nary_gradient, arguments)
@@ -143,7 +142,7 @@ class _TensorFlowBackend(Backend):
 
         def nary_hessian(points, vectors):
             feed_dict = {
-                argument: array for argument, array in zip(
+                argument: value for argument, value in zip(
                     itertools.chain(flattened_arguments, zeros),
                     itertools.chain(flatten_arguments(points),
                                     flatten_arguments(vectors)))
