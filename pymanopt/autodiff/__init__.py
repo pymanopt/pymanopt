@@ -55,8 +55,7 @@ class Function(object):
 
 
 def make_tracing_backend_decorator(Backend):
-    """
-    Creates a function decorator which can either by used as
+    """Creates a function decorator which can either by used as
 
       @decorator
       def f(x):
@@ -64,7 +63,7 @@ def make_tracing_backend_decorator(Backend):
 
     or
 
-      @decorator(3, 1)
+      @decorator(("x", "y", "z"), "w")
       def f(x, y, z, w):
           pass
 
