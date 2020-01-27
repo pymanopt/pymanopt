@@ -1,6 +1,7 @@
 """
 Module containing functions to differentiate functions using tensorflow.
 """
+import itertools
 
 try:
     import tensorflow as tf
@@ -48,10 +49,9 @@ class _TensorFlowBackend(Backend):
     def compile_function(self, function, arguments):
         flattened_arguments = flatten_arguments(arguments)
         if len(flattened_arguments) == 1:
-            # TODO(nkoep): don't use single-letter variable names.
-            def unary_function(x):
+            def unary_function(point):
                 (argument,) = flattened_arguments
-                feed_dict = {argument: x}
+                feed_dict = {argument: point}
                 return self._session.run(function, feed_dict)
             return unary_function
 
@@ -73,8 +73,8 @@ class _TensorFlowBackend(Backend):
         if len(flattened_arguments) == 1:
             (argument,) = flattened_arguments
 
-            def unary_gradient(x):
-                feed_dict = {argument: x}
+            def unary_gradient(point):
+                feed_dict = {argument: point}
                 return self._session.run(gradient[0], feed_dict)
             return unary_gradient
 
@@ -89,23 +89,31 @@ class _TensorFlowBackend(Backend):
         return group_return_values(nary_gradient, arguments)
 
     @Backend._assert_backend_available
-    def compute_hessian(self, objective, argument):
-        if not isinstance(argument, list):
-            argA = tf.zeros_like(argument)
-            tfhess = _hessian_vector_product(objective, [argument], [argA])
+    def compute_hessian(self, function, arguments):
+        flattened_arguments = flatten_arguments(arguments)
 
-            def hess(x, a):
-                feed_dict = {argument: x, argA: a}
-                return self._session.run(tfhess[0], feed_dict)
-        else:
-            argA = [tf.zeros_like(arg) for arg in argument]
-            tfhess = _hessian_vector_product(objective, argument, argA)
+        if len(flattened_arguments) == 1:
+            (argument,) = flattened_arguments
+            zeros = tf.zeros_like(argument)
+            hessian = _hessian_vector_product(function, [argument], [zeros])
 
-            def hess(x, a):
-                feed_dict = {i: d for i, d in zip(argument+argA, x+a)}
-                return self._session.run(tfhess, feed_dict)
+            def unary_hessian(point, vector):
+                feed_dict = {argument: point, zeros: vector}
+                return self._session.run(hessian[0], feed_dict)
+            return unary_hessian
 
-        return hess
+        zeros = [tf.zeros_like(argument) for argument in flattened_arguments]
+        hessian = _hessian_vector_product(function, flattened_arguments, zeros)
+
+        def nary_hessian(points, vectors):
+            feed_dict = {
+                argument: array for argument, array in zip(
+                    itertools.chain(flattened_arguments, zeros),
+                    itertools.chain(flatten_arguments(points),
+                                    flatten_arguments(vectors)))
+            }
+            return self._session.run(hessian, feed_dict)
+        return group_return_values(nary_hessian, arguments)
 
 
 TensorFlow = make_graph_backend_decorator(_TensorFlowBackend)

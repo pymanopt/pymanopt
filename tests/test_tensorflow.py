@@ -4,7 +4,6 @@ import unittest
 import numpy as np
 import numpy.random as rnd
 import numpy.testing as np_testing
-from numpy import float32, float64
 import tensorflow as tf
 
 from pymanopt.function import TensorFlow
@@ -19,7 +18,7 @@ class TestArity(unittest.TestCase):
         """
         n = 10
 
-        x = tf.Variable(tf.zeros(n, dtype=float64))
+        x = tf.Variable(tf.zeros(n, dtype=tf.float64), name="x")
 
         @TensorFlow(x)
         def cost(x):
@@ -33,8 +32,6 @@ class TestArity(unittest.TestCase):
         # Test whether gradient accepts single argument.
         egrad = cost.compute_gradient()
         np_testing.assert_allclose(2 * x, egrad(x))
-
-        return
 
         # Test the Hessian.
         u = rnd.randn(n)
@@ -53,8 +50,8 @@ class TestArity(unittest.TestCase):
         """
         n = 10
 
-        x = tf.Variable(tf.zeros(n, dtype=float64))
-        y = tf.Variable(tf.zeros(n, dtype=float64))
+        x = tf.Variable(tf.zeros(n, dtype=tf.float64), name="x")
+        y = tf.Variable(tf.zeros(n, dtype=tf.float64), name="y")
 
         @TensorFlow(x, y)
         def cost(x, y):
@@ -80,8 +77,6 @@ class TestArity(unittest.TestCase):
         np_testing.assert_allclose(g_x, y)
         np_testing.assert_allclose(g_y, x)
 
-        return
-
         # Test the Hessian-vector product.
         u = rnd.randn(n)
         v = rnd.randn(n)
@@ -106,9 +101,9 @@ class TestArity(unittest.TestCase):
         """
         n = 10
 
-        x = tf.Variable(tf.zeros(n, dtype=float64))
-        y = tf.Variable(tf.zeros(n, dtype=float64))
-        z = tf.Variable(tf.zeros(n, dtype=float64))
+        x = tf.Variable(tf.zeros(n, dtype=tf.float64), name="x")
+        y = tf.Variable(tf.zeros(n, dtype=tf.float64), name="y")
+        z = tf.Variable(tf.zeros(n, dtype=tf.float64), name="z")
 
         @TensorFlow((x, y), z)
         def cost(x, y, z):
@@ -139,13 +134,13 @@ class TestArity(unittest.TestCase):
         np_testing.assert_allclose(g_xy[1], 1)
         np_testing.assert_allclose(g_z, 3 * z ** 2)
 
-        return
-
         # Test the Hessian.
         u, v, w = [rnd.randn(n) for _ in range(3)]
 
         ehess = cost.compute_hessian()
         h = ehess(((x, y), z), ((u, v), w))
+
+        print(h)
 
         # Test the type composition of the return value.
         self.assertIsInstance(h, (list, tuple))
@@ -165,7 +160,7 @@ class TestVector(unittest.TestCase):
     def setUp(self):
         n = self.n = 15
 
-        self.X = X = tf.Variable(tf.zeros([n], dtype=float64))
+        self.X = X = tf.Variable(tf.zeros([n], dtype=tf.float64))
 
         @TensorFlow(X)
         def cost(X):
@@ -215,10 +210,15 @@ class TestMatrix(unittest.TestCase):
         n = self.n = 15
 
         self.X = X = tf.Variable(tf.zeros([m, n]))
-        self.cost = tf.exp(tf.reduce_sum(X**2))
 
-        Y = self.Y = rnd.randn(m, n).astype(float32) * 1e-3
-        A = self.A = rnd.randn(m, n).astype(float32) * 1e-3
+        @TensorFlow(X)
+        def cost(X):
+            return tf.exp(tf.reduce_sum(X ** 2))
+
+        self.cost = cost
+
+        Y = self.Y = rnd.randn(m, n).astype(tf.float32) * 1e-3
+        A = self.A = rnd.randn(m, n).astype(tf.float32) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
@@ -245,7 +245,7 @@ class TestMatrix(unittest.TestCase):
                                    rtol=1e-4)
 
     def test_grad(self):
-        grad = self.cost.compute_gradient(self.cost, self.X)
+        grad = self.cost.compute_gradient()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y),
                                    rtol=1e-4)
 
@@ -264,10 +264,15 @@ class TestTensor3(unittest.TestCase):
         n3 = self.n3 = 5
 
         self.X = X = tf.Variable(tf.zeros([n1, n2, n3]))
-        self.cost = tf.exp(tf.reduce_sum(X**2))
 
-        Y = self.Y = rnd.randn(n1, n2, n3).astype(float32) * 1e-3
-        A = self.A = rnd.randn(n1, n2, n3).astype(float32) * 1e-3
+        @TensorFlow(X)
+        def cost(X):
+            return tf.exp(tf.reduce_sum(X ** 2))
+
+        self.cost = cost
+
+        Y = self.Y = rnd.randn(n1, n2, n3).astype(tf.float32) * 1e-3
+        A = self.A = rnd.randn(n1, n2, n3).astype(tf.float32) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
@@ -317,18 +322,22 @@ class TestMixed(unittest.TestCase):
         x = tf.Variable(tf.zeros([n1]))
         y = tf.Variable(tf.zeros([n2, n3]))
         z = tf.Variable(tf.zeros([n4, n5, n6]))
-        f = (tf.exp(tf.reduce_sum(x**2)) + tf.exp(tf.reduce_sum(y**2)) +
-             tf.exp(tf.reduce_sum(z**2)))
 
-        self.cost = f
+        @TensorFlow(x, y, z)
+        def cost(x, y, z):
+            return (tf.exp(tf.reduce_sum(x ** 2)) +
+                    tf.exp(tf.reduce_sum(y ** 2)) +
+                    tf.exp(tf.reduce_sum(z ** 2)))
+
+        self.cost = cost
         self.arg = [x, y, z]
 
-        self.y = y = (rnd.randn(n1).astype(float32) * 1e-3,
-                      rnd.randn(n2, n3).astype(float32) * 1e-3,
-                      rnd.randn(n4, n5, n6).astype(float32) * 1e-3)
-        self.a = a = (rnd.randn(n1).astype(float32) * 1e-3,
-                      rnd.randn(n2, n3).astype(float32) * 1e-3,
-                      rnd.randn(n4, n5, n6).astype(float32) * 1e-3)
+        self.y = y = (rnd.randn(n1).astype(tf.float32) * 1e-3,
+                      rnd.randn(n2, n3).astype(tf.float32) * 1e-3,
+                      rnd.randn(n4, n5, n6).astype(tf.float32) * 1e-3)
+        self.a = a = (rnd.randn(n1).astype(tf.float32) * 1e-3,
+                      rnd.randn(n2, n3).astype(tf.float32) * 1e-3,
+                      rnd.randn(n4, n5, n6).astype(tf.float32) * 1e-3)
 
         self.correct_cost = (np.exp(np.sum(y[0]**2)) +
                              np.exp(np.sum(y[1]**2)) +

@@ -49,8 +49,7 @@ class _TheanoBackend(Backend):
         with respect to 'arguments'.
         """
         flattened_arguments = flatten_arguments(arguments)
-        # For functions expecting one argument, make sure we don't return the
-        # gradient evaluated at some point as a singleton tuple.
+
         if len(flattened_arguments) == 1:
             (argument,) = flattened_arguments
             gradient = T.grad(function, argument)
@@ -111,6 +110,7 @@ class _TheanoBackend(Backend):
         vector.
         """
         flattened_arguments = flatten_arguments(arguments)
+
         if len(flattened_arguments) == 1:
             (argument,) = flattened_arguments
             gradient = T.grad(function, argument)
@@ -122,9 +122,9 @@ class _TheanoBackend(Backend):
             gradients, flattened_arguments)
 
         @functools.wraps(hessian_vector_product)
-        def wrapper(point, vector):
-            return hessian_vector_product(*flatten_arguments(point),
-                                          *flatten_arguments(vector))
+        def wrapper(points, vectors):
+            return hessian_vector_product(*flatten_arguments(points),
+                                          *flatten_arguments(vectors))
         return group_return_values(wrapper, arguments)
 
 
