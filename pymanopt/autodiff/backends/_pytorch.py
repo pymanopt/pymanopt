@@ -1,6 +1,8 @@
 """
 Module containing functions to differentiate functions using pytorch.
 """
+import functools
+
 try:
     import torch
 except ImportError:
@@ -10,6 +12,7 @@ else:
 
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
+from ...tools import flatten_arguments
 
 
 class _PyTorchBackend(Backend):
@@ -18,33 +21,52 @@ class _PyTorchBackend(Backend):
 
     @staticmethod
     def is_available():
-        return torch is not None and torch.__version__ >= "0.4"
+        return torch is not None and torch.__version__ >= "0.4.1"
 
     @Backend._assert_backend_available
-    def is_compatible(self, objective, argument):
-        return callable(objective)
+    def is_compatible(self, function, arguments):
+        return callable(function)
 
-    # TODO: Add support for product manifolds.
-
-    @Backend._assert_backend_available
-    def compile_function(self, objective, argument):
-        def func(x):
-            # PyTorch unboxes scalars automatically, but we still need to get a
-            # numpy view of the data when "compiling" gradients or Hessians.
-            f = objective(torch.from_numpy(x))
+    @staticmethod
+    def _torch_tensor_to_numpy_ndarray(function):
+        """Decorator which tries to transform the return value of a function
+        from a torch tensor to a numpy array.
+        """
+        @functools.wraps(function)
+        def wrapper(*args):
+            value = function(*args)
             try:
-                return f.numpy()
+                return value.numpy()
             except AttributeError:
                 pass
-            return f
-        return func
+            return value
+        return wrapper
 
     @Backend._assert_backend_available
-    def compute_gradient(self, objective, argument):
+    def compile_function(self, function, arguments):
+        flattened_arguments = flatten_arguments(arguments)
+        if len(flattened_arguments) == 1:
+            @self._torch_tensor_to_numpy_ndarray
+            @functools.wraps(function)
+            def unary_function(argument):
+                return function(torch.from_numpy(argument))
+            return unary_function
+
+        @self._torch_tensor_to_numpy_ndarray
+        @functools.wraps(function)
+        def nary_function(arguments):
+            return function(
+                *map(torch.from_numpy, flatten_arguments(arguments)))
+        return nary_function
+
+    @Backend._assert_backend_available
+    def compute_gradient(self, function, arguments):
+        raise NotImplementedError
+
         def grad(x):
             x = torch.from_numpy(x)
             x.requires_grad_(True)
-            objective(x).backward()
+            function(x).backward()
             g = x.grad
             # See above.
             try:
@@ -56,6 +78,8 @@ class _PyTorchBackend(Backend):
 
     @Backend._assert_backend_available
     def compute_hessian(self, objective, argument):
+        raise NotImplementedError
+
         def hess(x, v):
             x = torch.from_numpy(x)
             v = torch.from_numpy(v)
