@@ -12,7 +12,7 @@ else:
 
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
-from ...tools import flatten_arguments
+from ...tools import flatten_arguments, group_return_values
 
 
 class _PyTorchBackend(Backend):
@@ -27,54 +27,44 @@ class _PyTorchBackend(Backend):
     def is_compatible(self, function, arguments):
         return callable(function)
 
-    @staticmethod
-    def _torch_tensor_to_numpy_ndarray(function):
-        """Decorator which tries to transform the return value of a function
-        from a torch tensor to a numpy array.
-        """
-        @functools.wraps(function)
-        def wrapper(*args):
-            value = function(*args)
-            try:
-                return value.numpy()
-            except AttributeError:
-                pass
-            return value
-        return wrapper
-
     @Backend._assert_backend_available
     def compile_function(self, function, arguments):
         flattened_arguments = flatten_arguments(arguments)
+
         if len(flattened_arguments) == 1:
-            @self._torch_tensor_to_numpy_ndarray
             @functools.wraps(function)
             def unary_function(argument):
-                return function(torch.from_numpy(argument))
+                return function(torch.from_numpy(argument)).numpy()
             return unary_function
 
-        @self._torch_tensor_to_numpy_ndarray
         @functools.wraps(function)
         def nary_function(arguments):
             return function(
-                *map(torch.from_numpy, flatten_arguments(arguments)))
+                *map(torch.from_numpy, flatten_arguments(arguments))).numpy()
         return nary_function
 
     @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
-        raise NotImplementedError
+        flattened_arguments = flatten_arguments(arguments)
 
-        def grad(x):
-            x = torch.from_numpy(x)
-            x.requires_grad_(True)
-            function(x).backward()
-            g = x.grad
-            # See above.
-            try:
-                return g.numpy()
-            except AttributeError:
-                pass
-            return g
-        return grad
+        if len(flattened_arguments) == 1:
+            @functools.wraps(function)
+            def unary_gradient(argument):
+                torch_argument = torch.from_numpy(argument)
+                torch_argument.requires_grad_(True)
+                function(torch_argument).backward()
+                return torch_argument.grad.numpy()
+            return unary_gradient
+
+        def nary_gradient(arguments):
+            torch_arguments = []
+            for argument in flatten_arguments(arguments):
+                torch_argument = torch.from_numpy(argument)
+                torch_argument.requires_grad_()
+                torch_arguments.append(torch_argument)
+            function(*torch_arguments).backward()
+            return [argument.grad.numpy() for argument in torch_arguments]
+        return group_return_values(nary_gradient, arguments)
 
     @Backend._assert_backend_available
     def compute_hessian(self, objective, argument):
