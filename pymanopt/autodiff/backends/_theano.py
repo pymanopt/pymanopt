@@ -24,6 +24,8 @@ class _TheanoBackend(Backend):
 
     @Backend._assert_backend_available
     def is_compatible(self, function, arguments):
+        if not isinstance(function, T.TensorVariable):
+            return False
         flattened_arguments = flatten_arguments(arguments)
         return all([isinstance(argument, T.TensorVariable)
                     for argument in flattened_arguments])
