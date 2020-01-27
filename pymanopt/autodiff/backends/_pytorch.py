@@ -52,6 +52,8 @@ class _PyTorchBackend(Backend):
                 torch_argument = torch.from_numpy(argument)
                 torch_argument.requires_grad_(True)
                 function(torch_argument).backward()
+                if torch_argument.grad is None:
+                    return torch.zeros(torch_argument.shape).numpy()
                 return torch_argument.grad.numpy()
             return unary_gradient
 
@@ -62,7 +64,13 @@ class _PyTorchBackend(Backend):
                 torch_argument.requires_grad_()
                 torch_arguments.append(torch_argument)
             function(*torch_arguments).backward()
-            return [argument.grad.numpy() for argument in torch_arguments]
+            return_values = []
+            for argument in torch_arguments:
+                if argument.grad is None:
+                    return_values.append(torch.zeros(argument.shape).numpy())
+                else:
+                    return_values.append(argument.grad.numpy())
+            return return_values
         return group_return_values(nary_gradient, arguments)
 
     @Backend._assert_backend_available
