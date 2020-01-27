@@ -41,7 +41,7 @@ class TestArity(unittest.TestCase):
         optimizing over the FixedRankEmbedded manifold where points on the
         manifold are represented as a 3-tuple making up a truncated SVD.
         """
-        @Autograd(("x", "y"))
+        @Autograd
         def cost(x, y):
             return np.dot(x, y)
 

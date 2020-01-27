@@ -46,7 +46,7 @@ class TestArity(unittest.TestCase):
         x = T.vector()
         y = T.vector()
 
-        @Theano((x, y))
+        @Theano(x, y)
         def cost(x, y):
             return T.dot(x, y)
 

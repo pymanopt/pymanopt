@@ -45,7 +45,7 @@ class _TheanoBackend(Backend):
 
     @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
-        """Returns a compiled function computing the gradient of 'function'
+        """Returns a compiled function computing the gradient of `function`
         with respect to 'arguments'.
         """
         flattened_arguments = flatten_arguments(arguments)
