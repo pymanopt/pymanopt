@@ -18,7 +18,7 @@ class TestArity(unittest.TestCase):
         """
         n = 10
 
-        x = tf.Variable(tf.zeros(n, dtype=tf.float64), name="x")
+        x = tf.Variable(tf.zeros(n, dtype=np.float64), name="x")
 
         @TensorFlow(x)
         def cost(x):
@@ -50,8 +50,8 @@ class TestArity(unittest.TestCase):
         """
         n = 10
 
-        x = tf.Variable(tf.zeros(n, dtype=tf.float64), name="x")
-        y = tf.Variable(tf.zeros(n, dtype=tf.float64), name="y")
+        x = tf.Variable(tf.zeros(n, dtype=np.float64), name="x")
+        y = tf.Variable(tf.zeros(n, dtype=np.float64), name="y")
 
         @TensorFlow(x, y)
         def cost(x, y):
@@ -101,9 +101,9 @@ class TestArity(unittest.TestCase):
         """
         n = 10
 
-        x = tf.Variable(tf.zeros(n, dtype=tf.float64), name="x")
-        y = tf.Variable(tf.zeros(n, dtype=tf.float64), name="y")
-        z = tf.Variable(tf.zeros(n, dtype=tf.float64), name="z")
+        x = tf.Variable(tf.zeros(n, dtype=np.float64), name="x")
+        y = tf.Variable(tf.zeros(n, dtype=np.float64), name="y")
+        z = tf.Variable(tf.zeros(n, dtype=np.float64), name="z")
 
         @TensorFlow((x, y), z)
         def cost(x, y, z):
@@ -140,8 +140,6 @@ class TestArity(unittest.TestCase):
         ehess = cost.compute_hessian()
         h = ehess(((x, y), z), ((u, v), w))
 
-        print(h)
-
         # Test the type composition of the return value.
         self.assertIsInstance(h, (list, tuple))
         self.assertEqual(len(h), 2)
@@ -160,7 +158,7 @@ class TestVector(unittest.TestCase):
     def setUp(self):
         n = self.n = 15
 
-        self.X = X = tf.Variable(tf.zeros([n], dtype=tf.float64))
+        self.X = X = tf.Variable(tf.zeros([n], dtype=np.float64))
 
         @TensorFlow(X)
         def cost(X):
@@ -217,8 +215,8 @@ class TestMatrix(unittest.TestCase):
 
         self.cost = cost
 
-        Y = self.Y = rnd.randn(m, n).astype(tf.float32) * 1e-3
-        A = self.A = rnd.randn(m, n).astype(tf.float32) * 1e-3
+        Y = self.Y = rnd.randn(m, n).astype(np.float32) * 1e-3
+        A = self.A = rnd.randn(m, n).astype(np.float32) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
@@ -271,8 +269,8 @@ class TestTensor3(unittest.TestCase):
 
         self.cost = cost
 
-        Y = self.Y = rnd.randn(n1, n2, n3).astype(tf.float32) * 1e-3
-        A = self.A = rnd.randn(n1, n2, n3).astype(tf.float32) * 1e-3
+        Y = self.Y = rnd.randn(n1, n2, n3).astype(np.float32) * 1e-3
+        A = self.A = rnd.randn(n1, n2, n3).astype(np.float32) * 1e-3
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y ** 2))
@@ -332,12 +330,12 @@ class TestMixed(unittest.TestCase):
         self.cost = cost
         self.arg = [x, y, z]
 
-        self.y = y = (rnd.randn(n1).astype(tf.float32) * 1e-3,
-                      rnd.randn(n2, n3).astype(tf.float32) * 1e-3,
-                      rnd.randn(n4, n5, n6).astype(tf.float32) * 1e-3)
-        self.a = a = (rnd.randn(n1).astype(tf.float32) * 1e-3,
-                      rnd.randn(n2, n3).astype(tf.float32) * 1e-3,
-                      rnd.randn(n4, n5, n6).astype(tf.float32) * 1e-3)
+        self.y = y = (rnd.randn(n1).astype(np.float32) * 1e-3,
+                      rnd.randn(n2, n3).astype(np.float32) * 1e-3,
+                      rnd.randn(n4, n5, n6).astype(np.float32) * 1e-3)
+        self.a = a = (rnd.randn(n1).astype(np.float32) * 1e-3,
+                      rnd.randn(n2, n3).astype(np.float32) * 1e-3,
+                      rnd.randn(n4, n5, n6).astype(np.float32) * 1e-3)
 
         self.correct_cost = (np.exp(np.sum(y[0]**2)) +
                              np.exp(np.sum(y[1]**2)) +
