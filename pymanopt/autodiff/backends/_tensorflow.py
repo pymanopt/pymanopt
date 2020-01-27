@@ -45,17 +45,24 @@ class _TensorFlowBackend(Backend):
                     for argument in flattened_arguments])
 
     @Backend._assert_backend_available
-    def compile_function(self, objective, argument):
-        if not isinstance(argument, list):
-            def func(x):
+    def compile_function(self, function, arguments):
+        flattened_arguments = flatten_arguments(arguments)
+        if len(flattened_arguments) == 1:
+            def unary_function(x):
+                (argument,) = flattened_arguments
                 feed_dict = {argument: x}
-                return self._session.run(objective, feed_dict)
-        else:
-            def func(x):
-                feed_dict = {i: d for i, d in zip(argument, x)}
-                return self._session.run(objective, feed_dict)
+                return self._session.run(function, feed_dict)
+            return unary_function
 
-        return func
+        def nary_function(xs):
+            flattened_input = flatten_arguments(xs)
+            feed_dict = {
+                argument: x
+                for argument, x in zip(flattened_arguments, flattened_input)
+            }
+            return self._session.run(function, feed_dict)
+
+        return nary_function
 
     @Backend._assert_backend_available
     def compute_gradient(self, objective, argument):
