@@ -409,3 +409,21 @@ class TestMixed(unittest.TestCase):
         for k in range(len(hess(self.y, self.a))):
             np_testing.assert_allclose(self.correct_hess[k],
                                        hess(self.y, self.a)[k], rtol=1e-4)
+
+
+class TestUserProvidedSession(unittest.TestCase):
+    def test_user_session(self):
+        class MockSession:
+            def run(*args, **kwargs):
+                raise RuntimeError
+
+        n = 10
+
+        x = tf.Variable(tf.zeros(n, dtype=tf.float64), name="x")
+
+        @TensorFlow(x, session=MockSession())
+        def cost(x):
+            return tf.reduce_sum(x)
+
+        with self.assertRaises(RuntimeError):
+            cost(rnd.randn(n))
