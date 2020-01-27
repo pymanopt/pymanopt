@@ -24,7 +24,7 @@ def main():
     # (b) Definition of a cost function (here using autograd.numpy)
     #       Note that the cost must be defined in terms of u, s and vt, where
     #       X = u * diag(s) * vt.
-    @pymanopt.function.Autograd(("u", "s", "vt"))
+    @pymanopt.function.Autograd
     def cost(u, s, vt):
         delta = 0.5
         X = np.dot(np.dot(u, np.diag(s)), vt)
