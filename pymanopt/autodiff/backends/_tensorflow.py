@@ -5,11 +5,6 @@ import itertools
 
 try:
     import tensorflow as tf
-    try:
-        from tensorflow.python.ops.gradients import _hessian_vector_product
-    except ImportError:
-        from tensorflow.python.ops.gradients_impl import \
-            _hessian_vector_product
 except ImportError:
     tf = None
 
@@ -65,10 +60,15 @@ class _TensorFlowBackend(Backend):
             return self._session.run(function, feed_dict)
         return nary_function
 
+    @staticmethod
+    def _gradients(function, arguments):
+        return tf.gradients(function, arguments,
+                            unconnected_gradients=tf.UnconnectedGradients.ZERO)
+
     @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
         flattened_arguments = flatten_arguments(arguments)
-        gradient = tf.gradients(function, flattened_arguments)
+        gradient = self._gradients(function, flattened_arguments)
 
         if len(flattened_arguments) == 1:
             (argument,) = flattened_arguments
@@ -88,6 +88,40 @@ class _TensorFlowBackend(Backend):
             return self._session.run(gradient, feed_dict)
         return group_return_values(nary_gradient, arguments)
 
+    @staticmethod
+    def _hessian_vector_product(function, arguments, vectors):
+        """Multiply the Hessian of `function` w.r.t. `arguments` by `vectors`.
+
+        Notes
+        -----
+        The implementation of this method is based on TensorFlow's
+        '_hessian_vector_product' [1]_. The (private) '_hessian_vector_product'
+        TensorFlow function replaces unconnected gradients with None, which
+        results in exceptions when a function depends linearly on one of its
+        inputs. Instead, we here allow unconnected gradients to be zero.
+
+        References
+        ----------
+        [1] https://git.io/JvmrW
+        """
+
+        # Validate the input
+        num_arguments = len(arguments)
+        assert len(vectors) == num_arguments
+
+        # First backprop
+        gradients = _TensorFlowBackend._gradients(function, arguments)
+
+        assert len(gradients) == num_arguments
+        element_wise_products = [
+            tf.multiply(gradient, tf.stop_gradient(vector))
+            for gradient, vector in zip(gradients, vectors)
+            if gradient is not None
+        ]
+
+        # Second backprop
+        return _TensorFlowBackend._gradients(element_wise_products, arguments)
+
     @Backend._assert_backend_available
     def compute_hessian(self, function, arguments):
         flattened_arguments = flatten_arguments(arguments)
@@ -95,7 +129,8 @@ class _TensorFlowBackend(Backend):
         if len(flattened_arguments) == 1:
             (argument,) = flattened_arguments
             zeros = tf.zeros_like(argument)
-            hessian = _hessian_vector_product(function, [argument], [zeros])
+            hessian = self._hessian_vector_product(
+                function, [argument], [zeros])
 
             def unary_hessian(point, vector):
                 feed_dict = {argument: point, zeros: vector}
@@ -103,7 +138,8 @@ class _TensorFlowBackend(Backend):
             return unary_hessian
 
         zeros = [tf.zeros_like(argument) for argument in flattened_arguments]
-        hessian = _hessian_vector_product(function, flattened_arguments, zeros)
+        hessian = self._hessian_vector_product(
+            function, flattened_arguments, zeros)
 
         def nary_hessian(points, vectors):
             feed_dict = {
