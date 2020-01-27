@@ -39,6 +39,10 @@ class _AutogradBackend(Backend):
         flattened_arguments = flatten_arguments(arguments)
         if len(flattened_arguments) == 1:
             return autograd.grad(function)
+        # XXX: This path handles cases where the signature hint looks like
+        #      '@Autograd(("x", "y"))'. This is potentially unnecessary as
+        #      tests also pass if we instead use '@Autograd'. Revisit this
+        #      once we ported more complicated examples to autograd.
         if len(arguments) == 1:
             # TODO(nkoep): unpack_arguments should be able to handle this so we
             #              can merge the two paths.
