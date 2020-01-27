@@ -14,6 +14,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_graph_backend_decorator
+from ...tools import flatten_arguments
 
 
 class _TensorFlowBackend(Backend):
@@ -36,18 +37,12 @@ class _TensorFlowBackend(Backend):
         return tf is not None
 
     @Backend._assert_backend_available
-    def is_compatible(self, objective, argument):
-        if isinstance(objective, tf.Tensor):
-            if (argument is None or not
-                isinstance(argument, tf.Variable) and not
-                all([isinstance(arg, tf.Variable)
-                     for arg in argument])):
-                raise ValueError(
-                    "Tensorflow backend requires an argument (or sequence of "
-                    "arguments) with respect to which compilation is to be "
-                    "carried out")
-            return True
-        return False
+    def is_compatible(self, function, arguments):
+        if not isinstance(function, tf.Tensor):
+            return False
+        flattened_arguments = flatten_arguments(arguments)
+        return all([isinstance(argument, tf.Variable)
+                    for argument in flattened_arguments])
 
     @Backend._assert_backend_available
     def compile_function(self, objective, argument):
