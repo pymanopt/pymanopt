@@ -68,7 +68,6 @@ class _AutogradBackend(Backend):
             return np.sum(
                 [np.tensordot(gradients[i], vector, axes=vector.ndim)
                  for i, vector in enumerate(vectors)])
-
         return autograd.grad(vector_dot_grad)
 
     @Backend._assert_backend_available
@@ -93,7 +92,6 @@ class _AutogradBackend(Backend):
             return hessian_vector_product(
                 flatten_arguments(point, signature=arguments),
                 flatten_arguments(vector, signature=arguments))
-
         return group_return_values(wrapper, arguments)
 
 

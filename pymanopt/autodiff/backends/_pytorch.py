@@ -48,7 +48,6 @@ class _PyTorchBackend(Backend):
         flattened_arguments = flatten_arguments(arguments)
 
         if len(flattened_arguments) == 1:
-            @functools.wraps(function)
             def unary_gradient(argument):
                 torch_argument = torch.from_numpy(argument)
                 torch_argument.requires_grad_(True)
@@ -67,24 +66,47 @@ class _PyTorchBackend(Backend):
         return group_return_values(nary_gradient, arguments)
 
     @Backend._assert_backend_available
-    def compute_hessian(self, objective, argument):
-        raise NotImplementedError
+    def compute_hessian(self, function, arguments):
+        flattened_arguments = flatten_arguments(arguments)
 
-        def hess(x, v):
-            x = torch.from_numpy(x)
-            v = torch.from_numpy(v)
-            x.requires_grad_(True)
-            fx = objective(x)
-            grad_fx = autograd.grad(fx, x, create_graph=True)[0]
-            grad_fx.matmul(v).backward()
-            g = x.grad
-            # See above.
-            try:
-                return g.numpy()
-            except AttributeError:
-                pass
-            return g
-        return hess
+        if len(flattened_arguments) == 1:
+            def unary_hessian(point, vector):
+                x = torch.from_numpy(point)
+                v = torch.from_numpy(vector)
+                x.requires_grad_(True)
+                fx = function(x)
+                (grad_fx,) = autograd.grad(fx, x, create_graph=True,
+                                           allow_unused=True)
+                (grad_fx * v).sum().backward()
+                if x.grad is None:
+                    return torch.zeros(x.shape).numpy()
+                return x.grad.numpy()
+            return unary_hessian
+
+        def nary_hessian(points, vectors):
+            xs = []
+            for point in flatten_arguments(points):
+                x = torch.from_numpy(point)
+                x.requires_grad_(True)
+                xs.append(x)
+            vs = [torch.from_numpy(vector)
+                  for vector in flatten_arguments(vectors)]
+            fx = function(*xs)
+            fx.requires_grad_(True)
+            gradients = autograd.grad(fx, xs, create_graph=True,
+                                      allow_unused=True)
+            dot_product = 0
+            for gradient, vector in zip(gradients, vs):
+                dot_product += (gradient * vector).sum()
+            dot_product.backward()
+            return_values = []
+            for x in xs:
+                if x.grad is None:
+                    return_values.append(torch.zeros(x.shape).numpy())
+                else:
+                    return_values.append(x.grad.numpy())
+            return return_values
+        return group_return_values(nary_hessian, arguments)
 
 
 PyTorch = make_tracing_backend_decorator(_PyTorchBackend)
