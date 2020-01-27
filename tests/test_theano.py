@@ -153,7 +153,7 @@ class TestVector(unittest.TestCase):
 
         @Theano(X)
         def cost(X):
-            return T.exp(T.sum(X**2))
+            return T.exp(T.sum(X ** 2))
         self.cost = cost
 
         n = self.n = 15
@@ -221,7 +221,7 @@ class TestMatrix(unittest.TestCase):
 
         @Theano(X)
         def cost(X):
-            return T.exp(T.sum(X**2))
+            return T.exp(T.sum(X ** 2))
         self.cost = cost
 
         m = self.m = 10
@@ -276,7 +276,7 @@ class TestMatrix(unittest.TestCase):
 
         @Theano(X)
         def cost(X):
-            return T.exp(T.sum(X**2))
+            return T.exp(T.sum(X ** 2))
 
         # And check that all is still well
         hess = cost.compute_hessian()
@@ -293,7 +293,7 @@ class TestTensor3(unittest.TestCase):
 
         @Theano(X)
         def cost(X):
-            return T.exp(T.sum(X**2))
+            return T.exp(T.sum(X ** 2))
         self.cost = cost
 
         n1 = self.n1 = 3
@@ -348,7 +348,7 @@ class TestTensor3(unittest.TestCase):
 
         @Theano(X)
         def cost(X):
-            return T.exp(T.sum(X**2))
+            return T.exp(T.sum(X ** 2))
 
         # And check that all is still well
         hess = cost.compute_hessian()
@@ -366,7 +366,7 @@ class TestMixed(unittest.TestCase):
         x = T.vector()
         y = T.matrix()
         z = T.tensor3()
-        f = T.exp(T.sum(x**2)) + T.exp(T.sum(y**2)) + T.exp(T.sum(z**2))
+        f = T.exp(T.sum(x ** 2)) + T.exp(T.sum(y ** 2)) + T.exp(T.sum(z ** 2))
 
         @Theano(x, y, z)
         def cost(x, y, z):
@@ -383,9 +383,9 @@ class TestMixed(unittest.TestCase):
         self.y = y = (rnd.randn(n1), rnd.randn(n2, n3), rnd.randn(n4, n5, n6))
         self.a = a = (rnd.randn(n1), rnd.randn(n2, n3), rnd.randn(n4, n5, n6))
 
-        self.correct_cost = (np.exp(np.sum(y[0]**2)) +
-                             np.exp(np.sum(y[1]**2)) +
-                             np.exp(np.sum(y[2]**2)))
+        self.correct_cost = (np.exp(np.sum(y[0] ** 2)) +
+                             np.exp(np.sum(y[1] ** 2)) +
+                             np.exp(np.sum(y[2] ** 2)))
 
         # CALCULATE CORRECT GRAD
         g1 = 2 * y[0] * np.exp(np.sum(y[0] ** 2))
@@ -466,7 +466,7 @@ class TestMixed(unittest.TestCase):
         x = T.vector()
         y = T.matrix()
         z = T.tensor3()
-        f = T.exp(T.sum(x**2)) + T.exp(T.sum(y**2)) + T.exp(T.sum(z**2))
+        f = T.exp(T.sum(x ** 2)) + T.exp(T.sum(y ** 2)) + T.exp(T.sum(z ** 2))
 
         # Alternative use of `Theano' in decorator notation.
         cost = Theano(x, y, z)(lambda x, y, z: f)
