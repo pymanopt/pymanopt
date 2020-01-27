@@ -14,7 +14,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_graph_backend_decorator
-from ...tools import flatten_arguments
+from ...tools import flatten_arguments, group_return_values
 
 
 class _TensorFlowBackend(Backend):
@@ -48,39 +48,45 @@ class _TensorFlowBackend(Backend):
     def compile_function(self, function, arguments):
         flattened_arguments = flatten_arguments(arguments)
         if len(flattened_arguments) == 1:
+            # TODO(nkoep): don't use single-letter variable names.
             def unary_function(x):
                 (argument,) = flattened_arguments
                 feed_dict = {argument: x}
                 return self._session.run(function, feed_dict)
             return unary_function
 
-        def nary_function(xs):
-            flattened_input = flatten_arguments(xs)
+        def nary_function(arguments):
+            flattened_inputs = flatten_arguments(arguments)
             feed_dict = {
-                argument: x
-                for argument, x in zip(flattened_arguments, flattened_input)
+                argument: array
+                for argument, array in zip(flattened_arguments,
+                                           flattened_inputs)
             }
             return self._session.run(function, feed_dict)
-
         return nary_function
 
     @Backend._assert_backend_available
-    def compute_gradient(self, objective, argument):
-        """
-        Compute the gradient of 'objective' and return as a function.
-        """
-        tfgrad = tf.gradients(objective, argument)
+    def compute_gradient(self, function, arguments):
+        flattened_arguments = flatten_arguments(arguments)
+        gradient = tf.gradients(function, flattened_arguments)
 
-        if not isinstance(argument, list):
-            def grad(x):
+        if len(flattened_arguments) == 1:
+            (argument,) = flattened_arguments
+
+            def unary_gradient(x):
                 feed_dict = {argument: x}
-                return self._session.run(tfgrad[0], feed_dict)
-        else:
-            def grad(x):
-                feed_dict = {i: d for i, d in zip(argument, x)}
-                return self._session.run(tfgrad, feed_dict)
+                return self._session.run(gradient[0], feed_dict)
+            return unary_gradient
 
-        return grad
+        def nary_gradient(arguments):
+            flattened_inputs = flatten_arguments(arguments)
+            feed_dict = {
+                argument: array
+                for argument, array in zip(flattened_arguments,
+                                           flattened_inputs)
+            }
+            return self._session.run(gradient, feed_dict)
+        return group_return_values(nary_gradient, arguments)
 
     @Backend._assert_backend_available
     def compute_hessian(self, objective, argument):

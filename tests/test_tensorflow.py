@@ -30,11 +30,11 @@ class TestArity(unittest.TestCase):
         # Test whether cost function accepts single argument.
         self.assertAlmostEqual(np.sum(x ** 2), cost(x))
 
-        return
-
         # Test whether gradient accepts single argument.
         egrad = cost.compute_gradient()
         np_testing.assert_allclose(2 * x, egrad(x))
+
+        return
 
         # Test the Hessian.
         u = rnd.randn(n)
@@ -68,8 +68,6 @@ class TestArity(unittest.TestCase):
         # one argument, in this case a tuple of vectors.
         self.assertAlmostEqual(np.dot(x, y), cost((x, y)))
 
-        return
-
         egrad = cost.compute_gradient()
         g = egrad((x, y))
         # Since we treat the tuple (x, y) as one argument, we expect the result
@@ -81,6 +79,8 @@ class TestArity(unittest.TestCase):
         g_x, g_y = g
         np_testing.assert_allclose(g_x, y)
         np_testing.assert_allclose(g_y, x)
+
+        return
 
         # Test the Hessian-vector product.
         u = rnd.randn(n)
@@ -122,8 +122,6 @@ class TestArity(unittest.TestCase):
         # y) and a single vector z.
         self.assertAlmostEqual(np.sum(x ** 2 + y + z ** 3), cost(((x, y), z)))
 
-        return
-
         egrad = cost.compute_gradient()
         g = egrad(((x, y), z))
         # We defined the cost function signature to treat the first two
@@ -140,6 +138,8 @@ class TestArity(unittest.TestCase):
         np_testing.assert_allclose(g_xy[0], 2 * x)
         np_testing.assert_allclose(g_xy[1], 1)
         np_testing.assert_allclose(g_z, 3 * z ** 2)
+
+        return
 
         # Test the Hessian.
         u, v, w = [rnd.randn(n) for _ in range(3)]

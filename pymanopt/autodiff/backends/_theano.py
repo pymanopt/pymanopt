@@ -125,7 +125,6 @@ class _TheanoBackend(Backend):
         def wrapper(point, vector):
             return hessian_vector_product(*flatten_arguments(point),
                                           *flatten_arguments(vector))
-
         return group_return_values(wrapper, arguments)
 
 
