@@ -27,12 +27,10 @@ install:
 
 script:
   - >
-    nosetests tests
-    --nologcapture
-    --verbosity=2
+    nose2 tests
+    --verbose
     --with-coverage
-    --cover-package=pymanopt
-  - flake8 examples pymanopt tests setup.py
+  - flake8 examples pymanopt setup.py tests
 
 after_success:
   - coveralls
