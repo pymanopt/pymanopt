@@ -65,7 +65,7 @@ class TestVector(_backend_tests.TestVector):
 
         n = self.n
 
-        self.X = X = tf.Variable(tf.zeros(n, dtype=np.float64))
+        X = tf.Variable(tf.zeros(n, dtype=np.float64))
 
         @TensorFlow(X)
         def cost(X):
@@ -74,57 +74,20 @@ class TestVector(_backend_tests.TestVector):
         self.cost = cost
 
 
-class TestMatrix(unittest.TestCase):
+class TestMatrix(_backend_tests.TestMatrix):
     def setUp(self):
-        m = self.m = 10
-        n = self.n = 15
+        super().setUp()
 
-        self.X = X = tf.Variable(tf.zeros([m, n]))
+        m = self.m
+        n = self.n
+
+        X = tf.Variable(tf.zeros([m, n], dtype=np.float64))
 
         @TensorFlow(X)
         def cost(X):
             return tf.exp(tf.reduce_sum(X ** 2))
 
         self.cost = cost
-
-        Y = self.Y = rnd.randn(m, n).astype(np.float32) * 1e-3
-        A = self.A = rnd.randn(m, n).astype(np.float32) * 1e-3
-
-        # Calculate correct cost and grad...
-        self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
-
-        # ... and hess
-        # First form hessian tensor H (4th order)
-        Y1 = Y.reshape(m, n, 1, 1)
-        Y2 = Y.reshape(1, 1, m, n)
-
-        # Create an m x n x m x n array with diag[i,j,k,l] == 1 iff
-        # (i == k and j == l), this is a 'diagonal' tensor.
-        diag = np.eye(m * n).reshape(m, n, m, n)
-
-        H = np.exp(np.sum(Y ** 2)) * (4 * Y1 * Y2 + 2 * diag)
-
-        # Then 'right multiply' H by A
-        Atensor = A.reshape(1, 1, m, n)
-
-        self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
-
-    def test_compile(self):
-        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y),
-                                   rtol=1e-4)
-
-    def test_grad(self):
-        grad = self.cost.compute_gradient()
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y),
-                                   rtol=1e-4)
-
-    def test_hessian(self):
-        hess = self.cost.compute_hessian()
-
-        # Now test hess
-        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A),
-                                   rtol=1e-4)
 
 
 class TestTensor3(unittest.TestCase):

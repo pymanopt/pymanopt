@@ -87,53 +87,17 @@ class TestVector(_backend_tests.TestVector):
         T.exp.R_op = Rop
 
 
-class TestMatrix(unittest.TestCase):
+class TestMatrix(_backend_tests.TestMatrix):
     def setUp(self):
+        super().setUp()
+
         X = T.matrix()
 
         @Theano(X)
         def cost(X):
             return T.exp(T.sum(X ** 2))
+
         self.cost = cost
-
-        m = self.m = 10
-        n = self.n = 15
-
-        Y = self.Y = rnd.randn(m, n)
-        A = self.A = rnd.randn(m, n)
-
-        # Calculate correct cost and grad...
-        self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
-
-        # ... and hess
-        # First form hessian tensor H (4th order)
-        Y1 = Y.reshape(m, n, 1, 1)
-        Y2 = Y.reshape(1, 1, m, n)
-
-        # Create an m x n x m x n array with diag[i,j,k,l] == 1 iff
-        # (i == k and j == l), this is a 'diagonal' tensor.
-        diag = np.eye(m * n).reshape(m, n, m, n)
-
-        H = np.exp(np.sum(Y ** 2)) * (4 * Y1 * Y2 + 2 * diag)
-
-        # Then 'right multiply' H by A
-        Atensor = A.reshape(1, 1, m, n)
-
-        self.correct_hess = np.sum(H * Atensor, axis=(2, 3))
-
-    def test_compile(self):
-        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
-
-    def test_grad(self):
-        grad = self.cost.compute_gradient()
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
-
-    def test_hessian(self):
-        hess = self.cost.compute_hessian()
-
-        # Now test hess
-        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
     def test_hessian_no_Rop(self):
         # Break the Rop in T.exp
