@@ -43,6 +43,14 @@ class _PyTorchBackend(Backend):
                 *map(torch.from_numpy, flatten_arguments(arguments))).numpy()
         return nary_function
 
+    def _sanitize_gradient(self, tensor):
+        if tensor.grad is None:
+            return torch.zeros(tensor.shape, dtype=tensor.dtype).numpy()
+        return tensor.grad.numpy()
+
+    def _sanitize_gradients(self, tensors):
+        return list(map(self._sanitize_gradient, tensors))
+
     @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
         flattened_arguments = flatten_arguments(arguments)
@@ -52,9 +60,7 @@ class _PyTorchBackend(Backend):
                 torch_argument = torch.from_numpy(argument)
                 torch_argument.requires_grad_(True)
                 function(torch_argument).backward()
-                if torch_argument.grad is None:
-                    return torch.zeros(torch_argument.shape).numpy()
-                return torch_argument.grad.numpy()
+                return self._sanitize_gradient(torch_argument)
             return unary_gradient
 
         def nary_gradient(arguments):
@@ -64,13 +70,7 @@ class _PyTorchBackend(Backend):
                 torch_argument.requires_grad_()
                 torch_arguments.append(torch_argument)
             function(*torch_arguments).backward()
-            return_values = []
-            for argument in torch_arguments:
-                if argument.grad is None:
-                    return_values.append(torch.zeros(argument.shape).numpy())
-                else:
-                    return_values.append(argument.grad.numpy())
-            return return_values
+            return self._sanitize_gradients(torch_arguments)
         return group_return_values(nary_gradient, arguments)
 
     @Backend._assert_backend_available
@@ -86,9 +86,7 @@ class _PyTorchBackend(Backend):
                 (grad_fx,) = autograd.grad(fx, x, create_graph=True,
                                            allow_unused=True)
                 (grad_fx * v).sum().backward()
-                if x.grad is None:
-                    return torch.zeros(x.shape).numpy()
-                return x.grad.numpy()
+                return self._sanitize_gradient(x)
             return unary_hessian
 
         def nary_hessian(points, vectors):
@@ -107,13 +105,7 @@ class _PyTorchBackend(Backend):
             for gradient, vector in zip(gradients, vs):
                 dot_product += (gradient * vector).sum()
             dot_product.backward()
-            return_values = []
-            for x in xs:
-                if x.grad is None:
-                    return_values.append(torch.zeros(x.shape).numpy())
-                else:
-                    return_values.append(x.grad.numpy())
-            return return_values
+            return self._sanitize_gradients(xs)
         return group_return_values(nary_hessian, arguments)
 
 
