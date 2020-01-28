@@ -1,21 +1,20 @@
-import unittest
-
 import numpy as np
-from numpy import random as rnd
-import numpy.testing as np_testing
 import theano.tensor as T
+from numpy import random as rnd, testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import Sphere
 
+from ._test import TestCase
 
-class TestProblem(unittest.TestCase):
+
+class TestProblem(TestCase):
     def setUp(self):
-        self.X = X = T.vector()
+        X = T.vector()
 
         @pymanopt.function.Theano(X)
         def cost(X):
-            return T.exp(T.sum(X**2))
+            return T.exp(T.sum(X ** 2))
 
         self.cost = cost
 

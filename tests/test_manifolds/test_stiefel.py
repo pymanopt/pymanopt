@@ -1,18 +1,17 @@
-import unittest
-
+import autograd.numpy as npa
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
-from pymanopt.manifolds import Stiefel
 import pymanopt.tools.testing as testing
+from pymanopt.manifolds import Stiefel
 from pymanopt.tools.multi import multisym, multiprod, multitransp, multieye
 
-import autograd.numpy as npa
+from .._test import TestCase
 
 
-class TestSingleStiefelManifold(unittest.TestCase):
+class TestSingleStiefelManifold(TestCase):
     def setUp(self):
         self.m = m = 20
         self.n = n = 2
@@ -136,7 +135,7 @@ class TestSingleStiefelManifold(unittest.TestCase):
         # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiStiefelManifold(unittest.TestCase):
+class TestMultiStiefelManifold(TestCase):
     def setUp(self):
         self.m = m = 10
         self.n = n = 3

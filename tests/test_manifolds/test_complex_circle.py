@@ -1,9 +1,9 @@
-import unittest
-
 from pymanopt.manifolds import ComplexCircle
 
+from .._test import TestCase
 
-class TestComplexCircleManifold(unittest.TestCase):
+
+class TestComplexCircleManifold(TestCase):
     def setUp(self):
         self.dimension = 50
         self.man = ComplexCircle(self.dimension)

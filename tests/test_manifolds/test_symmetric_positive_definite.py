@@ -1,17 +1,16 @@
-import unittest
-
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
-
-import scipy as sp
+from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiprod, multisym, multitransp
 
+from .._test import TestCase
 
-class TestSingleSymmetricPositiveDefiniteManifold(unittest.TestCase):
+
+class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
     def setUp(self):
         self.n = n = 15
         self.man = SymmetricPositiveDefinite(n)
@@ -45,7 +44,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(unittest.TestCase):
 
         # Test alternative implementation
         # from Eq 6.14 of "Positive definite matrices"
-        d = np.sqrt((np.log(sp.linalg.eigvalsh(x, y))**2).sum())
+        d = np.sqrt((np.log(eigvalsh(x, y))**2).sum())
         np_testing.assert_almost_equal(man.dist(x, y), d)
 
         # check that dist is consistent with log
@@ -66,7 +65,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(unittest.TestCase):
         man = self.man
         x = man.rand()
         u = man.randvec(x)
-        e = sp.linalg.expm(la.solve(x, u))
+        e = expm(la.solve(x, u))
 
         np_testing.assert_allclose(multiprod(x, e), man.exp(x, u))
         u = u * 1e-6
@@ -103,7 +102,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(unittest.TestCase):
         np_testing.assert_allclose(man.log(x, y), u)
 
 
-class TestMultiSymmetricPositiveDefiniteManifold(unittest.TestCase):
+class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
     def setUp(self):
         self.n = n = 10
         self.k = k = 3
@@ -220,7 +219,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(unittest.TestCase):
         u = man.randvec(x)
         e = np.zeros((self.k, self.n, self.n))
         for i in range(self.k):
-            e[i] = sp.linalg.expm(la.solve(x[i], u[i]))
+            e[i] = expm(la.solve(x[i], u[i]))
         np_testing.assert_allclose(multiprod(x, e), man.exp(x, u))
         u = u * 1e-6
         np_testing.assert_allclose(man.exp(x, u), x + u)

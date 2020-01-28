@@ -1,5 +1,4 @@
-import unittest
-
+import autograd.numpy as npa
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
@@ -9,10 +8,10 @@ from pymanopt.manifolds import Grassmann
 from pymanopt.tools.multi import multiprod, multitransp, multieye, multisym
 import pymanopt.tools.testing as testing
 
-import autograd.numpy as npa
+from .._test import TestCase
 
 
-class TestSingleGrassmannManifold(unittest.TestCase):
+class TestSingleGrassmannManifold(TestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
@@ -97,7 +96,7 @@ class TestSingleGrassmannManifold(unittest.TestCase):
         # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiGrassmannManifold(unittest.TestCase):
+class TestMultiGrassmannManifold(TestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2

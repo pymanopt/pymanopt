@@ -1,13 +1,13 @@
-import unittest
+from pymanopt.manifolds import PSDFixedRank
 
-from pymanopt.manifolds import Elliptope
+from .._test import TestCase
 
 
-class TestElliptopeManifold(unittest.TestCase):
+class TestPSDFixedRankManifold(TestCase):
     def test_constructor(self):
         n = 50
         k = 10
-        Elliptope(n, k)
+        PSDFixedRank(n, k)
 
     # def test_dim(self):
 
