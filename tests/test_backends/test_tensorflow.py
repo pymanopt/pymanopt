@@ -59,52 +59,19 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
         self.cost = cost
 
 
-class TestVector(unittest.TestCase):
+class TestVector(_backend_tests.TestVector):
     def setUp(self):
-        n = self.n = 15
+        super().setUp()
 
-        self.X = X = tf.Variable(tf.zeros([n], dtype=np.float64))
+        n = self.n
+
+        self.X = X = tf.Variable(tf.zeros(n, dtype=np.float64))
 
         @TensorFlow(X)
         def cost(X):
             return tf.exp(tf.reduce_sum(X ** 2))
 
         self.cost = cost
-
-        Y = self.Y = rnd.randn(n) * 1e-3
-        A = self.A = rnd.randn(n) * 1e-3
-
-        # Calculate correct cost and grad...
-        self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
-
-        # ... and hess
-        # First form hessian matrix H
-        # Convert Y and A into matrices (column vectors)
-        Ymat = np.matrix(Y)
-        Amat = np.matrix(A)
-
-        diag = np.eye(n)
-
-        H = np.exp(np.sum(Y ** 2)) * (4 * Ymat.T.dot(Ymat) + 2 * diag)
-
-        # Then 'right multiply' H by A
-        self.correct_hess = np.array(Amat.dot(H)).squeeze()
-
-    def test_compile(self):
-        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y),
-                                   rtol=1e-4)
-
-    def test_grad(self):
-        grad = self.cost.compute_gradient()
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y), rtol=1e-4)
-
-    def test_hessian(self):
-        hess = self.cost.compute_hessian()
-
-        # Now test hess
-        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A),
-                                   rtol=1e-4)
 
 
 class TestMatrix(unittest.TestCase):

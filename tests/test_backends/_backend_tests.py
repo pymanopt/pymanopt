@@ -151,3 +151,43 @@ class TestNaryParameterGrouping(unittest.TestCase):
         np_testing.assert_allclose(h_xy[0], 2 * u)
         np_testing.assert_allclose(h_xy[1], 0)
         np_testing.assert_allclose(h_z, 6 * z * w)
+
+
+class TestVector(unittest.TestCase):
+    def setUp(self):
+        np.seterr(all='raise')
+
+        n = self.n = 15
+
+        Y = self.Y = rnd.randn(n)
+        A = self.A = rnd.randn(n)
+
+        # Calculate correct cost and grad...
+        self.correct_cost = np.exp(np.sum(Y ** 2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+
+        # ... and hess
+        # First form hessian matrix H
+        # Convert Y and A into matrices (row vectors)
+        Ymat = np.matrix(Y)
+        Amat = np.matrix(A)
+
+        diag = np.eye(n)
+
+        H = np.exp(np.sum(Y ** 2)) * (4 * Ymat.T.dot(Ymat) + 2 * diag)
+
+        # Then 'left multiply' H by A
+        self.correct_hess = np.squeeze(np.array(Amat.dot(H)))
+
+    def test_compile(self):
+        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
+
+    def test_grad(self):
+        grad = self.cost.compute_gradient()
+        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
+
+    def test_hessian(self):
+        hess = self.cost.compute_hessian()
+
+        # Now test hess
+        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))

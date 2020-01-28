@@ -44,8 +44,6 @@ class _AutogradBackend(Backend):
         #      tests also pass if we instead use '@Autograd'. Revisit this
         #      once we ported more complicated examples to autograd.
         if len(arguments) == 1:
-            # TODO(nkoep): unpack_arguments should be able to handle this so we
-            #              can merge the two paths.
             @functools.wraps(function)
             def unary_function(arguments):
                 return function(*arguments)
@@ -54,11 +52,11 @@ class _AutogradBackend(Backend):
         # Turn `function` into a function accepting a single argument which
         # gets unpacked when the function is called. This is necessary for
         # autograd to compute and return the gradient for each input in the
-        # input tuple/list.
+        # input tuple/list and return it in the same grouping.
         # In order to unpack arguments correctly, we also need a signature hint
         # in the form of `arguments`. This is because autograd wraps tuples and
-        # lists in a `SequenceBox' which is not a subclass of tuple or list so
-        # we cannot detect nested tuples as call arguments.
+        # lists in `SequenceBox` types which are not derived from tuple or list
+        # so we cannot detect nested arguments automatically.
         unary_function = unpack_arguments(function, signature=arguments)
         return autograd.grad(unary_function)
 
