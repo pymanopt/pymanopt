@@ -6,7 +6,6 @@ import numpy.random as rnd
 import tensorflow as tf
 
 from pymanopt.function import TensorFlow
-
 from . import _backend_tests
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

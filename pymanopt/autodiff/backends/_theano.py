@@ -11,7 +11,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_graph_backend_decorator
-from ...tools import unpack_arguments, flatten_arguments, group_return_values
+from ...tools import flatten_arguments, group_return_values, unpack_arguments
 
 
 class _TheanoBackend(Backend):

@@ -1,7 +1,6 @@
 import numpy as np
-import numpy.random as rnd
-import numpy.linalg as la
 import theano.tensor as T
+from numpy import linalg as la, random as rnd
 
 import pymanopt
 from pymanopt.manifolds import Sphere

@@ -1,7 +1,6 @@
 import autograd.numpy as np
 
 from pymanopt.function import Autograd
-
 from . import _backend_tests
 
 

@@ -3,9 +3,9 @@ from copy import deepcopy
 
 import numpy as np
 
+from pymanopt import tools
 from pymanopt.solvers.linesearch import LineSearchAdaptive
 from pymanopt.solvers.solver import Solver
-from pymanopt import tools
 
 
 # TODO: Use Python's enum module.

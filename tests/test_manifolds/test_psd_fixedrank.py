@@ -1,5 +1,4 @@
 from pymanopt.manifolds import PSDFixedRank
-
 from .._test import TestCase
 
 

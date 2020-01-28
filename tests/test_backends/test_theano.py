@@ -1,8 +1,7 @@
+import numpy.testing as np_testing
 import theano.tensor as T
-from numpy import testing as np_testing
 
 from pymanopt.function import Theano
-
 from . import _backend_tests
 
 

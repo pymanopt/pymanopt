@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.linalg import expm
 
-from pymanopt.tools.multi import multiprod, multitransp, multisym
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.tools.multi import multiprod, multisym, multitransp
 
 
 class Stiefel(EuclideanEmbeddedSubmanifold):

@@ -1,5 +1,4 @@
 from pymanopt.manifolds import Elliptope
-
 from .._test import TestCase
 
 

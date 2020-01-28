@@ -1,11 +1,8 @@
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
+from numpy import linalg as la, random as rnd, testing as np_testing
 
 from pymanopt.manifolds import Symmetric
 from pymanopt.tools.multi import multisym
-
 from .._test import TestCase
 
 

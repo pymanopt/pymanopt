@@ -3,8 +3,8 @@ import time
 import numpy as np
 
 import pymanopt
-from pymanopt.solvers.steepest_descent import SteepestDescent
 from pymanopt.solvers.solver import Solver
+from pymanopt.solvers.steepest_descent import SteepestDescent
 
 
 # TODO(nkoep): Check if a suitable autodiff backend is available, and solve the
