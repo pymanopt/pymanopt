@@ -65,53 +65,15 @@ class TestMatrix(_backend_tests.TestMatrix):
         self.cost = cost
 
 
-class TestTensor3(unittest.TestCase):
+class TestTensor3(_backend_tests.TestTensor3):
     def setUp(self):
-        np.seterr(all='raise')
+        super().setUp()
 
         @PyTorch
         def cost(X):
             return torch.exp(torch.sum(X ** 2))
+
         self.cost = cost
-
-        n1 = self.n1 = 3
-        n2 = self.n2 = 4
-        n3 = self.n3 = 5
-
-        Y = self.Y = rnd.randn(n1, n2, n3)
-        A = self.A = rnd.randn(n1, n2, n3)
-
-        # Calculate correct cost and grad...
-        self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
-
-        # ... and hess
-        # First form hessian tensor H (6th order)
-        Y1 = Y.reshape(n1, n2, n3, 1, 1, 1)
-        Y2 = Y.reshape(1, 1, 1, n1, n2, n3)
-
-        # Create an n1 x n2 x n3 x n1 x n2 x n3 diagonal tensor
-        diag = np.eye(n1 * n2 * n3).reshape(n1, n2, n3, n1, n2, n3)
-
-        H = np.exp(np.sum(Y ** 2)) * (4 * Y1 * Y2 + 2 * diag)
-
-        # Then 'right multiply' H by A
-        Atensor = A.reshape(1, 1, 1, n1, n2, n3)
-
-        self.correct_hess = np.sum(H * Atensor, axis=(3, 4, 5))
-
-    def test_compile(self):
-        np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
-
-    def test_grad(self):
-        grad = self.cost.compute_gradient()
-        np_testing.assert_allclose(self.correct_grad, grad(self.Y))
-
-    def test_hessian(self):
-        hess = self.cost.compute_hessian()
-
-        # Now test hess
-        np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
 
 class TestMixed(unittest.TestCase):
