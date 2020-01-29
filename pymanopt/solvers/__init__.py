@@ -1,10 +1,10 @@
-__all__ = (
+__all__ = [
     "ConjugateGradient",
     "NelderMead",
     "ParticleSwarm",
     "SteepestDescent",
     "TrustRegions"
-)
+]
 
 from .conjugate_gradient import ConjugateGradient
 from .nelder_mead import NelderMead

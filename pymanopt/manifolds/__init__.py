@@ -1,4 +1,4 @@
-__all__ = (
+__all__ = [
     "ComplexCircle",
     "Elliptope",
     "Euclidean",
@@ -16,7 +16,7 @@ __all__ = (
     "Stiefel",
     "Symmetric",
     "SymmetricPositiveDefinite"
-)
+]
 
 from .complex_circle import ComplexCircle
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
