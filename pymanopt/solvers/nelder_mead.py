@@ -63,7 +63,7 @@ class NelderMead(Solver):
             - contraction (0.5)
                 Factor by which to contract the reflected simplex
         """
-        super(NelderMead, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals
         self._maxiter = maxiter

@@ -35,7 +35,7 @@ class ConjugateGradient(Solver):
             - linesearch (LineSearchAdaptive)
                 The linesearch method to used.
         """
-        super(ConjugateGradient, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._beta_type = beta_type
         self._orth_value = orth_value

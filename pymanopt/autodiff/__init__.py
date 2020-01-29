@@ -3,7 +3,7 @@ import inspect
 from ..tools import flatten_arguments
 
 
-class Function(object):
+class Function:
     def __str__(self):
         return "Function <{}>".format(self._backend)
 
