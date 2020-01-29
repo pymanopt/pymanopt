@@ -81,10 +81,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # Calculate the actual solution by normalizing the columns of A.
     X = matrix / la.norm(matrix, axis=0)[np.newaxis, :]
 
+    # Print information about the solution.
     if not quiet:
-        # Print information about the solution.
-        print('')
-        print("solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
+        print("Solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
         print("Frobenius-error: %f" % la.norm(X - Xopt))
 
 
