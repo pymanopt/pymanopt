@@ -58,7 +58,7 @@ class _PyTorchBackend(Backend):
         if len(flattened_arguments) == 1:
             def unary_gradient(argument):
                 torch_argument = torch.from_numpy(argument)
-                torch_argument.requires_grad_(True)
+                torch_argument.requires_grad_()
                 function(torch_argument).backward()
                 return self._sanitize_gradient(torch_argument)
             return unary_gradient
@@ -81,7 +81,7 @@ class _PyTorchBackend(Backend):
             def unary_hessian(point, vector):
                 x = torch.from_numpy(point)
                 v = torch.from_numpy(vector)
-                x.requires_grad_(True)
+                x.requires_grad_()
                 fx = function(x)
                 (grad_fx,) = autograd.grad(fx, x, create_graph=True,
                                            allow_unused=True)
@@ -93,12 +93,12 @@ class _PyTorchBackend(Backend):
             xs = []
             for point in flatten_arguments(points):
                 x = torch.from_numpy(point)
-                x.requires_grad_(True)
+                x.requires_grad_()
                 xs.append(x)
             vs = [torch.from_numpy(vector)
                   for vector in flatten_arguments(vectors)]
             fx = function(*xs)
-            fx.requires_grad_(True)
+            fx.requires_grad_()
             gradients = autograd.grad(fx, xs, create_graph=True,
                                       allow_unused=True)
             dot_product = 0
