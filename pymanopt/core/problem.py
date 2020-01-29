@@ -59,6 +59,16 @@ class Problem:
 
         self.verbosity = verbosity
 
+    def __setattr__(self, key, value):
+        if hasattr(self, key):
+            if (key == "verbosity"
+                    and (not isinstance(value, int) or value < 0)):
+                raise ValueError(
+                    "Verbosity level must be an nonnegative integer")
+            if key == "manifold":
+                raise AttributeError("Cannot override 'manifold' attribute")
+        super().__setattr__(key, value)
+
     @property
     def egrad(self):
         if self._egrad is None:
