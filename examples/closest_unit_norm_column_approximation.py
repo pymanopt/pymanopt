@@ -21,9 +21,6 @@ SUPPORTED_BACKENDS = (
 
 
 def create_cost_function_and_euclidean_gradient(backend, A):
-    """Returns the matrix with unit-norm columns that is closests to A w.r.t.
-    the Frobenius norm.
-    """
     m, n = A.shape
 
     egrad = None

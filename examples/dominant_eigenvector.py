@@ -21,11 +21,6 @@ SUPPORTED_BACKENDS = (
 
 
 def create_cost_function_and_euclidean_gradient(backend, A):
-    """Returns the dominant eigenvector of the symmetric matrix A.
-
-    Note: For the same A, this should yield the same as the dominant invariant
-    subspace example with p = 1.
-    """
     m, n = A.shape
     assert m == n, "matrix must be square"
     assert np.allclose(np.sum(A - A.T), 0), "matrix must be symmetric"
