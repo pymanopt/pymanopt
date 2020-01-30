@@ -1,9 +1,7 @@
 import numpy as np
-import numpy.linalg as la
-import numpy.testing as np_testing
+from numpy import linalg as la, testing as np_testing
 
 from pymanopt.manifolds import FixedRankEmbedded
-
 from .._test import TestCase
 
 

@@ -3,13 +3,12 @@ Module containing manifolds of n-dimensional rotations
 """
 
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
+from numpy import linalg as la, random as rnd
 from scipy.linalg import expm, logm
 from scipy.special import comb
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multiprod, multitransp, multisym, multiskew
+from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
 
 
 class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):

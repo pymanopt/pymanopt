@@ -26,7 +26,7 @@ install:
   - pip install -q -r requirements.txt
 
 script:
-  - flake8 examples pymanopt setup.py tests
+  - flake8 docs/conf.py examples pymanopt setup.py tests
   - >
     nose2 tests
     --verbose

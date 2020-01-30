@@ -1,13 +1,9 @@
-import autograd.numpy as npa
-import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
+import autograd.numpy as np
+from numpy import linalg as la, random as rnd, testing as np_testing
 
-import pymanopt.tools.testing as testing
 from pymanopt.manifolds import Stiefel
-from pymanopt.tools.multi import multisym, multiprod, multitransp, multieye
-
+from pymanopt.tools import testing
+from pymanopt.tools.multi import multieye, multiprod, multisym, multitransp
 from .._test import TestCase
 
 
@@ -17,8 +13,8 @@ class TestSingleStiefelManifold(TestCase):
         self.n = n = 2
         self.k = k = 1
         self.man = Stiefel(m, n, k=k)
-        self.proj = lambda x, u: u - npa.dot(x, npa.dot(x.T, u) +
-                                             npa.dot(u.T, x)) / 2
+        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u) +
+                                            np.dot(u.T, x)) / 2
 
     def test_dim(self):
         assert self.man.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
