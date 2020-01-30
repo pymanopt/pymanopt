@@ -20,7 +20,7 @@ SUPPORTED_BACKENDS = (
 )
 
 
-def create_cost_function_and_euclidean_gradient(backend, A):
+def create_cost_egrad(backend, A):
     m, n = A.shape
     egrad = None
 
@@ -65,7 +65,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = rnd.randn(n, n)
     matrix = 0.5 * (matrix + matrix.T)
 
-    cost, egrad = create_cost_function_and_euclidean_gradient(backend, matrix)
+    cost, egrad = create_cost_egrad(backend, matrix)
     manifold = Sphere(n)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
     if quiet:
