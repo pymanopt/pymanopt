@@ -22,7 +22,6 @@ SUPPORTED_BACKENDS = (
 
 def create_cost_function_and_euclidean_gradient(backend, A):
     m, n = A.shape
-
     egrad = None
 
     if backend == "Autograd":
@@ -75,13 +74,15 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     solver = ConjugateGradient()
     Xopt = solver.solve(problem)
 
+    if quiet:
+        return
+
     # Calculate the actual solution by normalizing the columns of A.
     X = matrix / la.norm(matrix, axis=0)[np.newaxis, :]
 
     # Print information about the solution.
-    if not quiet:
-        print("Solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
-        print("Frobenius-error: %f" % la.norm(X - Xopt))
+    print("Solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
+    print("Frobenius-error: %f" % la.norm(X - Xopt))
 
 
 if __name__ == "__main__":
