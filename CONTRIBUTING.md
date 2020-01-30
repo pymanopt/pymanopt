@@ -26,7 +26,7 @@ travis-ci build. To prevent adding commits which fail to adhere to the PEP8
 guidelines, we include a [pre-commit][pre-commit] config, which immediately
 invokes flake8 on all files staged for commit when running `git commit`. To
 enable the hook, simply run `pre-commit install` after installing `pre-commit`
-either manually via `pip` as part of `dev-requirements.txt`.
+either manually via `pip` or as part of `dev-requirements.txt`.
 
 Push a feature branch to your fork and [submit a pull request][pr]. Refer to
 [this guide][commits] on how to write good commit messages.

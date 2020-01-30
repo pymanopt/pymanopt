@@ -7,7 +7,6 @@ will only be correct if the manifold is a submanifold of Euclidean space,
 that is if the projection is an orthogonal projection onto the tangent space.
 """
 import numpy as np
-
 from autograd import grad, jacobian
 
 

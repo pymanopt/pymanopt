@@ -80,7 +80,7 @@ class TrustRegions(Solver):
         Also included is the Truncated (Steihaug-Toint) Conjugate-Gradient
         algorithm, based on tCG.m from the Manopt MATLAB package.
         """
-        super(TrustRegions, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.miniter = miniter
         self.kappa = kappa

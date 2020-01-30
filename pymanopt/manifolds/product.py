@@ -7,6 +7,7 @@ from pymanopt.tools import ndarraySequenceMixin
 class Product(Manifold):
     """Product manifold, i.e., the cartesian product of multiple manifolds."""
 
+    # TODO: Change the argument to *manifold so we can do Product(man1, man2).
     def __init__(self, manifolds):
         self._manifolds = manifolds
         name = ("Product manifold: {:s}".format(

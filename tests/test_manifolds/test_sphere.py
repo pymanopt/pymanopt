@@ -1,26 +1,22 @@
-import unittest
 import warnings
 
-import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
+import autograd.numpy as np
+from numpy import linalg as la, random as rnd, testing as np_testing
 
-import autograd.numpy as npa
-
-from pymanopt.manifolds import (Sphere, SphereSubspaceIntersection,
-                                SphereSubspaceComplementIntersection)
-import pymanopt.tools.testing as testing
+from pymanopt.manifolds import (Sphere, SphereSubspaceComplementIntersection,
+                                SphereSubspaceIntersection)
+from pymanopt.tools import testing
+from .._test import TestCase
 
 
-class TestSphereManifold(unittest.TestCase):
+class TestSphereManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
         self.man = Sphere(m, n)
 
         # For automatic testing of ehess2rhess
-        self.proj = lambda x, u: u - npa.tensordot(x, u, np.ndim(u)) * x
+        self.proj = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
 
     def test_dim(self):
         assert self.man.dim == self.m * self.n - 1
@@ -33,14 +29,14 @@ class TestSphereManifold(unittest.TestCase):
         x = s.rand()
         y = s.rand()
         correct_dist = np.arccos(np.tensordot(x, y))
-        np.testing.assert_almost_equal(correct_dist, s.dist(x, y))
+        np_testing.assert_almost_equal(correct_dist, s.dist(x, y))
 
     def test_inner(self):
         s = self.man
         x = s.rand()
         u = s.randvec(x)
         v = s.randvec(x)
-        np.testing.assert_almost_equal(np.sum(u * v), s.inner(x, u, v))
+        np_testing.assert_almost_equal(np.sum(u * v), s.inner(x, u, v))
 
     def test_proj(self):
         #  Construct a random point X on the manifold.
@@ -147,7 +143,7 @@ class TestSphereManifold(unittest.TestCase):
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
+class TestSphereSubspaceIntersectionManifold(TestCase):
     def setUp(self):
         self.n = 2
         # Defines the 1-sphere intersected with the 1-dimensional subspace
@@ -194,7 +190,7 @@ class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
         self.assertEqual(man.dim, dim)
 
 
-class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
+class TestSphereSubspaceComplementIntersectionManifold(TestCase):
     def setUp(self):
         self.n = 2
         # Define the 1-sphere intersected with the 1-dimensional subspace

@@ -1,5 +1,5 @@
-import time
 import abc
+import time
 
 
 class Solver:

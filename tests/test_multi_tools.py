@@ -1,17 +1,13 @@
-import unittest
-
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
+from numpy import linalg as la, random as rnd, testing as np_testing
+from scipy.linalg import expm, logm
 
-from scipy.linalg import logm, expm
-
-from pymanopt.tools.multi import (multiprod, multitransp, multieye,
-                                  multisym, multilog, multiexp)
+from pymanopt.tools.multi import (multiexp, multieye, multilog, multiprod,
+                                  multisym, multitransp)
+from ._test import TestCase
 
 
-class TestMulti(unittest.TestCase):
+class TestMulti(TestCase):
     def setUp(self):
         self.m = 40
         self.n = 50
