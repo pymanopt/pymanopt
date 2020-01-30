@@ -73,7 +73,6 @@ if __name__ == "__main__":
             "CONTRIBUTORS",
             "LICENSE",
             "MAINTAINERS",
-            "README.md",
-            "VERSION"
+            "README.md"
         ]
     )
