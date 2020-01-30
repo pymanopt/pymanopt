@@ -1,8 +1,7 @@
 import warnings
 
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
+from numpy import linalg as la, random as rnd
 from scipy.linalg import expm
 # Workaround for SciPy bug: https://github.com/scipy/scipy/pull/8082
 try:
@@ -11,7 +10,7 @@ except ImportError:
     from scipy.linalg import solve_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold, Manifold
-from pymanopt.tools.multi import multiprod, multitransp, multisym, multilog
+from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
 
 
 class _RetrAsExpMixin:

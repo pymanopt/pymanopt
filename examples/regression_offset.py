@@ -1,5 +1,5 @@
-from numpy import linalg as la
 import numpy as np
+from numpy import linalg as la
 
 import pymanopt
 from pymanopt.manifolds import Euclidean, Product

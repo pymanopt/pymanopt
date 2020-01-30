@@ -1,6 +1,6 @@
+import numpy as np
 import theano.compile.sharedvalue as S
 import theano.tensor as T
-import numpy as np
 
 import pymanopt
 from pymanopt.manifolds import Euclidean

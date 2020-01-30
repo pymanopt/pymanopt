@@ -1,6 +1,6 @@
-from numpy import linalg as la, random as rnd
 import numpy as np
 import theano.tensor as T
+from numpy import linalg as la, random as rnd
 
 import pymanopt
 from pymanopt.manifolds import Oblique

@@ -1,13 +1,9 @@
-import autograd.numpy as npa
-import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
+import autograd.numpy as np
+from numpy import linalg as la, random as rnd, testing as np_testing
 
 from pymanopt.manifolds import Grassmann
-from pymanopt.tools.multi import multiprod, multitransp, multieye, multisym
-import pymanopt.tools.testing as testing
-
+from pymanopt.tools import testing
+from pymanopt.tools.multi import multieye, multiprod, multisym, multitransp
 from .._test import TestCase
 
 
@@ -18,7 +14,7 @@ class TestSingleGrassmannManifold(TestCase):
         self.k = k = 1
         self.man = Grassmann(m, n, k=k)
 
-        self.proj = lambda x, u: u - npa.dot(x, npa.dot(x.T, u))
+        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u))
 
     def test_dist(self):
         x = self.man.rand()
@@ -103,7 +99,7 @@ class TestMultiGrassmannManifold(TestCase):
         self.k = k = 3
         self.man = Grassmann(m, n, k=k)
 
-        self.proj = lambda x, u: u - npa.dot(x, npa.dot(x.T, u))
+        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u))
 
     def test_dim(self):
         assert self.man.dim == self.k * (self.m * self.n - self.n ** 2)

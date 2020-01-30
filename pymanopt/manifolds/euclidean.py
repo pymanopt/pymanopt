@@ -1,9 +1,8 @@
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
+from numpy import linalg as la, random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multisym, multiskew
+from pymanopt.tools.multi import multiskew, multisym
 
 
 class _Euclidean(EuclideanEmbeddedSubmanifold):

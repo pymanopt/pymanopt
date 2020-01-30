@@ -1,10 +1,7 @@
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
+from numpy import linalg as la, random as rnd, testing as np_testing
 
 from pymanopt.manifolds import Euclidean
-
 from .._test import TestCase
 
 

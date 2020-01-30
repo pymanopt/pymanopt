@@ -1,12 +1,9 @@
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
-import numpy.testing as np_testing
+from numpy import linalg as la, random as rnd, testing as np_testing
 from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiprod, multisym, multitransp
-
 from .._test import TestCase
 
 

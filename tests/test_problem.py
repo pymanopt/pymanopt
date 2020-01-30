@@ -4,7 +4,6 @@ from numpy import random as rnd, testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import Sphere
-
 from ._test import TestCase
 
 

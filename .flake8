@@ -1,0 +1,3 @@
+[flake8]
+application_import_names = pymanopt
+import_order_style = smarkets

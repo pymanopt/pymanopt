@@ -1,7 +1,6 @@
 import torch
 
 from pymanopt.function import PyTorch
-
 from . import _backend_tests
 
 

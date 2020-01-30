@@ -1,8 +1,7 @@
 import numpy as np
 import numpy.testing as np_testing
 
-from pymanopt.manifolds import Product, Euclidean, Sphere, Grassmann
-
+from pymanopt.manifolds import Euclidean, Grassmann, Product, Sphere
 from .._test import TestCase
 
 

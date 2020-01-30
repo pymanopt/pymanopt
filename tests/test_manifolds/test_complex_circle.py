@@ -1,5 +1,4 @@
 from pymanopt.manifolds import ComplexCircle
-
 from .._test import TestCase
 
 
