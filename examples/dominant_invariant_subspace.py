@@ -20,7 +20,7 @@ SUPPORTED_BACKENDS = (
 )
 
 
-def create_cost_egrad(backend, A, p):
+def create_cost_egrad_ehess(backend, A, p):
     n = A.shape[-1]
     egrad = ehess = None
 
@@ -37,7 +37,13 @@ def create_cost_egrad(backend, A, p):
         def egrad(X):
             return -(A + A.T) @ X
 
-        @pymanopt.function.Callable
+        # FIXME(nkoep): With the decorator, the Callable backend currently
+        #               interprets the 'ehess' function as a regular nary
+        #               function, which should be wrapped in a unary function
+        #               whose arguments get unpacked when the function is
+        #               called. We need a way to signal to the backend that
+        #               'ehess' implements a Hessian-vector product, which
+        #               requires two arguments.
         def ehess(X, H):
             return -(A + A.T) @ H
     elif backend == "PyTorch":
@@ -75,7 +81,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = rnd.randn(num_rows, num_rows)
     matrix = 0.5 * (matrix + matrix.T)
 
-    cost, egrad, ehess = create_cost_egrad(backend, matrix, subspace_dimension)
+    cost, egrad, ehess = create_cost_egrad_ehess(
+        backend, matrix, subspace_dimension)
     manifold = Grassmann(num_rows, subspace_dimension)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
     if quiet:
