@@ -11,7 +11,7 @@ class SteepestDescent(Solver):
     steepestdescent.m from the manopt MATLAB package.
     """
 
-    def __init__(self, linesearch=LineSearchBackTracking(), *args, **kwargs):
+    def __init__(self, linesearch=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         if linesearch is None:
