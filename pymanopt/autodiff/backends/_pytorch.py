@@ -85,7 +85,7 @@ class _PyTorchBackend(Backend):
                 fx = function(x)
                 (grad_fx,) = autograd.grad(fx, x, create_graph=True,
                                            allow_unused=True)
-                (grad_fx * v).sum().backward()
+                torch.tensordot(grad_fx, v, dims=grad_fx.dim()).backward()
                 return self._sanitize_gradient(x)
             return unary_hessian
 
@@ -103,7 +103,8 @@ class _PyTorchBackend(Backend):
                                       allow_unused=True)
             dot_product = 0
             for gradient, vector in zip(gradients, vs):
-                dot_product += (gradient * vector).sum()
+                dot_product += torch.tensordot(
+                    gradient, vector, dims=gradient.dim())
             dot_product.backward()
             return self._sanitize_gradients(xs)
         return group_return_values(nary_hessian, arguments)
