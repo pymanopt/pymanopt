@@ -1,6 +1,6 @@
 autograd>=1.2
 numpy>=1.16
 scipy
-tensorflow==1.15
+tensorflow==1.15.2
 torch>=1.0
 theano
