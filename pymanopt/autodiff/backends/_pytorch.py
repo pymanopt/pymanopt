@@ -3,6 +3,7 @@ Module containing functions to differentiate functions using pytorch.
 """
 import functools
 
+import numpy as np
 try:
     import torch
 except ImportError:
@@ -27,6 +28,17 @@ class _PyTorchBackend(Backend):
     def is_compatible(self, function, arguments):
         return callable(function)
 
+    @staticmethod
+    def _from_numpy(array):
+        """Wrap numpy ndarray ``array`` in a torch tensor. Since torch does not
+        support negative strides, we create a copy of the array to reset the
+        strides in that case.
+        """
+        strides = np.array(array.strides)
+        if np.any(strides < 0):
+            array = array.copy()
+        return torch.from_numpy(array)
+
     @Backend._assert_backend_available
     def compile_function(self, function, arguments):
         flattened_arguments = flatten_arguments(arguments)
@@ -34,13 +46,13 @@ class _PyTorchBackend(Backend):
         if len(flattened_arguments) == 1:
             @functools.wraps(function)
             def unary_function(argument):
-                return function(torch.from_numpy(argument)).numpy()
+                return function(self._from_numpy(argument)).numpy()
             return unary_function
 
         @functools.wraps(function)
         def nary_function(arguments):
             return function(
-                *map(torch.from_numpy, flatten_arguments(arguments))).numpy()
+                *map(self._from_numpy, flatten_arguments(arguments))).numpy()
         return nary_function
 
     def _sanitize_gradient(self, tensor):
@@ -57,7 +69,7 @@ class _PyTorchBackend(Backend):
 
         if len(flattened_arguments) == 1:
             def unary_gradient(argument):
-                torch_argument = torch.from_numpy(argument)
+                torch_argument = self._from_numpy(argument)
                 torch_argument.requires_grad_()
                 function(torch_argument).backward()
                 return self._sanitize_gradient(torch_argument)
@@ -66,7 +78,7 @@ class _PyTorchBackend(Backend):
         def nary_gradient(arguments):
             torch_arguments = []
             for argument in flatten_arguments(arguments):
-                torch_argument = torch.from_numpy(argument)
+                torch_argument = self._from_numpy(argument)
                 torch_argument.requires_grad_()
                 torch_arguments.append(torch_argument)
             function(*torch_arguments).backward()
@@ -79,8 +91,8 @@ class _PyTorchBackend(Backend):
 
         if len(flattened_arguments) == 1:
             def unary_hessian(point, vector):
-                x = torch.from_numpy(point)
-                v = torch.from_numpy(vector)
+                x = self._from_numpy(point)
+                v = self._from_numpy(vector)
                 x.requires_grad_()
                 fx = function(x)
                 (grad_fx,) = autograd.grad(fx, x, create_graph=True,
@@ -92,10 +104,10 @@ class _PyTorchBackend(Backend):
         def nary_hessian(points, vectors):
             xs = []
             for point in flatten_arguments(points):
-                x = torch.from_numpy(point)
+                x = self._from_numpy(point)
                 x.requires_grad_()
                 xs.append(x)
-            vs = [torch.from_numpy(vector)
+            vs = [self._from_numpy(vector)
                   for vector in flatten_arguments(vectors)]
             fx = function(*xs)
             fx.requires_grad_()
