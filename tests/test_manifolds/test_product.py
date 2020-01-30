@@ -1,12 +1,12 @@
-import unittest
-
 import numpy as np
 import numpy.testing as np_testing
 
 from pymanopt.manifolds import Product, Euclidean, Sphere, Grassmann
 
+from .._test import TestCase
 
-class TestProductManifold(unittest.TestCase):
+
+class TestProductManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50

@@ -1,11 +1,11 @@
 import numpy as np
 import numpy.random as rnd
 import numpy.linalg as la
-import theano.tensor as T
+import torch
 
 import pymanopt
 from pymanopt.manifolds import Sphere
-from pymanopt.solvers import ConjugateGradient
+from pymanopt.solvers import TrustRegions
 
 
 def dominant_eigenvector(A):
@@ -20,12 +20,11 @@ def dominant_eigenvector(A):
     assert np.allclose(np.sum(A - A.T), 0), "matrix must be symmetric"
 
     manifold = Sphere(n)
-    solver = ConjugateGradient(maxiter=500, minstepsize=1e-6)
-    x = T.vector()
+    solver = TrustRegions()
 
-    @pymanopt.function.Theano(x)
+    @pymanopt.function.PyTorch
     def cost(x):
-        return -x.T.dot(T.dot(A, x))
+        return -x.matmul(torch.from_numpy(A).matmul(x))
 
     problem = pymanopt.Problem(manifold, cost)
     xopt = solver.solve(problem)
@@ -46,7 +45,7 @@ if __name__ == "__main__":
     xopt = dominant_eigenvector(A)
 
     # Make sure both vectors have the same direction. Both are valid
-    # eigenvectors, but for comparison we need to get rid of the sign
+    # eigenvectors, of course, but for comparison we need to get rid of the
     # ambiguity.
     if np.sign(x[0]) != np.sign(xopt[0]):
         xopt = -xopt
@@ -55,4 +54,5 @@ if __name__ == "__main__":
     print('')
     print("l2-norm of x: %f" % la.norm(x))
     print("l2-norm of xopt: %f" % la.norm(xopt))
+    print("solution found: %s" % np.allclose(x, xopt, rtol=1e-3))
     print("l2-error: %f" % la.norm(x - xopt))

@@ -2,38 +2,40 @@ import time
 
 import numpy as np
 
-from pymanopt import Problem
+import pymanopt
 from pymanopt.solvers.steepest_descent import SteepestDescent
 from pymanopt.solvers.solver import Solver
 
 
-def compute_centroid(man, x):
-    """
-    Compute the centroid as Karcher mean of points x belonging to the manifold
-    man.
-    """
-    n = len(x)
+# TODO(nkoep): Check if a suitable autodiff backend is available, and solve the
+#              problem using the TR solver if so.
+def compute_centroid(manifold, points):
+    """Compute the centroid of `points` on the `manifold` as Karcher mean."""
+    num_points = len(points)
 
-    def objective(y):  # weighted Frechet variance
-        acc = 0
-        for i in range(n):
-            acc += man.dist(y, x[i]) ** 2
-        return acc / 2
+    @pymanopt.function.Callable
+    def objective(y):
+        accumulator = 0
+        for i in range(num_points):
+            accumulator += manifold.dist(y, points[i]) ** 2
+        return accumulator / 2
 
+    @pymanopt.function.Callable
     def gradient(y):
-        g = man.zerovec(y)
-        for i in range(n):
-            g -= man.log(y, x[i])
+        g = manifold.zerovec(y)
+        for i in range(num_points):
+            g -= manifold.log(y, points[i])
         return g
 
-    # TODO: manopt runs a few TR iterations here. For us to do this, we either
-    #       need to work out the Hessian of the Frechet variance by hand or
-    #       implement approximations for the Hessian to use in the TR solver.
-    #       This is because we cannot implement the Frechet variance with
-    #       theano and compute the Hessian automatically due to dependency on
-    #       the manifold-dependent distance function.
+    # XXX: Manopt runs a few TR iterations here. For us to do this, we either
+    #      need to work out the Hessian of the Karcher mean by hand or
+    #      implement approximations for the Hessian to use in the TR solver as
+    #      Manopt. This is because we cannot implement the Karcher mean with
+    #      Theano, say, and compute the Hessian automatically due to dependence
+    #      on the manifold-dependent distance function, which is written in
+    #      numpy.
     solver = SteepestDescent(maxiter=15)
-    problem = Problem(man, cost=objective, grad=gradient, verbosity=0)
+    problem = pymanopt.Problem(manifold, objective, grad=gradient, verbosity=0)
     return solver.solve(problem)
 
 
@@ -61,7 +63,7 @@ class NelderMead(Solver):
             - contraction (0.5)
                 Factor by which to contract the reflected simplex
         """
-        super(NelderMead, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals
         self._maxiter = maxiter
@@ -157,7 +159,7 @@ class NelderMead(Solver):
             vec = man.log(xbar, x[-1])
 
             # Reflection step
-            xr = man.exp(xbar, -self._reflection * vec)
+            xr = man.retr(xbar, -self._reflection * vec)
             costr = objective(xr)
             costevals += 1
 
@@ -172,7 +174,7 @@ class NelderMead(Solver):
 
             # If the reflected point is better than the best point, expand.
             if costr < costs[0]:
-                xe = man.exp(xbar, -self._expansion * vec)
+                xe = man.retr(xbar, -self._expansion * vec)
                 coste = objective(xe)
                 costevals += 1
                 if coste < costr:
@@ -193,7 +195,7 @@ class NelderMead(Solver):
             if costr >= costs[-2]:
                 if costr < costs[-1]:
                     # do an outside contraction
-                    xoc = man.exp(xbar, -self._contraction * vec)
+                    xoc = man.retr(xbar, -self._contraction * vec)
                     costoc = objective(xoc)
                     costevals += 1
                     if costoc <= costr:
@@ -204,7 +206,7 @@ class NelderMead(Solver):
                         continue
                 else:
                     # do an inside contraction
-                    xic = man.exp(xbar, self._contraction * vec)
+                    xic = man.retr(xbar, self._contraction * vec)
                     costic = objective(xic)
                     costevals += 1
                     if costic <= costs[-1]:

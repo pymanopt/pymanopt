@@ -8,6 +8,7 @@ from pymanopt.solvers.solver import Solver
 from pymanopt import tools
 
 
+# TODO: Use Python's enum module.
 BetaTypes = tools.make_enum(
     "BetaTypes",
     "FletcherReeves PolakRibiere HestenesStiefel HagerZhang".split())
@@ -34,7 +35,7 @@ class ConjugateGradient(Solver):
             - linesearch (LineSearchAdaptive)
                 The linesearch method to used.
         """
-        super(ConjugateGradient, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._beta_type = beta_type
         self._orth_value = orth_value

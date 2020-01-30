@@ -1,9 +1,9 @@
-import unittest
-
 from pymanopt.manifolds import PSDFixedRankComplex
 
+from .._test import TestCase
 
-class TestPSDFixedRankComplexManifold(unittest.TestCase):
+
+class TestPSDFixedRankComplexManifold(TestCase):
     def test_constructor(self):
         n = 50
         k = 10

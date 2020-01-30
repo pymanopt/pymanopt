@@ -12,7 +12,7 @@ class SteepestDescent(Solver):
     """
 
     def __init__(self, linesearch=LineSearchBackTracking(), *args, **kwargs):
-        super(SteepestDescent, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if linesearch is None:
             self._linesearch = LineSearchBackTracking()

@@ -1,29 +1,30 @@
-import unittest
-
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
-from pymanopt.manifolds import Euclidean
+from pymanopt.manifolds import Symmetric
+from pymanopt.tools.multi import multisym
+
+from .._test import TestCase
 
 
-class TestEuclideanManifold(unittest.TestCase):
+class TestSymmetricManifold(TestCase):
     def setUp(self):
-        self.m = m = 10
-        self.n = n = 5
-        self.man = Euclidean(m, n)
+        self.n = n = 10
+        self.k = k = 5
+        self.man = Symmetric(n, k)
 
     def test_dim(self):
-        assert self.man.dim == self.m * self.n
+        assert self.man.dim == 0.5 * self.k * self.n * (self.n + 1)
 
     def test_typicaldist(self):
-        np_testing.assert_almost_equal(self.man.typicaldist, np.sqrt(self.m *
-                                                                     self.n))
+        man = self.man
+        np_testing.assert_almost_equal(man.typicaldist, np.sqrt(man.dim))
 
     def test_dist(self):
         e = self.man
-        x, y = rnd.randn(2, self.m, self.n)
+        x, y = rnd.randn(2, self.k, self.n, self.n)
         np_testing.assert_almost_equal(e.dist(x, y), la.norm(x - y))
 
     def test_inner(self):
@@ -36,16 +37,16 @@ class TestEuclideanManifold(unittest.TestCase):
     def test_proj(self):
         e = self.man
         x = e.rand()
-        u = e.randvec(x)
-        np_testing.assert_allclose(e.proj(x, u), u)
+        u = np.random.randn(self.k, self.n, self.n)
+        np_testing.assert_allclose(e.proj(x, u), multisym(u))
 
     def test_ehess2rhess(self):
         e = self.man
         x = e.rand()
         u = e.randvec(x)
-        egrad, ehess = rnd.randn(2, self.m, self.n)
+        egrad, ehess = rnd.randn(2, self.k, self.n, self.n)
         np_testing.assert_allclose(e.ehess2rhess(x, egrad, ehess, u),
-                                   ehess)
+                                   multisym(ehess))
 
     def test_retr(self):
         e = self.man
@@ -62,14 +63,15 @@ class TestEuclideanManifold(unittest.TestCase):
     def test_norm(self):
         e = self.man
         x = e.rand()
-        u = rnd.randn(self.m, self.n)
+        u = rnd.randn(self.n, self.n, self.k)
         np_testing.assert_almost_equal(np.sqrt(np.sum(u**2)), e.norm(x, u))
 
     def test_rand(self):
         e = self.man
         x = e.rand()
         y = e.rand()
-        assert np.shape(x) == (self.m, self.n)
+        assert np.shape(x) == (self.k, self.n, self.n)
+        np_testing.assert_allclose(x, multisym(x))
         assert la.norm(x - y) > 1e-6
 
     def test_randvec(self):
@@ -77,7 +79,8 @@ class TestEuclideanManifold(unittest.TestCase):
         x = e.rand()
         u = e.randvec(x)
         v = e.randvec(x)
-        assert np.shape(u) == (self.m, self.n)
+        assert np.shape(u) == (self.k, self.n, self.n)
+        np_testing.assert_allclose(u, multisym(u))
         np_testing.assert_almost_equal(la.norm(u), 1)
         assert la.norm(u - v) > 1e-6
 

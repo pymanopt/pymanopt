@@ -1,19 +1,19 @@
-import unittest
 import warnings
 
+import autograd.numpy as npa
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
 import numpy.testing as np_testing
 
-import autograd.numpy as npa
-
 from pymanopt.manifolds import (Sphere, SphereSubspaceIntersection,
                                 SphereSubspaceComplementIntersection)
 import pymanopt.tools.testing as testing
 
+from .._test import TestCase
 
-class TestSphereManifold(unittest.TestCase):
+
+class TestSphereManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
@@ -147,7 +147,7 @@ class TestSphereManifold(unittest.TestCase):
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
+class TestSphereSubspaceIntersectionManifold(TestCase):
     def setUp(self):
         self.n = 2
         # Defines the 1-sphere intersected with the 1-dimensional subspace
@@ -194,7 +194,7 @@ class TestSphereSubspaceIntersectionManifold(unittest.TestCase):
         self.assertEqual(man.dim, dim)
 
 
-class TestSphereSubspaceComplementIntersectionManifold(unittest.TestCase):
+class TestSphereSubspaceComplementIntersectionManifold(TestCase):
     def setUp(self):
         self.n = 2
         # Define the 1-sphere intersected with the 1-dimensional subspace

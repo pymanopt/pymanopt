@@ -1,11 +1,11 @@
-import unittest
-
 import numpy.testing as np_testing
 
 from pymanopt.manifolds import Oblique
 
+from .._test import TestCase
 
-class TestObliqueManifold(unittest.TestCase):
+
+class TestObliqueManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
