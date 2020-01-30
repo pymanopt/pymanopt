@@ -171,11 +171,6 @@ class _PSDFixedRank(Manifold, _RetrAsExpMixin):
     def norm(self, Y, U):
         return la.norm(U, "fro")
 
-    def dist(self, U, V):
-        raise NotImplementedError(
-            "The manifold '{:s}' currently provides no implementation of the "
-            "'dist' method".format(self._get_class_name()))
-
     def proj(self, Y, H):
         # Projection onto the horizontal space
         YtY = Y.T.dot(Y)
@@ -344,11 +339,6 @@ class Elliptope(Manifold, _RetrAsExpMixin):
 
     def inner(self, Y, U, V):
         return float(np.tensordot(U, V))
-
-    def dist(self, U, V):
-        raise NotImplementedError(
-            "The manifold '{:s}' currently provides no implementation of the "
-            "'dist' method".format(self._get_class_name()))
 
     def norm(self, Y, U):
         return np.sqrt(self.inner(Y, U, U))

@@ -101,9 +101,6 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     def typicaldist(self):
         return self.dim
 
-    def dist(self, X, Y):
-        raise NotImplementedError
-
     def inner(self, X, G, H):
         return np.sum(np.tensordot(a, b) for (a, b) in zip(G, H))
 
@@ -113,19 +110,17 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Z = U*S*V', applies it to a matrix W to calculate the matrix product
         ZW.
         """
-        if isinstance(Z, tuple):
+        if isinstance(Z, (list, tuple)):
             return np.dot(Z[0], np.dot(Z[1], np.dot(Z[2].T, W)))
-        else:
-            return np.dot(Z, W)
+        return np.dot(Z, W)
 
     def _apply_ambient_transpose(self, Z, W):
         """
         Same as apply_ambient, but applies Z' to W.
         """
-        if isinstance(Z, tuple):
+        if isinstance(Z, (list, tuple)):
             return np.dot(Z[2], np.dot(Z[1], np.dot(Z[0].T, W)))
-        else:
-            return np.dot(Z.T, W)
+        return np.dot(Z.T, W)
 
     def proj(self, X, Z):
         """
