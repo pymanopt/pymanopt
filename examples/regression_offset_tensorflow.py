@@ -1,20 +1,26 @@
-import tensorflow as tf
-import numpy as np
+# XXX: This example is currently broken.
 
-from pymanopt import Problem
-from pymanopt.solvers import TrustRegions
+import numpy as np
+import tensorflow as tf
+
+import pymanopt
 from pymanopt.manifolds import Euclidean, Product
+from pymanopt.solvers import TrustRegions
+
 
 if __name__ == "__main__":
     # Generate random data
     X = np.random.randn(3, 100).astype('float32')
-    Y = (X[0:1, :] - 2*X[1:2, :] + np.random.randn(1, 100) + 5).astype(
+    Y = (X[0:1, :] - 2 * X[1:2, :] + np.random.randn(1, 100) + 5).astype(
         'float32')
 
     # Cost function is the squared test error
     w = tf.Variable(tf.zeros([3, 1]))
     b = tf.Variable(tf.zeros([1, 1]))
-    cost = tf.reduce_mean(tf.square(Y - tf.matmul(tf.transpose(w), X) - b))
+
+    @pymanopt.function.TensorFlow(w, b)
+    def cost(w, b):
+        return tf.reduce_mean(tf.square(Y - tf.matmul(tf.transpose(w), X) - b))
 
     # first-order, second-order
     solver = TrustRegions()
@@ -23,7 +29,7 @@ if __name__ == "__main__":
     manifold = Product([Euclidean(3, 1), Euclidean(1, 1)])
 
     # Solve the problem with pymanopt
-    problem = Problem(manifold=manifold, cost=cost, arg=[w, b], verbosity=0)
+    problem = pymanopt.Problem(manifold, cost, verbosity=0)
     wopt = solver.solve(problem)
 
     print('Weights found by pymanopt (top) / '

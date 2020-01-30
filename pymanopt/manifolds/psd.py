@@ -1,64 +1,65 @@
-from __future__ import division
-
 import warnings
 
 import numpy as np
 import numpy.linalg as la
 import numpy.random as rnd
-import scipy as sp
+from scipy.linalg import expm
 # Workaround for SciPy bug: https://github.com/scipy/scipy/pull/8082
 try:
     from scipy.linalg import solve_continuous_lyapunov as lyap
 except ImportError:
     from scipy.linalg import solve_lyapunov as lyap
 
-from pymanopt.manifolds.manifold import Manifold
+from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold, Manifold
 from pymanopt.tools.multi import multiprod, multitransp, multisym, multilog
 
 
-class PositiveDefinite(Manifold):
+class _RetrAsExpMixin:
+    """Mixin class which defers calls to the exponential map to the retraction
+    and issues a warning.
     """
-    Manifold of (n x n)^k positive definite matrices, based on the geometry
-    discussed in Chapter 6 of Positive Definite Matrices (Bhatia 2007). Some
-    of the implementation is based on sympositivedefinitefactory.m from the
-    Manopt MATLAB package. Also see "Conic geometric optimisation on the
-    manifold of positive definite matrices" (Sra & Hosseini 2013) for more
+
+    def exp(self, Y, U):
+        warnings.warn(
+            "Exponential map for manifold '{:s}' not implemented yet. Using "
+            "retraction instead.".format(self._get_class_name()),
+            RuntimeWarning)
+        return self.retr(Y, U)
+
+
+class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
+    """Manifold of (n x n)^k symmetric positive definite matrices, based on the
+    geometry discussed in Chapter 6 of Positive Definite Matrices (Bhatia
+    2007). Some of the implementation is based on sympositivedefinitefactory.m
+    from the Manopt MATLAB package. Also see "Conic geometric optimisation on
+    the manifold of positive definite matrices" (Sra & Hosseini 2013) for more
     details.
     """
     def __init__(self, n, k=1):
         self._n = n
         self._k = k
 
-        self._dim = k * 0.5 * n * (n + 1)
-        self._typicaldist = np.sqrt(k * 0.5 * n * (n+1))
-
-        if self._k == 1:
-            self._name = ("Manifold of positive definite ({} x {}) "
-                          "matrices").format(self._n, self._n)
+        if k == 1:
+            name = ("Manifold of positive definite ({} x {}) matrices").format(
+                n, n)
         else:
-            self._name = "Product manifold of {} ({} x {}) matrices".format(
-                self._k, self._n, self._n)
-
-    def __str__(self):
-        return self._name
-
-    @property
-    def dim(self):
-        return self._dim
+            name = "Product manifold of {} ({} x {}) matrices".format(k, n, n)
+        dimension = int(k * n * (n + 1) / 2)
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
-        return self._typicaldist
+        return np.sqrt(self.dim)
 
     def dist(self, x, y):
-        # Adapted from equation 6.13 of "Positive definite matrices". Chol
-        # decomp gives the same result as matrix sqrt. There may be a more
-        # efficient way to compute this!
-        c = np.linalg.cholesky(x)
-        c_inv = np.linalg.inv(c)
+        # Adapted from equation 6.13 of "Positive definite matrices". The
+        # Cholesky decomposition gives the same result as matrix sqrt. There
+        # may be more efficient ways to compute this.
+        c = la.cholesky(x)
+        c_inv = la.inv(c)
         logm = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
                         pos_def=True)
-        return la.norm(multiprod(multiprod(c, logm), c_inv))
+        return la.norm(logm)
 
     def inner(self, x, u, v):
         return np.tensordot(la.solve(x, u), la.solve(x, v), axes=x.ndim)
@@ -75,16 +76,18 @@ class PositiveDefinite(Manifold):
         return (multiprod(multiprod(x, multisym(ehess)), x) +
                 multisym(multiprod(multiprod(u, multisym(egrad)), x)))
 
-    def retr(self, X, G):
-        return self.exp(X, G)
-
     def norm(self, x, u):
-        return la.norm(la.solve(x, u))
+        # This implementation is as fast as np.linalg.solve_triangular and is
+        # more stable, as the above solver tends to output non positive
+        # definite results.
+        c = la.cholesky(x)
+        c_inv = la.inv(c)
+        return la.norm(multiprod(multiprod(c_inv, u), multitransp(c_inv)))
 
     def rand(self):
         # The way this is done is arbitrary. I think the space of p.d.
         # matrices would have infinite measure w.r.t. the Riemannian metric
-        # (c.f. integral 0-inf [ln(x)] dx = inf) so impossible to have a
+        # (cf. integral 0-inf [ln(x)] dx = inf) so impossible to have a
         # 'uniform' distribution.
 
         # Generate eigenvalues between 1 and 2
@@ -99,14 +102,15 @@ class PositiveDefinite(Manifold):
 
         if self._k == 1:
             return multiprod(u, d * multitransp(u))[0]
-        else:
-            return multiprod(u, d * multitransp(u))
+        return multiprod(u, d * multitransp(u))
 
     def randvec(self, x):
-        if self._k == 1:
-            u = multisym(np.random.randn(self._n, self._n))
+        k = self._k
+        n = self._n
+        if k == 1:
+            u = multisym(rnd.randn(n, n))
         else:
-            u = multisym(np.random.randn(self._k, self._n, self._n))
+            u = multisym(rnd.randn(k, n, n))
         return u / self.norm(x, u)
 
     def transp(self, x1, x2, d):
@@ -114,13 +118,13 @@ class PositiveDefinite(Manifold):
 
     def exp(self, x, u):
         # TODO: Check which method is faster depending on n, k.
-        x_inv_u = np.linalg.solve(x, u)
+        x_inv_u = la.solve(x, u)
         if self._k > 1:
             e = np.zeros(np.shape(x))
             for i in range(self._k):
-                e[i] = sp.linalg.expm(x_inv_u[i])
+                e[i] = expm(x_inv_u[i])
         else:
-            e = sp.linalg.expm(x_inv_u)
+            e = expm(x_inv_u)
         return multiprod(x, e)
         # This alternative implementation is sometimes faster though less
         # stable. It can return a matrix with small negative determinant.
@@ -130,6 +134,8 @@ class PositiveDefinite(Manifold):
         #                 sym=True)
         #    return multiprod(multiprod(c, e), multitransp(c))
 
+    retr = exp
+
     def log(self, x, y):
         c = la.cholesky(x)
         c_inv = la.inv(c)
@@ -137,15 +143,75 @@ class PositiveDefinite(Manifold):
                         pos_def=True)
         return multiprod(multiprod(c, logm), multitransp(c))
 
-    def pairmean(self, X, Y):
-        '''
-        Computes the intrinsic mean of X and Y, that is, a point that lies
-        mid-way between X and Y on the geodesic arc joining them.
-        '''
-        raise NotImplementedError
+    def zerovec(self, x):
+        k = self._k
+        n = self._n
+        if k == 1:
+            return np.zeros((k, n, n))
+        return np.zeros((n, n))
 
 
-class PSDFixedRank(Manifold):
+# TODO(nkoep): This could either stay in here (seeing how it's a manifold of
+#              psd matrices, or in fixed_rank. Alternatively, move this one and
+#              the next class to a dedicated 'psd_fixed_rank' module.
+
+class _PSDFixedRank(Manifold, _RetrAsExpMixin):
+    def __init__(self, n, k, name, dimension):
+        self._n = n
+        self._k = k
+        super().__init__(name, dimension)
+
+    @property
+    def typicaldist(self):
+        return 10 + self._k
+
+    def inner(self, Y, U, V):
+        # Euclidean metric on the total space.
+        return float(np.tensordot(U, V))
+
+    def norm(self, Y, U):
+        return la.norm(U, "fro")
+
+    def dist(self, U, V):
+        raise NotImplementedError(
+            "The manifold '{:s}' currently provides no implementation of the "
+            "'dist' method".format(self._get_class_name()))
+
+    def proj(self, Y, H):
+        # Projection onto the horizontal space
+        YtY = Y.T.dot(Y)
+        AS = Y.T.dot(H) - H.T.dot(Y)
+        Omega = lyap(YtY, AS)
+        return H - Y.dot(Omega)
+
+    def egrad2rgrad(self, Y, egrad):
+        return egrad
+
+    def ehess2rhess(self, Y, egrad, ehess, U):
+        return self.proj(Y, ehess)
+
+    def retr(self, Y, U):
+        return Y + U
+
+    def rand(self):
+        return rnd.randn(self._n, self._k)
+
+    def randvec(self, Y):
+        H = self.rand()
+        P = self.proj(Y, H)
+        return self._normalize(P)
+
+    def transp(self, Y, Z, U):
+        return self.proj(Z, U)
+
+    def _normalize(self, Y):
+        return Y / self.norm(None, Y)
+
+    def zerovec(self, X):
+        return np.zeros((self._n, self._k))
+
+
+class PSDFixedRank(_PSDFixedRank):
     """
     Manifold of n-by-n symmetric positive semidefinite matrices of rank k.
 
@@ -179,77 +245,13 @@ class PSDFixedRank(Manifold):
     """
 
     def __init__(self, n, k):
-        self._n = n
-        self._k = k
-
-    def __str__(self):
-        return ("YY' quotient manifold of {:d}x{:d} psd matrices of "
-                "rank {:d}".format(self._n, self._n, self._k))
-
-    @property
-    def dim(self):
-        n = self._n
-        k = self._k
-        return k * n - k * (k - 1) / 2
-
-    @property
-    def typicaldist(self):
-        return 10 + self._k
-
-    def inner(self, Y, U, V):
-        # Euclidean metric on the total space.
-        return float(np.tensordot(U, V))
-
-    def norm(self, Y, U):
-        return la.norm(U, "fro")
-
-    def dist(self, U, V):
-        raise NotImplementedError
-
-    def proj(self, Y, H):
-        # Projection onto the horizontal space
-        YtY = Y.T.dot(Y)
-        AS = Y.T.dot(H) - H.T.dot(Y)
-        Omega = lyap(YtY, AS)
-        return H - Y.dot(Omega)
-
-    def egrad2rgrad(self, Y, egrad):
-        return egrad
-
-    def ehess2rhess(self, Y, egrad, ehess, U):
-        return self.proj(Y, ehess)
-
-    def exp(self, Y, U):
-        warnings.warn("Exponential map for symmetric, fixed-rank "
-                      "manifold not implemented yet. Used retraction instead.",
-                      RuntimeWarning)
-        return self.retr(Y, U)
-
-    def retr(self, Y, U):
-        return Y + U
-
-    def log(self, Y, U):
-        raise NotImplementedError
-
-    def rand(self):
-        return rnd.randn(self._n, self._k)
-
-    def randvec(self, Y):
-        H = self.rand()
-        P = self.proj(Y, H)
-        return self._normalize(P)
-
-    def transp(self, Y, Z, U):
-        return self.proj(Z, U)
-
-    def pairmean(self, X, Y):
-        raise NotImplementedError
-
-    def _normalize(self, Y):
-        return Y / self.norm(None, Y)
+        name = ("YY' quotient manifold of {:d}x{:d} psd matrices of "
+                "rank {:d}".format(n, n, k))
+        dimension = int(k * n - k * (k - 1) / 2)
+        super().__init__(n, k, name, dimension)
 
 
-class PSDFixedRankComplex(PSDFixedRank):
+class PSDFixedRankComplex(_PSDFixedRank):
     """
     Manifold of n x n complex Hermitian pos. semidefinite matrices of rank k.
 
@@ -260,11 +262,12 @@ class PSDFixedRankComplex(PSDFixedRank):
 
     Paper link: http://dx.doi.org/10.1109/ICASSP.2013.6638382.
 
-    A point X on the manifold M is parameterized as YY^*, where
-    Y is a complex matrix of size nxk. For any point Y on the manifold M,
+    A point X on the manifold M is parameterized as YY^*, where Y is a
+    complex matrix of size nxk of full rank. For any point Y on the manifold M,
     given any kxk complex unitary matrix U, we say Y*U  is equivalent to Y,
     i.e., YY^* does not change. Therefore, M is the set of equivalence
-    classes and is a Riemannian quotient manifold C^{nk}/SU(k).
+    classes and is a Riemannian quotient manifold C^{nk}/U(k)
+    where C^{nk} is the set of all complex matrix of size nxk of full rank.
     The metric is the usual real-trace inner product, that is,
     it is the usual metric for the complex plane identified with R^2.
 
@@ -274,18 +277,11 @@ class PSDFixedRankComplex(PSDFixedRank):
     exactly k. Reduce k if that is not the case.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(PSDFixedRankComplex, self).__init__(*args, **kwargs)
-
-    def __str__(self):
-        return ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
-                "matrices of rank {:d}".format(self._n, self._n, self._k))
-
-    @property
-    def dim(self):
-        n = self._n
-        k = self._k
-        return 2 * k * n - k * k
+    def __init__(self, n, k):
+        name = ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
+                "matrices of rank {:d}".format(n, n, k))
+        dimension = 2 * k * n - k * k
+        super().__init__(n, k, name, dimension)
 
     def inner(self, Y, U, V):
         return 2 * float(np.tensordot(U, V).real)
@@ -295,25 +291,15 @@ class PSDFixedRankComplex(PSDFixedRank):
 
     def dist(self, U, V):
         S, _, D = la.svd(V.T.conj().dot(U))
-        E = U - V.dot(S).dot(D)  # numpy's svd returns D.H
+        E = U - V.dot(S).dot(D)
         return self.inner(None, E, E) / 2
 
-    def exp(self, Y, U):
-        # We only overload this to adjust the warning.
-        warnings.warn("Exponential map for symmetric, fixed-rank complex "
-                      "manifold not implemented yet. Used retraction instead.",
-                      RuntimeWarning)
-        return self.retr(Y, U)
-
     def rand(self):
-        rand_ = super(PSDFixedRankComplex, self).rand
+        rand_ = super().rand
         return rand_() + 1j * rand_()
 
-    def pairmean(self, X, Y):
-        raise NotImplementedError
 
-
-class Elliptope(Manifold):
+class Elliptope(Manifold, _RetrAsExpMixin):
     """
     Manifold of n-by-n psd matrices of rank k with unit diagonal elements.
 
@@ -348,15 +334,10 @@ class Elliptope(Manifold):
         self._n = n
         self._k = k
 
-    def __str__(self):
-        return ("YY' quotient manifold of {:d}x{:d} psd matrices of rank {:d} "
-                "with diagonal elements being 1".format(
-                    self._n, self._n, self._k))
-
-    @property
-    def dim(self):
-        k = self._k
-        return self._n * (k - 1) - k * (k - 1) / 2
+        name = ("YY' quotient manifold of {:d}x{:d} psd matrices of rank {:d} "
+                "with diagonal elements being 1".format(n, n, k))
+        dimension = int(n * (k - 1) - k * (k - 1) / 2)
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
@@ -365,11 +346,13 @@ class Elliptope(Manifold):
     def inner(self, Y, U, V):
         return float(np.tensordot(U, V))
 
+    def dist(self, U, V):
+        raise NotImplementedError(
+            "The manifold '{:s}' currently provides no implementation of the "
+            "'dist' method".format(self._get_class_name()))
+
     def norm(self, Y, U):
         return np.sqrt(self.inner(Y, U, U))
-
-    def dist(self, U, V):
-        raise NotImplementedError
 
     # Projection onto the tangent space, i.e., on the tangent space of
     # ||Y[i, :]||_2 = 1
@@ -385,9 +368,6 @@ class Elliptope(Manifold):
     def retr(self, Y, U):
         return self._normalize_rows(Y + U)
 
-    def log(self, Y, U):
-        raise NotImplementedError
-
     # Euclidean gradient to Riemannian gradient conversion. We only need the
     # ambient space projection: the remainder of the projection function is not
     # necessary because the Euclidean gradient must already be orthogonal to
@@ -396,20 +376,13 @@ class Elliptope(Manifold):
         return self._project_rows(Y, egrad)
 
     def ehess2rhess(self, Y, egrad, ehess, U):
-        scaling_grad = (egrad * Y).sum(1)
+        scaling_grad = (egrad * Y).sum(axis=1)
         hess = ehess - U * scaling_grad[:, np.newaxis]
 
-        scaling_hess = (U * egrad + Y * ehess).sum(1)
+        scaling_hess = (U * egrad + Y * ehess).sum(axis=1)
         hess -= Y * scaling_hess[:, np.newaxis]
 
-        # Project onto the horizontal space
         return self.proj(Y, hess)
-
-    def exp(self, Y, U):
-        warnings.warn("Exponential map for fixed-rank elliptope manifold "
-                      "not implemented yet. Used retraction instead.",
-                      RuntimeWarning)
-        return self.retr(Y, U)
 
     def rand(self):
         return self._normalize_rows(rnd.randn(self._n, self._k))
@@ -421,9 +394,6 @@ class Elliptope(Manifold):
     def transp(self, Y, Z, U):
         return self.proj(Z, U)
 
-    def pairmean(self, U, V):
-        raise NotImplementedError
-
     def _normalize_rows(self, Y):
         """Return an l2-row-normalized copy of the matrix Y."""
         return Y / la.norm(Y, axis=1)[:, np.newaxis]
@@ -433,5 +403,8 @@ class Elliptope(Manifold):
     def _project_rows(self, Y, H):
         # Compute the inner product between each vector H[i, :] with its root
         # point Y[i, :], i.e., Y[i, :].T * H[i, :]. Returns a row vector.
-        inners = (Y * H).sum(1)
+        inners = (Y * H).sum(axis=1)
         return H - Y * inners[:, np.newaxis]
+
+    def zerovec(self, X):
+        return np.zeros((self._n, self._k))

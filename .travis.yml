@@ -1,54 +1,67 @@
-dist: trusty
+os: linux
+dist: xenial
 
 language: python
 python:
-  - "2.7"
-  - "3.4"
   - "3.5"
   - "3.6"
-
-sudo: required
+  - "3.7"
 
 notifications:
   email: false
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/601eba4ae3738ceb2406
-    on_success: change  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: never     # options: [always|never|change] default: always
+    on_success: change
+    on_failure: always
+    on_start: never
 
-# Install scipy without need to compile, taken from Theano
-# Setup anaconda
-before_install:
-  - sudo apt-get update
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - conda update --yes conda
-  - conda config --add channels conda-forge
+addons:
+  apt:
+    update: true
 
-# Install packages
 install:
-  # Use openblas to fix a theano error (hacky); see http://stackoverflow.com/questions/11987325/theano-fails-due-to-numpy-fortran-mixup-under-ubuntu
-  - conda create --name conda-env-python$TRAVIS_PYTHON_VERSION --yes python=$TRAVIS_PYTHON_VERSION numpy scipy nose libgfortran six wheel
-  - source activate conda-env-python$TRAVIS_PYTHON_VERSION
-  - pip install flake8
-  - pip install coveralls
-  - pip install autograd
-  - pip install theano
-  - pip install tensorflow
-  - python setup.py install
+  - pip install --upgrade pip setuptools wheel
+  - pip install -q -r dev-requirements.txt
+  - pip install -q -r requirements.txt
 
 script:
-  - nosetests ./tests --nologcapture --verbosity=2 --with-coverage --cover-package=pymanopt
-  - flake8 examples pymanopt tests setup.py
+  - flake8 examples pymanopt setup.py tests
+  - >
+    nose2 tests
+    --verbose
+    --with-coverage
 
 after_success:
   - coveralls
+  - >
+    PYTHONPATH=. sphinx-build
+    -b html
+    -D version=latest
+    -D release=latest
+    docs
+    website/docs
+
+deploy:
+  - provider: pypi
+    username: $TWINE_USER
+    password: $TWINE_PW
+    on:
+      repo: pymanopt/pymanopt
+      tags: true
+    distributions: "sdist bdist_wheel"
+    skip_existing: true
+  - provider: pages
+    skip_cleanup: true
+    token: $GITHUB_PAGES_TOKEN
+    keep_history: true
+    repo: pymanopt/pymanopt.github.io
+    target_branch: master
+    fqdn: www.pymanopt.org
+    project_name: pymanopt
+    on:
+      condition: >
+                 $TRAVIS_PYTHON_VERSION = "3.7" &&
+                 ($TRAVIS_BRANCH = "master" || -n $TRAVIS_TAG)
+      repo: pymanopt/pymanopt
+    local_dir: website

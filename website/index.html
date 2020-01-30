@@ -1,0 +1,692 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" id="index">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Pymanopt</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css" />
+
+    <!-- mathjax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]
+        }
+      });
+    </script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+    <!-- code-prettify -->
+    <script type="text/javascript" src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?lang=py"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha256-l85OmPOjvil/SOvVt3HnSSjzF1TUMyT9eV0c2BzEGzU=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha256-2YQRJMXD7pIAPHiXr0s+vlRWA7GYJEK0ARns7k2sbHY=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="css/layout.css"  type="text/css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Pymanopt</h1>
+
+      <p>Pymanopt is a Python toolbox for optimization on manifolds, that computes
+      gradients and Hessians automatically. It builds upon the Matlab toolbox
+      <a href="http://manopt.org/">Manopt</a> but is otherwise independent of it.
+      Pymanopt aims to lower the barriers for users wishing to use state of the art
+      techniques for optimization on manifolds, by relying on automatic differentiation for
+      computing gradients and Hessians, saving users time and saving them from
+      potential calculation and implementiation errors.</p>
+
+      <p>Pymanopt is modular and hence easy to use. All of the automatic
+      differentiation is done behind the scenes, so that the amount of setup the user
+      needs to do is minimal. Usually only the following steps are required:</p>
+      <ol>
+        <li>Instantiate a manifold $\mathcal{M}$ to optimise over</li>
+        <li>Define a cost function $f:\mathcal{M}\to \mathbb{R}$ to
+          minimise</li>
+        <li>Instantiate a Pymanopt solver</li>
+      </ol>
+
+      <p>Experimenting with optimization on manifolds is simple with Pymanopt. The
+      minimum working example below demonstrates this. The steps will be
+      discussed in more detail in the subsequent three sections. Please
+      refer to <a href="MoG.html">this example</a> for a <strong>cool
+        application</strong> of Riemannian optimization using Pymanopt for
+      Inference in MoG models!</p>
+
+      <p><strong>We encourage users and developers to report problems, request
+        features, ask for help, or leave general comments either on
+        <a href="https://github.com/pymanopt/pymanopt">github</a>,
+        <a href="https://gitter.im/pymanopt/pymanopt">gitter</a>, or via email to
+        one of the <a href="https://github.com/pymanopt/pymanopt/blob/master/MAINTAINERS">maintainers</a>.</strong>
+      Please refer to the <a href="docs/index.html">dev documentation</a> and the
+      <a href="https://github.com/pymanopt/pymanopt/blob/master/CONTRIBUTING.md">CONTRIBUTING.md</a>
+      file if you wish to extend Pymanopt's functionality and/or contribute to
+      the project. Pymanopt is distributed under the open source
+      <a href="https://github.com/pymanopt/pymanopt/blob/master/LICENSE">3-clause BSD license</a>.
+      Please cite <a href="http://jmlr.org/papers/v17/16-177.html">this JMLR paper</a>
+      if you publish work using Pymanopt (<a href="http://jmlr.org/papers/v17/16-177.bib">BibTeX</a>).</p>
+
+      <pre><code class="prettyprint language-py">import autograd.numpy as np
+
+from pymanopt.manifolds import Stiefel
+from pymanopt import Problem
+from pymanopt.solvers import SteepestDescent
+
+# (1) Instantiate a manifold
+manifold = Stiefel(5, 2)
+
+# (2) Define the cost function (here using autograd.numpy)
+def cost(X): return np.sum(X)
+
+problem = Problem(manifold=manifold, cost=cost)
+
+# (3) Instantiate a Pymanopt solver
+solver = SteepestDescent()
+
+# let Pymanopt do the rest
+Xopt = solver.solve(problem)
+print(Xopt)</code></pre>
+
+      <h2>Installation</h2>
+      <h3>Dependencies</h3>
+      <p>Pymanopt is compatible with Python 2.7 and Python 3.4+, and depends on
+      NumPy and SciPy. Additionally, to use Pymanopt's built-in automatic
+      differentiation, which we strongly recommend, you need to setup your cost
+      functions using either <a href="https://github.com/HIPS/autograd">Autograd</a>,
+      <a href="http://www.deeplearning.net/software/theano/">Theano</a> or
+      <a href="https://www.tensorflow.org">TensorFlow</a>. If you're unfamiliar
+      with these packages and not sure which to go for, it's probably best to start
+      with Autograd. Autograd wraps thinly around NumPy, and is very simple to use,
+      particularly if you're already familiar with NumPy (see
+      <a href="#autograd-example">below</a>).</p>
+
+      <p>Instructions for installing NumPy, SciPy, and Theano on different operating
+      systems can be found
+      <a href="http://deeplearning.net/software/theano/install.html">here</a>,
+      for installing Autograd
+      <a href="https://github.com/HIPS/autograd#how-to-install">here</a> and for
+      installing TensorFlow
+      <a href="https://www.tensorflow.org/versions/r0.7/get_started/os_setup.html#download-and-setup">here</a>.</p>
+
+      <h3>Installing Pymanopt</h3>
+      <p>Pymanopt can be installed with the following command:</p>
+      <pre><code>pip install --user pymanopt</code></pre>
+
+
+      <h2>Manifolds</h2>
+
+      <p>The rigorous mathematical definition of <em>manifold</em> is
+        abstract and too technical for this tutorial. However if you're
+        unfamiliar with the idea, it's fine just to visualize it as a
+        smooth subset of
+        <a href="https://en.wikipedia.org/wiki/Euclidean_space">Euclidean
+          space</a>. Simple examples include the surface of a sphere or of a
+        <a href="https://en.wikipedia.org/wiki/Torus">torus</a>, or the
+        <a href="https://en.wikipedia.org/wiki/Möbius_strip">Möbius
+          strip</a>. If you need to solve an optimization problem with a
+        search space which is constrained in some smooth way, then
+        performing optimization on manifolds may well be the natural approach to take.</p>
+      <p>The manifolds that we currently support are listed below.
+        We plan to implement more depending on the needs of users, so if
+        there's a particular manifold you'd like to optimize over, please
+        let us know.
+
+        If you wish to implement your own manifold for Pymanopt, you will
+        need to inherit from the
+        <a href="docs/api-reference.html#pymanopt.manifolds.manifold.Manifold">Manifold
+          abstract base class</a>.</p>
+
+<!-------------------------------------------------------------------------->
+<!-- MANIFOLDS TABLE START ------------------------------------------------->
+<!-------------------------------------------------------------------------->
+      <div class="row">
+        <div class="one-half column">
+          <strong>Euclidean manifold</strong><br />
+          <code class="table-code-decl prettyprint language-py">Euclidean(n1, n2, ..., nk)</code><br />
+          Unconstrained Euclidean space of shape <code>(n1, n2, ..., nk)</code> tensors.
+          Useful for unconstrained problems or for unconstrained hyperparameters,
+          as part of a product manifold.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Euclidean
+
+# Space of shape (3, ) vectors
+manifold = Euclidean(3)
+
+# Space of (4 x 2) matrices
+manifold = Euclidean(4, 2)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Symmetric matrices</strong><br />
+          <code class="table-code-decl prettyprint language-py">Symmetric(n, k=1)</code><br />
+          If $k = 1$, this is the manifold of $n \times n$ symmetric matrices.
+          If $k > 1$ then this is a product of $k$ symmetric matrices,
+          arranged as an array of shape <code>(k, n, n)</code>.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Symmetric
+
+# Manifold of 3 x 3 symmetric matrices
+manifold = Symmetric(3)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column"><strong>Sphere manifold</strong><br />
+          <code class="table-code-decl prettyprint language-py">Sphere(n1, n2, ..., nk)</code><br />
+          Shape <code>(n1, n2, ..., nk)</code> tensors with unit
+          2-norm.
+        </div>
+        <div class="one-half column">
+          <pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Sphere
+
+# The 'usual' sphere S^2, the set of points lying
+# on the surface of a ball in 3D space:
+manifold = Sphere(3)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column"><strong>Complex circle</strong><br />
+          <code class="table-code-decl prettyprint language-py">ComplexCircle(n)</code><br />
+          The complex circle manifold $\{x \in \mathbb{C}^n: |x_1| = |x_2| =
+          \ldots = |x_n| = 1\}$ of all complex $n$-vectors with unit-modulus
+          entries.
+        </div>
+        <div class="one-half column">
+          <pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import ComplexCircle
+
+manifold = ComplexCircle(3)</code>
+          </pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column"><strong>Rotations manifold</strong><br />
+          <code class="table-code-decl prettyprint language-py">Rotations(n, k=1)</code><br />
+          Special orthogonal group (the manifold of rotations). That is
+          $\mathrm{SO}(n) := \{X\in\mathbb{R}^{n\times n}:X^\top X=I_n, \mathrm{det}(X)=1\}$.
+          If $k>1$ then this instantiates a product $\mathrm{SO}(n)^k$ of $k$ rotations
+          manifolds.
+        </div>
+        <div class="one-half column">
+          <pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Rotations
+
+# Manifold of 3 x 3 orthogonal matrices with
+# determinant 1.
+manifold = Rotations(3)</code>
+          </pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column"><strong>Stiefel manifold</strong><br />
+          <code class="table-code-decl prettyprint language-py">Stiefel(n, p, k=1)</code><br />
+          Manifold $\mathrm{St}(n, p)$ of n x p matrices whose columns are
+          orthonormal. That is
+          $\mathrm{St}(n, p):=\{X\in \mathbb{R}^{n \times p}:X^TX=I_p\}$.
+          If $k > 1$ then this instantiates a product $\mathrm{St}(n, p)^k$
+          of $k$ Stiefel manifolds.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Stiefel
+
+# Manifold of 3 x 2 matrices with orthonormal
+# columns.
+manifold = Stiefel(3, 2)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Grassmann manifold</strong></br>
+          <code class="table-code-decl prettyprint language-py">Grassmann(n, p, k=1)</code></br>
+          Manifold of $p$-dimensional subspaces of $\mathbb{R}^n$,
+          denoted $\mathrm{Gr}(n, p)$. If the optional argument $k > 1$, instantiates
+          the product $\mathrm{Gr}(n, p)^k$ of $k$ Grassmann manifolds.</br>
+          If $k = 1$ then elements (subspaces) are represented by $n \times p$ Stiefel
+          matrices whose columns span the subspace (see above for definition).
+          If $k > 1$ then elements are represented by a $k \times n \times p$ array
+          containing $k$ copies of $n \times p$ Stiefel matrices.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Grassmann
+
+# Manifold of planes through the origin in R^3
+manifold = Grassmann(3, 2)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Oblique manifold</strong><br />
+          <code class="table-code-decl prettyprint language-py">Oblique(m, n)</code><br />
+          Manifold of $m \times n$ matrices with unit-norm columns. See
+          <a href="http://www.damtp.cam.ac.uk/user/na/NA_papers/NA2006_01.pdf">
+            this paper</a> for an example doing Independent Components Analysis
+          by optimizing over this manifold.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Oblique
+
+# Two 3-vectors, each with norm 1
+manifold = Oblique(3, 2)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Positive-definite matrices</strong><br />
+          <code class="table-code-decl prettyprint language-py">PositiveDefinite(n, k=1)</code><br />
+          If $k = 1$, this is the manifold of $n \times n$ positive-definite matrices.
+          That is, symmetric matrices whose eigenvalues are all strictly positive.
+          If $k > 1$, then this is a product of $k$ positive definite matrices,
+          arranged as an array of shape <code>(k, n, n)</code>. This is useful
+          in the <a href="MoG.html">Mixture of Gaussians example</a>.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import PositiveDefinite
+
+# Manifold of 3 x 3 positive-definite matrices
+manifold = PositiveDefinite(3)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Elliptope manifold</strong><br />
+          <code class="table-code-decl prettyprint language-py">Elliptope(n, k)</code><br />
+          Manifold of $n \times n$ positive-semidefinite matrices with rank $k$
+          and unit diagonal elements. Note, a
+          <a href="https://en.wikipedia.org/wiki/Correlation_and_dependence#Correlation_matrices">
+            correlation matrix</a>
+          is of this form. Used in
+          <a href="http://arxiv.org/pdf/cond-mat/0403477.pdf">
+            this paper</a> for rank reduction of correlation matrices.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Elliptope
+
+# Manifold of 3 x 3 correlation matrices
+# of rank 2
+manifold = Elliptope(3, 2)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Fixed rank positive-semidefinite matrices</strong><br/>
+          <code class="table-code-decl prettyprint language-py">PSDFixedRank(n, k)</code><br />
+          <code class="table-code-decl prettyprint language-py">PSDFixedRankComplex(n, k)</code><br />
+          Manifold of real (or complex) valued $n \times n$ symmetric (or hermitian)
+          positive-semidefinite matrices of rank $k$.<br />
+          See <a href="http://epubs.siam.org/doi/abs/10.1137/080731359">this
+            paper</a> for details.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import PSDFixedRank, PSDFixedRankComplex
+
+# 3 x 3 rank 2 p.s.d. matrices
+# Real
+manifold = PSDFixedRank(3, 2)
+
+# Complex
+manifold = PSDFixedRankComplex(3, 2)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Fixed rank matrices</strong><br/>
+          <code class="table-code-decl prettyprint language-py">FixedRankEmbedded(m, n, k)</code><br />
+          Manifold of real valued $m \times n$ matrices of rank $k$.
+          This follows the embedded geometry described in <a href="http://arxiv.org/abs/1209.3834">this paper</a>.<br />
+          <strong>Note:</strong> this manifold is a work in progress, see <a href="https://github.com/pymanopt/pymanopt/issues/23">here</a>.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import FixedRankEmbedded
+
+# 5 x 4 rank 2 matrices
+manifold = FixedRankEmbedded(5, 4, 2)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Product manifold</strong><br />
+          <code class="table-code-decl prettyprint language-py">Product((man1, man2, ..., manN))</code><br />
+          Product manifold of any of the manifolds listed above. This enables
+          you to optimize over multiple manifolds simultaneously. Useful for problems
+          with multiple parameters that have different constraints.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.manifolds import Product, Stiefel, Euclidean
+
+# Product of Euclidean 3-vector with
+# 5 x 2 Stiefel manifold.
+manifold = Product((Euclidean(3), Stiefel(5, 2)))</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+<!-------------------------------------------------------------------------->
+<!-- COST FUNCTIONS -------------------------------------------------------->
+<!-------------------------------------------------------------------------->
+        <br />
+        <h2>Cost Functions</h2>
+
+        <p>Together, a manifold and cost function fully describe a manifold optimization
+        problem that is to be solved. They are combined into a Pymanopt Problem object that
+        is then passed to a Pymanopt solver.</p>
+<pre><code class="prettyprint language-py">from pymanopt import Problem
+problem = Problem(manifold=manifold, cost=cost)</code></pre>
+
+        <p>The cost function passed to Pymanopt should take a single input (a point on
+        the manifold), and return a scalar. You have three options for how to define
+        the cost function:</p>
+        <table id="cost-setup" class="u-full-width">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Method</th>
+              <th>Additional requirements</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>(a)</td><td>Use Autograd</td><td>None</td>
+            </tr>
+            <tr>
+              <td>(b)</td><td>Use Theano</td><td>None</td>
+            </tr>
+            <tr>
+              <td>(c)</td><td>Use TensorFlow</td><td>None</td>
+            </tr>
+            <tr>
+              <td>(d)</td><td>Use a regular Python function</td><td>Calculate and implement
+                derivatives (gradient and Hessian) by hand.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>The first three options are recommended – indeed, they are what makes
+          manifold optimization with Pymanopt so easy!</strong></p>
+
+        <h3>(a/b/c) Use Autograd, Theano or TensorFlow</h3>
+
+        <p>Currently Pymanopt supports Autograd, Theano and TensorFlow as autodiff
+        backends.</p>
+
+        <h4 id="autograd-example">Setting up the cost function using Autograd</h4>
+        <p>If you already know how to use NumPy, then this approach will be easy. Just
+        import autograd.numpy and setup your cost as a Python function, using the
+        autograd numpy to perform the computation.</p>
+<pre><code class="prettyprint language-python">import autograd.numpy as np
+
+def cost(X):
+    return np.exp(-np.sum(X**2))
+
+problem = Problem(manifold=manifold, cost=cost)</code></pre>
+
+
+        <h4>Setting up the cost function using Theano</h4>
+        <p>This approach requires you to setup your cost as a Theano graph. A
+        tutorial on using Theano can be found
+        <a href="http://deeplearning.net/software/theano/tutorial/">here</a>.</p>
+<pre><code class="prettyprint language-python">import theano.tensor as T
+
+X = T.matrix()
+cost = T.exp(-T.sum(X**2))
+
+problem = Problem(manifold=manifold, cost=cost, arg=X)</code></pre>
+
+        <h4>Setting up the cost function using TensorFlow</h4>
+        <p>This approach requires you to setup your cost as a TensorFlow graph. A
+        tutorial on using TensorFlow can be found
+        <a href="https://www.tensorflow.org/versions/r0.7/get_started/basic_usage.html#basic-usage">here</a>.</p>
+<pre><code class="prettyprint language-python">import tensorflow as tf
+import numpy as np
+
+X = tf.Variable(tf.placeholder(tf.float32))
+cost = tf.exp(-tf.reduce_sum(tf.square(X)))
+
+problem = Problem(manifold=manifold, cost=cost, arg=X)</code></pre>
+
+
+        <h3>(d) Use a regular Python function</h3>
+
+        <p>If you wish to use one of the derivative-free solvers (perhaps your cost
+        function is nowhere smooth), then this approach makes sense. If you want to use
+        a solver which requires derivatives (these solvers generally perform far better
+        than derivative-free methods) this approach enables you to calculate and
+        implement gradients and Hessians by hand.</p>
+
+        <p>Using Pymanopt in this way is similar to Manopt. You can refer to the Manopt
+        <a href="http://www.manopt.org/tutorial.html">tutorial</a> and
+        <a href="https://groups.google.com/forum/#!forum/manopttoolbox">forum</a> for
+        advice on calculating gradients/hessians by hand.
+        However, we would like to stress that there is <i>little or no advantage</i> to
+        doing things in this way. The gradients and Hessians calculated by Pymanopt
+        should be both correct and efficient.
+        </p>
+<pre><code class="prettyprint language-python">problem = Problem(manifold=manifold, cost=cost, egrad=egrad, ehess=ehess)</code></pre>
+
+<!-------------------------------------------------------------------------->
+<!-- SOLVERS --------------------------------------------------------------->
+<!-------------------------------------------------------------------------->
+        <h2>Solvers</h2>
+
+        <p>The Pymanopt Solver classes provide the algorithms for optimization.
+        Once a Pymanopt Problem object has been set up and a solver instantiated
+        the optimization is run as follows:</p>
+<pre><code class="prettyprint, language-py">xoptimal = solver.solve(problem)</code></pre>
+        <p>The solvers' parameters are specified when instantiating the solver object.
+        The following parameters are shared by all solvers
+        (<code class="prettyprint, language-py">argumentname=defaultvalue</code>):</p>
+        <dl>
+          <dt><code class="table-code-decl prettyprint, language-py">maxtime=1000</code></dt>
+          <dd>Maximum time in seconds for the solver to run. You can set
+          <code class="prettyprint, language-py">maxtime=float('inf')</code>
+          for no time limit.</dd>
+
+          <dt><code class="table-code-decl prettyprint, language-py">maxiter=1000</code></dt>
+          <dd>Maximum number of iterations to run.</dd>
+
+          <dt><code class="table-code-decl prettyprint, language-py">mingradnorm=1e-6</code></dt>
+          <dd>Terminate optimization if the norm of the gradient is below this.</dd>
+
+          <dt><code class="table-code-decl prettyprint, language-py">minstepsize=1e-10</code></dt>
+          <dd>Terminate optimization if the stepsize is below this.</dd>
+
+          <dt><code class="table-code-decl prettyprint, language-py">maxcostvals=5000</code></dt>
+          <dd>Maximum number of allowed cost evaluations, especially important if
+          cost evaluation is computationally expensive.</dd>
+
+          <dt><code class="table-code-decl prettyprint, language-py">logverbosity=0</code></dt>
+          <dd>Level of information logged by the solver while it operates, 0
+          is silent, 2 is most information. If set to a non-zero value, the solver
+          will return both the final point on the manifold as well as a dictionary
+          that holds the log information, otherwise the solve routine only returns
+          the final point, i.e.,
+<pre><code class="prettyprint, language-py">xoptimal = solver.solve(problem, logverbosity=0)
+xoptimal, optlog = solver.solve(problem, logverbosity=2)</code></pre>
+          See <a href="#example-optlog-1">below</a> for a minimalistic example.</dd>
+        </dl>
+
+        <p>The solvers implemented in Pymanopt are listed below. Note, all of these
+          are currently based on solvers from Manopt, and more details may be found
+          on the
+          <a href="http://www.manopt.org">Manopt website</a>.
+          Solvers may have individual parameters to adjust
+          their behaviour. These are documented in the respective source files.
+          If you wish to implement your own solver, you must inherit from the
+          <a href="docs/api-reference.html#pymanopt.solvers.solver.Solver">Solver abstract
+          base class</a>. The
+          <a href="https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/steepest_descent.py">
+          steepest_descent</a> solver is reasonably simple and
+          could be used as a model for custom solvers.
+        </p>
+
+      </div>
+      <div class="row">
+        <div class="one-half column">
+          <strong>Trust regions</strong><br />
+          <code class="table-code-decl prettyprint language-py">TrustRegions()</code><br />
+          Second-order method that approximates the objective function by
+          a quadratic surface and then updates the current estimate based on
+          that.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import TrustRegions
+solver = TrustRegions()
+Xopt = solver.solve(problem)</code></pre>
+        </div>
+      </div>
+      <div class="row">
+        <div class="one-half column">
+          <strong>Steepest descent</strong><br />
+          <code class="table-code-decl prettyprint language-py">SteepestDescent()</code><br />
+          Classical first-order steepest descent algorithm. By default uses a back-tracking
+          linesearch. To set linesearch parameters you can instantiate the
+          <a href="docs/api-reference.html#pymanopt.solvers.linesearch.LineSearchBackTracking">LineSearchBackTracking</a>
+          object with your desired parameters and pass it to the
+          SteepestDescent solver using the optional <code>linesearch</code> parameter:
+          <code class="prettify language-py">SteepestDescent(linesearch=LinesearchObject)</code>.
+          You can also implement your own linesearch class, just take
+            <a href="https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/linesearch.py#L4">this code</a>
+          as a starting point.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import SteepestDescent
+solver = SteepestDescent()
+Xopt = solver.solve(problem)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <strong>Conjugate gradient</strong><br />
+          <code class="table-code-decl prettyprint language-py">ConjugateGradient()</code><br />
+          Classical first-order conjugate gradient descent algorithm.
+          By default uses an adaptive linesearch. To set linesearch parameters
+          you can instantiate the
+          <a href="docs/api-reference.html#pymanopt.solvers.linesearch.LineSearchAdaptive">LineSearchAdaptive</a>
+          object with your desired parameters and pass it to the
+          Conjugate gradient solver using the optional <code>linesearch</code> parameter:
+          <code class="language-py">ConjugateGradient(linesearch=LinesearchObject)</code>.
+          You can also implement your own linesearch class, just take
+            <a href="https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/linesearch.py#L81">this code</a>
+          as a starting point.
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import ConjugateGradient
+solver = ConjugateGradient()
+Xopt = solver.solve(problem)</code></pre>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="one-half column">
+          <Strong>Nelder-Mead</strong><br />
+          <code class="table-code-decl prettyprint language-py">NelderMead()</code><br />
+          Derivative-free optimization
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import NelderMead
+solver = NelderMead()
+Xopt = solver.solve(problem)</code></pre>
+        </div>
+      </div>
+      <div class="row">
+        <div class="one-half column">
+          <strong>Particle swarm</strong><br />
+          <code class="table-code-decl prettyprint language-py">ParticleSwarm()</code><br />
+          Derivative-free optimization
+        </div>
+        <div class="one-half column">
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import ParticleSwarm
+solver = ParticleSwarm()
+Xopt = solver.solve(problem)</code></pre>
+        </div>
+      </div>
+      <div class="row">
+        <br />
+
+
+        <h2>Examples</h2>
+
+        <p>Several examples that demonstrate how to use Pymanopt can be found
+        <a href="https://github.com/pymanopt/pymanopt/tree/master/examples">here</a>.
+        Below are some examples that demonstrate certain use-cases that may be of
+        general interest and give an idea of what can be done with Pymanopt.</p>
+
+        <table class="u-full-width">
+          <thead>
+            <tr>
+              <th>Example</th>
+              <th>Notes</th>
+              <th>Links</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="example-optlog-1">
+              <td>Log optimization behaviour</td>
+              <td>Demonstrates how to log and inspect the optimization behaviour,
+                i.e. how the cost function's value changes over iterations, which of
+                the stopping criterions caused the solver to stop, etc.</td>
+              <td>
+                <a href="https://github.com/pymanopt/pymanopt/blob/master/examples/optlog_example.py">
+                  optlog_example.py</a>
+              </td>
+            </tr>
+
+            <tr id="example-mog-1">
+              <td>Riemannian optimization using Pymanopt for Inference in MoG models</td>
+              <td>Given samples of a Mixture of Gaussians model, infer the parameters
+                using optimization on manifolds instead of expectation maximisation (EM).</td>
+              <td>
+                <a href="MoG.html">
+                  MoG.html</a> /
+                <a href="https://github.com/pymanopt/pymanopt/blob/master/examples/MoG.ipynb">
+                  MoG.ipynb</a>
+              </td>
+            </tr>
+
+            <tr id="example-productmanifold-1">
+              <td>Linear regression as optimization over the product manifold</td>
+              <td>Optimises the weights $w$ and the offset $b$ in the linear regression
+                problem $\min_{w,b} ||Y-w^\top X-b||_2^2$, for given label vector $Y$ and
+                covariates matrix $X$ over the product manifold
+                $\mathbb{R}^3 \times \mathbb{R}$ to demonstrate optimization over
+                product manifolds.</td>
+              <td>
+                <a href="https://github.com/pymanopt/pymanopt/blob/master/examples/regression_offset_autograd.py">
+                  regression_offset_autograd.py</a> /
+                <a href="https://github.com/pymanopt/pymanopt/blob/master/examples/regression_offset_theano.py">
+                  regression_offset_theano.py</a> /
+                <a href="https://github.com/pymanopt/pymanopt/blob/master/examples/regression_offset_tensorflow.py">
+                  regression_offset_tensorflow.py</a>
+              </td>
+            </tr>
+
+            <tr id="example-multiple-1">
+              <td>Solve the same optimization problems for several data instances</td>
+              <td>Demonstrates how to solve the same optimization problems for several
+                data instances, i.e., in this case solving a regression problem for five
+                different datasets.</td>
+              <td>
+                <a href="https://github.com/pymanopt/pymanopt/blob/master/examples/linreg_multiple_autograd.py">
+                  linreg_multiple_autograd.py</a> /
+                <a href="https://github.com/pymanopt/pymanopt/blob/master/examples/linreg_multiple_theano.py">
+                  linreg_multiple_theano.py</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

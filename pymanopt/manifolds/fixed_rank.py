@@ -2,16 +2,14 @@
 Module containing manifolds of fixed rank matrices.
 """
 
-from __future__ import division
-
 import numpy as np
 
-from pymanopt.manifolds.manifold import Manifold
-from pymanopt.manifolds import Stiefel
+from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.stiefel import Stiefel
 from pymanopt.tools import ndarraySequenceMixin
 
 
-class FixedRankEmbedded(Manifold):
+class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     """
     Note: Currently not compatible with the second order TrustRegions solver.
     Should be fixed soon.
@@ -84,23 +82,20 @@ class FixedRankEmbedded(Manifold):
     Original author: Nicolas Boumal, Dec. 30, 2012.
     """
 
+    # TODO(nkoep): Change the signature to (self, dims, k) where dims has to be
+    #              a 2-element iterable specifying m and n.
+
     def __init__(self, m, n, k):
         self._m = m
         self._n = n
         self._k = k
-
-        self._name = ("Manifold of {m}-by-{n} matrices with rank {k} and "
-                      "embedded geometry".format(m=m, n=n, k=k))
-
         self._stiefel_m = Stiefel(m, k)
         self._stiefel_n = Stiefel(n, k)
 
-    def __str__(self):
-        return self._name
-
-    @property
-    def dim(self):
-        return (self._m + self._n - self._k) * self._k
+        name = ("Manifold of {m}-by-{n} matrices with rank {k} and embedded "
+                "geometry".format(m=m, n=n, k=k))
+        dimension = (m + n - k) * k
+        super().__init__(name, dimension)
 
     @property
     def typicaldist(self):
@@ -178,8 +173,9 @@ class FixedRankEmbedded(Manifold):
 
         return _FixedRankTangentVector((Up, M, Vp))
 
-    def ehess2rhess(self, X, egrad, ehess, H):
-        raise NotImplementedError
+    # TODO(nkoep): Implement the 'weingarten' method to support the
+    # trust-region solver, cf.
+    # https://sites.uclouvain.be/absil/2013-01/Weingarten_07PA_techrep.pdf
 
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
@@ -261,15 +257,6 @@ class FixedRankEmbedded(Manifold):
     def transp(self, X1, X2, G):
         return self.proj(X2, self.tangent2ambient(X1, G))
 
-    def exp(self, X, U):
-        raise NotImplementedError
-
-    def log(self, X, Y):
-        raise NotImplementedError
-
-    def pairmean(self, X, Y):
-        raise NotImplementedError
-
     def zerovec(self, X):
         return _FixedRankTangentVector((np.zeros((self._m, self._k)),
                                         np.zeros((self._k, self._k)),
@@ -278,8 +265,7 @@ class FixedRankEmbedded(Manifold):
 
 class _FixedRankTangentVector(tuple, ndarraySequenceMixin):
     def __repr__(self):
-        repr_ = super(_FixedRankTangentVector, self).__repr__()
-        return "_FixedRankTangentVector: " + repr_
+        return "_FixedRankTangentVector: " + super().__repr__()
 
     def to_ambient(self, x):
         Z1 = x[0].dot(self[1].dot(x[2]))

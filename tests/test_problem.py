@@ -1,24 +1,29 @@
-import unittest
-
+import numpy as np
 import theano.tensor as T
+from numpy import random as rnd, testing as np_testing
 
-from pymanopt import Problem
+import pymanopt
 from pymanopt.manifolds import Sphere
 
+from ._test import TestCase
 
-class TestProblem(unittest.TestCase):
+
+class TestProblem(TestCase):
     def setUp(self):
-        self.X = X = T.vector()
-        self.cost = T.exp(T.sum(X**2))
+        X = T.vector()
+
+        @pymanopt.function.Theano(X)
+        def cost(X):
+            return T.exp(T.sum(X ** 2))
+
+        self.cost = cost
 
         n = self.n = 15
 
         self.man = Sphere(n)
 
     def test_prepare(self):
-        problem = Problem(self.man, self.cost)
-        with self.assertRaises(ValueError):
-            # Asking for the gradient of a Theano cost function without
-            # specifying an argument for differentiation should raise an
-            # exception.
-            problem.grad
+        problem = pymanopt.Problem(self.man, self.cost)
+        x = rnd.randn(self.n)
+        np_testing.assert_allclose(2 * x * np.exp(np.sum(x ** 2)),
+                                   problem.egrad(x))

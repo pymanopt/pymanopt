@@ -1,5 +1,3 @@
-from __future__ import print_function, division
-
 import time
 
 import numpy as np
@@ -30,7 +28,7 @@ class ParticleSwarm(Solver):
             - social (1.4)
                 Quantifies performance relative to neighbors
         """
-        super(ParticleSwarm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals
         self._maxiter = maxiter

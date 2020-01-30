@@ -1,5 +1,3 @@
-from __future__ import print_function, division
-
 import time
 from copy import deepcopy
 
@@ -14,7 +12,7 @@ class SteepestDescent(Solver):
     """
 
     def __init__(self, linesearch=LineSearchBackTracking(), *args, **kwargs):
-        super(SteepestDescent, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if linesearch is None:
             self._linesearch = LineSearchBackTracking()
