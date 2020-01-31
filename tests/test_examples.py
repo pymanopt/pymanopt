@@ -2,6 +2,7 @@ from examples import (
     closest_unit_norm_column_approximation,
     dominant_eigenvector,
     dominant_invariant_subspace,
+    low_rank_psd_matrix_approximation,
     low_rank_matrix_approximation,
     multiple_linear_regression
 )
@@ -22,6 +23,10 @@ class TestExamples(TestCase):
     @params(*dominant_invariant_subspace.SUPPORTED_BACKENDS)
     def test_dominant_invariant_subspace(self, backend):
         dominant_invariant_subspace.run(backend=backend)
+
+    @params(*low_rank_psd_matrix_approximation.SUPPORTED_BACKENDS)
+    def test_low_rank_psd_matrix_approximation(self, backend):
+        low_rank_psd_matrix_approximation.run(backend=backend)
 
     @params(*low_rank_matrix_approximation.SUPPORTED_BACKENDS)
     def test_low_rank_matrix_approximation(self, backend):
