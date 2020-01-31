@@ -45,7 +45,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     and the full matrix can be recovered using the matrix product
     x[0] * diag(x[1]) * x[2]:
     >>> import numpy as np
-    >>> X = x[0].dot(np.diag(x[1])).dot(x[2])
+    >>> X = x[0] @ np.diag(x[1]) @ x[2]
 
     Tangent vectors are represented as a tuple (Up, M, Vp). The matrices Up
     (mxk) and Vp (nxk) obey Up'*U = 0 and Vp'*V = 0.
@@ -111,16 +111,16 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         ZW.
         """
         if isinstance(Z, (list, tuple)):
-            return np.dot(Z[0], np.dot(Z[1], np.dot(Z[2].T, W)))
-        return np.dot(Z, W)
+            return Z[0] @ Z[1] @ Z[2].T @ W
+        return Z @ W
 
     def _apply_ambient_transpose(self, Z, W):
         """
         Same as apply_ambient, but applies Z' to W.
         """
         if isinstance(Z, (list, tuple)):
-            return np.dot(Z[2], np.dot(Z[1], np.dot(Z[0].T, W)))
-        return np.dot(Z.T, W)
+            return Z[2] @ Z[1] @ Z[0].T @ W
+        return Z.T @ W
 
     def proj(self, X, Z):
         """
@@ -132,12 +132,12 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         (Up, M, Vp), as described in the class docstring.
         """
         ZV = self._apply_ambient(Z, X[2].T)
-        UtZV = np.dot(X[0].T, ZV)
+        UtZV = X[0].T @ ZV
         ZtU = self._apply_ambient_transpose(Z, X[0])
 
-        Up = ZV - np.dot(X[0], UtZV)
+        Up = ZV - X[0] @ UtZV
         M = UtZV
-        Vp = ZtU - np.dot(X[2].T, UtZV.T)
+        Vp = ZtU - X[2].T @ UtZV.T
 
         return _FixedRankTangentVector((Up, M, Vp))
 
@@ -152,12 +152,12 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         space. See https://j-towns.github.io/papers/svd-derivative.pdf for a
         derivation.
         """
-        utdu = np.dot(x[0].T, egrad[0])
-        uutdu = np.dot(x[0], utdu)
+        utdu = x[0].T @ egrad[0]
+        uutdu = x[0] @ utdu
         Up = (egrad[0] - uutdu) / x[1]
 
-        vtdv = np.dot(x[2], egrad[2].T)
-        vvtdv = np.dot(x[2].T, vtdv)
+        vtdv = x[2] @ egrad[2].T
+        vvtdv = x[2].T @ vtdv
         Vp = (egrad[2].T - vvtdv) / x[1]
 
         i = np.eye(self._k)
@@ -188,8 +188,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         # Transpose because numpy outputs it the wrong way.
         Vt = Vt.T
 
-        U = np.dot(np.hstack((X[0], Qu)), Ut[:, :self._k])
-        V = np.dot(np.hstack((X[2].T, Qv)), Vt[:, :self._k])
+        U = np.hstack((X[0], Qu)) @ Ut[:, :self._k]
+        V = np.hstack((X[2].T, Qv)) @ Vt[:, :self._k]
         S = St[:self._k] + np.spacing(1)
         return (U, S, V.T)
 
@@ -209,8 +209,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         errors. If Z was indeed a tangent vector at X, this should barely
         affect Z (it would not at all if we had infinite numerical accuracy).
         """
-        Up = Z[0] - np.dot(X[0], np.dot(X[0].T, Z[0]))
-        Vp = Z[2] - np.dot(X[2].T, np.dot(X[2], Z[2]))
+        Up = Z[0] - X[0] @ X[0].T @ Z[0]
+        Vp = Z[2] - X[2].T @ X[2] @ Z[2]
 
         return _FixedRankTangentVector((Up, Z[1], Vp))
 
@@ -238,7 +238,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         general) orthonormal and S is not (in general) diagonal.
         (In this implementation, S is identity, but this might change.)
         """
-        U = np.hstack((np.dot(X[0], Z[1]) + Z[0], X[0]))
+        U = np.hstack((X[0] @ Z[1] + Z[0], X[0]))
         S = np.eye(2 * self._k)
         V = np.hstack(([X[2].T, Z[2]]))
         return (U, S, V)
@@ -263,9 +263,9 @@ class _FixedRankTangentVector(tuple, ndarraySequenceMixin):
         return "_FixedRankTangentVector: " + super().__repr__()
 
     def to_ambient(self, x):
-        Z1 = x[0].dot(self[1].dot(x[2]))
-        Z2 = self[0].dot(x[2])
-        Z3 = x[0].dot(self[2].T)
+        Z1 = x[0] @ self[1] @ x[2]
+        Z2 = self[0] @ x[2]
+        Z3 = x[0] @ self[2].T
         return Z1 + Z2 + Z3
 
     def __add__(self, other):
