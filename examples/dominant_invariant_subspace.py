@@ -37,7 +37,7 @@ def create_cost_egrad_ehess(backend, A, p):
         def egrad(X):
             return -(A + A.T) @ X
 
-        # FIXME(nkoep): With the decorator, the Callable backend currently
+        # FIXME(nkoep): With the 'Callable' decorator, the backend currently
         #               interprets the 'ehess' function as a regular nary
         #               function, which should be wrapped in a unary function
         #               whose arguments get unpacked when the function is

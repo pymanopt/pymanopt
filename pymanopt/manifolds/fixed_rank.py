@@ -1,7 +1,6 @@
 """
 Module containing manifolds of fixed rank matrices.
 """
-
 import numpy as np
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
