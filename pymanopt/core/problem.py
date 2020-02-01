@@ -6,6 +6,8 @@ import functools
 
 import numpy as np
 
+from ..autodiff import Function
+
 
 class Problem:
     """
@@ -43,16 +45,30 @@ class Problem:
             Level of information printed by the solver while it operates, 0
             is silent, 2 is most information.
     """
+
     def __init__(self, manifold, cost, egrad=None, ehess=None, grad=None,
                  hess=None, precon=None, verbosity=2):
         self.manifold = manifold
 
+        for function, name in (
+                (cost, "cost"), (egrad, "egrad"), (ehess, "ehess"),
+                (grad, "grad"), (hess, "hess")):
+            self._validate_function(function, name)
+
         self._cost = cost
 
-        self._ehess = ehess
+        if egrad is not None:
+            egrad = self._wrap_gradient(egrad)
         self._egrad = egrad
+        if ehess is not None:
+            ehess = self._wrap_hessian_vector_product(ehess)
+        self._ehess = ehess
 
+        if grad is not None:
+            grad = self._wrap_gradient(grad)
         self._grad = grad
+        if hess is not None:
+            hess = self._wrap_hessian_vector_product(hess)
         self._hess = hess
 
         if precon is None:
@@ -68,9 +84,17 @@ class Problem:
                     and (not isinstance(value, int) or value < 0)):
                 raise ValueError(
                     "Verbosity level must be an nonnegative integer")
-            if key == "manifold":
-                raise AttributeError("Cannot override 'manifold' attribute")
+            if key in ("manifold", "precon"):
+                raise AttributeError(
+                    "Cannot override '{:s}' attribute".format(key))
         super().__setattr__(key, value)
+
+    @staticmethod
+    def _validate_function(function, name):
+        if function is not None and not isinstance(function, Function):
+            raise ValueError(
+                "Function '{:s}' must be decorated with one of the decorators "
+                "from 'pymanopt.function'".format(name))
 
     def _flatten_arguments(self, arguments, signature):
         flattened_arguments = []
