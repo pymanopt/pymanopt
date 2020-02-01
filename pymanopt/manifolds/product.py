@@ -7,13 +7,24 @@ from pymanopt.tools import ndarraySequenceMixin
 class Product(Manifold):
     """Product manifold, i.e., the cartesian product of multiple manifolds."""
 
-    # TODO: Change the argument to *manifold so we can do Product(man1, man2).
+    # TODO(nkoep): Change the argument to *manifold so we can do Product(man1,
+    #              man2).
     def __init__(self, manifolds):
-        self._manifolds = manifolds
+        for manifold in manifolds:
+            if isinstance(manifold, Product):
+                raise ValueError("Nested product manifolds are not supported")
+        self._manifolds = tuple(manifolds)
         name = ("Product manifold: {:s}".format(
-                " X ".join([str(man) for man in self._manifolds])))
-        dimension = np.sum([man.dim for man in self._manifolds])
-        super().__init__(name, dimension)
+                " x ".join([str(man) for man in manifolds])))
+        dimension = np.sum([man.dim for man in manifolds])
+        point_format = (manifold.point_format for manifold in manifolds)
+        super().__init__(name, dimension, point_format=point_format)
+
+    def __setattr__(self, key, value):
+        if hasattr(self, key):
+            if key == "manifolds":
+                raise AttributeError("Cannot override 'manifolds' attribute")
+        super().__setattr__(key, value)
 
     @property
     def typicaldist(self):

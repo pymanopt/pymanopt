@@ -25,11 +25,14 @@ class Manifold(metaclass=abc.ABCMeta):
     methods in this class have equivalents in Manopt with the same name).
     """
 
-    def __init__(self, name, dimension):
+    def __init__(self, name, dimension, point_format=1):
         assert isinstance(dimension, (int, np.integer)), \
-                "dimension must be an integer"
+            "dimension must be an integer"
+        assert isinstance(point_format, int) and point_format > 0, \
+            "point_format must be a positive integer"
         self._name = name
         self._dimension = dimension
+        self._point_format = point_format
 
     def __str__(self):
         """Returns a string representation of the particular manifold."""
@@ -42,6 +45,17 @@ class Manifold(metaclass=abc.ABCMeta):
     def dim(self):
         """The dimension of the manifold"""
         return self._dimension
+
+    @property
+    def point_format(self):
+        """The number of elements a point on a manifold consists of.
+
+        For most manifolds, which represent points as (potentially
+        multi-dimensional) arrays, this will be 1, but other manifolds might
+        represent points as tuples or lists of arrays. In this case,
+        `point_format` describes how many elements such tuples/lists contain.
+        """
+        return self._point_format
 
     # Manifold properties that subclasses can define
 

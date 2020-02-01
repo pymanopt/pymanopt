@@ -38,15 +38,15 @@ class Function:
     def compute_gradient(self):
         assert self._backend is not None
         if self._egrad is None:
-            self._egrad = self._backend.compute_gradient(self._function,
-                                                         self._args)
+            self._egrad = self._backend.compute_gradient(
+                self._function, self._args)
         return self._egrad
 
-    def compute_hessian(self):
+    def compute_hessian_vector_product(self):
         assert self._backend is not None
         if self._ehess is None:
-            self._ehess = self._backend.compute_hessian(self._function,
-                                                        self._args)
+            self._ehess = self._backend.compute_hessian_vector_product(
+                self._function, self._args)
         return self._ehess
 
     def __call__(self, *args, **kwargs):
