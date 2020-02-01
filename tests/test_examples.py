@@ -7,6 +7,7 @@ from examples import (
     multiple_linear_regression,
     optimal_rotations,
     packing_on_the_sphere,
+    pca,
     rank_k_correlation_matrix_approximation
 )
 from nose2.tools import params
@@ -46,6 +47,10 @@ class TestExamples(TestCase):
     @params(*packing_on_the_sphere.SUPPORTED_BACKENDS)
     def test_packing_on_the_sphere(self, backend):
         packing_on_the_sphere.run(backend)
+
+    @params(*pca.SUPPORTED_BACKENDS)
+    def test_pca(self, backend):
+        pca.run(backend)
 
     @params(*rank_k_correlation_matrix_approximation.SUPPORTED_BACKENDS)
     def test_rank_k_correlation_matrix_approximation(self, backend):
