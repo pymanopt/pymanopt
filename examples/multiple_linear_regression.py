@@ -38,7 +38,7 @@ def create_cost_egrad_ehess(backend, samples, targets):
         def egrad(weights):
             return -2 * samples.T @ (targets - samples @ weights)
 
-        # FIXME(nkoep): See examples/dominant_invariant_subspace.py.
+        @pymanopt.function.Callable
         def ehess(weights, vector):
             return 2 * samples.T @ samples @ vector
     elif backend == "PyTorch":

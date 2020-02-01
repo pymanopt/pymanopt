@@ -37,8 +37,7 @@ def create_cost_egrad_ehess(backend, matrix, rank):
         def egrad(X):
             return 0.5 * X @ (X.T @ X - matrix)
 
-        # FIXME(nkoep): See examples/dominant_invariant_subspace.py.
-        # @pymanopt.function.Callable
+        @pymanopt.function.Callable
         def ehess(X, H):
             return X @ (H.T @ X + X.T @ H) + H @ (X.T @ X - matrix)
     elif backend == "PyTorch":

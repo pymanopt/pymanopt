@@ -37,14 +37,7 @@ def create_cost_egrad_ehess(backend, A, p):
         def egrad(X):
             return -(A + A.T) @ X
 
-        # FIXME(nkoep): With the 'Callable' decorator, the backend currently
-        #               interprets the 'ehess' function as a regular nary
-        #               function, which should be wrapped in a unary function
-        #               whose arguments get unpacked when the function is
-        #               called. We need a way to signal to the backend that
-        #               'ehess' implements a Hessian-vector product, which
-        #               requires two arguments.
-        # @pymanopt.function.Callable
+        @pymanopt.function.Callable
         def ehess(X, H):
             return -(A + A.T) @ H
     elif backend == "PyTorch":

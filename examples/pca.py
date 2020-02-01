@@ -39,8 +39,7 @@ def create_cost_egrad_ehess(backend, samples, num_components):
                 (samples - samples @ w @ w.T).T @ samples
             ) @ w
 
-        # FIXME(nkoep): See examples/dominant_invariant_subspace.py.
-        # @pymanopt.function.Callable
+        @pymanopt.function.Callable
         def ehess(w, h):
             return -2 * (
                 samples.T @ (samples - samples @ w @ h.T) @ w +
