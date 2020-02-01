@@ -5,6 +5,7 @@ from examples import (
     low_rank_matrix_approximation,
     low_rank_psd_matrix_approximation,
     multiple_linear_regression,
+    optimal_rotations,
     packing_on_the_sphere,
     rank_k_correlation_matrix_approximation
 )
@@ -37,6 +38,10 @@ class TestExamples(TestCase):
     @params(*multiple_linear_regression.SUPPORTED_BACKENDS)
     def test_multiple_linear_regression(self, backend):
         multiple_linear_regression.run(backend)
+
+    @params(*optimal_rotations.SUPPORTED_BACKENDS)
+    def test_optimal_rotations(self, backend):
+        optimal_rotations.run(backend)
 
     @params(*packing_on_the_sphere.SUPPORTED_BACKENDS)
     def test_packing_on_the_sphere(self, backend):
