@@ -2,6 +2,7 @@
 Module containing functions to differentiate functions using pytorch.
 """
 import functools
+import warnings
 
 import numpy as np
 try:
@@ -36,6 +37,9 @@ class _PyTorchBackend(Backend):
         """
         strides = np.array(array.strides)
         if np.any(strides < 0):
+            warnings.warn(
+                "PyTorch does not support numpy arrays with negative strides. "
+                "Copying array to normalize strides.")
             array = array.copy()
         return torch.from_numpy(array)
 
