@@ -57,7 +57,7 @@ def create_cost_egrad(backend, A, rank):
 
         @pymanopt.function.TensorFlow(u, s, vt)
         def cost(u, s, vt):
-            X = tf.matmul(u, tf.matmul(tf.diag(s), vt))
+            X = tf.matmul(u, tf.matmul(tf.linalg.diag(s), vt))
             return tf.norm(X - A) ** 2
     elif backend == "Theano":
         u = T.matrix()
