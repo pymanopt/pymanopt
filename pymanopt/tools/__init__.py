@@ -93,3 +93,14 @@ def group_return_values(function, signature):
             i += n
         return groups
     return inner
+
+
+def unpack_singleton_iterable_return_value(function):
+    """Function decorator which unwraps^
+    """
+    @functools.wraps(function)
+    def wrapper(*args):
+        result = function(*args)
+        assert isinstance(result, (list, tuple))
+        return result[0]
+    return wrapper
