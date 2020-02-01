@@ -1,27 +1,36 @@
 import unittest
 
-from pymanopt.tools import flatten_arguments
+from pymanopt.tools import (
+    bisect_sequence, unpack_singleton_sequence_return_value
+)
 
 
 class TestArgumentFlattening(unittest.TestCase):
-    def _test_flatten_arguments(
-            self, arguments, correctly_flattened_arguments):
-        flattened_arguments = flatten_arguments(arguments)
-        self.assertEqual(flattened_arguments, correctly_flattened_arguments)
+    def test_bisect_sequence(self):
+        sequence = range(10)
+        half1, half2 = bisect_sequence(sequence)
+        self.assertEqual(half1, range(5))
+        self.assertEqual(half2, range(5, 10))
+        with self.assertRaises(ValueError):
+            bisect_sequence(range(11))
 
-        flattened_arguments_with_signature_hint = flatten_arguments(
-            arguments, signature=arguments)
-        self.assertEqual(flattened_arguments_with_signature_hint,
-                         correctly_flattened_arguments)
+    def test_unpack_singleton_sequence_return_value(self):
+        @unpack_singleton_sequence_return_value
+        def f():
+            return (1,)
 
-    def test_single_argument(self):
-        arguments = ("x",)
-        self._test_flatten_arguments(arguments, arguments)
+        self.assertEqual(f(), 1)
 
-    def test_multiple_arguments(self):
-        arguments = ("x", "y", "z")
-        self._test_flatten_arguments(arguments, arguments)
+        @unpack_singleton_sequence_return_value
+        def g():
+            return (1, 2)
 
-    def test_nested_arguments(self):
-        arguments = (("x", "y"), "z")
-        self._test_flatten_arguments(arguments, ("x", "y", "z"))
+        with self.assertRaises(ValueError):
+            g()
+
+        @unpack_singleton_sequence_return_value
+        def h():
+            return None
+
+        with self.assertRaises(ValueError):
+            h()

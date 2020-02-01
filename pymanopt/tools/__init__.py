@@ -19,14 +19,15 @@ class ndarraySequenceMixin:
     __array_ufunc__ = None  # Available since numpy 1.13
 
 
-def unpack_singleton_iterable_return_value(function):
+def unpack_singleton_sequence_return_value(function):
     """Function decorator which unwraps the return value of ``function`` if it
     is a sequence containing only a single element.
     """
     @functools.wraps(function)
     def wrapper(*args):
         result = function(*args)
-        assert isinstance(result, (list, tuple)) and len(result) == 1
+        if not isinstance(result, (list, tuple)) or len(result) != 1:
+            raise ValueError("Function did not return a singleton sequence")
         return result[0]
     return wrapper
 

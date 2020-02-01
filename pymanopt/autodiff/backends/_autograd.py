@@ -10,7 +10,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
-from ...tools import bisect_sequence, unpack_singleton_iterable_return_value
+from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
 
 
 class _AutogradBackend(Backend):
@@ -35,7 +35,7 @@ class _AutogradBackend(Backend):
         num_arguments = len(arguments)
         gradient = autograd.grad(function, argnum=list(range(num_arguments)))
         if num_arguments == 1:
-            return unpack_singleton_iterable_return_value(gradient)
+            return unpack_singleton_sequence_return_value(gradient)
         return gradient
 
     @Backend._assert_backend_available
@@ -49,7 +49,7 @@ class _AutogradBackend(Backend):
             arguments, vectors = bisect_sequence(args)
             return hessian_vector_product(*arguments, vectors)
         if num_arguments == 1:
-            return unpack_singleton_iterable_return_value(wrapper)
+            return unpack_singleton_sequence_return_value(wrapper)
         return wrapper
 
 

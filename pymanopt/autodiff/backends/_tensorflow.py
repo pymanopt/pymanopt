@@ -10,7 +10,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_graph_backend_decorator
-from ...tools import bisect_sequence, unpack_singleton_iterable_return_value
+from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
 
 
 class _TensorFlowBackend(Backend):
@@ -65,7 +65,7 @@ class _TensorFlowBackend(Backend):
             }
             return self._session.run(gradients, feed_dict)
         if len(variables) == 1:
-            return unpack_singleton_iterable_return_value(gradient)
+            return unpack_singleton_sequence_return_value(gradient)
         return gradient
 
     @staticmethod
@@ -117,7 +117,7 @@ class _TensorFlowBackend(Backend):
             }
             return self._session.run(hessian, feed_dict)
         if len(variables) == 1:
-            return unpack_singleton_iterable_return_value(
+            return unpack_singleton_sequence_return_value(
                 hessian_vector_product)
         return hessian_vector_product
 

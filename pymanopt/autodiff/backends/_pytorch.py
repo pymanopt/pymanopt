@@ -14,7 +14,7 @@ else:
 
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
-from ...tools import bisect_sequence, unpack_singleton_iterable_return_value
+from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
 
 
 class _PyTorchBackend(Backend):
@@ -77,7 +77,7 @@ class _PyTorchBackend(Backend):
             function(*torch_arguments).backward()
             return self._sanitize_gradients(torch_arguments)
         if len(arguments) == 1:
-            return unpack_singleton_iterable_return_value(gradient)
+            return unpack_singleton_sequence_return_value(gradient)
         return gradient
 
     @Backend._assert_backend_available
@@ -101,7 +101,7 @@ class _PyTorchBackend(Backend):
             dot_product.backward()
             return self._sanitize_gradients(xs)
         if len(arguments) == 1:
-            return unpack_singleton_iterable_return_value(
+            return unpack_singleton_sequence_return_value(
                 hessian_vector_product)
         return hessian_vector_product
 
