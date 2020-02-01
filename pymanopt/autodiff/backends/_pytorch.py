@@ -14,7 +14,7 @@ else:
 
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
-from ...tools import flatten_arguments, group_return_values
+from ...tools import bisect_iterable, unpack_singleton_iterable_return_value
 
 
 class _PyTorchBackend(Backend):
@@ -45,19 +45,10 @@ class _PyTorchBackend(Backend):
 
     @Backend._assert_backend_available
     def compile_function(self, function, arguments):
-        flattened_arguments = flatten_arguments(arguments)
-
-        if len(flattened_arguments) == 1:
-            @functools.wraps(function)
-            def unary_function(argument):
-                return function(self._from_numpy(argument)).numpy()
-            return unary_function
-
         @functools.wraps(function)
-        def nary_function(arguments):
-            return function(
-                *map(self._from_numpy, flatten_arguments(arguments))).numpy()
-        return nary_function
+        def wrapper(*args):
+            return function(*map(self._from_numpy, args)).numpy()
+        return wrapper
 
     def _sanitize_gradient(self, tensor):
         if tensor.grad is None:
@@ -69,50 +60,36 @@ class _PyTorchBackend(Backend):
 
     @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
-        flattened_arguments = flatten_arguments(arguments)
+        # if len(arguments) == 1:
+        #     def unary_gradient(argument):
+        #         torch_argument = self._from_numpy(argument)
+        #         torch_argument.requires_grad_()
+        #         function(torch_argument).backward()
+        #         return self._sanitize_gradient(torch_argument)
+        #     return unary_gradient
 
-        if len(flattened_arguments) == 1:
-            def unary_gradient(argument):
-                torch_argument = self._from_numpy(argument)
-                torch_argument.requires_grad_()
-                function(torch_argument).backward()
-                return self._sanitize_gradient(torch_argument)
-            return unary_gradient
-
-        def nary_gradient(arguments):
+        def gradient(*args):
             torch_arguments = []
-            for argument in flatten_arguments(arguments):
+            for argument in args:
                 torch_argument = self._from_numpy(argument)
                 torch_argument.requires_grad_()
                 torch_arguments.append(torch_argument)
             function(*torch_arguments).backward()
             return self._sanitize_gradients(torch_arguments)
-        return group_return_values(nary_gradient, arguments)
+        if len(arguments) == 1:
+            return unpack_singleton_iterable_return_value(gradient)
+        return gradient
 
     @Backend._assert_backend_available
-    def compute_hessian(self, function, arguments):
-        flattened_arguments = flatten_arguments(arguments)
-
-        if len(flattened_arguments) == 1:
-            def unary_hessian(point, vector):
-                x = self._from_numpy(point)
-                v = self._from_numpy(vector)
-                x.requires_grad_()
-                fx = function(x)
-                (grad_fx,) = autograd.grad(fx, x, create_graph=True,
-                                           allow_unused=True)
-                torch.tensordot(grad_fx, v, dims=grad_fx.dim()).backward()
-                return self._sanitize_gradient(x)
-            return unary_hessian
-
-        def nary_hessian(points, vectors):
+    def compute_hessian_vector_product(self, function, arguments):
+        def hessian_vector_product(*args):
+            points, vectors = bisect_iterable(args)
             xs = []
-            for point in flatten_arguments(points):
+            for point in points:
                 x = self._from_numpy(point)
                 x.requires_grad_()
                 xs.append(x)
-            vs = [self._from_numpy(vector)
-                  for vector in flatten_arguments(vectors)]
+            vs = [self._from_numpy(vector) for vector in vectors]
             fx = function(*xs)
             fx.requires_grad_()
             gradients = autograd.grad(fx, xs, create_graph=True,
@@ -123,7 +100,10 @@ class _PyTorchBackend(Backend):
                     gradient, vector, dims=gradient.dim())
             dot_product.backward()
             return self._sanitize_gradients(xs)
-        return group_return_values(nary_hessian, arguments)
+        if len(arguments) == 1:
+            return unpack_singleton_iterable_return_value(
+                hessian_vector_product)
+        return hessian_vector_product
 
 
 PyTorch = make_tracing_backend_decorator(_PyTorchBackend)

@@ -104,3 +104,10 @@ def unpack_singleton_iterable_return_value(function):
         assert isinstance(result, (list, tuple))
         return result[0]
     return wrapper
+
+
+def bisect_iterable(iterable):
+    num_items = len(iterable)
+    if num_items % 2 == 1:
+        raise ValueError("Iterable must have an even number of elements")
+    return iterable[:num_items // 2], iterable[num_items // 2:]
