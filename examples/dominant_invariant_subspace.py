@@ -61,10 +61,18 @@ def create_cost_egrad_ehess(backend, A, p):
             return -tf.tensordot(X, tf.matmul(A, X), axes=2)
     elif backend == "Theano":
         X = T.matrix()
+        U = T.matrix()
 
         @pymanopt.function.Theano(X)
         def cost(X):
             return -T.dot(X.T, T.dot(A, X)).trace()
+
+        # Define the Euclidean Hessian-vector product explicitly for the
+        # purpose of demonstration. The Euclidean gradient is automatically
+        # calculated via Theano's autodiff capabilities.
+        @pymanopt.function.Theano(X, U)
+        def ehess(X, U):
+            return -T.dot(A + A.T, U)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
