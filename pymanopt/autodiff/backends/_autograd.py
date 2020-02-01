@@ -68,8 +68,8 @@ class _AutogradBackend(Backend):
             arguments, vectors = args[:-1], args[-1]
             gradients = gradient(*arguments)
             return np.sum(
-                [np.tensordot(gradients[i], vector, axes=vector.ndim)
-                 for i, vector in enumerate(vectors)])
+                [np.tensordot(gradient, vector, axes=vector.ndim)
+                 for gradient, vector in zip(gradients, vectors)])
         return autograd.grad(vector_dot_grad)
 
     @Backend._assert_backend_available

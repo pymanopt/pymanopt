@@ -44,6 +44,7 @@ def create_cost_egrad_ehess(backend, A, p):
         #               called. We need a way to signal to the backend that
         #               'ehess' implements a Hessian-vector product, which
         #               requires two arguments.
+        # @pymanopt.function.Callable
         def ehess(X, H):
             return -(A + A.T) @ H
     elif backend == "PyTorch":
