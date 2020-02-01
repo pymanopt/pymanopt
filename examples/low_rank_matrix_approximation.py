@@ -67,7 +67,7 @@ def create_cost_egrad(backend, A, rank):
         @pymanopt.function.Theano(u, s, vt)
         def cost(u, s, vt):
             X = T.dot(T.dot(u, T.diag(s)), vt)
-            return (X - A).norm(2)
+            return (X - A).norm(2) ** 2
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
