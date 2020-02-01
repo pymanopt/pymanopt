@@ -30,7 +30,7 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
     def setUp(self):
         super().setUp()
 
-        @PyTorch(("x", "y"), "z")
+        @PyTorch
         def cost(x, y, z):
             return torch.sum(x ** 2 + y + z ** 3)
 

@@ -40,7 +40,7 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
         y = T.vector()
         z = T.vector()
 
-        @Theano((x, y), z)
+        @Theano(x, y, z)
         def cost(x, y, z):
             return T.sum(x ** 2 + y + z ** 3)
 
@@ -75,7 +75,7 @@ class TestVector(_backend_tests.TestVector):
             return T.exp(T.sum(X ** 2))
 
         # And check that all is still well
-        hess = cost.compute_hessian()
+        hess = cost.compute_hessian_vector_product()
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -111,7 +111,7 @@ class TestMatrix(_backend_tests.TestMatrix):
             return T.exp(T.sum(X ** 2))
 
         # And check that all is still well
-        hess = cost.compute_hessian()
+        hess = cost.compute_hessian_vector_product()
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -147,7 +147,7 @@ class TestTensor3(_backend_tests.TestTensor3):
             return T.exp(T.sum(X ** 2))
 
         # And check that all is still well
-        hess = cost.compute_hessian()
+        hess = cost.compute_hessian_vector_product()
 
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
@@ -189,9 +189,9 @@ class TestMixed(_backend_tests.TestMixed):
         cost = Theano(x, y, z)(lambda x, y, z: f)
 
         # And check that all is still well
-        hess = cost.compute_hessian()
+        hess = cost.compute_hessian_vector_product()
 
-        h = hess(self.y, self.a)
+        h = hess(*self.y, *self.a)
         for k in range(len(h)):
             np_testing.assert_allclose(self.correct_hess[k], h[k])
 
