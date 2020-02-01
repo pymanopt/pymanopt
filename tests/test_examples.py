@@ -5,7 +5,8 @@ from examples import (
     low_rank_matrix_approximation,
     low_rank_psd_matrix_approximation,
     multiple_linear_regression,
-    packing_on_the_sphere
+    packing_on_the_sphere,
+    rank_k_correlation_matrix_approximation
 )
 from nose2.tools import params
 
@@ -40,3 +41,7 @@ class TestExamples(TestCase):
     @params(*packing_on_the_sphere.SUPPORTED_BACKENDS)
     def test_packing_on_the_sphere(self, backend):
         packing_on_the_sphere.run(backend)
+
+    @params(*rank_k_correlation_matrix_approximation.SUPPORTED_BACKENDS)
+    def test_rank_k_correlation_matrix_approximation(self, backend):
+        rank_k_correlation_matrix_approximation.run(backend)
