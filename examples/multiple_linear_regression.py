@@ -89,7 +89,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
             print("Weights found by pymanopt (top) / "
                   "closed form solution (bottom)")
             print(estimated_weights)
-            print(la.inv(samples.T @ samples) @ samples.T @ targets)
+            print(la.pinv(samples) @ targets)
             print("")
 
 
