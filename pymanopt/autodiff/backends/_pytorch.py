@@ -14,7 +14,7 @@ else:
 
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
-from ...tools import bisect_iterable, unpack_singleton_iterable_return_value
+from ...tools import bisect_sequence, unpack_singleton_iterable_return_value
 
 
 class _PyTorchBackend(Backend):
@@ -83,7 +83,7 @@ class _PyTorchBackend(Backend):
     @Backend._assert_backend_available
     def compute_hessian_vector_product(self, function, arguments):
         def hessian_vector_product(*args):
-            points, vectors = bisect_iterable(args)
+            points, vectors = bisect_sequence(args)
             xs = []
             for point in points:
                 x = self._from_numpy(point)

@@ -10,7 +10,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
-from ...tools import bisect_iterable, unpack_singleton_iterable_return_value
+from ...tools import bisect_sequence, unpack_singleton_iterable_return_value
 
 
 class _AutogradBackend(Backend):
@@ -46,7 +46,7 @@ class _AutogradBackend(Backend):
 
         @functools.wraps(hessian_vector_product)
         def wrapper(*args):
-            arguments, vectors = bisect_iterable(args)
+            arguments, vectors = bisect_sequence(args)
             return hessian_vector_product(*arguments, vectors)
         if num_arguments == 1:
             return unpack_singleton_iterable_return_value(wrapper)

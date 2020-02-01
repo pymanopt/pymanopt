@@ -10,7 +10,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_graph_backend_decorator
-from ...tools import bisect_iterable, unpack_singleton_iterable_return_value
+from ...tools import bisect_sequence, unpack_singleton_iterable_return_value
 
 
 class _TensorFlowBackend(Backend):
@@ -108,7 +108,7 @@ class _TensorFlowBackend(Backend):
         hessian = self._hessian_vector_product(function, variables, zeros)
 
         def hessian_vector_product(*args):
-            arguments, vectors = bisect_iterable(args)
+            arguments, vectors = bisect_sequence(args)
             feed_dict = {
                 variable: argument
                 for variable, argument in zip(

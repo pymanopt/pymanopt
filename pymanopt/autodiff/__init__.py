@@ -1,7 +1,5 @@
 import inspect
 
-from ..tools import flatten_arguments
-
 
 class Function:
     def __str__(self):
@@ -63,8 +61,8 @@ def make_tracing_backend_decorator(Backend):
 
     or
 
-      @decorator(("x", "y", "z"), "w")
-      def f(x, y, z, w):
+      @decorator(backend_specific_kwarg=...)
+      def f(x):
           pass
 
     to annotate a tracing-based autodiff function with how the arguments are
@@ -81,6 +79,9 @@ def make_tracing_backend_decorator(Backend):
             return Function(function, args=tuple(argspec.args),
                             backend=Backend())
 
+        if len(args) != 0:
+            raise ValueError("Only keyword arguments allowed")
+
         def inner(function):
             return Function(function, args=args, backend=Backend(**kwargs))
         return inner
@@ -90,7 +91,7 @@ def make_tracing_backend_decorator(Backend):
 def make_graph_backend_decorator(Backend):
     def decorator(*args, **kwargs):
         def inner(function):
-            graph = function(*flatten_arguments(args))
+            graph = function(*args)
             return Function(graph, args=args, backend=Backend(**kwargs))
         return inner
     return decorator
