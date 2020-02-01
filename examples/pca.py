@@ -15,7 +15,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
 )
 
 
@@ -27,6 +27,29 @@ def create_cost_egrad_ehess(backend, samples, num_components):
         @pymanopt.function.Autograd
         def cost(w):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
+    elif backend == "Callable":
+        @pymanopt.function.Callable
+        def cost(w):
+            return np.linalg.norm(samples - samples @ w @ w.T) ** 2
+
+        @pymanopt.function.Callable
+        def egrad(w):
+            return -2 * (
+                samples.T @ (samples - samples @ w @ w.T) +
+                (samples - samples @ w @ w.T).T @ samples
+            ) @ w
+
+        # FIXME(nkoep): See examples/dominant_invariant_subspace.py.
+        # @pymanopt.function.Callable
+        def ehess(w, h):
+            return -2 * (
+                samples.T @ (samples - samples @ w @ h.T) @ w +
+                samples.T @ (samples - samples @ h @ w.T) @ w +
+                samples.T @ (samples - samples @ w @ w.T) @ h +
+                (samples - samples @ w @ h.T).T @ samples @ w +
+                (samples - samples @ h @ w.T).T @ samples @ w +
+                (samples - samples @ w @ w.T).T @ samples @ h
+            )
     elif backend == "PyTorch":
         samples_ = torch.from_numpy(samples)
 
@@ -66,11 +89,13 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     cost, egrad, ehess = create_cost_egrad_ehess(
         backend, samples, num_components)
     manifold = Stiefel(dimension, num_components)
-    problem = pymanopt.Problem(manifold, cost)
+    problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
     if quiet:
         problem.verbosity = 0
 
     solver = TrustRegions()
+    # from pymanopt.solvers import ConjugateGradient
+    # solver = ConjugateGradient()
     estimated_span_matrix = solver.solve(problem)
 
     if quiet:
