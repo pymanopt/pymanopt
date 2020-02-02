@@ -55,7 +55,8 @@ class Problem:
                 (grad, "grad"), (hess, "hess")):
             self._validate_function(function, name)
 
-        self._cost = cost
+        self._original_cost = cost
+        self._cost = self._wrap_function(cost)
 
         if egrad is not None:
             egrad = self._wrap_gradient(egrad)
@@ -97,12 +98,17 @@ class Problem:
                 "from 'pymanopt.function'".format(name))
 
     def _flatten_arguments(self, arguments, signature):
+        assert len(arguments) == len(signature)
+
         flattened_arguments = []
-        for i, group in enumerate(signature):
-            if isinstance(group, (list, tuple)):
-                flattened_arguments.extend(arguments[i])
+        for i, group_size in enumerate(signature):
+            argument = arguments[i]
+            if group_size == 1:
+                assert not isinstance(argument, (list, tuple))
+                flattened_arguments.append(argument)
             else:
-                flattened_arguments.append(arguments[i])
+                assert len(argument) == group_size
+                flattened_arguments.extend(argument)
         return flattened_arguments
 
     def _group_return_values(self, function, signature):
@@ -158,7 +164,7 @@ class Problem:
         wrapped_gradient = self._wrap_function(gradient)
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (list, tuple)):
-            self._group_return_values(wrapped_gradient, point_layout)
+            return self._group_return_values(wrapped_gradient, point_layout)
         return wrapped_gradient
 
     def _wrap_hessian_vector_product(self, hessian_vector_product):
@@ -168,7 +174,7 @@ class Problem:
             def wrapper(point, vector):
                 return hessian_vector_product(
                     *self._flatten_arguments(point, point_layout),
-                    *self._flattened_arguments(vector, point_layout))
+                    *self._flatten_arguments(vector, point_layout))
             return self._group_return_values(wrapper, point_layout)
 
         if point_layout == 1:
@@ -183,12 +189,13 @@ class Problem:
 
     @property
     def cost(self):
-        return self._wrap_function(self._cost)
+        return self._cost
 
     @property
     def egrad(self):
         if self._egrad is None:
-            self._egrad = self._wrap_gradient(self._cost.compute_gradient())
+            self._egrad = self._wrap_gradient(
+                self._original_cost.compute_gradient())
         return self._egrad
 
     @property
@@ -205,7 +212,7 @@ class Problem:
     def ehess(self):
         if self._ehess is None:
             self._ehess = self._wrap_hessian_vector_product(
-                self._cost.compute_hessian_vector_product())
+                self._original_cost.compute_hessian_vector_product())
         return self._ehess
 
     @property
