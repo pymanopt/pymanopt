@@ -14,7 +14,7 @@ BetaTypes = tools.make_enum(
     "FletcherReeves PolakRibiere HestenesStiefel HagerZhang".split())
 
 
-class ConjugateGradient(Solver):
+class ConjugateGradients(Solver):
     """
     Module containing conjugate gradient algorithm based on
     conjugategradient.m from the manopt MATLAB package.

@@ -8,7 +8,7 @@ from examples._tools import ExampleRunner
 
 import pymanopt
 from pymanopt.manifolds import Elliptope
-from pymanopt.solvers import ConjugateGradient
+from pymanopt.solvers import ConjugateGradients
 
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -90,7 +90,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         problem.verbosity = 0
 
-    solver = ConjugateGradient(mingradnorm=1e-8, maxiter=1e5)
+    solver = ConjugateGradients(mingradnorm=1e-8, maxiter=1e5)
     Yopt = solver.solve(problem)
 
     if quiet:

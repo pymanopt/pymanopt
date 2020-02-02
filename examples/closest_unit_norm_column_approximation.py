@@ -9,7 +9,7 @@ from numpy import linalg as la, random as rnd
 
 import pymanopt
 from pymanopt.manifolds import Oblique
-from pymanopt.solvers import ConjugateGradient
+from pymanopt.solvers import ConjugateGradients
 
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -71,7 +71,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         problem.verbosity = 0
 
-    solver = ConjugateGradient()
+    solver = ConjugateGradients()
     Xopt = solver.solve(problem)
 
     if quiet:

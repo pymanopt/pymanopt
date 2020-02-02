@@ -93,8 +93,6 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         problem.verbosity = 0
 
     solver = TrustRegions()
-    # from pymanopt.solvers import ConjugateGradient
-    # solver = ConjugateGradient()
     estimated_span_matrix = solver.solve(problem)
 
     if quiet:

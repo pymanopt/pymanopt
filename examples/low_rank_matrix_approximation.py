@@ -9,7 +9,7 @@ from numpy import linalg as la, random as rnd
 
 import pymanopt
 from pymanopt.manifolds import FixedRankEmbedded
-from pymanopt.solvers import ConjugateGradient
+from pymanopt.solvers import ConjugateGradients
 
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -84,7 +84,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         problem.verbosity = 0
 
-    solver = ConjugateGradient()
+    solver = ConjugateGradients()
     left_singular_vectors, singular_values, right_singular_vectors = \
         solver.solve(problem)
     low_rank_approximation = (left_singular_vectors @

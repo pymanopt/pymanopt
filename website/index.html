@@ -568,22 +568,22 @@ Xopt = solver.solve(problem)</code></pre>
 
       <div class="row">
         <div class="one-half column">
-          <strong>Conjugate gradient</strong><br />
-          <code class="table-code-decl prettyprint language-py">ConjugateGradient()</code><br />
+          <strong>Conjugate gradients</strong><br />
+          <code class="table-code-decl prettyprint language-py">ConjugateGradients()</code><br />
           Classical first-order conjugate gradient descent algorithm.
           By default uses an adaptive linesearch. To set linesearch parameters
           you can instantiate the
           <a href="docs/api-reference.html#pymanopt.solvers.linesearch.LineSearchAdaptive">LineSearchAdaptive</a>
           object with your desired parameters and pass it to the
-          Conjugate gradient solver using the optional <code>linesearch</code> parameter:
-          <code class="language-py">ConjugateGradient(linesearch=LinesearchObject)</code>.
+          Conjugate gradients solver using the optional <code>linesearch</code> parameter:
+          <code class="language-py">ConjugateGradients(linesearch=LinesearchObject)</code>.
           You can also implement your own linesearch class, just take
             <a href="https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/linesearch.py#L81">this code</a>
           as a starting point.
         </div>
         <div class="one-half column">
-<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import ConjugateGradient
-solver = ConjugateGradient()
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import ConjugateGradients
+solver = ConjugateGradients()
 Xopt = solver.solve(problem)</code></pre>
         </div>
       </div>
