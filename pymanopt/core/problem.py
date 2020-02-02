@@ -135,16 +135,16 @@ class Problem:
         return wrapper
 
     def _wrap_function(self, function):
-        point_format = self.manifold.point_format
-        if isinstance(point_format, (tuple, list)):
+        point_layout = self.manifold.point_layout
+        if isinstance(point_layout, (tuple, list)):
             @functools.wraps(function)
             def wrapper(point):
-                return function(*self._flatten_arguments(point, point_format))
+                return function(*self._flatten_arguments(point, point_layout))
             return wrapper
 
-        assert isinstance(point_format, int)
+        assert isinstance(point_layout, int)
 
-        if point_format == 1:
+        if point_layout == 1:
             @functools.wraps(function)
             def wrapper(point):
                 return function(point)
@@ -156,22 +156,22 @@ class Problem:
 
     def _wrap_gradient(self, gradient):
         wrapped_gradient = self._wrap_function(gradient)
-        point_format = self.manifold.point_format
-        if isinstance(point_format, (list, tuple)):
-            self._group_return_values(wrapped_gradient, point_format)
+        point_layout = self.manifold.point_layout
+        if isinstance(point_layout, (list, tuple)):
+            self._group_return_values(wrapped_gradient, point_layout)
         return wrapped_gradient
 
     def _wrap_hessian_vector_product(self, hessian_vector_product):
-        point_format = self.manifold.point_format
-        if isinstance(point_format, (list, tuple)):
+        point_layout = self.manifold.point_layout
+        if isinstance(point_layout, (list, tuple)):
             @functools.wraps(hessian_vector_product)
             def wrapper(point, vector):
                 return hessian_vector_product(
-                    *self._flatten_arguments(point, point_format),
-                    *self._flattened_arguments(vector, point_format))
-            return self._group_return_values(wrapper, point_format)
+                    *self._flatten_arguments(point, point_layout),
+                    *self._flattened_arguments(vector, point_layout))
+            return self._group_return_values(wrapper, point_layout)
 
-        if point_format == 1:
+        if point_layout == 1:
             @functools.wraps(hessian_vector_product)
             def wrapper(point, vector):
                 return hessian_vector_product(point, vector)

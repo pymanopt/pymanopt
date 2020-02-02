@@ -17,8 +17,8 @@ class Product(Manifold):
         name = ("Product manifold: {:s}".format(
                 " x ".join([str(man) for man in manifolds])))
         dimension = np.sum([man.dim for man in manifolds])
-        point_format = (manifold.point_format for manifold in manifolds)
-        super().__init__(name, dimension, point_format=point_format)
+        point_layout = tuple(manifold.point_layout for manifold in manifolds)
+        super().__init__(name, dimension, point_layout=point_layout)
 
     def __setattr__(self, key, value):
         if hasattr(self, key):
