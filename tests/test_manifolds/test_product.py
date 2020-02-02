@@ -11,7 +11,13 @@ class TestProductManifold(TestCase):
         self.n = n = 50
         self.euclidean = Euclidean(m, n)
         self.sphere = Sphere(n)
-        self.man = Product([self.euclidean, self.sphere])
+        self.man = Product(self.euclidean, self.sphere)
+
+    def test_constructor(self):
+        with self.assertRaises(ValueError):
+            Product()
+        with self.assertRaises(ValueError):
+            Product(1, 2, 3)
 
     def test_dim(self):
         np_testing.assert_equal(self.man.dim, self.m*self.n+self.n-1)
@@ -30,7 +36,7 @@ class TestProductManifold(TestCase):
 
     def test_tangent_vector_multiplication(self):
         # Regression test for https://github.com/pymanopt/pymanopt/issues/49.
-        man = Product((Euclidean(12), Grassmann(12, 3)))
+        man = Product(Euclidean(12), Grassmann(12, 3))
         x = man.rand()
         eta = man.randvec(x)
         np.float64(1.0) * eta

@@ -22,7 +22,7 @@ class TestProblemBackendInterface(TestCase):
         self.gradient = self.cost.compute_gradient()
         self.hvp = self.cost.compute_hessian_vector_product()
 
-        self.manifold = Product([FixedRankEmbedded(m, n, rank), Euclidean(n)])
+        self.manifold = Product(FixedRankEmbedded(m, n, rank), Euclidean(n))
         self.problem = pymanopt.Problem(self.manifold, self.cost)
 
     def test_cost_function(self):

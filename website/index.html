@@ -357,7 +357,7 @@ manifold = FixedRankEmbedded(5, 4, 2)</code></pre>
       <div class="row">
         <div class="one-half column">
           <strong>Product manifold</strong><br />
-          <code class="table-code-decl prettyprint language-py">Product((man1, man2, ..., manN))</code><br />
+          <code class="table-code-decl prettyprint language-py">Product(man1, man2, ..., manN)</code><br />
           Product manifold of any of the manifolds listed above. This enables
           you to optimize over multiple manifolds simultaneously. Useful for problems
           with multiple parameters that have different constraints.
@@ -367,7 +367,7 @@ manifold = FixedRankEmbedded(5, 4, 2)</code></pre>
 
 # Product of Euclidean 3-vector with
 # 5 x 2 Stiefel manifold.
-manifold = Product((Euclidean(3), Stiefel(5, 2)))</code></pre>
+manifold = Product(Euclidean(3), Stiefel(5, 2))</code></pre>
         </div>
       </div>
 

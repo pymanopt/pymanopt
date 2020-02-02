@@ -7,10 +7,13 @@ from pymanopt.tools import ndarraySequenceMixin
 class Product(Manifold):
     """Product manifold, i.e., the cartesian product of multiple manifolds."""
 
-    # TODO(nkoep): Change the argument to *manifold so we can do Product(man1,
-    #              man2).
-    def __init__(self, manifolds):
+    def __init__(self, *manifolds):
+        if len(manifolds) == 0:
+            raise ValueError("At least one manifold required")
         for manifold in manifolds:
+            if not isinstance(manifold, Manifold):
+                raise ValueError(
+                    "Unsupport manifold of type '{}'".format(type(manifold)))
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
         self._manifolds = tuple(manifolds)
