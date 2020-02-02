@@ -72,7 +72,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     num_samples, num_weights = 200, 3
 
     solver = TrustRegions()
-    manifold = Euclidean(3)
+    manifold = Euclidean(num_weights)
 
     for k in range(5):
         samples = rnd.randn(num_samples, num_weights)
