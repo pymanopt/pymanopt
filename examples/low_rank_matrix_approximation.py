@@ -26,47 +26,46 @@ def create_cost_egrad(backend, A, rank):
 
     if backend == "Autograd":
         @pymanopt.function.Autograd
-        def cost(u, s, vt):
-            X = u @ np.diag(s) @ vt
+        def cost(u, s, v):
+            X = u @ s @ v.T
             return np.linalg.norm(X - A) ** 2
     elif backend == "Callable":
         @pymanopt.function.Callable
-        def cost(u, s, vt):
-            X = u @ np.diag(s) @ vt
+        def cost(u, s, v):
+            X = u @ s @ v.T
             return la.norm(X - A) ** 2
 
         @pymanopt.function.Callable
-        def egrad(u, s, vt):
-            X = u @ np.diag(s) @ vt
-            S = np.diag(s)
-            gu = 2 * (X - A) @ (S @ vt).T
-            gs = 2 * np.diag(u.T @ (X - A) @ vt.T)
-            gvt = 2 * (u @ S).T @ (X - A)
-            return gu, gs, gvt
+        def egrad(u, s, v):
+            X = u @ s @ v.T
+            gu = 2 * (X - A) @ v @ s
+            gs = 2 * u.T @ (X - A) @ v
+            gv = 2 * (X - A).T @ u @ s
+            return gu, gs, gv
     elif backend == "PyTorch":
         A_ = torch.from_numpy(A)
 
         @pymanopt.function.PyTorch
-        def cost(u, s, vt):
-            X = torch.matmul(u, torch.matmul(torch.diag(s), vt))
+        def cost(u, s, v):
+            X = torch.matmul(u, torch.matmul(s, torch.transpose(v, 1, 0)))
             return torch.norm(X - A_) ** 2
     elif backend == "TensorFlow":
         u = tf.Variable(tf.zeros((m, rank), dtype=np.float64), name="u")
-        s = tf.Variable(tf.zeros(rank, dtype=np.float64), name="s")
-        vt = tf.Variable(tf.zeros((rank, n), dtype=np.float64), name="vt")
+        s = tf.Variable(tf.zeros((rank, rank), dtype=np.float64), name="s")
+        v = tf.Variable(tf.zeros((n, rank), dtype=np.float64), name="v")
 
-        @pymanopt.function.TensorFlow(u, s, vt)
-        def cost(u, s, vt):
-            X = tf.matmul(u, tf.matmul(tf.linalg.diag(s), vt))
+        @pymanopt.function.TensorFlow(u, s, v)
+        def cost(u, s, v):
+            X = tf.matmul(u, tf.matmul(s, tf.transpose(v)))
             return tf.norm(X - A) ** 2
     elif backend == "Theano":
         u = T.matrix()
-        s = T.vector()
-        vt = T.matrix()
+        s = T.matrix()
+        v = T.matrix()
 
-        @pymanopt.function.Theano(u, s, vt)
-        def cost(u, s, vt):
-            X = T.dot(T.dot(u, T.diag(s)), vt)
+        @pymanopt.function.Theano(u, s, v)
+        def cost(u, s, v):
+            X = T.dot(T.dot(u, s), v.T)
             return (X - A).norm(2) ** 2
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
@@ -88,15 +87,12 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     left_singular_vectors, singular_values, right_singular_vectors = \
         solver.solve(problem)
     low_rank_approximation = (left_singular_vectors @
-                              np.diag(singular_values) @
-                              right_singular_vectors)
+                              singular_values @
+                              right_singular_vectors.T)
 
     if not quiet:
         u, s, vt = la.svd(matrix, full_matrices=False)
-        indices = np.argsort(s)[-rank:]
-        low_rank_solution = (u[:, indices] @
-                             np.diag(s[indices]) @
-                             vt[indices, :])
+        low_rank_solution = u[:, :rank] @ np.diag(s[:rank]) @ vt[:rank, :]
         print("Analytic low-rank solution:")
         print()
         print(low_rank_solution)

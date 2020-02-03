@@ -37,31 +37,31 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     >>> x[0].shape
     (5, 3)
     >>> x[1].shape
-    (3,)
+    (3, 3)
     >>> x[2].shape
-    (3, 4)
+    (4, 3)
 
     and the full matrix can be recovered using the matrix product
-    x[0] * diag(x[1]) * x[2]:
+    x[0] * x[1] * x[2].T:
     >>> import numpy as np
-    >>> X = x[0] @ np.diag(x[1]) @ x[2]
+    >>> X = x[0] @ x[1] @ x[2].T
 
     Tangent vectors are represented as a tuple (Up, M, Vp). The matrices Up
-    (mxk) and Vp (nxk) obey Up'*U = 0 and Vp'*V = 0.
-    The matrix M (kxk) is arbitrary. Such a structure corresponds to the
-    following tangent vector in the ambient space of mxn matrices:
-      Z = U*M*V' + Up*V' + U*Vp'
+    (m x k) and Vp (n x k) obey Up.T @ U = 0 and Vp.T @ V = 0.
+    The matrix M (k x k) is arbitrary. Such a structure corresponds to the
+    following tangent vector in the ambient space of m x n matrices:
+      Z = U @ M @ V.T + Up @ V.T + U @ Vp.T
     where (U, S, V) is the current point and (Up, M, Vp) is the tangent
     vector at that point.
 
-    Vectors in the ambient space are best represented as mxn matrices. If
+    Vectors in the ambient space are best represented as m x n matrices. If
     these are low-rank, they may also be represented as structures with
-    U, S, V fields, such that Z = U*S*V'. There are no restrictions on what
-    U, S and V are, as long as their product as indicated yields a real, mxn
-    matrix.
+    U, S, V fields, such that Z = U @ S @ V.T. There are no restrictions on
+    what U, S and V are, as long as their product as indicated yields a real,
+    m x n matrix.
 
     The chosen geometry yields a Riemannian submanifold of the embedding
-    space R^(mxn) equipped with the usual trace (Frobenius) inner product.
+    space R^(m x n) equipped with the usual trace (Frobenius) inner product.
 
 
     Please cite the Pymanopt paper as well as the research paper:
@@ -103,8 +103,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     def _apply_ambient(self, Z, W):
         """
         For a given ambient vector Z, given as a tuple (U, S, V) such that
-        Z = U*S*V', applies it to a matrix W to calculate the matrix product
-        ZW.
+        Z = U @ S @ V.T, applies it to a matrix W to calculate the matrix
+        product ZW.
         """
         if isinstance(Z, (list, tuple)):
             return Z[0] @ Z[1] @ Z[2].T @ W
@@ -112,10 +112,10 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
     def _apply_ambient_transpose(self, Z, W):
         """
-        Same as apply_ambient, but applies Z' to W.
+        Same as apply_ambient, but applies Z.T to W.
         """
         if isinstance(Z, (list, tuple)):
-            return Z[2] @ Z[1] @ Z[0].T @ W
+            return Z[2] @ Z[1].T @ Z[0].T @ W
         return Z.T @ W
 
     def proj(self, X, Z):
@@ -127,42 +127,17 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         This function then returns a tangent vector parameterized as
         (Up, M, Vp), as described in the class docstring.
         """
-        ZV = self._apply_ambient(Z, X[2].T)
+        ZV = self._apply_ambient(Z, X[2])
         UtZV = X[0].T @ ZV
         ZtU = self._apply_ambient_transpose(Z, X[0])
 
         Up = ZV - X[0] @ UtZV
         M = UtZV
-        Vp = ZtU - X[2].T @ UtZV.T
+        Vp = ZtU - X[2] @ UtZV.T
 
-        return _FixedRankTangentVector((Up, M, Vp))
+        return _TangentVector((Up, M, Vp))
 
-    def egrad2rgrad(self, x, egrad):
-        """
-        Assuming that the cost function being optimized has been defined
-        in terms of the low-rank singular value decomposition of X, the
-        gradient returned by the autodiff backends will have three components
-        and will be in the form of a tuple egrad = (df/dU, df/dS, df/dV).
-
-        This function correctly maps a gradient of this form into the tangent
-        space. See https://j-towns.github.io/papers/svd-derivative.pdf for a
-        derivation.
-        """
-        utdu = x[0].T @ egrad[0]
-        uutdu = x[0] @ utdu
-        Up = (egrad[0] - uutdu) / x[1]
-
-        vtdv = x[2] @ egrad[2].T
-        vvtdv = x[2].T @ vtdv
-        Vp = (egrad[2].T - vvtdv) / x[1]
-
-        i = np.eye(self._k)
-        f = 1 / (x[1][np.newaxis, :]**2 - x[1][:, np.newaxis]**2 + i)
-
-        M = (f * (utdu - utdu.T) * x[1] +
-             x[1][:, np.newaxis] * f * (vtdv - vtdv.T) + np.diag(egrad[1]))
-
-        return _FixedRankTangentVector((Up, M, Vp))
+    egrad2rgrad = proj
 
     # TODO(nkoep): Implement the 'weingarten' method to support the
     # trust-region solver, cf.
@@ -172,31 +147,33 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
     # SIAM J. Optim., 22 (2012), pp. 135-158.
     def retr(self, X, Z):
-        Qu, Ru = np.linalg.qr(Z[0])
-        Qv, Rv = np.linalg.qr(Z[2])
+        Qu, Ru = np.linalg.qr(np.hstack((X[0], Z[0])))
+        Qv, Rv = np.linalg.qr(np.hstack((X[2], Z[2])))
 
-        T = np.vstack((np.hstack((np.diag(X[1]) + Z[1], Rv.T)),
-                      np.hstack((Ru, np.zeros((self._k, self._k))))))
+        # FIXME(nkoep): The identity matrix must be scaled by what Manopt calls
+        #               t!
+        Id = np.eye(self._k)
+        T = np.block([
+            [X[1] + Z[1], Id],
+            [Id, np.zeros((self._k, self._k))]
+        ])
 
-        # Numpy svd outputs St as a 1d vector, not a matrix.
-        Ut, St, Vt = np.linalg.svd(T, full_matrices=False)
-
-        # Transpose because numpy outputs it the wrong way.
+        Ut, St, Vt = np.linalg.svd(Ru @ T @ Rv.T, full_matrices=False)
         Vt = Vt.T
 
-        U = np.hstack((X[0], Qu)) @ Ut[:, :self._k]
-        V = np.hstack((X[2].T, Qv)) @ Vt[:, :self._k]
-        S = St[:self._k] + np.spacing(1)
-        return (U, S, V.T)
+        U = Qu @ Ut[:, :self._k]
+        S = np.diag(St[:self._k])
+        V = Qv @ Vt[:, :self._k]
+        return (U, S, V)
 
     def norm(self, X, G):
         return np.sqrt(self.inner(X, G, G))
 
     def rand(self):
         u = self._stiefel_m.rand()
-        s = np.sort(np.random.rand(self._k))[::-1]
-        vt = self._stiefel_n.rand().T
-        return (u, s, vt)
+        s = np.diag(np.sort(np.random.rand(self._k))[::-1])
+        v = self._stiefel_n.rand()
+        return (u, s, v)
 
     def _tangent(self, X, Z):
         """
@@ -206,37 +183,33 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         affect Z (it would not at all if we had infinite numerical accuracy).
         """
         Up = Z[0] - X[0] @ X[0].T @ Z[0]
-        Vp = Z[2] - X[2].T @ X[2] @ Z[2]
+        Vp = Z[2] - X[2] @ X[2].T @ Z[2]
 
-        return _FixedRankTangentVector((Up, Z[1], Vp))
+        return _TangentVector((Up, Z[1], Vp))
 
     def randvec(self, X):
         Up = np.random.randn(self._m, self._k)
-        Vp = np.random.randn(self._n, self._k)
         M = np.random.randn(self._k, self._k)
-
+        Vp = np.random.randn(self._n, self._k)
         Z = self._tangent(X, (Up, M, Vp))
-
-        nrm = self.norm(X, Z)
-
-        return _FixedRankTangentVector((Z[0]/nrm, Z[1]/nrm, Z[2]/nrm))
+        norm = self.norm(X, Z)
+        return _TangentVector((Z[0] / norm, Z[1] / norm, Z[2] / norm))
 
     def tangent2ambient(self, X, Z):
-        """
-        Transforms a tangent vector Z represented as a structure (Up, M, Vp)
+        """Transforms a tangent vector Z represented as a structure (Up, M, Vp)
         into a structure with fields (U, S, V) that represents that same
-        tangent vector in the ambient space of mxn matrices, as U*S*V'.
-        This matrix is equal to X.U*Z.M*X.V' + Z.Up*X.V' + X.U*Z.Vp'. The
-        latter is an mxn matrix, which could be too large to build
-        explicitly, and this is why we return a low-rank representation
+        tangent vector in the ambient space of m x n matrices, as U @ S @ V.T.
+        This matrix is equal to X.U @ Z.M @ X.V.T + Z.Up @ X.V.T + X.U @
+        Z.Vp.T. The latter is an m x n matrix, which could be too large to
+        build explicitly, and this is why we return a low-rank representation
         instead. Note that there are no guarantees on U, S and V other than
-        that USV' is the desired matrix. In particular, U and V are not (in
-        general) orthonormal and S is not (in general) diagonal.
+        that U @ S @ V.T is the desired matrix. In particular, U and V are not
+        (in general) orthonormal and S is not (in general) diagonal.
         (In this implementation, S is identity, but this might change.)
         """
         U = np.hstack((X[0] @ Z[1] + Z[0], X[0]))
         S = np.eye(2 * self._k)
-        V = np.hstack(([X[2].T, Z[2]]))
+        V = np.hstack((X[2], Z[2]))
         return (U, S, V)
 
     # Comment from Manopt:
@@ -249,34 +222,34 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return self.proj(X2, self.tangent2ambient(X1, G))
 
     def zerovec(self, X):
-        return _FixedRankTangentVector((np.zeros((self._m, self._k)),
-                                        np.zeros((self._k, self._k)),
-                                        np.zeros((self._n, self._k))))
+        return _TangentVector((np.zeros((self._m, self._k)),
+                               np.zeros((self._k, self._k)),
+                               np.zeros((self._n, self._k))))
 
 
-class _FixedRankTangentVector(tuple, ndarraySequenceMixin):
+class _TangentVector(tuple, ndarraySequenceMixin):
     def __repr__(self):
-        return "_FixedRankTangentVector: " + super().__repr__()
+        return "{:s}: {}".format(self.__class__.__name__, super().__repr__())
 
     def to_ambient(self, x):
-        Z1 = x[0] @ self[1] @ x[2]
-        Z2 = self[0] @ x[2]
+        Z1 = x[0] @ self[1] @ x[2].T
+        Z2 = self[0] @ x[2].T
         Z3 = x[0] @ self[2].T
         return Z1 + Z2 + Z3
 
     def __add__(self, other):
-        return _FixedRankTangentVector((s + o for (s, o) in zip(self, other)))
+        return _TangentVector((s + o for (s, o) in zip(self, other)))
 
     def __sub__(self, other):
-        return _FixedRankTangentVector((s - o for (s, o) in zip(self, other)))
+        return _TangentVector((s - o for (s, o) in zip(self, other)))
 
     def __mul__(self, other):
-        return _FixedRankTangentVector((other * s for s in self))
+        return _TangentVector((other * s for s in self))
 
     __rmul__ = __mul__
 
     def __div__(self, other):
-        return _FixedRankTangentVector((val / other for val in self))
+        return _TangentVector((val / other for val in self))
 
     def __neg__(self):
-        return _FixedRankTangentVector((-val for val in self))
+        return _TangentVector((-val for val in self))
