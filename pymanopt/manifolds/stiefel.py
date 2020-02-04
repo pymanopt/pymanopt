@@ -96,7 +96,6 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
         return self.proj(x2, d)
 
     def exp(self, X, U):
-        # TODO: Simplify these expressions.
         if self._k == 1:
             W = expm(np.bmat([[X.T.dot(U), -U.T.dot(U)],
                               [np.eye(self._p), X.T.dot(U)]]))
