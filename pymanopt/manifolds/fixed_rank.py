@@ -81,6 +81,34 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     Original author: Nicolas Boumal, Dec. 30, 2012.
     """
 
+    class _TangentVector(tuple, ndarraySequenceMixin):
+        def __repr__(self):
+            return "{:s}: {}".format(
+                self.__class__.__name__, super().__repr__())
+
+        def to_ambient(self, x):
+            Z1 = x[0] @ self[1] @ x[2].T
+            Z2 = self[0] @ x[2].T
+            Z3 = x[0] @ self[2].T
+            return Z1 + Z2 + Z3
+
+        def __add__(self, other):
+            return self.__class__((s + o for (s, o) in zip(self, other)))
+
+        def __sub__(self, other):
+            return self.__class__((s - o for (s, o) in zip(self, other)))
+
+        def __mul__(self, other):
+            return self.__class__((other * s for s in self))
+
+        __rmul__ = __mul__
+
+        def __div__(self, other):
+            return self.__class__((val / other for val in self))
+
+        def __neg__(self):
+            return self.__class__((-val for val in self))
+
     def __init__(self, m, n, k):
         self._m = m
         self._n = n
@@ -135,7 +163,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         M = UtZV
         Vp = ZtU - X[2] @ UtZV.T
 
-        return _TangentVector((Up, M, Vp))
+        return self._TangentVector((Up, M, Vp))
 
     egrad2rgrad = proj
 
@@ -151,7 +179,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         T = self._apply_ambient_transpose(egrad, H[0]) / s
         Vp += (1 - X[2] @ X[2].T) @ T
 
-        return _TangentVector((Up, M, Vp))
+        return self._TangentVector((Up, M, Vp))
 
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
@@ -195,7 +223,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Up = Z[0] - X[0] @ X[0].T @ Z[0]
         Vp = Z[2] - X[2] @ X[2].T @ Z[2]
 
-        return _TangentVector((Up, Z[1], Vp))
+        return self._TangentVector((Up, Z[1], Vp))
 
     def randvec(self, X):
         Up = np.random.randn(self._m, self._k)
@@ -203,7 +231,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Vp = np.random.randn(self._n, self._k)
         Z = self._tangent(X, (Up, M, Vp))
         norm = self.norm(X, Z)
-        return _TangentVector((Z[0] / norm, Z[1] / norm, Z[2] / norm))
+        return self._TangentVector((Z[0] / norm, Z[1] / norm, Z[2] / norm))
 
     def tangent2ambient(self, X, Z):
         """Transforms a tangent vector Z represented as a structure (Up, M, Vp)
@@ -232,34 +260,6 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return self.proj(X2, self.tangent2ambient(X1, G))
 
     def zerovec(self, X):
-        return _TangentVector((np.zeros((self._m, self._k)),
-                               np.zeros((self._k, self._k)),
-                               np.zeros((self._n, self._k))))
-
-
-class _TangentVector(tuple, ndarraySequenceMixin):
-    def __repr__(self):
-        return "{:s}: {}".format(self.__class__.__name__, super().__repr__())
-
-    def to_ambient(self, x):
-        Z1 = x[0] @ self[1] @ x[2].T
-        Z2 = self[0] @ x[2].T
-        Z3 = x[0] @ self[2].T
-        return Z1 + Z2 + Z3
-
-    def __add__(self, other):
-        return _TangentVector((s + o for (s, o) in zip(self, other)))
-
-    def __sub__(self, other):
-        return _TangentVector((s - o for (s, o) in zip(self, other)))
-
-    def __mul__(self, other):
-        return _TangentVector((other * s for s in self))
-
-    __rmul__ = __mul__
-
-    def __div__(self, other):
-        return _TangentVector((val / other for val in self))
-
-    def __neg__(self):
-        return _TangentVector((-val for val in self))
+        return self._TangentVector((np.zeros((self._m, self._k)),
+                                    np.zeros((self._k, self._k)),
+                                    np.zeros((self._n, self._k))))
