@@ -139,9 +139,19 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
     egrad2rgrad = proj
 
-    # TODO(nkoep): Implement the 'weingarten' method to support the
-    # trust-region solver, cf.
-    # https://sites.uclouvain.be/absil/2013-01/Weingarten_07PA_techrep.pdf
+    def ehess2rhess(self, X, egrad, ehess, H):
+        # Euclidean part
+        Up, M, Vp = self.proj(X, ehess)
+
+        # Curvature part
+        s = np.diag(X[1])
+        T = self._apply_ambient(egrad, H[2]) / s
+        Up += (1 - X[0] @ X[0].T) @ T
+
+        T = self._apply_ambient_transpose(egrad, H[0]) / s
+        Vp += (1 - X[2] @ X[2].T) @ T
+
+        return _TangentVector((Up, M, Vp))
 
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
