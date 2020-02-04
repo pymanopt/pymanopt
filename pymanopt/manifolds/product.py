@@ -7,6 +7,32 @@ from pymanopt.tools import ndarraySequenceMixin
 class Product(Manifold):
     """Product manifold, i.e., the cartesian product of multiple manifolds."""
 
+    class _TangentVector(list, ndarraySequenceMixin):
+        def __repr__(self):
+            return "{:s}: {}".format(
+                self.__class__.__name__, super().__repr__())
+
+        def __add__(self, other):
+            assert len(self) == len(other)
+            return self.__class__(
+                [v + other[k] for k, v in enumerate(self)])
+
+        def __sub__(self, other):
+            assert len(self) == len(other)
+            return self.__class__(
+                [v - other[k] for k, v in enumerate(self)])
+
+        def __mul__(self, other):
+            return self.__class__([other * val for val in self])
+
+        __rmul__ = __mul__
+
+        def __div__(self, other):
+            return self.__class__([val / other for val in self])
+
+        def __neg__(self):
+            return self.__class__([-val for val in self])
+
     def __init__(self, *manifolds):
         if len(manifolds) == 0:
             raise ValueError("At least one manifold required")
@@ -46,16 +72,16 @@ class Product(Manifold):
                                for k, man in enumerate(self._manifolds)]))
 
     def proj(self, X, U):
-        return _ProductTangentVector(
+        return self._TangentVector(
             [man.proj(X[k], U[k]) for k, man in enumerate(self._manifolds)])
 
     def egrad2rgrad(self, X, U):
-        return _ProductTangentVector(
+        return self._TangentVector(
             [man.egrad2rgrad(X[k], U[k])
              for k, man in enumerate(self._manifolds)])
 
     def ehess2rhess(self, X, egrad, ehess, H):
-        return _ProductTangentVector(
+        return self._TangentVector(
             [man.ehess2rhess(X[k], egrad[k], ehess[k], H[k])
              for k, man in enumerate(self._manifolds)])
 
@@ -66,7 +92,7 @@ class Product(Manifold):
         return [man.retr(X[k], U[k]) for k, man in enumerate(self._manifolds)]
 
     def log(self, X, U):
-        return _ProductTangentVector(
+        return self._TangentVector(
             [man.log(X[k], U[k]) for k, man in enumerate(self._manifolds)])
 
     def rand(self):
@@ -74,12 +100,12 @@ class Product(Manifold):
 
     def randvec(self, X):
         scale = len(self._manifolds) ** (-1/2)
-        return _ProductTangentVector(
+        return self._TangentVector(
             [scale * man.randvec(X[k])
              for k, man in enumerate(self._manifolds)])
 
     def transp(self, X1, X2, G):
-        return _ProductTangentVector(
+        return self._TangentVector(
             [man.transp(X1[k], X2[k], G[k])
              for k, man in enumerate(self._manifolds)])
 
@@ -88,31 +114,5 @@ class Product(Manifold):
                 for k, man in enumerate(self._manifolds)]
 
     def zerovec(self, X):
-        return _ProductTangentVector(
+        return self._TangentVector(
             [man.zerovec(X[k]) for k, man in enumerate(self._manifolds)])
-
-
-class _ProductTangentVector(list, ndarraySequenceMixin):
-    def __repr__(self):
-        return "_ProductTangentVector: " + super().__repr__()
-
-    def __add__(self, other):
-        assert len(self) == len(other)
-        return _ProductTangentVector(
-            [v + other[k] for k, v in enumerate(self)])
-
-    def __sub__(self, other):
-        assert len(self) == len(other)
-        return _ProductTangentVector(
-            [v - other[k] for k, v in enumerate(self)])
-
-    def __mul__(self, other):
-        return _ProductTangentVector([other * val for val in self])
-
-    __rmul__ = __mul__
-
-    def __div__(self, other):
-        return _ProductTangentVector([val / other for val in self])
-
-    def __neg__(self):
-        return _ProductTangentVector([-val for val in self])
