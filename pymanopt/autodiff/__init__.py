@@ -70,7 +70,7 @@ def make_tracing_backend_decorator(Backend):
     to annotate a tracing-based autodiff function with how the arguments are
     conceptually grouped together.
     """
-    def decorator(*args):
+    def decorator(*args, **kwargs):
         if len(args) == 1 and callable(args[0]):
             (function,) = args
             argspec = inspect.getfullargspec(function)
@@ -78,16 +78,11 @@ def make_tracing_backend_decorator(Backend):
                 raise ValueError(
                     "Decorated function must only accept positional "
                     "arguments")
-            # We use the function signature to signal to the backend how many
-            # arguments a function requires. We do this as early as possible so
-            # as not to lose the information when wrapping `function` in one of
-            # our various wrapper functions which often accept varargs and
-            # kwargs.
             return Function(function, args=tuple(argspec.args),
                             backend=Backend())
 
         def inner(function):
-            return Function(function, args=args, backend=Backend())
+            return Function(function, args=args, backend=Backend(**kwargs))
         return inner
     return decorator
 

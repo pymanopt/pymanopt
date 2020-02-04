@@ -1,88 +1,109 @@
-"""
-This file is based on dominant_invariant_subspace.m from the manopt MATLAB
-package.
+import os
 
-The optimization is performed on the Grassmann manifold, since only the
-space spanned by the columns of X matters. The implementation is short to
-show how Manopt can be used to quickly obtain a prototype. To make the
-implementation more efficient, one might first try to use the caching
-system, that is, use the optional 'store' arguments in the cost, grad and
-hess functions. Furthermore, using egrad2rgrad and ehess2rhess is quick
-and easy, but not always efficient. Having a look at the formulas
-implemented in these functions can help rewrite the code without them,
-possibly more efficiently.
-
-See also: dominant_invariant_subspace_complex
-
-Main author: Nicolas Boumal, July 5, 2013
-
-Ported to pymanopt by Jamie Townsend, Nov 24, 2015
-"""
-import numpy as np
+import autograd.numpy as np
+import tensorflow as tf
 import theano.tensor as T
+import torch
+from examples._tools import ExampleRunner
+from numpy import linalg as la, random as rnd
 
 import pymanopt
 from pymanopt.manifolds import Grassmann
 from pymanopt.solvers import TrustRegions
 
 
-def dominant_invariant_subspace(A, p):
-    """
-    Returns an orthonormal basis of the dominant invariant p-subspace of A.
-
-    Arguments:
-        - A
-            A real, symmetric matrix A of size nxn
-        - p
-            integer p < n.
-    Returns:
-        A real, orthonormal matrix X of size nxp such that trace(X'*A*X)
-        is maximized. That is, the columns of X form an orthonormal basis
-        of a dominant subspace of dimension p of A. These span the same space
-        as  the eigenvectors associated with the largest eigenvalues of A.
-        Sign is important: 2 is deemed a larger eigenvalue than -5.
-    """
-    # Make sure the input matrix is square and symmetric
-    n = A.shape[0]
-    assert type(A) == np.ndarray, 'A must be a numpy array.'
-    assert np.isreal(A).all(), 'A must be real.'
-    assert A.shape[1] == n, 'A must be square.'
-    assert np.linalg.norm(A-A.T) < n * np.spacing(1), 'A must be symmetric.'
-    assert p <= n, 'p must be smaller than n.'
-
-    # Define the cost on the Grassmann manifold
-    Gr = Grassmann(n, p)
-    X = T.matrix()
-
-    @pymanopt.function.Theano(X)
-    def cost(X):
-        return -T.dot(X.T, T.dot(A, X)).trace()
-
-    # Setup the problem
-    problem = pymanopt.Problem(Gr, cost)
-
-    # Create a solver object
-    solver = TrustRegions()
-
-    # Solve
-    Xopt = solver.solve(problem, Delta_bar=8*np.sqrt(p))
-
-    return Xopt
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
-if __name__ == '__main__':
-    """
-    This demo script will generate a random 128 x 128 symmetric matrix and find
-    the dominant invariant 3 dimensional subspace for this matrix, that is, it
-    will find the subspace spanned by the three eigenvectors with the largest
+SUPPORTED_BACKENDS = (
+    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+)
+
+
+def create_cost_egrad_ehess(backend, A, p):
+    n = A.shape[-1]
+    egrad = ehess = None
+
+    if backend == "Autograd":
+        @pymanopt.function.Autograd
+        def cost(X):
+            return -np.trace(X.T @ A @ X)
+    elif backend == "Callable":
+        @pymanopt.function.Callable
+        def cost(X):
+            return -np.trace(X.T @ A @ X)
+
+        @pymanopt.function.Callable
+        def egrad(X):
+            return -(A + A.T) @ X
+
+        # FIXME(nkoep): With the 'Callable' decorator, the backend currently
+        #               interprets the 'ehess' function as a regular nary
+        #               function, which should be wrapped in a unary function
+        #               whose arguments get unpacked when the function is
+        #               called. We need a way to signal to the backend that
+        #               'ehess' implements a Hessian-vector product, which
+        #               requires two arguments.
+        # @pymanopt.function.Callable
+        def ehess(X, H):
+            return -(A + A.T) @ H
+    elif backend == "PyTorch":
+        A_ = torch.from_numpy(A)
+
+        @pymanopt.function.PyTorch
+        def cost(X):
+            return -torch.tensordot(X, torch.matmul(A_, X))
+    elif backend == "TensorFlow":
+        X = tf.Variable(tf.zeros((n, p), dtype=np.float64), name="X")
+
+        @pymanopt.function.TensorFlow(X)
+        def cost(X):
+            return -tf.tensordot(X, tf.matmul(A, X), axes=2)
+    elif backend == "Theano":
+        X = T.matrix()
+
+        @pymanopt.function.Theano(X)
+        def cost(X):
+            return -T.dot(X.T, T.dot(A, X)).trace()
+    else:
+        raise ValueError("Unsupported backend '{:s}'".format(backend))
+
+    return cost, egrad, ehess
+
+
+def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
+    """This example generates a random 128 x 128 symmetric matrix and finds the
+    dominant invariant 3 dimensional subspace for this matrix, i.e., it finds
+    the subspace spanned by the three eigenvectors with the largest
     eigenvalues.
     """
-    # Generate some random data to test the function
-    print('Generating random matrix...')
-    A = np.random.randn(128, 128)
-    A = 0.5 * (A + A.T)
+    num_rows = 128
+    subspace_dimension = 3
+    matrix = rnd.randn(num_rows, num_rows)
+    matrix = 0.5 * (matrix + matrix.T)
 
-    p = 3
+    cost, egrad, ehess = create_cost_egrad_ehess(
+        backend, matrix, subspace_dimension)
+    manifold = Grassmann(num_rows, subspace_dimension)
+    problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
+    if quiet:
+        problem.verbosity = 0
 
-    # Test function...
-    dominant_invariant_subspace(A, p)
+    solver = TrustRegions()
+    estimated_spanning_set = solver.solve(
+        problem, Delta_bar=8*np.sqrt(subspace_dimension))
+
+    if quiet:
+        return
+
+    eigenvalues, eigenvectors = la.eig(matrix)
+    column_indices = np.argsort(eigenvalues)[-subspace_dimension:]
+    spanning_set = eigenvectors[:, column_indices]
+    print("Geodesic distance between true and estimated dominant subspace:",
+          manifold.dist(spanning_set, estimated_spanning_set))
+
+
+if __name__ == "__main__":
+    runner = ExampleRunner(run, "Dominant invariant subspace",
+                           SUPPORTED_BACKENDS)
+    runner.run()

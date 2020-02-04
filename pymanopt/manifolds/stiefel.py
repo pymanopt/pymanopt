@@ -43,11 +43,6 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
         # For the stiefel this is the Frobenius inner product.
         return np.tensordot(G, H, axes=G.ndim)
 
-    def dist(self, X, Y):
-        raise NotImplementedError(
-            "The manifold '{:s}' currently provides no implementation of "
-            "the 'dist' method".format(self._get_class_name()))
-
     def proj(self, X, U):
         return U - multiprod(X, multisym(multiprod(multitransp(X), U)))
 

@@ -26,3 +26,13 @@ class TestProblem(TestCase):
         x = rnd.randn(self.n)
         np_testing.assert_allclose(2 * x * np.exp(np.sum(x ** 2)),
                                    problem.egrad(x))
+
+    def test_attribute_override(self):
+        problem = pymanopt.Problem(self.man, self.cost)
+        with self.assertRaises(ValueError):
+            problem.verbosity = "0"
+        with self.assertRaises(ValueError):
+            problem.verbosity = -1
+        problem.verbosity = 2
+        with self.assertRaises(AttributeError):
+            problem.manifold = None

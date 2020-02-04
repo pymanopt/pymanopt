@@ -1,5 +1,6 @@
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
+from ...tools import flatten_arguments, unpack_arguments
 
 
 class _CallableBackend(Backend):
@@ -16,7 +17,10 @@ class _CallableBackend(Backend):
 
     @Backend._assert_backend_available
     def compile_function(self, function, arguments):
-        return function
+        flattened_arguments = flatten_arguments(arguments)
+        if len(flattened_arguments) == 1:
+            return function
+        return unpack_arguments(function)
 
     def _raise_not_implemented_error(self, function, arguments):
         raise NotImplementedError(

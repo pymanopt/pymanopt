@@ -1,5 +1,10 @@
-import numpy as np
+import os
+
+import autograd.numpy as np
+import tensorflow as tf
 import theano.tensor as T
+import torch
+from examples._tools import ExampleRunner
 from numpy import linalg as la, random as rnd
 
 import pymanopt
@@ -7,38 +12,80 @@ from pymanopt.manifolds import Oblique
 from pymanopt.solvers import ConjugateGradient
 
 
-def closest_unit_norm_column_approximation(A):
-    """
-    Returns the matrix with unit-norm columns that is closests to A w.r.t. the
-    Frobenius norm.
-    """
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+
+SUPPORTED_BACKENDS = (
+    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+)
+
+
+def create_cost_egrad(backend, A):
     m, n = A.shape
+    egrad = None
 
+    if backend == "Autograd":
+        @pymanopt.function.Autograd
+        def cost(X):
+            return 0.5 * np.sum((X - A) ** 2)
+    elif backend == "Callable":
+        @pymanopt.function.Callable
+        def cost(X):
+            return 0.5 * np.sum((X - A) ** 2)
+
+        @pymanopt.function.Callable
+        def egrad(X):
+            return X - A
+    elif backend == "PyTorch":
+        A_ = torch.from_numpy(A)
+
+        @pymanopt.function.PyTorch
+        def cost(X):
+            return 0.5 * torch.sum((X - A_) ** 2)
+    elif backend == "TensorFlow":
+        X = tf.Variable(tf.zeros((m, n), dtype=np.float64), name="X")
+
+        @pymanopt.function.TensorFlow(X)
+        def cost(X):
+            return 0.5 * tf.reduce_sum((X - A) ** 2)
+    elif backend == "Theano":
+        X = T.matrix()
+
+        @pymanopt.function.Theano(X)
+        def cost(X):
+            return 0.5 * T.sum((X - A) ** 2)
+    else:
+        raise ValueError("Unsupported backend '{:s}'".format(backend))
+
+    return cost, egrad
+
+
+def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
+    m = 5
+    n = 8
+    matrix = rnd.randn(m, n)
+
+    cost, egrad = create_cost_egrad(backend, matrix)
     manifold = Oblique(m, n)
+    problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
+    if quiet:
+        problem.verbosity = 0
+
     solver = ConjugateGradient()
-    X = T.matrix()
+    Xopt = solver.solve(problem)
 
-    @pymanopt.function.Theano(X)
-    def cost(X):
-        return 0.5 * T.sum((X - A) ** 2)
+    if quiet:
+        return
 
-    problem = pymanopt.Problem(manifold, cost=cost)
-    return solver.solve(problem)
+    # Calculate the actual solution by normalizing the columns of A.
+    X = matrix / la.norm(matrix, axis=0)[np.newaxis, :]
+
+    # Print information about the solution.
+    print("Solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
+    print("Frobenius-error: %f" % la.norm(X - Xopt))
 
 
 if __name__ == "__main__":
-    # Generate random problem data.
-    m = 5
-    n = 8
-    A = rnd.randn(m, n)
-
-    # Calculate the actual solution by normalizing the columns of A.
-    X = A / la.norm(A, axis=0)[np.newaxis, :]
-
-    # Solve the problem with pymanopt.
-    Xopt = closest_unit_norm_column_approximation(A)
-
-    # Print information about the solution.
-    print('')
-    print("solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
-    print("Frobenius-error: %f" % la.norm(X - Xopt))
+    runner = ExampleRunner(run, "Closest unit Frobenius norm approximation",
+                           SUPPORTED_BACKENDS)
+    runner.run()

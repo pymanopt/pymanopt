@@ -58,11 +58,6 @@ class Manifold(metaclass=abc.ABCMeta):
     # Abstract methods that subclasses must implement
 
     @abc.abstractmethod
-    def dist(self, X, Y):
-        """Returns the geodesic distance between two points `X` and `Y` on the
-        manifold."""
-
-    @abc.abstractmethod
     def inner(self, X, G, H):
         """Returns the inner product (i.e., the Riemannian metric) between two
         tangent vectors `G` and `H` in the tangent space at `X`.
@@ -107,6 +102,11 @@ class Manifold(metaclass=abc.ABCMeta):
                 "Manifold class '{:s}' provides no implementation for "
                 "'{:s}'".format(self._get_class_name(), method.__name__))
         return wrapper
+
+    @_raise_not_implemented_error
+    def dist(self, X, Y):
+        """Returns the geodesic distance between two points `X` and `Y` on the
+        manifold."""
 
     @_raise_not_implemented_error
     def egrad2rgrad(self, X, G):
