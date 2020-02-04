@@ -10,7 +10,7 @@ except ImportError:
 
 from ._backend import Backend
 from .. import make_graph_backend_decorator
-from ...tools import flatten_arguments, group_return_values
+from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
 
 
 class _TensorFlowBackend(Backend):
@@ -36,29 +36,18 @@ class _TensorFlowBackend(Backend):
     def is_compatible(self, function, arguments):
         if not isinstance(function, tf.Tensor):
             return False
-        flattened_arguments = flatten_arguments(arguments)
         return all([isinstance(argument, tf.Variable)
-                    for argument in flattened_arguments])
+                    for argument in arguments])
 
     @Backend._assert_backend_available
-    def compile_function(self, function, arguments):
-        flattened_arguments = flatten_arguments(arguments)
-        if len(flattened_arguments) == 1:
-            def unary_function(point):
-                (argument,) = flattened_arguments
-                feed_dict = {argument: point}
-                return self._session.run(function, feed_dict)
-            return unary_function
-
-        def nary_function(arguments):
-            flattened_inputs = flatten_arguments(arguments)
+    def compile_function(self, function, variables):
+        def compiled_function(*args):
             feed_dict = {
-                argument: array
-                for argument, array in zip(flattened_arguments,
-                                           flattened_inputs)
+                variable: argument
+                for variable, argument in zip(variables, args)
             }
             return self._session.run(function, feed_dict)
-        return nary_function
+        return compiled_function
 
     @staticmethod
     def _gradients(function, arguments):
@@ -66,26 +55,18 @@ class _TensorFlowBackend(Backend):
                             unconnected_gradients=tf.UnconnectedGradients.ZERO)
 
     @Backend._assert_backend_available
-    def compute_gradient(self, function, arguments):
-        flattened_arguments = flatten_arguments(arguments)
-        gradient = self._gradients(function, flattened_arguments)
+    def compute_gradient(self, function, variables):
+        gradients = self._gradients(function, variables)
 
-        if len(flattened_arguments) == 1:
-            (argument,) = flattened_arguments
-
-            def unary_gradient(point):
-                feed_dict = {argument: point}
-                return self._session.run(gradient[0], feed_dict)
-            return unary_gradient
-
-        def nary_gradient(points):
+        def gradient(*args):
             feed_dict = {
-                argument: point
-                for argument, point in zip(flattened_arguments,
-                                           flatten_arguments(points))
+                variable: argument
+                for variable, argument in zip(variables, args)
             }
-            return self._session.run(gradient, feed_dict)
-        return group_return_values(nary_gradient, arguments)
+            return self._session.run(gradients, feed_dict)
+        if len(variables) == 1:
+            return unpack_singleton_sequence_return_value(gradient)
+        return gradient
 
     @staticmethod
     def _hessian_vector_product(function, arguments, vectors):
@@ -122,33 +103,23 @@ class _TensorFlowBackend(Backend):
         return _TensorFlowBackend._gradients(element_wise_products, arguments)
 
     @Backend._assert_backend_available
-    def compute_hessian(self, function, arguments):
-        flattened_arguments = flatten_arguments(arguments)
+    def compute_hessian_vector_product(self, function, variables):
+        zeros = [tf.zeros_like(variable) for variable in variables]
+        hessian = self._hessian_vector_product(function, variables, zeros)
 
-        if len(flattened_arguments) == 1:
-            (argument,) = flattened_arguments
-            zeros = tf.zeros_like(argument)
-            hessian = self._hessian_vector_product(
-                function, [argument], [zeros])
-
-            def unary_hessian(point, vector):
-                feed_dict = {argument: point, zeros: vector}
-                return self._session.run(hessian[0], feed_dict)
-            return unary_hessian
-
-        zeros = [tf.zeros_like(argument) for argument in flattened_arguments]
-        hessian = self._hessian_vector_product(
-            function, flattened_arguments, zeros)
-
-        def nary_hessian(points, vectors):
+        def hessian_vector_product(*args):
+            arguments, vectors = bisect_sequence(args)
             feed_dict = {
-                argument: value for argument, value in zip(
-                    itertools.chain(flattened_arguments, zeros),
-                    itertools.chain(flatten_arguments(points),
-                                    flatten_arguments(vectors)))
+                variable: argument
+                for variable, argument in zip(
+                    itertools.chain(variables, zeros),
+                    itertools.chain(arguments, vectors))
             }
             return self._session.run(hessian, feed_dict)
-        return group_return_values(nary_hessian, arguments)
+        if len(variables) == 1:
+            return unpack_singleton_sequence_return_value(
+                hessian_vector_product)
+        return hessian_vector_product
 
 
 TensorFlow = make_graph_backend_decorator(_TensorFlowBackend)

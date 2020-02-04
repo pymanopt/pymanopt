@@ -50,7 +50,7 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
         y = tf.Variable(tf.zeros(n, dtype=np.float64), name="y")
         z = tf.Variable(tf.zeros(n, dtype=np.float64), name="z")
 
-        @TensorFlow((x, y), z)
+        @TensorFlow(x, y, z)
         def cost(x, y, z):
             return tf.reduce_sum(x ** 2 + y + z ** 3)
 
@@ -79,7 +79,7 @@ class TestMatrix(_backend_tests.TestMatrix):
         m = self.m
         n = self.n
 
-        X = tf.Variable(tf.zeros([m, n], dtype=np.float64))
+        X = tf.Variable(tf.zeros((m, n), dtype=np.float64))
 
         @TensorFlow(X)
         def cost(X):

@@ -111,7 +111,7 @@ class Backend(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def compute_hessian(self, function, arguments):
+    def compute_hessian_vector_product(self, function, arguments):
         """Computes the Hessian-vector product of function a function and turns
         it into a Python callable.
 

@@ -21,7 +21,7 @@ class TestNaryFunction(_backend_tests.TestNaryFunction):
 
         @Autograd
         def cost(x, y):
-            return np.dot(x, y)
+            return x @ y
 
         self.cost = cost
 
@@ -30,7 +30,7 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
     def setUp(self):
         super().setUp()
 
-        @Autograd(("x", "y"), "z")
+        @Autograd
         def cost(x, y, z):
             return np.sum(x ** 2 + y + z ** 3)
 

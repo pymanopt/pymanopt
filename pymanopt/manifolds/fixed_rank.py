@@ -94,7 +94,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         name = ("Manifold of {m}-by-{n} matrices with rank {k} and embedded "
                 "geometry".format(m=m, n=n, k=k))
         dimension = (m + n - k) * k
-        super().__init__(name, dimension)
+        super().__init__(name, dimension, point_layout=3)
 
     @property
     def typicaldist(self):

@@ -37,14 +37,7 @@ def create_cost_egrad_ehess(backend, A, p):
         def egrad(X):
             return -(A + A.T) @ X
 
-        # FIXME(nkoep): With the 'Callable' decorator, the backend currently
-        #               interprets the 'ehess' function as a regular nary
-        #               function, which should be wrapped in a unary function
-        #               whose arguments get unpacked when the function is
-        #               called. We need a way to signal to the backend that
-        #               'ehess' implements a Hessian-vector product, which
-        #               requires two arguments.
-        # @pymanopt.function.Callable
+        @pymanopt.function.Callable
         def ehess(X, H):
             return -(A + A.T) @ H
     elif backend == "PyTorch":
@@ -59,12 +52,27 @@ def create_cost_egrad_ehess(backend, A, p):
         @pymanopt.function.TensorFlow(X)
         def cost(X):
             return -tf.tensordot(X, tf.matmul(A, X), axes=2)
+
+        # Define the Euclidean gradient explicitly for the purpose of
+        # demonstration. The Euclidean Hessian-vector product is automatically
+        # calculated via TensorFlow's autodiff capabilities.
+        @pymanopt.function.TensorFlow(X)
+        def egrad(X):
+            return -tf.matmul(A + A.T, X)
     elif backend == "Theano":
         X = T.matrix()
+        U = T.matrix()
 
         @pymanopt.function.Theano(X)
         def cost(X):
             return -T.dot(X.T, T.dot(A, X)).trace()
+
+        # Define the Euclidean Hessian-vector product explicitly for the
+        # purpose of demonstration. The Euclidean gradient is automatically
+        # calculated via Theano's autodiff capabilities.
+        @pymanopt.function.Theano(X, U)
+        def ehess(X, U):
+            return -T.dot(A + A.T, U)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
