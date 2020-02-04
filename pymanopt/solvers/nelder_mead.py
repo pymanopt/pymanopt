@@ -9,14 +9,14 @@ from pymanopt.solvers.steepest_descent import SteepestDescent
 
 def compute_centroid(manifold, points):
     """Compute the centroid of `points` on the `manifold` as Karcher mean."""
-    @pymanopt.function.Callable
+    @pymanopt.function.Callable(no_wrap=True)
     def objective(y):
         accumulator = 0
         for point in points:
             accumulator += manifold.dist(y, point) ** 2
         return accumulator / 2
 
-    @pymanopt.function.Callable
+    @pymanopt.function.Callable(no_wrap=True)
     def gradient(y):
         g = manifold.zerovec(y)
         for point in points:

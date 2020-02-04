@@ -5,10 +5,11 @@ class Function:
     def __str__(self):
         return "Function <{}>".format(self._backend)
 
-    def __init__(self, function, args, backend):
+    def __init__(self, function, args, backend, no_wrap=False):
         self._function = function
         self._args = args
         self._backend = backend
+        self.no_wrap = no_wrap
 
         self._compiled_function = None
         self._egrad = None
@@ -81,9 +82,11 @@ def make_tracing_backend_decorator(Backend):
 
         if len(args) != 0:
             raise ValueError("Only keyword arguments allowed")
+        no_wrap = kwargs.pop("no_wrap", False)
 
         def inner(function):
-            return Function(function, args=args, backend=Backend(**kwargs))
+            return Function(function, args=args, backend=Backend(**kwargs),
+                            no_wrap=no_wrap)
         return inner
     return decorator
 

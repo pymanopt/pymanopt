@@ -141,6 +141,8 @@ class Problem:
         return wrapper
 
     def _wrap_function(self, function):
+        if function.no_wrap:
+            return function
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (tuple, list)):
             @functools.wraps(function)
@@ -161,6 +163,8 @@ class Problem:
         return wrapper
 
     def _wrap_gradient(self, gradient):
+        if gradient.no_wrap:
+            return gradient
         wrapped_gradient = self._wrap_function(gradient)
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (list, tuple)):
@@ -168,6 +172,8 @@ class Problem:
         return wrapped_gradient
 
     def _wrap_hessian_vector_product(self, hessian_vector_product):
+        if hessian_vector_product.no_wrap:
+            return hessian_vector_product
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (list, tuple)):
             @functools.wraps(hessian_vector_product)
@@ -194,8 +200,9 @@ class Problem:
     @property
     def egrad(self):
         if self._egrad is None:
-            self._egrad = self._wrap_gradient(
-                self._original_cost.compute_gradient())
+            gradient = self._original_cost.compute_gradient()
+            gradient.no_wrap = False
+            self._egrad = self._wrap_gradient(gradient)
         return self._egrad
 
     @property
@@ -211,8 +218,9 @@ class Problem:
     @property
     def ehess(self):
         if self._ehess is None:
-            self._ehess = self._wrap_hessian_vector_product(
-                self._original_cost.compute_hessian_vector_product())
+            hvp = self._original_cost.compute_hessian_vector_product()
+            hvp.no_wrap = False
+            self._ehess = self._wrap_hessian_vector_product(hvp)
         return self._ehess
 
     @property
