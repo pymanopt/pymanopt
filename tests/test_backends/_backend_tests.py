@@ -59,7 +59,7 @@ class TestNaryFunction(unittest.TestCase):
         x = rnd.randn(n)
         y = rnd.randn(n)
 
-        self.assertAlmostEqual(np.dot(x, y), cost(x, y))
+        self.assertAlmostEqual(x @ y, cost(x, y))
 
         egrad = cost.compute_gradient()
         g = egrad(x, y)
@@ -164,10 +164,10 @@ class TestVector(unittest.TestCase):
 
         diag = np.eye(n)
 
-        H = np.exp(np.sum(Y ** 2)) * (4 * Ymat.T.dot(Ymat) + 2 * diag)
+        H = np.exp(np.sum(Y ** 2)) * (4 * Ymat.T @ Ymat + 2 * diag)
 
         # Then 'left multiply' H by A
-        self.correct_hess = np.squeeze(np.array(Amat.dot(H)))
+        self.correct_hess = np.squeeze(np.array(Amat @ H))
 
     def test_compile(self):
         np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
@@ -304,10 +304,10 @@ class TestMixed(unittest.TestCase):
 
         diag = np.eye(n1)
 
-        H = np.exp(np.sum(y[0] ** 2)) * (4 * Ymat.T.dot(Ymat) + 2 * diag)
+        H = np.exp(np.sum(y[0] ** 2)) * (4 * Ymat.T @ Ymat + 2 * diag)
 
         # Then 'left multiply' H by A
-        h1 = np.array(Amat.dot(H)).flatten()
+        h1 = np.array(Amat @ H).flatten()
 
         # 2. MATRIX
         # First form hessian tensor H (4th order)

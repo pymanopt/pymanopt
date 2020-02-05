@@ -53,7 +53,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     >>> m = 10
     >>> A = np.random.randn(n, m)
     >>> B = np.random.randn(n, m)
-    >>> ABt = np.dot(A,B.T)
+    >>> ABt = A @ B.T
 
     Create manifold - SO(n).
     >>> manifold = Rotations(n)
@@ -115,7 +115,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     def retr(self, X, U):
         def retri(Y):
             Q, R = la.qr(Y)
-            return np.dot(Q, np.diag(np.sign(np.sign(np.diag(R)) + 0.5)))
+            return Q @ np.diag(np.sign(np.sign(np.diag(R)) + 0.5))
 
         Y = X + multiprod(X, U)
         if self._k == 1:
@@ -125,10 +125,13 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
                 Y[i] = retri(Y[i])
             return Y
 
+    # TODO(nkoep): Rename this to retr_polar and retr to retr_qr (e.g.), and
+    #              make them private. Then add a parameter to the constructor
+    #              to select the retraction.
     def retr2(self, X, U):
         def retr2i(Y):
             U, _, Vt = la.svd(Y)
-            return np.dot(U, Vt)
+            return U @ Vt
 
         Y = X + multiprod(X, U)
         if self._k == 1:
@@ -166,7 +169,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             # group of orthogonal n-by-n matrices.
             A = rnd.randn(n, n)
             Q, RR = la.qr(A)
-            Q = np.dot(Q, np.diag(np.sign(np.diag(RR))))  # Mezzadri 2007
+            Q = Q @ np.diag(np.sign(np.diag(RR)))
 
             # If Q is in O(n) but not in SO(n), we permute the two first
             # columns of Q such that det(new Q) = -det(Q), hence the new Q will

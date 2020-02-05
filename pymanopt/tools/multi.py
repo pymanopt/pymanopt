@@ -12,7 +12,7 @@ def multiprod(A, B):
 
     # First check if we have been given just one matrix
     if len(np.shape(A)) == 2:
-        return np.dot(A, B)
+        return A @ B
 
     # Old (slower) implementation:
     # a = A.reshape(np.hstack([np.shape(A), [1]]))

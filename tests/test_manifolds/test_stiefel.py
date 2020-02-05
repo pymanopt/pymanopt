@@ -11,10 +11,11 @@ class TestSingleStiefelManifold(TestCase):
     def setUp(self):
         self.m = m = 20
         self.n = n = 2
-        self.k = k = 1
-        self.man = Stiefel(m, n, k=k)
-        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u) +
-                                            np.dot(u.T, x)) / 2
+        self.man = Stiefel(m, n)
+
+        def proj(x, u):
+            return u - x @ (x.T @ u + u.T @ x) / 2
+        self.proj = proj
 
     def test_dim(self):
         assert self.man.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
@@ -37,14 +38,14 @@ class TestSingleStiefelManifold(TestCase):
         H = rnd.randn(self.m, self.n)
 
         # Compare the projections.
-        Hproj = H - X.dot(X.T.dot(H) + H.T.dot(X)) / 2
+        Hproj = H - X @ (X.T @ H + H.T @ X) / 2
         np_testing.assert_allclose(Hproj, self.man.proj(X, H))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         X = self.man.rand()
-        np_testing.assert_allclose(X.T.dot(X), np.eye(self.n), atol=1e-10)
+        np_testing.assert_allclose(X.T @ X, np.eye(self.n), atol=1e-10)
         Y = self.man.rand()
         assert np.linalg.norm(X - Y) > 1e-6
 
@@ -53,7 +54,7 @@ class TestSingleStiefelManifold(TestCase):
         # two then they are not equal.
         X = self.man.rand()
         U = self.man.randvec(X)
-        np_testing.assert_allclose(multisym(X.T.dot(U)),
+        np_testing.assert_allclose(multisym(X.T @ U),
                                    np.zeros((self.n, self.n)), atol=1e-10)
         V = self.man.randvec(X)
         assert la.norm(U - V) > 1e-6
@@ -65,8 +66,7 @@ class TestSingleStiefelManifold(TestCase):
         u = self.man.randvec(x)
 
         xretru = self.man.retr(x, u)
-        np_testing.assert_allclose(xretru.T.dot(xretru), np.eye(self.n,
-                                                                self.n),
+        np_testing.assert_allclose(xretru.T @ xretru, np.eye(self.n, self.n),
                                    atol=1e-10)
 
         u = u * 1e-6
@@ -101,8 +101,7 @@ class TestSingleStiefelManifold(TestCase):
         u = s.randvec(x)
 
         xexpu = s.exp(x, u)
-        np_testing.assert_allclose(xexpu.T.dot(xexpu), np.eye(self.n,
-                                                              self.n),
+        np_testing.assert_allclose(xexpu.T @ xexpu, np.eye(self.n, self.n),
                                    atol=1e-10)
 
         u = u * 1e-6
@@ -139,8 +138,9 @@ class TestMultiStiefelManifold(TestCase):
         self.man = Stiefel(m, n, k=k)
 
     def test_dim(self):
-        assert self.man.dim == 0.5 * self.k * self.n * (2 * self.m - self.n -
-                                                        1)
+        self.assertEqual(
+            self.man.dim,
+            int(0.5 * self.k * self.n * (2 * self.m - self.n - 1)))
 
     def test_typicaldist(self):
         np_testing.assert_almost_equal(self.man.typicaldist,

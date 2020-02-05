@@ -62,13 +62,12 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
             # Calculate 'thin' qr decomposition of X + G
             q, r = np.linalg.qr(X + G)
             # Unflip any flipped signs
-            XNew = np.dot(q, np.diag(np.sign(np.sign(np.diag(r)) + 0.5)))
+            XNew = q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
         else:
             XNew = X + G
             for i in range(self._k):
                 q, r = np.linalg.qr(XNew[i])
-                XNew[i] = np.dot(
-                    q, np.diag(np.sign(np.sign(np.diag(r)) + 0.5)))
+                XNew[i] = q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
         return XNew
 
     def norm(self, X, G):
@@ -100,18 +99,18 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
 
     def exp(self, X, U):
         if self._k == 1:
-            W = expm(np.bmat([[X.T.dot(U), -U.T.dot(U)],
-                              [np.eye(self._p), X.T.dot(U)]]))
-            Z = np.bmat([[expm(-X.T.dot(U))], [np.zeros((self._p, self._p))]])
-            Y = np.bmat([X, U]).dot(W).dot(Z)
+            W = expm(np.bmat([[X.T @ U, -U.T @ U],
+                              [np.eye(self._p), X.T @ U]]))
+            Z = np.bmat([[expm(-X.T @ U)], [np.zeros((self._p, self._p))]])
+            Y = np.bmat([X, U]) @ W @ Z
         else:
             Y = np.zeros(np.shape(X))
             for i in range(self._k):
-                W = expm(np.bmat([[X[i].T.dot(U[i]), -U[i].T.dot(U[i])],
-                                  [np.eye(self._p), X[i].T.dot(U[i])]]))
-                Z = np.bmat([[expm(-X[i].T.dot(U[i]))],
+                W = expm(np.bmat([[X[i].T @ U[i], -U[i].T @ U[i]],
+                                  [np.eye(self._p), X[i].T @ U[i]]]))
+                Z = np.bmat([[expm(-X[i].T @ U[i])],
                              [np.zeros((self._p, self._p))]])
-                Y[i] = np.bmat([X[i], U[i]]).dot(W).dot(Z)
+                Y[i] = np.bmat([X[i], U[i]]) @ W @ Z
         return Y
 
     def zerovec(self, X):

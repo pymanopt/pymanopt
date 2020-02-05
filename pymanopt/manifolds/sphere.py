@@ -145,11 +145,11 @@ class _SphereSubspaceIntersectionManifold(_Sphere):
 
     def rand(self):
         X = super().rand()
-        return self._normalize(self._subspace_projector.dot(X))
+        return self._normalize(self._subspace_projector @ X)
 
     def randvec(self, X):
         Y = super().randvec(X)
-        return self._normalize(self._subspace_projector.dot(Y))
+        return self._normalize(self._subspace_projector @ Y)
 
 
 class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
@@ -163,7 +163,7 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         self._validate_span_matrix(U)
         m = U.shape[0]
         Q, _ = la.qr(U)
-        projector = Q.dot(Q.T)
+        projector = Q @ Q.T
         subspace_dimension = la.matrix_rank(projector)
         name = ("Sphere manifold of {}-dimensional vectors intersecting a "
                 "{}-dimensional subspace".format(m, subspace_dimension))
@@ -183,7 +183,7 @@ class SphereSubspaceComplementIntersection(
         self._validate_span_matrix(U)
         m = U.shape[0]
         Q, _ = la.qr(U)
-        projector = np.eye(m) - Q.dot(Q.T)
+        projector = np.eye(m) - Q @ Q.T
         subspace_dimension = la.matrix_rank(projector)
         name = ("Sphere manifold of {}-dimensional vectors orthogonal "
                 "to a {}-dimensional subspace".format(m, subspace_dimension))

@@ -164,8 +164,8 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
 
     def proj(self, Y, H):
         # Projection onto the horizontal space
-        YtY = Y.T.dot(Y)
-        AS = Y.T.dot(H) - H.T.dot(Y)
+        YtY = Y.T @ Y
+        AS = Y.T @ H - H.T @ Y
         Omega = lyap(YtY, AS)
         return H - Y @ Omega
 
@@ -278,8 +278,8 @@ class PSDFixedRankComplex(_PSDFixedRank):
         return np.sqrt(self.inner(Y, U, U))
 
     def dist(self, U, V):
-        S, _, D = la.svd(V.T.conj().dot(U))
-        E = U - V.dot(S).dot(D)
+        S, _, D = la.svd(V.T.conj() @ U)
+        E = U - V @ S @ D
         return self.inner(None, E, E) / 2
 
     def rand(self):
@@ -343,8 +343,8 @@ class Elliptope(Manifold, RetrAsExpMixin):
         eta = self._project_rows(Y, H)
 
         # Projection onto the horizontal space
-        YtY = Y.T.dot(Y)
-        AS = Y.T.dot(eta) - H.T.dot(Y)
+        YtY = Y.T @ Y
+        AS = Y.T @ eta - H.T @ Y
         Omega = lyap(YtY, -AS)
         return eta - Y @ (Omega - Omega.T) / 2
 

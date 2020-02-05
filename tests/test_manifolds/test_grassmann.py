@@ -11,10 +11,11 @@ class TestSingleGrassmannManifold(TestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
-        self.k = k = 1
-        self.man = Grassmann(m, n, k=k)
+        self.man = Grassmann(m, n)
 
-        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u))
+        def proj(x, u):
+            return u - x @ (x.T @ u)
+        self.proj = proj
 
     def test_dist(self):
         x = self.man.rand()
@@ -29,9 +30,9 @@ class TestSingleGrassmannManifold(TestCase):
         egrad = rnd.randn(self.m, self.n)
         ehess = rnd.randn(self.m, self.n)
 
-        np_testing.assert_allclose(testing.ehess2rhess(self.proj)(x, egrad,
-                                                                  ehess, u),
-                                   self.man.ehess2rhess(x, egrad, ehess, u))
+        np_testing.assert_allclose(
+            testing.ehess2rhess(self.proj)(x, egrad, ehess, u),
+            self.man.ehess2rhess(x, egrad, ehess, u))
 
     def test_retr(self):
         # Test that the result is on the manifold and that for small
@@ -42,8 +43,7 @@ class TestSingleGrassmannManifold(TestCase):
         xretru = self.man.retr(x, u)
 
         np_testing.assert_allclose(multiprod(multitransp(xretru), xretru),
-                                   np.eye(self.n),
-                                   atol=1e-10)
+                                   np.eye(self.n), atol=1e-10)
 
         u = u * 1e-6
         xretru = self.man.retr(x, u)
@@ -98,8 +98,6 @@ class TestMultiGrassmannManifold(TestCase):
         self.n = n = 2
         self.k = k = 3
         self.man = Grassmann(m, n, k=k)
-
-        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u))
 
     def test_dim(self):
         assert self.man.dim == self.k * (self.m * self.n - self.n ** 2)
