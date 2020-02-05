@@ -82,7 +82,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # using a small epsilon straightaway is to reduce epsilon bit by bit and to
     # warm-start subsequent optimization in that way. Trustregions will be more
     # appropriate for these fine tunings.
-    epsilon = 0.0015
+    epsilon = 0.005
 
     cost = create_cost(backend, dimension, num_points, epsilon)
     manifold = Elliptope(num_points, dimension)
