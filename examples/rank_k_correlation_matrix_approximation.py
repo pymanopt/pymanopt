@@ -46,13 +46,13 @@ def create_cost_egrad_ehess(backend, matrix, rank):
         @pymanopt.function.PyTorch
         def cost(X):
             return 0.25 * torch.norm(
-                torch.matmul(torch.transpose(X, 1, 0), X) - matrix_) ** 2
+                torch.transpose(X, 1, 0) @ X - matrix_) ** 2
     elif backend == "TensorFlow":
         X = tf.Variable(tf.zeros((rank, num_rows), dtype=np.float64), name="X")
 
         @pymanopt.function.TensorFlow(X)
         def cost(X):
-            return 0.25 * tf.norm(tf.matmul(tf.transpose(X), X) - matrix) ** 2
+            return 0.25 * tf.norm(tf.transpose(X) @ X - matrix) ** 2
     elif backend == "Theano":
         X = T.matrix()
 

@@ -47,7 +47,7 @@ def create_cost_egrad(backend, A, rank):
 
         @pymanopt.function.PyTorch
         def cost(u, s, v):
-            X = torch.matmul(u, torch.matmul(s, torch.transpose(v, 1, 0)))
+            X = u @ s @ torch.transpose(v, 1, 0)
             return torch.norm(X - A_) ** 2
     elif backend == "TensorFlow":
         u = tf.Variable(tf.zeros((m, rank), dtype=np.float64), name="u")
@@ -56,7 +56,7 @@ def create_cost_egrad(backend, A, rank):
 
         @pymanopt.function.TensorFlow(u, s, v)
         def cost(u, s, v):
-            X = tf.matmul(u, tf.matmul(s, tf.transpose(v)))
+            X = u @ s @ tf.transpose(v)
             return tf.norm(X - A) ** 2
     elif backend == "Theano":
         u = T.matrix()

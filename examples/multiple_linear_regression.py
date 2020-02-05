@@ -47,7 +47,7 @@ def create_cost_egrad_ehess(backend, samples, targets):
 
         @pymanopt.function.PyTorch
         def cost(weights):
-            return torch.norm(targets_ - torch.matmul(samples_, weights)) ** 2
+            return torch.norm(targets_ - samples_ @ weights) ** 2
     elif backend == "TensorFlow":
         weights = tf.Variable(tf.zeros(num_weights, dtype=np.float64),
                               name="weights")

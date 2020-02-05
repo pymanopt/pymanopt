@@ -45,20 +45,20 @@ def create_cost_egrad_ehess(backend, A, p):
 
         @pymanopt.function.PyTorch
         def cost(X):
-            return -torch.tensordot(X, torch.matmul(A_, X))
+            return -torch.tensordot(X, A_ @ X)
     elif backend == "TensorFlow":
         X = tf.Variable(tf.zeros((n, p), dtype=np.float64), name="X")
 
         @pymanopt.function.TensorFlow(X)
         def cost(X):
-            return -tf.tensordot(X, tf.matmul(A, X), axes=2)
+            return -tf.tensordot(X, A @ X, axes=2)
 
         # Define the Euclidean gradient explicitly for the purpose of
         # demonstration. The Euclidean Hessian-vector product is automatically
         # calculated via TensorFlow's autodiff capabilities.
         @pymanopt.function.TensorFlow(X)
         def egrad(X):
-            return -tf.matmul(A + A.T, X)
+            return -(A + A.T) @ X
     elif backend == "Theano":
         X = T.matrix()
         U = T.matrix()

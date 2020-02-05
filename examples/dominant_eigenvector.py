@@ -27,11 +27,11 @@ def create_cost_egrad(backend, A):
     if backend == "Autograd":
         @pymanopt.function.Autograd
         def cost(x):
-            return -np.inner(x, A @ x)
+            return -x @ A @ x
     elif backend == "Callable":
         @pymanopt.function.Callable
         def cost(x):
-            return -np.inner(x, A @ x)
+            return -x @ A @ x
 
         @pymanopt.function.Callable
         def egrad(x):
@@ -41,7 +41,7 @@ def create_cost_egrad(backend, A):
 
         @pymanopt.function.PyTorch
         def cost(x):
-            return -torch.matmul(x, torch.matmul(A_, x))
+            return -x @ A_ @ x
     elif backend == "TensorFlow":
         x = tf.Variable(tf.zeros(n, dtype=np.float64), name="X")
 

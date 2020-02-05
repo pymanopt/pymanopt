@@ -54,17 +54,16 @@ def create_cost_egrad_ehess(backend, samples, num_components):
 
         @pymanopt.function.PyTorch
         def cost(w):
-            projector = torch.matmul(w, torch.transpose(w, 1, 0))
-            return torch.norm(
-                samples_ - torch.matmul(samples_, projector)) ** 2
+            projector = w @ torch.transpose(w, 1, 0)
+            return torch.norm(samples_ - samples_ @ projector) ** 2
     elif backend == "TensorFlow":
         w = tf.Variable(
             tf.zeros((dimension, num_components), dtype=np.float64), name="w")
 
         @pymanopt.function.TensorFlow(w)
         def cost(w):
-            projector = tf.matmul(w, tf.transpose(w))
-            return tf.norm(samples - tf.matmul(samples, projector)) ** 2
+            projector = w @ tf.transpose(w)
+            return tf.norm(samples - samples @ projector) ** 2
     elif backend == "Theano":
         w = T.matrix()
 
