@@ -35,7 +35,7 @@ def create_cost(backend, dimension, num_points, epsilon):
     elif backend == "PyTorch":
         @pymanopt.function.PyTorch
         def cost(X):
-            Y = X @ torch.transpose(X, 1, 0)
+            Y = X @ X.t()
             s = torch.triu(Y, 1).max()
             expY = torch.exp((Y - s) / epsilon)
             expY = expY - torch.diag(torch.diag(expY))
