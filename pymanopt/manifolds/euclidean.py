@@ -28,13 +28,17 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def proj(self, X, U):
         return U
 
+    def tangent(self, X, U):
+        return self.proj(X, U)
+
     def ehess2rhess(self, X, egrad, ehess, H):
         return ehess
 
     def exp(self, X, U):
         return X + U
 
-    retr = exp
+    def retr(self, X, U):
+        return self.exp(X, U)
 
     def log(self, X, Y):
         return Y - X

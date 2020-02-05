@@ -169,7 +169,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold, RetrAsExpMixin):
         Vp = ZtU - X[2] @ UtZV.T
         return self._TangentVector(Up, M, Vp)
 
-    egrad2rgrad = proj
+    def egrad2rgrad(self, X, egrad):
+        return self.proj(X, egrad)
 
     def ehess2rhess(self, X, egrad, ehess, H):
         # Euclidean part

@@ -102,6 +102,12 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
+    def tangent(self, X, Z):
+        """Tangentializes a tangent vector ``Z`` in the tangent space at a
+        point ``X``.
+        """
+
+    @abc.abstractmethod
     def norm(self, X, G):
         """Computes the norm of a tangent vector `G` in the tangent space at
         `X`.

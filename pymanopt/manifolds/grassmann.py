@@ -69,7 +69,11 @@ class Grassmann(Manifold):
     def proj(self, X, U):
         return U - multiprod(X, multiprod(multitransp(X), U))
 
-    egrad2rgrad = proj
+    def tangent(self, X, U):
+        return self.proj(X, U)
+
+    def egrad2rgrad(self, X, egrad):
+        return self.proj(X, egrad)
 
     def ehess2rhess(self, X, egrad, ehess, H):
         # Convert Euclidean into Riemannian Hessian.

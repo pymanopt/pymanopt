@@ -34,6 +34,9 @@ class _Sphere(EuclideanEmbeddedSubmanifold):
     def proj(self, X, H):
         return H - self.inner(None, X, H) * X
 
+    def tangent(self, X, U):
+        return self.proj(X, U)
+
     def weingarten(self, X, U, V):
         return -self.inner(X, X, V) * U
 
@@ -135,7 +138,10 @@ class _SphereSubspaceIntersectionManifold(_Sphere):
 
     def proj(self, X, H):
         Y = super().proj(X, H)
-        return self._subspace_projector.dot(Y)
+        return self._subspace_projector @ Y
+
+    def tangent(self, X, U):
+        return self.proj(X, U)
 
     def rand(self):
         X = super().rand()
