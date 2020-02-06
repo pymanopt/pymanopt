@@ -23,7 +23,7 @@ class Product(Manifold):
                 [v - other[k] for k, v in enumerate(self)])
 
         def __mul__(self, other):
-            return self.__class__([s / other for s in self])
+            return self.__class__([s * other for s in self])
 
         __rmul__ = __mul__
 
