@@ -70,7 +70,7 @@
 
 from pymanopt.manifolds import Stiefel
 from pymanopt import Problem
-from pymanopt.solvers import SteepestDescent
+from pymanopt.solvers import GradientDescent
 
 # (1) Instantiate a manifold
 manifold = Stiefel(5, 2)
@@ -81,7 +81,7 @@ def cost(X): return np.sum(X)
 problem = Problem(manifold=manifold, cost=cost)
 
 # (3) Instantiate a Pymanopt solver
-solver = SteepestDescent()
+solver = GradientDescent()
 
 # let Pymanopt do the rest
 Xopt = solver.solve(problem)
@@ -525,8 +525,8 @@ xoptimal, optlog = solver.solve(problem, logverbosity=2)</code></pre>
           If you wish to implement your own solver, you must inherit from the
           <a href="docs/api-reference.html#pymanopt.solvers.solver.Solver">Solver abstract
           base class</a>. The
-          <a href="https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/steepest_descent.py">
-          steepest_descent</a> solver is reasonably simple and
+          <a href="https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/gradient_descent.py">
+          gradient_descent</a> solver is reasonably simple and
           could be used as a model for custom solvers.
         </p>
 
@@ -547,21 +547,21 @@ Xopt = solver.solve(problem)</code></pre>
       </div>
       <div class="row">
         <div class="one-half column">
-          <strong>Steepest descent</strong><br />
-          <code class="table-code-decl prettyprint language-py">SteepestDescent()</code><br />
-          Classical first-order steepest descent algorithm. By default uses a back-tracking
+          <strong>Gradient descent</strong><br />
+          <code class="table-code-decl prettyprint language-py">GradientDescent()</code><br />
+          Classical first-order gradient descent algorithm. By default uses a back-tracking
           linesearch. To set linesearch parameters you can instantiate the
           <a href="docs/api-reference.html#pymanopt.solvers.linesearch.LineSearchBackTracking">LineSearchBackTracking</a>
           object with your desired parameters and pass it to the
-          SteepestDescent solver using the optional <code>linesearch</code> parameter:
-          <code class="prettify language-py">SteepestDescent(linesearch=LinesearchObject)</code>.
+          GradientDescent solver using the optional <code>linesearch</code> parameter:
+          <code class="prettify language-py">GradientDescent(linesearch=LinesearchObject)</code>.
           You can also implement your own linesearch class, just take
             <a href="https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/linesearch.py#L4">this code</a>
           as a starting point.
         </div>
         <div class="one-half column">
-<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import SteepestDescent
-solver = SteepestDescent()
+<pre class="table-code-block"><code class="prettyprint language-py">from pymanopt.solvers import GradientDescent
+solver = GradientDescent()
 Xopt = solver.solve(problem)</code></pre>
         </div>
       </div>

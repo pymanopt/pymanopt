@@ -24,12 +24,12 @@ class Manifold(metaclass=abc.ABCMeta):
     would like to extend Pymanopt with a new manifold, then your manifold
     should inherit from this class.
 
-    Not all methods are required by all solvers. In particular, first order
+    Not all methods are required by all solvers. In particular, first-order
     gradient based solvers such as
-    :py:mod:`pymanopt.solvers.steepest_descent` and
-    :py:mod:`pymanopt.solvers.conjugate_gradient` require
+    :py:mod:`pymanopt.solvers.gradient_descent` and
+    :py:mod:`pymanopt.solvers.conjugate_gradients` require
     :py:func:`egrad2rgrad` to be implemented but not :py:func:`ehess2rhess`.
-    Second order solvers such as :py:mod:`pymanopt.solvers.trust_regions`
+    Second-order solvers such as :py:mod:`pymanopt.solvers.trust_regions`
     will require :py:func:`ehess2rhess`.
 
     All of these methods correspond closely to methods in

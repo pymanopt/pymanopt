@@ -5,12 +5,7 @@ from pymanopt.solvers.linesearch import LineSearchBackTracking
 from pymanopt.solvers.solver import Solver
 
 
-class SteepestDescent(Solver):
-    """
-    Steepest descent (gradient descent) algorithm based on
-    steepestdescent.m from the manopt MATLAB package.
-    """
-
+class GradientDescent(Solver):
     def __init__(self, linesearch=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -20,7 +15,6 @@ class SteepestDescent(Solver):
             self._linesearch = linesearch
         self.linesearch = None
 
-    # Function to solve optimisation problem using steepest descent.
     def solve(self, problem, x=None, reuselinesearch=False):
         """
         Perform optimization using gradient descent with linesearch.

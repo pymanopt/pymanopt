@@ -8,7 +8,7 @@ from examples._tools import ExampleRunner
 
 import pymanopt
 from pymanopt.manifolds import SpecialOrthogonalGroup
-from pymanopt.solvers import SteepestDescent
+from pymanopt.solvers import GradientDescent
 
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -84,7 +84,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         problem.verbosity = 0
 
-    solver = SteepestDescent()
+    solver = GradientDescent()
     X = solver.solve(problem)
 
     if not quiet:

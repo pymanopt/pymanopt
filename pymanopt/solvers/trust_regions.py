@@ -11,8 +11,6 @@
 #       Volume   = {7},
 #       Doi      = {10.1007/s10208-005-0179-9}
 #     }
-#
-# See also: steepestdescent conjugategradient manopt/examples
 
 # An explicit, general listing of this algorithm, with preconditioning,
 # can be found in the following paper:

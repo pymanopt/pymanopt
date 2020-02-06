@@ -20,33 +20,33 @@ Euclidean Space
 
 .. automodule:: pymanopt.manifolds.euclidean
 
-The Grassmann Manifold
-~~~~~~~~~~~~~~~~~~~~~~
+Grassmann Manifold
+~~~~~~~~~~~~~~~~~~
 
 .. automodule:: pymanopt.manifolds.grassmann
 
-The Oblique Manifold
-~~~~~~~~~~~~~~~~~~~~
+Oblique Manifold
+~~~~~~~~~~~~~~~~
 
 .. automodule:: pymanopt.manifolds.oblique
 
-The Product Manifold
-~~~~~~~~~~~~~~~~~~~~
+Product Manifold
+~~~~~~~~~~~~~~~~
 
 .. automodule:: pymanopt.manifolds.product
 
-The Manifolds of Positive Semidefinite Matrices
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Manifolds of Positive Semidefinite Matrices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: pymanopt.manifolds.psd
 
-The Sphere Manifold
-~~~~~~~~~~~~~~~~~~~
+Sphere Manifold
+~~~~~~~~~~~~~~~
 
 .. automodule:: pymanopt.manifolds.sphere
 
-The Stiefel Manifold
-~~~~~~~~~~~~~~~~~~~~
+Stiefel Manifold
+~~~~~~~~~~~~~~~~
 
 .. automodule:: pymanopt.manifolds.stiefel
 
@@ -64,8 +64,8 @@ Riemannian Conjugate Gradients
 
 .. automodule:: pymanopt.solvers.conjugate_gradient
 
-The Nelder-Mead Algorithm
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Nelder-Mead Algorithm
+~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: pymanopt.solvers.nelder_mead
 
@@ -74,10 +74,10 @@ Particle Swarms
 
 .. automodule:: pymanopt.solvers.particle_swarm
 
-The Riemannian Steepest Descent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Riemannian Gradient Descent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: pymanopt.solvers.steepest_descent
+.. automodule:: pymanopt.solvers.gradient_descent
 
 Second-Order Riemannian Trust Regions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

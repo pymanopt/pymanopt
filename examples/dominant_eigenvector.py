@@ -9,7 +9,7 @@ from numpy import linalg as la, random as rnd
 
 import pymanopt
 from pymanopt.manifolds import Sphere
-from pymanopt.solvers import SteepestDescent
+from pymanopt.solvers import GradientDescent
 
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -71,7 +71,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         problem.verbosity = 0
 
-    solver = SteepestDescent()
+    solver = GradientDescent()
     estimated_dominant_eigenvector = solver.solve(problem)
 
     if quiet:

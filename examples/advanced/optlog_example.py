@@ -4,7 +4,7 @@ import autograd.numpy as np
 
 import pymanopt
 from pymanopt.manifolds import Stiefel
-from pymanopt.solvers import SteepestDescent
+from pymanopt.solvers import GradientDescent
 
 
 if __name__ == "__main__":
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     def cost(w):
         return np.sum(np.sum((X - np.dot(w, np.dot(w.T, X))) ** 2))
 
-    solver = SteepestDescent(logverbosity=2)
+    solver = GradientDescent(logverbosity=2)
     manifold = Stiefel(3, 2)
     problem = pymanopt.Problem(manifold, cost, verbosity=0)
     wopt, optlog = solver.solve(problem)

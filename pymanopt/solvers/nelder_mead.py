@@ -4,7 +4,7 @@ import numpy as np
 
 import pymanopt
 from pymanopt.solvers.solver import Solver
-from pymanopt.solvers.steepest_descent import SteepestDescent
+from pymanopt.solvers.gradient_descent import GradientDescent
 
 
 def compute_centroid(manifold, points):
@@ -23,7 +23,7 @@ def compute_centroid(manifold, points):
             g -= manifold.log(y, point)
         return g
 
-    solver = SteepestDescent(maxiter=15)
+    solver = GradientDescent(maxiter=15)
     problem = pymanopt.Problem(manifold, objective, grad=gradient, verbosity=0)
     return solver.solve(problem)
 
