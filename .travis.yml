@@ -42,6 +42,11 @@ after_success:
     -D release=latest
     docs
     website/docs
+  - >
+    PYTHONPATH=. jupyter nbconvert
+    --execute
+    examples/notebooks/mixture_of_gaussians.ipynb
+    --output website/MoG.html
 
 deploy:
   - provider: pypi
