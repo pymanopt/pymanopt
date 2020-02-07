@@ -10,12 +10,17 @@ die() {
   exit 1
 }
 
-for p in pyenv; do
+PYTHONVERSION="3.7.6"
+NAME="pymanopt"
+ENVNAME="$NAME-$PYTHONVERSION"
+
+for p in pyenv pyenv-virtualenv; do
   command -v $p >/dev/null 2>&1 || { die "\`$p\` not found in PATH"; }
 done
 
-CONFIGURE_OPTS=--enable-shared pyenv install 3.7.6
-pyenv virtualenv 3.7.6 pymanopt-3.7
+CONFIGURE_OPTS=--enable-shared pyenv install -s $PYTHONVERSION
+pyenv virtualenv -f $PYTHONVERSION $ENVNAME
+pyenv local $ENVNAME
 pip install --upgrade pip setuptools wheel
 pip install -r dev-requirements.txt
 pip install -r requirements.txt
