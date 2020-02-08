@@ -1,4 +1,5 @@
-import autograd.numpy as np
+import numpy as np
+from numpy import linalg as la
 
 from ..core.problem import Problem
 try:
@@ -17,7 +18,7 @@ def identify_linear_piece(x, y, window_length):
     output poly specifies a first order polynomial that best fits (x, y) over
     that segment, following the usual matlab convention for polynomials
     (highest degree coefficients first).
-    See also: checkdiff checkgradient checkhessian
+    See also: check_directional_derivative check_gradient check_hessian
     """
     residues = np.zeros(len(x)-window_length)
     polys = np.zeros(shape=(2, len(residues)))
@@ -25,7 +26,7 @@ def identify_linear_piece(x, y, window_length):
         segment = range(i, (i+window_length)+1)
         poly, residuals, _, _, _ = np.polyfit(x[segment], y[segment],
                                               1, full=True)
-        residues[i] = np.linalg.norm(residuals)
+        residues[i] = la.norm(residuals)
         polys[:, i] = poly
     best = np.argmin(residues)
     segment = range(best, best+window_length+1)
@@ -33,12 +34,12 @@ def identify_linear_piece(x, y, window_length):
     return segment, poly
 
 
-def directionalDerivative(problem, x, d):
+def get_directional_derivative(problem, x, d):
     """Computes the directional derivative of the cost function at x along d.
     Returns the derivative at x along d of the cost function described in the
     problem structure.
     """
-    if hasattr(problem.manifold, 'diff'):
+    if hasattr(problem.manifold, "diff"):
         diff = problem.manifold.diff(x, d)
     else:
         grad = problem.manifold.grad(x)
@@ -46,17 +47,19 @@ def directionalDerivative(problem, x, d):
     return diff
 
 
-def checkdiff(problem, x=None, d=None, force_gradient=False):
+def check_directional_derivative(problem, x=None, d=None,
+                                 force_gradient=False):
     """Checks the consistency of the cost function and directional derivatives.
-    checkdiff performs a numerical test to check that the directional
-    derivatives defined in the problem structure agree up to first order with
-    the cost function at some point x, along some direction d. The test is
-    based on a truncated Taylor series (see online pymanopt documentation).
+    check_directional_derivative performs a numerical test to check that the
+    directional derivatives defined in the problem structure agree up to first
+    order with the cost function at some point x, along some direction d. The
+    test is based on a truncated Taylor series (see online pymanopt
+    documentation).
     Both x and d are optional and will be sampled at random if omitted.
-    See also: checkgradient checkhessian
-    If force_gradient is True, then the function will call getGradient and
-    infer the directional derivative, rather than call getDirectionalDerivative
-    directly. This is used by checkgradient.
+    See also: check_gradient check_hessian
+    If force_gradient is True, then the function will call get_gradient and
+    infer the directional derivative, rather than call
+    get_directional_derivative directly. This is used by check_gradient.
     """
     #  If x and / or d are not specified, pick them at random.
     if d is not None and x is None:
@@ -74,14 +77,14 @@ def checkdiff(problem, x=None, d=None, force_gradient=False):
     # Compute the value f0 at f and directional derivative at x along d.
     f0 = problem.cost(x)
     if not force_gradient:
-        df0 = directionalDerivative(problem, x, d)
+        df0 = get_directional_derivative(problem, x, d)
         pass
     else:
         grad = problem.grad(x)
         df0 = problem.manifold.inner(x, grad, d)
 
     #  Pick a stepping function: exponential or retraction?
-    if hasattr(problem.manifold, 'exp'):
+    if hasattr(problem.manifold, "exp"):
         stepper = problem.manifold.exp
     else:
         # No need to issue a warning: to check the gradient, any retraction
@@ -105,7 +108,7 @@ def checkdiff(problem, x=None, d=None, force_gradient=False):
     err = np.abs(model - value)
 
     if not np.all(err < 1e-12):
-        isModelExact = False
+        is_model_exact = False
         # In a numerically reasonable neighborhood, the error should
         # decrease as the square of the stepsize, i.e., in loglog scale,
         # the error should have a slope of 2.
@@ -113,7 +116,7 @@ def checkdiff(problem, x=None, d=None, force_gradient=False):
         segment, poly = identify_linear_piece(np.log10(h), np.log10(err),
                                               window_len)
     else:
-        isModelExact = True
+        is_model_exact = True
         # The 1st order model is exact: all errors are (numerically) zero
         # Fit line from all points, use log scale only in h.
         segment = range(len(h))
@@ -121,22 +124,21 @@ def checkdiff(problem, x=None, d=None, force_gradient=False):
         # Set mean error in log scale for plot.
         poly[-1] = np.log10(poly[-1])
 
-    # plot
-    # if isModelExact:
-    #     plt.title('Directional derivative check.'
-    #               'It seems the linear model is exact:'
-    #               'Model error is numerically zero for all h.')
-    # else:
-    #     plt.title('Directional derivative check. The slope of the'
-    #               'continuous line should match that of the dashed'
-    #               '(reference) line over at least a few orders of'
-    #               'magnitude for h.')
-    return h, err, segment, poly, isModelExact
+    if is_model_exact:
+        print("Directional derivative check."
+              "It seems the linear model is exact:"
+              "Model error is numerically zero for all h.")
+    else:
+        print("Directional derivative check. The slope of the"
+              "continuous line should match that of the dashed "
+              "(reference) line over at least a few orders of"
+              "magnitude for h.")
+    return h, err, segment, poly
 
 
-def checkgradient(problem, x=None, d=None):
+def check_gradient(problem, x=None, d=None):
     """Checks the consistency of the cost function and the gradient.
-    checkgradient performs a numerical test to check that the gradient
+    check_gradient performs a numerical test to check that the gradient
     defined in the problem structure agrees up to first order with the cost
     function at some point x, along some direction d. The test is based on a
     truncated Taylor series (see online pymanopt documentation).
@@ -145,7 +147,7 @@ def checkgradient(problem, x=None, d=None):
     """
     #  If x and / or d are not specified, pick them at random.
     if plt is None:
-        raise RuntimeError("The 'checkgradient' function requires matplotlib")
+        raise RuntimeError("The 'check_gradient' function requires matplotlib")
     if d is not None and x is None:
         raise ValueError("If d is provided, x must be too,"
                          "since d is tangent at x.")
@@ -158,46 +160,50 @@ def checkgradient(problem, x=None, d=None):
     elif d.shape != problem.manifold.randvec(x).shape:
         d = np.reshape(d, problem.manifold.randvec(x).shape)
 
-    h, err, segment, poly, isModelExact = checkdiff(problem, x, d,
-                                                    force_gradient=True)
+    h, err, segment, poly = check_directional_derivative(problem, x, d,
+                                                         force_gradient=True)
 
     # plot
     plt.figure()
     plt.loglog(h, err)
-    plt.xlabel('h')
-    plt.ylabel('Approximation error')
+    plt.xlabel("h")
+    plt.ylabel("Approximation error")
     plt.loglog(h[segment], 10**np.polyval(poly, np.log10(h[segment])),
                linewidth=3)
     plt.autoscale(False)
-    plt.plot([1e-8, 1e0], [1e-8, 1e8], linestyle="--", color='k')
+    plt.plot([1e-8, 1e0], [1e-8, 1e8], linestyle="--", color="k")
 
-    plt.title('Gradient check\nThe slope of the continuous line '
-              'should match that of the dashed\n(reference) line '
-              'over at least a few orders of magnitude for h.')
+    plt.title("Gradient check\nThe slope of the continuous line "
+              "should match that of the dashed\n(reference) line "
+              "over at least a few orders of magnitude for h.")
     plt.show()
 
     # Try to check that the gradient is a tangent vector
-    if hasattr(problem.manifold, 'tangent'):
-        # problem_cp = Problem(manifold=problem.manifold, cost=problem.cost)
-        # grad=problem_cp.grad(x)
+    if hasattr(problem.manifold, "tangent"):
         grad = problem.grad(x)
-        pgrad = problem.manifold.tangent(x, grad)
-        residual = grad - pgrad
+        projected_grad = problem.manifold.tangent(x, grad)
+        residual = grad - projected_grad
         err = problem.manifold.norm(x, residual)
-        print('The residual should be 0, or very close. '
-              'Residual: {:g}.'.format(err))
-        print('If it is far from 0, then the gradient '
-              'is not in the tangent space.')
+        print("The residual should be 0, or very close. "
+              "Residual: {:g}.".format(err))
+        print("If it is far from 0, then the gradient "
+              "is not in the tangent space.")
     else:
-        print('Unfortunately, pymanopt was unable to verify that the gradient'
-              'is indeed a tangent vector. Please verify this manually or'
-              'implement the ''tangent'' function in your manifold structure.')
-        problem_cp = Problem(manifold=problem.manifold, cost=problem.cost)
+        print("Unfortunately, pymanopt was unable to verify that the gradient "
+              "is indeed a tangent vector. Please verify this manually or "
+              "implement the 'tangent' function in your manifold structure.")
+        if problem.egrad is not None:
+            problem_cp = Problem(manifold=problem.manifold,
+                                 cost=problem.cost,
+                                 egrad=problem.egrad)
+        else:
+            problem_cp = Problem(manifold=problem.manifold,
+                                 cost=problem.cost)
         grad = problem_cp.grad(x)
-        pgrad = problem.manifold.proj(x, grad)
-        residual = grad - pgrad
+        projected_grad = problem.manifold.proj(x, grad)
+        residual = grad - projected_grad
         err = problem.manifold.norm(x, residual)
-        print('The residual should be 0, or very close. '
-              'Residual: {:g}.'.format(err))
-        print('If it is far from 0, then the gradient '
-              'is not in the tangent space.')
+        print("The residual should be 0, or very close. "
+              "Residual: {:g}.".format(err))
+        print("If it is far from 0, then the gradient "
+              "is not in the tangent space.")
