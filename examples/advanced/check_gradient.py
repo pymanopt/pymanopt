@@ -1,13 +1,19 @@
+import os
+
 import autograd.numpy as np
 import tensorflow as tf
 import theano.tensor as T
 import torch
+from examples._tools import ExampleRunner
 
 import pymanopt
 from pymanopt import Problem
 from pymanopt.manifolds import Sphere
 from pymanopt.solvers import SteepestDescent
 from pymanopt.tools.diagnostics import check_gradient
+
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 
 SUPPORTED_BACKENDS = (
@@ -65,15 +71,21 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # Create the problem structure.
     manifold = Sphere(n)
     problem = Problem(manifold=manifold, cost=cost, egrad=egrad)
+    if quiet:
+        problem.verbosity = 0
 
     # Numerically check gradient consistency (optional).
     check_gradient(problem)
+
+    if quiet:
+        return
 
     # Solve
     solver = SteepestDescent()
     _ = solver.solve(problem)
 
 
-for backend in SUPPORTED_BACKENDS:
-    print(backend)
-    run(backend)
+if __name__ == "__main__":
+    runner = ExampleRunner(run, "Check gradient for sphere manifold",
+                           SUPPORTED_BACKENDS)
+    runner.run()

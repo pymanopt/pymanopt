@@ -1,7 +1,6 @@
 import numpy as np
 from numpy import linalg as la
 
-from ..core.problem import Problem
 try:
     import matplotlib.pyplot as plt
 except ImportError:
@@ -125,13 +124,13 @@ def check_directional_derivative(problem, x=None, d=None,
         poly[-1] = np.log10(poly[-1])
 
     if is_model_exact:
-        print("Directional derivative check."
-              "It seems the linear model is exact:"
+        print("Directional derivative check. "
+              "It seems the linear model is exact: "
               "Model error is numerically zero for all h.")
     else:
-        print("Directional derivative check. The slope of the"
+        print("Directional derivative check. The slope of the "
               "continuous line should match that of the dashed "
-              "(reference) line over at least a few orders of"
+              "(reference) line over at least a few orders of "
               "magnitude for h.")
     return h, err, segment, poly
 
@@ -192,14 +191,7 @@ def check_gradient(problem, x=None, d=None):
         print("Unfortunately, pymanopt was unable to verify that the gradient "
               "is indeed a tangent vector. Please verify this manually or "
               "implement the 'tangent' function in your manifold structure.")
-        if problem.egrad is not None:
-            problem_cp = Problem(manifold=problem.manifold,
-                                 cost=problem.cost,
-                                 egrad=problem.egrad)
-        else:
-            problem_cp = Problem(manifold=problem.manifold,
-                                 cost=problem.cost)
-        grad = problem_cp.grad(x)
+        grad = problem.grad(x)
         projected_grad = problem.manifold.proj(x, grad)
         residual = grad - projected_grad
         err = problem.manifold.norm(x, residual)
