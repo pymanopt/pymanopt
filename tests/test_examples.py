@@ -10,6 +10,7 @@ from examples import (
     pca,
     rank_k_correlation_matrix_approximation
 )
+from examples.advanced import check_gradient
 from nose2.tools import params
 
 from ._test import TestCase
@@ -55,3 +56,7 @@ class TestExamples(TestCase):
     @params(*rank_k_correlation_matrix_approximation.SUPPORTED_BACKENDS)
     def test_rank_k_correlation_matrix_approximation(self, backend):
         rank_k_correlation_matrix_approximation.run(backend)
+
+    @params(*check_gradient.SUPPORTED_BACKENDS)
+    def test_check_gradient(self, backend):
+        check_gradient.run(backend)
