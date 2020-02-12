@@ -3,8 +3,8 @@ import time
 import numpy as np
 
 import pymanopt
-from pymanopt.solvers.solver import Solver
 from pymanopt.solvers.gradient_descent import GradientDescent
+from pymanopt.solvers.solver import Solver
 
 
 def compute_centroid(manifold, points):
