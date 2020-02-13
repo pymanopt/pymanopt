@@ -41,9 +41,6 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     def proj(self, z, u):
         return u - (u.conj() * z).real * z
 
-    def tangent(self, x, u):
-        return self.proj(x, u)
-
     def ehess2rhess(self, z, egrad, ehess, zdot):
         return self.proj(z, (z * egrad.conj()).real * zdot)
 

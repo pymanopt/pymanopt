@@ -46,9 +46,6 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
     def proj(self, X, U):
         return U - multiprod(X, multisym(multiprod(multitransp(X), U)))
 
-    def tangent(self, X, U):
-        return self.proj(X, U)
-
     # TODO(nkoep): Implement the weingarten map instead.
     def ehess2rhess(self, X, egrad, ehess, H):
         XtG = multiprod(multitransp(X), egrad)

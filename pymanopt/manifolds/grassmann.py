@@ -69,9 +69,6 @@ class Grassmann(Manifold):
     def proj(self, X, U):
         return U - multiprod(X, multiprod(multitransp(X), U))
 
-    def tangent(self, X, U):
-        return self.proj(X, U)
-
     def egrad2rgrad(self, X, egrad):
         return self.proj(X, egrad)
 

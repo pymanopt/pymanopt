@@ -52,9 +52,6 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
     def proj(self, X, G):
         return multisym(G)
 
-    def tangent(self, X, U):
-        return self.proj(X, U)
-
     def egrad2rgrad(self, x, u):
         # TODO: Check that this is correct
         return multiprod(multiprod(x, multisym(u)), x)
@@ -168,9 +165,6 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         AS = Y.T @ H - H.T @ Y
         Omega = lyap(YtY, AS)
         return H - Y @ Omega
-
-    def tangent(self, X, U):
-        return self.proj(X, U)
 
     def egrad2rgrad(self, Y, egrad):
         return egrad
@@ -347,9 +341,6 @@ class Elliptope(Manifold, RetrAsExpMixin):
         AS = Y.T @ eta - H.T @ Y
         Omega = lyap(YtY, -AS)
         return eta - Y @ (Omega - Omega.T) / 2
-
-    def tangent(self, Y, U):
-        return self.proj(Y, U)
 
     def retr(self, Y, U):
         return self._normalize_rows(Y + U)

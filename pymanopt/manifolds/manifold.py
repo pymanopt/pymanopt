@@ -75,6 +75,13 @@ class Manifold(metaclass=abc.ABCMeta):
         """
         return self._point_layout
 
+    def tangent(self, X, Z):
+        """Tangentialize a tangent vector ``Z`` in the tangent space at a
+        point ``X``. This defaults to projecting ``Z`` on the tangent space at
+        ``X``.
+        """
+        return self.proj(X, Z)
+
     # Manifold properties that subclasses can define
 
     @property
@@ -99,12 +106,6 @@ class Manifold(metaclass=abc.ABCMeta):
     def proj(self, X, G):
         """Projects a vector `G` in the ambient space on the tangent space at
         `X`.
-        """
-
-    @abc.abstractmethod
-    def tangent(self, X, Z):
-        """Tangentializes a tangent vector ``Z`` in the tangent space at a
-        point ``X``.
         """
 
     @abc.abstractmethod

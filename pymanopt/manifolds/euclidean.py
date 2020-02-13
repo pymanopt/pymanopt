@@ -28,9 +28,6 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def proj(self, X, U):
         return U
 
-    def tangent(self, X, U):
-        return self.proj(X, U)
-
     def ehess2rhess(self, X, egrad, ehess, H):
         return ehess
 
