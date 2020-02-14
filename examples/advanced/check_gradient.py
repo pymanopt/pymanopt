@@ -9,7 +9,6 @@ from examples._tools import ExampleRunner
 import pymanopt
 from pymanopt import Problem
 from pymanopt.manifolds import Sphere
-from pymanopt.solvers import SteepestDescent
 from pymanopt.tools.diagnostics import check_gradient
 
 
@@ -28,7 +27,7 @@ def create_cost_egrad(backend, A):
     if backend == "Autograd":
         @pymanopt.function.Autograd
         def cost(x):
-            return -np.inner(x,  A @ x)
+            return -np.inner(x, A @ x)
     elif backend == "Callable":
         @pymanopt.function.Callable
         def cost(x):
@@ -36,13 +35,13 @@ def create_cost_egrad(backend, A):
 
         @pymanopt.function.Callable
         def egrad(x):
-            return -2 * A @  x
+            return -2 * A @ x
     elif backend == "PyTorch":
         A_ = torch.from_numpy(A)
 
         @pymanopt.function.PyTorch
         def cost(x):
-            return -torch.matmul(x, torch.matmul(A_, x))
+            return - x @ A_ @ x
     elif backend == "TensorFlow":
         x = tf.Variable(tf.zeros(n, dtype=np.float64), name="X")
 
@@ -77,12 +76,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # Numerically check gradient consistency (optional).
     check_gradient(problem)
 
-    if quiet:
-        return
-
-    # Solve
-    solver = SteepestDescent()
-    _ = solver.solve(problem)
+    return
 
 
 if __name__ == "__main__":
