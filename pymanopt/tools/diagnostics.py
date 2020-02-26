@@ -75,31 +75,26 @@ def check_directional_derivative(problem, x=None, d=None):
     err = np.abs(model - value)
     model_is_exact = not np.all(err < 1e-12)
     if model_is_exact:
-        is_model_exact = False
-        # In a numerically reasonable neighborhood, the error should
-        # decrease as the square of the stepsize, i.e., in loglog scale,
-        # the error should have a slope of 2.
-        window_len = 10
-        segment, poly = identify_linear_piece(np.log10(h), np.log10(err),
-                                              window_len)
-    else:
-        is_model_exact = True
+        print("Directional derivative check. "
+              "It seems the linear model is exact: "
+              "Model error is numerically zero for all h.")
         # The 1st order model is exact: all errors are (numerically) zero
         # Fit line from all points, use log scale only in h.
         segment = range(len(h))
         poly = np.polyfit(np.log10(h), err, 1)
         # Set mean error in log scale for plot.
         poly[-1] = np.log10(poly[-1])
-
-    if is_model_exact:
-        print("Directional derivative check. "
-              "It seems the linear model is exact: "
-              "Model error is numerically zero for all h.")
     else:
         print("Directional derivative check. The slope of the "
               "continuous line should match that of the dashed "
               "(reference) line over at least a few orders of "
               "magnitude for h.")
+        # In a numerically reasonable neighborhood, the error should
+        # decrease as the square of the stepsize, i.e., in loglog scale,
+        # the error should have a slope of 2.
+        window_len = 10
+        segment, poly = identify_linear_piece(np.log10(h), np.log10(err),
+                                              window_len)
     return h, err, segment, poly
 
 
