@@ -76,8 +76,6 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # Numerically check gradient consistency (optional).
     check_gradient(problem)
 
-    return
-
 
 if __name__ == "__main__":
     runner = ExampleRunner(run, "Check gradient for sphere manifold",
