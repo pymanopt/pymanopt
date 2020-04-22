@@ -1,7 +1,7 @@
 import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools.multi import multiprod, multihconj
+from pymanopt.tools.multi import multihconj, multiprod
 
 
 class ComplexGrassmann(Manifold):
