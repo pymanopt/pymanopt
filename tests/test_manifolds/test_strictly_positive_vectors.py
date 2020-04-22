@@ -6,19 +6,17 @@ from pymanopt.manifolds import StrictlyPositiveVectors
 from .._test import TestCase
 
 
-class TestSingleStrictlyPositiveVectors(TestCase):
+class TestStrictlyPositiveVectors(TestCase):
     def setUp(self):
         self.n = n = 3
-        self.k = k = 1
+        self.k = k = 2
         self.man = StrictlyPositiveVectors(n, k=k)
 
     def test_inner(self):
         x = self.man.rand()
         g = self.man.randvec(x)
         h = self.man.randvec(x)
-        inv_x = 1./x
-        np_testing.assert_almost_equal(np.sum(inv_x*g*inv_x*h),
-                                       self.man.inner(x, g, h))
+        assert (self.man.inner(x, g, h).shape == np.array([1, self.k])).all()
 
     def test_proj(self):
         # Test proj(proj(X)) == proj(X)
@@ -32,9 +30,10 @@ class TestSingleStrictlyPositiveVectors(TestCase):
     def test_norm(self):
         x = self.man.rand()
         u = self.man.randvec(x)
-        inv_x = 1./x
+        x_u = (1./x) * u
         np_testing.assert_almost_equal(
-            np.sqrt(np.sum(inv_x*u*inv_x*u)), self.man.norm(x, u))
+            la.norm(x_u, axis=0, keepdims=True),
+            self.man.norm(x, u))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold
@@ -42,7 +41,7 @@ class TestSingleStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         assert (x > 0).all()
         y = self.man.rand()
-        assert self.man.dist(x, y) > 1e-6
+        assert (self.man.dist(x, y)).all() > 1e-6
 
     def test_randvec(self):
         # Just make sure that if you generate two they are not equal.
@@ -50,7 +49,7 @@ class TestSingleStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         g = self.man.randvec(x)
         h = self.man.randvec(x)
-        assert la.norm(g - h) > 1e-6
+        assert (la.norm(g-h, axis=0) > 1e-6).all()
         np_testing.assert_almost_equal(self.man.norm(x, g), 1)
 
     def test_dist(self):

@@ -29,7 +29,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
 
     def inner(self, x, u, v):
         inv_x = (1./x)
-        return np.tensordot(inv_x*u, inv_x*v, axes=(-1, -1))
+        return np.sum(inv_x*u*inv_x*v, axis=0, keepdims=True)
 
     def proj(self, x, u):
         return u
@@ -38,26 +38,17 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         return np.sqrt(self.inner(x, u, u))
 
     def rand(self):
-        if self._k == 1:
-            return rnd.uniform(low=1e-6, high=1, size=(self._n))
-        return rnd.uniform(low=1e-6, high=1, size=(self._k, self._n))
+        return rnd.uniform(low=1e-6, high=1, size=(self._n, self._k))
 
     def randvec(self, x):
-        if self._k == 1:
-            u = rnd.randn(self._n)
-        else:
-            u = rnd.randn(self._k, self._n)
+        u = rnd.randn(self._n, self._k)
         return u / self.norm(x, u)
 
     def zerovec(self, x):
-        k = self._k
-        n = self._n
-        if k == 1:
-            return np.zeros(n)
-        return np.zeros(k, n)
+        return np.zeros(self._n, self._k)
 
     def dist(self, x, y):
-        return la.norm(np.log(x)-np.log(y), axis=0)
+        return la.norm(np.log(x)-np.log(y), axis=0, keepdims=True)
 
     egrad2rgrad = proj
 
