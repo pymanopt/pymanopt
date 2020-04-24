@@ -50,7 +50,8 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     def dist(self, x, y):
         return la.norm(np.log(x)-np.log(y), axis=0, keepdims=True)
 
-    egrad2rgrad = proj
+    def egrad2rgrad(self, x, u):
+        return u*(x**2)
 
     # def ehess2rhess(self, x, egrad, ehess, u):
 
