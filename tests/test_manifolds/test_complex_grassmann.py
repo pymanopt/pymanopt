@@ -74,17 +74,6 @@ class TestSingleComplexGrassmannManifold(TestCase):
         np_testing.assert_almost_equal(self.man.norm(X, self.man.log(X, Y)),
                                        self.man.dist(X, Y))
 
-    # def test_ehess2rhess(self):
-        # testing.ehess2rhess doesn't work with X and U complex !!
-        # Test this function at some randomly generated point.
-        # X = self.man.rand()
-        # U = self.man.randvec(X)
-        # egrad = rnd.randn(self.m, self.n)
-        # ehess = rnd.randn(self.m, self.n)
-        # np_testing.assert_allclose(
-        #     testing.ehess2rhess(self.proj)(X, egrad, ehess, U),
-        #     self.man.ehess2rhess(X, egrad, ehess, U))
-
     def test_exp_log_inverse(self):
         X = self.man.rand()
         Y = self.man.rand()
@@ -116,8 +105,6 @@ class TestSingleComplexGrassmannManifold(TestCase):
         u = u * 1e-6
         xretru = self.man.retr(x, u)
         np_testing.assert_allclose(xretru, x + u)
-
-    # def test_transp(self):
 
 
 class TestMultiComplexGrassmannManifold(TestCase):
@@ -223,5 +210,3 @@ class TestMultiComplexGrassmannManifold(TestCase):
         u = u * 1e-6
         xretru = self.man.retr(x, u)
         np_testing.assert_allclose(xretru, x + u)
-
-    # def test_transp(self):
