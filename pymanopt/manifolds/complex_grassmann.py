@@ -7,7 +7,7 @@ from pymanopt.tools.multi import multihconj, multiprod
 class ComplexGrassmann(Manifold):
     """
     Factory class for the Grassmann manifold. This is the manifold of p-
-    dimensional subspaces of n dimensional real vector space. Initiation
+    dimensional subspaces of n dimensional complex vector space. Initiation
     requires the dimensions n, p to be specified. Optional argument k
     allows the user to optimize over the product of k Grassmanns.
 
