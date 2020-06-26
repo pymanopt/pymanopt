@@ -1,6 +1,7 @@
 __all__ = [
     "Autograd",
     "Callable",
+    "Jax",
     "PyTorch",
     "TensorFlow",
     "Theano"
@@ -9,6 +10,7 @@ __all__ = [
 from pymanopt.autodiff.backends import (
     Autograd,
     Callable,
+    Jax,
     PyTorch,
     TensorFlow,
     Theano

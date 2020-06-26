@@ -4,3 +4,4 @@ scipy
 tensorflow==1.15.2
 torch>=1.0
 theano
+jax>=0.1.70
