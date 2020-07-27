@@ -15,6 +15,7 @@ __all__ = [
     "SphereSubspaceComplementIntersection",
     "SphereSubspaceIntersection",
     "Stiefel",
+    "StrictlyPositiveVectors",
     "Symmetric",
     "SymmetricPositiveDefinite"
 ]
@@ -32,3 +33,4 @@ from .special_orthogonal_group import SpecialOrthogonalGroup
 from .sphere import (Sphere, SphereSubspaceComplementIntersection,
                      SphereSubspaceIntersection)
 from .stiefel import Stiefel
+from .strictly_positive_vectors import StrictlyPositiveVectors
