@@ -15,8 +15,8 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         self._k = k
 
         if k == 1:
-            name = ("Manifold of strictly positive vectors of size{}").format(
-                n, n)
+            name = ("Manifold of strictly positive vectors of size {}").format(
+                n)
         else:
             name = ("Product manifold of {} \
                     strictly positive vectors of size {}").format(k, n)

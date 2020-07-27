@@ -37,6 +37,10 @@ def multitransp(A):
     return np.transpose(A, (0, 2, 1))
 
 
+def multihconj(A):
+    return np.conjugate(multitransp(A))
+
+
 def multisym(A):
     # Inspired by MATLAB multisym function by Nicholas Boumal.
     return 0.5 * (A + multitransp(A))
