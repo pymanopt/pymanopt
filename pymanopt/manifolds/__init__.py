@@ -1,5 +1,6 @@
 __all__ = [
     "ComplexCircle",
+    "ComplexEuclidean",
     "ComplexGrassmann",
     "Elliptope",
     "Euclidean",
@@ -21,6 +22,7 @@ __all__ = [
 ]
 
 from .complex_circle import ComplexCircle
+from .complex_euclidean import ComplexEuclidean
 from .complex_grassmann import ComplexGrassmann
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded

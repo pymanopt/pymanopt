@@ -2,7 +2,6 @@ import numpy as np
 from numpy import linalg as la, random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multiskew, multisym
 
 
 class _ComplexEuclidean(EuclideanEmbeddedSubmanifold):
