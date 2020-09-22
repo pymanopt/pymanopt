@@ -6,6 +6,7 @@ __all__ = [
     "Euclidean",
     "FixedRankEmbedded",
     "Grassmann",
+    "HermitianPositiveDefinite",
     "Oblique",
     "PSDFixedRank",
     "PSDFixedRankComplex",
@@ -27,6 +28,7 @@ from .complex_grassmann import ComplexGrassmann
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
 from .grassmann import Grassmann
+from .hpd import HermitianPositiveDefinite
 from .oblique import Oblique
 from .product import Product
 from .psd import (Elliptope, PSDFixedRank, PSDFixedRankComplex,
