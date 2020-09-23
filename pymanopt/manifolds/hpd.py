@@ -106,3 +106,94 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         logm = multilog(multiprod(multiprod(c_inv, y), multihconj(c_inv)),
                         pos_def=True)
         return np.real(la.norm(logm))
+
+
+class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
+    """Manifold of (n x n)^k Hermitian positive
+    definite matrices with unit determinant
+    called 'Special Hermitian positive definite manifold'.
+    It is a totally geodesic submanifold of
+    the Hermitian positive definite matrices.
+    """
+    def __init__(self, n, k=1):
+        self._n = n
+        self._k = k
+
+        self.HPD = HermitianPositiveDefinite(n, k)
+
+        if k == 1:
+            name = ("Manifold of special Hermitian positive definite\
+                    ({} x {}) matrices").format(n, n)
+        else:
+            name = "Product manifold of {} special Hermitian positive\
+                    definite ({} x {}) matrices".format(k, n, n)
+        dimension = int(k * (n*(n+1) - 1))
+        super().__init__(name, dimension)
+
+    def rand(self):
+        # Generate k HPD matrices.
+        x = self.HPD.rand()
+
+        # Normalize them.
+        if self._k == 1:
+            x = x / (np.real(la.det(x))**(1/self._n))
+        else:
+            x = x / (np.linalg.det(x)**(1/self._n)).reshape(-1, 1, 1)
+
+        return x
+
+    def randvec(self, x):
+        # Generate k matrices.
+        k = self._k
+        n = self._n
+        if k == 1:
+            u = rnd.randn(n, n)+1j*rnd.randn(n, n)
+        else:
+            u = rnd.randn(k, n, n)+1j*rnd.randn(k, n, n)
+
+        # Project them on tangent space.
+        u = self.proj(x, u)
+
+        # Unit norm.
+        u = u / self.norm(x, u)
+
+        return u
+
+    def zerovec(self, x):
+        return self.HPD.zerovec(x)
+
+    def inner(self, x, u, v):
+        return self.HPD.inner(x, u, v)
+
+    def norm(self, x, u):
+        return self.HPD.norm(x, u)
+
+    def proj(self, x, u):
+        n = self._n
+        k = self._k
+
+        # Project matrix on tangent space of HPD.
+        u = multiherm(u)
+
+        # Project on tangent space of SHPD at x.
+        t = np.trace(la.solve(x, u), axis1=-2, axis2=-1)
+        if k == 1:
+            u = u - (1/n) * np.real(t) * x
+        else:
+            u = u - (1/n) * np.real(t.reshape(-1, 1, 1)) * x
+
+        return u
+
+    def egrad2rgrad(self, x, u):
+        return self.proj(x, multiprod(multiprod(x, u), x))
+
+    def exp(self, x, u):
+        return self.HPD.exp(x, u)
+
+    retr = exp
+
+    def log(self, x, y):
+        return self.HPD.log(x, y)
+
+    def dist(self, x, y):
+        return self.HPD.dist(x, y)

@@ -12,6 +12,7 @@ __all__ = [
     "PSDFixedRankComplex",
     "Product",
     "SkewSymmetric",
+    "SpecialHermitianPositiveDefinite",
     "SpecialOrthogonalGroup",
     "Sphere",
     "SphereSubspaceComplementIntersection",
@@ -28,7 +29,7 @@ from .complex_grassmann import ComplexGrassmann
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
 from .grassmann import Grassmann
-from .hpd import HermitianPositiveDefinite
+from .hpd import HermitianPositiveDefinite, SpecialHermitianPositiveDefinite
 from .oblique import Oblique
 from .product import Product
 from .psd import (Elliptope, PSDFixedRank, PSDFixedRankComplex,
