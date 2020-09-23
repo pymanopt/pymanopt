@@ -16,7 +16,7 @@ class _ComplexEuclidean(EuclideanEmbeddedSubmanifold):
         return np.sqrt(self.dim/2)
 
     def inner(self, X, G, H):
-        return np.real(np.tensordot(G, H, axes=G.ndim))
+        return np.real(np.tensordot(G.conj(), H, axes=G.ndim))
 
     def norm(self, X, G):
         return la.norm(G)

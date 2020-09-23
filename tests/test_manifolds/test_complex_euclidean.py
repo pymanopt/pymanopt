@@ -29,7 +29,8 @@ class TestComplexEuclideanManifold(TestCase):
         y = e.randvec(x)
         z = e.randvec(x)
         np_testing.assert_almost_equal(
-            np.real(np.sum(y * z)), e.inner(x, y, z))
+            np.real(np.sum(y.conj() * z)),
+            e.inner(x, y, z))
 
     def test_proj(self):
         e = self.man
