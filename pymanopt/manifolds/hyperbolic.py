@@ -31,14 +31,14 @@ class PoincareBall(Manifold):
         self._n = n
 
         if k < 1:
-            raise ValueError(f"Need k >= 1. Value supplied was {k}")
+            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
         if n < 1:
-            raise ValueError(f"Need n >= 1. Value supplied was {n}")
+            raise ValueError("Need n >= 1. Value supplied was n = %d." % n)
 
         if n == 1:
-            name = f"Poincare ball B({k})"
+            name = "Poincare ball B({:d})".format(k)
         elif n >= 2:
-            name = f"Product Poincare ball B({k})^{n}"
+            name = "Product Poincare ball B({:d})^{:d}".format(k, n)
 
         dimension = k * n
         super().__init__(name, dimension)

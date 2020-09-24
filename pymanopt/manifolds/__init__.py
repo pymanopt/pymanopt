@@ -26,6 +26,7 @@ from .complex_grassmann import ComplexGrassmann
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
 from .grassmann import Grassmann
+from .hyperbolic import PoincareBall
 from .oblique import Oblique
 from .product import Product
 from .psd import (
@@ -42,4 +43,3 @@ from .sphere import (
 )
 from .stiefel import Stiefel
 from .strictly_positive_vectors import StrictlyPositiveVectors
-from .hyperbolic import PoincareBall
