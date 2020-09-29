@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import linalg as la, random as rnd
-from scipy.linalg import expm, logm
+from scipy.linalg import logm
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.tools.multi import multihconj, multiherm, multilog
@@ -76,14 +76,36 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return multiprod(multiprod(x, multiherm(u)), x)
 
     def exp(self, x, u):
-        x_inv_u = la.solve(x, u)
-        if self._k > 1:
-            e = np.zeros(np.shape(x), dtype=np.complex)
-            for i in range(self._k):
-                e[i] = expm(x_inv_u[i])
+        k = self._k
+
+        d, q = la.eigh(x)
+        if k == 1:
+            x_sqrt = q@np.diag(np.sqrt(d))@q.conj().T
+            x_isqrt = q@np.diag(1/np.sqrt(d))@q.conj().T
         else:
-            e = expm(x_inv_u)
-        return multiherm(multiprod(x, e))
+            temp = np.zeros(q.shape, dtype=np.complex)
+            for i in range(q.shape[0]):
+                temp[i, :, :] = np.diag(np.sqrt(d[i, :]))[np.newaxis, :, :]
+            x_sqrt = multiprod(multiprod(q, temp), multihconj(q))
+
+            temp = np.zeros(q.shape, dtype=np.complex)
+            for i in range(q.shape[0]):
+                temp[i, :, :] = np.diag(1/np.sqrt(d[i, :]))[np.newaxis, :, :]
+            x_isqrt = multiprod(multiprod(q, temp), multihconj(q))
+
+        d, q = la.eigh(multiprod(multiprod(x_isqrt, u), x_isqrt))
+        if k == 1:
+            e = q@np.diag(np.exp(d))@q.conj().T
+        else:
+            temp = np.zeros(q.shape, dtype=np.complex)
+            for i in range(q.shape[0]):
+                temp[i, :, :] = np.diag(np.exp(d[i, :]))[np.newaxis, :, :]
+            d = temp
+            e = multiprod(multiprod(q, d), multihconj(q))
+
+        e = multiprod(multiprod(x_sqrt, e), x_sqrt)
+        e = multiherm(e)
+        return e
 
     retr = exp
 
@@ -185,11 +207,13 @@ class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return u
 
     def egrad2rgrad(self, x, u):
-        rgrad = multiprod(multiprod(x, multiherm(u)), x)
-        return self.proj(x, rgrad)
+        rgrad = multiprod(multiprod(x, u), x)
+        rgrad = self.proj(x, rgrad)
+        return rgrad
 
     def exp(self, x, u):
         e = self.HPD.exp(x, u)
+
         # Normalize them.
         if self._k == 1:
             e = e / np.real(la.det(e))**(1/self._n)
