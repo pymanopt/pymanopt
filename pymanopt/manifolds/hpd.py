@@ -138,7 +138,7 @@ class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         if self._k == 1:
             x = x / (np.real(la.det(x))**(1/self._n))
         else:
-            x = x / (np.linalg.det(x)**(1/self._n)).reshape(-1, 1, 1)
+            x = x / (np.real(la.det(x))**(1/self._n)).reshape(-1, 1, 1)
 
         return x
 
@@ -185,10 +185,17 @@ class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return u
 
     def egrad2rgrad(self, x, u):
-        return self.proj(x, multiprod(multiprod(x, u), x))
+        rgrad = multiprod(multiprod(x, multiherm(u)), x)
+        return self.proj(x, rgrad)
 
     def exp(self, x, u):
-        return self.HPD.exp(x, u)
+        e = self.HPD.exp(x, u)
+        # Normalize them.
+        if self._k == 1:
+            e = e / np.real(la.det(e))**(1/self._n)
+        else:
+            e = e / (np.real(la.det(e))**(1/self._n)).reshape(-1, 1, 1)
+        return e
 
     retr = exp
 
