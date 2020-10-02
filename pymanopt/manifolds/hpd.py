@@ -120,7 +120,7 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return multiherm(multiprod(x, log))
 
     def transp(self, x1, x2, d):
-        return d
+        return self.proj(x2, d)
 
     def dist(self, x, y):
         c = la.cholesky(x)
@@ -225,6 +225,9 @@ class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
 
     def log(self, x, y):
         return self.HPD.log(x, y)
+
+    def transp(self, x1, x2, d):
+        return self.proj(x2, d)
 
     def dist(self, x, y):
         return self.HPD.dist(x, y)
