@@ -107,7 +107,9 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         e = multiherm(e)
         return e
 
-    retr = exp
+    def retr(self, x, u):
+        r = x + u + (1/2)*u@la.solve(x, u)
+        return r
 
     def log(self, x, y):
         x_inv_y = la.solve(x, y)
@@ -221,7 +223,15 @@ class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
             e = e / (np.real(la.det(e))**(1/self._n)).reshape(-1, 1, 1)
         return e
 
-    retr = exp
+    def retr(self, x, u):
+        r = self.HPD.retr(x, u)
+
+        # Normalize them.
+        if self._k == 1:
+            r = r / np.real(la.det(r))**(1/self._n)
+        else:
+            r = r / (np.real(la.det(r))**(1/self._n)).reshape(-1, 1, 1)
+        return r
 
     def log(self, x, y):
         return self.HPD.log(x, y)
