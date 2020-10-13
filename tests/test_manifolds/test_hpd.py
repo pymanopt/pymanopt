@@ -120,7 +120,8 @@ class TestSingleHermitianPositiveDefiniteManifold(TestCase):
         x = man.rand()
         y = man.rand()
         u = man.randvec(x)
-        np_testing.assert_allclose(man.transp(x, y, u), u)
+        t_u = man.transp(x, y, u)
+        np_testing.assert_allclose(t_u, man.proj(y, t_u))
 
     def test_dist(self):
         man = self.man
@@ -279,7 +280,8 @@ class TestMultiHermitianPositiveDefiniteManifold(TestCase):
         x = man.rand()
         y = man.rand()
         u = man.randvec(x)
-        np_testing.assert_allclose(man.transp(x, y, u), u)
+        t_u = man.transp(x, y, u)
+        np_testing.assert_allclose(t_u, man.proj(y, t_u))
 
     def test_dist(self):
         man = self.man

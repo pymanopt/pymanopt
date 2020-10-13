@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import linalg as la, random as rnd
-from scipy.linalg import logm
+from scipy.linalg import logm, sqrtm
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.tools.multi import multihconj, multiherm, multilog
@@ -122,7 +122,14 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return multiherm(multiprod(x, log))
 
     def transp(self, x1, x2, d):
-        return self.proj(x2, d)
+        E = multihconj(la.solve(multihconj(x1), multihconj(x2)))
+        if self._k == 1:
+            E = sqrtm(E)
+        else:
+            for i in range(len(E)):
+                E[i, :, :] = sqrtm(E[i, :, :])
+        transp_d = multiprod(multiprod(E, d), multihconj(E))
+        return transp_d
 
     def dist(self, x, y):
         c = la.cholesky(x)
@@ -237,7 +244,7 @@ class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return self.HPD.log(x, y)
 
     def transp(self, x1, x2, d):
-        return self.proj(x2, d)
+        return self.proj(x2, self.HPD.transp(x1, x2, d))
 
     def dist(self, x, y):
         return self.HPD.dist(x, y)
