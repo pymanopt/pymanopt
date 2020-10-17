@@ -50,11 +50,6 @@ class _TensorFlowBackend(Backend):
             return function(*map(self._from_numpy, args)).numpy()
         return wrapper
 
-    @staticmethod
-    def _gradients(function, arguments):
-        return tf.gradients(ys=function, xs=arguments,
-                            unconnected_gradients=tf.UnconnectedGradients.ZERO)
-
     @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
 
