@@ -3,7 +3,7 @@ Module containing functions to differentiate functions using tensorflow.
 """
 try:
     import tensorflow as tf
-except ImportError:
+except ImportError:  # pragma nocover
     tf = None
 
 import functools
@@ -49,11 +49,6 @@ class _TensorFlowBackend(Backend):
         def wrapper(*args):
             return function(*map(self._from_numpy, args)).numpy()
         return wrapper
-
-    @staticmethod
-    def _gradients(function, arguments):
-        return tf.gradients(ys=function, xs=arguments,
-                            unconnected_gradients=tf.UnconnectedGradients.ZERO)
 
     @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
