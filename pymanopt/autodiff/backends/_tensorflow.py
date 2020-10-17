@@ -1,15 +1,15 @@
 """
 Module containing functions to differentiate functions using tensorflow.
 """
-import itertools
-
 try:
     import tensorflow as tf
 except ImportError:
     tf = None
 
 import functools
+
 import numpy as np
+
 from ._backend import Backend
 from .. import make_tracing_backend_decorator
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
@@ -25,16 +25,9 @@ class _TensorFlowBackend(Backend):
     def is_available():
         return tf is not None
 
-    @Backend._assert_backend_available
-    def is_compatible(self, function, arguments):
-        if not isinstance(function, tf.Tensor):
-            return False
-        return all([isinstance(argument, tf.Variable)
-                    for argument in arguments])
-
     @staticmethod
     def _from_numpy(array):
-        """Wrap numpy ndarray ``array`` in a tensorflow tensor. 
+        """Wrap numpy ndarray ``array`` in a tensorflow tensor.
         """
         return tf.constant(array)
 
@@ -96,7 +89,8 @@ class _TensorFlowBackend(Backend):
             return self._sanitize_gradients(tf_args, acc.jvp(grads))
 
         if len(variables) == 1:
-            return unpack_singleton_sequence_return_value(hessian_vector_product)
+            return unpack_singleton_sequence_return_value(
+                    hessian_vector_product)
         return hessian_vector_product
 
 

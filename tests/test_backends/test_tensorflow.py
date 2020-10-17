@@ -1,8 +1,5 @@
 import os
-import unittest
 
-import numpy as np
-import numpy.random as rnd
 import tensorflow as tf
 
 from pymanopt.function import TensorFlow
