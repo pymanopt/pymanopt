@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import linalg as la, random as rnd
-from scipy.linalg import logm, sqrtm
+from scipy.linalg import sqrtm
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.tools.multi import multihconj, multiherm, multilog
@@ -112,14 +112,36 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return r
 
     def log(self, x, y):
-        x_inv_y = la.solve(x, y)
-        if self._k > 1:
-            log = np.zeros(np.shape(x), dtype=np.complex)
-            for i in range(self._k):
-                log[i] = logm(x_inv_y[i])
+        k = self._k
+
+        d, q = la.eigh(x)
+        if k == 1:
+            x_sqrt = q@np.diag(np.sqrt(d))@q.conj().T
+            x_isqrt = q@np.diag(1/np.sqrt(d))@q.conj().T
         else:
-            log = logm(x_inv_y)
-        return multiherm(multiprod(x, log))
+            temp = np.zeros(q.shape, dtype=np.complex)
+            for i in range(q.shape[0]):
+                temp[i, :, :] = np.diag(np.sqrt(d[i, :]))[np.newaxis, :, :]
+            x_sqrt = multiprod(multiprod(q, temp), multihconj(q))
+
+            temp = np.zeros(q.shape, dtype=np.complex)
+            for i in range(q.shape[0]):
+                temp[i, :, :] = np.diag(1/np.sqrt(d[i, :]))[np.newaxis, :, :]
+            x_isqrt = multiprod(multiprod(q, temp), multihconj(q))
+
+        d, q = la.eigh(multiprod(multiprod(x_isqrt, y), x_isqrt))
+        if k == 1:
+            log = q@np.diag(np.log(d))@q.conj().T
+        else:
+            temp = np.zeros(q.shape, dtype=np.complex)
+            for i in range(q.shape[0]):
+                temp[i, :, :] = np.diag(np.log(d[i, :]))[np.newaxis, :, :]
+            d = temp
+            log = multiprod(multiprod(q, d), multihconj(q))
+
+        xi = multiprod(multiprod(x_sqrt, log), x_sqrt)
+        xi = multiherm(xi)
+        return xi
 
     def transp(self, x1, x2, d):
         E = multihconj(la.solve(multihconj(x1), multihconj(x2)))
