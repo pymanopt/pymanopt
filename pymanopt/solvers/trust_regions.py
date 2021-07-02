@@ -444,10 +444,14 @@ class TrustRegions(Solver):
             d_Hd = inner(x, delta, Hdelta)
 
             # Note that if d_Hd == 0, we will exit at the next "if" anyway.
-            alpha = z_r / d_Hd
-            # <neweta,neweta>_P =
-            # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
-            e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha ** 2 * d_Pd
+            if d_Hd != 0:
+                alpha = z_r / d_Hd
+                # <neweta,neweta>_P =
+                # <eta,eta>_P + 2*alpha*<eta,delta>_P + alpha*alpha*<delta,delta>_P
+                e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha ** 2 * d_Pd
+            else:
+                e_Pe_new = e_Pe
+
 
             # Check against negative curvature and trust-region radius
             # violation. If either condition triggers, we bail out.
