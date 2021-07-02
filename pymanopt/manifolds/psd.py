@@ -146,8 +146,8 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         k = self._k
         n = self._n
         if k == 1:
-            return np.zeros((k, n, n))
-        return np.zeros((n, n))
+            return np.zeros((n, n))
+        return np.zeros((k, n, n))
 
 
 # TODO(nkoep): This could either stay in here (seeing how it's a manifold of
