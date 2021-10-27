@@ -1,7 +1,7 @@
 # Pymanopt TODO List
 
 - Development
-  - Integrate `flake8-import-order` into travis config
+  - Integrate `flake8-import-order` into ci
   - Integrate flake8-docstrings (add 'docstring-convention = numpy' in [flake8]
     section of .flake8 file)
 
