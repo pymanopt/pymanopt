@@ -1,0 +1,33 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Set up Python'
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+      - name: 'Pip upgrade'
+        run: pip install --upgrade pip setuptools wheel
+      - name: 'Install dev-requirements'
+        run: pip install -q -r dev-requirements.txt
+      - name: 'Install requirements'
+        run: pip install -q -r requirements.txt
+      - name: 'Flake8'
+        run: flake8 docs/conf.py examples pymanopt setup.py tests
+      - name: 'Tests'
+        run: nose2 tests
+      - name: 'Build sdist and wheel'
+        run: python setup.py sdist bdist_wheel
+      - name: 'Publish to pypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
