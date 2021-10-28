@@ -22,7 +22,7 @@ or executing the test suite via [nose][nose]:
 Note that we run the [flake8][flake8] utility on every python file in the
 package to verify coding style consistency during our integration tests. As
 such, failure to comply to the [style guide][style] will result in a failing
-travis-ci build. To prevent adding commits which fail to adhere to the PEP8
+ci build. To prevent adding commits which fail to adhere to the PEP8
 guidelines, we include a [pre-commit][pre-commit] config, which immediately
 invokes flake8 on all files staged for commit when running `git commit`. To
 enable the hook, simply run `pre-commit install` after installing `pre-commit`
