@@ -60,7 +60,7 @@ def create_cost_egrad_ehess(backend, samples, num_components):
         w = tf.Variable(
             tf.zeros((dimension, num_components), dtype=np.float64), name="w")
 
-        @pymanopt.function.TensorFlow(w)
+        @pymanopt.function.TensorFlow
         def cost(w):
             projector = w @ tf.transpose(w)
             return tf.norm(samples - samples @ projector) ** 2

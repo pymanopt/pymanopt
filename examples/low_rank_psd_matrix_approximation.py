@@ -50,7 +50,7 @@ def create_cost_egrad_ehess(backend, A, rank):
     elif backend == "TensorFlow":
         Y = tf.Variable(tf.zeros((num_rows, rank), dtype=np.float64), name="Y")
 
-        @pymanopt.function.TensorFlow(Y)
+        @pymanopt.function.TensorFlow
         def cost(Y):
             X = Y @ tf.transpose(Y)
             return tf.norm(X - A) ** 2

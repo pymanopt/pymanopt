@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/pymanopt/pymanopt](https://badges.gitter.im/pymanopt/pymanopt.svg)](https://gitter.im/pymanopt/pymanopt?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![PyPI version](https://badge.fury.io/py/pymanopt.svg)](https://badge.fury.io/py/pymanopt)
-[![Build Status](https://travis-ci.org/pymanopt/pymanopt.svg?branch=master)](https://travis-ci.org/pymanopt/pymanopt)
+[![Build Status](https://github.com/pymanopt/pymanopt/actions/workflows/build.yml/badge.svg)](https://github.com/pymanopt/pymanopt/actions/workflows/build.yml)
 [![Coverage Status](https://coveralls.io/repos/github/pymanopt/pymanopt/badge.svg?branch=master)](https://coveralls.io/github/pymanopt/pymanopt?branch=master)
 
 Please refer to the **documentation at [pymanopt.org](https://pymanopt.org)**

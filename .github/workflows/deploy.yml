@@ -1,0 +1,65 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'testpypi or pypi'
+        required: false
+        default: 'testpypi'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Set up Python'
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+      - name: 'Pip upgrade'
+        run: pip install --upgrade pip setuptools wheel
+      - name: 'Install dev-requirements'
+        run: pip install -q -r dev-requirements.txt
+      - name: 'Install requirements'
+        run: pip install -q -r requirements.txt
+      - name: 'Flake8'
+        run: flake8 docs/conf.py examples pymanopt setup.py tests
+      - name: 'Tests'
+        run: nose2 tests
+      - name: 'Build sdist and wheel'
+        run: python setup.py sdist bdist_wheel
+      - name: 'Publish to pypi'
+        if: ${{ github.event.inputs.repository == 'pypi' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: 'Publish to testpypi'
+        if: ${{ github.event.inputs.repository != 'pypi' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+      - name: 'Build website'
+        if: ${{ github.event.inputs.repository == 'pypi' && github.ref == 'refs/heads/master' }}
+        run: >-
+          PYTHONPATH=. sphinx-build
+          -b html
+          -D version=latest
+          -D release=latest
+          docs
+          website/docs
+      - name: 'Publish website'
+        if: ${{ github.event.inputs.repository == 'pypi' && github.ref == 'refs/heads/master' }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          external_repository: pymanopt/pymanopt.github.io
+          publish_branch: main
+          publish_dir: ./website
+          cname: www.pymanopt.org
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

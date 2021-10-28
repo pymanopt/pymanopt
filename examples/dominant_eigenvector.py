@@ -45,7 +45,7 @@ def create_cost_egrad(backend, A):
     elif backend == "TensorFlow":
         x = tf.Variable(tf.zeros(n, dtype=np.float64), name="X")
 
-        @pymanopt.function.TensorFlow(x)
+        @pymanopt.function.TensorFlow
         def cost(x):
             return -tf.tensordot(x, tf.tensordot(A, x, axes=1), axes=1)
     elif backend == "Theano":
