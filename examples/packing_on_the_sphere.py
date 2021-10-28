@@ -45,7 +45,7 @@ def create_cost(backend, dimension, num_points, epsilon):
         X = tf.Variable(tf.zeros((num_points, dimension), dtype=np.float64),
                         name="X")
 
-        @pymanopt.function.TensorFlow(X)
+        @pymanopt.function.TensorFlow
         def cost(X):
             Y = tf.matmul(X, tf.transpose(X))
             s = tf.reduce_max(tf.linalg.band_part(Y, 0, -1))
