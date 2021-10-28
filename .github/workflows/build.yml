@@ -16,6 +16,9 @@ jobs:
         python-version:
           - '3.6'
           - '3.7'
+          - '3.8'
+          - '3.9'
+          #- '3.10' (wait for all dependencies having the needed support)
     steps:
       - name: 'Set up Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v2
@@ -34,7 +37,7 @@ jobs:
       - name: 'Tests'
         run: nose2 tests --verbose --with-coverage
       - name: 'Coveralls'
-        if: ${{ matrix.python-version == '3.7' }}
+        if: ${{ matrix.python-version == '3.9' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_SERVICE_NAME: github
