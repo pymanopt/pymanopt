@@ -37,7 +37,7 @@ jobs:
       - name: 'Tests'
         run: nose2 tests --verbose --with-coverage
       - name: 'Coveralls'
-        if: ${{ matrix.python-version == '3.7' }}
+        if: ${{ matrix.python-version == '3.9' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_SERVICE_NAME: github
