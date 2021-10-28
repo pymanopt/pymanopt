@@ -113,7 +113,7 @@ class Solver(metaclass=abc.ABCMeta):
             self._optlog['final_values']['stepsize'] = stepsize
         if gradnorm is not float('inf'):
             self._optlog['final_values']['gradnorm'] = gradnorm
-        if iter is not -1:
+        if iter != -1:
             self._optlog['final_values']['iterations'] = iter
-        if costevals is not -1:
+        if costevals != -1:
             self._optlog['final_values']['costevals'] = costevals
