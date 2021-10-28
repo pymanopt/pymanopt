@@ -2,6 +2,11 @@ name: deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      repository:
+        description: 'testpypi or pypi'
+        required: false
+        default: 'testpypi'
 
 jobs:
   deploy:
@@ -26,6 +31,13 @@ jobs:
       - name: 'Build sdist and wheel'
         run: python setup.py sdist bdist_wheel
       - name: 'Publish to pypi'
+        if: ${{ github.event.inputs.repository == 'pypi' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: 'Publish to testpypi'
+        if: ${{ github.event.inputs.repository != 'pypi' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
