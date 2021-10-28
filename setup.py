@@ -15,7 +15,7 @@ def parse_requirements_file(filename):
 
 
 if __name__ == "__main__":
-    requirements = parse_requirements_file("requirements.txt")
+    requirements = parse_requirements_file("requirements/base.txt")
 
     install_requires = []
     optional_dependencies = {}
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         else:
             install_requires.append(requirement)
 
-    dev_requirements = parse_requirements_file("dev-requirements.txt")
+    dev_requirements = parse_requirements_file("requirements/dev.txt")
     extras_require = {
         "test": dev_requirements,
         **optional_dependencies
