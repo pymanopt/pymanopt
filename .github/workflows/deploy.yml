@@ -44,7 +44,7 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
       - name: 'Build website'
-        if: github.ref == 'refs/heads/master'
+        if: ${{ github.event.inputs.repository == 'pypi' && github.ref == 'refs/heads/master' }}
         run: >-
           PYTHONPATH=. sphinx-build
           -b html
@@ -52,8 +52,8 @@ jobs:
           -D release=latest
           docs
           website/docs
-      - name: 'Publish docs'
-        if: github.ref == 'refs/heads/master'
+      - name: 'Publish website'
+        if: ${{ github.event.inputs.repository == 'pypi' && github.ref == 'refs/heads/master' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
