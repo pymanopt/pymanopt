@@ -16,7 +16,6 @@ jobs:
         python-version:
           - '3.6'
           - '3.7'
-          - '3.8'
     steps:
       - name: 'Set up Python ${{ matrix.python-version }}'
         uses: actions/setup-python@v2
