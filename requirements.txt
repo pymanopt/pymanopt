@@ -5,3 +5,4 @@ tensorflow>=2.0
 torch>=1.0
 theano
 jax>=0.1.70
+jaxlib
