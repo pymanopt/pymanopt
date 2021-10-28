@@ -52,7 +52,7 @@ def create_cost_egrad_ehess(backend, samples, targets):
         weights = tf.Variable(tf.zeros(num_weights, dtype=np.float64),
                               name="weights")
 
-        @pymanopt.function.TensorFlow(weights)
+        @pymanopt.function.TensorFlow
         def cost(weights):
             return tf.norm(
                 targets - tf.tensordot(samples, weights, axes=1)) ** 2

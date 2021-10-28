@@ -55,7 +55,7 @@ def create_cost_egrad(backend, A, rank):
         s = tf.Variable(tf.zeros(rank, dtype=np.float64), name="s")
         vt = tf.Variable(tf.zeros((rank, n), dtype=np.float64), name="vt")
 
-        @pymanopt.function.TensorFlow(u, s, vt)
+        @pymanopt.function.TensorFlow
         def cost(u, s, vt):
             X = tf.matmul(u, tf.matmul(tf.linalg.diag(s), vt))
             return tf.norm(X - A) ** 2
