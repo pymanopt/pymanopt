@@ -25,7 +25,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ matrix.version == latest && github.sha || matrix.version }}
+          ref: ${{ matrix.version == "latest" && github.sha || matrix.version }}
 
       - name: Install requirements
         run: |
