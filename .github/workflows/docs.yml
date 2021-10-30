@@ -27,6 +27,11 @@ jobs:
         with:
           ref: ${{ matrix.version == 'latest' && github.sha || matrix.version }}
 
+      - name: Fix-up requirement files
+        run: |
+          mkdir -p requirements
+          test -f dev-requirements.txt && mv dev-requirements requirements/dev.txt
+
       - name: Install requirements
         run: |
           pip install pip==21.3.1 setuptools==47.1.0 wheel==0.37.0
