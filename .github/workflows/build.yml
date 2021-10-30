@@ -28,9 +28,9 @@ jobs:
         run: pip install pip==21.3.1 setuptools==47.1.0 wheel==0.37.0
 
       - name: Install requirements
-        run: >
-          pip install
-            -r requirements/base.txt
+        run: |
+          pip install \
+            -r requirements/base.txt \
             -r requirements/dev.txt
 
       - name: Run linting
@@ -40,7 +40,7 @@ jobs:
         run: nose2 tests --verbose --with-coverage
 
       - name: Upload coverage
-        if: ${{ matrix.python-version == 3.6 }}
+        if: ${{ matrix.python-version == 3.9 }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_SERVICE_NAME: github
