@@ -4,7 +4,7 @@ import pymanopt
 # Package information
 project = "Pymanopt"
 author = "Jamie Townsend, Niklas Koep, Sebastian Weichwald"
-copyright = "2016-2020, {:s}".format(author)
+copyright = "2016-2021, {:s}".format(author)
 release = version = pymanopt.__version__
 
 # Build settings
