@@ -30,8 +30,8 @@ jobs:
         shell: bash
         run: |
           GITHUB_TAG="${GITHUB_REF##refs/tags/v}"
-          [[ $GITHUB_TAG =~ ^[0-9]+.[0-9]+.[0-9]+$ ]] && \
-          echo "__version__ = \"${GITHUB_TAG}\"" > pymanopt/_version.py
+          [[ $GITHUB_TAG =~ ^[0-9]+.[0-9]+.[0-9]+ ]] && \
+            echo "__version__ = \"${GITHUB_TAG}\"" > pymanopt/_version.py
 
       - name: Build sdist and wheel
         run: python setup.py sdist bdist_wheel
