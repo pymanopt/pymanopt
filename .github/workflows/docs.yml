@@ -30,7 +30,7 @@ jobs:
       - name: Fix-up requirement files
         run: |
           mkdir -p requirements
-          test -f dev-requirements.txt && mv dev-requirements requirements/dev.txt
+          test -f dev-requirements.txt && mv dev-requirements.txt requirements/dev.txt
 
       - name: Install requirements
         run: |
