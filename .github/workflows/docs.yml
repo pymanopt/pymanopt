@@ -17,10 +17,10 @@ jobs:
           - latest
           - 0.2.5
     steps:
-      - name: Set up python 3.9
+      - name: Set up python 3.6
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.6
 
       - name: Checkout
         uses: actions/checkout@v2
