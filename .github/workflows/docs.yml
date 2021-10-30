@@ -11,14 +11,20 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        version:
+          - latest
     steps:
-      - name: Set up Python 3.9
+      - name: Set up python 3.9
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
 
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.version == latest && github.sha || matrix.version }}
 
       - name: Install requirements
         run: |
@@ -29,19 +35,19 @@ jobs:
         run: |
           PYTHONPATH=. sphinx-build \
             -b html \
-            -D version=latest \
-            -D release=latest \
+            -D version=${{ matrix.version }} \
+            -D release=${{ matrix.version }} \
             docs \
-            website/docs
+            website/docs/${{ matrix.version }}
 
-      - name: Publish website
+      - name: Publish documentation
         if: ${{ github.ref == refs/heads/master }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           external_repository: pymanopt/pymanopt.github.io
           publish_branch: main
-          publish_dir: ./website
+          publish_dir: website/docs/${{ matrix.version }}
           cname: www.pymanopt.org
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
