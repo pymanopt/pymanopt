@@ -3,7 +3,7 @@ name: Deploy new version
 on:
   push:
     tags:
-      - "*"
+      - '*'
     inputs:
       repository: pypi
   pull_request:
@@ -38,14 +38,14 @@ jobs:
         run: python setup.py sdist bdist_wheel
 
       - name: Publish to pypi
-        if: ${{ github.ref == "refs/heads/master" && github.event.inputs.repository == "pypi" }}
+        if: ${{ github.ref == 'refs/heads/master' && github.event.inputs.repository == 'pypi' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Publish to test.pypi
-        if: ${{ github.ref == "refs/heads/master" && github.event.inputs.repository == "test.pypi" }}
+        if: ${{ github.ref == 'refs/heads/master' && github.event.inputs.repository == 'test.pypi' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
