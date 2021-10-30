@@ -1,4 +1,4 @@
-name: Deploy new version
+name: Build release version
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       - name: Install requirements
         run: |
           pip install pip==21.3.1 setuptools==47.1.0 wheel==0.37.0
-          pip install -r requirements/dev.txt
+          pip install -r requirements/base.txt -r requirements/dev.txt
 
       - name: Build sdist and wheel
         run: python setup.py sdist bdist_wheel
