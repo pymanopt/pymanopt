@@ -4,18 +4,9 @@ on:
   push:
     tags:
       - '*'
-    inputs:
-      repository: pypi
   pull_request:
     branches:
       master
-  # TODO: Remove this.
-  workflow_dispatch:
-    inputs:
-      repository:
-        description: test.pypi or pypi
-        required: false
-        default: test.pypi
 
 jobs:
   deploy:
@@ -37,17 +28,9 @@ jobs:
       - name: Build sdist and wheel
         run: python setup.py sdist bdist_wheel
 
-      - name: Publish to pypi
-        if: ${{ github.ref == 'refs/heads/master' && github.event.inputs.repository == 'pypi' }}
+      - name: Publish to pypi on tags
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-
-      - name: Publish to test.pypi
-        if: ${{ github.ref == 'refs/heads/master' && github.event.inputs.repository == 'test.pypi' }}
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
