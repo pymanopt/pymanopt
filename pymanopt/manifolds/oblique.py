@@ -42,9 +42,6 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def proj(self, X, H):
         return H - X * ((X * H).sum(0)[np.newaxis, :])
 
-    def tangent(self, X, H):
-        return self.proj(X, H)
-
     def ehess2rhess(self, X, egrad, ehess, U):
         PXehess = self.proj(X, ehess)
         # TODO(nkoep): Move the second summand to the 'weingarten' method
