@@ -1,4 +1,0 @@
-coveralls
-jupyter
-sphinx
-sphinx_rtd_theme
