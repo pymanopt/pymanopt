@@ -27,7 +27,7 @@ jobs:
         with:
           ref: ${{ matrix.version == 'latest' && github.sha || matrix.version }}
 
-      - name: Fix-up requirement files
+      - name: Fix-up requirement files for older tags
         run: |
           mkdir -p requirements
           (test -f requirements.txt && mv requirements.txt requirements/base.txt) || true
@@ -55,6 +55,5 @@ jobs:
           external_repository: pymanopt/pymanopt.github.io
           publish_branch: main
           publish_dir: website/docs/${{ matrix.version }}
-          cname: www.pymanopt.org
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
