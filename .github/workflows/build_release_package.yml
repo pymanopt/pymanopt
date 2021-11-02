@@ -3,7 +3,7 @@ name: Build release version
 on:
   push:
     tags:
-      - '*'
+      - '*.*.*'
   pull_request:
     branches:
       master
