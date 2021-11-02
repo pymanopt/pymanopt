@@ -1,8 +1,5 @@
-coveralls
 flake8
 flake8-import-order
 matplotlib
 nose2
 pre-commit
-sphinx
-sphinx_rtd_theme
