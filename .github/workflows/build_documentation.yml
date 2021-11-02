@@ -32,11 +32,15 @@ jobs:
           mkdir -p requirements
           (test -f requirements.txt && mv requirements.txt requirements/base.txt) || true
           (test -f dev-requirements.txt && mv dev-requirements.txt requirements/dev.txt) || true
+          touch requirements/ci.txt requirements/docs.txt
 
       - name: Install requirements
         run: |
-          pip install pip==21.3.1 setuptools==47.1.0 wheel==0.37.0
-          pip install -r requirements/base.txt -r requirements/dev.txt
+          pip install -r requirements/ci.txt
+          pip install \
+            -r requirements/docs.txt \
+            -r requirements/base.txt \
+            -r requirements/dev.txt
 
       - name: Build docs
         run: |
