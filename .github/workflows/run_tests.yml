@@ -1,0 +1,43 @@
+name: Lint and run tests
+
+on:
+  pull_request:
+    branches:
+      master
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version:
+          - 3.6
+          - 3.7
+          - 3.8
+          - 3.9
+    steps:
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install requirements
+        run: |
+          pip install -r requirements/ci.txt
+          pip install -r requirements/base.txt -r requirements/dev.txt
+
+      - name: Run linting
+        run: flake8 docs/conf.py examples pymanopt setup.py tests
+
+      - name: Run tests
+        run: nose2 tests --verbose --with-coverage
+
+      - name: Upload coverage
+        if: ${{ matrix.python-version == 3.9 }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_SERVICE_NAME: github
+        run: coveralls

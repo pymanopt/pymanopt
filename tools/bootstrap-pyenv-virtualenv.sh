@@ -6,21 +6,20 @@ set -o errexit
 # bootstraps a Python 3.7 development environment.
 
 die() {
-  echo $*
+  echo "$@"
   exit 1
 }
-
-PYTHONVERSION="3.7.6"
-NAME="pymanopt"
-ENVNAME="$NAME-$PYTHONVERSION"
 
 for p in pyenv pyenv-virtualenv; do
   command -v $p >/dev/null 2>&1 || { die "\`$p\` not found in PATH"; }
 done
 
-CONFIGURE_OPTS=--enable-shared pyenv install -s $PYTHONVERSION
-pyenv virtualenv -f $PYTHONVERSION $ENVNAME
-pyenv local $ENVNAME
-pip install --upgrade pip setuptools wheel
-pip install -r dev-requirements.txt
-pip install -r requirements.txt
+PYTHON_VERSION="3.7.10"
+NAME="pymanopt"
+ENV_NAME="$NAME-$PYTHON_VERSION"
+
+CONFIGURE_OPTS=--enable-shared pyenv install -s "$PYTHON_VERSION"
+pyenv virtualenv -f "$PYTHON_VERSION" "$ENV_NAME"
+pyenv local "$ENV_NAME"
+pip install -r requirements/ci.txt
+pip install -r requirements/base.txt -r requirements/dev.txt

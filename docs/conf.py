@@ -1,10 +1,12 @@
+import datetime
+
 import pymanopt
 
 
 # Package information
 project = "Pymanopt"
 author = "Jamie Townsend, Niklas Koep, Sebastian Weichwald"
-copyright = "2016-2020, {:s}".format(author)
+copyright = f"2016-{datetime.date.today().year}, {author}"
 release = version = pymanopt.__version__
 
 # Build settings
@@ -22,7 +24,7 @@ exclude_patterns = ["build", "*.egg*"]
 # Output options
 html_theme = "sphinx_rtd_theme"
 html_show_sphinx = False
-html_baseurl = "www.pymanopt.org"
+html_baseurl = "pymanopt.org"
 htmlhelp_basename = "pymanoptdoc"
 html_last_updated_fmt = "%c"
 

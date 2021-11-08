@@ -1,4 +1,5 @@
 import os
+import re
 import runpy
 from itertools import chain
 
@@ -11,23 +12,24 @@ OPTIONAL_DEPENDENCIES = ("autograd", "tensorflow", "theano")
 
 def parse_requirements_file(filename):
     with open(filename) as f:
-        return f.read().splitlines()
+        return [line.strip() for line in f.read().splitlines()]
 
 
 if __name__ == "__main__":
-    requirements = parse_requirements_file("requirements.txt")
+    requirements = parse_requirements_file("requirements/base.txt")
 
     install_requires = []
     optional_dependencies = {}
     for requirement in requirements:
-        # We manually separate out hard from optional dependencies.
-        if any((d in requirement for d in OPTIONAL_DEPENDENCIES)):
-            package = requirement.split(">")[0].split("=")[0]
+        # We manually separate hard from optional dependencies.
+        if any(requirement.startswith(optional_dependency)
+               for optional_dependency in OPTIONAL_DEPENDENCIES):
+            package = re.match(r"([A-Za-z0-9\-_]+).*", requirement).group(1)
             optional_dependencies[package] = [requirement]
         else:
             install_requires.append(requirement)
 
-    dev_requirements = parse_requirements_file("dev-requirements.txt")
+    dev_requirements = parse_requirements_file("requirements/dev.txt")
     extras_require = {
         "test": dev_requirements,
         **optional_dependencies
