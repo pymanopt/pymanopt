@@ -51,5 +51,7 @@ jobs:
           external_repository: pymanopt/pymanopt.github.io
           publish_branch: main
           publish_dir: website/docs/${{ matrix.version }}
+          destination_dir: docs/${{ matrix.version }}
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: ${{ github.event.head_commit.message }}
