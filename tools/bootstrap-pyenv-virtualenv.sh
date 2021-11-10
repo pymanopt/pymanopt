@@ -23,3 +23,4 @@ pyenv virtualenv -f "$PYTHON_VERSION" "$ENV_NAME"
 pyenv local "$ENV_NAME"
 pip install -r requirements/ci.txt
 pip install -r requirements/base.txt -r requirements/dev.txt
+
