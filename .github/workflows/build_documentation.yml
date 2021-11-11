@@ -1,0 +1,57 @@
+name: Build documentation
+
+on:
+  pull_request:
+    branches:
+      master
+  push:
+    branches:
+      master
+
+jobs:
+  docs:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        version:
+          - latest
+    steps:
+      - name: Set up python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ matrix.version == 'latest' && github.sha || matrix.version }}
+
+      - name: Install requirements
+        run: |
+          pip install -r requirements/ci.txt
+          pip install \
+            -r requirements/docs.txt \
+            -r requirements/base.txt \
+            -r requirements/dev.txt
+
+      - name: Build docs
+        run: |
+          PYTHONPATH=. sphinx-build \
+            -b html \
+            -D version=${{ matrix.version }} \
+            -D release=${{ matrix.version }} \
+            docs \
+            website/docs/${{ matrix.version }}
+
+      - name: Publish documentation
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          external_repository: pymanopt/pymanopt.github.io
+          publish_branch: main
+          publish_dir: website/docs/${{ matrix.version }}
+          destination_dir: docs/${{ matrix.version }}
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: ${{ github.event.head_commit.message }}
