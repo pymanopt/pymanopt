@@ -133,7 +133,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         n = self.n
         x = man.rand()
         a, b = rnd.randn(2, k, n, n)
-        np.testing.assert_almost_equal(np.tensordot(a, b, axes=a.ndim),
+        np.testing.assert_almost_equal(np.tensordot(a, b.transpose((0,2,1)), axes=a.ndim),
                                        man.inner(x, multiprod(x, a),
                                                  multiprod(x, b)))
 
