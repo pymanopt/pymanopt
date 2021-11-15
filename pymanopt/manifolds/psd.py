@@ -78,7 +78,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 
     def norm(self, x, u):
         xinvu = la.solve(x, u)
-        return np.sqrt(np.tensordot(xinvu, multitransp(xinvu), axes=x.ndim))
+        return np.sqrt(self.inner(x, u, v))
 
     def rand(self):
         # The way this is done is arbitrary. I think the space of p.d.
