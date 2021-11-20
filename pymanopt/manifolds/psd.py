@@ -61,8 +61,12 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return la.norm(logm)
 
     def inner(self, x, u, v):
-        return (np.tensordot(la.solve(x, u),
-                multitransp(la.solve(x, v)), axes=x.ndim))
+        xinvu = la.solve(x, u)
+        if u is v:
+            xinvv = xinvu
+        else:
+            xinvv = la.solve(x, v)
+        return np.tensordot(xinvu, multitransp(xinvv), axes=x.ndim)
 
     def proj(self, X, G):
         return multisym(G)
