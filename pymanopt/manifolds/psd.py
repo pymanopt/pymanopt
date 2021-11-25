@@ -61,7 +61,12 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return la.norm(logm)
 
     def inner(self, x, u, v):
-        return np.tensordot(la.solve(x, u), la.solve(x, v), axes=x.ndim)
+        xinvu = la.solve(x, u)
+        if u is v:
+            xinvv = xinvu
+        else:
+            xinvv = la.solve(x, v)
+        return np.tensordot(xinvu, multitransp(xinvv), axes=x.ndim)
 
     def proj(self, X, G):
         return multisym(G)
@@ -76,12 +81,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
                 multisym(multiprod(multiprod(u, multisym(egrad)), x)))
 
     def norm(self, x, u):
-        # This implementation is as fast as np.linalg.solve_triangular and is
-        # more stable, as the above solver tends to output non positive
-        # definite results.
-        c = la.cholesky(x)
-        c_inv = la.inv(c)
-        return la.norm(multiprod(multiprod(c_inv, u), multitransp(c_inv)))
+        return np.sqrt(self.inner(x, u, u))
 
     def rand(self):
         # The way this is done is arbitrary. I think the space of p.d.
