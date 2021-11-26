@@ -1,3 +1,5 @@
+import matplotlib
+
 from examples import (
     closest_unit_norm_column_approximation,
     dominant_eigenvector,
@@ -59,4 +61,5 @@ class TestExamples(TestCase):
 
     @params(*check_gradient.SUPPORTED_BACKENDS)
     def test_check_gradient(self, backend):
+        matplotlib.use("Agg")
         check_gradient.run(backend)

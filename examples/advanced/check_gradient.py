@@ -64,7 +64,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # Generate random problem data.
     n = 128
     A = np.random.randn(n, n)
-    A = .5 * (A + A.T)
+    A = 0.5 * (A + A.T)
     cost, egrad = create_cost_egrad(backend, A)
 
     # Create the problem structure.
