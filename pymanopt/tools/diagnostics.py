@@ -127,7 +127,6 @@ def check_gradient(problem, x=None, d=None):
     plt.ylabel("Approximation error")
     plt.loglog(h[segment], 10**np.polyval(poly, np.log10(h[segment])),
                linewidth=3)
-    plt.autoscale(False)
     plt.plot([1e-8, 1e0], [1e-8, 1e8], linestyle="--", color="k")
 
     plt.title("Gradient check\nThe slope of the continuous line "
