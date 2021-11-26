@@ -18,15 +18,15 @@ def identify_linear_piece(x, y, window_length):
     See also: check_directional_derivative check_gradient
     """
     residues = np.zeros(len(x)-window_length)
-    polys = np.zeros(shape=(2, len(residues)))
-    for i in range(len(residues)):
-        segment = range(i, (i+window_length)+1)
+    polys = np.zeros((2, len(residues)))
+    for k in np.arange(len(residues)):
+        segment = np.arange(k, (k+window_length)+1)
         poly, residuals, _, _, _ = np.polyfit(x[segment], y[segment],
                                               1, full=True)
-        residues[i] = np.linalg.norm(residuals)
-        polys[:, i] = poly
+        residues[k] = np.linalg.norm(residuals)
+        polys[:, k] = poly
     best = np.argmin(residues)
-    segment = range(best, best+window_length+1)
+    segment = np.arange(best, best+window_length+1)
     poly = polys[:, best]
     return segment, poly
 
@@ -80,7 +80,7 @@ def check_directional_derivative(problem, x=None, d=None):
               "Model error is numerically zero for all h.")
         # The 1st order model is exact: all errors are (numerically) zero
         # Fit line from all points, use log scale only in h.
-        segment = range(len(h))
+        segment = np.arange(len(h))
         poly = np.polyfit(np.log10(h), err, 1)
         # Set mean error in log scale for plot.
         poly[-1] = np.log10(poly[-1])
