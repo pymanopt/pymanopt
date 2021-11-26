@@ -1,5 +1,4 @@
 import matplotlib
-
 from examples import (
     closest_unit_norm_column_approximation,
     dominant_eigenvector,
