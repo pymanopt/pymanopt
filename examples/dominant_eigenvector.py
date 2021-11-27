@@ -1,5 +1,3 @@
-import os
-
 import autograd.numpy as np
 import tensorflow as tf
 import theano.tensor as T
@@ -10,10 +8,6 @@ from numpy import linalg as la, random as rnd
 import pymanopt
 from pymanopt.manifolds import Sphere
 from pymanopt.solvers import SteepestDescent
-
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
 
 SUPPORTED_BACKENDS = (
     "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"

@@ -1,5 +1,3 @@
-import os
-
 import autograd.numpy as np
 import tensorflow as tf
 import theano.tensor as T
@@ -10,10 +8,6 @@ import pymanopt
 from pymanopt import Problem
 from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_gradient
-
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
 
 SUPPORTED_BACKENDS = (
     "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
