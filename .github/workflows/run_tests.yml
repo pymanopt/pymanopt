@@ -4,12 +4,6 @@ on:
   pull_request:
     branches:
       master
-  workflow_dispatch:
-    inputs:
-      debug_enabled:
-        description: Run tests with tmate session
-        required: false
-        default: false
 
 jobs:
   build:
@@ -47,14 +41,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_SERVICE_NAME: github
         run: coveralls
-
-      - name: Tmate debug session
-        uses: mxschmitt/action-tmate@v3
-        if: |-
-          ${{
-            github.event_name == 'workflow_dispatch' &&
-            github.event.inputs.debug_enabled &&
-            failure()
-          }}
-        with:
-          limit-access-to-actor: true
