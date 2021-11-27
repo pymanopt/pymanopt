@@ -96,8 +96,12 @@ def check_directional_derivative(problem, x=None, d=None):
         # decrease as the square of the stepsize, i.e., in loglog scale,
         # the error should have a slope of 2.
         window_len = 10
-        segment, poly = identify_linear_piece(np.log10(h), np.log10(err),
-                                              window_len)
+        try:
+            segment, poly = identify_linear_piece(np.log10(h), np.log10(err),
+                                                  window_len)
+        except Exception:
+            print(h)
+            print(err)
     return h, err, segment, poly
 
 
