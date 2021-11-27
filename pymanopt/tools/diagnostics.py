@@ -16,15 +16,15 @@ def identify_linear_piece(x, y, window_length):
     x(segment) is the portion over which (x, y) is the most linear and the
     output poly specifies a first order polynomial that best fits (x, y) over
     that segment (highest degree coefficients first).
-    See also: check_directional_derivative check_gradient
     """
     residues = np.zeros(len(x)-window_length)
     polys = np.zeros((2, len(residues)))
     for k in np.arange(len(residues)):
-        segment = np.arange(k, (k+window_length)+1)
-        poly, residuals, _, _, _ = np.polyfit(x[segment], y[segment],
-                                              1, full=True)
-        residues[k] = np.linalg.norm(residuals)
+        segment = np.arange(k, k+window_length+1)
+        poly, residuals, *_ = np.polyfit(
+            x[segment], y[segment], deg=1, full=True
+        )
+        residues[k] = np.sqrt(residuals)
         polys[:, k] = poly
     best = np.argmin(residues)
     segment = np.arange(best, best+window_length+1)
@@ -41,7 +41,6 @@ def check_directional_derivative(problem, x=None, d=None):
     test is based on a truncated Taylor series (see online pymanopt
     documentation).
     Both x and d are optional and will be sampled at random if omitted.
-    See also: check_gradient
     """
     #  If x and / or d are not specified, pick them at random.
     if d is not None and x is None:
@@ -52,7 +51,7 @@ def check_directional_derivative(problem, x=None, d=None):
     if d is None:
         d = problem.manifold.randvec(x)
 
-    # Compute the value f0 at f and directional derivative at x along d.
+    # Compute the value f0 of f at x and directional derivative at x along d.
     f0 = problem.cost(x)
     grad = problem.grad(x)
     df0 = problem.manifold.inner(x, grad, d)
