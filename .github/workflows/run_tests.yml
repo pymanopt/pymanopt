@@ -4,6 +4,12 @@ on:
   pull_request:
     branches:
       master
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: Run tests with tmate session
+        required: false
+        default: false
 
 jobs:
   build:
@@ -44,7 +50,11 @@ jobs:
 
       - name: Tmate debug session
         uses: mxschmitt/action-tmate@v3
-        if: ${{ failure() }}
+        if: |-
+          ${{
+            github.event_name == 'workflow_dispatch' &&
+            github.event.inputs.debug_enabled &&
+            failure()
+          }}
         with:
           limit-access-to-actor: true
-        timeout-minutes: 15
