@@ -77,7 +77,7 @@ def check_directional_derivative(problem, x=None, d=None):
 
     # Compute the approximation error
     err = np.abs(model - value)
-    model_is_exact = np.allclose(err, 0, atol=1e-12)
+    model_is_exact = np.all(err < 1e-12)
     if model_is_exact:
         print("Directional derivative check. "
               "It seems the linear model is exact: "
