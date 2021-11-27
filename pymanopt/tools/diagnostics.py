@@ -96,12 +96,12 @@ def check_directional_derivative(problem, x=None, d=None):
         # decrease as the square of the stepsize, i.e., in loglog scale,
         # the error should have a slope of 2.
         window_len = 10
-        try:
-            segment, poly = identify_linear_piece(np.log10(h), np.log10(err),
-                                                  window_len)
-        except Exception:
-            print(h)
-            print(err)
+        # Despite not all coordinates of the model being close to the true
+        # value, some entries of 'err' can be zero. To avoid numerical issues
+        # we add an epsilon here.
+        eps = np.finfo(err.dtype).eps
+        segment, poly = identify_linear_piece(np.log10(h), np.log10(err + eps),
+                                              window_len)
     return h, err, segment, poly
 
 
