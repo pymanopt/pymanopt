@@ -16,8 +16,7 @@ ask for help, or leave general comments either here on github,
 [maintainers](MAINTAINERS).
 
 Please refer to the [documentation](https://pymanopt.org/docs/) and the
-[contributing guide](CONTRIBUTING.md)
-file if you wish to extend Pymanopt's functionality and/or contribute to the
-project.
+[contributing guide](CONTRIBUTING.md) if you wish to extend Pymanopt's
+functionality and/or contribute to the project.
 
 Pymanopt is distributed under the [3-clause BSD license](LICENSE).
