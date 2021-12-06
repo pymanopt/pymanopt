@@ -1,11 +1,7 @@
-import os
-
 import tensorflow as tf
 
 from pymanopt.function import TensorFlow
 from . import _backend_tests
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
 class TestUnaryFunction(_backend_tests.TestUnaryFunction):
