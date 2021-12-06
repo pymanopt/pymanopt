@@ -1,5 +1,3 @@
-import os
-
 import autograd.numpy as np
 import tensorflow as tf
 import theano.tensor as T
@@ -9,10 +7,6 @@ from examples._tools import ExampleRunner
 import pymanopt
 from pymanopt.manifolds import Stiefel
 from pymanopt.solvers import TrustRegions
-
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
 
 SUPPORTED_BACKENDS = (
     "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
