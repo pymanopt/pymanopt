@@ -1,5 +1,6 @@
 # Pymanopt
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f18a06690115446b96d8afa4028f58c6)](https://app.codacy.com/gh/pymanopt/pymanopt?utm_source=github.com&utm_medium=referral&utm_content=pymanopt/pymanopt&utm_campaign=Badge_Grade_Settings)
 [![Latest version](https://badge.fury.io/py/pymanopt.svg)](https://badge.fury.io/py/pymanopt)
 [![Downloads](https://static.pepy.tech/personalized-badge/pymanopt?period=total&units=international_system&left_color=grey&right_color=green&left_text=Downloads)](https://pepy.tech/project/pymanopt)
 [![Build status](https://github.com/pymanopt/pymanopt/actions/workflows/run_tests.yml/badge.svg)](https://github.com/pymanopt/pymanopt/actions/workflows/run_tests.yml)
