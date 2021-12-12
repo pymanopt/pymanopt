@@ -27,8 +27,7 @@ class _TensorFlowBackend(Backend):
 
     @staticmethod
     def _from_numpy(array):
-        """Wrap numpy ndarray ``array`` in a tensorflow tensor.
-        """
+        """Wrap numpy ndarray ``array`` in a tensorflow tensor."""
         return tf.constant(array)
 
     def _sanitize_gradient(self, tensor, grad):
@@ -78,7 +77,7 @@ class _TensorFlowBackend(Backend):
 
             return self._sanitize_gradients(tf_args, acc.jvp(grads))
 
-        if num_arguments:
+        if num_arguments == 1:
             return unpack_singleton_sequence_return_value(
                     hessian_vector_product)
         return hessian_vector_product
