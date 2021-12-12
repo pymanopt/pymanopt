@@ -8,7 +8,7 @@ class TestUnaryFunction(_backend_tests.TestUnaryFunction):
     def setUp(self):
         super().setUp()
 
-        @TensorFlow
+        @TensorFlow(self.manifold)
         def cost(x):
             return tf.reduce_sum(x ** 2)
 
@@ -19,7 +19,7 @@ class TestNaryFunction(_backend_tests.TestNaryFunction):
     def setUp(self):
         super().setUp()
 
-        @TensorFlow
+        @TensorFlow(self.manifold)
         def cost(x, y):
             return tf.tensordot(x, y, axes=1)
 
@@ -30,7 +30,7 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
     def setUp(self):
         super().setUp()
 
-        @TensorFlow
+        @TensorFlow(self.manifold)
         def cost(x, y, z):
             return tf.reduce_sum(x ** 2 + y + z ** 3)
 
@@ -41,7 +41,7 @@ class TestVector(_backend_tests.TestVector):
     def setUp(self):
         super().setUp()
 
-        @TensorFlow
+        @TensorFlow(self.manifold)
         def cost(X):
             return tf.exp(tf.reduce_sum(X ** 2))
 
@@ -52,7 +52,7 @@ class TestMatrix(_backend_tests.TestMatrix):
     def setUp(self):
         super().setUp()
 
-        @TensorFlow
+        @TensorFlow(self.manifold)
         def cost(X):
             return tf.exp(tf.reduce_sum(X ** 2))
 
@@ -63,7 +63,7 @@ class TestTensor3(_backend_tests.TestTensor3):
     def setUp(self):
         super().setUp()
 
-        @TensorFlow
+        @TensorFlow(self.manifold)
         def cost(X):
             return tf.exp(tf.reduce_sum(X ** 2))
 
@@ -74,7 +74,7 @@ class TestMixed(_backend_tests.TestMixed):
     def setUp(self):
         super().setUp()
 
-        @TensorFlow
+        @TensorFlow(self.manifold)
         def cost(x, y, z):
             return (tf.exp(tf.reduce_sum(x ** 2)) +
                     tf.exp(tf.reduce_sum(y ** 2)) +

@@ -3,6 +3,28 @@ import unittest
 import numpy as np
 from numpy import random as rnd, testing as np_testing
 
+from pymanopt.manifolds.manifold import Manifold
+
+
+def manifold_factory(point_layout):
+    class CustomManifold(Manifold):
+        def __init__(self):
+            super().__init__(
+                name="Test manifold", dimension=0, point_layout=point_layout
+            )
+
+        def _generic(self, *args, **kwargs):
+            pass
+
+        inner = _generic
+        norm = _generic
+        proj = _generic
+        rand = _generic
+        randvec = _generic
+        zerovec = _generic
+
+    return CustomManifold()
+
 
 class TestUnaryFunction(unittest.TestCase):
     """Test cost function, gradient and Hessian for the function
@@ -11,6 +33,7 @@ class TestUnaryFunction(unittest.TestCase):
     """
 
     def setUp(self):
+        self.manifold = manifold_factory(point_layout=1)
         self.n = 10
         self.cost = None
 
@@ -48,6 +71,7 @@ class TestNaryFunction(unittest.TestCase):
     """
 
     def setUp(self):
+        self.manifold = manifold_factory(point_layout=2)
         self.n = 10
         self.cost = None
 
@@ -98,6 +122,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
     """
 
     def setUp(self):
+        self.manifold = manifold_factory(point_layout=3)
         self.n = 10
         self.cost = None
 
@@ -147,6 +172,8 @@ class TestVector(unittest.TestCase):
     def setUp(self):
         np.seterr(all='raise')
 
+        self.manifold = manifold_factory(point_layout=1)
+
         n = self.n = 15
 
         Y = self.Y = rnd.randn(n)
@@ -186,6 +213,8 @@ class TestVector(unittest.TestCase):
 class TestMatrix(unittest.TestCase):
     def setUp(self):
         np.seterr(all='raise')
+
+        self.manifold = manifold_factory(point_layout=1)
 
         m = self.m = 10
         n = self.n = 15
@@ -231,6 +260,8 @@ class TestTensor3(unittest.TestCase):
     def setUp(self):
         np.seterr(all='raise')
 
+        self.manifold = manifold_factory(point_layout=1)
+
         n1 = self.n1 = 3
         n2 = self.n2 = 4
         n3 = self.n3 = 5
@@ -275,6 +306,8 @@ class TestMixed(unittest.TestCase):
     # Test autograd on a tuple containing vector, matrix and tensor3.
     def setUp(self):
         np.seterr(all='raise')
+
+        self.manifold = manifold_factory(point_layout=3)
 
         n1 = self.n1 = 3
         n2 = self.n2 = 4
