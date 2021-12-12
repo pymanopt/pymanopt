@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 from numpy import linalg as la, random as rnd
@@ -10,7 +9,7 @@ from pymanopt.manifolds import Oblique
 from pymanopt.solvers import TrustRegions
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
@@ -47,12 +46,6 @@ def create_cost_egrad_ehess(backend, matrix, rank):
         @pymanopt.function.TensorFlow
         def cost(X):
             return 0.25 * tf.norm(tf.matmul(tf.transpose(X), X) - matrix) ** 2
-    elif backend == "Theano":
-        X = T.matrix()
-
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            return 0.25 * T.sum((T.dot(X.T, X) - matrix) ** 2)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 

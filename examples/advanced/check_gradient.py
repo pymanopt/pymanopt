@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 
@@ -10,7 +9,7 @@ from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_gradient
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
@@ -42,12 +41,6 @@ def create_cost_egrad(backend, A):
         @pymanopt.function.TensorFlow
         def cost(x):
             return -tf.tensordot(x, tf.tensordot(A, x, axes=1), axes=1)
-    elif backend == "Theano":
-        x = T.vector()
-
-        @pymanopt.function.Theano(x)
-        def cost(x):
-            return -x.T.dot(T.dot(A, x))
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 

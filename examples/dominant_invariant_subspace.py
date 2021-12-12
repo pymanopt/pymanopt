@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 from numpy import linalg as la, random as rnd
@@ -10,7 +9,7 @@ from pymanopt.manifolds import Grassmann
 from pymanopt.solvers import TrustRegions
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
@@ -53,20 +52,6 @@ def create_cost_egrad_ehess(backend, A, p):
         @pymanopt.function.TensorFlow
         def egrad(X):
             return -tf.matmul(A + A.T, X)
-    elif backend == "Theano":
-        X = T.matrix()
-        U = T.matrix()
-
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            return -T.dot(X.T, T.dot(A, X)).trace()
-
-        # Define the Euclidean Hessian-vector product explicitly for the
-        # purpose of demonstration. The Euclidean gradient is automatically
-        # calculated via Theano's autodiff capabilities.
-        @pymanopt.function.Theano(X, U)
-        def ehess(X, U):
-            return -T.dot(A + A.T, U)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 

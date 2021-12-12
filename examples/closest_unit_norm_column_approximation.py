@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 from numpy import linalg as la, random as rnd
@@ -10,7 +9,7 @@ from pymanopt.manifolds import Oblique
 from pymanopt.solvers import ConjugateGradient
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
@@ -42,12 +41,6 @@ def create_cost_egrad(backend, A):
         @pymanopt.function.TensorFlow
         def cost(X):
             return 0.5 * tf.reduce_sum((X - A) ** 2)
-    elif backend == "Theano":
-        X = T.matrix()
-
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            return 0.5 * T.sum((X - A) ** 2)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 

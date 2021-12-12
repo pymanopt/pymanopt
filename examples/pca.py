@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 
@@ -9,7 +8,7 @@ from pymanopt.manifolds import Stiefel
 from pymanopt.solvers import TrustRegions
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
@@ -59,13 +58,6 @@ def create_cost_egrad_ehess(backend, samples, num_components):
         def cost(w):
             projector = tf.matmul(w, tf.transpose(w))
             return tf.norm(samples - tf.matmul(samples, projector)) ** 2
-    elif backend == "Theano":
-        w = T.matrix()
-
-        @pymanopt.function.Theano(w)
-        def cost(w):
-            projector = T.dot(w, w.T)
-            return (samples - T.dot(samples, projector)).norm(2) ** 2
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 

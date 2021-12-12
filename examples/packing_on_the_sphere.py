@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 
@@ -9,7 +8,7 @@ from pymanopt.manifolds import Elliptope
 from pymanopt.solvers import ConjugateGradient
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "PyTorch", "TensorFlow"
 )
 
 
@@ -47,17 +46,6 @@ def create_cost(backend, dimension, num_points, epsilon):
             expY = expY - tf.linalg.diag(tf.linalg.diag_part(expY))
             u = tf.reduce_sum(tf.linalg.band_part(Y, 0, -1))
             return s + epsilon * tf.math.log(u)
-    elif backend == "Theano":
-        X = T.matrix()
-
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            Y = T.dot(X, X.T)
-            s = T.triu(Y, 1).max()
-            expY = T.exp((Y - s) / epsilon)
-            expY = expY - T.diag(T.diag(expY))
-            u = T.sum(T.triu(expY, 1))
-            return s + epsilon * T.log(u)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
