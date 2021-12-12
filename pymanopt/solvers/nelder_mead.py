@@ -31,7 +31,7 @@ def compute_centroid(manifold, points):
     #      need to work out the Hessian of the Karcher mean by hand or
     #      implement approximations for the Hessian to use in the TR solver as
     #      Manopt. This is because we cannot implement the Karcher mean with
-    #      Theano, say, and compute the Hessian automatically due to dependence
+    #      say autograd and compute the Hessian automatically due to dependence
     #      on the manifold-dependent distance function, which is written in
     #      numpy.
     solver = SteepestDescent(maxiter=15)

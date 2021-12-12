@@ -18,12 +18,11 @@ class Problem:
         - manifold
             Manifold to optimize over.
         - cost
-            A callable which takes an element of manifold and returns a
-            real number, or a symbolic Theano or TensorFlow expression.
-            In case of a symbolic expression, the gradient (and if
-            necessary the Hessian) are computed automatically if they are
-            not explicitly given. We recommend you take this approach
-            rather than calculating gradients and Hessians by hand.
+            A callable decorated with a decorator from ``pymanopt.functions``
+            which takes an element of a manifold and returns a real number. If
+            any decorator other than ``pymanopt.function.Callable`` is used the
+            gradient and Hessian-vector production functions can be computed
+            automatically.
         - grad
             grad(x) is the gradient of cost at x. This must take an
             element X of manifold and return an element of the tangent space

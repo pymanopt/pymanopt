@@ -43,8 +43,7 @@ class ParticleSwarm(Solver):
             - problem
                 Pymanopt problem setup using the Problem class, this must
                 have a .manifold attribute specifying the manifold to optimize
-                over, as well as a cost (specified using a theano graph
-                or as a python function).
+                over, as well as a cost.
             - x=None
                 Optional parameter. Initial population of elements on the
                 manifold. If None then an initial population will be randomly

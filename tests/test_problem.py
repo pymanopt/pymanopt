@@ -1,5 +1,5 @@
 import numpy as np
-import theano.tensor as T
+import tensorflow as tf
 from numpy import random as rnd, testing as np_testing
 
 import pymanopt
@@ -11,9 +11,9 @@ class TestProblem(TestCase):
     def setUp(self):
         X = T.vector()
 
-        @pymanopt.function.Theano(X)
+        @pymanopt.function.TensorFlow(X)
         def cost(X):
-            return T.exp(T.sum(X ** 2))
+            return tf.exp(tf.reduce_sum(X ** 2))
 
         self.cost = cost
 
