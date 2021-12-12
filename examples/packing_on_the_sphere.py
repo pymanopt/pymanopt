@@ -12,9 +12,9 @@ SUPPORTED_BACKENDS = (
 )
 
 
-def create_cost(backend, dimension, num_points, epsilon):
+def create_cost(manifold, epsilon, backend):
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(X):
             Y = X @ X.T
             # Shift the exponentials by the maximum value to reduce numerical
@@ -26,7 +26,7 @@ def create_cost(backend, dimension, num_points, epsilon):
             u = np.triu(expY, 1).sum()
             return s + epsilon * np.log(u)
     elif backend == "PyTorch":
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(X):
             Y = torch.matmul(X, torch.transpose(X, 1, 0))
             s = torch.triu(Y, 1).max()
@@ -35,7 +35,7 @@ def create_cost(backend, dimension, num_points, epsilon):
             u = torch.triu(expY, 1).sum()
             return s + epsilon * torch.log(u)
     elif backend == "TensorFlow":
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(X):
             Y = tf.matmul(X, tf.transpose(X))
             s = tf.reduce_max(tf.linalg.band_part(Y, 0, -1))
@@ -63,8 +63,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # appropriate for these fine tunings.
     epsilon = 0.005
 
-    cost = create_cost(backend, dimension, num_points, epsilon)
     manifold = Elliptope(num_points, dimension)
+    cost = create_cost(manifold, epsilon, backend)
     problem = pymanopt.Problem(manifold, cost)
     if quiet:
         problem.verbosity = 0

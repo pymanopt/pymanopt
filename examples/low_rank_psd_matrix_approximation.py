@@ -13,37 +13,37 @@ SUPPORTED_BACKENDS = (
 )
 
 
-def create_cost_egrad_ehess(backend, A, rank):
+def create_cost_egrad_ehess(manifold, matrix, backend):
     egrad = ehess = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(Y):
-            return np.linalg.norm(Y @ Y.T - A, "fro") ** 2
+            return np.linalg.norm(Y @ Y.T - matrix, "fro") ** 2
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(Y):
-            return la.norm(Y @ Y.T - A, "fro") ** 2
+            return la.norm(Y @ Y.T - matrix, "fro") ** 2
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(Y):
-            return 4 * (Y @ Y.T - A) @ Y
+            return 4 * (Y @ Y.T - matrix) @ Y
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def ehess(Y, U):
-            return 4 * ((Y @ U.T + U @ Y.T) @ Y + (Y @ Y.T - A) @ U)
+            return 4 * ((Y @ U.T + U @ Y.T) @ Y + (Y @ Y.T - matrix) @ U)
     elif backend == "PyTorch":
-        A_ = torch.from_numpy(A)
+        matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(Y):
             X = torch.matmul(Y, torch.transpose(Y, 1, 0))
-            return torch.norm(X - A_) ** 2
+            return torch.norm(X - matrix_) ** 2
     elif backend == "TensorFlow":
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(Y):
             X = tf.matmul(Y, tf.transpose(Y))
-            return tf.norm(X - A) ** 2
+            return tf.norm(X - matrix) ** 2
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
@@ -56,8 +56,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     low_rank_factor = rnd.randn(num_rows, rank)
     matrix = low_rank_factor @ low_rank_factor.T
 
-    cost, egrad, ehess = create_cost_egrad_ehess(backend, matrix, rank)
     manifold = PSDFixedRank(num_rows, rank)
+    cost, egrad, ehess = create_cost_egrad_ehess(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
     if quiet:
         problem.verbosity = 0

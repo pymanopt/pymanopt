@@ -12,26 +12,26 @@ SUPPORTED_BACKENDS = (
 )
 
 
-def create_cost_egrad_ehess(backend, samples, num_components):
+def create_cost_egrad_ehess(manifold, samples, backend):
     egrad = ehess = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(w):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(w):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(w):
             return -2 * (
                 samples.T @ (samples - samples @ w @ w.T) +
                 (samples - samples @ w @ w.T).T @ samples
             ) @ w
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def ehess(w, h):
             return -2 * (
                 samples.T @ (samples - samples @ w @ h.T) @ w +
@@ -44,13 +44,13 @@ def create_cost_egrad_ehess(backend, samples, num_components):
     elif backend == "PyTorch":
         samples_ = torch.from_numpy(samples)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(w):
             projector = torch.matmul(w, torch.transpose(w, 1, 0))
             return torch.norm(
                 samples_ - torch.matmul(samples_, projector)) ** 2
     elif backend == "TensorFlow":
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(w):
             projector = tf.matmul(w, tf.transpose(w))
             return tf.norm(samples - tf.matmul(samples, projector)) ** 2
@@ -67,9 +67,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     samples = np.random.randn(num_samples, dimension) @ np.diag([3, 2, 1])
     samples -= samples.mean(axis=0)
 
-    cost, egrad, ehess = create_cost_egrad_ehess(
-        backend, samples, num_components)
     manifold = Stiefel(dimension, num_components)
+    cost, egrad, ehess = create_cost_egrad_ehess(
+        manifold, samples, backend)
     problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
     if quiet:
         problem.verbosity = 0

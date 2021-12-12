@@ -13,34 +13,34 @@ SUPPORTED_BACKENDS = (
 )
 
 
-def create_cost_egrad_ehess(backend, matrix, rank):
+def create_cost_egrad_ehess(manifold, matrix, backend):
     egrad = ehess = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(X):
             return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(X):
             return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(X):
             return 0.5 * X @ (X.T @ X - matrix)
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def ehess(X, H):
             return X @ (H.T @ X + X.T @ H) + H @ (X.T @ X - matrix)
     elif backend == "PyTorch":
         matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(X):
             return 0.25 * torch.norm(
                 torch.matmul(torch.transpose(X, 1, 0), X) - matrix_) ** 2
     elif backend == "TensorFlow":
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(X):
             return 0.25 * tf.norm(tf.matmul(tf.transpose(X), X) - matrix) ** 2
     else:
@@ -56,8 +56,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = 0.5 * (matrix + matrix.T)
 
     # Solve the problem with pymanopt.
-    cost, egrad, ehess = create_cost_egrad_ehess(backend, matrix, rank)
     manifold = Oblique(rank, num_rows)
+    cost, egrad, ehess = create_cost_egrad_ehess(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
     if quiet:
         problem.verbosity = 0

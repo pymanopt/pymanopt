@@ -13,32 +13,31 @@ SUPPORTED_BACKENDS = (
 )
 
 
-def create_cost_egrad(backend, A):
-    m, n = A.shape
+def create_cost_egrad(manifold, matrix, backend):
     egrad = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(x):
-            return -np.inner(x, A @ x)
+            return -np.inner(x, matrix @ x)
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(x):
-            return -np.inner(x, A @ x)
+            return -np.inner(x, matrix @ x)
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(x):
-            return -2 * A @ x
+            return -2 * matrix @ x
     elif backend == "PyTorch":
-        A_ = torch.from_numpy(A)
+        matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(x):
-            return -torch.matmul(x, torch.matmul(A_, x))
+            return -torch.matmul(x, torch.matmul(matrix_, x))
     elif backend == "TensorFlow":
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(x):
-            return -tf.tensordot(x, tf.tensordot(A, x, axes=1), axes=1)
+            return -tf.tensordot(x, tf.tensordot(matrix, x, axes=1), axes=1)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
@@ -50,8 +49,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = rnd.randn(n, n)
     matrix = 0.5 * (matrix + matrix.T)
 
-    cost, egrad = create_cost_egrad(backend, matrix)
     manifold = Sphere(n)
+    cost, egrad = create_cost_egrad(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
     if quiet:
         problem.verbosity = 0
