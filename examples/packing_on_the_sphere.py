@@ -35,9 +35,6 @@ def create_cost(backend, dimension, num_points, epsilon):
             u = torch.triu(expY, 1).sum()
             return s + epsilon * torch.log(u)
     elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros((num_points, dimension), dtype=np.float64),
-                        name="X")
-
         @pymanopt.function.TensorFlow
         def cost(X):
             Y = tf.matmul(X, tf.transpose(X))

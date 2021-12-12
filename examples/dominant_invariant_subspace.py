@@ -14,7 +14,6 @@ SUPPORTED_BACKENDS = (
 
 
 def create_cost_egrad_ehess(backend, A, p):
-    n = A.shape[-1]
     egrad = ehess = None
 
     if backend == "Autograd":
@@ -40,8 +39,6 @@ def create_cost_egrad_ehess(backend, A, p):
         def cost(X):
             return -torch.tensordot(X, torch.matmul(A_, X))
     elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros((n, p), dtype=np.float64), name="X")
-
         @pymanopt.function.TensorFlow
         def cost(X):
             return -tf.tensordot(X, tf.matmul(A, X), axes=2)

@@ -14,7 +14,6 @@ SUPPORTED_BACKENDS = (
 
 
 def create_cost_egrad_ehess(backend, samples, targets):
-    num_weights = samples.shape[-1]
     egrad = ehess = None
 
     if backend == "Autograd":
@@ -42,9 +41,6 @@ def create_cost_egrad_ehess(backend, samples, targets):
         def cost(weights):
             return torch.norm(targets_ - torch.matmul(samples_, weights)) ** 2
     elif backend == "TensorFlow":
-        weights = tf.Variable(tf.zeros(num_weights, dtype=np.float64),
-                              name="weights")
-
         @pymanopt.function.TensorFlow
         def cost(weights):
             return tf.norm(

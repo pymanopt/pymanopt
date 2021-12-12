@@ -34,8 +34,6 @@ def create_cost_egrad(backend, ABt):
         def cost(X):
             return -torch.tensordot(X, ABt_, dims=X.dim())
     elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros(ABt.shape, dtype=np.float64), name="X")
-
         @pymanopt.function.TensorFlow
         def cost(X):
             return -tf.tensordot(X, ABt, axes=ABt.ndim)

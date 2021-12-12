@@ -44,10 +44,6 @@ def create_cost_egrad(backend, A, rank):
             X = torch.matmul(u, torch.matmul(torch.diag(s), vt))
             return torch.norm(X - A_) ** 2
     elif backend == "TensorFlow":
-        u = tf.Variable(tf.zeros((m, rank), dtype=np.float64), name="u")
-        s = tf.Variable(tf.zeros(rank, dtype=np.float64), name="s")
-        vt = tf.Variable(tf.zeros((rank, n), dtype=np.float64), name="vt")
-
         @pymanopt.function.TensorFlow
         def cost(u, s, vt):
             X = tf.matmul(u, tf.matmul(tf.linalg.diag(s), vt))
