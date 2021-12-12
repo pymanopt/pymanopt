@@ -1,50 +1,81 @@
+import abc
 import inspect
+
+from pymanopt.manifolds.manifold import Manifold
+
+
+class Signature(metaclass=abc.ABCMeta):
+    """Base class for function signature definitions."""
+
+
+class Arguments(Signature):
+    def __init__(self, names):
+        self.names = names
+
+
+class Vararg(Signature):
+    def __init__(self, name):
+        self.name = name
 
 
 class Function:
-    def __str__(self):
-        return "Function <{}>".format(self._backend)
+    def __init__(self, *, function, signature, manifold, backend):
+        self._validate_backend(backend)
 
-    def __init__(self, function, args, backend):
         self._function = function
-        self._args = args
+        self._manifold = manifold
         self._backend = backend
 
+        self._num_arguments = self._verify_signature(signature, manifold)
         self._compiled_function = None
         self._egrad = None
         self._ehess = None
 
-        self._validate_backend()
         self._compile()
 
-    def _validate_backend(self):
-        if not self._backend.is_available():
+    def _get_number_of_arguments(self, manifold):
+        point_layout = manifold.point_layout
+        if hasattr(point_layout, "__iter__"):
+            return sum(point_layout)
+        return point_layout
+
+    def _verify_signature(self, signature, manifold):
+        num_required_arguments = self._get_number_of_arguments(manifold)
+        if (isinstance(signature, Arguments) and
+                num_required_arguments != len(signature.names)):
+            raise ValueError(
+                "Function does not accept correct number of arguments"
+            )
+        return num_required_arguments
+
+    def __str__(self):
+        return "Function <{}>".format(self._backend)
+
+    def _validate_backend(self, backend):
+        if not backend.is_available():
             raise ValueError("Backend `{}' is not available".format(
-                self._backend))
-        if not self._backend.is_compatible(self._function, self._args):
-            raise ValueError("Backend `{}' is not compatible with cost "
-                             "function of type `{:s}'".format(
-                                 self._backend,
-                                 self._function.__class__.__name__))
+                backend)
+            )
 
     def _compile(self):
         assert self._backend is not None
         if self._compiled_function is None:
             self._compiled_function = self._backend.compile_function(
-                self._function, self._args)
+                self._function
+            )
 
     def compute_gradient(self):
         assert self._backend is not None
         if self._egrad is None:
             self._egrad = self._backend.compute_gradient(
-                self._function, self._args)
+                self._function, self._num_arguments)
         return self._egrad
 
     def compute_hessian_vector_product(self):
         assert self._backend is not None
         if self._ehess is None:
             self._ehess = self._backend.compute_hessian_vector_product(
-                self._function, self._args)
+                self._function, self._num_arguments)
         return self._ehess
 
     def __call__(self, *args, **kwargs):
@@ -53,45 +84,37 @@ class Function:
 
 
 def make_tracing_backend_decorator(Backend):
-    """Creates a function decorator which can either by used as
+    """Create autodiff backend function decorator.
 
-      @decorator
+    A backend decorator factory to be used by autodiff backends to create a
+    decorator for callables defined using the respective framework. The
+    created decorator accepts a single argument ``manifold`` that specifies
+    the domain (i.e., the manifold) of the decorated function:
+
+      @decorator(manifold)
       def f(x):
-          pass
-
-    or
-
-      @decorator(backend_specific_kwarg=...)
-      def f(x):
-          pass
-
-    to annotate a tracing-based autodiff function with how the arguments are
-    conceptually grouped together.
+          ...
     """
-    def decorator(*args, **kwargs):
-        if len(args) == 1 and callable(args[0]):
-            (function,) = args
+    def decorator(manifold):
+        if not isinstance(manifold, Manifold):
+            raise TypeError(f"Argument {manifold} is not a manifold instance")
+
+        def inner(function):
             argspec = inspect.getfullargspec(function)
-            if argspec.varargs or argspec.varkw or argspec.kwonlyargs:
+            if ((argspec.args and argspec.varargs) or
+                    not (argspec.args or argspec.varargs) or
+                    (argspec.varkw or argspec.kwonlyargs)):
                 raise ValueError(
-                    "Decorated function must only accept positional "
-                    "arguments")
-            return Function(function, args=tuple(argspec.args),
-                            backend=Backend())
-
-        if len(args) != 0:
-            raise ValueError("Only keyword arguments allowed")
-
-        def inner(function):
-            return Function(function, args=args, backend=Backend(**kwargs))
-        return inner
-    return decorator
-
-
-def make_graph_backend_decorator(Backend):
-    def decorator(*args, **kwargs):
-        def inner(function):
-            graph = function(*args)
-            return Function(graph, args=args, backend=Backend(**kwargs))
+                    "Decorated function must only accept positional arguments "
+                    "or a variable-length argument like *x"
+                )
+            if argspec.args:
+                signature = Arguments(argspec.args)
+            else:
+                signature = Vararg(argspec.varargs)
+            return Function(
+                function=function, signature=signature, manifold=manifold,
+                backend=Backend()
+            )
         return inner
     return decorator

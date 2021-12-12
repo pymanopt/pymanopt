@@ -11,14 +11,10 @@ class _CallableBackend(Backend):
         return True
 
     @Backend._assert_backend_available
-    def is_compatible(self, function, arguments):
-        return callable(function)
-
-    @Backend._assert_backend_available
-    def compile_function(self, function, arguments):
+    def compile_function(self, function):
         return function
 
-    def _raise_not_implemented_error(self, function, arguments):
+    def _raise_not_implemented_error(self, *args, **kwargs):
         raise NotImplementedError(
             "No autodiff support available for the canonical '{}' "
             "backend".format(self))

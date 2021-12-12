@@ -52,42 +52,19 @@ class Backend(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def is_compatible(self, function, arguments):
-        """Checks whether `function` and `arguments` are compatible with the
-        backend.
-
-        Parameters
-        ----------
-        function
-            Python callable or a backend-specific computational graph node.
-        arguments
-            A backend-dependent representation of the arguments `function`
-            expects.
-
-        Returns
-        -------
-        bool
-            True if the backend is compatible with `function` and `arguments`,
-            False otherwise.
-        """
-
-    @abc.abstractmethod
-    def compile_function(self, function, arguments):
+    def compile_function(self, function):
         """Compiles a function into a Python callable.
 
         Parameters
         ----------
         function
             Python callable or a backend-specific computational graph node.
-        arguments
-            A backend-dependent representation of the arguments `function`
-            expects.
 
         Returns
         -------
         compiled_function : callable
-            A Python callable accepting arguments according to the signature
-            defined by `arguments`.
+            A Python callable accepting and a ``numpy.ndarray`` and returning a
+            scalar.
         """
 
     @abc.abstractmethod

@@ -25,10 +25,6 @@ class _PyTorchBackend(Backend):
     def is_available():
         return torch is not None and torch.__version__ >= "0.4.1"
 
-    @Backend._assert_backend_available
-    def is_compatible(self, function, arguments):
-        return callable(function)
-
     @staticmethod
     def _from_numpy(array):
         """Wrap numpy ndarray ``array`` in a torch tensor. Since torch does not
@@ -44,7 +40,7 @@ class _PyTorchBackend(Backend):
         return torch.from_numpy(array)
 
     @Backend._assert_backend_available
-    def compile_function(self, function, arguments):
+    def compile_function(self, function):
         @functools.wraps(function)
         def wrapper(*args):
             return function(*map(self._from_numpy, args)).numpy()
@@ -59,7 +55,7 @@ class _PyTorchBackend(Backend):
         return list(map(self._sanitize_gradient, tensors))
 
     @Backend._assert_backend_available
-    def compute_gradient(self, function, arguments):
+    def compute_gradient(self, function, num_arguments):
         def gradient(*args):
             torch_arguments = []
             for argument in args:
@@ -68,12 +64,12 @@ class _PyTorchBackend(Backend):
                 torch_arguments.append(torch_argument)
             function(*torch_arguments).backward()
             return self._sanitize_gradients(torch_arguments)
-        if len(arguments) == 1:
+        if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
         return gradient
 
     @Backend._assert_backend_available
-    def compute_hessian_vector_product(self, function, arguments):
+    def compute_hessian_vector_product(self, function, num_arguments):
         def hessian_vector_product(*args):
             points, vectors = bisect_sequence(args)
             torch_arguments = []
@@ -92,7 +88,7 @@ class _PyTorchBackend(Backend):
                     gradient, vector, dims=gradient.dim())
             dot_product.backward()
             return self._sanitize_gradients(torch_arguments)
-        if len(arguments) == 1:
+        if num_arguments == 1:
             return unpack_singleton_sequence_return_value(
                 hessian_vector_product)
         return hessian_vector_product
