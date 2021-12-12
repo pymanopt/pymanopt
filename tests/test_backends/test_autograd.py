@@ -26,6 +26,17 @@ class TestNaryFunction(_backend_tests.TestNaryFunction):
         self.cost = cost
 
 
+class TestNaryVarargFunction(_backend_tests.TestNaryFunction):
+    def setUp(self):
+        super().setUp()
+
+        @Autograd(self.manifold)
+        def cost(*args):
+            return np.dot(*args)
+
+        self.cost = cost
+
+
 class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
     def setUp(self):
         super().setUp()
