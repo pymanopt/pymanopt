@@ -1,32 +1,17 @@
-import abc
 import inspect
 
 from pymanopt.manifolds.manifold import Manifold
 
 
-class Signature(metaclass=abc.ABCMeta):
-    """Base class for function signature definitions."""
-
-
-class Arguments(Signature):
-    def __init__(self, names):
-        self.names = names
-
-
-class Vararg(Signature):
-    def __init__(self, name):
-        self.name = name
-
-
 class Function:
-    def __init__(self, *, function, signature, manifold, backend):
+    def __init__(self, *, function, manifold, backend):
         self._validate_backend(backend)
 
         self._function = function
         self._manifold = manifold
         self._backend = backend
 
-        self._num_arguments = self._verify_signature(signature, manifold)
+        self._num_arguments = self._get_number_of_arguments(manifold)
         self._compiled_function = None
         self._egrad = None
         self._ehess = None
@@ -38,15 +23,6 @@ class Function:
         if hasattr(point_layout, "__iter__"):
             return sum(point_layout)
         return point_layout
-
-    def _verify_signature(self, signature, manifold):
-        num_required_arguments = self._get_number_of_arguments(manifold)
-        if (isinstance(signature, Arguments) and
-                num_required_arguments != len(signature.names)):
-            raise ValueError(
-                "Function does not accept correct number of arguments"
-            )
-        return num_required_arguments
 
     def __str__(self):
         return "Function <{}>".format(self._backend)
@@ -97,7 +73,10 @@ def make_tracing_backend_decorator(Backend):
     """
     def decorator(manifold):
         if not isinstance(manifold, Manifold):
-            raise TypeError(f"Argument {manifold} is not a manifold instance")
+            raise TypeError(
+                "Backend decorator requires a manifold instance, got "
+                f"{manifold}"
+            )
 
         def inner(function):
             argspec = inspect.getfullargspec(function)
@@ -108,13 +87,8 @@ def make_tracing_backend_decorator(Backend):
                     "Decorated function must only accept positional arguments "
                     "or a variable-length argument like *x"
                 )
-            if argspec.args:
-                signature = Arguments(argspec.args)
-            else:
-                signature = Vararg(argspec.varargs)
             return Function(
-                function=function, signature=signature, manifold=manifold,
-                backend=Backend()
+                function=function, manifold=manifold, backend=Backend()
             )
         return inner
     return decorator
