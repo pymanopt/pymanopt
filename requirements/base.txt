@@ -3,4 +3,3 @@ numpy>=1.16
 scipy
 tensorflow>=2.0
 torch>=1.0
-theano
