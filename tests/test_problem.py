@@ -9,17 +9,14 @@ from ._test import TestCase
 
 class TestProblem(TestCase):
     def setUp(self):
-        X = T.vector()
+        self.n = 15
+        self.man = Sphere(self.n)
 
-        @pymanopt.function.TensorFlow(X)
+        @pymanopt.function.TensorFlow(self.man)
         def cost(X):
             return tf.exp(tf.reduce_sum(X ** 2))
 
         self.cost = cost
-
-        n = self.n = 15
-
-        self.man = Sphere(n)
 
     def test_prepare(self):
         problem = pymanopt.Problem(self.man, self.cost)
