@@ -9,8 +9,6 @@ from pymanopt.solvers.steepest_descent import SteepestDescent
 
 def compute_centroid(manifold, points):
     """Compute the centroid of `points` on the `manifold` as Karcher mean."""
-    num_points = len(points)
-
     @pymanopt.function.Callable(manifold)
     def objective(*y):
         if manifold.point_layout == 1:
