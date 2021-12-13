@@ -8,21 +8,14 @@ class Function:
         self._validate_backend(backend)
 
         self._function = function
-        self._manifold = manifold
         self._backend = backend
 
-        self._num_arguments = self._get_number_of_arguments(manifold)
+        self._num_arguments = manifold.num_values
         self._compiled_function = None
         self._egrad = None
         self._ehess = None
 
         self._compile()
-
-    def _get_number_of_arguments(self, manifold):
-        point_layout = manifold.point_layout
-        if hasattr(point_layout, "__iter__"):
-            return sum(point_layout)
-        return point_layout
 
     def __str__(self):
         return "Function <{}>".format(self._backend)

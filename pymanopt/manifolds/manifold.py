@@ -73,6 +73,13 @@ class Manifold(metaclass=abc.ABCMeta):
         """
         return self._point_layout
 
+    @property
+    def num_values(self):
+        """Total number of values representing a point on the manifold."""
+        if isinstance(self.point_layout, (tuple, list)):
+            return sum(self.point_layout)
+        return self.point_layout
+
     # Manifold properties that subclasses can define
 
     @property
