@@ -15,6 +15,18 @@ class TestUnaryFunction(_backend_tests.TestUnaryFunction):
         self.cost = cost
 
 
+class TestUnaryVarargFunction(_backend_tests.TestUnaryFunction):
+    def setUp(self):
+        super().setUp()
+
+        @Autograd(self.manifold)
+        def cost(*x):
+            (x,) = x
+            return np.sum(x ** 2)
+
+        self.cost = cost
+
+
 class TestNaryFunction(_backend_tests.TestNaryFunction):
     def setUp(self):
         super().setUp()
