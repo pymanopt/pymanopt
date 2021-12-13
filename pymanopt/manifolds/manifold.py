@@ -26,13 +26,25 @@ class Manifold(metaclass=abc.ABCMeta):
     """
 
     def __init__(self, name, dimension, point_layout=1):
-        assert isinstance(dimension, (int, np.integer)), \
-            "dimension must be an integer"
-        assert ((isinstance(point_layout, int) and point_layout > 0) or
-                (isinstance(point_layout, (list, tuple)) and
-                 all(np.array(point_layout) > 0))), \
-            ("'point_layout' must be a positive integer or a sequence of "
-             "positive integers")
+        if not isinstance(dimension, (int, np.integer)):
+            raise TypeError("Manifold dimension must be of type int")
+        if dimension < 0:
+            raise ValueError("Manifold dimension must be positive")
+        if not isinstance(point_layout, (int, tuple, list)):
+            raise TypeError(
+                "Point layout must be of type int, tuple or list, not "
+                f"{type(point_layout)}"
+            )
+        if isinstance(point_layout, (tuple, list)):
+            if not all([num_arguments > 0 for num_arguments in point_layout]):
+                raise ValueError(
+                    f"Invalid point layout {point_layout}: all values must be "
+                    "positive"
+                )
+        elif point_layout <= 0:
+            raise ValueError(
+                f"Invalid point layout {point_layout}: must be positive"
+            )
 
         self._name = name
         self._dimension = dimension

@@ -10,7 +10,7 @@ def manifold_factory(point_layout):
     class CustomManifold(Manifold):
         def __init__(self):
             super().__init__(
-                name="Test manifold", dimension=0, point_layout=point_layout
+                name="Test manifold", dimension=3, point_layout=point_layout
             )
 
         def _generic(self, *args, **kwargs):
