@@ -68,7 +68,7 @@ class Backend(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def compute_gradient(self, function, arguments):
+    def compute_gradient(self, function, num_arguments):
         """Computes the gradient of a function and turns it into a Python
         callable.
 
@@ -76,9 +76,8 @@ class Backend(metaclass=abc.ABCMeta):
         ----------
         function
             Python callable or a backend-specific computational graph node.
-        arguments
-            A backend-dependent representation of the arguments `function`
-            expects.
+        num_arguments
+            The number of arguments that `function` expects.
 
         Returns
         -------
@@ -88,7 +87,7 @@ class Backend(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def compute_hessian_vector_product(self, function, arguments):
+    def compute_hessian_vector_product(self, function, num_arguments):
         """Computes the Hessian-vector product of function a function and turns
         it into a Python callable.
 
@@ -96,9 +95,8 @@ class Backend(metaclass=abc.ABCMeta):
         ----------
         function
             Python callable or a backend-specific computational graph node.
-        arguments
-            A backend-dependent representation of the arguments `function`
-            expects.
+        num_arguments
+            The number of arguments that `function` expects.
 
         Returns
         -------
