@@ -5,50 +5,35 @@ from pymanopt.manifolds.manifold import Manifold
 
 class Function:
     def __init__(self, *, function, manifold, backend):
-        self._validate_backend(backend)
+        if not callable(function):
+            raise TypeError(f"Object {function} is not callable")
+        if not backend.is_available():
+            raise RuntimeError(f"Backend `{backend}' is not available")
 
         self._function = function
         self._backend = backend
-
+        self._compiled_function = backend.compile_function(function)
         self._num_arguments = manifold.num_values
-        self._compiled_function = None
+
         self._egrad = None
         self._ehess = None
-
-        self._compile()
 
     def __str__(self):
         return "Function <{}>".format(self._backend)
 
-    def _validate_backend(self, backend):
-        if not backend.is_available():
-            raise ValueError("Backend `{}' is not available".format(
-                backend)
-            )
-
-    def _compile(self):
-        assert self._backend is not None
-        if self._compiled_function is None:
-            self._compiled_function = self._backend.compile_function(
-                self._function
-            )
-
     def compute_gradient(self):
-        assert self._backend is not None
         if self._egrad is None:
             self._egrad = self._backend.compute_gradient(
                 self._function, self._num_arguments)
         return self._egrad
 
     def compute_hessian_vector_product(self):
-        assert self._backend is not None
         if self._ehess is None:
             self._ehess = self._backend.compute_hessian_vector_product(
                 self._function, self._num_arguments)
         return self._ehess
 
     def __call__(self, *args, **kwargs):
-        assert self._compiled_function is not None
         return self._compiled_function(*args, **kwargs)
 
 

@@ -38,17 +38,18 @@ class _AutogradBackend(Backend):
         gradient = autograd.grad(function, argnum)
 
         def vector_dot_gradient(*args):
-            arguments, vectors = args[:-1], args[-1]
+            *arguments, vectors = args
             gradients = gradient(*arguments)
             return np.sum(
                 [np.tensordot(gradient, vector, axes=vector.ndim)
-                 for gradient, vector in zip(gradients, vectors)])
+                 for gradient, vector in zip(gradients, vectors)]
+            )
         return autograd.grad(vector_dot_gradient, argnum)
 
     @Backend._assert_backend_available
     def compute_hessian_vector_product(self, function, num_arguments):
         hessian_vector_product = self._hessian_vector_product(
-            function, argnum=tuple(range(num_arguments)))
+            function, argnum=list(range(num_arguments)))
 
         @functools.wraps(hessian_vector_product)
         def wrapper(*args):

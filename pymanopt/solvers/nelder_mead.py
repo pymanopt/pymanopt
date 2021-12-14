@@ -11,13 +11,13 @@ def compute_centroid(manifold, points):
     """Compute the centroid of `points` on the `manifold` as Karcher mean."""
     @pymanopt.function.Callable(manifold)
     def objective(*y):
-        if manifold.point_layout == 1:
+        if manifold.num_values == 1:
             (y,) = y
         return sum([manifold.dist(y, point) ** 2 for point in points]) / 2
 
     @pymanopt.function.Callable(manifold)
     def gradient(*y):
-        if manifold.point_layout == 1:
+        if manifold.num_values == 1:
             (y,) = y
         return -sum(
             [manifold.log(y, point) for point in points], manifold.zerovec(y)
