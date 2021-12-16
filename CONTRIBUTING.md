@@ -63,5 +63,5 @@ with the -s option automatically adds this line.
 [flake8]: http://flake8.pycqa.org/en/latest/
 [pre-commit]: https://pre-commit.com/
 [style]: https://www.python.org/dev/peps/pep-0008/
-[pr]: https://github.com/j-towns/pymanopt/compare
+[pr]: https://github.com/pymanopt/pymanopt/compare
 [commits]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
