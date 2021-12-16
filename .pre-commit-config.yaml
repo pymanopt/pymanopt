@@ -14,3 +14,9 @@ repos:
         args:
           - --branch=master
       - id: trailing-whitespace
+
+  - repo: https://github.com/mwouts/jupytext
+    rev: v1.13.4
+    hooks:
+      - id: jupytext
+        args: [--sync]
