@@ -2,7 +2,6 @@ import datetime
 
 import pymanopt
 
-
 # Package information
 project = "Pymanopt"
 author = "Jamie Townsend, Niklas Koep, Sebastian Weichwald"
@@ -14,12 +13,29 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
-    "sphinx.ext.viewcode"
+    "sphinx.ext.viewcode",
+    "nbsphinx",
 ]
-source_suffix = ".rst"
 master_doc = "index"
 language = None
-exclude_patterns = ["build", "*.egg*"]
+
+# nbsphinx
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc={'figure.dpi': 96}",
+]
+nbsphinx_prolog = r"""
+{% set docname = env.doc2path(env.docname, base=None) %}
+.. only:: html
+
+    .. role:: raw-html(raw)
+        :format: html
+    .. nbinfo::
+        :raw-html:`<a href="https://github.com/pymanopt/pymanopt/blob/master/{{
+        docname }}"><img alt="Open on GitHub"
+        src="https://img.shields.io/badge/Open-on%20GitHub-blue?logo=GitHub"
+        style="vertical-align:text-bottom"></a>`
+"""
 
 # Output options
 html_theme = "sphinx_rtd_theme"

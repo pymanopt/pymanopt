@@ -15,3 +15,9 @@ manifolds with support for automatic differentiation.*
    :caption: Getting Started
 
    api-reference.rst
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Notebooks
+
+   examples/notebooks/mixture_of_gaussians.ipynb
