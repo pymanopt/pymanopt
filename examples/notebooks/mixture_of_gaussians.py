@@ -113,7 +113,6 @@ import sys
 
 sys.path.insert(0, "../..")
 
-import autograd.numpy as np
 from autograd.scipy.special import logsumexp
 
 import pymanopt
