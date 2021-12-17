@@ -13,12 +13,19 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "myst_parser",
     "nbsphinx",
 ]
 master_doc = "index"
 language = None
+
+# napoleon
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
+napoleon_use_param = False
+napoleon_use_rtype = False
 
 # nbsphinx
 nbsphinx_execute_arguments = [
