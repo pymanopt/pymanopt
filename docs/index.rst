@@ -15,6 +15,7 @@ manifolds with support for automatic differentiation.*
    :caption: Getting Started
 
    api-reference.rst
+   CONTRIBUTING.md
 
 .. toctree::
    :maxdepth: 1

@@ -14,6 +14,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
+    "myst_parser",
     "nbsphinx",
 ]
 master_doc = "index"
