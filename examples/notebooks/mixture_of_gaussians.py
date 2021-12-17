@@ -11,7 +11,7 @@
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
-#     name: python3
+#     name: python
 # ---
 
 # # Riemannian Optimisation with Pymanopt for Inference in MoG models
