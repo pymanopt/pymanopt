@@ -5,24 +5,17 @@ import numpy as np
 
 
 class Manifold(metaclass=abc.ABCMeta):
-    """
-    Abstract base class setting out a template for manifold classes. If you
-    would like to extend Pymanopt with a new manifold, then your manifold
-    should inherit from this class.
+    """Riemannian manifold base class.
 
-    Not all methods are required by all solvers. In particular, first order
-    gradient based solvers such as
-    :py:mod:`pymanopt.solvers.steepest_descent` and
-    :py:mod:`pymanopt.solvers.conjugate_gradient` require
-    :py:func:`egrad2rgrad` to be implemented but not :py:func:`ehess2rhess`.
-    Second order solvers such as :py:mod:`pymanopt.solvers.trust_regions`
-    will require :py:func:`ehess2rhess`.
+    Abstract base class setting out a template for manifold classes.
 
-    All of these methods correspond closely to methods in
-    `Manopt <http://www.manopt.org>`_. See
-    http://www.manopt.org/tutorial.html#manifolds for more details on manifolds
-    in Manopt, which are effectively identical to those in Pymanopt (all of the
-    methods in this class have equivalents in Manopt with the same name).
+    Not all methods are required by all solvers.
+    In particular, first order gradient based solvers such as
+    :mod:`pymanopt.solvers.steepest_descent` and
+    :mod:`pymanopt.solvers.conjugate_gradient` require :meth:`egrad2rgrad` to
+    be implemented but not :meth:`ehess2rhess`.
+    Second order solvers such as :mod:`pymanopt.solvers.trust_regions` will
+    require :meth:`ehess2rhess`.
     """
 
     def __init__(self, name, dimension, point_layout=1):
@@ -173,23 +166,18 @@ class Manifold(metaclass=abc.ABCMeta):
 
 
 class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
-    """A class to model embedded submanifolds of a Euclidean space. It provides
-    a generic way to project Euclidean gradients to their Riemannian
-    counterparts via the `egrad2rgrad` method. Similarly, if the Weingarten map
-    (also known as shape operator) is provided via implementing the
-    'weingarten' method, the class provides a generic implementation of the
-    'ehess2rhess' method required by second-order solvers to translate
-    Euclidean Hessian-vector products to their Riemannian counterparts.
+    """Embedded submanifolds of Euclidean space.
 
-    Notes
-    -----
-    Refer to [1]_ for the exact definition of the Weingarten map.
+    This class provides a generic way to project Euclidean gradients to their
+    Riemannian counterparts via the :meth:`egrad2rgrad` method.
+    Similarly, if the Weingarten map (also known as shape operator) is provided
+    via implementing the :meth:`weingarten` method, the class provides a
+    generic implementation of the :meth:`ehess2rhess` method required by
+    second-order solvers to translate Euclidean Hessian-vector products to
+    their Riemannian counterparts.
 
-    References
-    ----------
-    .. [1] Absil, P-A., Robert Mahony, and Jochen Trumpf. "An extrinsic look at
-       the Riemannian Hessian." International Conference on Geometric Science
-       of Information. Springer, Berlin, Heidelberg, 2013.
+    Notes:
+        Refer to [AMT2013]_ for the exact definition of the Weingarten map.
     """
 
     def egrad2rgrad(self, X, G):

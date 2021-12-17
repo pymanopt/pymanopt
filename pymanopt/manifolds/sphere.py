@@ -89,15 +89,8 @@ class Sphere(_Sphere):
     metric is such that the sphere is a Riemannian submanifold of Euclidean
     space.
 
-    Notes
-    -----
-    The implementation of the Weingarten map is taken from [1]_.
-
-    References
-    ----------
-    .. [1] Absil, P-A., Robert Mahony, and Jochen Trumpf. "An extrinsic look at
-       the Riemannian Hessian." International Conference on Geometric Science
-       of Information. Springer, Berlin, Heidelberg, 2013.
+    Notes:
+        The implementation of the Weingarten map is taken from [AMT2013]_.
     """
 
     def __init__(self, *shape):
