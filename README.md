@@ -1,4 +1,4 @@
-![](docs/logo.png | width=150 align=right)
+![](docs/logo.png | width=150)
 
 # Pymanopt
 
