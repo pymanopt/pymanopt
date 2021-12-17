@@ -1,8 +1,8 @@
 Pymanopt
 ========
 
-*Pymanopt provides a convenient interface to perform optimization on Riemannian
-manifolds with support for automatic differentiation.*
+*Pymanopt is a Python toolbox for optimization on Riemannian manifolds with
+support for automatic differentiation.*
 
 **Quick install**
 

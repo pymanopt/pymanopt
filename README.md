@@ -1,4 +1,4 @@
-<a href="https://pymanopt.org"><img src="https://github.com/pymanopt/pymanopt/blob/master/docs/logo.png?raw=true" width="200" align="right"/></a>
+![](docs/logo.png | width=150 align=right)
 
 # Pymanopt
 
