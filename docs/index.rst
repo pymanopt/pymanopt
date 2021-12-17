@@ -14,6 +14,7 @@ manifolds with support for automatic differentiation.*
    :maxdepth: 1
    :caption: Getting Started
 
+   Examples <https://github.com/pymanopt/pymanopt/tree/master/examples>
    api-reference.rst
    CONTRIBUTING.md
 
