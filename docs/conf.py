@@ -40,6 +40,7 @@ nbsphinx_prolog = r"""
 
 # Output options
 html_theme = "sphinx_rtd_theme"
+html_logo = "logo.png"
 html_show_sphinx = False
 html_baseurl = "pymanopt.org"
 htmlhelp_basename = "pymanoptdoc"
@@ -50,5 +51,5 @@ autodoc_default_options = {
     "member-order": "bysource",
     "members": True,
     "undoc-members": True,
-    "show-inheritance": True
+    "show-inheritance": True,
 }
