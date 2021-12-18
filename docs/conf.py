@@ -93,6 +93,7 @@ katex_autorender_path = (
     f"https://cdn.jsdelivr.net/npm/katex@{katex_version}/dist/contrib/"
     "auto-render.min.js"
 )
+# TODO(nkoep): Move this macro generation to its own module.
 latex_macros = r"""
     \def \manM   {\mathcal{M}}
     \def \R      {\mathbb{R}}

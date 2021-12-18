@@ -140,14 +140,14 @@ Eigenvectors are not unique since every eigenpair :math:`(\lambda, \vmv)` still
 satisfies the eigenvalue equation :math:`\vmA \vmv = \lambda \vmv` if
 :math:`\vmv` is replaced by :math:`\alpha \vmv` for some :math:`\alpha \in \R
 \setminus \set{0}`.
-That is, the dominant eigenctor is only unique up to multiplication by a
+That is, the dominant eigenvector is only unique up to multiplication by a
 nonzero constant.
 
 The example above constitutes the conceivably simplest demonstration of
 Pymanopt.
-For slightly more interesting examples we refer to the `examples
-<https://github.com/pymanopt/pymanopt/tree/master/examples>`_ in the github
-repository.
+For more interesting examples we refer to the `examples
+<https://github.com/pymanopt/pymanopt/tree/master/examples>`_ in Pymanopt's
+github repository.
 Moreover, `this notebook <examples/notebooks/mixture_of_gaussians.ipynb>`_
-demonstrates a more complete application of Riemannian optimization using
+demonstrates a more involved application of Riemannian optimization using
 Pymanopt in the context of inference in Gaussian mixture models.
