@@ -1,9 +1,21 @@
 import datetime
+import pathlib
 import string
 
 import sphinxcontrib.katex as katex
+import yaml
 
 import pymanopt
+
+
+def get_doc_versions():
+    """Retrieve doc versions from github workflow file."""
+    root = pathlib.Path(__file__).resolve().parent.parent
+    yaml_file = root / ".github" / "workflows" / "build_documentation.yml"
+    with open(str(yaml_file)) as fp:
+        doc_config = yaml.safe_load(fp)
+    return doc_config["jobs"]["docs"]["strategy"]["matrix"]["version"]
+
 
 # Package information
 project = "Pymanopt"
@@ -23,6 +35,10 @@ extensions = [
 ]
 master_doc = "index"
 language = None
+
+# Doc version sidebar
+templates_path = ["_templates"]
+html_context = {"doc_versions": get_doc_versions()}
 
 # Output options
 html_theme = "sphinx_rtd_theme"
