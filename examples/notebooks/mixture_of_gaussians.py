@@ -14,7 +14,7 @@
 #     name: python
 # ---
 
-# # Riemannian Optimisation with Pymanopt for Inference in MoG models
+# # Riemannian Optimization for Inference in MoG models
 
 # The Mixture of Gaussians (MoG) model assumes that datapoints $\mathbf{x}_i\in\mathbb{R}^d$ follow a distribution described by the following probability density function:
 #
