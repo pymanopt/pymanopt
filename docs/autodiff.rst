@@ -1,4 +1,9 @@
-Autodiff Backends
------------------
+Autodiff
+========
 
-.. automodule:: pymanopt.autodiff.backends
+.. automodule:: pymanopt.autodiff
+
+Backend Decorators
+------------------
+
+.. automodule:: pymanopt.function
