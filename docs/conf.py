@@ -28,6 +28,7 @@ extensions = [
     "myst_parser",
     "nbsphinx",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",

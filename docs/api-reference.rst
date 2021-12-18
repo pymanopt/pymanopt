@@ -8,7 +8,7 @@ API Reference
 
    manifolds.rst
    autodiff.rst
-   solvers.rst
    problem.rst
+   solvers.rst
    tools.rst
    bibliography.rst
