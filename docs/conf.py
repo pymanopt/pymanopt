@@ -28,6 +28,7 @@ napoleon_use_param = False
 napoleon_use_rtype = False
 
 # nbsphinx
+nbsphinx_kernel_name = "python"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
