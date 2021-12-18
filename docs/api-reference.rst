@@ -6,9 +6,9 @@ API Reference
    :maxdepth: 3
    :caption: Packages & Modules
 
-   problem
    manifolds
-   solvers
    autodiff
+   solvers
+   problem
    tools
    bibliography
