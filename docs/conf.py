@@ -1,4 +1,5 @@
 import datetime
+import string
 
 import sphinxcontrib.katex as katex
 
@@ -76,9 +77,29 @@ katex_autorender_path = (
     "auto-render.min.js"
 )
 latex_macros = r"""
-    \def \man {\mathcal{M}}
-    \def \R   {\mathbb{R}}
+    \def \manM   {\mathcal{M}}
+    \def \R      {\mathbb{R}}
+    \def \Id     {\mathrm{Id}}
+    \def \set    #1{\{#1\}}
+    \def \inner  #2{\langle #1, #2 \rangle}
+    \def \opt    #1{#1^\star}
+    \def \sphere {\mathcal{S}}
 """
+# Generate macros for boldface letters.
+latex_macros += "\n".join(
+    [
+        r"\def \vm{letter} {{\mathbf{{{letter}}}}}".format(letter=letter)
+        for letter in string.ascii_lowercase + string.ascii_uppercase
+    ]
+)
 katex_macros = katex.latex_defs_to_katex_macros(latex_macros)
-katex_options = "macros: {" + katex_macros + "}"
+katex_options = (
+    "macros: {"
+    + katex_macros
+    + "\n"
+    + r'"\\argmin":'
+    + r'"\\mathop{\\operatorname{argmin}}\\limits"'
+    + "}"
+)
+print("Defined KaTeX macros:\n{katex_macros}")
 latex_elements = {"preamble": latex_macros}
