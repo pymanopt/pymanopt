@@ -1,3 +1,4 @@
+ipykernel==6.4.2
 myst-parser==0.16.1
 nbsphinx==0.8.7
 sphinx==4.2.0
