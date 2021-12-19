@@ -3,6 +3,7 @@ from copy import deepcopy
 
 from pymanopt.solvers.linesearch import LineSearchBackTracking
 from pymanopt.solvers.solver import Solver
+from pymanopt.tools import printer
 
 
 class SteepestDescent(Solver):
@@ -57,15 +58,27 @@ class SteepestDescent(Solver):
         if x is None:
             x = man.rand()
 
-        # Initialize iteration counter and timer
-        iter = 0
-        time0 = time.time()
-
+        if verbosity >= 1:
+            print("Optimizing...")
         if verbosity >= 2:
-            print(" iter\t\t   cost val\t    grad. norm")
+            column_printer = printer.ColumnPrinter(
+                columns=[
+                    ("Iteration", "5d"),
+                    ("Cost", "+.16e"),
+                    ("Gradient norm", ".8e"),
+                ]
+            )
+        else:
+            column_printer = printer.VoidPrinter()
+
+        column_printer.print_header()
 
         self._start_optlog(extraiterfields=['gradnorm'],
                            solverparams={'linesearcher': linesearch})
+
+        # Initialize iteration counter and timer
+        iter = 0
+        time0 = time.time()
 
         while True:
             # Calculate new cost, grad and gradnorm
@@ -74,8 +87,7 @@ class SteepestDescent(Solver):
             gradnorm = man.norm(x, grad)
             iter = iter + 1
 
-            if verbosity >= 2:
-                print("%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm))
+            column_printer.print_row([iter, cost, gradnorm])
 
             if self._logverbosity >= 2:
                 self._append_optlog(iter, x, cost, gradnorm=gradnorm)

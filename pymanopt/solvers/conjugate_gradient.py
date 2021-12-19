@@ -6,6 +6,7 @@ import numpy as np
 from pymanopt import tools
 from pymanopt.solvers.linesearch import LineSearchAdaptive
 from pymanopt.solvers.solver import Solver
+from pymanopt.tools import printer
 
 
 # TODO: Use Python's enum module.
@@ -83,15 +84,20 @@ class ConjugateGradient(Solver):
         if x is None:
             x = man.rand()
 
-        # Initialize iteration counter and timer
-        iter = 0
-        stepsize = np.nan
-        time0 = time.time()
-
         if verbosity >= 1:
             print("Optimizing...")
         if verbosity >= 2:
-            print(" iter\t\t   cost val\t    grad. norm")
+            column_printer = printer.ColumnPrinter(
+                columns=[
+                    ("Iteration", "5d"),
+                    ("Cost", "+.16e"),
+                    ("Gradient norm", ".8e"),
+                ]
+            )
+        else:
+            column_printer = printer.VoidPrinter()
+
+        column_printer.print_header()
 
         # Calculate initial cost-related quantities
         cost = objective(x)
@@ -108,9 +114,13 @@ class ConjugateGradient(Solver):
                                          'orth_value': self._orth_value,
                                          'linesearcher': linesearch})
 
+        # Initialize iteration counter and timer
+        iter = 0
+        stepsize = np.nan
+        time0 = time.time()
+
         while True:
-            if verbosity >= 2:
-                print("%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm))
+            column_printer.print_row([iter, cost, gradnorm])
 
             if self._logverbosity >= 2:
                 self._append_optlog(iter, x, cost, gradnorm=gradnorm)
