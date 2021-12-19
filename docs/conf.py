@@ -60,12 +60,6 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
-# napoleon
-napoleon_google_docstring = True
-napoleon_numpy_docstring = False
-napoleon_use_param = False
-napoleon_use_rtype = False
-
 # nbsphinx
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
