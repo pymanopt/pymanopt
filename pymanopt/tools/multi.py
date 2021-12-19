@@ -1,22 +1,28 @@
 import numpy as np
 
 
-def multiprod(A, B):
+def multiprod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
     """Vectorized matrix-matrix multiplication.
 
-    A and B are
-    assumed to be arrays containing M matrices, that is, A and B have
-    dimensions A: (M, N, P), B:(M, P, Q). multiprod multiplies each matrix
-    in A with the corresponding matrix in B, using matrix multiplication.
-    so multiprod(A, B) has dimensions (M, N, Q).
+    Args:
+        A: The first matrix.
+        B: The second matrix.
+
+    Returns:
+        The matrix (or more precisely array of matrices) corresponding to
+        the matrix product vectorized over the first dimension of ``A`` and
+        ``B`` (if ``A.ndim == 2``).
+
+    The matrices ``A`` and ``B`` are assumed to be arrays containing ``k``
+    matrices, i.e., ``A`` and ``B`` have shape ``(k, m, n)`` and ``(k, n, p)``,
+    respectively.
+    The function multiplies each matrix in ``A`` with the corresponding matrix
+    in ``B`` along the first dimension.
+    The resulting array has shape ``(k, m, p)``.
     """
-
-    # First check if we have been given just one matrix
-    if len(np.shape(A)) == 2:
+    if A.ndim == 2:
         return np.dot(A, B)
-
-    # Approx 5x faster, only supported by numpy version >= 1.6:
-    return np.einsum('ijk,ikl->ijl', A, B)
+    return np.einsum("ijk,ikl->ijl", A, B)
 
 
 def multitransp(A):
@@ -28,7 +34,6 @@ def multitransp(A):
     containing the M matrix transposes of the matrices in A, each of which will
     be P x N.
     """
-    # First check if we have been given just one matrix
     if A.ndim == 2:
         return A.T
     return np.transpose(A, (0, 2, 1))
