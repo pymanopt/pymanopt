@@ -19,3 +19,5 @@ Bibliography
 .. [SH2015] Sra, Suvrit, and Reshad Hosseini. "Conic geometric optimization on
    the manifold of positive definite matrices." SIAM Journal on Optimization
    25.1 (2015): 713-739.
+.. [Van2013] Vandereycken, Bart. "Low-rank matrix completion by Riemannian
+   optimization." SIAM Journal on Optimization 23.2 (2013): 1214-1236.
