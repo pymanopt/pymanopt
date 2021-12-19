@@ -45,6 +45,8 @@ html_context = {"doc_versions": get_doc_versions()}
 # Output options
 html_theme = "sphinx_rtd_theme"
 html_logo = "logo.png"
+html_static_path = ["_static"]
+html_style = "css/style.css"
 html_show_sphinx = False
 html_baseurl = "pymanopt.org"
 htmlhelp_basename = "pymanoptdoc"
