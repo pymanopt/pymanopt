@@ -40,10 +40,7 @@ def compute_centroid(manifold, points):
 
 
 class NelderMead(Solver):
-    """
-    Nelder-Mead minimization alglorithm for derivative-free minimization
-    based on neldermead.m and centroid.m from the manopt MATLAB package.
-    """
+    """Nelder-Mead alglorithm."""
 
     def __init__(self, maxcostevals=None, maxiter=None, reflection=1,
                  expansion=2, contraction=0.5, *args, **kwargs):

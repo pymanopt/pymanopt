@@ -6,10 +6,7 @@ from pymanopt.solvers.solver import Solver
 
 
 class SteepestDescent(Solver):
-    """
-    Steepest descent (gradient descent) algorithm based on
-    steepestdescent.m from the manopt MATLAB package.
-    """
+    """Riemannian steepest descent solver."""
 
     def __init__(self, linesearch=None, *args, **kwargs):
         super().__init__(*args, **kwargs)

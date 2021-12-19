@@ -15,10 +15,7 @@ BetaTypes = tools.make_enum(
 
 
 class ConjugateGradient(Solver):
-    """
-    Module containing conjugate gradient algorithm based on
-    conjugategradient.m from the manopt MATLAB package.
-    """
+    """Riemannian conjugate gradient method."""
 
     def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
                  linesearch=None, *args, **kwargs):

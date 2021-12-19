@@ -161,10 +161,11 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
 
 class SphereSubspaceComplementIntersection(
         _SphereSubspaceIntersectionManifold):
-    """Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
-    the r-dimensional subspace of R^n spanned by columns of the matrix U. This
-    implementation is based on spheresubspacefactory.m from the Manopt MATLAB
-    package.
+    r"""Sphere-subspace compliment intersection manifold.
+
+    Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
+    the :math:`r`-dimensional subspace of :math:`\R^n` spanned by columns of
+    the matrix ``U``.
     """
 
     def __init__(self, U):

@@ -6,6 +6,8 @@ Bibliography
 .. Generate labels using the so-called AMS "authorship trigraph" style.
 .. Citations are ordered alphabetically.
 
+.. [Bha2007] Bhatia, Rajendra. "Positive definite matrices." Princeton
+   university press, 2007.
 .. [Bou2020] Boumal, Nicolas. "An introduction to optimization on smooth
    manifolds." Available online, Aug (2020).
 .. [AMS2008] Absil, P-A., Robert Mahony, and Rodolphe
@@ -14,3 +16,6 @@ Bibliography
 .. [AMT2013] Absil, P-A., Robert Mahony, and Jochen Trumpf. "An extrinsic look
    at the Riemannian Hessian." International conference on geometric science of
    information. Springer, Berlin, Heidelberg, 2013.
+.. [SH2015] Sra, Suvrit, and Reshad Hosseini. "Conic geometric optimization on
+   the manifold of positive definite matrices." SIAM Journal on Optimization
+   25.1 (2015): 713-739.

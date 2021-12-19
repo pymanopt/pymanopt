@@ -1,8 +1,5 @@
 class LineSearchBackTracking:
-    """
-    Back-tracking line-search based on linesearch.m in the manopt MATLAB
-    package.
-    """
+    """Back-tracking line-search algorithm."""
 
     def __init__(self, contraction_factor=.5, optimism=2,
                  suff_decr=1e-4, maxiter=25, initial_stepsize=1):

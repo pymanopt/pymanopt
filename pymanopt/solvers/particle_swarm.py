@@ -7,10 +7,7 @@ from pymanopt.solvers.solver import Solver
 
 
 class ParticleSwarm(Solver):
-    """
-    Particle swarm optimization method based on pso.m from the manopt
-    MATLAB package.
-    """
+    """Particle swarm optimization method."""
 
     def __init__(self, maxcostevals=None, maxiter=None, populationsize=None,
                  nostalgia=1.4, social=1.4, *args, **kwargs):

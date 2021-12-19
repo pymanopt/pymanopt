@@ -27,12 +27,11 @@ class _RetrAsExpMixin:
 
 
 class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
-    """Manifold of (n x n)^k symmetric positive definite matrices, based on the
-    geometry discussed in Chapter 6 of Positive Definite Matrices (Bhatia
-    2007). Some of the implementation is based on sympositivedefinitefactory.m
-    from the Manopt MATLAB package. Also see "Conic geometric optimisation on
-    the manifold of positive definite matrices" (Sra & Hosseini 2013) for more
-    details.
+    """Manifold of symmetric positive definite matrices.
+
+    Notes:
+        The geometry is based on the discussion in chapter 6 of [Bha2007]_.
+        Also see [SH2015]_ for more details.
     """
     def __init__(self, n, k=1):
         self._n = n
