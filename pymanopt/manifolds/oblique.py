@@ -27,7 +27,17 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def typicaldist(self):
         return np.pi * np.sqrt(self._n)
 
-    def inner(self, X, U, V):
+    def inner(self, X: np.ndarray, U: np.ndarray, V: np.ndarray) -> np.float64:
+        """
+        Args:
+            X: The base point.
+            U: The first tangent vector.
+            V: The second tangent vector.
+
+        Returns:
+            The inner product between ``U`` and ``V`` in the tangent space at
+            ``X``.
+        """
         return float(np.tensordot(U, V))
 
     def norm(self, X, U):
