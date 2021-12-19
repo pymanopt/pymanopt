@@ -36,6 +36,9 @@ jobs:
             -r requirements/base.txt \
             -r requirements/dev.txt
 
+      - name: Run doctests
+        run: PYTHONPATH=. sphinx-build -b doctest docs $(mktemp -d)
+
       - name: Build docs
         run: |
           PYTHONPATH=. sphinx-build \
