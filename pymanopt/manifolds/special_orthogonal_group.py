@@ -46,7 +46,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     >>> import numpy as np
     >>> from pymanopt import Problem
     >>> from pymanopt.solvers import TrustRegions
-    >>> from pymanopt.manifolds import Rotations
+    >>> from pymanopt.manifolds import SpecialOrthogonalGroup
 
     Generate the problem data.
     >>> n = 3
