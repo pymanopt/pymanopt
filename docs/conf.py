@@ -38,6 +38,9 @@ extensions = [
 master_doc = "index"
 language = None
 
+# autodoc
+autodoc_typehints = "description"
+
 # Doc version sidebar
 templates_path = ["_templates"]
 html_context = {"doc_versions": get_doc_versions()}
