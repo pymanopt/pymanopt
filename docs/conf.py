@@ -120,5 +120,5 @@ katex_options = (
     + r'"\\mathop{\\operatorname{argmin}}\\limits"'
     + "}"
 )
-print("Defined KaTeX macros:\n{katex_macros}")
+print(f"Defined KaTeX macros:\n{katex_macros}")
 latex_elements = {"preamble": latex_macros}
