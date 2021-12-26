@@ -4,6 +4,13 @@ import numpy as np
 def multiprod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
     """Vectorized matrix-matrix multiplication.
 
+    The matrices ``A`` and ``B`` are assumed to be arrays containing ``k``
+    matrices, i.e., ``A`` and ``B`` have shape ``(k, m, n)`` and ``(k, n, p)``,
+    respectively.
+    The function multiplies each matrix in ``A`` with the corresponding matrix
+    in ``B`` along the first dimension.
+    The resulting array has shape ``(k, m, p)``.
+
     Args:
         A: The first matrix.
         B: The second matrix.
@@ -12,13 +19,6 @@ def multiprod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
         The matrix (or more precisely array of matrices) corresponding to
         the matrix product vectorized over the first dimension of ``A`` and
         ``B`` (if ``A.ndim == 2``).
-
-    The matrices ``A`` and ``B`` are assumed to be arrays containing ``k``
-    matrices, i.e., ``A`` and ``B`` have shape ``(k, m, n)`` and ``(k, n, p)``,
-    respectively.
-    The function multiplies each matrix in ``A`` with the corresponding matrix
-    in ``B`` along the first dimension.
-    The resulting array has shape ``(k, m, p)``.
     """
     if A.ndim == 2:
         return np.dot(A, B)

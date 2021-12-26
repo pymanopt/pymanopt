@@ -41,19 +41,19 @@ language = None
 # autodoc
 autodoc_typehints = "description"
 
-# Doc version sidebar
-templates_path = ["_templates"]
-html_context = {"doc_versions": get_doc_versions()}
-
 # Output options
 html_theme = "sphinx_rtd_theme"
-html_logo = "logo.png"
 html_static_path = ["_static"]
 html_style = "css/style.css"
+html_logo = "logo.png"
 html_show_sphinx = False
 html_baseurl = "pymanopt.org"
 htmlhelp_basename = "pymanoptdoc"
 html_last_updated_fmt = ""
+
+# Doc version sidebar
+templates_path = ["_templates"]
+html_context = {"doc_versions": get_doc_versions()}
 
 # autodoc
 autodoc_default_options = {
