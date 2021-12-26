@@ -40,26 +40,23 @@ def compute_centroid(manifold, points):
 
 
 class NelderMead(Solver):
-    """Nelder-Mead alglorithm."""
+    """Nelder-Mead alglorithm.
+
+    Perform optimization using the derivative-free Nelder-Mead minimization
+    algorithm.
+
+    Args:
+        maxcostevals: Maximum number of allowed cost function evaluations.
+        maxiter: Maximum number of allowed iterations.
+        reflection: Determines how far to reflect away from the worst vertex:
+            stretched (reflection > 1), compressed (0 < reflection < 1),
+            or exact (reflection = 1).
+        expansion: Factor by which to expand the reflected simplex.
+        contraction: Factor by which to contract the reflected simplex.
+    """
 
     def __init__(self, maxcostevals=None, maxiter=None, reflection=1,
                  expansion=2, contraction=0.5, *args, **kwargs):
-        """
-        Instantiate Nelder-Mead method solver class.
-        Variable attributes (defaults in brackets):
-            - maxcostevals (max(5000, 2 * dim))
-                Maximum number of allowed cost evaluations
-            - maxiter (max(500, 4 * dim))
-                Maximum number of allowed iterations
-            - reflection (1)
-                Determines how far to reflect away from the worst vertex;
-                stretched (reflection > 1), compressed (0 < reflection < 1),
-                or exact (reflection = 1)
-            - expansion (2)
-                Factor by which to expand the reflected simplex
-            - contraction (0.5)
-                Factor by which to contract the reflected simplex
-        """
         super().__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals
@@ -69,22 +66,18 @@ class NelderMead(Solver):
         self._contraction = contraction
 
     def solve(self, problem, x=None):
-        """
-        Perform optimization using a Nelder-Mead minimization algorithm.
-        Arguments:
-            - problem
-                Pymanopt problem setup using the Problem class, this must
-                have a .manifold attribute specifying the manifold to optimize
-                over, as well as a cost and enough information to compute
-                the gradient of that cost.
-            - x=None
-                Optional parameter. Initial population of elements on the
-                manifold. If None then an initial population will be randomly
-                generated
+        """Run Nelder-Mead algorithm.
+
+        Args:
+            problem: Pymanopt problem class instance exposing the cost function
+                and the manifold to optimize over.
+            x: Initial point on the manifold.
+                If no value is provided then a starting point will be randomly
+                generated.
+
         Returns:
-            - x
-                Local minimum of obj, or if algorithm terminated before
-                convergence x will be the point at which it terminated
+            Local minimum of the cost function, or the most recent iterate if
+            algorithm terminated before convergence.
         """
         man = problem.manifold
         verbosity = problem.verbosity
