@@ -4,6 +4,7 @@ import numpy as np
 import numpy.random as rnd
 
 from pymanopt.solvers.solver import Solver
+from pymanopt.tools import printer
 
 
 class ParticleSwarm(Solver):
@@ -89,19 +90,31 @@ class ParticleSwarm(Solver):
         fbest = costs[imin]
         xbest = x[imin]
 
+        if verbosity >= 2:
+            iter_format_length = int(np.log10(self._maxiter)) + 1
+            column_printer = printer.ColumnPrinter(
+                columns=[
+                    ("Iteration", f"{iter_format_length}d"),
+                    ("Cost evaluations", "7d"),
+                    ("Best cost", "+.8e"),
+                ]
+            )
+        else:
+            column_printer = printer.VoidPrinter()
+
+        column_printer.print_header()
+
+        self._start_optlog()
+
         # Iteration counter (at any point, iter is the number of fully executed
         # iterations so far).
         iter = 0
-
         time0 = time.time()
-
-        self._start_optlog()
 
         while True:
             iter += 1
 
-            if verbosity >= 2:
-                print("Cost evals: %7d\tBest cost: %+.8e" % (costevals, fbest))
+            column_printer.print_row([iter, costevals, fbest])
 
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):
