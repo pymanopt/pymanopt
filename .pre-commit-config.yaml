@@ -6,15 +6,20 @@ repos:
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: check-yaml
-      - id: flake8
       - id: mixed-line-ending
         args:
-          - --fix=no
+          - --fix=lf
       - id: no-commit-to-branch
         args:
           - --branch=master
       - id: trailing-whitespace
-
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.1
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-import-order
+          - flake8-docstrings
   - repo: https://github.com/mwouts/jupytext
     rev: v1.13.4
     hooks:
