@@ -1,9 +1,11 @@
 # Codacy (and in turn prospector) apparently enables _all_ rules available in
-# pydocstyle by default (see
-# https://community.codacy.com/t/d203-and-d213-are-not-required-by-pep-257/237/7).
-# This configures pep257 on prospector the ues the default conventions
-# according to the pep257 docs (see
-# http://www.pydocstyle.org/en/stable/error_codes.html#default-conventions).
+# pydocstyle by default [1].
+# This configures pep257 on prospector to use the default conventions according
+# to the pep257 docs [2].
+#
+# [1] https://community.codacy.com/t/d203-and-d213-are-not-required-by-pep-257/237/7)
+# [2] http://www.pydocstyle.org/en/stable/error_codes.html#default-conventions
+
 pep257:
   disable:
     - D203
