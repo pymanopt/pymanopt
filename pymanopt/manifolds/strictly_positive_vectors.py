@@ -5,10 +5,11 @@ from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
 
 class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
-    """Manifold of k strictly positive n-dimensional vectors, denoted ((R++)^n)^k.
-    Since ((R++)^n)^k is isomorphic to
-    (D_n^{++})^k (manifold of positive definite diagonal matrices of size n),
-    the geometry is inherited of the positive definite matrices.
+    r"""Manifold of strictly positive vectors.
+
+    Since :math:`((\R_{++})^n)^k` is isomorphic to the manifold of positive
+    definite diagonal matrices the geometry is inherited from the geometry of
+    positive definite matrices.
     """
     def __init__(self, n, k=1):
         self._n = n
@@ -52,8 +53,6 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
 
     def egrad2rgrad(self, x, u):
         return u*(x**2)
-
-    # def ehess2rhess(self, x, egrad, ehess, u):
 
     def exp(self, x, u):
         return x*np.exp((1./x)*u)

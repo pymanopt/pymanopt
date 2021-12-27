@@ -40,6 +40,7 @@ class ParticleSwarm(Solver):
             x: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
+
         Returns:
             Local minimum of the cost function, or the most recent iterate if
             algorithm terminated before convergence.
