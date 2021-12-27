@@ -19,6 +19,7 @@ def print_list(values: List[str]):
     """Print a formatted list of values.
 
     Join and print the values given in the ``values`` list.
+
     Args:
         values: A list of values to join and print.
     """
