@@ -1,6 +1,8 @@
 import time
 from copy import deepcopy
 
+import numpy as np
+
 from pymanopt.solvers.linesearch import LineSearchBackTracking
 from pymanopt.solvers.solver import Solver
 from pymanopt.tools import printer
@@ -61,9 +63,10 @@ class SteepestDescent(Solver):
         if verbosity >= 1:
             print("Optimizing...")
         if verbosity >= 2:
+            iter_format_length = int(np.log10(self._maxiter)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
-                    ("Iteration", "5d"),
+                    ("Iteration", f"{iter_format_length}d"),
                     ("Cost", "+.16e"),
                     ("Gradient norm", ".8e"),
                 ]

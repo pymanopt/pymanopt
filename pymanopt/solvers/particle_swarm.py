@@ -102,9 +102,10 @@ class ParticleSwarm(Solver):
         xbest = x[imin]
 
         if verbosity >= 2:
+            iter_format_length = int(np.log10(self._maxiter)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
-                    ("Iteration", "5d"),
+                    ("Iteration", f"{iter_format_length}d"),
                     ("Cost evaluations", "7d"),
                     ("Best cost", "+.8e"),
                 ]

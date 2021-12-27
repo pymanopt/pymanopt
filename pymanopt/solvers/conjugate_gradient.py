@@ -87,9 +87,10 @@ class ConjugateGradient(Solver):
         if verbosity >= 1:
             print("Optimizing...")
         if verbosity >= 2:
+            iter_format_length = int(np.log10(self._maxiter)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
-                    ("Iteration", "5d"),
+                    ("Iteration", f"{iter_format_length}d"),
                     ("Cost", "+.16e"),
                     ("Gradient norm", ".8e"),
                 ]
