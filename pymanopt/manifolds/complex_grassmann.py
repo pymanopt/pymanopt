@@ -10,9 +10,9 @@ class ComplexGrassmann(Manifold):
     This is the manifold of p-dimensional subspaces of n dimensional complex
     vector space.
     The optional argument k allows the user to optimize over the product of k
-    Grassmanns.
+    Grassmannians.
     Elements are represented as n x p matrices (if k == 1), and as k x n x p
-    matrices if k > 1 (Note that this is different to manopt!).
+    matrices if k > 1.
     """
 
     def __init__(self, n, p, k=1):
@@ -85,9 +85,6 @@ class ComplexGrassmann(Manifold):
         return PXehess - HXHG
 
     def retr(self, X, G):
-        # Calculate 'thin' qr decomposition of X + G
-        # XNew, r = np.linalg.qr(X + G)
-
         # We do not need to worry about flipping signs of columns here,
         # since only the column space is important, not the actual
         # columns. Compare this with the Stiefel manifold.

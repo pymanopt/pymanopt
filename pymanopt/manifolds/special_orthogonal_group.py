@@ -10,7 +10,7 @@ from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
 
 
 class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
-    """Special orthogonal group manifold.
+    """The special orthogonal group.
 
     Special orthogonal group (the manifold of rotations): deals with matrices
     X of size k x n x n (or n x n if k = 1, which is the default) such that
