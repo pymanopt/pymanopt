@@ -114,8 +114,7 @@ class Symmetric(_Euclidean):
 
 
 class SkewSymmetric(_Euclidean):
-    """
-    The Euclidean space of n-by-n skew-symmetric matrices.
+    """The Euclidean space of n-by-n skew-symmetric matrices.
 
     If k > 1 then this is an array of shape (k, n, n) (product manifold)
     containing k (n x n) matrices.

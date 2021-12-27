@@ -1,6 +1,5 @@
-"""
-Module containing manifolds of fixed rank matrices.
-"""
+"""Module containing manifolds of fixed-rank matrices."""
+
 import numpy as np
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
@@ -96,25 +95,20 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return np.sum(np.tensordot(a, b) for (a, b) in zip(G, H))
 
     def _apply_ambient(self, Z, W):
-        """
-        For a given ambient vector Z, given as a tuple (U, S, V) such that
-        Z = U*S*V', applies it to a matrix W to calculate the matrix product
-        ZW.
-        """
+        """Right-multiply matrix ``W`` to point ``Z`` in ambient space."""
         if isinstance(Z, (list, tuple)):
             return Z[0] @ Z[1] @ Z[2].T @ W
         return Z @ W
 
     def _apply_ambient_transpose(self, Z, W):
-        """
-        Same as apply_ambient, but applies Z' to W.
-        """
+        """Right-multiple matrix ``W`` to ``Z.T`` in ambient space."""
         if isinstance(Z, (list, tuple)):
             return Z[2] @ Z[1] @ Z[0].T @ W
         return Z.T @ W
 
     def proj(self, X, Z):
-        """
+        """Project point to tangent space.
+
         Note that Z must either be an m x n matrix from the ambient space, or
         else a tuple (Uz, Sz, Vz), where Uz * Sz * Vz is in the ambient space
         (of low-rank matrices).
@@ -133,7 +127,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return _FixedRankTangentVector((Up, M, Vp))
 
     def egrad2rgrad(self, x, egrad):
-        """
+        """Convert Euclidean to Riemannian gradient.
+
         Assuming that the cost function being optimized has been defined
         in terms of the low-rank singular value decomposition of X, the
         gradient returned by the autodiff backends will have three components
@@ -194,11 +189,12 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return (u, s, vt)
 
     def _tangent(self, X, Z):
-        """
+        """Project componenets of ``Z`` to tangent space at ``X``.
+
         Given Z in tangent vector format, projects the components Up and Vp
         such that they satisfy the tangent space constraints up to numerical
-        errors. If Z was indeed a tangent vector at X, this should barely
-        affect Z (it would not at all if we had infinite numerical accuracy).
+        errors.
+        If Z was indeed a tangent vector at X, this should barely affect Z.
         """
         Up = Z[0] - X[0] @ X[0].T @ Z[0]
         Vp = Z[2] - X[2].T @ X[2] @ Z[2]
@@ -217,17 +213,20 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return _FixedRankTangentVector((Z[0]/nrm, Z[1]/nrm, Z[2]/nrm))
 
     def tangent2ambient(self, X, Z):
-        """
+        """Represent tangent vector in ambient space.
+
         Transforms a tangent vector Z represented as a structure (Up, M, Vp)
         into a structure with fields (U, S, V) that represents that same
         tangent vector in the ambient space of mxn matrices, as U*S*V'.
-        This matrix is equal to X.U*Z.M*X.V' + Z.Up*X.V' + X.U*Z.Vp'. The
-        latter is an mxn matrix, which could be too large to build
+        This matrix is equal to X.U*Z.M*X.V' + Z.Up*X.V' + X.U*Z.Vp'.
+        The latter is an mxn matrix, which could be too large to build
         explicitly, and this is why we return a low-rank representation
-        instead. Note that there are no guarantees on U, S and V other than
-        that USV' is the desired matrix. In particular, U and V are not (in
-        general) orthonormal and S is not (in general) diagonal.
-        (In this implementation, S is identity, but this might change.)
+        instead.
+        Note that there are no guarantees on U, S and V other than that USV' is
+        the desired matrix.
+        In particular, U and V are not (in general) orthonormal and S is not
+        (in general) diagonal.
+        Currently, S is identity, but this might change.
         """
         U = np.hstack((X[0] @ Z[1] + Z[0], X[0]))
         S = np.eye(2 * self._k)

@@ -6,11 +6,10 @@ from pymanopt.tools.multi import multiprod, multisym, multitransp
 
 
 class Stiefel(EuclideanEmbeddedSubmanifold):
-    """
-    Factory class for the Stiefel manifold. Instantiation requires the
-    dimensions n, p to be specified. Optional argument k allows the user to
-    optimize over the product of k Stiefels.
+    """The Stiefel manifold.
 
+    The optional argument k allows the user to optimize over the product of k
+    Stiefels.
     Elements are represented as n x p matrices (if k == 1), and as k x n x p
     matrices if k > 1 (Note that this is different to manopt!).
     """

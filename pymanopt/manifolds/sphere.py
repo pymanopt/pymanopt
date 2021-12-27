@@ -77,16 +77,16 @@ class _Sphere(EuclideanEmbeddedSubmanifold):
         return np.zeros(self._shape)
 
     def _normalize(self, X):
-        """
-        Return a Frobenius-normalized version of the point X in the ambient
-        space.
-        """
+        """Return Frobenius-normalized version of X in ambient space."""
         return X / self.norm(None, X)
 
 
 class Sphere(_Sphere):
-    """Manifold of shape n1 x n2 x ... x nk tensors with unit 2-norm. The
-    metric is such that the sphere is a Riemannian submanifold of Euclidean
+    r"""The sphere manifold.
+
+    Manifold of shape :math:`n_1 \times n_2 \times \ldots \times n_k` tensors
+    with unit 2-norm.
+    The metric is such that the sphere is a Riemannian submanifold of Euclidean
     space.
 
     Notes:

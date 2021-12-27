@@ -1,6 +1,3 @@
-"""
-Module containing functions to differentiate functions using autograd.
-"""
 import functools
 
 try:

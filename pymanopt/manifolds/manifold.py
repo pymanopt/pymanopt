@@ -32,7 +32,6 @@ class Manifold(metaclass=abc.ABCMeta):
         self._point_layout = point_layout
 
     def __str__(self):
-        """Returns a string representation of the particular manifold."""
         return self._name
 
     def _get_class_name(self):
@@ -40,7 +39,7 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @property
     def dim(self):
-        """The dimension of the manifold"""
+        """The dimension of the manifold."""
         return self._dimension
 
     @property
@@ -58,9 +57,10 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @property
     def typicaldist(self):
-        """Returns the "scale" of the manifold. This is used by the
-        trust-regions solver to determine default initial and maximal
-        trust-region radii.
+        """Returns the `scale` of the manifold.
+
+        This is used by the trust-regions solver to determine default initial
+        and maximal trust-region radii.
         """
         raise NotImplementedError(
             "Manifold class '{:s}' does not provide a 'typicaldist'".format(
@@ -70,21 +70,19 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def inner(self, X, G, H):
-        """Returns the inner product (i.e., the Riemannian metric) between two
-        tangent vectors `G` and `H` in the tangent space at `X`.
+        """Inner product between tangent vectors at a point on the manifold.
+
+        The inner product corresponds to the Riemannian metric between two
+        tangent vectors ``G`` and ``H`` in the tangent space at ``X``.
         """
 
     @abc.abstractmethod
     def proj(self, X, G):
-        """Projects a vector `G` in the ambient space on the tangent space at
-        `X`.
-        """
+        """Projects vector in the ambient space on the tangent space."""
 
     @abc.abstractmethod
     def norm(self, X, G):
-        """Computes the norm of a tangent vector `G` in the tangent space at
-        `X`.
-        """
+        """Computes the norm of a tangent vector at a point on the manifold."""
 
     @abc.abstractmethod
     def rand(self):
@@ -92,21 +90,15 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def randvec(self, X):
-        """Returns a random vector in the tangent space at `X`. This does not
-        follow a specific distribution.
-        """
+        """Returns a random vector in the tangent space at ``X``."""
 
     @abc.abstractmethod
     def zerovec(self, X):
-        """Returns the zero vector in the tangent space at X."""
+        """Returns the zero vector in the tangent space at ``X``."""
 
     # Methods which are only required by certain solvers
 
     def _raise_not_implemented_error(method):
-        """Method decorator which raises a NotImplementedError with some meta
-        information about the manifold and method if a decorated method is
-        called.
-        """
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             raise NotImplementedError(
@@ -116,52 +108,63 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @_raise_not_implemented_error
     def dist(self, X, Y):
-        """Returns the geodesic distance between two points `X` and `Y` on the
-        manifold."""
+        """The geodesic distance between two points on the manifold."""
 
     @_raise_not_implemented_error
     def egrad2rgrad(self, X, G):
-        """Maps the Euclidean gradient `G` in the ambient space on the tangent
-        space of the manifold at `X`. For embedded submanifolds, this is simply
-        the projection of `G` on the tangent space at `X`.
+        """Converts the Euclidean to the Riemannian gradient.
+
+        For embedded submanifolds, this is simply the projection of ``G`` on
+        the tangent space at ``X``.
         """
 
     @_raise_not_implemented_error
     def ehess2rhess(self, X, G, H, U):
-        """Converts the Euclidean gradient `G` and Hessian `H` of a function at
-        a point `X` along a tangent vector `U` to the Riemannian Hessian of `X`
-        along `U` on the manifold.
+        """Converts the Euclidean to the Riemannian Hessian.
+
+        This converts the Euclidean Hessian ``H`` of a function at a point
+        ``X`` along a tangent vector ``U`` to the Riemannian Hessian of ``X``
+        along ``U`` on the manifold.
         """
 
     @_raise_not_implemented_error
     def retr(self, X, G):
-        """Computes a retraction mapping a vector `G` in the tangent space at
-        `X` to the manifold.
+        """Retracts a tangent vector back to the manifold.
+
+        This generalizes the exponential map, and is often more efficient to
+        compute numerically.
+        It maps a vector ``G`` in the tangent space at ``X`` back to the
+        manifold.
         """
 
     @_raise_not_implemented_error
     def exp(self, X, U):
-        """Computes the Lie-theoretic exponential map of a tangent vector `U`
-        at `X`.
-        """
+        """Computes the exponential map on the manifold."""
 
     @_raise_not_implemented_error
     def log(self, X, Y):
-        """Computes the Lie-theoretic logarithm of `Y`. This is the inverse of
-        `exp`.
+        """Computes the logarithmic map on the manifold.
+
+        This is the inverse of :meth:`exp`.
         """
 
     @_raise_not_implemented_error
     def transp(self, X1, X2, G):
-        """Computes a vector transport which transports a vector `G` in the
-        tangent space at `X1` to the tangent space at `X2`.
+        """Transport a tangent vector between different tangent spaces.
+
+        The vector transport generalizes the concept of parallel transport, and
+        is often more efficient to compute numerically.
+        It transports a vector ``G`` in the tangent space at ``X1`` to the
+        tangent space at `X2`.
         """
 
     @_raise_not_implemented_error
     def pairmean(self, X, Y):
-        """Returns the intrinsic mean of two points `X` and `Y` on the
-        manifold, i.e., a point that lies mid-way between `X` and `Y` on the
-        geodesic arc joining them.
+        """Computes the intrinsic mean of two points on the manifold.
+
+        Returns the intrinsic mean of two points ``X`` and ``Y`` on the
+        manifold, i.e., a point that lies mid-way between ``X`` and ``Y`` on
+        the geodesic arc joining them.
         """
 
 
@@ -184,16 +187,14 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
         return self.proj(X, G)
 
     def ehess2rhess(self, X, G, H, U):
-        """Converts the Euclidean gradient `G` and Hessian `H` of a function at
-        a point `X` along a tangent vector `U` to the Riemannian Hessian of `X`
-        along `U` on the manifold. This uses the Weingarten map
-        """
         normal_gradient = G - self.proj(X, G)
         return self.proj(X, H) + self.weingarten(X, U, normal_gradient)
 
     @Manifold._raise_not_implemented_error
     def weingarten(self, X, U, V):
-        """Evaluates the Weingarten map of the manifold. This map takes a
-        vector `U` in the tangent space at `X` and a vector `V` in the
-        normal space at `X` to produce another tangent vector.
+        """Compute the Weingarten map of the manifold.
+
+        This map takes a vector ``U`` in the tangent space at ``X`` and a
+        vector ``V`` in the normal space at ``X`` to produce another tangent
+        vector.
         """

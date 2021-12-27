@@ -1,6 +1,4 @@
-"""
-Module containing manifolds of n-dimensional rotations
-"""
+"""Module containing manifolds of n-dimensional rotations."""
 
 import numpy as np
 from numpy import linalg as la, random as rnd
@@ -12,11 +10,7 @@ from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
 
 
 class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
-    """
-    Returns a manifold structure to optimize over rotation matrices.
-
-    manifold = Rotations(n)
-    manifold = Rotations(n, k)
+    """Special orthogonal group manifold.
 
     Special orthogonal group (the manifold of rotations): deals with matrices
     X of size k x n x n (or n x n if k = 1, which is the default) such that
@@ -37,40 +31,6 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     exponential. To force the use of a second-order approximation, call
     manifold.retr = manifold.retr2 after creating M. This switches from a
     QR-based computation to an SVD-based computation.
-
-    By default, k = 1.
-
-    Example. Based on the example found at:
-    http://www.manopt.org/manifold_documentation_rotations.html
-
-    >>> import numpy as np
-    >>> from pymanopt import Problem
-    >>> from pymanopt.solvers import TrustRegions
-    >>> from pymanopt.manifolds import SpecialOrthogonalGroup
-
-    Generate the problem data.
-    >>> n = 3
-    >>> m = 10
-    >>> A = np.random.randn(n, m)
-    >>> B = np.random.randn(n, m)
-    >>> ABt = np.dot(A,B.T)
-
-    Create manifold - SO(n).
-    >>> manifold = Rotations(n)
-
-    Define the cost function.
-    >>> cost = lambda X : -np.tensordot(X, ABt, axes=X.ndim)
-
-    Define and solve the problem.
-    >>> problem = Problem(manifold=manifold, cost=cost)
-    >>> solver = TrustRegions()
-    >>> X = solver.solve(problem)
-
-    See also: Stiefel
-
-    This file is based on rotationsfactory from Manopt: www.manopt.org
-    Ported by: Lars Tingelstad
-    Original author: Nicolas Boumal, Dec. 30, 2012.
     """
 
     def __init__(self, n, k=1):

@@ -1,6 +1,3 @@
-"""
-Module containing functions to differentiate functions using pytorch.
-"""
 import functools
 import warnings
 
@@ -31,9 +28,10 @@ class _PyTorchBackend(Backend):
 
     @staticmethod
     def _from_numpy(array):
-        """Wrap numpy ndarray ``array`` in a torch tensor. Since torch does not
-        support negative strides, we create a copy of the array to reset the
-        strides in that case.
+        """Wrap numpy ndarray ``array`` in a torch tensor.
+
+        Since torch does not support negative strides, we create a copy of the
+        array to reset the strides in that case.
         """
         strides = np.array(array.strides)
         if np.any(strides < 0):

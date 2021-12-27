@@ -1,53 +1,47 @@
-"""
-Module containing pymanopt problem class. Use this to build a problem
-object to feed to one of the solvers.
-"""
+"""The Pymanopt problem class."""
+
 import functools
+from typing import Callable, Optional
 
 import numpy as np
 
 from ..autodiff import Function
+from ..manifolds.manifold import Manifold
 
 
 class Problem:
-    """
-    Problem class for setting up a problem to feed to one of the
-    pymanopt solvers.
+    """Problem class to define a Riemannian optimization problem.
 
-    Attributes:
-        - manifold
-            Manifold to optimize over.
-        - cost
-            A callable which takes an element of manifold and returns a
-            real number, or a symbolic Theano or TensorFlow expression.
-            In case of a symbolic expression, the gradient (and if
-            necessary the Hessian) are computed automatically if they are
-            not explicitly given. We recommend you take this approach
-            rather than calculating gradients and Hessians by hand.
-        - grad
-            grad(x) is the gradient of cost at x. This must take an
-            element X of manifold and return an element of the tangent space
-            to manifold at X. This is usually computed automatically and
-            doesn't need to be set by the user.
-        - hess
-            hess(x, a) is the directional derivative of grad at x, in
-            direction a. It should return an element of the tangent
-            space to manifold at x.
-        - egrad
-            The 'Euclidean gradient', egrad(x) should return the grad of
-            cost in the usual sense, i.e. egrad(x) need not lie in the
-            tangent space.
-        - ehess
-            The 'Euclidean Hessian', ehess(x, a) should return the
-            directional derivative of egrad at x in direction a. This
-            need not lie in the tangent space.
-        - verbosity (2)
-            Level of information printed by the solver while it operates, 0
-            is silent, 2 is most information.
+    Args:
+        manifold: Manifold to optimize over.
+        cost: The cost function which takes an element of the manifold and
+            returns a real number.
+        egrad: The Euclidean gradient, i.e., the gradient of the cost function
+            in the typical sense in the ambient space.
+            The returned value need not belong to the tangent space of
+            ``manifold``.
+        ehess: The Euclidean Hessian-vector product, i.e., the directional
+            derivative of ``egrad`` in the direction of a tangent vector.
+        grad: The Riemannian gradient.
+            For embeddes submanifolds this is simply the projection of
+            ``egrad`` on the tangent space of ``manifold``.
+            In most cases this need not be provided and the Riemannian gradient
+            is instead computed internally.
+            If provided, the function needs to return a vector in the tangent
+            space of ``manifold``.
+        hess: The Riemannian Hessian-vector product, i.e., the directional
+            derivative of ``grad`` in the direction of a tangent vector.
+            As with ``grad`` this usually need not be provided explicitly.
+        verbosity: Level of information printed by the solver while it
+            operates: 0 is silent, 2 is most verbose.
     """
 
-    def __init__(self, manifold, cost, egrad=None, ehess=None, grad=None,
-                 hess=None, precon=None, verbosity=2):
+    def __init__(
+        self, manifold: Manifold, cost: Function,
+        egrad: Optional[Function] = None, ehess: Optional[Function] = None,
+        grad: Optional[Function] = None, hess: Optional[Function] = None,
+        precon: Optional[Callable] = None, verbosity: int = 2
+    ):
         self.manifold = manifold
 
         for function, name in (
@@ -112,7 +106,9 @@ class Problem:
         return flattened_arguments
 
     def _group_return_values(self, function, signature):
-        """Wraps a function inside another function which groups the return
+        """Decorator to group return values according to a given signature.
+
+        Wraps a function inside another function which groups the return
         values of ``function`` according to the group sizes delineated by
         ``signature``.
         """
