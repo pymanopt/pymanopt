@@ -3,3 +3,7 @@
 .wy-nav-side {
    padding-bottom: 3em;
 }
+
+.wy-nav-side .logo {
+  padding: 2em;
+}
