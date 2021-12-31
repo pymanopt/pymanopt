@@ -4,30 +4,25 @@ import numpy as np
 import numpy.random as rnd
 
 from pymanopt.solvers.solver import Solver
+from pymanopt.tools import printer
 
 
 class ParticleSwarm(Solver):
-    """
-    Particle swarm optimization method based on pso.m from the manopt
-    MATLAB package.
+    """Particle swarm optimization (PSO) method.
+
+    Perform optimization using the derivative-free particle swarm optimization
+    algorithm.
+
+    Args:
+        maxcostevals: Maximum number of allowed cost evaluations.
+        maxiter: Maximum number of allowed iterations.
+        populationsize: Size of the considered swarm population.
+        nostalgia: Quantifies performance relative to past performances.
+        social: Quantifies performance relative to neighbors.
     """
 
     def __init__(self, maxcostevals=None, maxiter=None, populationsize=None,
                  nostalgia=1.4, social=1.4, *args, **kwargs):
-        """
-        Instantiate Particle Swarm Optimization (PSO) solver class.
-        Variable attributes (defaults in brackets):
-            - maxcostevals (max(5000, 2 * dim))
-                Maximum number of allowed cost evaluations
-            - maxiter (max(500, 4 * dim))
-                Maximum number of allowed iterations
-            - populationsize (min(40, 10 * dim))
-                Size of the considered swarm population
-            - nostalgia (1.4)
-                Quantifies performance relative to past performances
-            - social (1.4)
-                Quantifies performance relative to neighbors
-        """
         super().__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals
@@ -37,21 +32,18 @@ class ParticleSwarm(Solver):
         self._social = social
 
     def solve(self, problem, x=None):
-        """
-        Perform optimization using the particle swarm optimization algorithm.
-        Arguments:
-            - problem
-                Pymanopt problem setup using the Problem class, this must
-                have a .manifold attribute specifying the manifold to optimize
-                over, as well as a cost.
-            - x=None
-                Optional parameter. Initial population of elements on the
-                manifold. If None then an initial population will be randomly
-                generated
+        """Run PSO algorithm.
+
+        Args:
+            problem: Pymanopt problem class instance exposing the cost function
+                and the manifold to optimize over.
+            x: Initial point on the manifold.
+                If no value is provided then a starting point will be randomly
+                generated.
+
         Returns:
-            - x
-                Local minimum of obj, or if algorithm terminated before
-                convergence x will be the point at which it terminated
+            Local minimum of the cost function, or the most recent iterate if
+            algorithm terminated before convergence.
         """
         man = problem.manifold
         verbosity = problem.verbosity
@@ -99,19 +91,31 @@ class ParticleSwarm(Solver):
         fbest = costs[imin]
         xbest = x[imin]
 
+        if verbosity >= 2:
+            iter_format_length = int(np.log10(self._maxiter)) + 1
+            column_printer = printer.ColumnPrinter(
+                columns=[
+                    ("Iteration", f"{iter_format_length}d"),
+                    ("Cost evaluations", "7d"),
+                    ("Best cost", "+.8e"),
+                ]
+            )
+        else:
+            column_printer = printer.VoidPrinter()
+
+        column_printer.print_header()
+
+        self._start_optlog()
+
         # Iteration counter (at any point, iter is the number of fully executed
         # iterations so far).
         iter = 0
-
         time0 = time.time()
-
-        self._start_optlog()
 
         while True:
             iter += 1
 
-            if verbosity >= 2:
-                print("Cost evals: %7d\tBest cost: %+.8e" % (costevals, fbest))
+            column_printer.print_row([iter, costevals, fbest])
 
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):

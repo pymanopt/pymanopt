@@ -56,10 +56,12 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
-    """This example generates a random 128 x 128 symmetric matrix and finds the
-    dominant invariant 3 dimensional subspace for this matrix, i.e., it finds
-    the subspace spanned by the three eigenvectors with the largest
-    eigenvalues.
+    """Dominant invariant subspace example.
+
+    This example generates a random 128 x 128 symmetric matrix, and finds the
+    dominant invariant 3-dimensional subspace for this matrix.
+    That is, it finds the subspace spanned by the three eigenvectors with the
+    largest eigenvalues.
     """
     num_rows = 128
     subspace_dimension = 3

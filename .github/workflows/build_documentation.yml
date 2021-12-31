@@ -12,6 +12,9 @@ jobs:
   docs:
     runs-on: ubuntu-20.04
     strategy:
+      # Make sure we never build docs in parallel in case we deploy new
+      # versions to avoid potential race conditions while pushing to gh pages.
+      max-parallel: 1
       matrix:
         version:
           - latest
@@ -26,13 +29,18 @@ jobs:
         with:
           ref: ${{ matrix.version == 'latest' && github.sha || matrix.version }}
 
-      - name: Install requirements
+      - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
           pip install -r requirements/ci.txt
           pip install \
             -r requirements/docs.txt \
             -r requirements/base.txt \
             -r requirements/dev.txt
+
+      - name: Run doctests
+        run: PYTHONPATH=. sphinx-build -b doctest docs $(mktemp -d)
 
       - name: Build docs
         run: |

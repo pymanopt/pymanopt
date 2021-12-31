@@ -1,52 +1,52 @@
-"""
-Module containing pymanopt problem class. Use this to build a problem
-object to feed to one of the solvers.
-"""
+"""The Pymanopt problem class."""
+
 import functools
+from typing import Callable, Optional
 
 import numpy as np
 
 from ..autodiff import Function
+from ..manifolds.manifold import Manifold
 
 
 class Problem:
-    """
-    Problem class for setting up a problem to feed to one of the
-    pymanopt solvers.
+    """Problem class to define a Riemannian optimization problem.
 
-    Attributes:
-        - manifold
-            Manifold to optimize over.
-        - cost
-            A callable decorated with a decorator from
-            :mod:`pymanopt.functions` which takes an element of a manifold and
-            returns a real number. If any decorator other than
+    Args:
+        manifold: Manifold to optimize over.
+        cost: A callable decorated with a decorator from
+            :mod:`pymanopt.functions` which takes a point on a manifold and
+            returns a real scalar.
+            If any decorator other than
             :func:`pymanopt.function.Callable` is used the gradient and
-            Hessian-vector production functions can be computed automatically.
-        - grad
-            grad(x) is the gradient of cost at x. This must take an
-            element X of manifold and return an element of the tangent space
-            to manifold at X. This is usually computed automatically and
-            doesn't need to be set by the user.
-        - hess
-            hess(x, a) is the directional derivative of grad at x, in
-            direction a. It should return an element of the tangent
-            space to manifold at x.
-        - egrad
-            The 'Euclidean gradient', egrad(x) should return the grad of
-            cost in the usual sense, i.e. egrad(x) need not lie in the
-            tangent space.
-        - ehess
-            The 'Euclidean Hessian', ehess(x, a) should return the
-            directional derivative of egrad at x in direction a. This
-            need not lie in the tangent space.
-        - verbosity (2)
-            Level of information printed by the solver while it operates, 0
-            is silent, 2 is most information.
+            Hessian-vector production functions are computed automatically if
+            needed and no ``(e)grad`` or ``(e)hess`` arguments are provided.
+        egrad: The Euclidean gradient, i.e., the gradient of the cost function
+            in the typical sense in the ambient space.
+            The returned value need not belong to the tangent space of
+            ``manifold``.
+        ehess: The Euclidean Hessian-vector product, i.e., the directional
+            derivative of ``egrad`` in the direction of a tangent vector.
+        grad: The Riemannian gradient.
+            For embeddes submanifolds this is simply the projection of
+            ``egrad`` on the tangent space of ``manifold``.
+            In most cases this need not be provided and the Riemannian gradient
+            is instead computed internally.
+            If provided, the function needs to return a vector in the tangent
+            space of ``manifold``.
+        hess: The Riemannian Hessian-vector product, i.e., the directional
+            derivative of ``grad`` in the direction of a tangent vector.
+            As with ``grad`` this usually need not be provided explicitly.
+        verbosity: Level of information printed by the solver while it
+            operates: 0 is silent, 2 is most verbose.
     """
 
-    def __init__(self, manifold, cost, egrad=None, ehess=None, grad=None,
-                 hess=None, precon=None, verbosity=2):
+    def __init__(
+        self, manifold: Manifold, cost: Function,
+        egrad: Optional[Function] = None, ehess: Optional[Function] = None,
+        grad: Optional[Function] = None, hess: Optional[Function] = None,
+        precon: Optional[Callable] = None, verbosity: int = 2
+    ):
         self.manifold = manifold
 
         for function, name in (
@@ -111,7 +111,9 @@ class Problem:
         return flattened_arguments
 
     def _group_return_values(self, function, signature):
-        """Wraps a function inside another function which groups the return
+        """Decorator to group return values according to a given signature.
+
+        Wraps a function inside another function which groups the return
         values of ``function`` according to the group sizes delineated by
         ``signature``.
         """

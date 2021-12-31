@@ -3,13 +3,10 @@ import functools
 
 
 class Backend(metaclass=abc.ABCMeta):
-    """Abstract base class defining the interface autodiff backends must
-    implement.
+    """Abstract base class defining the interface for autodiff backends.
 
-    Parameters
-    ----------
-    name : str
-        The name of the backend.
+    Args:
+        name: The name of the backend.
     """
 
     def __init__(self, name):
@@ -19,19 +16,16 @@ class Backend(metaclass=abc.ABCMeta):
         return self._name
 
     def _assert_backend_available(method):
-        """Decorator which verifies the availability of a backend before
-        evaluating the decorated function, raising a RuntimeError exception if
-        the backend isn't available.
+        """Decorator verifying the availability of a backend.
 
-        Parameters
-        ----------
-        method : callable
-            The method of a class to decorate.
+        Args:
+            method: The method of a class to decorate.
 
-        Returns
-        -------
-        callable
-            The wrapped method.
+        Returns:
+            callable: The wrapped method.
+
+        Raises:
+            RuntimeError: If the backend isn't available.
         """
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
@@ -45,9 +39,7 @@ class Backend(metaclass=abc.ABCMeta):
     def is_available():
         """Checks whether the backend is available or not.
 
-        Returns
-        -------
-        bool
+        Returns:
             True if backend is available, False otherwise.
         """
 
@@ -55,55 +47,40 @@ class Backend(metaclass=abc.ABCMeta):
     def compile_function(self, function):
         """Compiles a function into a Python callable.
 
-        Parameters
-        ----------
-        function
-            Python callable or a backend-specific computational graph node.
+        Args:
+            function: A callable.
 
-        Returns
-        -------
-        compiled_function : callable
+        Returns:
             A Python callable accepting and a ``numpy.ndarray`` and returning a
             scalar.
         """
 
     @abc.abstractmethod
     def compute_gradient(self, function, num_arguments):
-        """Computes the gradient of a function and turns it into a Python
-        callable.
+        """Creates a function to compute gradients of a function.
 
-        Parameters
-        ----------
-        function
-            Python callable or a backend-specific computational graph node.
-        num_arguments
-            The number of arguments that `function` expects.
+        Args:
+            function: A callable.
+            num_arguments: The number of arguments that ``function`` expects.
 
-        Returns
-        -------
-        gradient : callable
+        Returns:
             A Python callable of the gradient of `function` accepting arguments
             according to the signature defined by `arguments`.
         """
 
     @abc.abstractmethod
     def compute_hessian_vector_product(self, function, num_arguments):
-        """Computes the Hessian-vector product of function a function and turns
-        it into a Python callable.
+        """Creates a function to compute Hessian-vector products of a function.
 
-        Parameters
-        ----------
-        function
-            Python callable or a backend-specific computational graph node.
-        num_arguments
-            The number of arguments that `function` expects.
+        Args:
+            function: A callable.
+            num_arguments: The number of arguments that ``function`` expects.
 
-        Returns
-        -------
-        hessian_vector_product : callable
+        Returns:
             A Python callable evaluating the Hessian-vector product of
-            `function` accepting arguments according to the signature defined
-            by `arguments`. The returned callable accepts a point of evaluation
-            according to `arguments`, as well as a vector that is
-            right-multiplied to the Hessian.
+            ``function`` accepting arguments according to the signature defined
+            by ``arguments``.
+            The returned callable accepts a point of evaluation as a sequence
+            of length ``num_arguments``, as well as a vector of the same shape
+            that is right-multiplied to the Hessian.
         """

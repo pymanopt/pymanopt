@@ -1,0 +1,15 @@
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: {{ version }}
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Versions</dt>
+      {%- for doc_version in doc_versions %}
+      <dd><a href="/docs/{{ doc_version }}">{{ doc_version }}</a></dd>
+      {%- endfor %}
+    </dl>
+  </div>
+</div>

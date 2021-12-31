@@ -1,6 +1,3 @@
-"""
-Module containing functions to differentiate functions using tensorflow.
-"""
 try:
     import tensorflow as tf
 except ImportError:  # pragma nocover

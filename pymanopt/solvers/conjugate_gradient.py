@@ -6,6 +6,7 @@ import numpy as np
 from pymanopt import tools
 from pymanopt.solvers.linesearch import LineSearchAdaptive
 from pymanopt.solvers.solver import Solver
+from pymanopt.tools import printer
 
 
 # TODO: Use Python's enum module.
@@ -15,26 +16,25 @@ BetaTypes = tools.make_enum(
 
 
 class ConjugateGradient(Solver):
-    """
-    Module containing conjugate gradient algorithm based on
-    conjugategradient.m from the manopt MATLAB package.
+    """Riemannian conjugate gradient method.
+
+    Perform optimization using nonlinear conjugate gradient method with
+    linesearch.
+    This method first computes the gradient of the cost function, and then
+    optimizes by moving in a direction that is conjugate to all previous search
+    directions.
+
+    Args:
+        beta_type: Conjugate gradient beta rule used to construct the new
+            search direction.
+        orth_value: Parameter for Powell's restart strategy.
+            An infinite value disables this strategy.
+            See in code formula for the specific criterion used.
+        linesearch: The line search method.
     """
 
     def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
                  linesearch=None, *args, **kwargs):
-        """
-        Instantiate gradient solver class.
-        Variable attributes (defaults in brackets):
-            - beta_type (BetaTypes.HestenesStiefel)
-                Conjugate gradient beta rule used to construct the new search
-                direction
-            - orth_value (numpy.inf)
-                Parameter for Powell's restart strategy. An infinite
-                value disables this strategy. See in code formula for
-                the specific criterion used.
-            - linesearch (LineSearchAdaptive)
-                The linesearch method to used.
-        """
         super().__init__(*args, **kwargs)
 
         self._beta_type = beta_type
@@ -47,28 +47,22 @@ class ConjugateGradient(Solver):
         self.linesearch = None
 
     def solve(self, problem, x=None, reuselinesearch=False):
-        """
-        Perform optimization using nonlinear conjugate gradient method with
-        linesearch.
-        This method first computes the gradient of obj w.r.t. arg, and then
-        optimizes by moving in a direction that is conjugate to all previous
-        search directions.
-        Arguments:
-            - problem
-                Pymanopt problem setup using the Problem class, this must
-                have a .manifold attribute specifying the manifold to optimize
-                over, as well as a cost and enough information to compute
-                the gradient of that cost.
-            - x=None
-                Optional parameter. Starting point on the manifold. If none
-                then a starting point will be randomly generated.
-            - reuselinesearch=False
-                Whether to reuse the previous linesearch object. Allows to
-                use information from a previous solve run.
+        """Run CG method.
+
+        Args:
+            problem: Pymanopt problem class instance exposing the cost function
+                and the manifold to optimize over.
+                The class must either
+            x: Initial point on the manifold.
+                If no value is provided then a starting point will be randomly
+                generated.
+            reuselinesearch: Whether to reuse the previous linesearch object.
+                Allows to use information from a previous call to
+                :meth:`solve`.
+
         Returns:
-            - x
-                Local minimum of obj, or if algorithm terminated before
-                convergence x will be the point at which it terminated.
+            Local minimum of the cost function, or the most recent iterate if
+            algorithm terminated before convergence.
         """
         man = problem.manifold
         verbosity = problem.verbosity
@@ -83,15 +77,21 @@ class ConjugateGradient(Solver):
         if x is None:
             x = man.rand()
 
-        # Initialize iteration counter and timer
-        iter = 0
-        stepsize = np.nan
-        time0 = time.time()
-
         if verbosity >= 1:
             print("Optimizing...")
         if verbosity >= 2:
-            print(" iter\t\t   cost val\t    grad. norm")
+            iter_format_length = int(np.log10(self._maxiter)) + 1
+            column_printer = printer.ColumnPrinter(
+                columns=[
+                    ("Iteration", f"{iter_format_length}d"),
+                    ("Cost", "+.16e"),
+                    ("Gradient norm", ".8e"),
+                ]
+            )
+        else:
+            column_printer = printer.VoidPrinter()
+
+        column_printer.print_header()
 
         # Calculate initial cost-related quantities
         cost = objective(x)
@@ -108,9 +108,13 @@ class ConjugateGradient(Solver):
                                          'orth_value': self._orth_value,
                                          'linesearcher': linesearch})
 
+        # Initialize iteration counter and timer
+        iter = 0
+        stepsize = np.nan
+        time0 = time.time()
+
         while True:
-            if verbosity >= 2:
-                print("%5d\t%+.16e\t%.8e" % (iter, cost, gradnorm))
+            column_printer.print_row([iter, cost, gradnorm])
 
             if self._logverbosity >= 2:
                 self._append_optlog(iter, x, cost, gradnorm=gradnorm)

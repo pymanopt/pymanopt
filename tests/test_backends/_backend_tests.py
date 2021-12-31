@@ -27,9 +27,11 @@ def manifold_factory(point_layout):
 
 
 class TestUnaryFunction(unittest.TestCase):
-    """Test cost function, gradient and Hessian for the function
+    """Test cost function, gradient and hvp for a unary cost function.
 
-        f(x) = np.sum(x ** 2).
+    This test uses a cost function of the form::
+
+        f = lambda x: np.sum(x ** 2)
     """
 
     def setUp(self):
@@ -61,13 +63,15 @@ class TestUnaryFunction(unittest.TestCase):
 
 
 class TestNaryFunction(unittest.TestCase):
-    """Test cost function, gradient and Hessian for the cost function
+    """Test cost function, gradient and hvp for an nary cost function.
 
-        f(x, y) = x @ y
+    This test uses a cost function of the form::
+
+        f = lambda x, y: x @ y
 
     This situation arises e.g. when optimizing over the
-    FixedRankEmbedded manifold where points on the manifold are represented as
-    a 3-tuple making up a truncated SVD.
+    :class:`pymanopt.manifolds.FixedRankEmbedded` manifold where points on the
+    manifold are represented as a 3-tuple of a truncated SVD.
     """
 
     def setUp(self):
@@ -113,12 +117,14 @@ class TestNaryFunction(unittest.TestCase):
 
 
 class TestNaryParameterGrouping(unittest.TestCase):
-    """Test cost function, gradient and Hessian for the cost function
+    """Test parameter grouping for cost function, gradient and hvp.
 
-        f(x, y, z) = np.sum(x ** 2 * y + 3 * z)
+    This test assumes a cost function of the form::
 
-    would define on product manifolds where one of the underlying manifolds
-    represents points as a tuple of numpy.ndarrays.
+        f = lambda x, y, z: np.sum(x ** 2 * y + 3 * z)
+
+    This situation could arise e.g. on product manifolds where one of the
+    underlying manifolds represents points as a tuple of arrays.
     """
 
     def setUp(self):

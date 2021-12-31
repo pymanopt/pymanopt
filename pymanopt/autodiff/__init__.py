@@ -1,4 +1,5 @@
 import inspect
+import typing
 
 from pymanopt.manifolds.manifold import Manifold
 
@@ -37,17 +38,24 @@ class Function:
         return self._compiled_function(*args, **kwargs)
 
 
-def make_tracing_backend_decorator(Backend):
-    """Create autodiff backend function decorator.
+def make_tracing_backend_decorator(Backend) -> typing.Callable:
+    """Create function decorator for a backend.
 
-    A backend decorator factory to be used by autodiff backends to create a
-    decorator for callables defined using the respective framework. The
-    created decorator accepts a single argument ``manifold`` that specifies
-    the domain (i.e., the manifold) of the decorated function:
+    Function to create a backend decorator that is used to annotate a
+    callable::
 
-      @decorator(manifold)
-      def f(x):
-          ...
+        decorator = make_tracing_backend_decorator(Backend)
+
+        @decorator(manifold)
+        def function(x):
+            ...
+
+    Args:
+        Backend: a class implementing the backend interface defined by
+            :class:`pymanopt.autodiff.backend._backend._Backend`.
+
+    Returns:
+        A new backend decorator.
     """
     def decorator(manifold):
         if not isinstance(manifold, Manifold):

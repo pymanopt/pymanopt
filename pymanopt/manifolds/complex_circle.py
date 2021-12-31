@@ -6,15 +6,12 @@ from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
 
 class ComplexCircle(EuclideanEmbeddedSubmanifold):
-    """
-    The manifold of complex numbers with unit-modulus.
+    """Manifold of unit-modulus complex numbers.
 
     Description of vectors z in C^n (complex) such that each component z(i)
     has unit modulus. The manifold structure is the Riemannian submanifold
     structure from the embedding space R^2 x ... x R^2, i.e., the complex
-    circle is identified with the unit circle in the real plane. This
-    implementation is based on complexcirclefactory.m from the Manopt MATLAB
-    package.
+    circle is identified with the unit circle in the real plane.
     """
 
     def __init__(self, dimension=1):

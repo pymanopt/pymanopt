@@ -77,27 +77,20 @@ class _Sphere(EuclideanEmbeddedSubmanifold):
         return np.zeros(self._shape)
 
     def _normalize(self, X):
-        """
-        Return a Frobenius-normalized version of the point X in the ambient
-        space.
-        """
+        """Return Frobenius-normalized version of X in ambient space."""
         return X / self.norm(None, X)
 
 
 class Sphere(_Sphere):
-    """Manifold of shape n1 x n2 x ... x nk tensors with unit 2-norm. The
-    metric is such that the sphere is a Riemannian submanifold of Euclidean
+    r"""The sphere manifold.
+
+    Manifold of shape :math:`n_1 \times n_2 \times \ldots \times n_k` tensors
+    with unit 2-norm.
+    The metric is such that the sphere is a Riemannian submanifold of Euclidean
     space.
 
-    Notes
-    -----
-    The implementation of the Weingarten map is taken from [1]_.
-
-    References
-    ----------
-    .. [1] Absil, P-A., Robert Mahony, and Jochen Trumpf. "An extrinsic look at
-       the Riemannian Hessian." International Conference on Geometric Science
-       of Information. Springer, Berlin, Heidelberg, 2013.
+    Notes:
+        The implementation of the Weingarten map is taken from [AMT2013]_.
     """
 
     def __init__(self, *shape):
@@ -147,10 +140,11 @@ class _SphereSubspaceIntersectionManifold(_Sphere):
 
 
 class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
-    """Manifold of n-dimensional unit 2-norm vectors intersecting the
-    r-dimensional subspace of R^n spanned by the columns of the matrix U. This
-    implementation is based on spheresubspacefactory.m from the Manopt MATLAB
-    package.
+    r"""Sphere-subspace intersection manifold.
+
+    Manifold of n-dimensional unit 2-norm vectors intersecting the
+    :math:`r`-dimensional subspace of :math:`\R^n` spanned by the columns of
+    the matrix ``U`` of size :math:`n \times r`.
     """
 
     def __init__(self, U):
@@ -167,10 +161,11 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
 
 class SphereSubspaceComplementIntersection(
         _SphereSubspaceIntersectionManifold):
-    """Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
-    the r-dimensional subspace of R^n spanned by columns of the matrix U. This
-    implementation is based on spheresubspacefactory.m from the Manopt MATLAB
-    package.
+    r"""Sphere-subspace compliment intersection manifold.
+
+    Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
+    the :math:`r`-dimensional subspace of :math:`\R^n` spanned by columns of
+    the matrix ``U``.
     """
 
     def __init__(self, U):
