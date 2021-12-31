@@ -12,6 +12,9 @@ jobs:
   docs:
     runs-on: ubuntu-20.04
     strategy:
+      # Make sure we never build docs in parallel in case we deploy new
+      # versions to avoid potential race conditions while pushing to gh pages.
+      max-parallel: 1
       matrix:
         version:
           - latest
