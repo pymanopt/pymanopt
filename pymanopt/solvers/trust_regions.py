@@ -73,12 +73,12 @@ class TrustRegions(Solver):
 
     def __init__(self, miniter=3, kappa=0.1, theta=1.0, rho_prime=0.1,
                  use_rand=False, rho_regularization=1e3, *args, **kwargs):
-        """
-        Trust regions algorithm based on trustregions.m from the
-        Manopt MATLAB package.
+        """Riemannian Trust-Regions solver.
 
-        Also included is the Truncated (Steihaug-Toint) Conjugate-Gradient
-        algorithm, based on tCG.m from the Manopt MATLAB package.
+        Second-order method that approximates the objective function by a
+        quadratic surface and then updates the current estimate based on that.
+        Also included is the truncated (Steihaug-Toint) conjugate gradient
+        algorithm.
         """
         super().__init__(*args, **kwargs)
 

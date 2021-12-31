@@ -1,6 +1,3 @@
-"""
-Module containing functions to differentiate functions using tensorflow.
-"""
 try:
     import tensorflow as tf
 except ImportError:  # pragma nocover
@@ -27,8 +24,7 @@ class _TensorFlowBackend(Backend):
 
     @staticmethod
     def _from_numpy(array):
-        """Wrap numpy ndarray ``array`` in a tensorflow tensor.
-        """
+        """Wrap numpy ndarray ``array`` in a tensorflow tensor."""
         return tf.constant(array)
 
     def _sanitize_gradient(self, tensor, grad):

@@ -2,7 +2,7 @@
 
 [Fork and clone the repository][fork]:
 
-    git clone git@github.com:your-username/pymanopt.git
+    $ git clone git@github.com:your-username/pymanopt.git
 
 Set up a local development environment, installing both the runtime and
 development dependencies listed in the `requirements/dev.txt` and
@@ -13,11 +13,11 @@ and configured.
 
 Verify that all existing tests pass by either running
 
-    python setup.py test
+    $ python setup.py test
 
 or executing the test suite via [nose2][nose2]:
 
-    nose2 tests
+    $ nose2 tests
 
 Note that we run the [flake8][flake8] utility on every python file in the
 package to verify coding style consistency during our integration tests. As
@@ -63,5 +63,5 @@ with the -s option automatically adds this line.
 [flake8]: http://flake8.pycqa.org/en/latest/
 [pre-commit]: https://pre-commit.com/
 [style]: https://www.python.org/dev/peps/pep-0008/
-[pr]: https://github.com/j-towns/pymanopt/compare
+[pr]: https://github.com/pymanopt/pymanopt/compare
 [commits]: http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html

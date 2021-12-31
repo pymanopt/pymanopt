@@ -57,17 +57,11 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
 
 
 class Euclidean(_Euclidean):
-    """
-    Euclidean manifold of shape n1 x n2 x ... x nk tensors. Useful for
-    unconstrained optimization problems or for unconstrained hyperparameters,
-    as part of a product manifold.
+    """Euclidean manifold.
 
-    Examples:
-    Create a manifold of vectors of length n:
-    manifold = Euclidean(n)
-
-    Create a manifold of m x n matrices:
-    manifold = Euclidean(m, n)
+    Euclidean manifold of shape ``(n1, n2, ..., nk)`` arrays.
+    Useful for unconstrained optimization problems or for unconstrained
+    hyperparameters as part of a product manifold.
     """
 
     def __init__(self, *shape):
@@ -84,12 +78,12 @@ class Euclidean(_Euclidean):
 
 
 class Symmetric(_Euclidean):
-    """
-    Manifold of n x n symmetric matrices, as a Riemannian submanifold of
-    Euclidean space.
+    """Manifold of symmetric matrices.
 
-    If k > 1 then this is an array of shape (k, n, n) (product manifold)
-    containing k (n x n) matrices.
+    Manifold of ``n x n`` symmetric matrices as a Riemannian submanifold of
+    Euclidean space.
+    If ``k > 1`` then this is the product manifold of ``k`` symmetric ``n x n``
+    matrices represented as arrays of shape ``(k, n, n)``.
     """
 
     def __init__(self, n, k=1):
@@ -120,8 +114,7 @@ class Symmetric(_Euclidean):
 
 
 class SkewSymmetric(_Euclidean):
-    """
-    The Euclidean space of n-by-n skew-symmetric matrices.
+    """The Euclidean space of n-by-n skew-symmetric matrices.
 
     If k > 1 then this is an array of shape (k, n, n) (product manifold)
     containing k (n x n) matrices.

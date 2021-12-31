@@ -14,9 +14,7 @@ from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
 
 
 class _RetrAsExpMixin:
-    """Mixin class which defers calls to the exponential map to the retraction
-    and issues a warning.
-    """
+    """Mixin to use a retraction as exponential map."""
 
     def exp(self, Y, U):
         warnings.warn(
@@ -27,12 +25,11 @@ class _RetrAsExpMixin:
 
 
 class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
-    """Manifold of (n x n)^k symmetric positive definite matrices, based on the
-    geometry discussed in Chapter 6 of Positive Definite Matrices (Bhatia
-    2007). Some of the implementation is based on sympositivedefinitefactory.m
-    from the Manopt MATLAB package. Also see "Conic geometric optimisation on
-    the manifold of positive definite matrices" (Sra & Hosseini 2013) for more
-    details.
+    """Manifold of symmetric positive definite matrices.
+
+    Notes:
+        The geometry is based on the discussion in chapter 6 of [Bha2007]_.
+        Also see [SH2015]_ for more details.
     """
     def __init__(self, n, k=1):
         self._n = n
@@ -206,8 +203,7 @@ class _PSDFixedRank(Manifold, _RetrAsExpMixin):
 
 
 class PSDFixedRank(_PSDFixedRank):
-    """
-    Manifold of n-by-n symmetric positive semidefinite matrices of rank k.
+    """Manifold of fixed-rank positive semidefinite (PSD) matrices.
 
     A point X on the manifold is parameterized as YY^T where Y is a matrix of
     size nxk. As such, X is symmetric, positive semidefinite. We restrict to
@@ -246,8 +242,7 @@ class PSDFixedRank(_PSDFixedRank):
 
 
 class PSDFixedRankComplex(_PSDFixedRank):
-    """
-    Manifold of n x n complex Hermitian pos. semidefinite matrices of rank k.
+    """Manifold of fixed-rank Hermitian positive semidefinite (PSD) matrices.
 
     Manifold of n-by-n complex Hermitian positive semidefinite matrices of
     fixed rank k. This follows the quotient geometry described
@@ -294,8 +289,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
 
 
 class Elliptope(Manifold, _RetrAsExpMixin):
-    """
-    Manifold of n-by-n psd matrices of rank k with unit diagonal elements.
+    """Manifold of fixed-rank PSD matrices with unit diagonal elements.
 
     A point X on the manifold is parameterized as YY^T where Y is a matrix of
     size nxk. As such, X is symmetric, positive semidefinite. We restrict to

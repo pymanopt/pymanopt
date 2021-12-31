@@ -20,7 +20,9 @@ class ndarraySequenceMixin:
 
 
 def unpack_singleton_sequence_return_value(function):
-    """Function decorator which unwraps the return value of ``function`` if it
+    """Decorator to unwrap singleton return values.
+
+    Function decorator which unwraps the return value of ``function`` if it
     is a sequence containing only a single element.
     """
     @functools.wraps(function)

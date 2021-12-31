@@ -9,9 +9,15 @@ from pymanopt.tools import printer
 
 
 class SteepestDescent(Solver):
-    """
-    Steepest descent (gradient descent) algorithm based on
-    steepestdescent.m from the manopt MATLAB package.
+    """Riemannian steepest descent solver.
+
+    Perform optimization using gradient descent with line search.
+    This method first computes the gradient of the objective, and then
+    optimizes by moving in the direction of steepest descent (which is the
+    opposite direction to the gradient).
+
+    Args:
+        linesearch: The line search method.
     """
 
     def __init__(self, linesearch=None, *args, **kwargs):
@@ -25,27 +31,22 @@ class SteepestDescent(Solver):
 
     # Function to solve optimisation problem using steepest descent.
     def solve(self, problem, x=None, reuselinesearch=False):
-        """
-        Perform optimization using gradient descent with linesearch.
-        This method first computes the gradient (derivative) of obj
-        w.r.t. arg, and then optimizes by moving in the direction of
-        steepest descent (which is the opposite direction to the gradient).
-        Arguments:
-            - problem
-                Pymanopt problem setup using the Problem class, this must
-                have a .manifold attribute specifying the manifold to optimize
-                over, as well as a cost and enough information to compute
-                the gradient of that cost.
-            - x=None
-                Optional parameter. Starting point on the manifold. If none
-                then a starting point will be randomly generated.
-            - reuselinesearch=False
-                Whether to reuse the previous linesearch object. Allows to
-                use information from a previous solve run.
+        """Run steepest descent algorithm.
+
+        Args:
+            problem: Pymanopt problem class instance exposing the cost function
+                and the manifold to optimize over.
+                The class must either
+            x: Initial point on the manifold.
+                If no value is provided then a starting point will be randomly
+                generated.
+            reuselinesearch: Whether to reuse the previous linesearch object.
+                Allows to use information from a previous call to
+                :meth:`solve`.
+
         Returns:
-            - x
-                Local minimum of obj, or if algorithm terminated before
-                convergence x will be the point at which it terminated.
+            Local minimum of the cost function, or the most recent iterate if
+            algorithm terminated before convergence.
         """
         man = problem.manifold
         verbosity = problem.verbosity

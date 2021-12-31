@@ -3,29 +3,20 @@ import time
 
 
 class Solver(metaclass=abc.ABCMeta):
-    '''
-    Abstract base class setting out template for solver classes.
-    '''
+    """Abstract base class for Pymanopt solvers.
+
+    Args:
+        maxtime: Upper bound on the run time of a solver in seconds.
+        maxiter: The maximum number of iterations to perform.
+        mingradnorm: Termination threshold for the norm of the gradient.
+        minstepsize: Termination threshold for the line search step size.
+        maxcostevals: Maximum number of allowed cost function evaluations.
+        logverbosity: Level of information logged by the solver while it
+            operates: 0 is silent, 2 ist most verbose.
+    """
 
     def __init__(self, maxtime=1000, maxiter=1000, mingradnorm=1e-6,
                  minstepsize=1e-10, maxcostevals=5000, logverbosity=0):
-        """
-        Variable attributes (defaults in brackets):
-            - maxtime (1000)
-                Max time (in seconds) to run.
-            - maxiter (1000)
-                Max number of iterations to run.
-            - mingradnorm (1e-6)
-                Terminate if the norm of the gradient is below this.
-            - minstepsize (1e-10)
-                Terminate if linesearch returns a vector whose norm is below
-                this.
-            - maxcostevals (5000)
-                Maximum number of allowed cost evaluations
-            - logverbosity (0)
-                Level of information logged by the solver while it operates,
-                0 is silent, 2 ist most information.
-        """
         self._maxtime = maxtime
         self._maxiter = maxiter
         self._mingradnorm = mingradnorm
@@ -39,12 +30,11 @@ class Solver(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def solve(self, problem, x=None):
-        '''
-        Solve the given :py:class:`pymanopt.core.problem.Problem` (starting
-        from a random initial guess if the optional argument x is not
-        provided).
-        '''
-        pass
+        """Run a solver on a given optimization problem.
+
+        Solve the given :class:`pymanopt.core.problem.Problem` starting from
+        ``x`` if provided or from a random initial guess if not.
+        """
 
     def _check_stopping_criterion(self, time0, iter=-1, gradnorm=float('inf'),
                                   stepsize=float('inf'), costevals=-1):

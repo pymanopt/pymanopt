@@ -1,4 +1,5 @@
 import inspect
+import typing
 
 
 class Function:
@@ -52,21 +53,28 @@ class Function:
         return self._compiled_function(*args, **kwargs)
 
 
-def make_tracing_backend_decorator(Backend):
-    """Creates a function decorator which can either by used as
+def make_tracing_backend_decorator(Backend) -> typing.Callable:
+    """Create function decorator for a backend.
 
-      @decorator
-      def f(x):
-          pass
+    Function to create a backend decorator that is used to annotate a
+    callable::
 
-    or
+        decorator = make_tracing_backend_decorator(Backend)
 
-      @decorator(backend_specific_kwarg=...)
-      def f(x):
-          pass
+        @decorator
+        def function(x):
+            pass
 
-    to annotate a tracing-based autodiff function with how the arguments are
-    conceptually grouped together.
+        @decator(backend_specific_kwargs=...)
+        def function(x):
+            pass
+
+    Args:
+        Backend: a class implementing the backend interface defined by
+            :class:`pymanopt.autodiff.backend._backend._Backend`.
+
+    Returns:
+        A new backend decorator.
     """
     def decorator(*args, **kwargs):
         if len(args) == 1 and callable(args[0]):

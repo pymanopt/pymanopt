@@ -32,14 +32,10 @@ class _TheanoBackend(Backend):
 
     @Backend._assert_backend_available
     def compile_function(self, function, arguments):
-        """Compiles a Theano graph into a callable."""
         return self._compile_function_without_warnings(arguments, function)
 
     @Backend._assert_backend_available
     def compute_gradient(self, function, arguments):
-        """Returns a compiled function computing the gradient of ``function``
-        with respect to ``arguments``.
-        """
         if len(arguments) == 1:
             (argument,) = arguments
             gradient = T.grad(function, argument)
@@ -49,9 +45,6 @@ class _TheanoBackend(Backend):
         return self._compile_function_without_warnings(arguments, gradient)
 
     def _compute_unary_hessian_vector_product(self, gradient, argument):
-        """Returns a function accepting two arguments to compute a
-        Hessian-vector product of a scalar-valued unary function.
-        """
         argument_type = argument.type()
         try:
             Rop = T.Rop(gradient, argument, argument_type)
@@ -62,14 +55,6 @@ class _TheanoBackend(Backend):
             [argument, argument_type], Rop)
 
     def _compute_nary_hessian_vector_product(self, gradients, arguments):
-        """Returns a function accepting `2 * len(arguments)` arguments to
-        compute a Hessian-vector product of a multivariate function.
-
-        Notes
-        -----
-        The implementation is based on TensorFlow's '_hessian_vector_product'
-        function in 'tensorflow.python.ops.gradients_impl'.
-        """
         argument_types = [argument.type() for argument in arguments]
         try:
             Rop = T.Rop(gradients, arguments, argument_types)
@@ -91,10 +76,6 @@ class _TheanoBackend(Backend):
 
     @Backend._assert_backend_available
     def compute_hessian_vector_product(self, function, arguments):
-        """Computes the directional derivative of the gradient, which is
-        equivalent to computing a Hessian-vector product with the direction
-        vector.
-        """
         if len(arguments) == 1:
             (argument,) = arguments
             gradient = T.grad(function, argument)

@@ -1,6 +1,5 @@
-"""
-Module containing manifolds of fixed rank matrices.
-"""
+"""Module containing manifolds of fixed-rank matrices."""
+
 import numpy as np
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
@@ -9,82 +8,74 @@ from pymanopt.tools import ndarraySequenceMixin
 
 
 class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
-    """
-    Note: Currently not compatible with the second order TrustRegions solver.
-    Should be fixed soon.
+    r"""Manifold of fixed rank matrices.
 
-    Manifold of m-by-n real matrices of fixed rank k. This follows the
-    embedded geometry described in Bart Vandereycken's 2013 paper:
-    "Low-rank matrix completion by Riemannian optimization".
+    Args:
+        m: The number of rows of the matrices in the ambient space.
+        n: The number of columns of the matrices.
+        k: The rank of the matrices on the manifold.
 
-    Paper link: http://arxiv.org/pdf/1209.3834.pdf
+    Notes:
+        * The implementation follows the embedded geometry described in
+          [Van2013]_.
+        * The class is currently not compatible with the
+          :class:`pymanopt.solvers.TrustRegions` solver.
 
+    Manifold of ``m x n`` real matrices of fixed rank ``k``.
     For efficiency purposes, Pymanopt does not represent points on this
-    manifold explicitly using m x n matrices, but instead implicitly using
-    a truncated singular value decomposition. Specifically, a point is
-    represented by a tuple (u, s, vt) of three numpy arrays. The arrays u,
-    s and vt have shapes (m, k), (k,) and (k, n) respectively, and the low
-    rank matrix which they represent can be recovered by the matrix product
-    u * diag(s) * vt.
+    manifold explicitly using ``m x n`` matrices, but instead implicitly using
+    a truncated singular value decomposition.
+    Specifically, a point is represented by a tuple ``(u, s, vt)`` of three
+    numpy arrays.
+    The arrays ``u``, ``s`` and ``vt`` have shapes ``(m, k)``, ``(k,)`` and
+    ``(k, n)``, respectively, and the low rank matrix which they represent can
+    be recovered by the matrix product ``u * diag(s) * vt``.
 
-    For example, to optimize over the space of 5 by 4 matrices with rank 3,
-    we would need to
+    For example, to optimize over the space of 5 x 4 matrices with rank 3, we
+
+    would need to
+
     >>> import pymanopt.manifolds
     >>> manifold = pymanopt.manifolds.FixedRankEmbedded(5, 4, 3)
 
     Then the shapes will be as follows:
-    >>> x = manifold.rand()
-    >>> x[0].shape
+
+    >>> u, s, vt = manifold.rand()
+    >>> u.shape
     (5, 3)
-    >>> x[1].shape
+    >>> s.shape
     (3,)
-    >>> x[2].shape
+    >>> vt.shape
     (3, 4)
 
     and the full matrix can be recovered using the matrix product
-    x[0] * diag(x[1]) * x[2]:
-    >>> import numpy as np
-    >>> X = x[0] @ np.diag(x[1]) @ x[2]
+    ``u @ diag(s) @ vt``:
 
-    Tangent vectors are represented as a tuple (Up, M, Vp). The matrices Up
-    (mxk) and Vp (nxk) obey Up'*U = 0 and Vp'*V = 0.
-    The matrix M (kxk) is arbitrary. Such a structure corresponds to the
-    following tangent vector in the ambient space of mxn matrices:
-      Z = U*M*V' + Up*V' + U*Vp'
-    where (U, S, V) is the current point and (Up, M, Vp) is the tangent
+    >>> import numpy as np
+    >>> X = u @ np.diag(s) @ vt
+
+    Tangent vectors are represented as a tuple ``(Up, M, Vp)``.
+    The matrices ``Up`` (of size ``m x k``) and ``Vp`` (of size ``n x k``) obey
+    ``Up' * U = 0 and Vp' * V = 0``.
+    The matrix ``M`` (of size ``k x k``) is arbitrary.
+    Such a structure corresponds to the
+    following tangent vector in the ambient space of ``m x n`` matrices: ``Z =
+    U * M * V' + Up * V' + U * Vp'``
+    where ``(U, S, V)`` is the current point and ``(Up, M, Vp)`` is the tangent
     vector at that point.
 
-    Vectors in the ambient space are best represented as mxn matrices. If
-    these are low-rank, they may also be represented as structures with
-    U, S, V fields, such that Z = U*S*V'. There are no restrictions on what
-    U, S and V are, as long as their product as indicated yields a real, mxn
-    matrix.
+    Vectors in the ambient space are best represented as ``m x n`` matrices.
+    If these are low-rank, they may also be represented as structures with
+    ``U, S, V`` fields, such that ``Z = U * S * V'``.
+    There are no restrictions on what ``U``, ``S`` and ``V`` are, as long as
+    their product as indicated yields a real ``m x n`` matrix.
 
     The chosen geometry yields a Riemannian submanifold of the embedding
-    space R^(mxn) equipped with the usual trace (Frobenius) inner product.
-
-
-    Please cite the Pymanopt paper as well as the research paper:
-        @Article{vandereycken2013lowrank,
-          Title   = {Low-rank matrix completion by {Riemannian} optimization},
-          Author  = {Vandereycken, B.},
-          Journal = {SIAM Journal on Optimization},
-          Year    = {2013},
-          Number  = {2},
-          Pages   = {1214--1236},
-          Volume  = {23},
-          Doi     = {10.1137/110845768}
-        }
-
-    This file is based on fixedrankembeddedfactory from Manopt: www.manopt.org.
-    Ported by: Jamie Townsend, Sebastian Weichwald
-    Original author: Nicolas Boumal, Dec. 30, 2012.
+    space :math:`\R^(m \times n)` equipped with the usual trace (Frobenius)
+    inner product.
     """
 
-    # TODO(nkoep): Change the signature to (self, dims, k) where dims has to be
-    #              a 2-element iterable specifying m and n.
-
-    def __init__(self, m, n, k):
+    def __init__(self, m: int, n: int, k: int):
         self._m = m
         self._n = n
         self._k = k
@@ -104,25 +95,20 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return np.sum(np.tensordot(a, b) for (a, b) in zip(G, H))
 
     def _apply_ambient(self, Z, W):
-        """
-        For a given ambient vector Z, given as a tuple (U, S, V) such that
-        Z = U*S*V', applies it to a matrix W to calculate the matrix product
-        ZW.
-        """
+        """Right-multiply matrix ``W`` to point ``Z`` in ambient space."""
         if isinstance(Z, (list, tuple)):
             return Z[0] @ Z[1] @ Z[2].T @ W
         return Z @ W
 
     def _apply_ambient_transpose(self, Z, W):
-        """
-        Same as apply_ambient, but applies Z' to W.
-        """
+        """Right-multiple matrix ``W`` to ``Z.T`` in ambient space."""
         if isinstance(Z, (list, tuple)):
             return Z[2] @ Z[1] @ Z[0].T @ W
         return Z.T @ W
 
     def proj(self, X, Z):
-        """
+        """Project point to tangent space.
+
         Note that Z must either be an m x n matrix from the ambient space, or
         else a tuple (Uz, Sz, Vz), where Uz * Sz * Vz is in the ambient space
         (of low-rank matrices).
@@ -141,7 +127,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return _FixedRankTangentVector((Up, M, Vp))
 
     def egrad2rgrad(self, x, egrad):
-        """
+        """Convert Euclidean to Riemannian gradient.
+
         Assuming that the cost function being optimized has been defined
         in terms of the low-rank singular value decomposition of X, the
         gradient returned by the autodiff backends will have three components
@@ -202,11 +189,12 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return (u, s, vt)
 
     def _tangent(self, X, Z):
-        """
+        """Project componenets of ``Z`` to tangent space at ``X``.
+
         Given Z in tangent vector format, projects the components Up and Vp
         such that they satisfy the tangent space constraints up to numerical
-        errors. If Z was indeed a tangent vector at X, this should barely
-        affect Z (it would not at all if we had infinite numerical accuracy).
+        errors.
+        If Z was indeed a tangent vector at X, this should barely affect Z.
         """
         Up = Z[0] - X[0] @ X[0].T @ Z[0]
         Vp = Z[2] - X[2].T @ X[2] @ Z[2]
@@ -225,17 +213,20 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return _FixedRankTangentVector((Z[0]/nrm, Z[1]/nrm, Z[2]/nrm))
 
     def tangent2ambient(self, X, Z):
-        """
+        """Represent tangent vector in ambient space.
+
         Transforms a tangent vector Z represented as a structure (Up, M, Vp)
         into a structure with fields (U, S, V) that represents that same
         tangent vector in the ambient space of mxn matrices, as U*S*V'.
-        This matrix is equal to X.U*Z.M*X.V' + Z.Up*X.V' + X.U*Z.Vp'. The
-        latter is an mxn matrix, which could be too large to build
+        This matrix is equal to X.U*Z.M*X.V' + Z.Up*X.V' + X.U*Z.Vp'.
+        The latter is an mxn matrix, which could be too large to build
         explicitly, and this is why we return a low-rank representation
-        instead. Note that there are no guarantees on U, S and V other than
-        that USV' is the desired matrix. In particular, U and V are not (in
-        general) orthonormal and S is not (in general) diagonal.
-        (In this implementation, S is identity, but this might change.)
+        instead.
+        Note that there are no guarantees on U, S and V other than that USV' is
+        the desired matrix.
+        In particular, U and V are not (in general) orthonormal and S is not
+        (in general) diagonal.
+        Currently, S is identity, but this might change.
         """
         U = np.hstack((X[0] @ Z[1] + Z[0], X[0]))
         S = np.eye(2 * self._k)

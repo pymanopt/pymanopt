@@ -8,27 +8,21 @@ from pymanopt.tools import printer
 
 
 class ParticleSwarm(Solver):
-    """
-    Particle swarm optimization method based on pso.m from the manopt
-    MATLAB package.
+    """Particle swarm optimization (PSO) method.
+
+    Perform optimization using the derivative-free particle swarm optimization
+    algorithm.
+
+    Args:
+        maxcostevals: Maximum number of allowed cost evaluations.
+        maxiter: Maximum number of allowed iterations.
+        populationsize: Size of the considered swarm population.
+        nostalgia: Quantifies performance relative to past performances.
+        social: Quantifies performance relative to neighbors.
     """
 
     def __init__(self, maxcostevals=None, maxiter=None, populationsize=None,
                  nostalgia=1.4, social=1.4, *args, **kwargs):
-        """
-        Instantiate Particle Swarm Optimization (PSO) solver class.
-        Variable attributes (defaults in brackets):
-            - maxcostevals (max(5000, 2 * dim))
-                Maximum number of allowed cost evaluations
-            - maxiter (max(500, 4 * dim))
-                Maximum number of allowed iterations
-            - populationsize (min(40, 10 * dim))
-                Size of the considered swarm population
-            - nostalgia (1.4)
-                Quantifies performance relative to past performances
-            - social (1.4)
-                Quantifies performance relative to neighbors
-        """
         super().__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals
@@ -38,22 +32,18 @@ class ParticleSwarm(Solver):
         self._social = social
 
     def solve(self, problem, x=None):
-        """
-        Perform optimization using the particle swarm optimization algorithm.
-        Arguments:
-            - problem
-                Pymanopt problem setup using the Problem class, this must
-                have a .manifold attribute specifying the manifold to optimize
-                over, as well as a cost (specified using a theano graph
-                or as a python function).
-            - x=None
-                Optional parameter. Initial population of elements on the
-                manifold. If None then an initial population will be randomly
-                generated
+        """Run PSO algorithm.
+
+        Args:
+            problem: Pymanopt problem class instance exposing the cost function
+                and the manifold to optimize over.
+            x: Initial point on the manifold.
+                If no value is provided then a starting point will be randomly
+                generated.
+
         Returns:
-            - x
-                Local minimum of obj, or if algorithm terminated before
-                convergence x will be the point at which it terminated
+            Local minimum of the cost function, or the most recent iterate if
+            algorithm terminated before convergence.
         """
         man = problem.manifold
         verbosity = problem.verbosity

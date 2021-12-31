@@ -16,26 +16,25 @@ BetaTypes = tools.make_enum(
 
 
 class ConjugateGradient(Solver):
-    """
-    Module containing conjugate gradient algorithm based on
-    conjugategradient.m from the manopt MATLAB package.
+    """Riemannian conjugate gradient method.
+
+    Perform optimization using nonlinear conjugate gradient method with
+    linesearch.
+    This method first computes the gradient of the cost function, and then
+    optimizes by moving in a direction that is conjugate to all previous search
+    directions.
+
+    Args:
+        beta_type: Conjugate gradient beta rule used to construct the new
+            search direction.
+        orth_value: Parameter for Powell's restart strategy.
+            An infinite value disables this strategy.
+            See in code formula for the specific criterion used.
+        linesearch: The line search method.
     """
 
     def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
                  linesearch=None, *args, **kwargs):
-        """
-        Instantiate gradient solver class.
-        Variable attributes (defaults in brackets):
-            - beta_type (BetaTypes.HestenesStiefel)
-                Conjugate gradient beta rule used to construct the new search
-                direction
-            - orth_value (numpy.inf)
-                Parameter for Powell's restart strategy. An infinite
-                value disables this strategy. See in code formula for
-                the specific criterion used.
-            - linesearch (LineSearchAdaptive)
-                The linesearch method to used.
-        """
         super().__init__(*args, **kwargs)
 
         self._beta_type = beta_type
@@ -48,28 +47,22 @@ class ConjugateGradient(Solver):
         self.linesearch = None
 
     def solve(self, problem, x=None, reuselinesearch=False):
-        """
-        Perform optimization using nonlinear conjugate gradient method with
-        linesearch.
-        This method first computes the gradient of obj w.r.t. arg, and then
-        optimizes by moving in a direction that is conjugate to all previous
-        search directions.
-        Arguments:
-            - problem
-                Pymanopt problem setup using the Problem class, this must
-                have a .manifold attribute specifying the manifold to optimize
-                over, as well as a cost and enough information to compute
-                the gradient of that cost.
-            - x=None
-                Optional parameter. Starting point on the manifold. If none
-                then a starting point will be randomly generated.
-            - reuselinesearch=False
-                Whether to reuse the previous linesearch object. Allows to
-                use information from a previous solve run.
+        """Run CG method.
+
+        Args:
+            problem: Pymanopt problem class instance exposing the cost function
+                and the manifold to optimize over.
+                The class must either
+            x: Initial point on the manifold.
+                If no value is provided then a starting point will be randomly
+                generated.
+            reuselinesearch: Whether to reuse the previous linesearch object.
+                Allows to use information from a previous call to
+                :meth:`solve`.
+
         Returns:
-            - x
-                Local minimum of obj, or if algorithm terminated before
-                convergence x will be the point at which it terminated.
+            Local minimum of the cost function, or the most recent iterate if
+            algorithm terminated before convergence.
         """
         man = problem.manifold
         verbosity = problem.verbosity
