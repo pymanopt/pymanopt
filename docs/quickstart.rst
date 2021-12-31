@@ -88,7 +88,7 @@ function, and run the minimization problem using one of the available solvers.
     matrix = anp.random.normal(size=(dim, dim))
     matrix = 0.5 * (matrix + matrix.T)
 
-    @pymanopt.function.Autograd
+    @pymanopt.function.Autograd(manifold)
     def cost(point):
         return -point @ matrix @ point
 
