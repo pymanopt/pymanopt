@@ -14,8 +14,13 @@ class Problem:
 
     Args:
         manifold: Manifold to optimize over.
-        cost: The cost function which takes an element of the manifold and
-            returns a real number.
+        cost: A callable decorated with a decorator from
+            :mod:`pymanopt.functions` which takes a point on a manifold and
+            returns a real scalar.
+            If any decorator other than
+            :func:`pymanopt.function.Callable` is used the gradient and
+            Hessian-vector production functions are computed automatically if
+            needed and no ``(e)grad`` or ``(e)hess`` arguments are provided.
         egrad: The Euclidean gradient, i.e., the gradient of the cost function
             in the typical sense in the ambient space.
             The returned value need not belong to the tangent space of

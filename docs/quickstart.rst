@@ -73,7 +73,7 @@ instantiate the manifold, create the cost function (using Autograd in this
 case), define a problem instance which we pass the manifold and the cost
 function, and run the minimization problem using one of the available solvers.
 
-.. testcode::
+.. code-block:: python
 
     import autograd.numpy as anp
     import pymanopt
@@ -88,7 +88,7 @@ function, and run the minimization problem using one of the available solvers.
     matrix = anp.random.normal(size=(dim, dim))
     matrix = 0.5 * (matrix + matrix.T)
 
-    @pymanopt.function.Autograd
+    @pymanopt.function.Autograd(manifold)
     def cost(point):
         return -point @ matrix @ point
 
@@ -103,10 +103,9 @@ function, and run the minimization problem using one of the available solvers.
     print("Dominant eigenvector:", dominant_eigenvector)
     print("Pymanopt solution:", solution)
 
-Running this example will produce the following output:
+Running this example will produce (something like) the following output:
 
-.. testoutput::
-    :options: +NORMALIZE_WHITESPACE
+.. code-block:: none
 
     Optimizing...
     Iteration    Cost                       Gradient norm
@@ -139,15 +138,15 @@ Running this example will produce the following output:
     Dominant eigenvector: [-0.78442334 -0.38225031 -0.48843088]
     Pymanopt solution: [0.78442327 0.38225034 0.48843097]
 
-Note that the signs of the *true* dominant eigenvector and the solution found
-by Pymanopt differ.
+Note that the direction of the "true" dominant eigenvector and the solution
+found by Pymanopt differ.
 This is not exactly surprising though.
 Eigenvectors are not unique since every eigenpair :math:`(\lambda, \vmv)` still
 satisfies the eigenvalue equation :math:`\vmA \vmv = \lambda \vmv` if
 :math:`\vmv` is replaced by :math:`\alpha \vmv` for some :math:`\alpha \in \R
 \setminus \set{0}`.
 That is, the dominant eigenvector is only unique up to multiplication by a
-nonzero constant.
+nonzero constant; the zero vector is trivially considered *not* an eigenvector.
 
 The example above constitutes the conceivably simplest demonstration of
 Pymanopt.

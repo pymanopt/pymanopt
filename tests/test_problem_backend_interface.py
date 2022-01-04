@@ -13,8 +13,9 @@ class TestProblemBackendInterface(TestCase):
         self.rank = rank = 3
 
         A = np.random.randn(m, n)
+        self.manifold = Product([FixedRankEmbedded(m, n, rank), Euclidean(n)])
 
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(self.manifold)
         def cost(u, s, vt, x):
             return np.linalg.norm(((u * s) @ vt - A) @ x) ** 2
 
@@ -22,7 +23,6 @@ class TestProblemBackendInterface(TestCase):
         self.gradient = self.cost.compute_gradient()
         self.hvp = self.cost.compute_hessian_vector_product()
 
-        self.manifold = Product([FixedRankEmbedded(m, n, rank), Euclidean(n)])
         self.problem = pymanopt.Problem(self.manifold, self.cost)
 
     def test_cost_function(self):

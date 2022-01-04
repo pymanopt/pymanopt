@@ -1,25 +1,23 @@
 import numpy as np
-import theano.tensor as T
+import tensorflow as tf
 from numpy import random as rnd, testing as np_testing
 
 import pymanopt
-from pymanopt.manifolds import Sphere
+from pymanopt.manifolds import Product, Sphere, Stiefel
+from pymanopt.solvers import TrustRegions
 from ._test import TestCase
 
 
 class TestProblem(TestCase):
     def setUp(self):
-        X = T.vector()
+        self.n = 15
+        self.man = Sphere(self.n)
 
-        @pymanopt.function.Theano(X)
+        @pymanopt.function.TensorFlow(self.man)
         def cost(X):
-            return T.exp(T.sum(X ** 2))
+            return tf.exp(tf.reduce_sum(X ** 2))
 
         self.cost = cost
-
-        n = self.n = 15
-
-        self.man = Sphere(n)
 
     def test_prepare(self):
         problem = pymanopt.Problem(self.man, self.cost)
@@ -36,3 +34,18 @@ class TestProblem(TestCase):
         problem.verbosity = 2
         with self.assertRaises(AttributeError):
             problem.manifold = None
+
+    def test_vararg_cost_on_product(self):
+        shape = (3, 3)
+        manifold = Product([Stiefel(*shape)] * 2)
+
+        @pymanopt.function.TensorFlow(manifold)
+        def cost(*args):
+            X, Y = args
+            return tf.reduce_sum(X) + tf.reduce_sum(Y)
+
+        problem = pymanopt.Problem(manifold=manifold, cost=cost)
+        solver = TrustRegions(maxiter=1)
+        Xopt, Yopt = solver.solve(problem)
+        self.assertEqual(Xopt.shape, (3, 3))
+        self.assertEqual(Yopt.shape, (3, 3))

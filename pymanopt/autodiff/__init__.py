@@ -1,55 +1,40 @@
 import inspect
 import typing
 
+from pymanopt.manifolds.manifold import Manifold
+
 
 class Function:
-    def __str__(self):
-        return "Function <{}>".format(self._backend)
+    def __init__(self, *, function, manifold, backend):
+        if not callable(function):
+            raise TypeError(f"Object {function} is not callable")
+        if not backend.is_available():
+            raise RuntimeError(f"Backend `{backend}' is not available")
 
-    def __init__(self, function, args, backend):
         self._function = function
-        self._args = args
         self._backend = backend
+        self._compiled_function = backend.compile_function(function)
+        self._num_arguments = manifold.num_values
 
-        self._compiled_function = None
         self._egrad = None
         self._ehess = None
 
-        self._validate_backend()
-        self._compile()
-
-    def _validate_backend(self):
-        if not self._backend.is_available():
-            raise ValueError("Backend `{}' is not available".format(
-                self._backend))
-        if not self._backend.is_compatible(self._function, self._args):
-            raise ValueError("Backend `{}' is not compatible with cost "
-                             "function of type `{:s}'".format(
-                                 self._backend,
-                                 self._function.__class__.__name__))
-
-    def _compile(self):
-        assert self._backend is not None
-        if self._compiled_function is None:
-            self._compiled_function = self._backend.compile_function(
-                self._function, self._args)
+    def __str__(self):
+        return "Function <{}>".format(self._backend)
 
     def compute_gradient(self):
-        assert self._backend is not None
         if self._egrad is None:
             self._egrad = self._backend.compute_gradient(
-                self._function, self._args)
+                self._function, self._num_arguments)
         return self._egrad
 
     def compute_hessian_vector_product(self):
-        assert self._backend is not None
         if self._ehess is None:
             self._ehess = self._backend.compute_hessian_vector_product(
-                self._function, self._args)
+                self._function, self._num_arguments)
         return self._ehess
 
     def __call__(self, *args, **kwargs):
-        assert self._compiled_function is not None
         return self._compiled_function(*args, **kwargs)
 
 
@@ -61,13 +46,9 @@ def make_tracing_backend_decorator(Backend) -> typing.Callable:
 
         decorator = make_tracing_backend_decorator(Backend)
 
-        @decorator
+        @decorator(manifold)
         def function(x):
-            pass
-
-        @decator(backend_specific_kwargs=...)
-        def function(x):
-            pass
+            ...
 
     Args:
         Backend: a class implementing the backend interface defined by
@@ -76,30 +57,24 @@ def make_tracing_backend_decorator(Backend) -> typing.Callable:
     Returns:
         A new backend decorator.
     """
-    def decorator(*args, **kwargs):
-        if len(args) == 1 and callable(args[0]):
-            (function,) = args
+    def decorator(manifold):
+        if not isinstance(manifold, Manifold):
+            raise TypeError(
+                "Backend decorator requires a manifold instance, got "
+                f"{manifold}"
+            )
+
+        def inner(function):
             argspec = inspect.getfullargspec(function)
-            if argspec.varargs or argspec.varkw or argspec.kwonlyargs:
+            if ((argspec.args and argspec.varargs) or
+                    not (argspec.args or argspec.varargs) or
+                    (argspec.varkw or argspec.kwonlyargs)):
                 raise ValueError(
-                    "Decorated function must only accept positional "
-                    "arguments")
-            return Function(function, args=tuple(argspec.args),
-                            backend=Backend())
-
-        if len(args) != 0:
-            raise ValueError("Only keyword arguments allowed")
-
-        def inner(function):
-            return Function(function, args=args, backend=Backend(**kwargs))
-        return inner
-    return decorator
-
-
-def make_graph_backend_decorator(Backend):
-    def decorator(*args, **kwargs):
-        def inner(function):
-            graph = function(*args)
-            return Function(graph, args=args, backend=Backend(**kwargs))
+                    "Decorated function must only accept positional arguments "
+                    "or a variable-length argument like *x"
+                )
+            return Function(
+                function=function, manifold=manifold, backend=Backend()
+            )
         return inner
     return decorator

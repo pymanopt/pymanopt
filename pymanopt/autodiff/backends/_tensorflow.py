@@ -36,18 +36,14 @@ class _TensorFlowBackend(Backend):
         return list(map(self._sanitize_gradient, tensors, grads))
 
     @Backend._assert_backend_available
-    def is_compatible(self, function, arguments):
-        return callable(function)
-
-    @Backend._assert_backend_available
-    def compile_function(self, function, arguments):
+    def compile_function(self, function):
         @functools.wraps(function)
         def wrapper(*args):
             return function(*map(self._from_numpy, args)).numpy()
         return wrapper
 
     @Backend._assert_backend_available
-    def compute_gradient(self, function, arguments):
+    def compute_gradient(self, function, num_arguments):
 
         def gradient(*args):
             tf_arguments = []
@@ -59,13 +55,12 @@ class _TensorFlowBackend(Backend):
                 val = function(*tf_arguments)
                 grads = tape.gradient(val, tf_arguments)
             return self._sanitize_gradients(tf_arguments, grads)
-        if len(arguments) == 1:
+        if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
         return gradient
 
     @Backend._assert_backend_available
-    def compute_hessian_vector_product(self, function, variables):
-
+    def compute_hessian_vector_product(self, function, num_arguments):
         def hessian_vector_product(*args):
             arguments, vectors = bisect_sequence(args)
             tf_args = [self._from_numpy(arg) for arg in arguments]
@@ -79,7 +74,7 @@ class _TensorFlowBackend(Backend):
 
             return self._sanitize_gradients(tf_args, acc.jvp(grads))
 
-        if len(variables) == 1:
+        if num_arguments == 1:
             return unpack_singleton_sequence_return_value(
                     hessian_vector_product)
         return hessian_vector_product

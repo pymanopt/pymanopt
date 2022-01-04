@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 from numpy import linalg as la, random as rnd
@@ -10,44 +9,35 @@ from pymanopt.manifolds import Oblique
 from pymanopt.solvers import ConjugateGradient
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
-def create_cost_egrad(backend, A):
-    m, n = A.shape
+def create_cost_egrad(manifold, matrix, backend):
     egrad = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(X):
-            return 0.5 * np.sum((X - A) ** 2)
+            return 0.5 * np.sum((X - matrix) ** 2)
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(X):
-            return 0.5 * np.sum((X - A) ** 2)
+            return 0.5 * np.sum((X - matrix) ** 2)
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(X):
-            return X - A
+            return X - matrix
     elif backend == "PyTorch":
-        A_ = torch.from_numpy(A)
+        matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(X):
-            return 0.5 * torch.sum((X - A_) ** 2)
+            return 0.5 * torch.sum((X - matrix_) ** 2)
     elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros((m, n), dtype=np.float64), name="X")
-
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(X):
-            return 0.5 * tf.reduce_sum((X - A) ** 2)
-    elif backend == "Theano":
-        X = T.matrix()
-
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            return 0.5 * T.sum((X - A) ** 2)
+            return 0.5 * tf.reduce_sum((X - matrix) ** 2)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
@@ -59,8 +49,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     n = 8
     matrix = rnd.randn(m, n)
 
-    cost, egrad = create_cost_egrad(backend, matrix)
     manifold = Oblique(m, n)
+    cost, egrad = create_cost_egrad(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
     if quiet:
         problem.verbosity = 0
@@ -71,7 +61,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         return
 
-    # Calculate the actual solution by normalizing the columns of A.
+    # Calculate the actual solution by normalizing the columns of matrix.
     X = matrix / la.norm(matrix, axis=0)[np.newaxis, :]
 
     # Print information about the solution.

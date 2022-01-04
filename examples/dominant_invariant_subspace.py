@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 from numpy import linalg as la, random as rnd
@@ -10,63 +9,46 @@ from pymanopt.manifolds import Grassmann
 from pymanopt.solvers import TrustRegions
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
-def create_cost_egrad_ehess(backend, A, p):
-    n = A.shape[-1]
+def create_cost_egrad_ehess(manifold, matrix, backend):
     egrad = ehess = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(X):
-            return -np.trace(X.T @ A @ X)
+            return -np.trace(X.T @ matrix @ X)
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(X):
-            return -np.trace(X.T @ A @ X)
+            return -np.trace(X.T @ matrix @ X)
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(X):
-            return -(A + A.T) @ X
+            return -(matrix + matrix.T) @ X
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def ehess(X, H):
-            return -(A + A.T) @ H
+            return -(matrix + matrix.T) @ H
     elif backend == "PyTorch":
-        A_ = torch.from_numpy(A)
+        matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(X):
-            return -torch.tensordot(X, torch.matmul(A_, X))
+            return -torch.tensordot(X, torch.matmul(matrix_, X))
     elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros((n, p), dtype=np.float64), name="X")
-
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(X):
-            return -tf.tensordot(X, tf.matmul(A, X), axes=2)
+            return -tf.tensordot(X, tf.matmul(matrix, X), axes=2)
 
         # Define the Euclidean gradient explicitly for the purpose of
         # demonstration. The Euclidean Hessian-vector product is automatically
         # calculated via TensorFlow's autodiff capabilities.
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def egrad(X):
-            return -tf.matmul(A + A.T, X)
-    elif backend == "Theano":
-        X = T.matrix()
-        U = T.matrix()
-
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            return -T.dot(X.T, T.dot(A, X)).trace()
-
-        # Define the Euclidean Hessian-vector product explicitly for the
-        # purpose of demonstration. The Euclidean gradient is automatically
-        # calculated via Theano's autodiff capabilities.
-        @pymanopt.function.Theano(X, U)
-        def ehess(X, U):
-            return -T.dot(A + A.T, U)
+            return -tf.matmul(matrix + matrix.T, X)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
@@ -86,9 +68,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = rnd.randn(num_rows, num_rows)
     matrix = 0.5 * (matrix + matrix.T)
 
-    cost, egrad, ehess = create_cost_egrad_ehess(
-        backend, matrix, subspace_dimension)
     manifold = Grassmann(num_rows, subspace_dimension)
+    cost, egrad, ehess = create_cost_egrad_ehess(
+        manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
     if quiet:
         problem.verbosity = 0

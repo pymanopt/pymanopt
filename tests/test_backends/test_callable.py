@@ -2,6 +2,7 @@ import numpy as np
 from numpy import random as rnd, testing as np_testing
 
 from pymanopt.function import Callable
+from . import _backend_tests
 from .._test import TestCase
 
 
@@ -9,13 +10,13 @@ class TestCallableBackend(TestCase):
     def setUp(self):
         self.n = 10
 
-        @Callable
+        @Callable(_backend_tests.manifold_factory(point_layout=3))
         def nary_cost(x, y):
             return np.sum(x * y)
 
         self.cost = self.nary_cost = nary_cost
 
-        @Callable
+        @Callable(_backend_tests.manifold_factory(point_layout=3))
         def nested_nary_cost(x, y, z):
             return np.sum(x ** 2 * y + 3 * z)
 

@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 
@@ -10,44 +9,35 @@ from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_gradient
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
-def create_cost_egrad(backend, A):
-    m, n = A.shape
+def create_cost_egrad(manifold, matrix, backend):
     egrad = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(x):
-            return -np.inner(x, A @ x)
+            return -np.inner(x, matrix @ x)
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(x):
-            return -np.inner(x, A @ x)
+            return -np.inner(x, matrix @ x)
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(x):
-            return -2 * A @ x
+            return -2 * matrix @ x
     elif backend == "PyTorch":
-        A_ = torch.from_numpy(A)
+        matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(x):
-            return - x @ A_ @ x
+            return - x @ matrix_ @ x
     elif backend == "TensorFlow":
-        x = tf.Variable(tf.zeros(n, dtype=np.float64), name="X")
-
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(x):
-            return -tf.tensordot(x, tf.tensordot(A, x, axes=1), axes=1)
-    elif backend == "Theano":
-        x = T.vector()
-
-        @pymanopt.function.Theano(x)
-        def cost(x):
-            return -x.T.dot(T.dot(A, x))
+            return -tf.tensordot(x, tf.tensordot(matrix, x, axes=1), axes=1)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
@@ -55,14 +45,15 @@ def create_cost_egrad(backend, A):
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
-    # Generate random problem data.
     n = 128
-    A = np.random.randn(n, n)
-    A = 0.5 * (A + A.T)
-    cost, egrad = create_cost_egrad(backend, A)
+    manifold = Sphere(n)
+
+    # Generate random problem data.
+    matrix = np.random.randn(n, n)
+    matrix = 0.5 * (matrix + matrix.T)
+    cost, egrad = create_cost_egrad(manifold, matrix, backend)
 
     # Create the problem structure.
-    manifold = Sphere(n)
     problem = Problem(manifold=manifold, cost=cost, egrad=egrad)
     if quiet:
         problem.verbosity = 0

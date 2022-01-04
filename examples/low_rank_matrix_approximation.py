@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 from numpy import linalg as la, random as rnd
@@ -10,58 +9,44 @@ from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.solvers import ConjugateGradient
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
-def create_cost_egrad(backend, A, rank):
-    m, n = A.shape
+def create_cost_egrad(manifold, matrix, backend):
     egrad = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(u, s, vt):
             X = u @ np.diag(s) @ vt
-            return np.linalg.norm(X - A) ** 2
+            return np.linalg.norm(X - matrix) ** 2
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(u, s, vt):
             X = u @ np.diag(s) @ vt
-            return la.norm(X - A) ** 2
+            return la.norm(X - matrix) ** 2
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(u, s, vt):
             X = u @ np.diag(s) @ vt
             S = np.diag(s)
-            gu = 2 * (X - A) @ (S @ vt).T
-            gs = 2 * np.diag(u.T @ (X - A) @ vt.T)
-            gvt = 2 * (u @ S).T @ (X - A)
+            gu = 2 * (X - matrix) @ (S @ vt).T
+            gs = 2 * np.diag(u.T @ (X - matrix) @ vt.T)
+            gvt = 2 * (u @ S).T @ (X - matrix)
             return gu, gs, gvt
     elif backend == "PyTorch":
-        A_ = torch.from_numpy(A)
+        matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(u, s, vt):
             X = torch.matmul(u, torch.matmul(torch.diag(s), vt))
-            return torch.norm(X - A_) ** 2
+            return torch.norm(X - matrix_) ** 2
     elif backend == "TensorFlow":
-        u = tf.Variable(tf.zeros((m, rank), dtype=np.float64), name="u")
-        s = tf.Variable(tf.zeros(rank, dtype=np.float64), name="s")
-        vt = tf.Variable(tf.zeros((rank, n), dtype=np.float64), name="vt")
-
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(u, s, vt):
             X = tf.matmul(u, tf.matmul(tf.linalg.diag(s), vt))
-            return tf.norm(X - A) ** 2
-    elif backend == "Theano":
-        u = T.matrix()
-        s = T.vector()
-        vt = T.matrix()
-
-        @pymanopt.function.Theano(u, s, vt)
-        def cost(u, s, vt):
-            X = T.dot(T.dot(u, T.diag(s)), vt)
-            return (X - A).norm(2) ** 2
+            return tf.norm(X - matrix) ** 2
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
@@ -72,8 +57,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m, n, rank = 5, 4, 2
     matrix = rnd.randn(m, n)
 
-    cost, egrad = create_cost_egrad(backend, matrix, rank)
     manifold = FixedRankEmbedded(m, n, rank)
+    cost, egrad = create_cost_egrad(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
     if quiet:
         problem.verbosity = 0

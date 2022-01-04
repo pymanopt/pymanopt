@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 
@@ -9,13 +8,13 @@ from pymanopt.manifolds import Elliptope
 from pymanopt.solvers import ConjugateGradient
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "PyTorch", "TensorFlow"
 )
 
 
-def create_cost(backend, dimension, num_points, epsilon):
+def create_cost(manifold, epsilon, backend):
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(X):
             Y = X @ X.T
             # Shift the exponentials by the maximum value to reduce numerical
@@ -27,7 +26,7 @@ def create_cost(backend, dimension, num_points, epsilon):
             u = np.triu(expY, 1).sum()
             return s + epsilon * np.log(u)
     elif backend == "PyTorch":
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(X):
             Y = torch.matmul(X, torch.transpose(X, 1, 0))
             s = torch.triu(Y, 1).max()
@@ -36,10 +35,7 @@ def create_cost(backend, dimension, num_points, epsilon):
             u = torch.triu(expY, 1).sum()
             return s + epsilon * torch.log(u)
     elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros((num_points, dimension), dtype=np.float64),
-                        name="X")
-
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(X):
             Y = tf.matmul(X, tf.transpose(X))
             s = tf.reduce_max(tf.linalg.band_part(Y, 0, -1))
@@ -47,17 +43,6 @@ def create_cost(backend, dimension, num_points, epsilon):
             expY = expY - tf.linalg.diag(tf.linalg.diag_part(expY))
             u = tf.reduce_sum(tf.linalg.band_part(Y, 0, -1))
             return s + epsilon * tf.math.log(u)
-    elif backend == "Theano":
-        X = T.matrix()
-
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            Y = T.dot(X, X.T)
-            s = T.triu(Y, 1).max()
-            expY = T.exp((Y - s) / epsilon)
-            expY = expY - T.diag(T.diag(expY))
-            u = T.sum(T.triu(expY, 1))
-            return s + epsilon * T.log(u)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
@@ -78,8 +63,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # appropriate for these fine tunings.
     epsilon = 0.005
 
-    cost = create_cost(backend, dimension, num_points, epsilon)
     manifold = Elliptope(num_points, dimension)
+    cost = create_cost(manifold, epsilon, backend)
     problem = pymanopt.Problem(manifold, cost)
     if quiet:
         problem.verbosity = 0

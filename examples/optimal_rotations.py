@@ -1,6 +1,5 @@
 import autograd.numpy as np
 import tensorflow as tf
-import theano.tensor as T
 import torch
 from examples._tools import ExampleRunner
 
@@ -9,43 +8,35 @@ from pymanopt.manifolds import SpecialOrthogonalGroup
 from pymanopt.solvers import SteepestDescent
 
 SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
+    "Autograd", "Callable", "PyTorch", "TensorFlow"
 )
 
 
-def create_cost_egrad(backend, ABt):
+def create_cost_egrad(manifold, ABt, backend):
     egrad = None
 
     if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.Autograd(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
     elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
 
-        @pymanopt.function.Callable
+        @pymanopt.function.Callable(manifold)
         def egrad(X):
             return -ABt
     elif backend == "PyTorch":
         ABt_ = torch.from_numpy(ABt)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.PyTorch(manifold)
         def cost(X):
             return -torch.tensordot(X, ABt_, dims=X.dim())
     elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros(ABt.shape, dtype=np.float64), name="X")
-
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.TensorFlow(manifold)
         def cost(X):
             return -tf.tensordot(X, ABt, axes=ABt.ndim)
-    elif backend == "Theano":
-        X = T.tensor3()
-
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            return -T.tensordot(X, ABt, axes=ABt.ndim)
     else:
         raise ValueError("Unsupported backend '{:s}'".format(backend))
 
@@ -72,8 +63,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     B = np.random.randn(k, n, m)
     ABt = np.array([Ak @ Bk.T for Ak, Bk in zip(A, B)])
 
-    cost, egrad = create_cost_egrad(backend, ABt)
     manifold = SpecialOrthogonalGroup(n, k)
+    cost, egrad = create_cost_egrad(manifold, ABt, backend)
     problem = pymanopt.Problem(manifold, cost, egrad=egrad)
     if quiet:
         problem.verbosity = 0
