@@ -1,23 +1,14 @@
-import warnings
-
 import numpy as np
 from numpy import linalg as la, random as rnd
 from scipy.linalg import expm
 from scipy.linalg import solve_continuous_lyapunov as lyap
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold, Manifold
+from pymanopt.manifolds.manifold import (
+    EuclideanEmbeddedSubmanifold,
+    Manifold,
+    RetrAsExpMixin,
+)
 from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
-
-
-class _RetrAsExpMixin:
-    """Mixin to use a retraction as exponential map."""
-
-    def exp(self, Y, U):
-        warnings.warn(
-            "Exponential map for manifold '{:s}' not implemented yet. Using "
-            "retraction instead.".format(self._get_class_name()),
-            RuntimeWarning)
-        return self.retr(Y, U)
 
 
 class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
@@ -147,7 +138,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 #              psd matrices, or in fixed_rank. Alternatively, move this one and
 #              the next class to a dedicated 'psd_fixed_rank' module.
 
-class _PSDFixedRank(Manifold, _RetrAsExpMixin):
+class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def __init__(self, n, k, name, dimension):
         self._n = n
         self._k = k
@@ -284,7 +275,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
         return rand_() + 1j * rand_()
 
 
-class Elliptope(Manifold, _RetrAsExpMixin):
+class Elliptope(Manifold, RetrAsExpMixin):
     """Manifold of fixed-rank PSD matrices with unit diagonal elements.
 
     A point X on the manifold is parameterized as YY^T where Y is a matrix of
