@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OPTIONAL_DEPENDENCIES = ("autograd", "tensorflow", "theano")
+OPTIONAL_DEPENDENCIES = ("autograd", "tensorflow")
 
 
 def parse_requirements_file(filename):
@@ -65,7 +65,7 @@ if __name__ == "__main__":
         ],
         keywords=("optimization,manifold optimization,"
                   "automatic differentiation,machine learning,numpy,scipy,"
-                  "theano,autograd,tensorflow"),
+                  "autograd,tensorflow"),
         packages=find_packages(exclude=["tests"]),
         install_requires=install_requires,
         extras_require=extras_require,
