@@ -3,11 +3,7 @@ import warnings
 import numpy as np
 from numpy import linalg as la, random as rnd
 from scipy.linalg import expm
-# Workaround for SciPy bug: https://github.com/scipy/scipy/pull/8082
-try:
-    from scipy.linalg import solve_continuous_lyapunov as lyap
-except ImportError:
-    from scipy.linalg import solve_lyapunov as lyap
+from scipy.linalg import solve_continuous_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold, Manifold
 from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
