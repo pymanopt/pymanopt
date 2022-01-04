@@ -23,7 +23,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
     def inner(self, z, v, w):
-        return v.conj().dot(w).real
+        return (v.conj() @ w).real
 
     def norm(self, x, v):
         return la.norm(v)

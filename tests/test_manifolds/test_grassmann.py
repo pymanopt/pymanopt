@@ -14,7 +14,7 @@ class TestSingleGrassmannManifold(TestCase):
         self.k = k = 1
         self.man = Grassmann(m, n, k=k)
 
-        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u))
+        self.proj = lambda x, u: u - x @ x.T @ u
 
     def test_dist(self):
         x = self.man.rand()
@@ -99,7 +99,7 @@ class TestMultiGrassmannManifold(TestCase):
         self.k = k = 3
         self.man = Grassmann(m, n, k=k)
 
-        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u))
+        self.proj = lambda x, u: u - x @ x.T @ u
 
     def test_dim(self):
         assert self.man.dim == self.k * (self.m * self.n - self.n ** 2)

@@ -159,11 +159,11 @@ Xopt = solver.solve(problem)
 # Once Pymanopt has finished the optimisation we can obtain the inferred parameters as follows:
 
 mu1hat = Xopt[0][0][0:2, 2:3]
-Sigma1hat = Xopt[0][0][:2, :2] - mu1hat.dot(mu1hat.T)
+Sigma1hat = Xopt[0][0][:2, :2] - mu1hat @ mu1hat.T
 mu2hat = Xopt[0][1][0:2, 2:3]
-Sigma2hat = Xopt[0][1][:2, :2] - mu2hat.dot(mu2hat.T)
+Sigma2hat = Xopt[0][1][:2, :2] - mu2hat @ mu2hat.T
 mu3hat = Xopt[0][2][0:2, 2:3]
-Sigma3hat = Xopt[0][2][:2, :2] - mu3hat.dot(mu3hat.T)
+Sigma3hat = Xopt[0][2][:2, :2] - mu3hat @ mu3hat.T
 pihat = np.exp(np.concatenate([Xopt[1], [0]], axis=0))
 pihat = pihat / np.sum(pihat)
 

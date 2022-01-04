@@ -21,7 +21,7 @@ def multiprod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
         ``B`` (if ``A.ndim == 2``).
     """
     if A.ndim == 2:
-        return np.dot(A, B)
+        return A @ B
     return np.einsum("ijk,ikl->ijl", A, B)
 
 

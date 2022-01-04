@@ -20,7 +20,7 @@ class TestMulti(TestCase):
         B = rnd.randn(self.n, self.p)
 
         # Compare the products.
-        np_testing.assert_allclose(A.dot(B), multiprod(A, B))
+        np_testing.assert_allclose(A @ B, multiprod(A, B))
 
     def test_multiprod(self):
         # Two random arrays of matrices A (k x m x n) and B (k x n x p)
@@ -29,7 +29,7 @@ class TestMulti(TestCase):
 
         C = np.zeros((self.k, self.m, self.p))
         for i in range(self.k):
-            C[i] = A[i].dot(B[i])
+            C[i] = A[i] @ B[i]
 
         np_testing.assert_allclose(C, multiprod(A, B))
 
@@ -66,7 +66,7 @@ class TestMulti(TestCase):
         a = np.diag(rnd.rand(self.m))
         q, r = la.qr(rnd.randn(self.m, self.m))
         # A is a positive definite matrix
-        A = q.dot(a.dot(q.T))
+        A = q @ a @ q.T
         np_testing.assert_allclose(multilog(A, pos_def=True), logm(A))
 
     def test_multilog(self):
@@ -75,7 +75,7 @@ class TestMulti(TestCase):
         for i in range(self.k):
             a = np.diag(rnd.rand(self.m))
             q, r = la.qr(rnd.randn(self.m, self.m))
-            A[i] = q.dot(a.dot(q.T))
+            A[i] = q @ a @ q.T
             L[i] = logm(A[i])
         np_testing.assert_allclose(multilog(A, pos_def=True), L)
 

@@ -75,7 +75,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     def retr(self, X, U):
         def retri(Y):
             Q, R = la.qr(Y)
-            return np.dot(Q, np.diag(np.sign(np.sign(np.diag(R)) + 0.5)))
+            return Q @ np.diag(np.sign(np.sign(np.diag(R)) + 0.5))
 
         Y = X + multiprod(X, U)
         if self._k == 1:
@@ -88,7 +88,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     def retr2(self, X, U):
         def retr2i(Y):
             U, _, Vt = la.svd(Y)
-            return np.dot(U, Vt)
+            return U @ Vt
 
         Y = X + multiprod(X, U)
         if self._k == 1:
@@ -126,7 +126,8 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             # group of orthogonal n-by-n matrices.
             A = rnd.randn(n, n)
             Q, RR = la.qr(A)
-            Q = np.dot(Q, np.diag(np.sign(np.diag(RR))))  # Mezzadri 2007
+            # TODO(nkoep): Add a proper reference to Mezzadri 2007.
+            Q = Q @ np.diag(np.sign(np.diag(RR)))
 
             # If Q is in O(n) but not in SO(n), we permute the two first
             # columns of Q such that det(new Q) = -det(Q), hence the new Q will
