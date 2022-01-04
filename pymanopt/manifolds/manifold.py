@@ -1,7 +1,21 @@
 import abc
 import functools
+import warnings
 
 import numpy as np
+
+
+class RetrAsExpMixin:
+    """Mixin which defers calls to the exponential map to the retraction."""
+
+    def exp(self, Y, U):
+        class_name = self.__class__.__name__
+        warnings.warn(
+            f"Exponential map for manifold '{class_name}' not available. "
+            "Using retraction instead.",
+            RuntimeWarning
+        )
+        return self.retr(Y, U)
 
 
 class Manifold(metaclass=abc.ABCMeta):
