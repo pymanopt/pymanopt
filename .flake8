@@ -1,6 +1,8 @@
 [flake8]
 application_import_names = pymanopt
 docstring-convention = google
-import_order_style = smarkets
 exclude = examples/notebooks/*.py
-extend-ignore = D1
+ignore = E203, E501, W503
+import_order_style = pycharm
+max-line-length = 79
+select = C, E, F, W, B, B950, D1
