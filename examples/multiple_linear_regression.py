@@ -46,7 +46,7 @@ def create_cost_egrad_ehess(manifold, samples, targets, backend):
             return tf.norm(
                 targets - tf.tensordot(samples, weights, axes=1)) ** 2
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
     return cost, egrad, ehess
 
@@ -68,7 +68,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
         estimated_weights = solver.solve(problem)
         if not quiet:
-            print("Run {}".format(k+1))
+            print(f"Run {k + 1}")
             print("Weights found by pymanopt (top) / "
                   "closed form solution (bottom)")
             print(estimated_weights)

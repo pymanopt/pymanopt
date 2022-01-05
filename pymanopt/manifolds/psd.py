@@ -1,27 +1,14 @@
-import warnings
-
 import numpy as np
 from numpy import linalg as la, random as rnd
 from scipy.linalg import expm
-# Workaround for SciPy bug: https://github.com/scipy/scipy/pull/8082
-try:
-    from scipy.linalg import solve_continuous_lyapunov as lyap
-except ImportError:
-    from scipy.linalg import solve_lyapunov as lyap
+from scipy.linalg import solve_continuous_lyapunov as lyap
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold, Manifold
+from pymanopt.manifolds.manifold import (
+    EuclideanEmbeddedSubmanifold,
+    Manifold,
+    RetrAsExpMixin,
+)
 from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
-
-
-class _RetrAsExpMixin:
-    """Mixin to use a retraction as exponential map."""
-
-    def exp(self, Y, U):
-        warnings.warn(
-            "Exponential map for manifold '{:s}' not implemented yet. Using "
-            "retraction instead.".format(self._get_class_name()),
-            RuntimeWarning)
-        return self.retr(Y, U)
 
 
 class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
@@ -36,10 +23,11 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         self._k = k
 
         if k == 1:
-            name = ("Manifold of positive definite ({} x {}) matrices").format(
-                n, n)
+            name = f"Manifold of positive definite {n}x{n} matrices"
         else:
-            name = "Product manifold of {} ({} x {}) matrices".format(k, n, n)
+            name = (
+                f"Product manifold of {k} positive definite {n}x{n} matrices"
+            )
         dimension = int(k * n * (n + 1) / 2)
         super().__init__(name, dimension)
 
@@ -151,7 +139,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 #              psd matrices, or in fixed_rank. Alternatively, move this one and
 #              the next class to a dedicated 'psd_fixed_rank' module.
 
-class _PSDFixedRank(Manifold, _RetrAsExpMixin):
+class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def __init__(self, n, k, name, dimension):
         self._n = n
         self._k = k
@@ -170,10 +158,10 @@ class _PSDFixedRank(Manifold, _RetrAsExpMixin):
 
     def proj(self, Y, H):
         # Projection onto the horizontal space
-        YtY = Y.T.dot(Y)
-        AS = Y.T.dot(H) - H.T.dot(Y)
+        YtY = Y.T @ Y
+        AS = Y.T @ H - H.T @ Y
         Omega = lyap(YtY, AS)
-        return H - Y.dot(Omega)
+        return H - Y @ Omega
 
     def egrad2rgrad(self, Y, egrad):
         return egrad
@@ -235,8 +223,7 @@ class PSDFixedRank(_PSDFixedRank):
     """
 
     def __init__(self, n, k):
-        name = ("YY' quotient manifold of {:d}x{:d} psd matrices of "
-                "rank {:d}".format(n, n, k))
+        name = f"Quotient manifold of {n}x{n} psd matrices of rank {k}"
         dimension = int(k * n - k * (k - 1) / 2)
         super().__init__(n, k, name, dimension)
 
@@ -267,8 +254,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
     """
 
     def __init__(self, n, k):
-        name = ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
-                "matrices of rank {:d}".format(n, n, k))
+        name = f"Quotient manifold of Hermitian {n}x{n} matrices of rank {k}"
         dimension = 2 * k * n - k * k
         super().__init__(n, k, name, dimension)
 
@@ -279,8 +265,8 @@ class PSDFixedRankComplex(_PSDFixedRank):
         return np.sqrt(self.inner(Y, U, U))
 
     def dist(self, U, V):
-        S, _, D = la.svd(V.T.conj().dot(U))
-        E = U - V.dot(S).dot(D)
+        S, _, D = la.svd(V.T.conj() @ U)
+        E = U - V @ S @ D
         return self.inner(None, E, E) / 2
 
     def rand(self):
@@ -288,7 +274,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
         return rand_() + 1j * rand_()
 
 
-class Elliptope(Manifold, _RetrAsExpMixin):
+class Elliptope(Manifold, RetrAsExpMixin):
     """Manifold of fixed-rank PSD matrices with unit diagonal elements.
 
     A point X on the manifold is parameterized as YY^T where Y is a matrix of
@@ -322,8 +308,8 @@ class Elliptope(Manifold, _RetrAsExpMixin):
         self._n = n
         self._k = k
 
-        name = ("YY' quotient manifold of {:d}x{:d} psd matrices of rank {:d} "
-                "with diagonal elements being 1".format(n, n, k))
+        name = (f"Quotient manifold of {n}x{n} psd matrices of rank {k} "
+                "with unit diagonal elements")
         dimension = int(n * (k - 1) - k * (k - 1) / 2)
         super().__init__(name, dimension)
 
@@ -343,10 +329,10 @@ class Elliptope(Manifold, _RetrAsExpMixin):
         eta = self._project_rows(Y, H)
 
         # Projection onto the horizontal space
-        YtY = Y.T.dot(Y)
-        AS = Y.T.dot(eta) - H.T.dot(Y)
+        YtY = Y.T @ Y
+        AS = Y.T @ eta - H.T @ Y
         Omega = lyap(YtY, -AS)
-        return eta - Y.dot((Omega - Omega.T) / 2)
+        return eta - Y @ (Omega - Omega.T) / 2
 
     def retr(self, Y, U):
         return self._normalize_rows(Y + U)

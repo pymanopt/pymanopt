@@ -68,11 +68,13 @@ class Euclidean(_Euclidean):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
-            name = "Euclidean manifold of {}-vectors".format(*shape)
+            (n1,) = shape
+            name = f"Euclidean manifold of {n1}-vectors"
         elif len(shape) == 2:
-            name = ("Euclidean manifold of {}x{} matrices").format(*shape)
+            n1, n2 = shape
+            name = f"Euclidean manifold of {n1}x{n2} matrices"
         else:
-            name = ("Euclidean manifold of shape " + str(shape) + " tensors")
+            name = f"Euclidean manifold of shape {shape} tensors"
         dimension = np.prod(shape)
         super().__init__(name, dimension, *shape)
 
@@ -89,13 +91,12 @@ class Symmetric(_Euclidean):
     def __init__(self, n, k=1):
         if k == 1:
             shape = (n, n)
-            name = ("Manifold of {} x {} symmetric matrices").format(n, n)
+            name = f"Manifold of {n}x{n} symmetric matrices"
         elif k > 1:
             shape = (k, n, n)
-            name = ("Product manifold of {} ({} x {}) symmetric "
-                    "matrices").format(k, n, n)
+            name = f"Product manifold of {k} {n}x{n} symmetric matrices"
         else:
-            raise ValueError("k must be an integer no less than 1")
+            raise ValueError(f"k must be an integer no less than 1, got {k}")
         dimension = int(k * n * (n + 1) / 2)
         super().__init__(name, dimension, *shape)
 
@@ -123,12 +124,10 @@ class SkewSymmetric(_Euclidean):
     def __init__(self, n, k=1):
         if k == 1:
             shape = (n, n)
-            name = ("Manifold of {} x {} skew-symmetric "
-                    "matrices").format(n, n)
+            name = f"Manifold of {n}x{n} skew-symmetric matrices"
         elif k > 1:
             shape = (k, n, n)
-            name = ("Product manifold of {} ({} x {}) skew-symmetric "
-                    "matrices").format(k, n, n)
+            name = f"Product manifold of {k} {n}x{n} skew-symmetric matrices"
         else:
             raise ValueError("k must be an integer no less than 1")
         dimension = int(k * n * (n - 1) / 2)

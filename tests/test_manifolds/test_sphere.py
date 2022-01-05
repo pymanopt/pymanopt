@@ -47,7 +47,7 @@ class TestSphereManifold(TestCase):
         H = rnd.randn(self.m, self.n)
 
         #  Compare the projections.
-        np_testing.assert_array_almost_equal(H - X * np.trace(X.T.dot(H)),
+        np_testing.assert_array_almost_equal(H - X * np.trace(X.T @ H),
                                              self.man.proj(X, H))
 
     def test_egrad2rgrad(self):
@@ -60,7 +60,7 @@ class TestSphereManifold(TestCase):
         H = rnd.randn(self.m, self.n)
 
         #  Compare the projections.
-        np_testing.assert_array_almost_equal(H - X * np.trace(X.T.dot(H)),
+        np_testing.assert_array_almost_equal(H - X * np.trace(X.T @ H),
                                              self.man.egrad2rgrad(X, H))
 
     def test_ehess2rhess(self):
@@ -242,4 +242,4 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         # Test if a random element really lies in the left null space of U.
         x = man.rand()
         np_testing.assert_almost_equal(la.norm(x), 1)
-        np_testing.assert_array_almost_equal(U.T.dot(x), np.zeros(U.shape[1]))
+        np_testing.assert_array_almost_equal(U.T @ x, np.zeros(U.shape[1]))

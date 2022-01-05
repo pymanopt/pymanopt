@@ -9,7 +9,7 @@ class Function:
         if not callable(function):
             raise TypeError(f"Object {function} is not callable")
         if not backend.is_available():
-            raise RuntimeError(f"Backend `{backend}' is not available")
+            raise RuntimeError(f"Backend '{backend}' is not available")
 
         self._function = function
         self._backend = backend
@@ -20,7 +20,7 @@ class Function:
         self._ehess = None
 
     def __str__(self):
-        return "Function <{}>".format(self._backend)
+        return f"Function <{self._backend}>"
 
     def compute_gradient(self):
         if self._egrad is None:

@@ -1,7 +1,21 @@
 import abc
 import functools
+import warnings
 
 import numpy as np
+
+
+class RetrAsExpMixin:
+    """Mixin which defers calls to the exponential map to the retraction."""
+
+    def exp(self, Y, U):
+        class_name = self.__class__.__name__
+        warnings.warn(
+            f"Exponential map for manifold '{class_name}' not available. "
+            "Using retraction instead.",
+            RuntimeWarning
+        )
+        return self.retr(Y, U)
 
 
 class Manifold(metaclass=abc.ABCMeta):
@@ -46,9 +60,6 @@ class Manifold(metaclass=abc.ABCMeta):
     def __str__(self):
         return self._name
 
-    def _get_class_name(self):
-        return self.__class__.__name__
-
     @property
     def dim(self):
         """The dimension of the manifold."""
@@ -82,10 +93,11 @@ class Manifold(metaclass=abc.ABCMeta):
         and maximal trust-region radii.
         """
         raise NotImplementedError(
-            "Manifold class '{:s}' does not provide a 'typicaldist'".format(
-                self._get_class_name()))
+            f"Manifold '{self.__class__.__name__}' does not provide a "
+            "'typicaldist' property"
+        )
 
-    # Abstract methods that subclasses must implement
+    # Abstract methods that subclasses must implement.
 
     @abc.abstractmethod
     def inner(self, X, G, H):
@@ -115,14 +127,15 @@ class Manifold(metaclass=abc.ABCMeta):
     def zerovec(self, X):
         """Returns the zero vector in the tangent space at ``X``."""
 
-    # Methods which are only required by certain solvers
+    # Methods which are only required by certain solvers.
 
     def _raise_not_implemented_error(method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             raise NotImplementedError(
-                "Manifold class '{:s}' provides no implementation for "
-                "'{:s}'".format(self._get_class_name(), method.__name__))
+                f"Manifold '{self.__class__.__name__}' provides no "
+                f"implementation for '{method.__name__}'"
+            )
         return wrapper
 
     @_raise_not_implemented_error

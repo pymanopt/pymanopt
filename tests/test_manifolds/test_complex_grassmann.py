@@ -14,7 +14,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         self.k = k = 1
         self.man = ComplexGrassmann(m, n, k=k)
 
-        self.proj = lambda x, u: u - np.dot(x, np.dot(x.T, u))
+        self.proj = lambda x, u: u - x @ x.T @ u
 
     def test_inner(self):
         X = self.man.rand()

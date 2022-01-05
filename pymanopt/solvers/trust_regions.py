@@ -140,8 +140,7 @@ class TrustRegions(Solver):
         if verbosity >= 1:
             print("Optimizing...")
         if verbosity >= 2:
-            print("{:44s}f: {:+.6e}   |grad|: {:.6e}".format(
-                " ", float(fx), norm_grad))
+            print(f"{' ':44s}f: {fx:+.6e}   |grad|: {norm_grad:.6e}")
 
         self._start_optlog()
 
@@ -304,8 +303,8 @@ class TrustRegions(Solver):
                           "decreases).")
                     print(" +++ Consider decreasing options.Delta_bar "
                           "by an order of magnitude.")
-                    print(" +++ Current values: Delta_bar = {:g} and "
-                          "Delta0 = {:g}".format(Delta_bar, Delta0))
+                    print(f" +++ Current values: Delta_bar = {Delta_bar:g} "
+                          f"and Delta0 = {Delta0:g}")
             # If the actual decrease is at least 3/4 of the precicted decrease
             # and the tCG (inner solve) hit the TR boundary, increase the TR
             # radius. We also keep track of the number of consecutive
@@ -323,8 +322,8 @@ class TrustRegions(Solver):
                           "increases).")
                     print(" +++ Consider increasing options.Delta_bar "
                           "by an order of magnitude.")
-                    print(" +++ Current values: Delta_bar = {:g} and "
-                          "Delta0 = {:g}.".format(Delta_bar, Delta0))
+                    print(f" +++ Current values: Delta_bar = {Delta_bar:g} "
+                          f"and Delta0 = {Delta0:g}.")
             else:
                 # Otherwise, keep the TR radius constant.
                 consecutive_TRplus = 0
@@ -348,18 +347,16 @@ class TrustRegions(Solver):
 
             # ** Display:
             if verbosity == 2:
-                print("{:.3s} {:.3s}   k: {:5d}     num_inner: "
-                      "{:5d}     f: {:+e}   |grad|: {:e}   "
-                      "{:s}".format(accstr, trstr, k, numit,
-                                    float(fx), norm_grad, srstr))
+                print(f"{accstr:.3s} {trstr:.3s}   k: {k:5d}     num_inner: "
+                      f"{numit:5d}     f: {fx:+e}   |grad|: "
+                      f"{norm_grad:e}   {srstr:s}")
             elif verbosity > 2:
                 if self.use_rand and used_cauchy:
                     print("USED CAUCHY POINT")
-                print("{:.3s} {:.3s}    k: {:5d}     num_inner: "
-                      "{:5d}     {:s}".format(accstr, trstr, k, numit, srstr))
-                print("       f(x) : {:+e}     |grad| : "
-                      "{:e}".format(fx, norm_grad))
-                print("        rho : {:e}".format(rho))
+                print(f"{accstr:.3s} {trstr:.3s}    k: {k:5d}     num_inner: "
+                      f"{numit:5d}     {srstr:s}")
+                print(f"       f(x) : {fx:+e}     |grad| : {norm_grad:e}")
+                print(f"        rho : {rho:e}")
 
             # ** CHECK STOPPING criteria
             stop_reason = self._check_stopping_criterion(

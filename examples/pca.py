@@ -55,7 +55,7 @@ def create_cost_egrad_ehess(manifold, samples, backend):
             projector = tf.matmul(w, tf.transpose(w))
             return tf.norm(samples - tf.matmul(samples, projector)) ** 2
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
     return cost, egrad, ehess
 

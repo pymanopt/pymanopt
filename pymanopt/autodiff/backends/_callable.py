@@ -16,8 +16,9 @@ class _CallableBackend(Backend):
 
     def _raise_not_implemented_error(self, *args, **kwargs):
         raise NotImplementedError(
-            "No autodiff support available for the canonical '{}' "
-            "backend".format(self))
+            f"No autodiff support available for the canonical '{self}' "
+            "backend"
+        )
 
     compute_gradient = _raise_not_implemented_error
     compute_hessian_vector_product = _raise_not_implemented_error

@@ -85,16 +85,15 @@ class Problem:
                 raise ValueError(
                     "Verbosity level must be an nonnegative integer")
             if key in ("manifold", "precon"):
-                raise AttributeError(
-                    "Cannot override '{:s}' attribute".format(key))
+                raise AttributeError(f"Cannot override '{key}' attribute")
         super().__setattr__(key, value)
 
     @staticmethod
     def _validate_function(function, name):
         if function is not None and not isinstance(function, Function):
             raise ValueError(
-                "Function '{:s}' must be decorated with one of the decorators "
-                "from 'pymanopt.function'".format(name))
+                f"Function '{name}' must be decorated with a backend decorator"
+            )
 
     def _flatten_arguments(self, arguments, signature):
         assert len(arguments) == len(signature)

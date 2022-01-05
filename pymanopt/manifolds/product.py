@@ -14,8 +14,9 @@ class Product(Manifold):
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
         self._manifolds = tuple(manifolds)
-        name = ("Product manifold: {:s}".format(
-                " x ".join([str(man) for man in manifolds])))
+        manifold_names = " x ".join([str(man) for man in manifolds])
+        name = f"Product manifold: {manifold_names}"
+
         dimension = np.sum([man.dim for man in manifolds])
         point_layout = tuple(manifold.point_layout for manifold in manifolds)
         super().__init__(name, dimension, point_layout=point_layout)

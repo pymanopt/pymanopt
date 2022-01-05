@@ -27,10 +27,9 @@ class ComplexGrassmann(Manifold):
             raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
 
         if k == 1:
-            name = "Complex Grassmann manifold Gr({:d}, {:d})".format(n, p)
+            name = f"Complex Grassmann manifold Gr({n},{p})"
         elif k >= 2:
-            name = ("Product complex Grassmann manifold Gr({:d}, {:d})^{:d}"
-                    .format(n, p, k))
+            name = f"Product complex Grassmann manifold Gr({n},{p})^{k}"
         dimension = int(2 * k * (n * p - p ** 2))
         super().__init__(name, dimension)
 

@@ -148,8 +148,7 @@ def check_gradient(problem, x=None, d=None):
         projected_grad = problem.manifold.tangent(x, grad)
         residual = grad - projected_grad
         err = problem.manifold.norm(x, residual)
-        print("The residual should be 0, or very close. "
-              "Residual: {:g}.".format(err))
+        print(f"The residual should be 0, or very close. Residual: {err:g}.")
         print("If it is far from 0, then the gradient "
               "is not in the tangent space.")
     else:

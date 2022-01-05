@@ -18,7 +18,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def __init__(self, m, n):
         self._m = m
         self._n = n
-        name = "Oblique manifold OB({:d}, {:d})".format(m, n)
+        name = f"Oblique manifold OB({m},{n})"
         dimension = (m - 1) * n
         super().__init__(name, dimension)
 

@@ -97,11 +97,13 @@ class Sphere(_Sphere):
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
         if len(shape) == 1:
-            name = "Sphere manifold of {}-vectors".format(*shape)
+            (n1,) = shape
+            name = f"Sphere manifold of {n1}-vectors"
         elif len(shape) == 2:
-            name = "Sphere manifold of {}x{} matrices".format(*shape)
+            n1, n2 = shape
+            name = f"Sphere manifold of {n1}x{n2} matrices"
         else:
-            name = "Sphere manifold of shape " + str(shape) + " tensors"
+            name = f"Sphere manifold of shape {shape} tensors"
         dimension = np.prod(shape) - 1
         super().__init__(*shape, name=name, dimension=dimension)
 
@@ -112,9 +114,10 @@ class _SphereSubspaceIntersectionManifold(_Sphere):
         assert m == n, "projection matrix is not square"
         if dimension == 0:
             warnings.warn(
-                "Intersected subspace is 1-dimensional! The manifold '{:s}' "
+                "Intersected subspace is 1-dimensional. The manifold "
                 "therefore has dimension 0 as it only consists of isolated "
-                "points".format(self._get_class_name()))
+                "points"
+            )
         self._subspace_projector = projector
         super().__init__(n, name=name, dimension=dimension)
 
@@ -128,15 +131,15 @@ class _SphereSubspaceIntersectionManifold(_Sphere):
 
     def proj(self, X, H):
         Y = super().proj(X, H)
-        return self._subspace_projector.dot(Y)
+        return self._subspace_projector @ Y
 
     def rand(self):
         X = super().rand()
-        return self._normalize(self._subspace_projector.dot(X))
+        return self._normalize(self._subspace_projector @ X)
 
     def randvec(self, X):
         Y = super().randvec(X)
-        return self._normalize(self._subspace_projector.dot(Y))
+        return self._normalize(self._subspace_projector @ Y)
 
 
 class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
@@ -151,10 +154,10 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         self._validate_span_matrix(U)
         m = U.shape[0]
         Q, _ = la.qr(U)
-        projector = Q.dot(Q.T)
+        projector = Q @ Q.T
         subspace_dimension = la.matrix_rank(projector)
-        name = ("Sphere manifold of {}-dimensional vectors intersecting a "
-                "{}-dimensional subspace".format(m, subspace_dimension))
+        name = (f"Sphere manifold of {m}-dimensional vectors intersecting a "
+                f"{subspace_dimension}-dimensional subspace")
         dimension = subspace_dimension - 1
         super().__init__(projector, name, dimension)
 
@@ -172,9 +175,9 @@ class SphereSubspaceComplementIntersection(
         self._validate_span_matrix(U)
         m = U.shape[0]
         Q, _ = la.qr(U)
-        projector = np.eye(m) - Q.dot(Q.T)
+        projector = np.eye(m) - Q @ Q.T
         subspace_dimension = la.matrix_rank(projector)
-        name = ("Sphere manifold of {}-dimensional vectors orthogonal "
-                "to a {}-dimensional subspace".format(m, subspace_dimension))
+        name = (f"Sphere manifold of {m}-dimensional vectors orthogonal "
+                f"to a {subspace_dimension}-dimensional subspace")
         dimension = subspace_dimension - 1
         super().__init__(projector, name, dimension)

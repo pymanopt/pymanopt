@@ -30,8 +30,7 @@ class Backend(metaclass=abc.ABCMeta):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             if not self.is_available():
-                raise RuntimeError(
-                    "Backend '{}' is not available".format(self))
+                raise RuntimeError(f"Backend '{self}' is not available")
             return method(self, *args, **kwargs)
         return wrapper
 
