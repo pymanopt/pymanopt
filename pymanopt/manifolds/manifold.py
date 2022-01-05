@@ -60,9 +60,6 @@ class Manifold(metaclass=abc.ABCMeta):
     def __str__(self):
         return self._name
 
-    def _get_class_name(self):
-        return self.__class__.__name__
-
     @property
     def dim(self):
         """The dimension of the manifold."""
@@ -96,7 +93,7 @@ class Manifold(metaclass=abc.ABCMeta):
         and maximal trust-region radii.
         """
         raise NotImplementedError(
-            f"Manifold '{self._get_class_name()}' does not provide a "
+            f"Manifold '{self.__class__.__name__}' does not provide a "
             "'typicaldist' property"
         )
 
@@ -136,7 +133,7 @@ class Manifold(metaclass=abc.ABCMeta):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             raise NotImplementedError(
-                f"Manifold '{self._get_class_name()}' provides no "
+                f"Manifold '{self.__class__.__name__}' provides no "
                 f"implementation for '{method.__name__}'"
             )
         return wrapper

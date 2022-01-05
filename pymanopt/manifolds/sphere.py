@@ -114,9 +114,9 @@ class _SphereSubspaceIntersectionManifold(_Sphere):
         assert m == n, "projection matrix is not square"
         if dimension == 0:
             warnings.warn(
-                "Intersected subspace is 1-dimensional! The manifold "
-                f"'{self._get_class_name()}' therefore has dimension 0 as it "
-                "only consists of isolated points"
+                "Intersected subspace is 1-dimensional. The manifold "
+                "therefore has dimension 0 as it only consists of isolated "
+                "points"
             )
         self._subspace_projector = projector
         super().__init__(n, name=name, dimension=dimension)
