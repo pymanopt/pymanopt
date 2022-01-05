@@ -21,6 +21,6 @@ class ExampleRunner:
         if not quiet:
             print(self._name)
             print("-" * len(self._name))
-            print("Using '{:s}' backend".format(backend))
+            print(f"Using '{backend}' backend")
             print()
         self._run_function(backend=backend, quiet=quiet)

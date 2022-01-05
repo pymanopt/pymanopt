@@ -48,7 +48,7 @@ def create_cost_egrad(manifold, matrix, backend):
             X = tf.matmul(u, tf.matmul(tf.linalg.diag(s), vt))
             return tf.norm(X - matrix) ** 2
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
     return cost, egrad
 
@@ -80,7 +80,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         print()
         print(low_rank_solution)
         print()
-        print("Rank-{} approximation:".format(rank))
+        print(f"Rank-{rank} approximation:")
         print()
         print(low_rank_approximation)
         print()

@@ -50,7 +50,7 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
         def egrad(X):
             return -tf.matmul(matrix + matrix.T, X)
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
     return cost, egrad, ehess
 

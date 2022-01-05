@@ -38,7 +38,7 @@ def create_cost_egrad(manifold, ABt, backend):
         def cost(X):
             return -tf.tensordot(X, ABt, axes=ABt.ndim)
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
     return cost, egrad
 

@@ -39,7 +39,7 @@ def create_cost_egrad(manifold, matrix, backend):
         def cost(X):
             return 0.5 * tf.reduce_sum((X - matrix) ** 2)
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
     return cost, egrad
 

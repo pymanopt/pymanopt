@@ -44,7 +44,7 @@ def create_cost(manifold, epsilon, backend):
             u = tf.reduce_sum(tf.linalg.band_part(Y, 0, -1))
             return s + epsilon * tf.math.log(u)
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
     return cost
 
