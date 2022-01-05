@@ -28,10 +28,9 @@ class Grassmann(Manifold):
             raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
 
         if k == 1:
-            name = "Grassmann manifold Gr({:d}, {:d})".format(n, p)
+            name = f"Grassmann manifold Gr({n},{p})"
         elif k >= 2:
-            name = "Product Grassmann manifold Gr({:d}, {:d})^{:d}".format(
-                n, p, k)
+            name = f"Product Grassmann manifold Gr({n},{p})^{k}"
         dimension = int(k * (n * p - p ** 2))
         super().__init__(name, dimension)
 

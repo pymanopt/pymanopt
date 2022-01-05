@@ -23,10 +23,11 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         self._k = k
 
         if k == 1:
-            name = ("Manifold of positive definite ({} x {}) matrices").format(
-                n, n)
+            name = f"Manifold of positive definite {n}x{n} matrices"
         else:
-            name = "Product manifold of {} ({} x {}) matrices".format(k, n, n)
+            name = (
+                f"Product manifold of {k} positive definite {n}x{n} matrices"
+            )
         dimension = int(k * n * (n + 1) / 2)
         super().__init__(name, dimension)
 
@@ -222,8 +223,7 @@ class PSDFixedRank(_PSDFixedRank):
     """
 
     def __init__(self, n, k):
-        name = ("YY' quotient manifold of {:d}x{:d} psd matrices of "
-                "rank {:d}".format(n, n, k))
+        name = f"Quotient manifold of {n}x{n} psd matrices of rank {k}"
         dimension = int(k * n - k * (k - 1) / 2)
         super().__init__(n, k, name, dimension)
 
@@ -254,8 +254,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
     """
 
     def __init__(self, n, k):
-        name = ("YY' quotient manifold of Hermitian {:d}x{:d} complex "
-                "matrices of rank {:d}".format(n, n, k))
+        name = f"Quotient manifold of Hermitian {n}x{n} matrices of rank {k}"
         dimension = 2 * k * n - k * k
         super().__init__(n, k, name, dimension)
 
@@ -309,8 +308,8 @@ class Elliptope(Manifold, RetrAsExpMixin):
         self._n = n
         self._k = k
 
-        name = ("YY' quotient manifold of {:d}x{:d} psd matrices of rank {:d} "
-                "with diagonal elements being 1".format(n, n, k))
+        name = (f"Quotient manifold of {n}x{n} psd matrices of rank {k} "
+                "with unit diagonal elements")
         dimension = int(n * (k - 1) - k * (k - 1) / 2)
         super().__init__(name, dimension)
 

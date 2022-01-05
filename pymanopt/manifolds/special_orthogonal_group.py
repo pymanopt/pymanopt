@@ -38,9 +38,9 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         self._k = k
 
         if k == 1:
-            name = "Rotations manifold SO({n})".format(n=n)
+            name = f"Special orthogonal group SO({n})"
         elif k > 1:
-            name = "Rotations manifold SO({n})^{k}".format(n=n, k=k)
+            name = f"Sphecial orthogonal group SO({n})^{k}"
         else:
             raise ValueError("k must be an integer no less than 1.")
         dimension = int(k * comb(n, 2))

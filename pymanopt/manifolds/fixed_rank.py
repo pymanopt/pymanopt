@@ -82,8 +82,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         self._stiefel_m = Stiefel(m, k)
         self._stiefel_n = Stiefel(n, k)
 
-        name = ("Manifold of {m}-by-{n} matrices with rank {k} and embedded "
-                "geometry".format(m=m, n=n, k=k))
+        name = f"Embedded manifold of {m}x{n} matrices of rank {k}"
         dimension = (m + n - k) * k
         super().__init__(name, dimension, point_layout=3)
 

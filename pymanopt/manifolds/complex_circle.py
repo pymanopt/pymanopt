@@ -19,7 +19,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         if dimension == 1:
             name = "Complex circle S^1"
         else:
-            name = "Complex circle (S^1)^{:d}".format(dimension)
+            name = f"Product manifold of complex circles (S^1)^{dimension}"
         super().__init__(name, dimension)
 
     def inner(self, z, v, w):
