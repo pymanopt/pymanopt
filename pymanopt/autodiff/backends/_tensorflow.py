@@ -7,9 +7,9 @@ import functools
 
 import numpy as np
 
-from ._backend import Backend
-from .. import make_tracing_backend_decorator
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
+from .. import make_tracing_backend_decorator
+from ._backend import Backend
 
 
 class _TensorFlowBackend(Backend):
@@ -40,11 +40,11 @@ class _TensorFlowBackend(Backend):
         @functools.wraps(function)
         def wrapper(*args):
             return function(*map(self._from_numpy, args)).numpy()
+
         return wrapper
 
     @Backend._assert_backend_available
     def compute_gradient(self, function, num_arguments):
-
         def gradient(*args):
             tf_arguments = []
             with tf.GradientTape() as tape:
@@ -55,6 +55,7 @@ class _TensorFlowBackend(Backend):
                 val = function(*tf_arguments)
                 grads = tape.gradient(val, tf_arguments)
             return self._sanitize_gradients(tf_arguments, grads)
+
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
         return gradient
@@ -76,7 +77,8 @@ class _TensorFlowBackend(Backend):
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(
-                    hessian_vector_product)
+                hessian_vector_product
+            )
         return hessian_vector_product
 
 

@@ -13,7 +13,7 @@ class RetrAsExpMixin:
         warnings.warn(
             f"Exponential map for manifold '{class_name}' not available. "
             "Using retraction instead.",
-            RuntimeWarning
+            RuntimeWarning,
         )
         return self.retr(Y, U)
 
@@ -136,6 +136,7 @@ class Manifold(metaclass=abc.ABCMeta):
                 f"Manifold '{self.__class__.__name__}' provides no "
                 f"implementation for '{method.__name__}'"
             )
+
         return wrapper
 
     @_raise_not_implemented_error

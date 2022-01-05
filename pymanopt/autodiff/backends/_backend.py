@@ -27,11 +27,13 @@ class Backend(metaclass=abc.ABCMeta):
         Raises:
             RuntimeError: If the backend isn't available.
         """
+
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             if not self.is_available():
                 raise RuntimeError(f"Backend '{self}' is not available")
             return method(self, *args, **kwargs)
+
         return wrapper
 
     @abc.abstractstaticmethod

@@ -3,7 +3,7 @@ __all__ = [
     "NelderMead",
     "ParticleSwarm",
     "SteepestDescent",
-    "TrustRegions"
+    "TrustRegions",
 ]
 
 from .conjugate_gradient import ConjugateGradient

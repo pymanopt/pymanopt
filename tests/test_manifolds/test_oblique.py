@@ -1,6 +1,7 @@
 import numpy.testing as np_testing
 
 from pymanopt.manifolds import Oblique
+
 from .._test import TestCase
 
 

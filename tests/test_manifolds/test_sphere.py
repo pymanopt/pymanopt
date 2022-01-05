@@ -1,11 +1,17 @@
 import warnings
 
 import autograd.numpy as np
-from numpy import linalg as la, random as rnd, testing as np_testing
+from numpy import linalg as la
+from numpy import random as rnd
+from numpy import testing as np_testing
 
-from pymanopt.manifolds import (Sphere, SphereSubspaceComplementIntersection,
-                                SphereSubspaceIntersection)
+from pymanopt.manifolds import (
+    Sphere,
+    SphereSubspaceComplementIntersection,
+    SphereSubspaceIntersection,
+)
 from pymanopt.tools import testing
+
 from .._test import TestCase
 
 
@@ -47,8 +53,9 @@ class TestSphereManifold(TestCase):
         H = rnd.randn(self.m, self.n)
 
         #  Compare the projections.
-        np_testing.assert_array_almost_equal(H - X * np.trace(X.T @ H),
-                                             self.man.proj(X, H))
+        np_testing.assert_array_almost_equal(
+            H - X * np.trace(X.T @ H), self.man.proj(X, H)
+        )
 
     def test_egrad2rgrad(self):
         # Should be the same as proj
@@ -60,8 +67,9 @@ class TestSphereManifold(TestCase):
         H = rnd.randn(self.m, self.n)
 
         #  Compare the projections.
-        np_testing.assert_array_almost_equal(H - X * np.trace(X.T @ H),
-                                             self.man.egrad2rgrad(X, H))
+        np_testing.assert_array_almost_equal(
+            H - X * np.trace(X.T @ H), self.man.egrad2rgrad(X, H)
+        )
 
     def test_ehess2rhess(self):
         x = self.man.rand()
@@ -69,9 +77,10 @@ class TestSphereManifold(TestCase):
         egrad = rnd.randn(self.m, self.n)
         ehess = rnd.randn(self.m, self.n)
 
-        np_testing.assert_allclose(testing.ehess2rhess(self.proj)(x, egrad,
-                                                                  ehess, u),
-                                   self.man.ehess2rhess(x, egrad, ehess, u))
+        np_testing.assert_allclose(
+            testing.ehess2rhess(self.proj)(x, egrad, ehess, u),
+            self.man.ehess2rhess(x, egrad, ehess, u),
+        )
 
     def test_retr(self):
         # Test that the result is on the manifold and that for small

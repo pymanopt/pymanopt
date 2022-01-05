@@ -1,4 +1,5 @@
 from pymanopt.manifolds import Elliptope
+
 from .._test import TestCase
 
 
@@ -33,22 +34,22 @@ class TestElliptopeManifold(TestCase):
     # def test_transp(self):
 
     # def test_exp_log_inverse(self):
-        # s = self.man
-        # X = s.rand()
-        # U = s.randvec(X)
-        # Uexplog = s.exp(X, s.log(X, U))
-        # np_testing.assert_array_almost_equal(U, Uexplog)
+    # s = self.man
+    # X = s.rand()
+    # U = s.randvec(X)
+    # Uexplog = s.exp(X, s.log(X, U))
+    # np_testing.assert_array_almost_equal(U, Uexplog)
 
     # def test_log_exp_inverse(self):
-        # s = self.man
-        # X = s.rand()
-        # U = s.randvec(X)
-        # Ulogexp = s.log(X, s.exp(X, U))
-        # np_testing.assert_array_almost_equal(U, Ulogexp)
+    # s = self.man
+    # X = s.rand()
+    # U = s.randvec(X)
+    # Ulogexp = s.log(X, s.exp(X, U))
+    # np_testing.assert_array_almost_equal(U, Ulogexp)
 
     # def test_pairmean(self):
-        # s = self.man
-        # X = s.rand()
-        # Y = s.rand()
-        # Z = s.pairmean(X, Y)
-        # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
+    # s = self.man
+    # X = s.rand()
+    # Y = s.rand()
+    # Z = s.pairmean(X, Y)
+    # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

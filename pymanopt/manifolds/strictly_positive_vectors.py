@@ -1,5 +1,6 @@
 import numpy as np
-from numpy import linalg as la, random as rnd
+from numpy import linalg as la
+from numpy import random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -11,6 +12,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     definite diagonal matrices the geometry is inherited from the geometry of
     positive definite matrices.
     """
+
     def __init__(self, n, k=1):
         self._n = n
         self._k = k
@@ -27,8 +29,8 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         return np.sqrt(self.dim)
 
     def inner(self, x, u, v):
-        inv_x = (1./x)
-        return np.sum(inv_x*u*inv_x*v, axis=0, keepdims=True)
+        inv_x = 1.0 / x
+        return np.sum(inv_x * u * inv_x * v, axis=0, keepdims=True)
 
     def proj(self, x, u):
         return u
@@ -47,18 +49,19 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         return np.zeros(self._n, self._k)
 
     def dist(self, x, y):
-        return la.norm(np.log(x)-np.log(y), axis=0, keepdims=True)
+        return la.norm(np.log(x) - np.log(y), axis=0, keepdims=True)
 
     def egrad2rgrad(self, x, u):
-        return u*(x**2)
+        return u * (x ** 2)
 
     def exp(self, x, u):
-        return x*np.exp((1./x)*u)
+        return x * np.exp((1.0 / x) * u)
 
     def retr(self, x, u):
-        return x+u
+        return x + u
 
     def log(self, x, y):
-        return x*np.log((1./x)*y)
+        return x * np.log((1.0 / x) * y)
+
 
 # def transp(self, x1, x2, d):

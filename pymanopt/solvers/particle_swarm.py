@@ -21,8 +21,16 @@ class ParticleSwarm(Solver):
         social: Quantifies performance relative to neighbors.
     """
 
-    def __init__(self, maxcostevals=None, maxiter=None, populationsize=None,
-                 nostalgia=1.4, social=1.4, *args, **kwargs):
+    def __init__(
+        self,
+        maxcostevals=None,
+        maxiter=None,
+        populationsize=None,
+        nostalgia=1.4,
+        social=1.4,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals
@@ -68,8 +76,10 @@ class ParticleSwarm(Solver):
             raise ValueError("The initial population x must be iterable")
         else:
             if len(x) != self._populationsize:
-                print("The population size was forced to the size of "
-                      "the given initial population")
+                print(
+                    "The population size was forced to the size of "
+                    "the given initial population"
+                )
                 self._populationsize = len(x)
 
         # Initialize personal best positions to the initial population.
@@ -120,13 +130,14 @@ class ParticleSwarm(Solver):
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):
                 stop_reason = self._check_stopping_criterion(
-                    time0, iter=iter, costevals=costevals)
+                    time0, iter=iter, costevals=costevals
+                )
                 if stop_reason is not None:
                     break
             if stop_reason:
                 if verbosity >= 1:
                     print(stop_reason)
-                    print('')
+                    print("")
                 break
 
             # Compute the inertia factor which we linearly decrease from 0.9 to
@@ -175,6 +186,12 @@ class ParticleSwarm(Solver):
         if self._logverbosity <= 0:
             return xbest
         else:
-            self._stop_optlog(xbest, fbest, stop_reason, time0,
-                              costevals=costevals, iter=iter)
+            self._stop_optlog(
+                xbest,
+                fbest,
+                stop_reason,
+                time0,
+                costevals=costevals,
+                iter=iter,
+            )
             return xbest, self._optlog

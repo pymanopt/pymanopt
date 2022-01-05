@@ -12,7 +12,8 @@ from pymanopt.tools import printer
 # TODO: Use Python's enum module.
 BetaTypes = tools.make_enum(
     "BetaTypes",
-    "FletcherReeves PolakRibiere HestenesStiefel HagerZhang".split())
+    "FletcherReeves PolakRibiere HestenesStiefel HagerZhang".split(),
+)
 
 
 class ConjugateGradient(Solver):
@@ -33,8 +34,14 @@ class ConjugateGradient(Solver):
         linesearch: The line search method.
     """
 
-    def __init__(self, beta_type=BetaTypes.HestenesStiefel, orth_value=np.inf,
-                 linesearch=None, *args, **kwargs):
+    def __init__(
+        self,
+        beta_type=BetaTypes.HestenesStiefel,
+        orth_value=np.inf,
+        linesearch=None,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         self._beta_type = beta_type
@@ -103,10 +110,14 @@ class ConjugateGradient(Solver):
         # Initial descent direction is the negative gradient
         desc_dir = -Pgrad
 
-        self._start_optlog(extraiterfields=['gradnorm'],
-                           solverparams={'beta_type': self._beta_type,
-                                         'orth_value': self._orth_value,
-                                         'linesearcher': linesearch})
+        self._start_optlog(
+            extraiterfields=["gradnorm"],
+            solverparams={
+                "beta_type": self._beta_type,
+                "orth_value": self._orth_value,
+                "linesearcher": linesearch,
+            },
+        )
 
         # Initialize iteration counter and timer
         iter = 0
@@ -120,12 +131,13 @@ class ConjugateGradient(Solver):
                 self._append_optlog(iter, x, cost, gradnorm=gradnorm)
 
             stop_reason = self._check_stopping_criterion(
-                time0, gradnorm=gradnorm, iter=iter + 1, stepsize=stepsize)
+                time0, gradnorm=gradnorm, iter=iter + 1, stepsize=stepsize
+            )
 
             if stop_reason:
                 if verbosity >= 1:
                     print(stop_reason)
-                    print('')
+                    print("")
                 break
 
             # The line search algorithms require the directional derivative of
@@ -138,16 +150,19 @@ class ConjugateGradient(Solver):
             if df0 >= 0:
                 # Or we switch to the negative gradient direction.
                 if verbosity >= 3:
-                    print("Conjugate gradient info: got an ascent direction "
-                          "(df0 = %.2f), reset to the (preconditioned) "
-                          "steepest descent direction." % df0)
+                    print(
+                        "Conjugate gradient info: got an ascent direction "
+                        "(df0 = %.2f), reset to the (preconditioned) "
+                        "steepest descent direction." % df0
+                    )
                 # Reset to negative gradient: this discards the CG memory.
                 desc_dir = -Pgrad
                 df0 = -gradPgrad
 
             # Execute line search
-            stepsize, newx = linesearch.search(objective, man, x, desc_dir,
-                                               cost, df0)
+            stepsize, newx = linesearch.search(
+                objective, man, x, desc_dir, cost, df0
+            )
 
             # Compute the new cost-related quantities for newx
             newcost = objective(newx)
@@ -178,8 +193,9 @@ class ConjugateGradient(Solver):
                     diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
                     try:
-                        beta = max(0,
-                                   ip_diff / man.inner(newx, diff, desc_dir))
+                        beta = max(
+                            0, ip_diff / man.inner(newx, diff, desc_dir)
+                        )
                     # if ip_diff = man.inner(newx, diff, desc_dir) = 0
                     except ZeroDivisionError:
                         beta = 1
@@ -189,8 +205,12 @@ class ConjugateGradient(Solver):
                     Pdiff = Pnewgrad - Poldgrad
                     deno = man.inner(newx, diff, desc_dir)
                     numo = man.inner(newx, diff, Pnewgrad)
-                    numo -= (2 * man.inner(newx, diff, Pdiff) *
-                             man.inner(newx, desc_dir, newgrad) / deno)
+                    numo -= (
+                        2
+                        * man.inner(newx, diff, Pdiff)
+                        * man.inner(newx, desc_dir, newgrad)
+                        / deno
+                    )
                     beta = numo / deno
                     # Robustness (see Hager-Zhang paper mentioned above)
                     desc_dir_norm = man.norm(newx, desc_dir)
@@ -198,10 +218,12 @@ class ConjugateGradient(Solver):
                     beta = max(beta, eta_HZ)
                 else:
                     types = ", ".join(
-                        ["BetaTypes.%s" % t for t in BetaTypes._fields])
+                        ["BetaTypes.%s" % t for t in BetaTypes._fields]
+                    )
                     raise ValueError(
-                        "Unknown beta_type %s. Should be one of %s." % (
-                            self._beta_type, types))
+                        "Unknown beta_type %s. Should be one of %s."
+                        % (self._beta_type, types)
+                    )
 
                 desc_dir = -Pnewgrad + beta * desc_dir
 
@@ -218,7 +240,13 @@ class ConjugateGradient(Solver):
         if self._logverbosity <= 0:
             return x
         else:
-            self._stop_optlog(x, cost, stop_reason, time0,
-                              stepsize=stepsize, gradnorm=gradnorm,
-                              iter=iter)
+            self._stop_optlog(
+                x,
+                cost,
+                stop_reason,
+                time0,
+                stepsize=stepsize,
+                gradnorm=gradnorm,
+                iter=iter,
+            )
             return x, self._optlog

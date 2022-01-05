@@ -21,8 +21,10 @@ class ComplexGrassmann(Manifold):
         self._k = k
 
         if n < p or p < 1:
-            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
-                             "and p = %d." % (n, p))
+            raise ValueError(
+                "Need n >= p >= 1. Values supplied were n = %d "
+                "and p = %d." % (n, p)
+            )
         if k < 1:
             raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
 
@@ -48,18 +50,26 @@ class ComplexGrassmann(Manifold):
 
     def rand(self):
         if self._k == 1:
-            q, _ = np.linalg.qr((np.random.randn(self._n, self._p)
-                                 + 1j*np.random.randn(self._n, self._p)))
+            q, _ = np.linalg.qr(
+                (
+                    np.random.randn(self._n, self._p)
+                    + 1j * np.random.randn(self._n, self._p)
+                )
+            )
             return q
 
         X = np.zeros((self._k, self._n, self._p), np.complex_)
         for i in range(self._k):
-            X[i], _ = np.linalg.qr((np.random.randn(self._n, self._p)
-                                    + 1j*np.random.randn(self._n, self._p)))
+            X[i], _ = np.linalg.qr(
+                (
+                    np.random.randn(self._n, self._p)
+                    + 1j * np.random.randn(self._n, self._p)
+                )
+            )
         return X
 
     def randvec(self, X):
-        U = np.random.randn(*np.shape(X)) + 1j*np.random.randn(*np.shape(X))
+        U = np.random.randn(*np.shape(X)) + 1j * np.random.randn(*np.shape(X))
         U = self.proj(X, U)
         U = U / np.linalg.norm(U)
         return U
@@ -96,8 +106,9 @@ class ComplexGrassmann(Manifold):
         U, S, VH = np.linalg.svd(U, full_matrices=False)
         cos_S = np.expand_dims(np.cos(S), -2)
         sin_S = np.expand_dims(np.sin(S), -2)
-        Y = (multiprod(multiprod(X, multihconj(VH) * cos_S), VH)
-             + multiprod(U * sin_S, VH))
+        Y = multiprod(multiprod(X, multihconj(VH) * cos_S), VH) + multiprod(
+            U * sin_S, VH
+        )
 
         # From numerical experiments, it seems necessary to
         # re-orthonormalize. This is overall quite expensive.

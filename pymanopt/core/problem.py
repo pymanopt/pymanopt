@@ -42,16 +42,25 @@ class Problem:
     """
 
     def __init__(
-        self, manifold: Manifold, cost: Function,
-        egrad: Optional[Function] = None, ehess: Optional[Function] = None,
-        grad: Optional[Function] = None, hess: Optional[Function] = None,
-        precon: Optional[Callable] = None, verbosity: int = 2
+        self,
+        manifold: Manifold,
+        cost: Function,
+        egrad: Optional[Function] = None,
+        ehess: Optional[Function] = None,
+        grad: Optional[Function] = None,
+        hess: Optional[Function] = None,
+        precon: Optional[Callable] = None,
+        verbosity: int = 2,
     ):
         self.manifold = manifold
 
         for function, name in (
-                (cost, "cost"), (egrad, "egrad"), (ehess, "ehess"),
-                (grad, "grad"), (hess, "hess")):
+            (cost, "cost"),
+            (egrad, "egrad"),
+            (ehess, "ehess"),
+            (grad, "grad"),
+            (hess, "hess"),
+        ):
             self._validate_function(function, name)
 
         self._original_cost = cost
@@ -72,18 +81,22 @@ class Problem:
         self._hess = hess
 
         if precon is None:
+
             def precon(x, d):
                 return d
+
         self.precon = precon
 
         self.verbosity = verbosity
 
     def __setattr__(self, key, value):
         if hasattr(self, key):
-            if (key == "verbosity"
-                    and (not isinstance(value, int) or value < 0)):
+            if key == "verbosity" and (
+                not isinstance(value, int) or value < 0
+            ):
                 raise ValueError(
-                    "Verbosity level must be an nonnegative integer")
+                    "Verbosity level must be an nonnegative integer"
+                )
             if key in ("manifold", "precon"):
                 raise AttributeError(f"Cannot override '{key}' attribute")
         super().__setattr__(key, value)
@@ -127,37 +140,45 @@ class Problem:
                 raise ValueError("Function returned an unexpected value")
             if len(return_values) != num_return_values:
                 raise ValueError(
-                    "Function returned an unexpected number of arguments")
+                    "Function returned an unexpected number of arguments"
+                )
             groups = []
             i = 0
             for group_size in signature:
                 if group_size == 1:
                     group = return_values[i]
                 else:
-                    group = return_values[i:i+group_size]
+                    group = return_values[i : i + group_size]
                 groups.append(group)
                 i += group_size
             return groups
+
         return wrapper
 
     def _wrap_function(self, function):
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (tuple, list)):
+
             @functools.wraps(function)
             def wrapper(point):
                 return function(*self._flatten_arguments(point, point_layout))
+
             return wrapper
 
         assert isinstance(point_layout, int)
 
         if point_layout == 1:
+
             @functools.wraps(function)
             def wrapper(point):
                 return function(point)
+
         else:
+
             @functools.wraps(function)
             def wrapper(point):
                 return function(*point)
+
         return wrapper
 
     def _wrap_gradient(self, gradient):
@@ -170,21 +191,28 @@ class Problem:
     def _wrap_hessian_vector_product(self, hessian_vector_product):
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (list, tuple)):
+
             @functools.wraps(hessian_vector_product)
             def wrapper(point, vector):
                 return hessian_vector_product(
                     *self._flatten_arguments(point, point_layout),
-                    *self._flatten_arguments(vector, point_layout))
+                    *self._flatten_arguments(vector, point_layout),
+                )
+
             return self._group_return_values(wrapper, point_layout)
 
         if point_layout == 1:
+
             @functools.wraps(hessian_vector_product)
             def wrapper(point, vector):
                 return hessian_vector_product(point, vector)
+
         else:
+
             @functools.wraps(hessian_vector_product)
             def wrapper(point, vector):
                 return hessian_vector_product(*point, *vector)
+
         return wrapper
 
     @property
@@ -195,7 +223,8 @@ class Problem:
     def egrad(self):
         if self._egrad is None:
             self._egrad = self._wrap_gradient(
-                self._original_cost.compute_gradient())
+                self._original_cost.compute_gradient()
+            )
         return self._egrad
 
     @property
@@ -205,6 +234,7 @@ class Problem:
 
             def grad(x):
                 return self.manifold.egrad2rgrad(x, egrad(x))
+
             self._grad = grad
         return self._grad
 
@@ -212,7 +242,8 @@ class Problem:
     def ehess(self):
         if self._ehess is None:
             self._ehess = self._wrap_hessian_vector_product(
-                self._original_cost.compute_hessian_vector_product())
+                self._original_cost.compute_hessian_vector_product()
+            )
         return self._ehess
 
     @property
@@ -222,6 +253,8 @@ class Problem:
 
             def hess(x, a):
                 return self.manifold.ehess2rhess(
-                    x, self.egrad(x), ehess(x, a), a)
+                    x, self.egrad(x), ehess(x, a), a
+                )
+
             self._hess = hess
         return self._hess

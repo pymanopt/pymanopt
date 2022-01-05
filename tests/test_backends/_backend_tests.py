@@ -1,7 +1,8 @@
 import unittest
 
 import numpy as np
-from numpy import random as rnd, testing as np_testing
+from numpy import random as rnd
+from numpy import testing as np_testing
 
 from pymanopt.manifolds.manifold import Manifold
 
@@ -176,7 +177,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
 
 class TestVector(unittest.TestCase):
     def setUp(self):
-        np.seterr(all='raise')
+        np.seterr(all="raise")
 
         self.manifold = manifold_factory(point_layout=1)
 
@@ -218,7 +219,7 @@ class TestVector(unittest.TestCase):
 
 class TestMatrix(unittest.TestCase):
     def setUp(self):
-        np.seterr(all='raise')
+        np.seterr(all="raise")
 
         self.manifold = manifold_factory(point_layout=1)
 
@@ -264,7 +265,7 @@ class TestMatrix(unittest.TestCase):
 
 class TestTensor3(unittest.TestCase):
     def setUp(self):
-        np.seterr(all='raise')
+        np.seterr(all="raise")
 
         self.manifold = manifold_factory(point_layout=1)
 
@@ -311,7 +312,7 @@ class TestTensor3(unittest.TestCase):
 class TestMixed(unittest.TestCase):
     # Test autograd on a tuple containing vector, matrix and tensor3.
     def setUp(self):
-        np.seterr(all='raise')
+        np.seterr(all="raise")
 
         self.manifold = manifold_factory(point_layout=3)
 
@@ -325,9 +326,11 @@ class TestMixed(unittest.TestCase):
         self.y = y = (rnd.randn(n1), rnd.randn(n2, n3), rnd.randn(n4, n5, n6))
         self.a = a = (rnd.randn(n1), rnd.randn(n2, n3), rnd.randn(n4, n5, n6))
 
-        self.correct_cost = (np.exp(np.sum(y[0] ** 2)) +
-                             np.exp(np.sum(y[1] ** 2)) +
-                             np.exp(np.sum(y[2] ** 2)))
+        self.correct_cost = (
+            np.exp(np.sum(y[0] ** 2))
+            + np.exp(np.sum(y[1] ** 2))
+            + np.exp(np.sum(y[2] ** 2))
+        )
 
         # Calculate correct grad
         g1 = 2 * y[0] * np.exp(np.sum(y[0] ** 2))

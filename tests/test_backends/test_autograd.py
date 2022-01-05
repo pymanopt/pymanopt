@@ -1,6 +1,7 @@
 import autograd.numpy as np
 
 from pymanopt.function import Autograd
+
 from . import _backend_tests
 
 
@@ -99,7 +100,10 @@ class TestMixed(_backend_tests.TestMixed):
 
         @Autograd(self.manifold)
         def cost(x, y, z):
-            return (np.exp(np.sum(x ** 2)) + np.exp(np.sum(y ** 2)) +
-                    np.exp(np.sum(z ** 2)))
+            return (
+                np.exp(np.sum(x ** 2))
+                + np.exp(np.sum(y ** 2))
+                + np.exp(np.sum(z ** 2))
+            )
 
         self.cost = cost

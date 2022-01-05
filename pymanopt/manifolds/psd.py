@@ -1,5 +1,6 @@
 import numpy as np
-from numpy import linalg as la, random as rnd
+from numpy import linalg as la
+from numpy import random as rnd
 from scipy.linalg import expm
 from scipy.linalg import solve_continuous_lyapunov as lyap
 
@@ -18,6 +19,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         The geometry is based on the discussion in chapter 6 of [Bha2007]_.
         Also see [SH2015]_ for more details.
     """
+
     def __init__(self, n, k=1):
         self._n = n
         self._k = k
@@ -41,8 +43,9 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         # may be more efficient ways to compute this.
         c = la.cholesky(x)
         c_inv = la.inv(c)
-        logm = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
-                        pos_def=True)
+        logm = multilog(
+            multiprod(multiprod(c_inv, y), multitransp(c_inv)), pos_def=True
+        )
         return la.norm(logm)
 
     def inner(self, x, u, v):
@@ -62,8 +65,9 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 
     def ehess2rhess(self, x, egrad, ehess, u):
         # TODO: Check that this is correct
-        return (multiprod(multiprod(x, multisym(ehess)), x) +
-                multisym(multiprod(multiprod(u, multisym(egrad)), x)))
+        return multiprod(multiprod(x, multisym(ehess)), x) + multisym(
+            multiprod(multiprod(u, multisym(egrad)), x)
+        )
 
     def norm(self, x, u):
         return np.sqrt(self.inner(x, u, u))
@@ -123,8 +127,9 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
     def log(self, x, y):
         c = la.cholesky(x)
         c_inv = la.inv(c)
-        logm = multilog(multiprod(multiprod(c_inv, y), multitransp(c_inv)),
-                        pos_def=True)
+        logm = multilog(
+            multiprod(multiprod(c_inv, y), multitransp(c_inv)), pos_def=True
+        )
         return multiprod(multiprod(c, logm), multitransp(c))
 
     def zerovec(self, x):
@@ -138,6 +143,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 # TODO(nkoep): This could either stay in here (seeing how it's a manifold of
 #              psd matrices, or in fixed_rank. Alternatively, move this one and
 #              the next class to a dedicated 'psd_fixed_rank' module.
+
 
 class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def __init__(self, n, k, name, dimension):
@@ -308,8 +314,10 @@ class Elliptope(Manifold, RetrAsExpMixin):
         self._n = n
         self._k = k
 
-        name = (f"Quotient manifold of {n}x{n} psd matrices of rank {k} "
-                "with unit diagonal elements")
+        name = (
+            f"Quotient manifold of {n}x{n} psd matrices of rank {k} "
+            "with unit diagonal elements"
+        )
         dimension = int(n * (k - 1) - k * (k - 1) / 2)
         super().__init__(name, dimension)
 

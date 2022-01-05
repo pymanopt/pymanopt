@@ -1,6 +1,7 @@
 import tensorflow as tf
 
 from pymanopt.function import TensorFlow
+
 from . import _backend_tests
 
 
@@ -99,8 +100,10 @@ class TestMixed(_backend_tests.TestMixed):
 
         @TensorFlow(self.manifold)
         def cost(x, y, z):
-            return (tf.exp(tf.reduce_sum(x ** 2)) +
-                    tf.exp(tf.reduce_sum(y ** 2)) +
-                    tf.exp(tf.reduce_sum(z ** 2)))
+            return (
+                tf.exp(tf.reduce_sum(x ** 2))
+                + tf.exp(tf.reduce_sum(y ** 2))
+                + tf.exp(tf.reduce_sum(z ** 2))
+            )
 
         self.cost = cost

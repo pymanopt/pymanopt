@@ -59,20 +59,35 @@ from pymanopt.solvers.solver import Solver
 
 
 class TrustRegions(Solver):
-    (NEGATIVE_CURVATURE, EXCEEDED_TR, REACHED_TARGET_LINEAR,
-     REACHED_TARGET_SUPERLINEAR, MAX_INNER_ITER, MODEL_INCREASED) = range(6)
+    (
+        NEGATIVE_CURVATURE,
+        EXCEEDED_TR,
+        REACHED_TARGET_LINEAR,
+        REACHED_TARGET_SUPERLINEAR,
+        MAX_INNER_ITER,
+        MODEL_INCREASED,
+    ) = range(6)
     TCG_STOP_REASONS = {
         NEGATIVE_CURVATURE: "negative curvature",
         EXCEEDED_TR: "exceeded trust region",
         REACHED_TARGET_LINEAR: "reached target residual-kappa (linear)",
         REACHED_TARGET_SUPERLINEAR: "reached target residual-theta "
-                                    "(superlinear)",
+        "(superlinear)",
         MAX_INNER_ITER: "maximum inner iterations",
-        MODEL_INCREASED: "model increased"
+        MODEL_INCREASED: "model increased",
     }
 
-    def __init__(self, miniter=3, kappa=0.1, theta=1.0, rho_prime=0.1,
-                 use_rand=False, rho_regularization=1e3, *args, **kwargs):
+    def __init__(
+        self,
+        miniter=3,
+        kappa=0.1,
+        theta=1.0,
+        rho_prime=0.1,
+        use_rand=False,
+        rho_regularization=1e3,
+        *args,
+        **kwargs,
+    ):
         """Riemannian Trust-Regions solver.
 
         Second-order method that approximates the objective function by a
@@ -89,8 +104,15 @@ class TrustRegions(Solver):
         self.use_rand = use_rand
         self.rho_regularization = rho_regularization
 
-    def solve(self, problem, x=None, mininner=1, maxinner=None,
-              Delta_bar=None, Delta0=None):
+    def solve(
+        self,
+        problem,
+        x=None,
+        mininner=1,
+        maxinner=None,
+        Delta_bar=None,
+        Delta0=None,
+    ):
         man = problem.manifold
         verbosity = problem.verbosity
 
@@ -162,8 +184,16 @@ class TrustRegions(Solver):
 
             # Solve TR subproblem approximately
             eta, Heta, numit, stop_inner = self._truncated_conjugate_gradient(
-                problem, x, fgradx, eta, Delta, self.theta, self.kappa,
-                mininner, maxinner)
+                problem,
+                x,
+                fgradx,
+                eta,
+                Delta,
+                self.theta,
+                self.kappa,
+                mininner,
+                maxinner,
+            )
 
             srstr = self.TCG_STOP_REASONS[stop_inner]
 
@@ -189,10 +219,16 @@ class TrustRegions(Solver):
 
                 # Now that we have computed the Cauchy point in addition to the
                 # returned eta, we might as well keep the best of them.
-                mdle = (fx + man.inner(x, fgradx, eta) +
-                        0.5 * man.inner(x, Heta, eta))
-                mdlec = (fx + man.inner(x, fgradx, eta_c) +
-                         0.5 * man.inner(x, Heta_c, eta_c))
+                mdle = (
+                    fx
+                    + man.inner(x, fgradx, eta)
+                    + 0.5 * man.inner(x, Heta, eta)
+                )
+                mdlec = (
+                    fx
+                    + man.inner(x, fgradx, eta_c)
+                    + 0.5 * man.inner(x, Heta_c, eta_c)
+                )
                 if mdlec < mdle:
                     eta = eta_c
                     Heta = Heta_c
@@ -270,7 +306,7 @@ class TrustRegions(Solver):
             # The current strategy is that, if this should happen, then we
             # reject the step and reduce the trust region radius. This also
             # ensures that the actual cost values are monotonically decreasing.
-            model_decreased = (rhoden >= 0)
+            model_decreased = rhoden >= 0
 
             if not model_decreased:
                 srstr = srstr + ", model did not decrease"
@@ -284,8 +320,10 @@ class TrustRegions(Solver):
                 # stagnation in this "corner case" (NaN's really aren't
                 # supposed to occur, but it's nice if we can handle them
                 # nonetheless).
-                print("rho is NaN! Forcing a radius decrease. This should "
-                      "not happen.")
+                print(
+                    "rho is NaN! Forcing a radius decrease. This should "
+                    "not happen."
+                )
                 rho = np.nan
 
             # Choose the new TR radius based on the model performance
@@ -299,31 +337,45 @@ class TrustRegions(Solver):
                 consecutive_TRminus = consecutive_TRminus + 1
                 if consecutive_TRminus >= 5 and verbosity >= 1:
                     consecutive_TRminus = -np.inf
-                    print(" +++ Detected many consecutive TR- (radius "
-                          "decreases).")
-                    print(" +++ Consider decreasing options.Delta_bar "
-                          "by an order of magnitude.")
-                    print(f" +++ Current values: Delta_bar = {Delta_bar:g} "
-                          f"and Delta0 = {Delta0:g}")
+                    print(
+                        " +++ Detected many consecutive TR- (radius "
+                        "decreases)."
+                    )
+                    print(
+                        " +++ Consider decreasing options.Delta_bar "
+                        "by an order of magnitude."
+                    )
+                    print(
+                        f" +++ Current values: Delta_bar = {Delta_bar:g} "
+                        f"and Delta0 = {Delta0:g}"
+                    )
             # If the actual decrease is at least 3/4 of the precicted decrease
             # and the tCG (inner solve) hit the TR boundary, increase the TR
             # radius. We also keep track of the number of consecutive
             # trust-region radius increases. If there are many, this may
             # indicate the need to adapt the initial and maximum radii.
-            elif rho > 3.0 / 4 and (stop_inner == self.NEGATIVE_CURVATURE or
-                                    stop_inner == self.EXCEEDED_TR):
+            elif rho > 3.0 / 4 and (
+                stop_inner == self.NEGATIVE_CURVATURE
+                or stop_inner == self.EXCEEDED_TR
+            ):
                 trstr = "TR+"
                 Delta = min(2 * Delta, Delta_bar)
                 consecutive_TRminus = 0
                 consecutive_TRplus = consecutive_TRplus + 1
                 if consecutive_TRplus >= 5 and verbosity >= 1:
                     consecutive_TRplus = -np.inf
-                    print(" +++ Detected many consecutive TR+ (radius "
-                          "increases).")
-                    print(" +++ Consider increasing options.Delta_bar "
-                          "by an order of magnitude.")
-                    print(f" +++ Current values: Delta_bar = {Delta_bar:g} "
-                          f"and Delta0 = {Delta0:g}.")
+                    print(
+                        " +++ Detected many consecutive TR+ (radius "
+                        "increases)."
+                    )
+                    print(
+                        " +++ Consider increasing options.Delta_bar "
+                        "by an order of magnitude."
+                    )
+                    print(
+                        f" +++ Current values: Delta_bar = {Delta_bar:g} "
+                        f"and Delta0 = {Delta0:g}."
+                    )
             else:
                 # Otherwise, keep the TR radius constant.
                 consecutive_TRplus = 0
@@ -347,36 +399,43 @@ class TrustRegions(Solver):
 
             # ** Display:
             if verbosity == 2:
-                print(f"{accstr:.3s} {trstr:.3s}   k: {k:5d}     num_inner: "
-                      f"{numit:5d}     f: {fx:+e}   |grad|: "
-                      f"{norm_grad:e}   {srstr:s}")
+                print(
+                    f"{accstr:.3s} {trstr:.3s}   k: {k:5d}     num_inner: "
+                    f"{numit:5d}     f: {fx:+e}   |grad|: "
+                    f"{norm_grad:e}   {srstr:s}"
+                )
             elif verbosity > 2:
                 if self.use_rand and used_cauchy:
                     print("USED CAUCHY POINT")
-                print(f"{accstr:.3s} {trstr:.3s}    k: {k:5d}     num_inner: "
-                      f"{numit:5d}     {srstr:s}")
+                print(
+                    f"{accstr:.3s} {trstr:.3s}    k: {k:5d}     num_inner: "
+                    f"{numit:5d}     {srstr:s}"
+                )
                 print(f"       f(x) : {fx:+e}     |grad| : {norm_grad:e}")
                 print(f"        rho : {rho:e}")
 
             # ** CHECK STOPPING criteria
             stop_reason = self._check_stopping_criterion(
-                time0, gradnorm=norm_grad, iter=k)
+                time0, gradnorm=norm_grad, iter=k
+            )
 
             if stop_reason:
                 if verbosity >= 1:
                     print(stop_reason)
-                    print('')
+                    print("")
                 break
 
         if self._logverbosity <= 0:
             return x
         else:
-            self._stop_optlog(x, fx, stop_reason, time0,
-                              gradnorm=norm_grad, iter=k)
+            self._stop_optlog(
+                x, fx, stop_reason, time0, gradnorm=norm_grad, iter=k
+            )
             return x, self._optlog
 
-    def _truncated_conjugate_gradient(self, problem, x, fgradx, eta, Delta,
-                                      theta, kappa, mininner, maxinner):
+    def _truncated_conjugate_gradient(
+        self, problem, x, fgradx, eta, Delta, theta, kappa, mininner, maxinner
+    ):
         man = problem.manifold
         inner = man.inner
         hess = problem.hess
@@ -424,6 +483,7 @@ class TrustRegions(Solver):
 
         def model_fun(eta, Heta):
             return inner(x, eta, fgradx) + 0.5 * inner(x, eta, Heta)
+
         if not self.use_rand:
             model_value = 0
         else:
@@ -453,14 +513,14 @@ class TrustRegions(Solver):
 
             # Check against negative curvature and trust-region radius
             # violation. If either condition triggers, we bail out.
-            if d_Hd <= 0 or e_Pe_new >= Delta**2:
+            if d_Hd <= 0 or e_Pe_new >= Delta ** 2:
                 # want
                 #  ee = <eta,eta>_prec,x
                 #  ed = <eta,delta>_prec,x
                 #  dd = <delta,delta>_prec,x
-                tau = ((-e_Pd +
-                        np.sqrt(e_Pd * e_Pd +
-                                d_Pd * (Delta ** 2 - e_Pe))) / d_Pd)
+                tau = (
+                    -e_Pd + np.sqrt(e_Pd * e_Pd + d_Pd * (Delta ** 2 - e_Pe))
+                ) / d_Pd
 
                 eta = eta + tau * delta
 
@@ -518,8 +578,9 @@ class TrustRegions(Solver):
             # criterion on the r's (the gradients) or on the z's (the
             # preconditioned gradients). [CGT2000], page 206, mentions both as
             # acceptable criteria.
-            if (j >= mininner and
-               norm_r <= norm_r0 * min(norm_r0**theta, kappa)):
+            if j >= mininner and norm_r <= norm_r0 * min(
+                norm_r0 ** theta, kappa
+            ):
                 # Residual is small enough to quit
                 if kappa < norm_r0 ** theta:
                     stop_tCG = self.REACHED_TARGET_LINEAR

@@ -2,6 +2,7 @@ import numpy as np
 import numpy.testing as np_testing
 
 from pymanopt.manifolds import Euclidean, Grassmann, Product, Sphere
+
 from .._test import TestCase
 
 
@@ -14,19 +15,23 @@ class TestProductManifold(TestCase):
         self.man = Product([self.euclidean, self.sphere])
 
     def test_dim(self):
-        np_testing.assert_equal(self.man.dim, self.m*self.n+self.n-1)
+        np_testing.assert_equal(self.man.dim, self.m * self.n + self.n - 1)
 
     def test_typicaldist(self):
-        np_testing.assert_equal(self.man.typicaldist,
-                                np.sqrt((self.m*self.n)+np.pi**2))
+        np_testing.assert_equal(
+            self.man.typicaldist, np.sqrt((self.m * self.n) + np.pi ** 2)
+        )
 
     def test_dist(self):
         X = self.man.rand()
         Y = self.man.rand()
-        np_testing.assert_equal(self.man.dist(X, Y),
-                                np.sqrt(
-                                    self.euclidean.dist(X[0], Y[0])**2 +
-                                    self.sphere.dist(X[1], Y[1])**2))
+        np_testing.assert_equal(
+            self.man.dist(X, Y),
+            np.sqrt(
+                self.euclidean.dist(X[0], Y[0]) ** 2
+                + self.sphere.dist(X[1], Y[1]) ** 2
+            ),
+        )
 
     def test_tangent_vector_multiplication(self):
         # Regression test for https://github.com/pymanopt/pymanopt/issues/49.

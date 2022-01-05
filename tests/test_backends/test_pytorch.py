@@ -1,6 +1,7 @@
 import torch
 
 from pymanopt.function import PyTorch
+
 from . import _backend_tests
 
 
@@ -99,8 +100,10 @@ class TestMixed(_backend_tests.TestMixed):
 
         @PyTorch(self.manifold)
         def cost(x, y, z):
-            return (torch.exp(torch.sum(x ** 2)) +
-                    torch.exp(torch.sum(y ** 2)) +
-                    torch.exp(torch.sum(z ** 2)))
+            return (
+                torch.exp(torch.sum(x ** 2))
+                + torch.exp(torch.sum(y ** 2))
+                + torch.exp(torch.sum(z ** 2))
+            )
 
         self.cost = cost

@@ -3,8 +3,13 @@ import argparse
 
 def _parse_arguments(name, backends):
     parser = argparse.ArgumentParser(name)
-    parser.add_argument("-b", "--backend", help="backend to run the test on",
-                        choices=backends, default=backends[0])
+    parser.add_argument(
+        "-b",
+        "--backend",
+        help="backend to run the test on",
+        choices=backends,
+        default=backends[0],
+    )
     parser.add_argument("-q", "--quiet", action="store_true")
     return vars(parser.parse_args())
 

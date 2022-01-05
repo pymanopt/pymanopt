@@ -1,7 +1,8 @@
 import unittest
 
 from pymanopt.tools import (
-    bisect_sequence, unpack_singleton_sequence_return_value
+    bisect_sequence,
+    unpack_singleton_sequence_return_value,
 )
 
 

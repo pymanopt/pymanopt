@@ -1,5 +1,5 @@
-from ._backend import Backend
 from .. import make_tracing_backend_decorator
+from ._backend import Backend
 
 
 class _CallableBackend(Backend):

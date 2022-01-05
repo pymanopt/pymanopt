@@ -21,8 +21,10 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
 
         # Check that n is greater than or equal to p
         if n < p or p < 1:
-            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
-                             "and p = %d." % (n, p))
+            raise ValueError(
+                "Need n >= p >= 1. Values supplied were n = %d "
+                "and p = %d." % (n, p)
+            )
         if k < 1:
             raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
 
@@ -95,17 +97,25 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
 
     def exp(self, X, U):
         if self._k == 1:
-            W = expm(np.bmat([[X.T @ U, -U.T @ U],
-                              [np.eye(self._p), X.T @ U]]))
+            W = expm(
+                np.bmat([[X.T @ U, -U.T @ U], [np.eye(self._p), X.T @ U]])
+            )
             Z = np.bmat([[expm(-X.T @ U)], [np.zeros((self._p, self._p))]])
             Y = np.bmat([X, U]) @ W @ Z
         else:
             Y = np.zeros(np.shape(X))
             for i in range(self._k):
-                W = expm(np.bmat([[X[i].T @ U[i], -U[i].T @ U[i]],
-                                  [np.eye(self._p), X[i].T @ U[i]]]))
-                Z = np.bmat([[expm(-X[i].T @ U[i])],
-                             [np.zeros((self._p, self._p))]])
+                W = expm(
+                    np.bmat(
+                        [
+                            [X[i].T @ U[i], -U[i].T @ U[i]],
+                            [np.eye(self._p), X[i].T @ U[i]],
+                        ]
+                    )
+                )
+                Z = np.bmat(
+                    [[expm(-X[i].T @ U[i])], [np.zeros((self._p, self._p))]]
+                )
                 Y[i] = np.bmat([X[i], U[i]]) @ W @ Z
         return Y
 

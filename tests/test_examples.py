@@ -1,4 +1,6 @@
 import matplotlib
+from nose2.tools import params
+
 from examples import (
     closest_unit_norm_column_approximation,
     dominant_eigenvector,
@@ -9,10 +11,9 @@ from examples import (
     optimal_rotations,
     packing_on_the_sphere,
     pca,
-    rank_k_correlation_matrix_approximation
+    rank_k_correlation_matrix_approximation,
 )
 from examples.advanced import check_gradient
-from nose2.tools import params
 
 from ._test import TestCase
 

@@ -1,7 +1,8 @@
 """Module containing manifolds of n-dimensional rotations."""
 
 import numpy as np
-from numpy import linalg as la, random as rnd
+from numpy import linalg as la
+from numpy import random as rnd
 from scipy.linalg import expm, logm
 from scipy.special import comb
 

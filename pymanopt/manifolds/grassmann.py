@@ -22,8 +22,10 @@ class Grassmann(Manifold):
         self._k = k
 
         if n < p or p < 1:
-            raise ValueError("Need n >= p >= 1. Values supplied were n = %d "
-                             "and p = %d." % (n, p))
+            raise ValueError(
+                "Need n >= p >= 1. Values supplied were n = %d "
+                "and p = %d." % (n, p)
+            )
         if k < 1:
             raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
 
@@ -102,8 +104,9 @@ class Grassmann(Manifold):
         cos_s = np.expand_dims(np.cos(s), -2)
         sin_s = np.expand_dims(np.sin(s), -2)
 
-        Y = (multiprod(multiprod(X, multitransp(vt) * cos_s), vt) +
-             multiprod(u * sin_s, vt))
+        Y = multiprod(multiprod(X, multitransp(vt) * cos_s), vt) + multiprod(
+            u * sin_s, vt
+        )
 
         # From numerical experiments, it seems necessary to
         # re-orthonormalize. This is overall quite expensive.
