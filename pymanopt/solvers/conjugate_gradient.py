@@ -152,8 +152,8 @@ class ConjugateGradient(Solver):
                 if verbosity >= 3:
                     print(
                         "Conjugate gradient info: got an ascent direction "
-                        "(df0 = %.2f), reset to the (preconditioned) "
-                        "steepest descent direction." % df0
+                        f"(df0 = {df0:.2f}), reset to the (preconditioned) "
+                        "steepest descent direction."
                     )
                 # Reset to negative gradient: this discards the CG memory.
                 desc_dir = -Pgrad
@@ -218,11 +218,11 @@ class ConjugateGradient(Solver):
                     beta = max(beta, eta_HZ)
                 else:
                     types = ", ".join(
-                        ["BetaTypes.%s" % t for t in BetaTypes._fields]
+                        [f"BetaTypes.{t}" for t in BetaTypes._fields]
                     )
                     raise ValueError(
-                        "Unknown beta_type %s. Should be one of %s."
-                        % (self._beta_type, types)
+                        f"Unknown beta_type {self._beta_type}. Should be one "
+                        f"of {types}."
                     )
 
                 desc_dir = -Pnewgrad + beta * desc_dir

@@ -22,11 +22,10 @@ class ComplexGrassmann(Manifold):
 
         if n < p or p < 1:
             raise ValueError(
-                "Need n >= p >= 1. Values supplied were n = %d "
-                "and p = %d." % (n, p)
+                f"Need n >= p >= 1. Values supplied were n = {n} and p = {p}"
             )
         if k < 1:
-            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
+            raise ValueError(f"Need k >= 1. Value supplied was k = {k}")
 
         if k == 1:
             name = f"Complex Grassmann manifold Gr({n},{p})"

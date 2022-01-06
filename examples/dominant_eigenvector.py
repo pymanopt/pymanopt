@@ -81,16 +81,16 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         estimated_dominant_eigenvector = -estimated_dominant_eigenvector
 
     # Print information about the solution.
-    print("l2-norm of x: %f" % la.norm(dominant_eigenvector))
-    print("l2-norm of xopt: %f" % la.norm(estimated_dominant_eigenvector))
+    print("l2-norm of x:", la.norm(dominant_eigenvector))
+    print("l2-norm of xopt:", la.norm(estimated_dominant_eigenvector))
     print(
-        "Solution found: %s"
-        % np.allclose(
-            dominant_eigenvector, estimated_dominant_eigenvector, rtol=1e-3
-        )
+        "Solution found:",
+        np.allclose(
+            dominant_eigenvector, estimated_dominant_eigenvector, atol=1e-6
+        ),
     )
     error_norm = la.norm(dominant_eigenvector - estimated_dominant_eigenvector)
-    print("l2-error: %f" % error_norm)
+    print("l2-error:", error_norm)
 
 
 if __name__ == "__main__":

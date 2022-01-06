@@ -51,30 +51,29 @@ class Solver(metaclass=abc.ABCMeta):
         stepsize=float("inf"),
         costevals=-1,
     ):
+        runtime = time.time() - time0
         reason = None
         if time.time() >= time0 + self._maxtime:
-            reason = (
-                "Terminated - max time reached after %d iterations." % iter
-            )
+            reason = f"Terminated - max time reached after {iter} iterations."
         elif iter >= self._maxiter:
             reason = (
                 "Terminated - max iterations reached after "
-                "%.2f seconds." % (time.time() - time0)
+                f"{runtime:.2f} seconds."
             )
         elif gradnorm < self._mingradnorm:
             reason = (
-                "Terminated - min grad norm reached after %d "
-                "iterations, %.2f seconds." % (iter, (time.time() - time0))
+                f"Terminated - min grad norm reached after {iter} "
+                f"iterations, {runtime:.2f} seconds."
             )
         elif stepsize < self._minstepsize:
             reason = (
-                "Terminated - min stepsize reached after %d iterations, "
-                "%.2f seconds." % (iter, (time.time() - time0))
+                f"Terminated - min stepsize reached after {iter} iterations, "
+                f"{runtime:.2f} seconds."
             )
         elif costevals >= self._maxcostevals:
             reason = (
                 "Terminated - max cost evals reached after "
-                "%.2f seconds." % (time.time() - time0)
+                f"{runtime:.2f} seconds."
             )
         return reason
 

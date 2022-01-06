@@ -53,7 +53,7 @@ class NelderMead(Solver):
         expansion=2,
         contraction=0.5,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
 
@@ -127,8 +127,8 @@ class NelderMead(Solver):
 
             if verbosity >= 2:
                 print(
-                    "Cost evals: %7d\t"
-                    "Best cost: %+.8e" % (costevals, costs[0])
+                    f"Cost evals: {costevals:7d}\t"
+                    f"Best cost: {costs[0]:+.8e}"
                 )
 
             # Sort simplex points by cost.
