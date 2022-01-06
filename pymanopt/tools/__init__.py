@@ -1,5 +1,6 @@
 import collections
 import functools
+import typing
 
 
 def make_enum(name, fields):
@@ -41,3 +42,9 @@ def bisect_sequence(sequence):
     if num_items % 2 == 1:
         raise ValueError("Sequence must have an even number of elements")
     return sequence[: num_items // 2], sequence[num_items // 2 :]
+
+
+def is_sequence(instance):
+    return not isinstance(instance, str) and isinstance(
+        instance, typing.Sequence
+    )
