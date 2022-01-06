@@ -355,8 +355,7 @@ class TrustRegions(Solver):
             # trust-region radius increases. If there are many, this may
             # indicate the need to adapt the initial and maximum radii.
             elif rho > 3.0 / 4 and (
-                stop_inner == self.NEGATIVE_CURVATURE
-                or stop_inner == self.EXCEEDED_TR
+                stop_inner in (self.NEGATIVE_CURVATURE, self.EXCEEDED_TR)
             ):
                 trstr = "TR+"
                 Delta = min(2 * Delta, Delta_bar)
