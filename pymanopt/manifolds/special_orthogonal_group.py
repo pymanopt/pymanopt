@@ -32,9 +32,15 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     exponential. To force the use of a second-order approximation, call
     manifold.retr = manifold.retr2 after creating M. This switches from a
     QR-based computation to an SVD-based computation.
+
+    Args:
+        n: The dimension of the space that elements of the group act on.
+        k: The number of elements in the product of groups.
+        retraction: The type of retraction to use.
+            Possible choices are ``qr`` and ``polar``.
     """
 
-    def __init__(self, n, k=1):
+    def __init__(self, n, k=1, retraction="qr"):
         self._n = n
         self._k = k
 
@@ -46,6 +52,13 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             raise ValueError("k must be an integer no less than 1.")
         dimension = int(k * comb(n, 2))
         super().__init__(name, dimension)
+
+        if retraction == "qr":
+            self._retr = self._retr_qr
+        elif retraction == "polar":
+            self._retr = self._retr_polar
+        else:
+            raise ValueError(f"Invalid retraction type '{retraction}'")
 
     def inner(self, X, U, V):
         return np.tensordot(U, V, axes=U.ndim)
@@ -74,6 +87,9 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         return multiskew(Xtehess - multiprod(H, symXtegrad))
 
     def retr(self, X, U):
+        return self._retr(X, U)
+
+    def _retr_qr(self, X, U):
         def retri(Y):
             Q, R = la.qr(Y)
             return Q @ np.diag(np.sign(np.sign(np.diag(R)) + 0.5))
@@ -86,17 +102,17 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
                 Y[i] = retri(Y[i])
             return Y
 
-    def retr2(self, X, U):
-        def retr2i(Y):
+    def _retr_polar(self, X, U):
+        def retri(Y):
             U, _, Vt = la.svd(Y)
             return U @ Vt
 
         Y = X + multiprod(X, U)
         if self._k == 1:
-            return retr2i(Y)
+            return retri(Y)
         else:
             for i in range(self._k):
-                Y[i] = retr2i(Y[i])
+                Y[i] = retri(Y[i])
         return Y
 
     def exp(self, X, U):
