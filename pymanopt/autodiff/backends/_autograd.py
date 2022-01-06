@@ -1,14 +1,15 @@
 import functools
 
+
 try:
     import autograd
     import autograd.numpy as np
 except ImportError:
     autograd = None
 
-from ._backend import Backend
-from .. import make_tracing_backend_decorator
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
+from .. import make_tracing_backend_decorator
+from ._backend import Backend
 
 
 class _AutogradBackend(Backend):
@@ -38,20 +39,25 @@ class _AutogradBackend(Backend):
             *arguments, vectors = args
             gradients = gradient(*arguments)
             return np.sum(
-                [np.tensordot(gradient, vector, axes=vector.ndim)
-                 for gradient, vector in zip(gradients, vectors)]
+                [
+                    np.tensordot(gradient, vector, axes=vector.ndim)
+                    for gradient, vector in zip(gradients, vectors)
+                ]
             )
+
         return autograd.grad(vector_dot_gradient, argnum)
 
     @Backend._assert_backend_available
     def compute_hessian_vector_product(self, function, num_arguments):
         hessian_vector_product = self._hessian_vector_product(
-            function, argnum=list(range(num_arguments)))
+            function, argnum=list(range(num_arguments))
+        )
 
         @functools.wraps(hessian_vector_product)
         def wrapper(*args):
             arguments, vectors = bisect_sequence(args)
             return hessian_vector_product(*arguments, vectors)
+
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(wrapper)
         return wrapper

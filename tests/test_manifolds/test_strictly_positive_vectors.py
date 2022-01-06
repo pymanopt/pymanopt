@@ -1,7 +1,10 @@
 import autograd.numpy as np
-from numpy import linalg as la, random as rnd, testing as np_testing
+from numpy import linalg as la
+from numpy import random as rnd
+from numpy import testing as np_testing
 
 from pymanopt.manifolds import StrictlyPositiveVectors
+
 # from pymanopt.tools import testing
 from .._test import TestCase
 
@@ -30,10 +33,10 @@ class TestStrictlyPositiveVectors(TestCase):
     def test_norm(self):
         x = self.man.rand()
         u = self.man.randvec(x)
-        x_u = (1./x) * u
+        x_u = (1.0 / x) * u
         np_testing.assert_almost_equal(
-            la.norm(x_u, axis=0, keepdims=True),
-            self.man.norm(x, u))
+            la.norm(x_u, axis=0, keepdims=True), self.man.norm(x, u)
+        )
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold
@@ -49,7 +52,7 @@ class TestStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         g = self.man.randvec(x)
         h = self.man.randvec(x)
-        assert (la.norm(g-h, axis=0) > 1e-6).all()
+        assert (la.norm(g - h, axis=0) > 1e-6).all()
         np_testing.assert_almost_equal(self.man.norm(x, g), 1)
 
     def test_dist(self):
@@ -57,8 +60,9 @@ class TestStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         y = self.man.rand()
         u = self.man.log(x, y)
-        np_testing.assert_almost_equal(self.man.norm(x, u),
-                                       self.man.dist(x, y))
+        np_testing.assert_almost_equal(
+            self.man.norm(x, u), self.man.dist(x, y)
+        )
 
     # def test_ehess2rhess(self):
 

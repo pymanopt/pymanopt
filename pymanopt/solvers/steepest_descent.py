@@ -77,8 +77,10 @@ class SteepestDescent(Solver):
 
         column_printer.print_header()
 
-        self._start_optlog(extraiterfields=['gradnorm'],
-                           solverparams={'linesearcher': linesearch})
+        self._start_optlog(
+            extraiterfields=["gradnorm"],
+            solverparams={"linesearcher": linesearch},
+        )
 
         # Initialize iteration counter and timer
         iter = 0
@@ -100,22 +102,30 @@ class SteepestDescent(Solver):
             desc_dir = -grad
 
             # Perform line-search
-            stepsize, x = linesearch.search(objective, man, x, desc_dir,
-                                            cost, -gradnorm**2)
+            stepsize, x = linesearch.search(
+                objective, man, x, desc_dir, cost, -(gradnorm ** 2)
+            )
 
             stop_reason = self._check_stopping_criterion(
-                time0, stepsize=stepsize, gradnorm=gradnorm, iter=iter)
+                time0, stepsize=stepsize, gradnorm=gradnorm, iter=iter
+            )
 
             if stop_reason:
                 if verbosity >= 1:
                     print(stop_reason)
-                    print('')
+                    print("")
                 break
 
         if self._logverbosity <= 0:
             return x
         else:
-            self._stop_optlog(x, objective(x), stop_reason, time0,
-                              stepsize=stepsize, gradnorm=gradnorm,
-                              iter=iter)
+            self._stop_optlog(
+                x,
+                objective(x),
+                stop_reason,
+                time0,
+                stepsize=stepsize,
+                gradnorm=gradnorm,
+                iter=iter,
+            )
             return x, self._optlog

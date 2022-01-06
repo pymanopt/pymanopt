@@ -3,6 +3,7 @@ import numpy.testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import Euclidean, FixedRankEmbedded, Product
+
 from ._test import TestCase
 
 
@@ -71,6 +72,7 @@ class TestProblemBackendInterface(TestCase):
         (a, b, c), d = U
 
         (hu, hs, hvt), hx = H
-        for ha, hb in zip((hu, hs, hvt, hx),
-                          self.hvp(u, s, vt, x, a, b, c, d)):
+        for ha, hb in zip(
+            (hu, hs, hvt, hx), self.hvp(u, s, vt, x, a, b, c, d)
+        ):
             np_testing.assert_allclose(ha, hb)

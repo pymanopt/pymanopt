@@ -1,10 +1,12 @@
 import numpy as np
 import tensorflow as tf
-from numpy import random as rnd, testing as np_testing
+from numpy import random as rnd
+from numpy import testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import Product, Sphere, Stiefel
 from pymanopt.solvers import TrustRegions
+
 from ._test import TestCase
 
 
@@ -22,8 +24,9 @@ class TestProblem(TestCase):
     def test_prepare(self):
         problem = pymanopt.Problem(self.man, self.cost)
         x = rnd.randn(self.n)
-        np_testing.assert_allclose(2 * x * np.exp(np.sum(x ** 2)),
-                                   problem.egrad(x))
+        np_testing.assert_allclose(
+            2 * x * np.exp(np.sum(x ** 2)), problem.egrad(x)
+        )
 
     def test_attribute_override(self):
         problem = pymanopt.Problem(self.man, self.cost)

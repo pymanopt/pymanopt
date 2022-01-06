@@ -127,7 +127,8 @@ class _SphereSubspaceIntersectionManifold(_Sphere):
         num_rows, num_columns = U.shape
         if num_rows < num_columns:
             raise ValueError(
-                "The span matrix cannot have fewer rows than columns")
+                "The span matrix cannot have fewer rows than columns"
+            )
 
     def proj(self, X, H):
         Y = super().proj(X, H)
@@ -156,14 +157,17 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         Q, _ = la.qr(U)
         projector = Q @ Q.T
         subspace_dimension = la.matrix_rank(projector)
-        name = (f"Sphere manifold of {m}-dimensional vectors intersecting a "
-                f"{subspace_dimension}-dimensional subspace")
+        name = (
+            f"Sphere manifold of {m}-dimensional vectors intersecting a "
+            f"{subspace_dimension}-dimensional subspace"
+        )
         dimension = subspace_dimension - 1
         super().__init__(projector, name, dimension)
 
 
 class SphereSubspaceComplementIntersection(
-        _SphereSubspaceIntersectionManifold):
+    _SphereSubspaceIntersectionManifold
+):
     r"""Sphere-subspace compliment intersection manifold.
 
     Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
@@ -177,7 +181,9 @@ class SphereSubspaceComplementIntersection(
         Q, _ = la.qr(U)
         projector = np.eye(m) - Q @ Q.T
         subspace_dimension = la.matrix_rank(projector)
-        name = (f"Sphere manifold of {m}-dimensional vectors orthogonal "
-                f"to a {subspace_dimension}-dimensional subspace")
+        name = (
+            f"Sphere manifold of {m}-dimensional vectors orthogonal "
+            f"to a {subspace_dimension}-dimensional subspace"
+        )
         dimension = subspace_dimension - 1
         super().__init__(projector, name, dimension)

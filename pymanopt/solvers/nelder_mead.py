@@ -9,6 +9,7 @@ from pymanopt.solvers.steepest_descent import SteepestDescent
 
 def compute_centroid(manifold, points):
     """Compute the centroid of `points` on the `manifold` as Karcher mean."""
+
     @pymanopt.function.Callable(manifold)
     def objective(*y):
         if manifold.num_values == 1:
@@ -44,8 +45,16 @@ class NelderMead(Solver):
         contraction: Factor by which to contract the reflected simplex.
     """
 
-    def __init__(self, maxcostevals=None, maxiter=None, reflection=1,
-                 expansion=2, contraction=0.5, *args, **kwargs):
+    def __init__(
+        self,
+        maxcostevals=None,
+        maxiter=None,
+        reflection=1,
+        expansion=2,
+        contraction=0.5,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         self._maxcostevals = maxcostevals
@@ -89,9 +98,11 @@ class NelderMead(Solver):
         else:
             # XXX: Is this necessary?
             if len(x) != dim + 1:
-                print("The simplex size was adapted to the dimension "
-                      "of the manifold")
-                x = x[:dim + 1]
+                print(
+                    "The simplex size was adapted to the dimension "
+                    "of the manifold"
+                )
+                x = x[: dim + 1]
 
         # Compute objective-related quantities for x, and setup a function
         # evaluations counter.
@@ -115,8 +126,10 @@ class NelderMead(Solver):
             iter += 1
 
             if verbosity >= 2:
-                print("Cost evals: %7d\t"
-                      "Best cost: %+.8e" % (costevals, costs[0]))
+                print(
+                    f"Cost evals: {costevals:7d}\t"
+                    f"Best cost: {costs[0]:+.8e}"
+                )
 
             # Sort simplex points by cost.
             order = np.argsort(costs)
@@ -124,11 +137,12 @@ class NelderMead(Solver):
             x = [x[i] for i in order]  # XXX: Probably inefficient
 
             stop_reason = self._check_stopping_criterion(
-                time0, iter=iter, costevals=costevals)
+                time0, iter=iter, costevals=costevals
+            )
             if stop_reason:
                 if verbosity >= 1:
                     print(stop_reason)
-                    print('')
+                    print("")
                 break
 
             # Compute a centroid for the dim best points.
@@ -207,6 +221,12 @@ class NelderMead(Solver):
         if self._logverbosity <= 0:
             return x[0]
         else:
-            self._stop_optlog(x[0], objective(x[0]), stop_reason, time0,
-                              costevals=costevals, iter=iter)
+            self._stop_optlog(
+                x[0],
+                objective(x[0]),
+                stop_reason,
+                time0,
+                costevals=costevals,
+                iter=iter,
+            )
             return x[0], self._optlog

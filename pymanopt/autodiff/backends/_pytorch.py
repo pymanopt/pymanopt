@@ -2,6 +2,8 @@ import functools
 import warnings
 
 import numpy as np
+
+
 try:
     import torch
 except ImportError:
@@ -9,9 +11,9 @@ except ImportError:
 else:
     from torch import autograd
 
-from ._backend import Backend
-from .. import make_tracing_backend_decorator
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
+from .. import make_tracing_backend_decorator
+from ._backend import Backend
 
 
 class _PyTorchBackend(Backend):
@@ -33,7 +35,8 @@ class _PyTorchBackend(Backend):
         if np.any(strides < 0):
             warnings.warn(
                 "PyTorch does not support numpy arrays with negative strides. "
-                "Copying array to normalize strides.")
+                "Copying array to normalize strides."
+            )
             array = array.copy()
         return torch.from_numpy(array)
 
@@ -42,6 +45,7 @@ class _PyTorchBackend(Backend):
         @functools.wraps(function)
         def wrapper(*args):
             return function(*map(self._from_numpy, args)).numpy()
+
         return wrapper
 
     def _sanitize_gradient(self, tensor):
@@ -62,6 +66,7 @@ class _PyTorchBackend(Backend):
                 torch_arguments.append(torch_argument)
             function(*torch_arguments).backward()
             return self._sanitize_gradients(torch_arguments)
+
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
         return gradient
@@ -78,17 +83,21 @@ class _PyTorchBackend(Backend):
             torch_vectors = [self._from_numpy(vector) for vector in vectors]
             fx = function(*torch_arguments)
             fx.requires_grad_()
-            gradients = autograd.grad(fx, torch_arguments, create_graph=True,
-                                      allow_unused=True)
+            gradients = autograd.grad(
+                fx, torch_arguments, create_graph=True, allow_unused=True
+            )
             dot_product = 0
             for gradient, vector in zip(gradients, torch_vectors):
                 dot_product += torch.tensordot(
-                    gradient, vector, dims=gradient.dim())
+                    gradient, vector, dims=gradient.dim()
+                )
             dot_product.backward()
             return self._sanitize_gradients(torch_arguments)
+
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(
-                hessian_vector_product)
+                hessian_vector_product
+            )
         return hessian_vector_product
 
 

@@ -1,19 +1,19 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from examples._tools import ExampleRunner
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import Elliptope
 from pymanopt.solvers import ConjugateGradient
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "PyTorch", "TensorFlow"
-)
+
+SUPPORTED_BACKENDS = ("Autograd", "PyTorch", "TensorFlow")
 
 
 def create_cost(manifold, epsilon, backend):
     if backend == "Autograd":
+
         @pymanopt.function.Autograd(manifold)
         def cost(X):
             Y = X @ X.T
@@ -25,7 +25,9 @@ def create_cost(manifold, epsilon, backend):
             expY -= np.diag(np.diag(expY))
             u = np.triu(expY, 1).sum()
             return s + epsilon * np.log(u)
+
     elif backend == "PyTorch":
+
         @pymanopt.function.PyTorch(manifold)
         def cost(X):
             Y = torch.matmul(X, torch.transpose(X, 1, 0))
@@ -34,7 +36,9 @@ def create_cost(manifold, epsilon, backend):
             expY = expY - torch.diag(torch.diag(expY))
             u = torch.triu(expY, 1).sum()
             return s + epsilon * torch.log(u)
+
     elif backend == "TensorFlow":
+
         @pymanopt.function.TensorFlow(manifold)
         def cost(X):
             Y = tf.matmul(X, tf.transpose(X))
@@ -43,6 +47,7 @@ def create_cost(manifold, epsilon, backend):
             expY = expY - tf.linalg.diag(tf.linalg.diag_part(expY))
             u = tf.reduce_sum(tf.linalg.band_part(Y, 0, -1))
             return s + epsilon * tf.math.log(u)
+
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 

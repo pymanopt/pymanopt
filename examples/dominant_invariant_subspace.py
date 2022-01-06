@@ -1,26 +1,29 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from examples._tools import ExampleRunner
-from numpy import linalg as la, random as rnd
+from numpy import linalg as la
+from numpy import random as rnd
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import Grassmann
 from pymanopt.solvers import TrustRegions
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow"
-)
+
+SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad_ehess(manifold, matrix, backend):
     egrad = ehess = None
 
     if backend == "Autograd":
+
         @pymanopt.function.Autograd(manifold)
         def cost(X):
             return -np.trace(X.T @ matrix @ X)
+
     elif backend == "Callable":
+
         @pymanopt.function.Callable(manifold)
         def cost(X):
             return -np.trace(X.T @ matrix @ X)
@@ -32,13 +35,16 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
         @pymanopt.function.Callable(manifold)
         def ehess(X, H):
             return -(matrix + matrix.T) @ H
+
     elif backend == "PyTorch":
         matrix_ = torch.from_numpy(matrix)
 
         @pymanopt.function.PyTorch(manifold)
         def cost(X):
             return -torch.tensordot(X, torch.matmul(matrix_, X))
+
     elif backend == "TensorFlow":
+
         @pymanopt.function.TensorFlow(manifold)
         def cost(X):
             return -tf.tensordot(X, tf.matmul(matrix, X), axes=2)
@@ -49,6 +55,7 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
         @pymanopt.function.TensorFlow(manifold)
         def egrad(X):
             return -tf.matmul(matrix + matrix.T, X)
+
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
@@ -69,15 +76,15 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = 0.5 * (matrix + matrix.T)
 
     manifold = Grassmann(num_rows, subspace_dimension)
-    cost, egrad, ehess = create_cost_egrad_ehess(
-        manifold, matrix, backend)
+    cost, egrad, ehess = create_cost_egrad_ehess(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
     if quiet:
         problem.verbosity = 0
 
     solver = TrustRegions()
     estimated_spanning_set = solver.solve(
-        problem, Delta_bar=8*np.sqrt(subspace_dimension))
+        problem, Delta_bar=8 * np.sqrt(subspace_dimension)
+    )
 
     if quiet:
         return
@@ -85,11 +92,14 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     eigenvalues, eigenvectors = la.eig(matrix)
     column_indices = np.argsort(eigenvalues)[-subspace_dimension:]
     spanning_set = eigenvectors[:, column_indices]
-    print("Geodesic distance between true and estimated dominant subspace:",
-          manifold.dist(spanning_set, estimated_spanning_set))
+    print(
+        "Geodesic distance between true and estimated dominant subspace:",
+        manifold.dist(spanning_set, estimated_spanning_set),
+    )
 
 
 if __name__ == "__main__":
-    runner = ExampleRunner(run, "Dominant invariant subspace",
-                           SUPPORTED_BACKENDS)
+    runner = ExampleRunner(
+        run, "Dominant invariant subspace", SUPPORTED_BACKENDS
+    )
     runner.run()

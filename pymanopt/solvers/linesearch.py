@@ -1,8 +1,14 @@
 class LineSearchBackTracking:
     """Back-tracking line-search algorithm."""
 
-    def __init__(self, contraction_factor=.5, optimism=2,
-                 suff_decr=1e-4, maxiter=25, initial_stepsize=1):
+    def __init__(
+        self,
+        contraction_factor=0.5,
+        optimism=2,
+        suff_decr=1e-4,
+        maxiter=25,
+        initial_stepsize=1,
+    ):
         self.contraction_factor = contraction_factor
         self.optimism = optimism
         self.suff_decr = suff_decr
@@ -44,8 +50,10 @@ class LineSearchBackTracking:
         step_count = 1
 
         # Backtrack while the Armijo criterion is not satisfied
-        while (newf > f0 + self.suff_decr * alpha * df0 and
-               step_count <= self.maxiter):
+        while (
+            newf > f0 + self.suff_decr * alpha * df0
+            and step_count <= self.maxiter
+        ):
 
             # Reduce the step size
             alpha = self.contraction_factor * alpha
@@ -71,8 +79,13 @@ class LineSearchBackTracking:
 class LineSearchAdaptive:
     """Adaptive line-search."""
 
-    def __init__(self, contraction_factor=.5, suff_decr=.5, maxiter=10,
-                 initial_stepsize=1):
+    def __init__(
+        self,
+        contraction_factor=0.5,
+        suff_decr=0.5,
+        maxiter=10,
+        initial_stepsize=1,
+    ):
         self._contraction_factor = contraction_factor
         self._suff_decr = suff_decr
         self._maxiter = maxiter
@@ -92,8 +105,10 @@ class LineSearchAdaptive:
         newf = objective(newx)
         cost_evaluations = 1
 
-        while (newf > f0 + self._suff_decr * alpha * df0 and
-               cost_evaluations <= self._maxiter):
+        while (
+            newf > f0 + self._suff_decr * alpha * df0
+            and cost_evaluations <= self._maxiter
+        ):
             # Reduce the step size.
             alpha *= self._contraction_factor
 

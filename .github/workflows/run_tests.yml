@@ -30,7 +30,10 @@ jobs:
           pip install -r requirements/base.txt -r requirements/dev.txt
 
       - name: Run linting
-        run: flake8 docs/conf.py examples pymanopt setup.py tests
+        run: |
+          isort --check .
+          black --check .
+          flake8
 
       - name: Run tests
         run: nose2 tests --verbose --with-coverage

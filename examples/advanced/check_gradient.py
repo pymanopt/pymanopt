@@ -1,26 +1,28 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from examples._tools import ExampleRunner
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt import Problem
 from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_gradient
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow"
-)
+
+SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad(manifold, matrix, backend):
     egrad = None
 
     if backend == "Autograd":
+
         @pymanopt.function.Autograd(manifold)
         def cost(x):
             return -np.inner(x, matrix @ x)
+
     elif backend == "Callable":
+
         @pymanopt.function.Callable(manifold)
         def cost(x):
             return -np.inner(x, matrix @ x)
@@ -28,16 +30,20 @@ def create_cost_egrad(manifold, matrix, backend):
         @pymanopt.function.Callable(manifold)
         def egrad(x):
             return -2 * matrix @ x
+
     elif backend == "PyTorch":
         matrix_ = torch.from_numpy(matrix)
 
         @pymanopt.function.PyTorch(manifold)
         def cost(x):
-            return - x @ matrix_ @ x
+            return -x @ matrix_ @ x
+
     elif backend == "TensorFlow":
+
         @pymanopt.function.TensorFlow(manifold)
         def cost(x):
             return -tf.tensordot(x, tf.tensordot(matrix, x, axes=1), axes=1)
+
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
@@ -63,6 +69,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
 
 if __name__ == "__main__":
-    runner = ExampleRunner(run, "Check gradient for sphere manifold",
-                           SUPPORTED_BACKENDS)
+    runner = ExampleRunner(
+        run, "Check gradient for sphere manifold", SUPPORTED_BACKENDS
+    )
     runner.run()

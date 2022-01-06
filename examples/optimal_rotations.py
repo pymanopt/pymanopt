@@ -1,25 +1,27 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from examples._tools import ExampleRunner
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import SpecialOrthogonalGroup
 from pymanopt.solvers import SteepestDescent
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow"
-)
+
+SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad(manifold, ABt, backend):
     egrad = None
 
     if backend == "Autograd":
+
         @pymanopt.function.Autograd(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
+
     elif backend == "Callable":
+
         @pymanopt.function.Callable(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
@@ -27,16 +29,20 @@ def create_cost_egrad(manifold, ABt, backend):
         @pymanopt.function.Callable(manifold)
         def egrad(X):
             return -ABt
+
     elif backend == "PyTorch":
         ABt_ = torch.from_numpy(ABt)
 
         @pymanopt.function.PyTorch(manifold)
         def cost(X):
             return -torch.tensordot(X, ABt_, dims=X.dim())
+
     elif backend == "TensorFlow":
+
         @pymanopt.function.TensorFlow(manifold)
         def cost(X):
             return -tf.tensordot(X, ABt, axes=ABt.ndim)
+
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
@@ -78,6 +84,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
 
 if __name__ == "__main__":
-    runner = ExampleRunner(run, "Optimal rotations example",
-                           SUPPORTED_BACKENDS)
+    runner = ExampleRunner(
+        run, "Optimal rotations example", SUPPORTED_BACKENDS
+    )
     runner.run()

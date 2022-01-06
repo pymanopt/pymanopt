@@ -1,9 +1,18 @@
 import numpy as np
-from numpy import linalg as la, random as rnd, testing as np_testing
+from numpy import linalg as la
+from numpy import random as rnd
+from numpy import testing as np_testing
 from scipy.linalg import expm, logm
 
-from pymanopt.tools.multi import (multiexp, multieye, multilog, multiprod,
-                                  multisym, multitransp)
+from pymanopt.tools.multi import (
+    multiexp,
+    multieye,
+    multilog,
+    multiprod,
+    multisym,
+    multitransp,
+)
+
 from ._test import TestCase
 
 
@@ -51,7 +60,7 @@ class TestMulti(TestCase):
 
         C = np.zeros((self.k, self.m, self.m))
         for i in range(self.k):
-            C[i] = .5 * (A[i] + A[i].T)
+            C[i] = 0.5 * (A[i] + A[i].T)
 
         np.testing.assert_allclose(C, multisym(A))
 

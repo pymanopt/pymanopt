@@ -1,9 +1,12 @@
 import numpy as np
-from numpy import linalg as la, random as rnd, testing as np_testing
+from numpy import linalg as la
+from numpy import random as rnd
+from numpy import testing as np_testing
 from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiprod, multisym, multitransp
+
 from .._test import TestCase
 
 
@@ -34,23 +37,25 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         y = man.rand()
 
         # Test separability
-        np_testing.assert_almost_equal(man.dist(x, x), 0.)
+        np_testing.assert_almost_equal(man.dist(x, x), 0.0)
 
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
 
         # Test alternative implementation
         # from Eq 6.14 of "Positive definite matrices"
-        d = np.sqrt((np.log(eigvalsh(x, y))**2).sum())
+        d = np.sqrt((np.log(eigvalsh(x, y)) ** 2).sum())
         np_testing.assert_almost_equal(man.dist(x, y), d)
 
         # check that dist is consistent with log
-        np_testing.assert_almost_equal(man.dist(x, y),
-                                       man.norm(x, man.log(x, y)))
+        np_testing.assert_almost_equal(
+            man.dist(x, y), man.norm(x, man.log(x, y))
+        )
 
         # Test invariance under inversion
-        np_testing.assert_almost_equal(man.dist(x, y),
-                                       man.dist(la.inv(y), la.inv(x)))
+        np_testing.assert_almost_equal(
+            man.dist(x, y), man.dist(la.inv(y), la.inv(x))
+        )
 
         # Test congruence-invariance
         a = rnd.randn(self.n, self.n)  # must be invertible
@@ -109,7 +114,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         man = self.man
         n = self.n
         k = self.k
-        np_testing.assert_equal(man.dim, 0.5 * k * n * (n+1))
+        np_testing.assert_equal(man.dim, 0.5 * k * n * (n + 1))
 
     def test_typicaldist(self):
         man = self.man
@@ -122,7 +127,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         y = man.rand()
 
         # Test separability
-        np_testing.assert_almost_equal(man.dist(x, x), 0.)
+        np_testing.assert_almost_equal(man.dist(x, x), 0.0)
 
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
@@ -133,10 +138,10 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         n = self.n
         x = man.rand()
         a, b = rnd.randn(2, k, n, n)
-        np.testing.assert_almost_equal(np.tensordot(a,
-                                       b.transpose((0, 2, 1)), axes=a.ndim),
-                                       man.inner(x, multiprod(x, a),
-                                                 multiprod(x, b)))
+        np.testing.assert_almost_equal(
+            np.tensordot(a, b.transpose((0, 2, 1)), axes=a.ndim),
+            man.inner(x, multiprod(x, a), multiprod(x, b)),
+        )
 
     def test_proj(self):
         man = self.man
@@ -148,8 +153,9 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         man = self.man
         x = man.rand()
         u = rnd.randn(self.k, self.n, self.n)
-        np.testing.assert_allclose(man.egrad2rgrad(x, u),
-                                   multiprod(multiprod(x, multisym(u)), x))
+        np.testing.assert_allclose(
+            man.egrad2rgrad(x, u), multiprod(multiprod(x, multisym(u)), x)
+        )
 
     def test_ehess2rhess(self):
         # Use manopt's slow method
@@ -160,13 +166,15 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         egrad, ehess = rnd.randn(2, k, n, n)
         u = man.randvec(x)
 
-        Hess = (multiprod(multiprod(x, multisym(ehess)), x) +
-                2*multisym(multiprod(multiprod(u, multisym(egrad)), x)))
+        Hess = multiprod(multiprod(x, multisym(ehess)), x) + 2 * multisym(
+            multiprod(multiprod(u, multisym(egrad)), x)
+        )
 
         # Correction factor for the non-constant metric
         Hess = Hess - multisym(multiprod(multiprod(u, multisym(egrad)), x))
-        np_testing.assert_almost_equal(Hess, man.ehess2rhess(x, egrad, ehess,
-                                                             u))
+        np_testing.assert_almost_equal(
+            Hess, man.ehess2rhess(x, egrad, ehess, u)
+        )
 
     def test_norm(self):
         man = self.man

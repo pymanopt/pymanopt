@@ -1,5 +1,7 @@
 """Module containing manifolds of fixed-rank matrices."""
 
+import collections
+
 import numpy as np
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
@@ -123,7 +125,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         M = UtZV
         Vp = ZtU - X[2].T @ UtZV.T
 
-        return _FixedRankTangentVector((Up, M, Vp))
+        return _FixedRankTangentVector(Up, M, Vp)
 
     def egrad2rgrad(self, x, egrad):
         """Convert Euclidean to Riemannian gradient.
@@ -146,12 +148,15 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Vp = (egrad[2].T - vvtdv) / x[1]
 
         i = np.eye(self._k)
-        f = 1 / (x[1][np.newaxis, :]**2 - x[1][:, np.newaxis]**2 + i)
+        f = 1 / (x[1][np.newaxis, :] ** 2 - x[1][:, np.newaxis] ** 2 + i)
 
-        M = (f * (utdu - utdu.T) * x[1] +
-             x[1][:, np.newaxis] * f * (vtdv - vtdv.T) + np.diag(egrad[1]))
+        M = (
+            f * (utdu - utdu.T) * x[1]
+            + x[1][:, np.newaxis] * f * (vtdv - vtdv.T)
+            + np.diag(egrad[1])
+        )
 
-        return _FixedRankTangentVector((Up, M, Vp))
+        return _FixedRankTangentVector(Up, M, Vp)
 
     # TODO(nkoep): Implement the 'weingarten' method to support the
     # trust-region solver, cf.
@@ -164,8 +169,12 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Qu, Ru = np.linalg.qr(Z[0])
         Qv, Rv = np.linalg.qr(Z[2])
 
-        T = np.vstack((np.hstack((np.diag(X[1]) + Z[1], Rv.T)),
-                      np.hstack((Ru, np.zeros((self._k, self._k))))))
+        T = np.vstack(
+            (
+                np.hstack((np.diag(X[1]) + Z[1], Rv.T)),
+                np.hstack((Ru, np.zeros((self._k, self._k)))),
+            )
+        )
 
         # Numpy svd outputs St as a 1d vector, not a matrix.
         Ut, St, Vt = np.linalg.svd(T, full_matrices=False)
@@ -173,10 +182,10 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         # Transpose because numpy outputs it the wrong way.
         Vt = Vt.T
 
-        U = np.hstack((X[0], Qu)) @ Ut[:, :self._k]
-        V = np.hstack((X[2].T, Qv)) @ Vt[:, :self._k]
-        S = St[:self._k] + np.spacing(1)
-        return (U, S, V.T)
+        U = np.hstack((X[0], Qu)) @ Ut[:, : self._k]
+        V = np.hstack((X[2].T, Qv)) @ Vt[:, : self._k]
+        S = St[: self._k] + np.spacing(1)
+        return U, S, V.T
 
     def norm(self, X, G):
         return np.sqrt(self.inner(X, G, G))
@@ -198,7 +207,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Up = Z[0] - X[0] @ X[0].T @ Z[0]
         Vp = Z[2] - X[2].T @ X[2] @ Z[2]
 
-        return _FixedRankTangentVector((Up, Z[1], Vp))
+        return _FixedRankTangentVector(Up, Z[1], Vp)
 
     def randvec(self, X):
         Up = np.random.randn(self._m, self._k)
@@ -209,7 +218,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
         nrm = self.norm(X, Z)
 
-        return _FixedRankTangentVector((Z[0]/nrm, Z[1]/nrm, Z[2]/nrm))
+        return _FixedRankTangentVector(Z[0] / nrm, Z[1] / nrm, Z[2] / nrm)
 
     def tangent2ambient(self, X, Z):
         """Represent tangent vector in ambient space.
@@ -227,10 +236,10 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         (in general) diagonal.
         Currently, S is identity, but this might change.
         """
-        U = np.hstack((X[0] @ Z[1] + Z[0], X[0]))
+        U = np.hstack((X[0] @ Z.M + Z.Up, X[0]))
         S = np.eye(2 * self._k)
-        V = np.hstack(([X[2].T, Z[2]]))
-        return (U, S, V)
+        V = np.hstack(([X[2].T, Z.Vp]))
+        return U, S, V
 
     # Comment from Manopt:
     # New vector transport on June 24, 2014 (as indicated by Bart)
@@ -242,12 +251,17 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return self.proj(X2, self.tangent2ambient(X1, G))
 
     def zerovec(self, X):
-        return _FixedRankTangentVector((np.zeros((self._m, self._k)),
-                                        np.zeros((self._k, self._k)),
-                                        np.zeros((self._n, self._k))))
+        return _FixedRankTangentVector(
+            np.zeros((self._m, self._k)),
+            np.zeros((self._k, self._k)),
+            np.zeros((self._n, self._k)),
+        )
 
 
-class _FixedRankTangentVector(tuple, ndarraySequenceMixin):
+class _FixedRankTangentVector(
+    collections.namedtuple("_Triplet", field_names=("Up", "M", "Vp")),
+    ndarraySequenceMixin,
+):
     def __repr__(self):
         return "_FixedRankTangentVector: " + super().__repr__()
 
@@ -258,18 +272,18 @@ class _FixedRankTangentVector(tuple, ndarraySequenceMixin):
         return Z1 + Z2 + Z3
 
     def __add__(self, other):
-        return _FixedRankTangentVector((s + o for (s, o) in zip(self, other)))
+        return _FixedRankTangentVector(*[s + o for (s, o) in zip(self, other)])
 
     def __sub__(self, other):
-        return _FixedRankTangentVector((s - o for (s, o) in zip(self, other)))
+        return _FixedRankTangentVector(*[s - o for (s, o) in zip(self, other)])
 
     def __mul__(self, other):
-        return _FixedRankTangentVector((other * s for s in self))
+        return _FixedRankTangentVector(*[other * s for s in self])
 
     __rmul__ = __mul__
 
     def __div__(self, other):
-        return _FixedRankTangentVector((val / other for val in self))
+        return _FixedRankTangentVector(*[val / other for val in self])
 
     def __neg__(self):
-        return _FixedRankTangentVector((-val for val in self))
+        return _FixedRankTangentVector(*[-val for val in self])

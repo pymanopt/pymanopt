@@ -48,8 +48,9 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         abs_v = np.abs(v)
         mask = abs_v > 0
         not_mask = np.logical_not(mask)
-        y[mask] = (z[mask] * np.cos(abs_v[mask]) +
-                   v[mask] * (np.sin(abs_v[mask]) / abs_v[mask]))
+        y[mask] = z[mask] * np.cos(abs_v[mask]) + v[mask] * (
+            np.sin(abs_v[mask]) / abs_v[mask]
+        )
         y[not_mask] = z[not_mask]
         return y
 
@@ -67,7 +68,8 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     def rand(self):
         dimension = self._dimension
         return self._normalize(
-            rnd.randn(dimension) + 1j * rnd.randn(dimension))
+            rnd.randn(dimension) + 1j * rnd.randn(dimension)
+        )
 
     def randvec(self, z):
         v = rnd.randn(self._dimension) * (1j * z)

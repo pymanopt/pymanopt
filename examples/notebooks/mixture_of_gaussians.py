@@ -33,8 +33,10 @@
 # +
 import autograd.numpy as np
 
+
 np.set_printoptions(precision=2)
 import matplotlib.pyplot as plt
+
 
 # %matplotlib inline
 
@@ -111,6 +113,7 @@ plt.show()
 # +
 import sys
 
+
 sys.path.insert(0, "../..")
 
 from autograd.scipy.special import logsumexp
@@ -119,6 +122,7 @@ import pymanopt
 from pymanopt import Problem
 from pymanopt.manifolds import Euclidean, Product, SymmetricPositiveDefinite
 from pymanopt.solvers import SteepestDescent
+
 
 # (1) Instantiate the manifold
 manifold = Product([SymmetricPositiveDefinite(D + 1, k=K), Euclidean(K - 1)])

@@ -1,4 +1,5 @@
 from pymanopt.manifolds import SpecialOrthogonalGroup
+
 from .._test import TestCase
 
 

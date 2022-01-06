@@ -1,26 +1,29 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from examples._tools import ExampleRunner
-from numpy import linalg as la, random as rnd
+from numpy import linalg as la
+from numpy import random as rnd
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import Oblique
 from pymanopt.solvers import TrustRegions
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow"
-)
+
+SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad_ehess(manifold, matrix, backend):
     egrad = ehess = None
 
     if backend == "Autograd":
+
         @pymanopt.function.Autograd(manifold)
         def cost(X):
             return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
+
     elif backend == "Callable":
+
         @pymanopt.function.Callable(manifold)
         def cost(X):
             return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
@@ -32,17 +35,26 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
         @pymanopt.function.Callable(manifold)
         def ehess(X, H):
             return X @ (H.T @ X + X.T @ H) + H @ (X.T @ X - matrix)
+
     elif backend == "PyTorch":
         matrix_ = torch.from_numpy(matrix)
 
         @pymanopt.function.PyTorch(manifold)
         def cost(X):
-            return 0.25 * torch.norm(
-                torch.matmul(torch.transpose(X, 1, 0), X) - matrix_) ** 2
+            return (
+                0.25
+                * torch.norm(
+                    torch.matmul(torch.transpose(X, 1, 0), X) - matrix_
+                )
+                ** 2
+            )
+
     elif backend == "TensorFlow":
+
         @pymanopt.function.TensorFlow(manifold)
         def cost(X):
             return 0.25 * tf.norm(tf.matmul(tf.transpose(X), X) - matrix) ** 2
+
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
@@ -74,6 +86,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
 
 if __name__ == "__main__":
-    runner = ExampleRunner(run, "Nearest low-rank correlation matrix",
-                           SUPPORTED_BACKENDS)
+    runner = ExampleRunner(
+        run, "Nearest low-rank correlation matrix", SUPPORTED_BACKENDS
+    )
     runner.run()

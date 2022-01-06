@@ -22,22 +22,22 @@ if __name__ == "__main__":
     optional_dependencies = {}
     for requirement in requirements:
         # We manually separate hard from optional dependencies.
-        if any(requirement.startswith(optional_dependency)
-               for optional_dependency in OPTIONAL_DEPENDENCIES):
+        if any(
+            requirement.startswith(optional_dependency)
+            for optional_dependency in OPTIONAL_DEPENDENCIES
+        ):
             package = re.match(r"([A-Za-z0-9\-_]+).*", requirement).group(1)
             optional_dependencies[package] = [requirement]
         else:
             install_requires.append(requirement)
 
     dev_requirements = parse_requirements_file("requirements/dev.txt")
-    extras_require = {
-        "test": dev_requirements,
-        **optional_dependencies
-    }
+    extras_require = {"test": dev_requirements, **optional_dependencies}
     extras_require["all"] = list(chain(*extras_require.values()))
 
     pymanopt = runpy.run_path(
-        os.path.join(BASE_DIR, "pymanopt", "__init__.py"))
+        os.path.join(BASE_DIR, "pymanopt", "__init__.py")
+    )
 
     with open(os.path.join(BASE_DIR, "README.md")) as f:
         long_description = f.read()
@@ -45,8 +45,10 @@ if __name__ == "__main__":
     setup(
         name="pymanopt",
         version=pymanopt["__version__"],
-        description=("Toolbox for optimization on manifolds with support for "
-                     "automatic differentiation"),
+        description=(
+            "Toolbox for optimization on manifolds with support for "
+            "automatic differentiation"
+        ),
         url="https://pymanopt.org",
         author="Jamie Townsend, Niklas Koep and Sebastian Weichwald",
         license="BSD",
@@ -63,9 +65,11 @@ if __name__ == "__main__":
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
         ],
-        keywords=("optimization,manifold optimization,"
-                  "automatic differentiation,machine learning,numpy,scipy,"
-                  "autograd,tensorflow"),
+        keywords=(
+            "optimization,manifold optimization,"
+            "automatic differentiation,machine learning,numpy,scipy,"
+            "autograd,tensorflow"
+        ),
         packages=find_packages(exclude=["tests"]),
         install_requires=install_requires,
         extras_require=extras_require,
@@ -76,6 +80,6 @@ if __name__ == "__main__":
             "CONTRIBUTORS",
             "LICENSE",
             "MAINTAINERS",
-            "README.md"
-        ]
+            "README.md",
+        ],
     )
