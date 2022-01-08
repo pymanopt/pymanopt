@@ -6,7 +6,7 @@ import numpy as np
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
-from pymanopt.tools import ndarraySequenceMixin
+from pymanopt.tools import ndarraySequenceMixin, wrap_as_class_instance
 
 
 class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
@@ -185,7 +185,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         U = np.hstack((X[0], Qu)) @ Ut[:, : self._k]
         V = np.hstack((X[2].T, Qv)) @ Vt[:, : self._k]
         S = St[: self._k] + np.spacing(1)
-        return U, S, V.T
+        return _FixedRankPoint(U, S, V.T)
 
     def norm(self, X, G):
         return np.sqrt(self.inner(X, G, G))
@@ -194,18 +194,18 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         u = self._stiefel_m.rand()
         s = np.sort(np.random.rand(self._k))[::-1]
         vt = self._stiefel_n.rand().T
-        return (u, s, vt)
+        return _FixedRankPoint(u, s, vt)
 
     def _tangent(self, X, Z):
-        """Project componenets of ``Z`` to tangent space at ``X``.
+        """Project components of ``Z`` to tangent space at ``X``.
 
         Given Z in tangent vector format, projects the components Up and Vp
         such that they satisfy the tangent space constraints up to numerical
         errors.
         If Z was indeed a tangent vector at X, this should barely affect Z.
         """
-        Up = Z[0] - X[0] @ X[0].T @ Z[0]
-        Vp = Z[2] - X[2].T @ X[2] @ Z[2]
+        Up = Z.Up - X[0] @ X[0].T @ Z.Up
+        Vp = Z.Vp - X[2].T @ X[2] @ Z.Vp
 
         return _FixedRankTangentVector(Up, Z[1], Vp)
 
@@ -214,11 +214,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Vp = np.random.randn(self._n, self._k)
         M = np.random.randn(self._k, self._k)
 
-        Z = self._tangent(X, (Up, M, Vp))
-
-        nrm = self.norm(X, Z)
-
-        return _FixedRankTangentVector(Z[0] / nrm, Z[1] / nrm, Z[2] / nrm)
+        Z = self._tangent(X, _FixedRankTangentVector(Up, M, Vp))
+        return Z / self.norm(X, Z)
 
     def tangent2ambient(self, X, Z):
         """Represent tangent vector in ambient space.
@@ -258,32 +255,41 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         )
 
 
-class _FixedRankTangentVector(
-    collections.namedtuple("_Triplet", field_names=("Up", "M", "Vp")),
-    ndarraySequenceMixin,
-):
-    def __repr__(self):
-        return "_FixedRankTangentVector: " + super().__repr__()
-
-    def to_ambient(self, x):
-        Z1 = x[0] @ self[1] @ x[2]
-        Z2 = self[0] @ x[2]
-        Z3 = x[0] @ self[2].T
-        return Z1 + Z2 + Z3
-
-    def __add__(self, other):
-        return _FixedRankTangentVector(*[s + o for (s, o) in zip(self, other)])
-
-    def __sub__(self, other):
-        return _FixedRankTangentVector(*[s - o for (s, o) in zip(self, other)])
-
+class _ndarraySequence(ndarraySequenceMixin):
+    @wrap_as_class_instance
     def __mul__(self, other):
-        return _FixedRankTangentVector(*[other * s for s in self])
+        return [other * s for s in self]
 
     __rmul__ = __mul__
 
-    def __div__(self, other):
-        return _FixedRankTangentVector(*[val / other for val in self])
+    @wrap_as_class_instance
+    def __truediv__(self, other):
+        return [val / other for val in self]
 
+    @wrap_as_class_instance
     def __neg__(self):
-        return _FixedRankTangentVector(*[-val for val in self])
+        return [-val for val in self]
+
+
+class _FixedRankPoint(
+    _ndarraySequence,
+    collections.namedtuple(
+        "_FixedRankPointTuple", field_names=("u", "s", "vt")
+    ),
+):
+    pass
+
+
+class _FixedRankTangentVector(
+    _ndarraySequence,
+    collections.namedtuple(
+        "_FixedRankTangentVectorTuple", field_names=("Up", "M", "Vp")
+    ),
+):
+    @wrap_as_class_instance
+    def __add__(self, other):
+        return [s + o for (s, o) in zip(self, other)]
+
+    @wrap_as_class_instance
+    def __sub__(self, other):
+        return [s - o for (s, o) in zip(self, other)]
