@@ -207,7 +207,7 @@ class Manifold(metaclass=abc.ABCMeta):
 
         This method guarantees that ``vector`` is indeed a tangent vector
         at ``point`` on the manifold.
-        Typically this simply corresponds to ``proj(point, vector`` but differ
+        Typically this simply corresponds to ``proj(point, vector)`` but differ
         for certain manifolds.
         """
 
