@@ -1,7 +1,7 @@
 import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools import ndarraySequenceMixin
+from pymanopt.tools import ndarraySequenceMixin, wrap_as_class_instance
 
 
 class Product(Manifold):
@@ -117,29 +117,29 @@ class Product(Manifold):
         )
 
 
-class _ProductTangentVector(list, ndarraySequenceMixin):
-    def __repr__(self):
-        return "_ProductTangentVector: " + super().__repr__()
-
+class _ProductTangentVector(ndarraySequenceMixin, list):
+    @wrap_as_class_instance(unpack=False)
     def __add__(self, other):
-        assert len(self) == len(other)
-        return _ProductTangentVector(
-            [v + other[k] for k, v in enumerate(self)]
-        )
+        if len(self) != len(other):
+            raise ValueError("Arguments must be same length")
+        return [v + other[k] for k, v in enumerate(self)]
 
+    @wrap_as_class_instance(unpack=False)
     def __sub__(self, other):
-        assert len(self) == len(other)
-        return _ProductTangentVector(
-            [v - other[k] for k, v in enumerate(self)]
-        )
+        if len(self) != len(other):
+            raise ValueError("Arguments must be same length")
+        return [v - other[k] for k, v in enumerate(self)]
 
+    @wrap_as_class_instance(unpack=False)
     def __mul__(self, other):
-        return _ProductTangentVector([other * val for val in self])
+        return [other * val for val in self]
 
     __rmul__ = __mul__
 
-    def __div__(self, other):
-        return _ProductTangentVector([val / other for val in self])
+    @wrap_as_class_instance(unpack=False)
+    def __truediv__(self, other):
+        return [val / other for val in self]
 
+    @wrap_as_class_instance(unpack=False)
     def __neg__(self):
-        return _ProductTangentVector([-val for val in self])
+        return [-val for val in self]
