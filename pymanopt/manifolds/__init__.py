@@ -21,10 +21,9 @@ __all__ = [
 ]
 
 from .complex_circle import ComplexCircle
-from .complex_grassmann import ComplexGrassmann
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
-from .grassmann import Grassmann
+from .grassmann import ComplexGrassmann, Grassmann
 from .oblique import Oblique
 from .product import Product
 from .psd import (

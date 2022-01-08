@@ -4,8 +4,6 @@ from numpy import random as rnd
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import ComplexGrassmann
-
-# from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multihconj, multiprod, multisym
 
 from .._test import TestCase
