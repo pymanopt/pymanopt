@@ -54,9 +54,9 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
         if retraction == "qr":
-            self._retr = self._retr_qr
+            self.retr = self._retr_qr
         elif retraction == "polar":
-            self._retr = self._retr_polar
+            self.retr = self._retr_polar
         else:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
@@ -85,9 +85,6 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         symXtegrad = multisym(Xtegrad)
         Xtehess = multiprod(Xt, ehess)
         return multiskew(Xtehess - multiprod(H, symXtegrad))
-
-    def retr(self, X, U):
-        return self._retr(X, U)
 
     def _retr_qr(self, X, U):
         def retri(Y):
