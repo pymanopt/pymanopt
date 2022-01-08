@@ -71,8 +71,9 @@ class Manifold(metaclass=abc.ABCMeta):
 
         For most manifolds, which represent points as (potentially
         multi-dimensional) arrays, this will be 1, but other manifolds might
-        represent points as tuples or lists of arrays. In this case,
-        `point_layout` describes how many elements such tuples/lists contain.
+        represent points as tuples or lists of arrays.
+        In this case, `point_layout` describes how many elements such
+        tuples/lists contain.
         """
         return self._point_layout
 
@@ -198,6 +199,16 @@ class Manifold(metaclass=abc.ABCMeta):
         Returns the intrinsic mean of two points ``X`` and ``Y`` on the
         manifold, i.e., a point that lies mid-way between ``X`` and ``Y`` on
         the geodesic arc joining them.
+        """
+
+    @_raise_not_implemented_error
+    def tangent(self, point, vector):
+        """Re-tangentialize a tangent vector.
+
+        This method guarantees that ``vector`` is indeed a tangent vector
+        at ``point`` on the manifold.
+        Typically this simply corresponds to ``proj(point, vector`` but differ
+        for certain manifolds.
         """
 
 
