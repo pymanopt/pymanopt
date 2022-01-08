@@ -196,7 +196,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         vt = self._stiefel_n.rand().T
         return _FixedRankPoint(u, s, vt)
 
-    def _tangent(self, X, Z):
+    def tangent(self, X, Z):
         """Project components of ``Z`` to tangent space at ``X``.
 
         Given Z in tangent vector format, projects the components Up and Vp
@@ -214,7 +214,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Vp = np.random.randn(self._n, self._k)
         M = np.random.randn(self._k, self._k)
 
-        Z = self._tangent(X, _FixedRankTangentVector(Up, M, Vp))
+        Z = self.tangent(X, _FixedRankTangentVector(Up, M, Vp))
         return Z / self.norm(X, Z)
 
     def tangent2ambient(self, X, Z):
