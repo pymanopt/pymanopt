@@ -1,4 +1,3 @@
-from .. import make_tracing_backend_decorator
 from ._backend import Backend
 
 
@@ -22,6 +21,3 @@ class _NumPyBackend(Backend):
 
     compute_gradient = _raise_not_implemented_error
     compute_hessian_vector_product = _raise_not_implemented_error
-
-
-NumPy = make_tracing_backend_decorator(_NumPyBackend)

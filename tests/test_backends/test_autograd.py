@@ -1,6 +1,6 @@
 import autograd.numpy as np
 
-from pymanopt.function import Autograd
+import pymanopt
 
 from . import _backend_tests
 
@@ -9,7 +9,7 @@ class TestUnaryFunction(_backend_tests.TestUnaryFunction):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(x):
             return np.sum(x ** 2)
 
@@ -20,7 +20,7 @@ class TestUnaryVarargFunction(_backend_tests.TestUnaryFunction):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(*x):
             (x,) = x
             return np.sum(x ** 2)
@@ -32,7 +32,7 @@ class TestNaryFunction(_backend_tests.TestNaryFunction):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(x, y):
             return x @ y
 
@@ -43,7 +43,7 @@ class TestNaryVarargFunction(_backend_tests.TestNaryFunction):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(*args):
             return np.dot(*args)
 
@@ -54,7 +54,7 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(x, y, z):
             return np.sum(x ** 2 + y + z ** 3)
 
@@ -65,7 +65,7 @@ class TestVector(_backend_tests.TestVector):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(X):
             return np.exp(np.sum(X ** 2))
 
@@ -76,7 +76,7 @@ class TestMatrix(_backend_tests.TestMatrix):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(X):
             return np.exp(np.sum(X ** 2))
 
@@ -87,7 +87,7 @@ class TestTensor3(_backend_tests.TestTensor3):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(X):
             return np.exp(np.sum(X ** 2))
 
@@ -98,7 +98,7 @@ class TestMixed(_backend_tests.TestMixed):
     def setUp(self):
         super().setUp()
 
-        @Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(x, y, z):
             return (
                 np.exp(np.sum(x ** 2))

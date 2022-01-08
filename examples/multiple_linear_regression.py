@@ -10,44 +10,44 @@ from pymanopt.manifolds import Euclidean
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_egrad_ehess(manifold, samples, targets, backend):
     egrad = ehess = None
 
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(weights):
             # Use autograd's linalg.norm wrapper.
             return np.linalg.norm(targets - samples @ weights) ** 2
 
-    elif backend == "NumPy":
+    elif backend == "numpy":
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def cost(weights):
             return la.norm(targets - samples @ weights) ** 2
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def egrad(weights):
             return -2 * samples.T @ (targets - samples @ weights)
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def ehess(weights, vector):
             return 2 * samples.T @ samples @ vector
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
         samples_ = torch.from_numpy(samples)
         targets_ = torch.from_numpy(targets)
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(weights):
             return torch.norm(targets_ - torch.matmul(samples_, weights)) ** 2
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(weights):
             return (
                 tf.norm(targets - tf.tensordot(samples, weights, axes=1)) ** 2

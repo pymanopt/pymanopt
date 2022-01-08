@@ -8,7 +8,6 @@ except ImportError:
     autograd = None
 
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
-from .. import make_tracing_backend_decorator
 from ._backend import Backend
 
 
@@ -61,6 +60,3 @@ class _AutogradBackend(Backend):
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(wrapper)
         return wrapper
-
-
-Autograd = make_tracing_backend_decorator(_AutogradBackend)

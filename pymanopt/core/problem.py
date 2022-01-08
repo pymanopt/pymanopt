@@ -18,7 +18,7 @@ class Problem:
             :mod:`pymanopt.functions` which takes a point on a manifold and
             returns a real scalar.
             If any decorator other than
-            :func:`pymanopt.function.NumPy` is used the gradient and
+            :func:`pymanopt.function.numpy` is used the gradient and
             Hessian-vector production functions are computed automatically if
             needed and no ``(e)grad`` or ``(e)hess`` arguments are provided.
         egrad: The Euclidean gradient, i.e., the gradient of the cost function

@@ -10,27 +10,27 @@ from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.solvers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_egrad(manifold, matrix, backend):
     egrad = None
 
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(u, s, vt):
             X = u @ np.diag(s) @ vt
             return np.linalg.norm(X - matrix) ** 2
 
-    elif backend == "NumPy":
+    elif backend == "numpy":
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def cost(u, s, vt):
             X = u @ np.diag(s) @ vt
             return la.norm(X - matrix) ** 2
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def egrad(u, s, vt):
             X = u @ np.diag(s) @ vt
             S = np.diag(s)
@@ -39,17 +39,17 @@ def create_cost_egrad(manifold, matrix, backend):
             gvt = 2 * (u @ S).T @ (X - matrix)
             return gu, gs, gvt
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
         matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(u, s, vt):
             X = torch.matmul(u, torch.matmul(torch.diag(s), vt))
             return torch.norm(X - matrix_) ** 2
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(u, s, vt):
             X = tf.matmul(u, tf.matmul(tf.linalg.diag(s), vt))
             return tf.norm(X - matrix) ** 2

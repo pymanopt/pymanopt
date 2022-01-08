@@ -10,43 +10,43 @@ from pymanopt.manifolds import PSDFixedRank
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_egrad_ehess(manifold, matrix, backend):
     egrad = ehess = None
 
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(Y):
             return np.linalg.norm(Y @ Y.T - matrix, "fro") ** 2
 
-    elif backend == "NumPy":
+    elif backend == "numpy":
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def cost(Y):
             return la.norm(Y @ Y.T - matrix, "fro") ** 2
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def egrad(Y):
             return 4 * (Y @ Y.T - matrix) @ Y
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def ehess(Y, U):
             return 4 * ((Y @ U.T + U @ Y.T) @ Y + (Y @ Y.T - matrix) @ U)
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
         matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(Y):
             X = torch.matmul(Y, torch.transpose(Y, 1, 0))
             return torch.norm(X - matrix_) ** 2
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(Y):
             X = tf.matmul(Y, tf.transpose(Y))
             return tf.norm(X - matrix) ** 2

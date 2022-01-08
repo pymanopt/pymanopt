@@ -310,7 +310,6 @@ class TestTensor3(unittest.TestCase):
 
 
 class TestMixed(unittest.TestCase):
-    # Test autograd on a tuple containing vector, matrix and tensor3.
     def setUp(self):
         np.seterr(all="raise")
 

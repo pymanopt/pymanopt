@@ -10,36 +10,36 @@ from pymanopt.manifolds import Oblique
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_egrad_ehess(manifold, matrix, backend):
     egrad = ehess = None
 
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(X):
             return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
 
-    elif backend == "NumPy":
+    elif backend == "numpy":
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def cost(X):
             return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def egrad(X):
             return 0.5 * X @ (X.T @ X - matrix)
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def ehess(X, H):
             return X @ (H.T @ X + X.T @ H) + H @ (X.T @ X - matrix)
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
         matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(X):
             return (
                 0.25
@@ -49,9 +49,9 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
                 ** 2
             )
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(X):
             return 0.25 * tf.norm(tf.matmul(tf.transpose(X), X) - matrix) ** 2
 

@@ -8,7 +8,6 @@ import functools
 import numpy as np
 
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
-from .. import make_tracing_backend_decorator
 from ._backend import Backend
 
 
@@ -80,6 +79,3 @@ class _TensorFlowBackend(Backend):
                 hessian_vector_product
             )
         return hessian_vector_product
-
-
-TensorFlow = make_tracing_backend_decorator(_TensorFlowBackend)

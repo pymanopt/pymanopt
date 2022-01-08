@@ -10,38 +10,38 @@ from pymanopt.manifolds import Oblique
 from pymanopt.solvers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_egrad(manifold, matrix, backend):
     egrad = None
 
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(X):
             return 0.5 * np.sum((X - matrix) ** 2)
 
-    elif backend == "NumPy":
+    elif backend == "numpy":
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def cost(X):
             return 0.5 * np.sum((X - matrix) ** 2)
 
-        @pymanopt.function.NumPy(manifold)
+        @pymanopt.function.numpy(manifold)
         def egrad(X):
             return X - matrix
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
         matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(X):
             return 0.5 * torch.sum((X - matrix_) ** 2)
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(X):
             return 0.5 * tf.reduce_sum((X - matrix) ** 2)
 
