@@ -8,7 +8,7 @@ from pymanopt.manifolds import SpecialOrthogonalGroup
 from pymanopt.solvers import SteepestDescent
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad(manifold, ABt, backend):
@@ -20,13 +20,13 @@ def create_cost_egrad(manifold, ABt, backend):
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
 
-    elif backend == "Callable":
+    elif backend == "NumPy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def egrad(X):
             return -ABt
 

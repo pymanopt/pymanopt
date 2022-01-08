@@ -10,7 +10,7 @@ from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.solvers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad(manifold, matrix, backend):
@@ -23,14 +23,14 @@ def create_cost_egrad(manifold, matrix, backend):
             X = u @ np.diag(s) @ vt
             return np.linalg.norm(X - matrix) ** 2
 
-    elif backend == "Callable":
+    elif backend == "NumPy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def cost(u, s, vt):
             X = u @ np.diag(s) @ vt
             return la.norm(X - matrix) ** 2
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def egrad(u, s, vt):
             X = u @ np.diag(s) @ vt
             S = np.diag(s)

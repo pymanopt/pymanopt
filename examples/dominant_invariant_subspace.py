@@ -10,7 +10,7 @@ from pymanopt.manifolds import Grassmann
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad_ehess(manifold, matrix, backend):
@@ -22,17 +22,17 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
         def cost(X):
             return -np.trace(X.T @ matrix @ X)
 
-    elif backend == "Callable":
+    elif backend == "NumPy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def cost(X):
             return -np.trace(X.T @ matrix @ X)
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def egrad(X):
             return -(matrix + matrix.T) @ X
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def ehess(X, H):
             return -(matrix + matrix.T) @ H
 

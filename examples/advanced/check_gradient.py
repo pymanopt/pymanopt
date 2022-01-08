@@ -9,7 +9,7 @@ from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_gradient
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad(manifold, matrix, backend):
@@ -21,13 +21,13 @@ def create_cost_egrad(manifold, matrix, backend):
         def cost(x):
             return -np.inner(x, matrix @ x)
 
-    elif backend == "Callable":
+    elif backend == "NumPy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def cost(x):
             return -np.inner(x, matrix @ x)
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def egrad(x):
             return -2 * matrix @ x
 

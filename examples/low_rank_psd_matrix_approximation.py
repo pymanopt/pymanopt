@@ -10,7 +10,7 @@ from pymanopt.manifolds import PSDFixedRank
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad_ehess(manifold, matrix, backend):
@@ -22,17 +22,17 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
         def cost(Y):
             return np.linalg.norm(Y @ Y.T - matrix, "fro") ** 2
 
-    elif backend == "Callable":
+    elif backend == "NumPy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def cost(Y):
             return la.norm(Y @ Y.T - matrix, "fro") ** 2
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def egrad(Y):
             return 4 * (Y @ Y.T - matrix) @ Y
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def ehess(Y, U):
             return 4 * ((Y @ U.T + U @ Y.T) @ Y + (Y @ Y.T - matrix) @ U)
 

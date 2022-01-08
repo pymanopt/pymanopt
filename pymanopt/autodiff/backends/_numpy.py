@@ -2,9 +2,9 @@ from .. import make_tracing_backend_decorator
 from ._backend import Backend
 
 
-class _CallableBackend(Backend):
+class _NumPyBackend(Backend):
     def __init__(self):
-        super().__init__("Callable")
+        super().__init__("NumPy")
 
     @staticmethod
     def is_available():
@@ -24,4 +24,4 @@ class _CallableBackend(Backend):
     compute_hessian_vector_product = _raise_not_implemented_error
 
 
-Callable = make_tracing_backend_decorator(_CallableBackend)
+NumPy = make_tracing_backend_decorator(_NumPyBackend)

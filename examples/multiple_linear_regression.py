@@ -10,7 +10,7 @@ from pymanopt.manifolds import Euclidean
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad_ehess(manifold, samples, targets, backend):
@@ -23,17 +23,17 @@ def create_cost_egrad_ehess(manifold, samples, targets, backend):
             # Use autograd's linalg.norm wrapper.
             return np.linalg.norm(targets - samples @ weights) ** 2
 
-    elif backend == "Callable":
+    elif backend == "NumPy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def cost(weights):
             return la.norm(targets - samples @ weights) ** 2
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def egrad(weights):
             return -2 * samples.T @ (targets - samples @ weights)
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def ehess(weights, vector):
             return 2 * samples.T @ samples @ vector
 

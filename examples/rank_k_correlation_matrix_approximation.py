@@ -10,7 +10,7 @@ from pymanopt.manifolds import Oblique
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad_ehess(manifold, matrix, backend):
@@ -22,17 +22,17 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
         def cost(X):
             return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
 
-    elif backend == "Callable":
+    elif backend == "NumPy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def cost(X):
             return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def egrad(X):
             return 0.5 * X @ (X.T @ X - matrix)
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def ehess(X, H):
             return X @ (H.T @ X + X.T @ H) + H @ (X.T @ X - matrix)
 

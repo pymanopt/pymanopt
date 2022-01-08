@@ -1,6 +1,6 @@
-__all__ = ["Autograd", "Callable", "PyTorch", "TensorFlow"]
+__all__ = ["Autograd", "NumPy", "PyTorch", "TensorFlow"]
 
 from ._autograd import Autograd
-from ._callable import Callable
+from ._numpy import NumPy
 from ._pytorch import PyTorch
 from ._tensorflow import TensorFlow

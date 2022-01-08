@@ -8,7 +8,7 @@ from pymanopt.manifolds import Stiefel
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("Autograd", "NumPy", "PyTorch", "TensorFlow")
 
 
 def create_cost_egrad_ehess(manifold, samples, backend):
@@ -20,13 +20,13 @@ def create_cost_egrad_ehess(manifold, samples, backend):
         def cost(w):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
 
-    elif backend == "Callable":
+    elif backend == "NumPy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def cost(w):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def egrad(w):
             return (
                 -2
@@ -37,7 +37,7 @@ def create_cost_egrad_ehess(manifold, samples, backend):
                 @ w
             )
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.NumPy(manifold)
         def ehess(w, h):
             return -2 * (
                 samples.T @ (samples - samples @ w @ h.T) @ w
