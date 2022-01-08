@@ -17,7 +17,25 @@ class ndarraySequenceMixin:
     #
     # for details.
     __array_priority__ = 1000
-    __array_ufunc__ = None  # Available since numpy 1.13
+    __array_ufunc__ = None
+
+
+def wrap_as_class_instance(method=None, *, unpack=True):
+    """Method decorator to wrap return values in a class instance."""
+
+    def make_wrapper(function):
+        @functools.wraps(function)
+        def wrapper(self, *args, **kwargs):
+            return_value = function(self, *args, **kwargs)
+            if unpack:
+                return self.__class__(*return_value)
+            return self.__class__(return_value)
+
+        return wrapper
+
+    if method is not None and callable(method):
+        return make_wrapper(method)
+    return make_wrapper
 
 
 def unpack_singleton_sequence_return_value(function):
