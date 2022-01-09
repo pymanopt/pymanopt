@@ -183,7 +183,11 @@ class Manifold(metaclass=abc.ABCMeta):
     def log(self, point_a, point_b):
         """Computes the logarithmic map on the manifold.
 
-        This is the inverse of :meth:`exp`.
+        The logarithmic map ``log(point_a, point_b)`` produces a tangent vector
+        in the tangent space at ``point_a`` that points in the direction of
+        ``point_b``.
+        In other words, ``exp(point_a, log(point_a, point_b)) == point_b``.
+        As such it is the inverse of :meth:`exp`.
         """
 
     @_raise_not_implemented_error
