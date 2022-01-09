@@ -10,7 +10,7 @@ class NumPyBackend(Backend):
         return True
 
     @Backend._assert_backend_available
-    def compile_function(self, function):
+    def prepare_function(self, function):
         return function
 
     def _raise_not_implemented_error(self, *args, **kwargs):

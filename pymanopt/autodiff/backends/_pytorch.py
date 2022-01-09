@@ -40,7 +40,7 @@ class PyTorchBackend(Backend):
         return torch.from_numpy(array)
 
     @Backend._assert_backend_available
-    def compile_function(self, function):
+    def prepare_function(self, function):
         @functools.wraps(function)
         def wrapper(*args):
             return function(*map(self._from_numpy, args)).numpy()

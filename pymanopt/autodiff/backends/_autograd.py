@@ -20,7 +20,7 @@ class AutogradBackend(Backend):
         return autograd is not None
 
     @Backend._assert_backend_available
-    def compile_function(self, function):
+    def prepare_function(self, function):
         return function
 
     @Backend._assert_backend_available
