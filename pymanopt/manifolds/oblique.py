@@ -26,81 +26,68 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def typicaldist(self):
         return np.pi * np.sqrt(self._n)
 
-    def inner(self, X: np.ndarray, U: np.ndarray, V: np.ndarray) -> np.float64:
-        """Inner product.
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return np.tensordot(
+            tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
+        )
 
-        Args:
-            X: The base point.
-            U: The first tangent vector.
-            V: The second tangent vector.
+    def norm(self, point, tangent_vector):
+        return la.norm(tangent_vector)
 
-        Returns:
-            The inner product between ``U`` and ``V`` in the tangent space at
-            ``X``.
-        """
-        return float(np.tensordot(U, V))
-
-    def norm(self, X, U):
-        return la.norm(U)
-
-    def dist(self, X, Y):
-        XY = (X * Y).sum(0)
+    def dist(self, point_a, point_b):
+        XY = (point_a * point_b).sum(0)
         XY[XY > 1] = 1
-        U = np.arccos(XY)
-        return la.norm(U)
+        return la.norm(np.arccos(XY))
 
-    def proj(self, X, H):
-        return H - X * ((X * H).sum(0)[np.newaxis, :])
+    def proj(self, point, vector):
+        return vector - point * ((point * vector).sum(0)[np.newaxis, :])
 
-    def ehess2rhess(self, X, egrad, ehess, U):
-        PXehess = self.proj(X, ehess)
-        # TODO(nkoep): Move the second summand to the 'weingarten' method
-        #              instead.
-        return PXehess - U * ((X * egrad).sum(0)[np.newaxis, :])
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        # TODO(nkoep): Implement 'weingarten' instead.
+        PXehess = self.proj(point, euclidean_hvp)
+        return PXehess - tangent_vector * (
+            (point * euclidean_gradient).sum(0)[np.newaxis, :]
+        )
 
-    def exp(self, X, U):
-        norm_U = np.sqrt((U ** 2).sum(0))[np.newaxis, :]
+    def exp(self, point, tangent_vector):
+        norm = np.sqrt((tangent_vector ** 2).sum(0))[np.newaxis, :]
+        target_point = (
+            point * np.cos(norm)
+            + tangent_vector * np.sinc(norm / np.pi) / norm * np.pi
+        )
+        return target_point
 
-        Y = X * np.cos(norm_U) + U * (np.sin(norm_U) / norm_U)
+    def retr(self, point, tangent_vector):
+        return self._normalize_columns(point + tangent_vector)
 
-        # For those columns where the step is too small, use a retraction.
-        exclude = np.nonzero(norm_U <= 4.5e-8)[-1]
-        Y[:, exclude] = self._normalize_columns(X[:, exclude] + U[:, exclude])
-
-        return Y
-
-    def retr(self, X, U):
-        return self._normalize_columns(X + U)
-
-    def log(self, X, Y):
-        V = self.proj(X, Y - X)
-        dists = np.arccos((X * Y).sum(0))
-        norms = np.sqrt((V ** 2).sum(0)).real
-        factors = dists / norms
-        # For very close points, dists is almost equal to norms, but because
-        # they are both almost zero, the division above can return NaN's. To
-        # avoid that, we force those ratios to 1.
-        factors[dists <= 1e-6] = 1
-
-        return V * factors
+    def log(self, point_a, point_b):
+        vector = self.proj(point_a, point_b - point_a)
+        distances = np.arccos((point_a * point_b).sum(0))
+        norms = np.sqrt((vector ** 2).sum(0)).real
+        # Try to avoid zero-division when both distances and norms are almost
+        # zero.
+        epsilon = np.finfo(np.float64).eps
+        factors = (distances + epsilon) / (norms + epsilon)
+        return vector * factors
 
     def rand(self):
         return self._normalize_columns(rnd.randn(self._m, self._n))
 
-    def randvec(self, X):
-        H = rnd.randn(*X.shape)
-        P = self.proj(X, H)
-        return P / self.norm(X, P)
+    def randvec(self, point):
+        vector = rnd.randn(*point.shape)
+        tangent_vector = self.proj(point, vector)
+        return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, X, Y, U):
-        return self.proj(Y, U)
+    def transp(self, point_a, point_b, tangent_vector_a):
+        return self.proj(point_b, tangent_vector_a)
 
-    def pairmean(self, X, Y):
-        return self._normalize_columns(X + Y)
+    def pairmean(self, point_a, point_b):
+        return self._normalize_columns(point_a + point_b)
 
-    def zerovec(self, X):
+    def zerovec(self, point):
         return np.zeros((self._m, self._n))
 
-    def _normalize_columns(self, X):
-        """Return an l2-column-normalized copy of the matrix X."""
-        return X / la.norm(X, axis=0)[np.newaxis, :]
+    def _normalize_columns(self, array):
+        return array / la.norm(array, axis=0)[np.newaxis, :]

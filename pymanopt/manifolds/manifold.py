@@ -101,12 +101,26 @@ class Manifold(metaclass=abc.ABCMeta):
     # Abstract methods that subclasses must implement.
 
     @abc.abstractmethod
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner(
+        self,
+        point: np.ndarray,
+        tangent_vector_a: np.ndarray,
+        tangent_vector_b: np.ndarray,
+    ) -> np.float64:
         """Inner product between tangent vectors at a point on the manifold.
 
-        The inner product corresponds to the Riemannian metric between two
-        tangent vectors ``vector1`` and ``vector2`` in the tangent space at
-        ``point``.
+        This method implements a Riemannian inner product between two tangent
+        vectors ``tangent_vector_a`` and ``tangent_vector_b`` in the tangent
+        space at ``point``.
+
+        Args:
+            point: The base point.
+            tangent_vector_a: The first tangent vector.
+            tangent_vector_b: The second tangent vector.
+
+        Returns:
+            The inner product between ``tangent_vector_a`` and
+            ``tangent_vector_b`` in the tangent space at ``point``.
         """
 
     @abc.abstractmethod
