@@ -40,13 +40,13 @@ class Function:
         return self._compiled_function(*args, **kwargs)
 
 
-def make_tracing_backend_decorator(Backend) -> typing.Callable:
+def backend_decorator_factory(Backend) -> typing.Callable:
     """Create function decorator for a backend.
 
     Function to create a backend decorator that is used to annotate a
     callable::
 
-        decorator = make_tracing_backend_decorator(Backend)
+        decorator = backend_decorator_factory(Backend)
 
         @decorator(manifold)
         def function(x):

@@ -15,7 +15,7 @@ from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
 from ._backend import Backend
 
 
-class _PyTorchBackend(Backend):
+class PyTorchBackend(Backend):
     def __init__(self):
         super().__init__("PyTorch")
 

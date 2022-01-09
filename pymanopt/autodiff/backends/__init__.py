@@ -1,13 +1,13 @@
 __all__ = ["autograd", "numpy", "pytorch", "tensorflow"]
 
-from .. import make_tracing_backend_decorator
-from ._autograd import _AutogradBackend
-from ._numpy import _NumPyBackend
-from ._pytorch import _PyTorchBackend
-from ._tensorflow import _TensorFlowBackend
+from .. import backend_decorator_factory
+from ._autograd import AutogradBackend
+from ._numpy import NumPyBackend
+from ._pytorch import PyTorchBackend
+from ._tensorflow import TensorFlowBackend
 
 
-autograd = make_tracing_backend_decorator(_AutogradBackend)
-numpy = make_tracing_backend_decorator(_NumPyBackend)
-pytorch = make_tracing_backend_decorator(_PyTorchBackend)
-tensorflow = make_tracing_backend_decorator(_TensorFlowBackend)
+autograd = backend_decorator_factory(AutogradBackend)
+numpy = backend_decorator_factory(NumPyBackend)
+pytorch = backend_decorator_factory(PyTorchBackend)
+tensorflow = backend_decorator_factory(TensorFlowBackend)

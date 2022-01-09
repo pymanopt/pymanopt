@@ -11,7 +11,7 @@ from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
 from ._backend import Backend
 
 
-class _TensorFlowBackend(Backend):
+class TensorFlowBackend(Backend):
     def __init__(self, **kwargs):
 
         if self.is_available():

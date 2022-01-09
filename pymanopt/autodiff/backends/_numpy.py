@@ -1,7 +1,7 @@
 from ._backend import Backend
 
 
-class _NumPyBackend(Backend):
+class NumPyBackend(Backend):
     def __init__(self):
         super().__init__("NumPy")
 
