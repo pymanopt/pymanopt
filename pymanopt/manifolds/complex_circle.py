@@ -41,7 +41,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     tangent = proj
 
     def ehess2rhess(self, z, egrad, ehess, zdot):
-        return self.proj(z, (z * egrad.conj()).real * zdot)
+        return self.proj(z, ehess - (z * egrad.conj()).real * zdot)
 
     def exp(self, z, v):
         y = np.zeros(self._dimension)
