@@ -7,8 +7,12 @@ import numpy.random as rnd
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
 
-class _Sphere(EuclideanEmbeddedSubmanifold):
-    """Base class for tensors with unit Frobenius norm."""
+class _SphereBase(EuclideanEmbeddedSubmanifold):
+    """Base class for tensors with unit Frobenius norm.
+
+    Notes:
+        The implementation of the Weingarten map is taken from [AMT2013]_.
+    """
 
     def __init__(self, *shape, name, dimension):
         if len(shape) == 0:
@@ -77,20 +81,16 @@ class _Sphere(EuclideanEmbeddedSubmanifold):
         return np.zeros(self._shape)
 
     def _normalize(self, X):
-        """Return Frobenius-normalized version of X in ambient space."""
         return X / self.norm(None, X)
 
 
-class Sphere(_Sphere):
+class Sphere(_SphereBase):
     r"""The sphere manifold.
 
     Manifold of shape :math:`n_1 \times n_2 \times \ldots \times n_k` tensors
     with unit 2-norm.
     The metric is such that the sphere is a Riemannian submanifold of Euclidean
     space.
-
-    Notes:
-        The implementation of the Weingarten map is taken from [AMT2013]_.
     """
 
     def __init__(self, *shape):
@@ -108,7 +108,7 @@ class Sphere(_Sphere):
         super().__init__(*shape, name=name, dimension=dimension)
 
 
-class _SphereSubspaceIntersectionManifold(_Sphere):
+class _SphereSubspaceIntersectionManifold(_SphereBase):
     def __init__(self, projector, name, dimension):
         m, n = projector.shape
         assert m == n, "projection matrix is not square"
