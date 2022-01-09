@@ -22,40 +22,48 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
             name = f"Product manifold of complex circles (S^1)^{dimension}"
         super().__init__(name, dimension)
 
-    def inner(self, z, v, w):
-        return (v.conj() @ w).real
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return (tangent_vector_a.conj() @ tangent_vector_b).real
 
-    def norm(self, x, v):
-        return la.norm(v)
+    def norm(self, point, tangent_vector):
+        return la.norm(tangent_vector)
 
-    def dist(self, x, y):
-        return la.norm(np.arccos((x.conj() * y).real))
+    def dist(self, point_a, point_b):
+        return la.norm(np.arccos((point_a.conj() * point_b).real))
 
     @property
     def typicaldist(self):
         return np.pi * np.sqrt(self._dimension)
 
-    def proj(self, z, u):
-        return u - (u.conj() * z).real * z
+    def proj(self, point, vector):
+        return vector - (vector.conj() * point).real * point
 
     tangent = proj
 
-    def ehess2rhess(self, z, egrad, ehess, zdot):
-        return self.proj(z, ehess - (z * egrad.conj()).real * zdot)
-
-    def exp(self, z, v):
-        y = np.zeros(self._dimension)
-        abs_v = np.abs(v)
-        mask = abs_v > 0
-        not_mask = np.logical_not(mask)
-        y[mask] = z[mask] * np.cos(abs_v[mask]) + v[mask] * (
-            np.sin(abs_v[mask]) / abs_v[mask]
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        return self.proj(
+            point,
+            euclidean_hvp
+            - (point * euclidean_gradient.conj()).real * tangent_vector,
         )
-        y[not_mask] = z[not_mask]
-        return y
 
-    def retr(self, z, v):
-        return self._normalize(z + v)
+    def exp(self, point, tangent_vector):
+        tangent_vector_abs = np.abs(tangent_vector)
+        mask = tangent_vector_abs > 0
+        not_mask = np.logical_not(mask)
+        tangent_vector_new = np.zeros(self._dimension)
+        tangent_vector_new[mask] = point[mask] * np.cos(
+            tangent_vector_abs[mask]
+        ) + tangent_vector[mask] * (
+            np.sin(tangent_vector_abs[mask]) / tangent_vector_abs[mask]
+        )
+        tangent_vector_new[not_mask] = point[not_mask]
+        return tangent_vector_new
+
+    def retr(self, point, tangent_vector):
+        return self._normalize(point + tangent_vector)
 
     def log(self, x1, x2):
         v = self.proj(x1, x2 - x1)
@@ -71,20 +79,20 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
             rnd.randn(dimension) + 1j * rnd.randn(dimension)
         )
 
-    def randvec(self, z):
-        v = rnd.randn(self._dimension) * (1j * z)
-        return v / self.norm(z, v)
+    def randvec(self, point):
+        tangent_vector = rnd.randn(self._dimension) * 1j * point
+        return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, x1, x2, d):
-        return self.proj(x2, d)
+    def transp(self, point_a, point_b, tangent_vector_a):
+        return self.proj(point_b, tangent_vector_a)
 
-    def pairmean(self, z1, z2):
-        return self._normalize(z1 + z2)
+    def pairmean(self, point_a, point_b):
+        return self._normalize(point_a + point_b)
 
-    def zerovec(self, x):
+    def zerovec(self, point):
         return np.zeros(self._dimension)
 
     @staticmethod
-    def _normalize(x):
-        """Normalize the entries of x element-wise by their absolute values."""
-        return x / np.abs(x)
+    def _normalize(point):
+        """Normalize entries of array by their absolute values."""
+        return point / np.abs(point)
