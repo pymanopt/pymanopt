@@ -12,10 +12,8 @@ from ._backend import Backend
 
 
 class TensorFlowBackend(Backend):
-    def __init__(self, **kwargs):
-
-        if self.is_available():
-            super().__init__("TensorFlow")
+    def __init__(self):
+        super().__init__("TensorFlow")
 
     @staticmethod
     def is_available():
