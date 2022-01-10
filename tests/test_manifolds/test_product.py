@@ -62,8 +62,8 @@ class TestProductManifold(TestCase):
         s = self.man
         X = s.rand()
         Y = s.rand()
-        Yexplog = s.exp(X, s.log(X, Y))
-        np_testing.assert_almost_equal(s.dist(Y, Yexplog), 0)
+        Yexplog = s.exp(X, tangent_vector=s.log(X, Y))
+        np_testing.assert_almost_equal(s.dist(point_a=Y, point_b=Yexplog), 0)
 
     def test_log_exp_inverse(self):
         s = self.man

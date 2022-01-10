@@ -6,7 +6,7 @@ import numpy as np
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
-from pymanopt.tools import ndarraySequenceMixin, wrap_as_class_instance
+from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
 class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
@@ -262,17 +262,17 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
 
 class _ndarraySequence(ndarraySequenceMixin):
-    @wrap_as_class_instance
+    @return_as_class_instance
     def __mul__(self, other):
         return [other * s for s in self]
 
     __rmul__ = __mul__
 
-    @wrap_as_class_instance
+    @return_as_class_instance
     def __truediv__(self, other):
         return [val / other for val in self]
 
-    @wrap_as_class_instance
+    @return_as_class_instance
     def __neg__(self):
         return [-val for val in self]
 
@@ -292,10 +292,10 @@ class _FixedRankTangentVector(
         "_FixedRankTangentVectorTuple", field_names=("Up", "M", "Vp")
     ),
 ):
-    @wrap_as_class_instance
+    @return_as_class_instance
     def __add__(self, other):
         return [s + o for (s, o) in zip(self, other)]
 
-    @wrap_as_class_instance
+    @return_as_class_instance
     def __sub__(self, other):
         return [s - o for (s, o) in zip(self, other)]

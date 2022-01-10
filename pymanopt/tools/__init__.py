@@ -20,7 +20,7 @@ class ndarraySequenceMixin:
     __array_ufunc__ = None
 
 
-def wrap_as_class_instance(method=None, *, unpack=True):
+def return_as_class_instance(method=None, *, unpack=True):
     """Method decorator to wrap return values in a class instance."""
 
     def make_wrapper(function):
