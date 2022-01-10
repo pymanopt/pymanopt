@@ -32,102 +32,95 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
     def typicaldist(self):
         return np.sqrt(self.dim)
 
-    def dist(self, x, y):
-        # Adapted from equation 6.13 of "Positive definite matrices". The
-        # Cholesky decomposition gives the same result as matrix sqrt. There
-        # may be more efficient ways to compute this.
-        c = la.cholesky(x)
+    def dist(self, point_a, point_b):
+        # Adapted from equation (6.13) of [Bha2007].
+        c = la.cholesky(point_a)
         c_inv = la.inv(c)
         logm = multilog(
-            multiprod(multiprod(c_inv, y), multitransp(c_inv)), pos_def=True
+            multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
+            pos_def=True,
         )
         return la.norm(logm)
 
-    def inner(self, x, u, v):
-        xinvu = la.solve(x, u)
-        if u is v:
-            xinvv = xinvu
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        p_inv_tv_a = la.solve(point, tangent_vector_a)
+        if tangent_vector_a is tangent_vector_b:
+            p_inv_tv_b = p_inv_tv_a
         else:
-            xinvv = la.solve(x, v)
-        return np.tensordot(xinvu, multitransp(xinvv), axes=x.ndim)
-
-    def proj(self, X, G):
-        return multisym(G)
-
-    def egrad2rgrad(self, x, u):
-        # TODO: Check that this is correct
-        return multiprod(multiprod(x, multisym(u)), x)
-
-    def ehess2rhess(self, x, egrad, ehess, u):
-        # TODO: Check that this is correct
-        return multiprod(multiprod(x, multisym(ehess)), x) + multisym(
-            multiprod(multiprod(u, multisym(egrad)), x)
+            p_inv_tv_b = la.solve(point, tangent_vector_b)
+        return np.tensordot(
+            p_inv_tv_a, multitransp(p_inv_tv_b), axes=tangent_vector_a.ndim
         )
 
-    def norm(self, x, u):
-        return np.sqrt(self.inner(x, u, u))
+    def proj(self, point, vector):
+        return multisym(vector)
+
+    def egrad2rgrad(self, point, euclidean_gradient):
+        # TODO: Check that this is correct
+        return multiprod(multiprod(point, multisym(euclidean_gradient)), point)
+
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        # TODO: Check that this is correct
+        return multiprod(
+            multiprod(point, multisym(euclidean_hvp)), point
+        ) + multisym(
+            multiprod(
+                multiprod(tangent_vector, multisym(euclidean_gradient)), point
+            )
+        )
+
+    def norm(self, point, tangent_vector):
+        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
     def rand(self):
-        # The way this is done is arbitrary. I think the space of p.d.
-        # matrices would have infinite measure w.r.t. the Riemannian metric
-        # (cf. integral 0-inf [ln(x)] dx = inf) so impossible to have a
-        # 'uniform' distribution.
-
-        # Generate eigenvalues between 1 and 2
+        # Generate eigenvalues between 1 and 2.
         d = np.ones((self._k, self._n, 1)) + rnd.rand(self._k, self._n, 1)
 
-        # Generate an orthogonal matrix. Annoyingly qr decomp isn't
-        # vectorized so need to use a for loop. Could be done using
-        # svd but this is slower for bigger matrices.
+        # Generate an orthogonal matrix.
         u = np.zeros((self._k, self._n, self._n))
         for i in range(self._k):
-            u[i], r = la.qr(rnd.randn(self._n, self._n))
+            u[i], _ = la.qr(rnd.randn(self._n, self._n))
 
         if self._k == 1:
             return multiprod(u, d * multitransp(u))[0]
         return multiprod(u, d * multitransp(u))
 
-    def randvec(self, x):
+    def randvec(self, point):
         k = self._k
         n = self._n
         if k == 1:
-            u = multisym(rnd.randn(n, n))
+            tangent_vector = multisym(rnd.randn(n, n))
         else:
-            u = multisym(rnd.randn(k, n, n))
-        return u / self.norm(x, u)
+            tangent_vector = multisym(rnd.randn(k, n, n))
+        return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, x1, x2, d):
-        return d
+    def transp(self, point_a, point_b, tangent_vector_b):
+        return tangent_vector_b
 
-    def exp(self, x, u):
-        # TODO: Check which method is faster depending on n, k.
-        x_inv_u = la.solve(x, u)
+    def exp(self, point, tangent_vector):
+        p_inv_tv = la.solve(point, tangent_vector)
         if self._k > 1:
-            e = np.zeros(np.shape(x))
+            e = np.zeros(np.shape(point))
             for i in range(self._k):
-                e[i] = expm(x_inv_u[i])
+                e[i] = expm(p_inv_tv[i])
         else:
-            e = expm(x_inv_u)
-        return multiprod(x, e)
-        # This alternative implementation is sometimes faster though less
-        # stable. It can return a matrix with small negative determinant.
-        #    c = la.cholesky(x)
-        #    c_inv = la.inv(c)
-        #    e = multiexp(multiprod(multiprod(c_inv, u), multitransp(c_inv)),
-        #                 sym=True)
-        #    return multiprod(multiprod(c, e), multitransp(c))
+            e = expm(p_inv_tv)
+        return multiprod(point, e)
 
     retr = exp
 
-    def log(self, x, y):
-        c = la.cholesky(x)
+    def log(self, point_a, point_b):
+        c = la.cholesky(point_a)
         c_inv = la.inv(c)
         logm = multilog(
-            multiprod(multiprod(c_inv, y), multitransp(c_inv)), pos_def=True
+            multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
+            pos_def=True,
         )
         return multiprod(multiprod(c, logm), multitransp(c))
 
-    def zerovec(self, x):
+    def zerovec(self, point):
         k = self._k
         n = self._n
         if k == 1:
