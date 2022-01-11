@@ -133,9 +133,9 @@ class TestSphereManifold(TestCase):
     def test_exp_log_inverse(self):
         s = self.man
         X = s.rand()
-        U = s.randvec(X)
-        Uexplog = s.exp(X, s.log(X, U))
-        np_testing.assert_array_almost_equal(U, Uexplog)
+        Y = s.rand()
+        Yexplog = s.exp(X, s.log(X, Y))
+        np_testing.assert_array_almost_equal(Y, Yexplog)
 
     def test_log_exp_inverse(self):
         s = self.man
