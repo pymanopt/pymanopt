@@ -24,64 +24,57 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
     def typicaldist(self):
         return np.pi
 
-    def inner(self, X, U, V):
-        return float(np.tensordot(U, V, axes=U.ndim))
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return np.tensordot(
+            tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
+        )
 
-    def norm(self, X, U):
-        return la.norm(U)
+    def norm(self, point, tangent_vector):
+        return la.norm(tangent_vector)
 
-    def dist(self, U, V):
-        # Make sure inner product is between -1 and 1
-        inner = max(min(self.inner(None, U, V), 1), -1)
+    def dist(self, point_a, point_b):
+        inner = max(min(self.inner(point_a, point_a, point_b), 1), -1)
         return np.arccos(inner)
 
-    def proj(self, X, H):
-        return H - self.inner(None, X, H) * X
+    def proj(self, point, vector):
+        return vector - self.inner(point, point, vector) * point
 
-    def weingarten(self, X, U, V):
-        return -self.inner(X, X, V) * U
+    def weingarten(self, point, tangent_vector, normal_vector):
+        return -self.inner(point, point, normal_vector) * tangent_vector
 
-    def exp(self, X, U):
-        norm_U = self.norm(None, U)
-        # Check that norm_U isn't too tiny. If very small then
-        # sin(norm_U) / norm_U ~= 1 and retr is extremely close to exp.
-        if norm_U > 1e-3:
-            return X * np.cos(norm_U) + U * np.sin(norm_U) / norm_U
-        else:
-            return self.retr(X, U)
+    def exp(self, point, tangent_vector):
+        norm = self.norm(point, tangent_vector)
+        return point * np.cos(norm) + tangent_vector * np.sinc(norm / np.pi)
 
-    def retr(self, X, U):
-        Y = X + U
-        return self._normalize(Y)
+    def retr(self, point, tangent_vector):
+        return self._normalize(point + tangent_vector)
 
-    def log(self, X, Y):
-        P = self.proj(X, Y - X)
-        dist = self.dist(X, Y)
-        # If the two points are "far apart", correct the norm.
-        if dist > 1e-6:
-            P *= dist / self.norm(None, P)
-        return P
+    def log(self, point_a, point_b):
+        vector = self.proj(point_a, point_b - point_a)
+        distance = self.dist(point_a, point_b)
+        epsilon = np.finfo(np.float64).eps
+        factor = (distance + epsilon) / (self.norm(point_a, vector) + epsilon)
+        return factor * vector
 
     def rand(self):
-        Y = rnd.randn(*self._shape)
-        return self._normalize(Y)
+        point = rnd.randn(*self._shape)
+        return self._normalize(point)
 
-    def randvec(self, X):
-        H = rnd.randn(*self._shape)
-        P = self.proj(X, H)
-        return self._normalize(P)
+    def randvec(self, point):
+        vector = rnd.randn(*self._shape)
+        return self._normalize(self.proj(point, vector))
 
-    def transp(self, X, Y, U):
-        return self.proj(Y, U)
+    def transp(self, point_a, point_b, tangent_vector_a):
+        return self.proj(point_b, tangent_vector_a)
 
-    def pairmean(self, X, Y):
-        return self._normalize(X + Y)
+    def pairmean(self, point_a, point_b):
+        return self._normalize(point_a + point_b)
 
-    def zerovec(self, X):
+    def zerovec(self, point):
         return np.zeros(self._shape)
 
-    def _normalize(self, X):
-        return X / self.norm(None, X)
+    def _normalize(self, array):
+        return array / la.norm(array)
 
 
 class Sphere(_SphereBase):
@@ -121,26 +114,25 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
         self._subspace_projector = projector
         super().__init__(n, name=name, dimension=dimension)
 
-    def _validate_span_matrix(self, U):
-        if len(U.shape) != 2:
+    def _validate_span_matrix(self, matrix):
+        if len(matrix.shape) != 2:
             raise ValueError("Input array must be 2-dimensional")
-        num_rows, num_columns = U.shape
+        num_rows, num_columns = matrix.shape
         if num_rows < num_columns:
             raise ValueError(
                 "The span matrix cannot have fewer rows than columns"
             )
 
-    def proj(self, X, H):
-        Y = super().proj(X, H)
-        return self._subspace_projector @ Y
+    def proj(self, point, vector):
+        return self._subspace_projector @ super().proj(point, vector)
 
     def rand(self):
-        X = super().rand()
-        return self._normalize(self._subspace_projector @ X)
+        point = super().rand()
+        return self._normalize(self._subspace_projector @ point)
 
-    def randvec(self, X):
-        Y = super().randvec(X)
-        return self._normalize(self._subspace_projector @ Y)
+    def randvec(self, point):
+        vector = super().randvec(point)
+        return self._normalize(self._subspace_projector @ vector)
 
 
 class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
@@ -148,14 +140,14 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
 
     Manifold of n-dimensional unit 2-norm vectors intersecting the
     :math:`r`-dimensional subspace of :math:`\R^n` spanned by the columns of
-    the matrix ``U`` of size :math:`n \times r`.
+    the matrix ``matrix`` of size :math:`n \times r`.
     """
 
-    def __init__(self, U):
-        self._validate_span_matrix(U)
-        m = U.shape[0]
-        Q, _ = la.qr(U)
-        projector = Q @ Q.T
+    def __init__(self, matrix):
+        self._validate_span_matrix(matrix)
+        m = matrix.shape[0]
+        q, _ = la.qr(matrix)
+        projector = q @ q.T
         subspace_dimension = la.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors intersecting a "
@@ -172,14 +164,14 @@ class SphereSubspaceComplementIntersection(
 
     Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
     the :math:`r`-dimensional subspace of :math:`\R^n` spanned by columns of
-    the matrix ``U``.
+    the matrix ``matrix``.
     """
 
-    def __init__(self, U):
-        self._validate_span_matrix(U)
-        m = U.shape[0]
-        Q, _ = la.qr(U)
-        projector = np.eye(m) - Q @ Q.T
+    def __init__(self, matrix):
+        self._validate_span_matrix(matrix)
+        m = matrix.shape[0]
+        q, _ = la.qr(matrix)
+        projector = np.eye(m) - q @ q.T
         subspace_dimension = la.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors orthogonal "
