@@ -58,7 +58,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         )
 
     def egrad2rgrad(self, point, euclidean_gradient):
-        return euclidean_gradient * (point ** 2)
+        return euclidean_gradient * point ** 2
 
     def exp(self, point, tangent_vector):
         return point * np.exp((1.0 / point) * tangent_vector)
