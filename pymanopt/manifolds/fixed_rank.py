@@ -153,8 +153,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         vvtdv = vt.T @ vtdv
         Vp = (dvt.T - vvtdv) / s
 
-        i = np.eye(self._k)
-        f = 1 / (s[np.newaxis, :] ** 2 - s[:, np.newaxis] ** 2 + i)
+        identity = np.eye(self._k)
+        f = 1 / (s[np.newaxis, :] ** 2 - s[:, np.newaxis] ** 2 + identity)
 
         M = (
             f * (utdu - utdu.T) * s
