@@ -53,9 +53,8 @@ class Oblique(EuclideanEmbeddedSubmanifold):
 
     def exp(self, point, tangent_vector):
         norm = np.sqrt((tangent_vector ** 2).sum(0))[np.newaxis, :]
-        target_point = (
-            point * np.cos(norm)
-            + tangent_vector * np.sinc(norm / np.pi) / norm * np.pi
+        target_point = point * np.cos(norm) + tangent_vector * np.sinc(
+            norm / np.pi
         )
         return target_point
 
