@@ -98,17 +98,17 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
             for (a, b) in zip(tangent_vector_a, tangent_vector_b)
         )
 
-    def _apply_ambient(self, point, matrix):
-        """Right-multiply a matrix to a point in ambient space."""
-        if isinstance(point, (list, tuple)):
-            return point[0] @ point[1] @ point[2].T @ matrix
-        return point @ matrix
+    def _apply_ambient(self, vector, matrix):
+        """Right-multiply a matrix to a vector in ambient space."""
+        if isinstance(vector, (list, tuple)):
+            return vector[0] @ vector[1] @ vector[2].T @ matrix
+        return vector @ matrix
 
-    def _apply_ambient_transpose(self, point, matrix):
-        """Right-multiply a matrix to transpose of a point in ambient space."""
-        if isinstance(point, (list, tuple)):
-            return point[2] @ point[1] @ point[0].T @ matrix
-        return point.T @ matrix
+    def _apply_ambient_transpose(self, vector, matrix):
+        """Right-multiply a matrix to transpose of a vector in ambient space."""
+        if isinstance(vector, (list, tuple)):
+            return vector[2] @ vector[1] @ vector[0].T @ matrix
+        return vector.T @ matrix
 
     def proj(self, point, vector):
         """Project vector to tangent space.

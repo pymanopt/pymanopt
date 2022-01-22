@@ -3,7 +3,6 @@
 ### Issues
 
 #### #160:
-  - fixed_rank.py: drop support for full mxn matrices
   - Add default implementation for tangent?
 
 ### 1.0.x:
