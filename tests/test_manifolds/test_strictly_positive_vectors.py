@@ -19,7 +19,7 @@ class TestSingleStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         g = 2 * self.man.randvec(x)
         h = 3 * self.man.randvec(x)
-        assert type(self.man.inner(x, g, h)) is np.float64
+        assert isinstance(self.man.inner(x, g, h), np.float64)
 
     def test_proj(self):
         # Test proj(proj(X)) == proj(X)
@@ -34,7 +34,7 @@ class TestSingleStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         u = self.man.randvec(x)
         x_u = (1.0 / x) * u
-        assert type(self.man.norm(x, u)) is np.float64
+        assert isinstance(self.man.norm(x, u), np.float64)
         np_testing.assert_allclose(la.norm(x_u), self.man.norm(x, u))
 
     def test_rand(self):
@@ -67,7 +67,7 @@ class TestSingleStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         y = self.man.rand()
         u = self.man.log(x, y)
-        assert type(self.man.dist(x, y)) is np.float64
+        assert isinstance(self.man.dist(x, y), np.float64)
         np_testing.assert_allclose(self.man.norm(x, u), self.man.dist(x, y))
 
     def test_ehess2rhess(self):
@@ -129,7 +129,7 @@ class TestProductStrictlyPositiveVectors:
         x = self.man.rand()
         g = 2 * self.man.randvec(x)
         h = 3 * self.man.randvec(x)
-        assert type(self.man.inner(x, g, h)) is np.float64
+        assert isinstance(self.man.inner(x, g, h), np.float64)
 
     def test_proj(self):
         # Test proj(proj(X)) == proj(X)
@@ -144,7 +144,7 @@ class TestProductStrictlyPositiveVectors:
         x = self.man.rand()
         u = self.man.randvec(x)
         x_u = (1.0 / x) * u
-        assert type(self.man.norm(x, u)) is np.float64
+        assert isinstance(self.man.norm(x, u), np.float64)
         np_testing.assert_allclose(la.norm(x_u), self.man.norm(x, u))
 
     def test_rand(self):
@@ -179,7 +179,7 @@ class TestProductStrictlyPositiveVectors:
         x = self.man.rand()
         y = self.man.rand()
         u = self.man.log(x, y)
-        assert type(self.man.dist(x, y)) is np.float64
+        assert isinstance(self.man.dist(x, y), np.float64)
         np_testing.assert_allclose(self.man.norm(x, u), self.man.dist(x, y))
 
     def test_ehess2rhess(self):
