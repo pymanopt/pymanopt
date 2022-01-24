@@ -68,8 +68,8 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     def egrad2rgrad(self, x, u):
         return u * (x ** 2)
 
-    def ehess2rhess(self, x, egrad, ehess, u):
-        return ehess * (x ** 2) + egrad * u * x
+    def ehess2rhess(self, X, G, H, U):
+        return H * (X ** 2) + G * U * X
 
     def exp(self, x, u):
         return x * np.exp((1.0 / x) * u)
@@ -81,5 +81,5 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     def log(self, x, y):
         return x * np.log((1.0 / x) * y)
 
-    def transp(self, x1, x2, d):
-        return self.proj(x2, x2 * (x1 ** -1) * d)
+    def transp(self, X1, X2, G):
+        return self.proj(X2, X2 * (X1 ** -1) * G)
