@@ -30,7 +30,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
 
     def inner(self, x, u, v):
         inv_x = 1.0 / x
-        return np.sum(inv_x * u * inv_x * v, axis=0, keepdims=True)
+        return np.sum(inv_x * u * inv_x * v)
 
     def proj(self, x, u):
         return u
@@ -39,29 +39,47 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         return np.sqrt(self.inner(x, u, u))
 
     def rand(self):
-        return rnd.uniform(low=1e-6, high=1, size=(self._n, self._k))
+        k, n = self._k, self._n
+        if k == 1:
+            x = rnd.uniform(low=1e-6, high=1, size=(n, 1))
+        else:
+            x = rnd.uniform(low=1e-6, high=1, size=(k, n, 1))
+        return x
 
     def randvec(self, x):
-        u = rnd.randn(self._n, self._k)
+        k, n = self._k, self._n
+        if k == 1:
+            u = rnd.normal(size=(n, 1))
+        else:
+            u = rnd.normal(size=(k, n, 1))
         return u / self.norm(x, u)
 
     def zerovec(self, x):
-        return np.zeros(self._n, self._k)
+        k, n = self._k, self._n
+        if k == 1:
+            u = np.zeros((n, 1))
+        else:
+            u = np.zeros((k, n, 1))
+        return u
 
     def dist(self, x, y):
-        return la.norm(np.log(x) - np.log(y), axis=0, keepdims=True)
+        return la.norm(np.log(x) - np.log(y))
 
     def egrad2rgrad(self, x, u):
         return u * (x ** 2)
 
+    def ehess2rhess(self, x, egrad, ehess, u):
+        return ehess * (x ** 2) + egrad * u * x
+
     def exp(self, x, u):
         return x * np.exp((1.0 / x) * u)
 
+    # order 2 retraction
     def retr(self, x, u):
-        return x + u
+        return x + u + (1 / 2) * (x ** -1) * (u ** 2)
 
     def log(self, x, y):
         return x * np.log((1.0 / x) * y)
 
-
-# def transp(self, x1, x2, d):
+    def transp(self, x1, x2, d):
+        return self.proj(x2, x2 * (x1 ** -1) * d)
