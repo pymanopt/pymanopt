@@ -60,10 +60,7 @@ class TestSingleStrictlyPositiveVectors(TestCase):
 
     def test_zerovec(self):
         x = self.man.rand()
-        np_testing.assert_allclose(
-            self.man.zerovec(x),
-            np.zeros((self.n, 1))
-        )
+        np_testing.assert_allclose(self.man.zerovec(x), np.zeros((self.n, 1)))
 
     def test_dist(self):
         # To implement norm of log(x, y)
@@ -71,8 +68,7 @@ class TestSingleStrictlyPositiveVectors(TestCase):
         y = self.man.rand()
         u = self.man.log(x, y)
         assert type(self.man.dist(x, y)) is np.float64
-        np_testing.assert_allclose(self.man.norm(x, u),
-                                   self.man.dist(x, y))
+        np_testing.assert_allclose(self.man.norm(x, u), self.man.dist(x, y))
 
     def test_ehess2rhess(self):
         n = self.n
@@ -123,7 +119,7 @@ class TestSingleStrictlyPositiveVectors(TestCase):
         np_testing.assert_allclose(t_u, m.proj(y, t_u))
 
 
-class TestProductStrictlyPositiveVectors():
+class TestProductStrictlyPositiveVectors:
     def __init__(self):
         self.n = n = 10
         self.k = k = 2
@@ -175,8 +171,7 @@ class TestProductStrictlyPositiveVectors():
     def test_zerovec(self):
         x = self.man.rand()
         np_testing.assert_allclose(
-            self.man.zerovec(x),
-            np.zeros((self.k, self.n, 1))
+            self.man.zerovec(x), np.zeros((self.k, self.n, 1))
         )
 
     def test_dist(self):
@@ -185,8 +180,7 @@ class TestProductStrictlyPositiveVectors():
         y = self.man.rand()
         u = self.man.log(x, y)
         assert type(self.man.dist(x, y)) is np.float64
-        np_testing.assert_allclose(self.man.norm(x, u),
-                                   self.man.dist(x, y))
+        np_testing.assert_allclose(self.man.norm(x, u), self.man.dist(x, y))
 
     def test_ehess2rhess(self):
         k, n = self.k, self.n
