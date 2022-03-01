@@ -180,7 +180,7 @@ class TrustRegions(Solver):
                 eta = 1e-6 * man.randvec(x)
                 # Must be inside trust region
                 while man.norm(x, eta) > Delta:
-                    eta = np.sqrt(np.sqrt(np.spacing(1)))
+                    eta = np.sqrt(np.sqrt(np.spacing(1))) * man.randvec(x)
 
             # Solve TR subproblem approximately
             eta, Heta, numit, stop_inner = self._truncated_conjugate_gradient(
