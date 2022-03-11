@@ -7,9 +7,8 @@
 
 ### 1.0.x:
   - #160
-  - attrs
   - Return namedtupleS from solver's 'solve' method
-  - Clean up solver argument names and implementations
+  - Clean up solver argument names
   - Renaming:
     # Short names
     * dim
@@ -17,7 +16,7 @@
     * exp
     * log
     # Long forms
-    * transp -> vector_transport
+    * transp -> transporter
     * rand -> random_point
     * randvec -> random_vector
     * retr -> retraction
@@ -38,6 +37,8 @@
   - Use weingarten map for oblique manifold and Stiefel
 
 ### 1.1.x:
+  - attrs
+  - Refactor solver implementations
   - Add complex manifolds #125
   - Add jax backend #115
   - Add L-BFGS (and other quasi-Newton) solver
