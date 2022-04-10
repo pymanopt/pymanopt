@@ -1,10 +1,5 @@
-import collections
 import functools
 import typing
-
-
-def make_enum(name, fields):
-    return collections.namedtuple(name, fields)(*range(len(fields)))
 
 
 class ndarraySequenceMixin:

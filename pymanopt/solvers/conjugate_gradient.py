@@ -1,19 +1,19 @@
+import enum
 import time
 from copy import deepcopy
 
 import numpy as np
 
-from pymanopt import tools
 from pymanopt.solvers.linesearch import LineSearchAdaptive
 from pymanopt.solvers.solver import Solver
 from pymanopt.tools import printer
 
 
-# TODO: Use Python's enum module.
-BetaTypes = tools.make_enum(
-    "BetaTypes",
-    "FletcherReeves PolakRibiere HestenesStiefel HagerZhang".split(),
-)
+class BetaRule(enum.Enum):
+    FletcherReeves = enum.auto()
+    PolakRibiere = enum.auto()
+    HestenesStiefel = enum.auto()
+    HagerZhang = enum.auto()
 
 
 class ConjugateGradient(Solver):
@@ -26,8 +26,9 @@ class ConjugateGradient(Solver):
     directions.
 
     Args:
-        beta_type: Conjugate gradient beta rule used to construct the new
-            search direction.
+        beta_rule: Conjugate gradient beta rule used to construct the new
+            search direction. Valid choices are ``{"FletcherReeves",
+            "PolakRibiere", "HestenesStiefel", "HagerZhang"}``.
         orth_value: Parameter for Powell's restart strategy.
             An infinite value disables this strategy.
             See in code formula for the specific criterion used.
@@ -36,7 +37,7 @@ class ConjugateGradient(Solver):
 
     def __init__(
         self,
-        beta_type=BetaTypes.HestenesStiefel,
+        beta_rule: str = "HestenesStiefel",
         orth_value=np.inf,
         linesearch=None,
         *args,
@@ -44,7 +45,13 @@ class ConjugateGradient(Solver):
     ):
         super().__init__(*args, **kwargs)
 
-        self._beta_type = beta_type
+        beta_rules = list(map(str, BetaRule.__members__))
+        if beta_rule not in beta_rules:
+            raise ValueError(
+                f"Invalid beta rule {beta_rule}. Should be one of "
+                f"{beta_rules}."
+            )
+        self._beta_rule = beta_rule
         self._orth_value = orth_value
 
         if linesearch is None:
@@ -115,7 +122,7 @@ class ConjugateGradient(Solver):
         self._start_optlog(
             extraiterfields=["gradnorm"],
             solverparams={
-                "beta_type": self._beta_type,
+                "beta_rule": self._beta_rule,
                 "orth_value": self._orth_value,
                 "linesearcher": linesearch,
             },
@@ -185,13 +192,14 @@ class ConjugateGradient(Solver):
             else:
                 desc_dir = man.transp(x, newx, desc_dir)
 
-                if self._beta_type == BetaTypes.FletcherReeves:
+                # TODO(nkoep): Define closures for these in the constructor.
+                if self._beta_rule == "FletcherReeves":
                     beta = newgradPnewgrad / gradPgrad
-                elif self._beta_type == BetaTypes.PolakRibiere:
+                elif self._beta_rule == "PolakRibiere":
                     diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
                     beta = max(0, ip_diff / gradPgrad)
-                elif self._beta_type == BetaTypes.HestenesStiefel:
+                elif self._beta_rule == "HestenesStiefel":
                     diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
                     try:
@@ -201,7 +209,7 @@ class ConjugateGradient(Solver):
                     # if ip_diff = man.inner(newx, diff, desc_dir) = 0
                     except ZeroDivisionError:
                         beta = 1
-                elif self._beta_type == BetaTypes.HagerZhang:
+                elif self._beta_rule == "HagerZhang":
                     diff = newgrad - oldgrad
                     Poldgrad = man.transp(x, newx, Pgrad)
                     Pdiff = Pnewgrad - Poldgrad
@@ -219,13 +227,7 @@ class ConjugateGradient(Solver):
                     eta_HZ = -1 / (desc_dir_norm * min(0.01, gradnorm))
                     beta = max(beta, eta_HZ)
                 else:
-                    types = ", ".join(
-                        [f"BetaTypes.{t}" for t in BetaTypes._fields]
-                    )
-                    raise ValueError(
-                        f"Unknown beta_type {self._beta_type}. Should be one "
-                        f"of {types}."
-                    )
+                    raise AssertionError("unreachable")
 
                 desc_dir = -Pnewgrad + beta * desc_dir
 
