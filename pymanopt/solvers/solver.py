@@ -8,9 +8,9 @@ class Solver(metaclass=abc.ABCMeta):
     Args:
         max_time: Upper bound on the run time of a solver in seconds.
         max_iterations: The maximum number of iterations to perform.
-        gradient_norm_tolerance: Termination threshold for the norm of the
+        min_gradient_norm: Termination threshold for the norm of the
             gradient.
-        step_size_tolerance: Termination threshold for the line search step
+        min_step_size: Termination threshold for the line search step
             size.
         max_cost_evaluations: Maximum number of allowed cost function
             evaluations.
@@ -22,15 +22,15 @@ class Solver(metaclass=abc.ABCMeta):
         self,
         max_time=1000,
         max_iterations=1000,
-        gradient_norm_tolerance=1e-6,
-        step_size_tolerance=1e-10,
+        min_gradient_norm=1e-6,
+        min_step_size=1e-10,
         max_cost_evaluations=5000,
         log_verbosity=0,
     ):
         self._max_time = max_time
         self._max_iterations = max_iterations
-        self._gradient_norm_tolerance = gradient_norm_tolerance
-        self._step_size_tolerance = step_size_tolerance
+        self._min_gradient_norm = min_gradient_norm
+        self._min_step_size = min_step_size
         self._max_cost_evaluations = max_cost_evaluations
         self._log_verbosity = log_verbosity
         self._optlog = None
@@ -70,12 +70,12 @@ class Solver(metaclass=abc.ABCMeta):
                 "Terminated - max iterations reached after "
                 f"{run_time:.2f} seconds."
             )
-        elif gradnorm < self._gradient_norm_tolerance:
+        elif gradnorm < self._min_gradient_norm:
             reason = (
                 f"Terminated - min grad norm reached after {iter} "
                 f"iterations, {run_time:.2f} seconds."
             )
-        elif stepsize < self._step_size_tolerance:
+        elif stepsize < self._min_step_size:
             reason = (
                 f"Terminated - min stepsize reached after {iter} iterations, "
                 f"{run_time:.2f} seconds."
@@ -96,8 +96,8 @@ class Solver(metaclass=abc.ABCMeta):
                 "stoppingcriteria": {
                     "max_time": self._max_time,
                     "max_iterations": self._max_iterations,
-                    "gradient_norm_tolerance": self._gradient_norm_tolerance,
-                    "step_size_tolerance": self._step_size_tolerance,
+                    "min_gradient_norm": self._min_gradient_norm,
+                    "min_step_size": self._min_step_size,
                     "max_cost_evaluations": self._max_cost_evaluations,
                 },
                 "solverparams": solverparams,

@@ -74,7 +74,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         problem.verbosity = 0
 
-    solver = ConjugateGradient(mingradnorm=1e-8, maxiter=1e5)
+    solver = ConjugateGradient(min_gradient_norm=1e-8, max_iterations=1e5)
     Yopt = solver.solve(problem)
 
     if quiet:

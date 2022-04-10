@@ -69,7 +69,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         problem.verbosity = 0
 
-    solver = TrustRegions(maxiter=500, minstepsize=1e-6)
+    solver = TrustRegions(max_iterations=500, min_step_size=1e-6)
     low_rank_factor_estimate = solver.solve(problem)
 
     if quiet:
