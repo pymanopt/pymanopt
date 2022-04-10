@@ -19,7 +19,7 @@ class TestProductManifold(TestCase):
 
     def test_typicaldist(self):
         np_testing.assert_equal(
-            self.man.typicaldist, np.sqrt((self.m * self.n) + np.pi ** 2)
+            self.man.typicaldist, np.sqrt((self.m * self.n) + np.pi**2)
         )
 
     def test_dist(self):

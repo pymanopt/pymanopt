@@ -52,7 +52,7 @@ class Grassmann(_GrassmannBase):
             name = f"Grassmann manifold Gr({n},{p})"
         elif k >= 2:
             name = f"Product Grassmann manifold Gr({n},{p})^{k}"
-        dimension = int(k * (n * p - p ** 2))
+        dimension = int(k * (n * p - p**2))
         super().__init__(name, dimension)
 
     def dist(self, point_a, point_b):
@@ -159,7 +159,7 @@ class ComplexGrassmann(_GrassmannBase):
             name = f"Complex Grassmann manifold Gr({n},{p})"
         elif k >= 2:
             name = f"Product complex Grassmann manifold Gr({n},{p})^{k}"
-        dimension = int(2 * k * (n * p - p ** 2))
+        dimension = int(2 * k * (n * p - p**2))
         super().__init__(name, dimension)
 
     def dist(self, point_a, point_b):

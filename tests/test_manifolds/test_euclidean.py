@@ -63,7 +63,7 @@ class TestEuclideanManifold(TestCase):
         e = self.man
         x = e.rand()
         u = rnd.randn(self.m, self.n)
-        np_testing.assert_almost_equal(np.sqrt(np.sum(u ** 2)), e.norm(x, u))
+        np_testing.assert_almost_equal(np.sqrt(np.sum(u**2)), e.norm(x, u))
 
     def test_rand(self):
         e = self.man

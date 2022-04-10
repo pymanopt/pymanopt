@@ -52,7 +52,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         )
 
     def exp(self, point, tangent_vector):
-        norm = np.sqrt((tangent_vector ** 2).sum(0))[np.newaxis, :]
+        norm = np.sqrt((tangent_vector**2).sum(0))[np.newaxis, :]
         target_point = point * np.cos(norm) + tangent_vector * np.sinc(
             norm / np.pi
         )
@@ -64,7 +64,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def log(self, point_a, point_b):
         vector = self.proj(point_a, point_b - point_a)
         distances = np.arccos((point_a * point_b).sum(0))
-        norms = np.sqrt((vector ** 2).sum(0)).real
+        norms = np.sqrt((vector**2).sum(0)).real
         # Try to avoid zero-division when both distances and norms are almost
         # zero.
         epsilon = np.finfo(np.float64).eps

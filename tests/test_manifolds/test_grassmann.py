@@ -108,7 +108,7 @@ class TestMultiGrassmannManifold(TestCase):
         self.proj = lambda x, u: u - x @ x.T @ u
 
     def test_dim(self):
-        assert self.man.dim == self.k * (self.m * self.n - self.n ** 2)
+        assert self.man.dim == self.k * (self.m * self.n - self.n**2)
 
     def test_typicaldist(self):
         np_testing.assert_almost_equal(

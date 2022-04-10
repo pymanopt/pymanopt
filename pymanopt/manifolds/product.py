@@ -24,7 +24,7 @@ class Product(Manifold):
     @property
     def typicaldist(self):
         return np.sqrt(
-            np.sum([manifold.typicaldist ** 2 for manifold in self.manifolds])
+            np.sum([manifold.typicaldist**2 for manifold in self.manifolds])
         )
 
     def _dispatch(
@@ -57,7 +57,7 @@ class Product(Manifold):
     def dist(self, point_a, point_b):
         return self._dispatch(
             "dist",
-            transform=lambda value: value ** 2,
+            transform=lambda value: value**2,
             reduction=lambda values: np.sqrt(np.sum(values)),
         )(point_a, point_b)
 

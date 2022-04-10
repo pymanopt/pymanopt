@@ -11,7 +11,7 @@ class TestUnaryFunction(_backend_tests.TestUnaryFunction):
 
         @pymanopt.function.pytorch(self.manifold)
         def cost(x):
-            return torch.sum(x ** 2)
+            return torch.sum(x**2)
 
         self.cost = cost
 
@@ -23,7 +23,7 @@ class TestUnaryVarargFunction(_backend_tests.TestUnaryFunction):
         @pymanopt.function.pytorch(self.manifold)
         def cost(*x):
             (x,) = x
-            return torch.sum(x ** 2)
+            return torch.sum(x**2)
 
         self.cost = cost
 
@@ -56,7 +56,7 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
 
         @pymanopt.function.pytorch(self.manifold)
         def cost(x, y, z):
-            return torch.sum(x ** 2 + y + z ** 3)
+            return torch.sum(x**2 + y + z**3)
 
         self.cost = cost
 
@@ -67,7 +67,7 @@ class TestVector(_backend_tests.TestVector):
 
         @pymanopt.function.pytorch(self.manifold)
         def cost(X):
-            return torch.exp(torch.sum(X ** 2))
+            return torch.exp(torch.sum(X**2))
 
         self.cost = cost
 
@@ -78,7 +78,7 @@ class TestMatrix(_backend_tests.TestMatrix):
 
         @pymanopt.function.pytorch(self.manifold)
         def cost(X):
-            return torch.exp(torch.sum(X ** 2))
+            return torch.exp(torch.sum(X**2))
 
         self.cost = cost
 
@@ -89,7 +89,7 @@ class TestTensor3(_backend_tests.TestTensor3):
 
         @pymanopt.function.pytorch(self.manifold)
         def cost(X):
-            return torch.exp(torch.sum(X ** 2))
+            return torch.exp(torch.sum(X**2))
 
         self.cost = cost
 
@@ -101,9 +101,9 @@ class TestMixed(_backend_tests.TestMixed):
         @pymanopt.function.pytorch(self.manifold)
         def cost(x, y, z):
             return (
-                torch.exp(torch.sum(x ** 2))
-                + torch.exp(torch.sum(y ** 2))
-                + torch.exp(torch.sum(z ** 2))
+                torch.exp(torch.sum(x**2))
+                + torch.exp(torch.sum(y**2))
+                + torch.exp(torch.sum(z**2))
             )
 
         self.cost = cost

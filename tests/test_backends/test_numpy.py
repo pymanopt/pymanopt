@@ -24,7 +24,7 @@ class TestNumPyBackend(TestCase):
             _backend_tests.manifold_factory(point_layout=3)
         )
         def nested_nary_cost(x, y, z):
-            return np.sum(x ** 2 * y + 3 * z)
+            return np.sum(x**2 * y + 3 * z)
 
         self.nested_nary_cost = nested_nary_cost
 
@@ -37,7 +37,7 @@ class TestNumPyBackend(TestCase):
         n = self.n
         x, y, z = [rnd.randn(n) for _ in range(3)]
         np_testing.assert_allclose(
-            np.sum(x ** 2 * y + 3 * z), self.nested_nary_cost(x, y, z)
+            np.sum(x**2 * y + 3 * z), self.nested_nary_cost(x, y, z)
         )
 
     def test_gradient_hessian_exceptions(self):

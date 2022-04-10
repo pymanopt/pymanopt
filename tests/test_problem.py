@@ -17,7 +17,7 @@ class TestProblem(TestCase):
 
         @pymanopt.function.tensorflow(self.man)
         def cost(X):
-            return tf.exp(tf.reduce_sum(X ** 2))
+            return tf.exp(tf.reduce_sum(X**2))
 
         self.cost = cost
 
@@ -25,7 +25,7 @@ class TestProblem(TestCase):
         problem = pymanopt.Problem(self.man, self.cost)
         x = rnd.randn(self.n)
         np_testing.assert_allclose(
-            2 * x * np.exp(np.sum(x ** 2)), problem.egrad(x)
+            2 * x * np.exp(np.sum(x**2)), problem.egrad(x)
         )
 
     def test_attribute_override(self):
