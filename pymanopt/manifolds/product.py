@@ -1,145 +1,142 @@
+import functools
+
 import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools import ndarraySequenceMixin
+from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
 class Product(Manifold):
     """Product manifold, i.e., the cartesian product of multiple manifolds."""
 
-    # TODO(nkoep): Change the argument to *manifold so we can do Product(man1,
-    #              man2).
     def __init__(self, manifolds):
         for manifold in manifolds:
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
-        self._manifolds = tuple(manifolds)
-        manifold_names = " x ".join([str(man) for man in manifolds])
+        self.manifolds = tuple(manifolds)
+        manifold_names = " x ".join([str(manifold) for manifold in manifolds])
         name = f"Product manifold: {manifold_names}"
 
-        dimension = np.sum([man.dim for man in manifolds])
+        dimension = np.sum([manifold.dim for manifold in manifolds])
         point_layout = tuple(manifold.point_layout for manifold in manifolds)
         super().__init__(name, dimension, point_layout=point_layout)
-
-    def __setattr__(self, key, value):
-        if hasattr(self, key):
-            if key == "manifolds":
-                raise AttributeError("Cannot override 'manifolds' attribute")
-        super().__setattr__(key, value)
 
     @property
     def typicaldist(self):
         return np.sqrt(
-            np.sum([man.typicaldist ** 2 for man in self._manifolds])
+            np.sum([manifold.typicaldist**2 for manifold in self.manifolds])
         )
 
-    def inner(self, X, G, H):
-        return np.sum(
-            [
-                man.inner(X[k], G[k], H[k])
-                for k, man in enumerate(self._manifolds)
+    def _dispatch(
+        self,
+        method_name,
+        *,
+        transform=lambda value: value,
+        reduction=lambda values: values,
+    ):
+        """Wrapper to delegate method calls to individual manifolds."""
+
+        @functools.wraps(getattr(self, method_name))
+        def wrapper(*args, **kwargs):
+            return_values = [
+                transform(getattr(manifold, method_name)(*arguments))
+                for manifold, *arguments in zip(self.manifolds, *args)
             ]
+            return reduction(return_values)
+
+        return wrapper
+
+    def norm(self, point, tangent_vector):
+        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return self._dispatch("inner", reduction=np.sum)(
+            point, tangent_vector_a, tangent_vector_b
         )
 
-    def norm(self, X, G):
-        return np.sqrt(self.inner(X, G, G))
+    def dist(self, point_a, point_b):
+        return self._dispatch(
+            "dist",
+            transform=lambda value: value**2,
+            reduction=lambda values: np.sqrt(np.sum(values)),
+        )(point_a, point_b)
 
-    def dist(self, X, Y):
-        return np.sqrt(
-            np.sum(
-                [
-                    man.dist(X[k], Y[k]) ** 2
-                    for k, man in enumerate(self._manifolds)
-                ]
-            )
+    def proj(self, point, vector):
+        return self._dispatch("proj", reduction=_ProductTangentVector)(
+            point, vector
         )
 
-    def proj(self, X, U):
-        return _ProductTangentVector(
-            [man.proj(X[k], U[k]) for k, man in enumerate(self._manifolds)]
+    def egrad2rgrad(self, point, euclidean_gradient):
+        return self._dispatch("egrad2rgrad", reduction=_ProductTangentVector)(
+            point, euclidean_gradient
         )
 
-    def egrad2rgrad(self, X, U):
-        return _ProductTangentVector(
-            [
-                man.egrad2rgrad(X[k], U[k])
-                for k, man in enumerate(self._manifolds)
-            ]
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        return self._dispatch("ehess2rhess", reduction=_ProductTangentVector)(
+            point, euclidean_gradient, euclidean_hvp, tangent_vector
         )
 
-    def ehess2rhess(self, X, egrad, ehess, H):
-        return _ProductTangentVector(
-            [
-                man.ehess2rhess(X[k], egrad[k], ehess[k], H[k])
-                for k, man in enumerate(self._manifolds)
-            ]
-        )
+    def exp(self, point, tangent_vector):
+        return self._dispatch("exp")(point, tangent_vector)
 
-    def exp(self, X, U):
-        return [man.exp(X[k], U[k]) for k, man in enumerate(self._manifolds)]
+    def retr(self, point, tangent_vector):
+        return self._dispatch("retr")(point, tangent_vector)
 
-    def retr(self, X, U):
-        return [man.retr(X[k], U[k]) for k, man in enumerate(self._manifolds)]
-
-    def log(self, X, U):
-        return _ProductTangentVector(
-            [man.log(X[k], U[k]) for k, man in enumerate(self._manifolds)]
+    def log(self, point_a, point_b):
+        return self._dispatch("log", reduction=_ProductTangentVector)(
+            point_a, point_b
         )
 
     def rand(self):
-        return [man.rand() for man in self._manifolds]
+        return self._dispatch("rand")()
 
-    def randvec(self, X):
-        scale = len(self._manifolds) ** (-1 / 2)
-        return _ProductTangentVector(
-            [
-                scale * man.randvec(X[k])
-                for k, man in enumerate(self._manifolds)
-            ]
+    def randvec(self, point):
+        scale = len(self.manifolds) ** (-1 / 2)
+        return self._dispatch(
+            "randvec",
+            transform=lambda value: scale * value,
+            reduction=_ProductTangentVector,
+        )(point)
+
+    def transp(self, point_a, point_b, tangent_vector_a):
+        return self._dispatch("transp", reduction=_ProductTangentVector)(
+            point_a, point_b, tangent_vector_a
         )
 
-    def transp(self, X1, X2, G):
-        return _ProductTangentVector(
-            [
-                man.transp(X1[k], X2[k], G[k])
-                for k, man in enumerate(self._manifolds)
-            ]
-        )
+    def pairmean(self, point_a, point_b):
+        return self._dispatch("pairmean")(point_a, point_b)
 
-    def pairmean(self, X, Y):
-        return [
-            man.pairmean(X[k], Y[k]) for k, man in enumerate(self._manifolds)
-        ]
-
-    def zerovec(self, X):
-        return _ProductTangentVector(
-            [man.zerovec(X[k]) for k, man in enumerate(self._manifolds)]
+    def zerovec(self, point):
+        return self._dispatch("zerovec", reduction=_ProductTangentVector)(
+            point
         )
 
 
-class _ProductTangentVector(list, ndarraySequenceMixin):
-    def __repr__(self):
-        return "_ProductTangentVector: " + super().__repr__()
-
+class _ProductTangentVector(ndarraySequenceMixin, list):
+    @return_as_class_instance(unpack=False)
     def __add__(self, other):
-        assert len(self) == len(other)
-        return _ProductTangentVector(
-            [v + other[k] for k, v in enumerate(self)]
-        )
+        if len(self) != len(other):
+            raise ValueError("Arguments must be same length")
+        return [v + other[k] for k, v in enumerate(self)]
 
+    @return_as_class_instance(unpack=False)
     def __sub__(self, other):
-        assert len(self) == len(other)
-        return _ProductTangentVector(
-            [v - other[k] for k, v in enumerate(self)]
-        )
+        if len(self) != len(other):
+            raise ValueError("Arguments must be same length")
+        return [v - other[k] for k, v in enumerate(self)]
 
+    @return_as_class_instance(unpack=False)
     def __mul__(self, other):
-        return _ProductTangentVector([other * val for val in self])
+        return [other * val for val in self]
 
     __rmul__ = __mul__
 
-    def __div__(self, other):
-        return _ProductTangentVector([val / other for val in self])
+    @return_as_class_instance(unpack=False)
+    def __truediv__(self, other):
+        return [val / other for val in self]
 
+    @return_as_class_instance(unpack=False)
     def __neg__(self):
-        return _ProductTangentVector([-val for val in self])
+        return [-val for val in self]

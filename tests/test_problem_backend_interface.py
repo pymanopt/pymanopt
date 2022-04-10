@@ -16,7 +16,7 @@ class TestProblemBackendInterface(TestCase):
         A = np.random.randn(m, n)
         self.manifold = Product([FixedRankEmbedded(m, n, rank), Euclidean(n)])
 
-        @pymanopt.function.Autograd(self.manifold)
+        @pymanopt.function.autograd(self.manifold)
         def cost(u, s, vt, x):
             return np.linalg.norm(((u * s) @ vt - A) @ x) ** 2
 

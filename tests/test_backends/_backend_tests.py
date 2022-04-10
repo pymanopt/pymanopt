@@ -48,7 +48,7 @@ class TestUnaryFunction(unittest.TestCase):
         x = rnd.randn(n)
 
         # Test whether cost function accepts single argument.
-        self.assertAlmostEqual(np.sum(x ** 2), cost(x))
+        self.assertAlmostEqual(np.sum(x**2), cost(x))
 
         # Test whether gradient accepts single argument.
         egrad = cost.compute_gradient()
@@ -140,7 +140,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
 
         x, y, z = [rnd.randn(n) for _ in range(3)]
 
-        self.assertAlmostEqual(np.sum(x ** 2 + y + z ** 3), cost(x, y, z))
+        self.assertAlmostEqual(np.sum(x**2 + y + z**3), cost(x, y, z))
 
         egrad = cost.compute_gradient()
         g = egrad(x, y, z)
@@ -154,7 +154,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
         # Verify correctness of the gradient.
         np_testing.assert_allclose(g_x, 2 * x)
         np_testing.assert_allclose(g_y, 1)
-        np_testing.assert_allclose(g_z, 3 * z ** 2)
+        np_testing.assert_allclose(g_z, 3 * z**2)
 
         # Test the Hessian.
         u, v, w = [rnd.randn(n) for _ in range(3)]
@@ -187,8 +187,8 @@ class TestVector(unittest.TestCase):
         A = self.A = rnd.randn(n)
 
         # Calculate correct cost and grad...
-        self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_cost = np.exp(np.sum(Y**2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y**2))
 
         # ... and hess
         # First form hessian matrix H
@@ -198,7 +198,7 @@ class TestVector(unittest.TestCase):
 
         diag = np.eye(n)
 
-        H = np.exp(np.sum(Y ** 2)) * (4 * Ymat.T @ Ymat + 2 * diag)
+        H = np.exp(np.sum(Y**2)) * (4 * Ymat.T @ Ymat + 2 * diag)
 
         # Then 'left multiply' H by A
         self.correct_hess = np.squeeze(np.array(Amat @ H))
@@ -230,8 +230,8 @@ class TestMatrix(unittest.TestCase):
         A = self.A = rnd.randn(m, n)
 
         # Calculate correct cost and grad...
-        self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_cost = np.exp(np.sum(Y**2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y**2))
 
         # ... and hess
         # First form hessian tensor H (4th order)
@@ -242,7 +242,7 @@ class TestMatrix(unittest.TestCase):
         # (i == k and j == l), this is a 'diagonal' tensor.
         diag = np.eye(m * n).reshape(m, n, m, n)
 
-        H = np.exp(np.sum(Y ** 2)) * (4 * Y1 * Y2 + 2 * diag)
+        H = np.exp(np.sum(Y**2)) * (4 * Y1 * Y2 + 2 * diag)
 
         # Then 'right multiply' H by A
         Atensor = A.reshape(1, 1, m, n)
@@ -277,8 +277,8 @@ class TestTensor3(unittest.TestCase):
         A = self.A = rnd.randn(n1, n2, n3)
 
         # Calculate correct cost and grad...
-        self.correct_cost = np.exp(np.sum(Y ** 2))
-        self.correct_grad = 2 * Y * np.exp(np.sum(Y ** 2))
+        self.correct_cost = np.exp(np.sum(Y**2))
+        self.correct_grad = 2 * Y * np.exp(np.sum(Y**2))
 
         # ... and hess
         # First form hessian tensor H (6th order)
@@ -288,7 +288,7 @@ class TestTensor3(unittest.TestCase):
         # Create an n1 x n2 x n3 x n1 x n2 x n3 diagonal tensor
         diag = np.eye(n1 * n2 * n3).reshape(n1, n2, n3, n1, n2, n3)
 
-        H = np.exp(np.sum(Y ** 2)) * (4 * Y1 * Y2 + 2 * diag)
+        H = np.exp(np.sum(Y**2)) * (4 * Y1 * Y2 + 2 * diag)
 
         # Then 'right multiply' H by A
         Atensor = A.reshape(1, 1, 1, n1, n2, n3)
@@ -310,7 +310,6 @@ class TestTensor3(unittest.TestCase):
 
 
 class TestMixed(unittest.TestCase):
-    # Test autograd on a tuple containing vector, matrix and tensor3.
     def setUp(self):
         np.seterr(all="raise")
 

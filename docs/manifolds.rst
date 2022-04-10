@@ -48,7 +48,6 @@ Grassmann Manifold
 ------------------
 
 .. automodule:: pymanopt.manifolds.grassmann
-.. automodule:: pymanopt.manifolds.complex_grassmann
 
 Complex Circle
 --------------
@@ -64,6 +63,11 @@ Oblique Manifold
 ----------------
 
 .. automodule:: pymanopt.manifolds.oblique
+
+Symmetric Positive Definite Matrices
+------------------------------------
+
+.. automodule:: pymanopt.manifolds.positive_definite
 
 Manifold of Positive Semidefinite Matrices
 ------------------------------------------

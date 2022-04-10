@@ -129,7 +129,7 @@ manifold = Product([SymmetricPositiveDefinite(D + 1, k=K), Euclidean(K - 1)])
 
 # (2) Define cost function
 # The parameters must be contained in a list theta.
-@pymanopt.function.Autograd(manifold)
+@pymanopt.function.autograd(manifold)
 def cost(S, v):
     # Unpack parameters
     nu = np.append(v, 0)

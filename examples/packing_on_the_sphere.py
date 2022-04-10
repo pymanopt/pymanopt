@@ -8,13 +8,13 @@ from pymanopt.manifolds import Elliptope
 from pymanopt.solvers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("Autograd", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "pytorch", "tensorflow")
 
 
 def create_cost(manifold, epsilon, backend):
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(X):
             Y = X @ X.T
             # Shift the exponentials by the maximum value to reduce numerical
@@ -26,9 +26,9 @@ def create_cost(manifold, epsilon, backend):
             u = np.triu(expY, 1).sum()
             return s + epsilon * np.log(u)
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(X):
             Y = torch.matmul(X, torch.transpose(X, 1, 0))
             s = torch.triu(Y, 1).max()
@@ -37,9 +37,9 @@ def create_cost(manifold, epsilon, backend):
             u = torch.triu(expY, 1).sum()
             return s + epsilon * torch.log(u)
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(X):
             Y = tf.matmul(X, tf.transpose(X))
             s = tf.reduce_max(tf.linalg.band_part(Y, 0, -1))

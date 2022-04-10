@@ -129,7 +129,7 @@ def check_gradient(problem, x=None, d=None):
         raise RuntimeError("The 'check_gradient' function requires matplotlib")
     if d is not None and x is None:
         raise ValueError(
-            "If d is provided, x must be too," "since d is tangent at x."
+            "If d is provided, x must be too, since d is tangent at x."
         )
     if x is None:
         x = problem.manifold.rand()
@@ -153,20 +153,20 @@ def check_gradient(problem, x=None, d=None):
     )
     plt.show()
 
-    # Try to check that the gradient is a tangent vector.
     grad = problem.grad(x)
-    if hasattr(problem.manifold, "tangent"):
+    try:
         projected_grad = problem.manifold.tangent(x, grad)
+    except NotImplementedError:
+        print(
+            "Pymanopt was unable to verify that the gradient is indeed a "
+            f"tangent vector since {problem.manifold.__class__.__name__} does "
+            "not provide a 'tangent' method."
+        )
+    else:
         residual = grad - projected_grad
         err = problem.manifold.norm(x, residual)
         print(f"The residual should be 0, or very close. Residual: {err:g}.")
         print(
             "If it is far from 0, then the gradient "
             "is not in the tangent space."
-        )
-    else:
-        print(
-            "Unfortunately, pymanopt was unable to verify that the gradient "
-            "is indeed a tangent vector. Please verify this manually or "
-            "implement the 'tangent' function in your manifold structure."
         )

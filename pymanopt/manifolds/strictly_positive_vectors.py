@@ -28,40 +28,43 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     def typicaldist(self):
         return np.sqrt(self.dim)
 
-    def inner(self, x, u, v):
-        inv_x = 1.0 / x
-        return np.sum(inv_x * u * inv_x * v, axis=0, keepdims=True)
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        inv_x = 1.0 / point
+        return np.sum(
+            inv_x * tangent_vector_a * inv_x * tangent_vector_b,
+            axis=0,
+            keepdims=True,
+        )
 
-    def proj(self, x, u):
-        return u
+    def proj(self, point, tangent_vector):
+        return tangent_vector
 
-    def norm(self, x, u):
-        return np.sqrt(self.inner(x, u, u))
+    def norm(self, point, tangent_vector):
+        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
     def rand(self):
         return rnd.uniform(low=1e-6, high=1, size=(self._n, self._k))
 
-    def randvec(self, x):
-        u = rnd.randn(self._n, self._k)
-        return u / self.norm(x, u)
+    def randvec(self, point):
+        vector = rnd.randn(self._n, self._k)
+        return vector / self.norm(point, vector)
 
-    def zerovec(self, x):
+    def zerovec(self, point):
         return np.zeros(self._n, self._k)
 
-    def dist(self, x, y):
-        return la.norm(np.log(x) - np.log(y), axis=0, keepdims=True)
+    def dist(self, point_a, point_b):
+        return la.norm(
+            np.log(point_a) - np.log(point_b), axis=0, keepdims=True
+        )
 
-    def egrad2rgrad(self, x, u):
-        return u * (x ** 2)
+    def egrad2rgrad(self, point, euclidean_gradient):
+        return euclidean_gradient * point**2
 
-    def exp(self, x, u):
-        return x * np.exp((1.0 / x) * u)
+    def exp(self, point, tangent_vector):
+        return point * np.exp((1.0 / point) * tangent_vector)
 
-    def retr(self, x, u):
-        return x + u
+    def retr(self, point, tangent_vector):
+        return point + tangent_vector
 
-    def log(self, x, y):
-        return x * np.log((1.0 / x) * y)
-
-
-# def transp(self, x1, x2, d):
+    def log(self, point_a, point_b):
+        return point_a * np.log((1.0 / point_a) * point_b)

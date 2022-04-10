@@ -17,43 +17,49 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def typicaldist(self):
         return np.sqrt(self.dim)
 
-    def inner(self, X, G, H):
-        return float(np.tensordot(G, H, axes=G.ndim))
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return float(
+            np.tensordot(
+                tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
+            )
+        )
 
-    def norm(self, X, G):
-        return la.norm(G)
+    def norm(self, point, tangent_vector):
+        return la.norm(tangent_vector)
 
-    def dist(self, X, Y):
-        return la.norm(X - Y)
+    def dist(self, point_a, point_b):
+        return la.norm(point_a - point_b)
 
-    def proj(self, X, U):
-        return U
+    def proj(self, point, vector):
+        return vector
 
-    def ehess2rhess(self, X, egrad, ehess, H):
-        return ehess
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        return euclidean_hvp
 
-    def exp(self, X, U):
-        return X + U
+    def exp(self, point, tangent_vector):
+        return point + tangent_vector
 
     retr = exp
 
-    def log(self, X, Y):
-        return Y - X
+    def log(self, point_a, point_b):
+        return point_b - point_a
 
     def rand(self):
         return rnd.randn(*self._shape)
 
-    def randvec(self, X):
-        Y = self.rand()
-        return Y / self.norm(X, Y)
+    def randvec(self, point):
+        tangent_vector = self.rand()
+        return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, X1, X2, G):
-        return G
+    def transp(self, point_a, point_b, tangent_vector_a):
+        return tangent_vector_a
 
-    def pairmean(self, X, Y):
-        return (X + Y) / 2
+    def pairmean(self, point_a, point_b):
+        return (point_a + point_b) / 2
 
-    def zerovec(self, X):
+    def zerovec(self, point):
         return np.zeros(self._shape)
 
 
@@ -101,18 +107,20 @@ class Symmetric(_Euclidean):
         dimension = int(k * n * (n + 1) / 2)
         super().__init__(name, dimension, *shape)
 
-    def proj(self, X, U):
-        return multisym(U)
+    def proj(self, point, vector):
+        return multisym(vector)
 
-    def ehess2rhess(self, X, egrad, ehess, H):
-        return multisym(ehess)
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        return multisym(euclidean_hvp)
 
     def rand(self):
         return multisym(rnd.randn(*self._shape))
 
-    def randvec(self, X):
-        Y = self.rand()
-        return multisym(Y / self.norm(X, Y))
+    def randvec(self, point):
+        tangent_vector = self.rand()
+        return multisym(tangent_vector / self.norm(point, tangent_vector))
 
 
 class SkewSymmetric(_Euclidean):
@@ -134,15 +142,17 @@ class SkewSymmetric(_Euclidean):
         dimension = int(k * n * (n - 1) / 2)
         super().__init__(name, dimension, *shape)
 
-    def proj(self, X, U):
-        return multiskew(U)
+    def proj(self, point, vector):
+        return multiskew(vector)
 
-    def ehess2rhess(self, X, egrad, ehess, H):
-        return multiskew(ehess)
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        return multiskew(euclidean_hvp)
 
     def rand(self):
         return multiskew(rnd.randn(*self._shape))
 
-    def randvec(self, X):
-        G = self.rand()
-        return multiskew(G / self.norm(X, G))
+    def randvec(self, point):
+        tangent_vector = self.rand()
+        return multiskew(tangent_vector / self.norm(point, tangent_vector))

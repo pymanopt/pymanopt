@@ -12,11 +12,10 @@ else:
     from torch import autograd
 
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
-from .. import make_tracing_backend_decorator
 from ._backend import Backend
 
 
-class _PyTorchBackend(Backend):
+class PyTorchBackend(Backend):
     def __init__(self):
         super().__init__("PyTorch")
 
@@ -41,7 +40,7 @@ class _PyTorchBackend(Backend):
         return torch.from_numpy(array)
 
     @Backend._assert_backend_available
-    def compile_function(self, function):
+    def prepare_function(self, function):
         @functools.wraps(function)
         def wrapper(*args):
             return function(*map(self._from_numpy, args)).numpy()
@@ -99,6 +98,3 @@ class _PyTorchBackend(Backend):
                 hessian_vector_product
             )
         return hessian_vector_product
-
-
-PyTorch = make_tracing_backend_decorator(_PyTorchBackend)

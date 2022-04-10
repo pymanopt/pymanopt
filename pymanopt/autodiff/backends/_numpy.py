@@ -1,17 +1,16 @@
-from .. import make_tracing_backend_decorator
 from ._backend import Backend
 
 
-class _CallableBackend(Backend):
+class NumPyBackend(Backend):
     def __init__(self):
-        super().__init__("Callable")
+        super().__init__("NumPy")
 
     @staticmethod
     def is_available():
         return True
 
     @Backend._assert_backend_available
-    def compile_function(self, function):
+    def prepare_function(self, function):
         return function
 
     def _raise_not_implemented_error(self, *args, **kwargs):
@@ -22,6 +21,3 @@ class _CallableBackend(Backend):
 
     compute_gradient = _raise_not_implemented_error
     compute_hessian_vector_product = _raise_not_implemented_error
-
-
-Callable = make_tracing_backend_decorator(_CallableBackend)

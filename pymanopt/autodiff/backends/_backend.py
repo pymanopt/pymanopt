@@ -45,8 +45,8 @@ class Backend(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def compile_function(self, function):
-        """Compiles a function into a Python callable.
+    def prepare_function(self, function):
+        """Prepares a callable to be used with the backend.
 
         Args:
             function: A callable.

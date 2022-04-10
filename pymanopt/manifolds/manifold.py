@@ -8,14 +8,14 @@ import numpy as np
 class RetrAsExpMixin:
     """Mixin which defers calls to the exponential map to the retraction."""
 
-    def exp(self, Y, U):
+    def exp(self, point, tangent_vector):
         class_name = self.__class__.__name__
         warnings.warn(
             f"Exponential map for manifold '{class_name}' not available. "
             "Using retraction instead.",
             RuntimeWarning,
         )
-        return self.retr(Y, U)
+        return self.retr(point, tangent_vector)
 
 
 class Manifold(metaclass=abc.ABCMeta):
@@ -71,8 +71,9 @@ class Manifold(metaclass=abc.ABCMeta):
 
         For most manifolds, which represent points as (potentially
         multi-dimensional) arrays, this will be 1, but other manifolds might
-        represent points as tuples or lists of arrays. In this case,
-        `point_layout` describes how many elements such tuples/lists contain.
+        represent points as tuples or lists of arrays.
+        In this case, `point_layout` describes how many elements such
+        tuples/lists contain.
         """
         return self._point_layout
 
@@ -100,19 +101,34 @@ class Manifold(metaclass=abc.ABCMeta):
     # Abstract methods that subclasses must implement.
 
     @abc.abstractmethod
-    def inner(self, X, G, H):
+    def inner(
+        self,
+        point: np.ndarray,
+        tangent_vector_a: np.ndarray,
+        tangent_vector_b: np.ndarray,
+    ) -> np.float64:
         """Inner product between tangent vectors at a point on the manifold.
 
-        The inner product corresponds to the Riemannian metric between two
-        tangent vectors ``G`` and ``H`` in the tangent space at ``X``.
+        This method implements a Riemannian inner product between two tangent
+        vectors ``tangent_vector_a`` and ``tangent_vector_b`` in the tangent
+        space at ``point``.
+
+        Args:
+            point: The base point.
+            tangent_vector_a: The first tangent vector.
+            tangent_vector_b: The second tangent vector.
+
+        Returns:
+            The inner product between ``tangent_vector_a`` and
+            ``tangent_vector_b`` in the tangent space at ``point``.
         """
 
     @abc.abstractmethod
-    def proj(self, X, G):
+    def proj(self, point, vector):
         """Projects vector in the ambient space on the tangent space."""
 
     @abc.abstractmethod
-    def norm(self, X, G):
+    def norm(self, point, tangent_vector):
         """Computes the norm of a tangent vector at a point on the manifold."""
 
     @abc.abstractmethod
@@ -120,12 +136,12 @@ class Manifold(metaclass=abc.ABCMeta):
         """Returns a random point on the manifold."""
 
     @abc.abstractmethod
-    def randvec(self, X):
-        """Returns a random vector in the tangent space at ``X``."""
+    def randvec(self, point):
+        """Returns a random vector in the tangent space at ``point``."""
 
     @abc.abstractmethod
-    def zerovec(self, X):
-        """Returns the zero vector in the tangent space at ``X``."""
+    def zerovec(self, point):
+        """Returns the zero vector in the tangent space at ``point``."""
 
     # Methods which are only required by certain solvers.
 
@@ -140,64 +156,81 @@ class Manifold(metaclass=abc.ABCMeta):
         return wrapper
 
     @_raise_not_implemented_error
-    def dist(self, X, Y):
+    def dist(self, point_a, point_b):
         """The geodesic distance between two points on the manifold."""
 
     @_raise_not_implemented_error
-    def egrad2rgrad(self, X, G):
+    def egrad2rgrad(self, point, euclidean_gradient):
         """Converts the Euclidean to the Riemannian gradient.
 
-        For embedded submanifolds, this is simply the projection of ``G`` on
-        the tangent space at ``X``.
+        For embedded submanifolds of Euclidean space, this is simply the
+        projection of ``euclidean_gradient`` on the tangent space at ``point``.
         """
 
     @_raise_not_implemented_error
-    def ehess2rhess(self, X, G, H, U):
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
         """Converts the Euclidean to the Riemannian Hessian.
 
-        This converts the Euclidean Hessian ``H`` of a function at a point
-        ``X`` along a tangent vector ``U`` to the Riemannian Hessian of ``X``
-        along ``U`` on the manifold.
+        This converts the Euclidean Hessian-vector product (hvp)
+        ``euclidean_hvp`` of a function at a point ``point`` along a tangent
+        vector ``tangent_vector`` to the Riemannian hvp of ``point`` along
+        ``tangent_vector`` on the manifold.
         """
 
     @_raise_not_implemented_error
-    def retr(self, X, G):
+    def retr(self, point, tangent_vector):
         """Retracts a tangent vector back to the manifold.
 
         This generalizes the exponential map, and is often more efficient to
         compute numerically.
-        It maps a vector ``G`` in the tangent space at ``X`` back to the
-        manifold.
+        It maps a vector ``tangent_vector`` in the tangent space at ``point``
+        back to the manifold.
         """
 
     @_raise_not_implemented_error
-    def exp(self, X, U):
+    def exp(self, point, tangent_vector):
         """Computes the exponential map on the manifold."""
 
     @_raise_not_implemented_error
-    def log(self, X, Y):
+    def log(self, point_a, point_b):
         """Computes the logarithmic map on the manifold.
 
-        This is the inverse of :meth:`exp`.
+        The logarithmic map ``log(point_a, point_b)`` produces a tangent vector
+        in the tangent space at ``point_a`` that points in the direction of
+        ``point_b``.
+        In other words, ``exp(point_a, log(point_a, point_b)) == point_b``.
+        As such it is the inverse of :meth:`exp`.
         """
 
     @_raise_not_implemented_error
-    def transp(self, X1, X2, G):
+    def transp(self, point_a, point_b, tangent_vector_a):
         """Transport a tangent vector between different tangent spaces.
 
         The vector transport generalizes the concept of parallel transport, and
         is often more efficient to compute numerically.
-        It transports a vector ``G`` in the tangent space at ``X1`` to the
-        tangent space at `X2`.
+        It transports a vector ``tangent_vector_a`` in the tangent space at
+        ``point_a`` to the tangent space at `point_b`.
         """
 
     @_raise_not_implemented_error
-    def pairmean(self, X, Y):
+    def pairmean(self, point_a, point_b):
         """Computes the intrinsic mean of two points on the manifold.
 
         Returns the intrinsic mean of two points ``X`` and ``Y`` on the
         manifold, i.e., a point that lies mid-way between ``X`` and ``Y`` on
         the geodesic arc joining them.
+        """
+
+    @_raise_not_implemented_error
+    def tangent(self, point, vector):
+        """Re-tangentialize a vector.
+
+        This method guarantees that ``vector`` is indeed a tangent vector
+        at ``point`` on the manifold.
+        Typically this simply corresponds to ``proj(point, vector)`` but may
+        differ for certain manifolds.
         """
 
 
@@ -216,18 +249,24 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
         Refer to [AMT2013]_ for the exact definition of the Weingarten map.
     """
 
-    def egrad2rgrad(self, X, G):
-        return self.proj(X, G)
+    def egrad2rgrad(self, point, euclidean_gradient):
+        return self.proj(point, euclidean_gradient)
 
-    def ehess2rhess(self, X, G, H, U):
-        normal_gradient = G - self.proj(X, G)
-        return self.proj(X, H) + self.weingarten(X, U, normal_gradient)
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        normal_gradient = euclidean_gradient - self.proj(
+            point, euclidean_gradient
+        )
+        return self.proj(point, euclidean_hvp) + self.weingarten(
+            point, tangent_vector, normal_gradient
+        )
 
     @Manifold._raise_not_implemented_error
-    def weingarten(self, X, U, V):
+    def weingarten(self, point, tangent_vector, normal_vector):
         """Compute the Weingarten map of the manifold.
 
-        This map takes a vector ``U`` in the tangent space at ``X`` and a
-        vector ``V`` in the normal space at ``X`` to produce another tangent
-        vector.
+        This map takes a vector ``tangent_vector`` in the tangent space at
+        ``point`` and a vector ``normal_vector`` in the normal space at
+        ``point`` to produce another tangent vector.
         """

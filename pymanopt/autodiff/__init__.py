@@ -11,9 +11,9 @@ class Function:
         if not backend.is_available():
             raise RuntimeError(f"Backend '{backend}' is not available")
 
-        self._function = function
+        self._original_function = function
         self._backend = backend
-        self._compiled_function = backend.compile_function(function)
+        self._function = backend.prepare_function(function)
         self._num_arguments = manifold.num_values
 
         self._egrad = None
@@ -25,28 +25,28 @@ class Function:
     def compute_gradient(self):
         if self._egrad is None:
             self._egrad = self._backend.compute_gradient(
-                self._function, self._num_arguments
+                self._original_function, self._num_arguments
             )
         return self._egrad
 
     def compute_hessian_vector_product(self):
         if self._ehess is None:
             self._ehess = self._backend.compute_hessian_vector_product(
-                self._function, self._num_arguments
+                self._original_function, self._num_arguments
             )
         return self._ehess
 
     def __call__(self, *args, **kwargs):
-        return self._compiled_function(*args, **kwargs)
+        return self._function(*args, **kwargs)
 
 
-def make_tracing_backend_decorator(Backend) -> typing.Callable:
+def backend_decorator_factory(Backend) -> typing.Callable:
     """Create function decorator for a backend.
 
     Function to create a backend decorator that is used to annotate a
     callable::
 
-        decorator = make_tracing_backend_decorator(Backend)
+        decorator = backend_decorator_factory(Backend)
 
         @decorator(manifold)
         def function(x):

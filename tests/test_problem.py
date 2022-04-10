@@ -15,9 +15,9 @@ class TestProblem(TestCase):
         self.n = 15
         self.man = Sphere(self.n)
 
-        @pymanopt.function.TensorFlow(self.man)
+        @pymanopt.function.tensorflow(self.man)
         def cost(X):
-            return tf.exp(tf.reduce_sum(X ** 2))
+            return tf.exp(tf.reduce_sum(X**2))
 
         self.cost = cost
 
@@ -25,7 +25,7 @@ class TestProblem(TestCase):
         problem = pymanopt.Problem(self.man, self.cost)
         x = rnd.randn(self.n)
         np_testing.assert_allclose(
-            2 * x * np.exp(np.sum(x ** 2)), problem.egrad(x)
+            2 * x * np.exp(np.sum(x**2)), problem.egrad(x)
         )
 
     def test_attribute_override(self):
@@ -42,7 +42,7 @@ class TestProblem(TestCase):
         shape = (3, 3)
         manifold = Product([Stiefel(*shape)] * 2)
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(*args):
             X, Y = args
             return tf.reduce_sum(X) + tf.reduce_sum(Y)

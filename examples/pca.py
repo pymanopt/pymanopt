@@ -8,25 +8,25 @@ from pymanopt.manifolds import Stiefel
 from pymanopt.solvers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_egrad_ehess(manifold, samples, backend):
     egrad = ehess = None
 
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(w):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
 
-    elif backend == "Callable":
+    elif backend == "numpy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.numpy(manifold)
         def cost(w):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.numpy(manifold)
         def egrad(w):
             return (
                 -2
@@ -37,7 +37,7 @@ def create_cost_egrad_ehess(manifold, samples, backend):
                 @ w
             )
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.numpy(manifold)
         def ehess(w, h):
             return -2 * (
                 samples.T @ (samples - samples @ w @ h.T) @ w
@@ -48,19 +48,19 @@ def create_cost_egrad_ehess(manifold, samples, backend):
                 + (samples - samples @ w @ w.T).T @ samples @ h
             )
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
         samples_ = torch.from_numpy(samples)
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(w):
             projector = torch.matmul(w, torch.transpose(w, 1, 0))
             return (
                 torch.norm(samples_ - torch.matmul(samples_, projector)) ** 2
             )
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(w):
             projector = tf.matmul(w, tf.transpose(w))
             return tf.norm(samples - tf.matmul(samples, projector)) ** 2

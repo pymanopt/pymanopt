@@ -8,38 +8,38 @@ from pymanopt.manifolds import SpecialOrthogonalGroup
 from pymanopt.solvers import SteepestDescent
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_egrad(manifold, ABt, backend):
     egrad = None
 
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
 
-    elif backend == "Callable":
+    elif backend == "numpy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.numpy(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.numpy(manifold)
         def egrad(X):
             return -ABt
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
         ABt_ = torch.from_numpy(ABt)
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(X):
             return -torch.tensordot(X, ABt_, dims=X.dim())
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(X):
             return -tf.tensordot(X, ABt, axes=ABt.ndim)
 
