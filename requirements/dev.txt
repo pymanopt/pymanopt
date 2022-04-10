@@ -1,4 +1,4 @@
-black[jupyter]
+black[jupyter]<22
 flake8
 flake8-docstrings
 flake8-import-order
