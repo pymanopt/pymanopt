@@ -35,8 +35,8 @@ if __name__ == "__main__":
     extras_require = {"test": dev_requirements, **optional_dependencies}
     extras_require["all"] = list(chain(*extras_require.values()))
 
-    pymanopt = runpy.run_path(
-        os.path.join(BASE_DIR, "pymanopt", "__init__.py")
+    pymanopt_version = runpy.run_path(
+        os.path.join(BASE_DIR, "pymanopt", "_version.py")
     )
 
     with open(os.path.join(BASE_DIR, "README.md")) as f:
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     setup(
         name="pymanopt",
-        version=pymanopt["__version__"],
+        version=pymanopt_version["__version__"],
         description=(
             "Toolbox for optimization on manifolds with support for "
             "automatic differentiation"
