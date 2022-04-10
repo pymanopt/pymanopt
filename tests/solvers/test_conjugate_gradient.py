@@ -1,9 +1,9 @@
 from pymanopt.solvers import ConjugateGradient
 
-from ._test import TestCase
+from .._test import TestCase
 
 
 class TestConjugateGradient(TestCase):
     def test_beta_type(self):
         with self.assertRaises(ValueError):
-            ConjugateGradient(beta_type="SomeUnknownBetaRule")
+            ConjugateGradient(beta_rule="SomeUnknownBetaRule")
