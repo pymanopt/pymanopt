@@ -107,7 +107,7 @@ class TrustRegions(Solver):
     def solve(
         self,
         problem,
-        x=None,
+        initial_point=None,
         mininner=1,
         maxinner=None,
         Delta_bar=None,
@@ -135,8 +135,10 @@ class TrustRegions(Solver):
         hess = problem.hess
 
         # If no starting point is specified, generate one at random.
-        if x is None:
+        if initial_point is None:
             x = man.rand()
+        else:
+            x = initial_point
 
         # Initializations
         time0 = time.time()

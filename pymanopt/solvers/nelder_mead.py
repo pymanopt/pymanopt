@@ -64,13 +64,13 @@ class NelderMead(Solver):
         self._expansion = expansion
         self._contraction = contraction
 
-    def solve(self, problem, x=None):
+    def solve(self, problem, initial_point=None):
         """Run Nelder-Mead algorithm.
 
         Args:
             problem: Pymanopt problem class instance exposing the cost function
                 and the manifold to optimize over.
-            x: Initial point on the manifold.
+            initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
 
@@ -93,12 +93,17 @@ class NelderMead(Solver):
 
         # If no initial simplex x is given by the user, generate one at random.
         num_points = int(dim + 1)
-        if x is None:
+        if initial_point is None:
             x = [manifold.rand() for _ in range(num_points)]
-        elif not tools.is_sequence(x) or len(x) != num_points:
+        elif (
+            tools.is_sequence(initial_point)
+            and len(initial_point) != num_points
+        ):
+            x = initial_point
+        else:
             raise ValueError(
-                f"The initial simplex x must be a sequence of {num_points} "
-                "points"
+                "The initial simplex `initial_point` must be a sequence of "
+                f"{num_points} points"
             )
 
         # Compute objective-related quantities for x, and setup a function

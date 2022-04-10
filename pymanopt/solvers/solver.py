@@ -36,11 +36,18 @@ class Solver(metaclass=abc.ABCMeta):
         return type(self).__name__
 
     @abc.abstractmethod
-    def solve(self, problem, x=None):
+    def solve(self, problem, initial_point=None, *args, **kwargs):
         """Run a solver on a given optimization problem.
 
-        Solve the given :class:`pymanopt.core.problem.Problem` starting from
-        ``x`` if provided or from a random initial guess if not.
+        Args:
+            problem: Pymanopt problem class instance exposing the cost function
+                and the manifold to optimize over.
+                The class must either
+            initial_point: Initial point on the manifold.
+                If no value is provided then a starting point will be randomly
+                generated.
+            *args: Potential solver-specific positional arguments.
+            **kwargs: Potential solver-specific keyword arguments.
         """
 
     def _check_stopping_criterion(

@@ -3,6 +3,7 @@ import time
 import numpy as np
 import numpy.random as rnd
 
+from pymanopt import tools
 from pymanopt.solvers.solver import Solver
 from pymanopt.tools import printer
 
@@ -39,13 +40,13 @@ class ParticleSwarm(Solver):
         self._nostalgia = nostalgia
         self._social = social
 
-    def solve(self, problem, x=None):
+    def solve(self, problem, initial_point=None):
         """Run PSO algorithm.
 
         Args:
             problem: Pymanopt problem class instance exposing the cost function
                 and the manifold to optimize over.
-            x: Initial point on the manifold.
+            initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
 
@@ -70,17 +71,18 @@ class ParticleSwarm(Solver):
 
         # If no initial population x is given by the user, generate one at
         # random.
-        if x is None:
+        if initial_point is None:
             x = [man.rand() for i in range(int(self._populationsize))]
-        elif not hasattr(x, "__iter__"):
-            raise ValueError("The initial population x must be iterable")
-        else:
-            if len(x) != self._populationsize:
+        elif tools.is_sequence(initial_point):
+            if len(initial_point) != self._populationsize:
                 print(
                     "The population size was forced to the size of "
                     "the given initial population"
                 )
-                self._populationsize = len(x)
+                self._populationsize = len(initial_point)
+            x = initial_point
+        else:
+            raise ValueError("The initial population must be iterable")
 
         # Initialize personal best positions to the initial population.
         y = list(x)

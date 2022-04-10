@@ -53,17 +53,17 @@ class ConjugateGradient(Solver):
             self._linesearch = linesearch
         self.linesearch = None
 
-    def solve(self, problem, x=None, reuselinesearch=False):
+    def solve(self, problem, initial_point=None, reuse_line_searcher=False):
         """Run CG method.
 
         Args:
             problem: Pymanopt problem class instance exposing the cost function
                 and the manifold to optimize over.
                 The class must either
-            x: Initial point on the manifold.
+            initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
-            reuselinesearch: Whether to reuse the previous linesearch object.
+            reuse_line_search: Whether to reuse the previous line searcher.
                 Allows to use information from a previous call to
                 :meth:`solve`.
 
@@ -76,13 +76,15 @@ class ConjugateGradient(Solver):
         objective = problem.cost
         gradient = problem.grad
 
-        if not reuselinesearch or self.linesearch is None:
+        if not reuse_line_searcher or self.linesearch is None:
             self.linesearch = deepcopy(self._linesearch)
         linesearch = self.linesearch
 
         # If no starting point is specified, generate one at random.
-        if x is None:
+        if initial_point is None:
             x = man.rand()
+        else:
+            x = initial_point
 
         if verbosity >= 1:
             print("Optimizing...")
