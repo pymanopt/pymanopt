@@ -2,7 +2,7 @@
 
 ### Issues
 
-### 1.0.x:
+### 1.0:
   - Return namedtupleS from solver's 'solve' method
   - Clean up solver argument names
   - Renaming:
@@ -19,20 +19,22 @@
     * proj -> projection
     * tangent -> to_tangent_space
     * zerovec -> zero_vector
-    * typicaldist -> scale/approximate_scale?
+    * typicaldist -> typical_dist
     * pairmean -> point_mean
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp
     * egrad2rgrad -> euclidean_to_riemannian_gradient
     * ehess2rhess -> euclidean_to_riemannian_hvp
+
+### 1.0.x:
+  - Use weingarten map for oblique manifold and Stiefel
+
+### 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
     transport simply by orthogonal projection of the tangent vector translated
     in the ambient space. For this, 'EuclideanEmbeddedSubmanifold' would
     require a generic 'tangent2ambient' method. See 'FixedRankEmbedded'.
-  - Use weingarten map for oblique manifold and Stiefel
-
-### 1.1.x:
   - Add default implementation for tangent?
   - attrs
   - Refactor solver implementations
