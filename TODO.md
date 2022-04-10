@@ -2,11 +2,7 @@
 
 ### Issues
 
-#### #160:
-  - Add default implementation for tangent?
-
 ### 1.0.x:
-  - #160
   - Return namedtupleS from solver's 'solve' method
   - Clean up solver argument names
   - Renaming:
@@ -37,6 +33,7 @@
   - Use weingarten map for oblique manifold and Stiefel
 
 ### 1.1.x:
+  - Add default implementation for tangent?
   - attrs
   - Refactor solver implementations
   - Add complex manifolds #125
