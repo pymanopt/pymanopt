@@ -21,18 +21,13 @@ __all__ = [
 ]
 
 from .complex_circle import ComplexCircle
-from .complex_grassmann import ComplexGrassmann
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
-from .grassmann import Grassmann
+from .grassmann import ComplexGrassmann, Grassmann
 from .oblique import Oblique
+from .positive_definite import SymmetricPositiveDefinite
 from .product import Product
-from .psd import (
-    Elliptope,
-    PSDFixedRank,
-    PSDFixedRankComplex,
-    SymmetricPositiveDefinite,
-)
+from .psd import Elliptope, PSDFixedRank, PSDFixedRankComplex
 from .special_orthogonal_group import SpecialOrthogonalGroup
 from .sphere import (
     Sphere,

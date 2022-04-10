@@ -3,6 +3,7 @@ import time
 import numpy as np
 
 import pymanopt
+from pymanopt import tools
 from pymanopt.solvers.solver import Solver
 from pymanopt.solvers.steepest_descent import SteepestDescent
 
@@ -10,13 +11,13 @@ from pymanopt.solvers.steepest_descent import SteepestDescent
 def compute_centroid(manifold, points):
     """Compute the centroid of `points` on the `manifold` as Karcher mean."""
 
-    @pymanopt.function.Callable(manifold)
+    @pymanopt.function.numpy(manifold)
     def objective(*y):
         if manifold.num_values == 1:
             (y,) = y
         return sum([manifold.dist(y, point) ** 2 for point in points]) / 2
 
-    @pymanopt.function.Callable(manifold)
+    @pymanopt.function.numpy(manifold)
     def gradient(*y):
         if manifold.num_values == 1:
             (y,) = y
@@ -77,32 +78,28 @@ class NelderMead(Solver):
             Local minimum of the cost function, or the most recent iterate if
             algorithm terminated before convergence.
         """
-        man = problem.manifold
+        manifold = problem.manifold
         verbosity = problem.verbosity
         objective = problem.cost
 
         # Choose proper default algorithm parameters. We need to know about the
         # dimension of the manifold to limit the parameter range, so we have to
         # defer proper initialization until this point.
-        dim = man.dim
+        dim = manifold.dim
         if self._maxcostevals is None:
             self._maxcostevals = max(1000, 2 * dim)
         if self._maxiter is None:
             self._maxiter = max(2000, 4 * dim)
 
         # If no initial simplex x is given by the user, generate one at random.
+        num_points = int(dim + 1)
         if x is None:
-            x = [man.rand() for i in range(int(dim + 1))]
-        elif not hasattr(x, "__iter__"):
-            raise ValueError("The initial simplex x must be iterable")
-        else:
-            # XXX: Is this necessary?
-            if len(x) != dim + 1:
-                print(
-                    "The simplex size was adapted to the dimension "
-                    "of the manifold"
-                )
-                x = x[: dim + 1]
+            x = [manifold.rand() for _ in range(num_points)]
+        elif not tools.is_sequence(x) or len(x) != num_points:
+            raise ValueError(
+                f"The initial simplex x must be a sequence of {num_points} "
+                "points"
+            )
 
         # Compute objective-related quantities for x, and setup a function
         # evaluations counter.
@@ -112,7 +109,7 @@ class NelderMead(Solver):
         # Sort simplex points by cost.
         order = np.argsort(costs)
         costs = costs[order]
-        x = [x[i] for i in order]  # XXX: Probably inefficient
+        x = [x[i] for i in order]
 
         # Iteration counter (at any point, iter is the number of fully executed
         # iterations so far).
@@ -134,7 +131,7 @@ class NelderMead(Solver):
             # Sort simplex points by cost.
             order = np.argsort(costs)
             costs = costs[order]
-            x = [x[i] for i in order]  # XXX: Probably inefficient
+            x = [x[i] for i in order]
 
             stop_reason = self._check_stopping_criterion(
                 time0, iter=iter, costevals=costevals
@@ -146,13 +143,13 @@ class NelderMead(Solver):
                 break
 
             # Compute a centroid for the dim best points.
-            xbar = compute_centroid(man, x[:-1])
+            xbar = compute_centroid(manifold, x[:-1])
 
             # Compute the direction for moving along the axis xbar - worst x.
-            vec = man.log(xbar, x[-1])
+            vec = manifold.log(xbar, x[-1])
 
             # Reflection step
-            xr = man.retr(xbar, -self._reflection * vec)
+            xr = manifold.retr(xbar, -self._reflection * vec)
             costr = objective(xr)
             costevals += 1
 
@@ -167,7 +164,7 @@ class NelderMead(Solver):
 
             # If the reflected point is better than the best point, expand.
             if costr < costs[0]:
-                xe = man.retr(xbar, -self._expansion * vec)
+                xe = manifold.retr(xbar, -self._expansion * vec)
                 coste = objective(xe)
                 costevals += 1
                 if coste < costr:
@@ -188,7 +185,7 @@ class NelderMead(Solver):
             if costr >= costs[-2]:
                 if costr < costs[-1]:
                     # do an outside contraction
-                    xoc = man.retr(xbar, -self._contraction * vec)
+                    xoc = manifold.retr(xbar, -self._contraction * vec)
                     costoc = objective(xoc)
                     costevals += 1
                     if costoc <= costr:
@@ -199,7 +196,7 @@ class NelderMead(Solver):
                         continue
                 else:
                     # do an inside contraction
-                    xic = man.retr(xbar, self._contraction * vec)
+                    xic = manifold.retr(xbar, self._contraction * vec)
                     costic = objective(xic)
                     costevals += 1
                     if costic <= costs[-1]:
@@ -214,7 +211,7 @@ class NelderMead(Solver):
                 print("Shrinkage")
             x0 = x[0]
             for i in np.arange(1, dim + 1):
-                x[i] = man.pairmean(x0, x[i])
+                x[i] = manifold.pairmean(x0, x[i])
                 costs[i] = objective(x[i])
             costevals += dim
 

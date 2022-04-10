@@ -4,8 +4,6 @@ from numpy import random as rnd
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import ComplexGrassmann
-
-# from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multihconj, multiprod, multisym
 
 from .._test import TestCase
@@ -127,7 +125,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         self.man = ComplexGrassmann(m, n, k=k)
 
     def test_dim(self):
-        assert self.man.dim == self.k * 2 * (self.m * self.n - self.n ** 2)
+        assert self.man.dim == self.k * 2 * (self.m * self.n - self.n**2)
 
     def test_typicaldist(self):
         np_testing.assert_almost_equal(

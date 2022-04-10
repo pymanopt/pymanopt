@@ -211,7 +211,7 @@ class TrustRegions(Solver):
                 if g_Hg <= 0:
                     tau_c = 1
                 else:
-                    tau_c = min(norm_grad ** 3 / (Delta * g_Hg), 1)
+                    tau_c = min(norm_grad**3 / (Delta * g_Hg), 1)
 
                 # and generate the Cauchy point.
                 eta_c = -tau_c * Delta / norm_grad * fgradx
@@ -506,19 +506,19 @@ class TrustRegions(Solver):
                 # <eta,eta>_P
                 # + 2*alpha*<eta,delta>_P
                 # + alpha*alpha*<delta,delta>_P
-                e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha ** 2 * d_Pd
+                e_Pe_new = e_Pe + 2 * alpha * e_Pd + alpha**2 * d_Pd
             else:
                 e_Pe_new = e_Pe
 
             # Check against negative curvature and trust-region radius
             # violation. If either condition triggers, we bail out.
-            if d_Hd <= 0 or e_Pe_new >= Delta ** 2:
+            if d_Hd <= 0 or e_Pe_new >= Delta**2:
                 # want
                 #  ee = <eta,eta>_prec,x
                 #  ed = <eta,delta>_prec,x
                 #  dd = <delta,delta>_prec,x
                 tau = (
-                    -e_Pd + np.sqrt(e_Pd * e_Pd + d_Pd * (Delta ** 2 - e_Pe))
+                    -e_Pd + np.sqrt(e_Pd * e_Pd + d_Pd * (Delta**2 - e_Pe))
                 ) / d_Pd
 
                 eta = eta + tau * delta
@@ -578,10 +578,10 @@ class TrustRegions(Solver):
             # preconditioned gradients). [CGT2000], page 206, mentions both as
             # acceptable criteria.
             if j >= mininner and norm_r <= norm_r0 * min(
-                norm_r0 ** theta, kappa
+                norm_r0**theta, kappa
             ):
                 # Residual is small enough to quit
-                if kappa < norm_r0 ** theta:
+                if kappa < norm_r0**theta:
                     stop_tCG = self.REACHED_TARGET_LINEAR
                 else:
                     stop_tCG = self.REACHED_TARGET_SUPERLINEAR

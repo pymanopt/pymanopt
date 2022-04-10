@@ -8,15 +8,12 @@ import functools
 import numpy as np
 
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
-from .. import make_tracing_backend_decorator
 from ._backend import Backend
 
 
-class _TensorFlowBackend(Backend):
-    def __init__(self, **kwargs):
-
-        if self.is_available():
-            super().__init__("TensorFlow")
+class TensorFlowBackend(Backend):
+    def __init__(self):
+        super().__init__("TensorFlow")
 
     @staticmethod
     def is_available():
@@ -36,7 +33,7 @@ class _TensorFlowBackend(Backend):
         return list(map(self._sanitize_gradient, tensors, grads))
 
     @Backend._assert_backend_available
-    def compile_function(self, function):
+    def prepare_function(self, function):
         @functools.wraps(function)
         def wrapper(*args):
             return function(*map(self._from_numpy, args)).numpy()
@@ -80,6 +77,3 @@ class _TensorFlowBackend(Backend):
                 hessian_vector_product
             )
         return hessian_vector_product
-
-
-TensorFlow = make_tracing_backend_decorator(_TensorFlowBackend)

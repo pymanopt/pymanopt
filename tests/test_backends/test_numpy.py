@@ -2,25 +2,29 @@ import numpy as np
 from numpy import random as rnd
 from numpy import testing as np_testing
 
-from pymanopt.function import Callable
+import pymanopt
 
 from .._test import TestCase
 from . import _backend_tests
 
 
-class TestCallableBackend(TestCase):
+class TestNumPyBackend(TestCase):
     def setUp(self):
         self.n = 10
 
-        @Callable(_backend_tests.manifold_factory(point_layout=3))
+        @pymanopt.function.numpy(
+            _backend_tests.manifold_factory(point_layout=3)
+        )
         def nary_cost(x, y):
             return np.sum(x * y)
 
         self.cost = self.nary_cost = nary_cost
 
-        @Callable(_backend_tests.manifold_factory(point_layout=3))
+        @pymanopt.function.numpy(
+            _backend_tests.manifold_factory(point_layout=3)
+        )
         def nested_nary_cost(x, y, z):
-            return np.sum(x ** 2 * y + 3 * z)
+            return np.sum(x**2 * y + 3 * z)
 
         self.nested_nary_cost = nested_nary_cost
 
@@ -33,7 +37,7 @@ class TestCallableBackend(TestCase):
         n = self.n
         x, y, z = [rnd.randn(n) for _ in range(3)]
         np_testing.assert_allclose(
-            np.sum(x ** 2 * y + 3 * z), self.nested_nary_cost(x, y, z)
+            np.sum(x**2 * y + 3 * z), self.nested_nary_cost(x, y, z)
         )
 
     def test_gradient_hessian_exceptions(self):

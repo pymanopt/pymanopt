@@ -10,38 +10,38 @@ from pymanopt.manifolds import Sphere
 from pymanopt.solvers import SteepestDescent
 
 
-SUPPORTED_BACKENDS = ("Autograd", "Callable", "PyTorch", "TensorFlow")
+SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_egrad(manifold, matrix, backend):
     egrad = None
 
-    if backend == "Autograd":
+    if backend == "autograd":
 
-        @pymanopt.function.Autograd(manifold)
+        @pymanopt.function.autograd(manifold)
         def cost(x):
             return -np.inner(x, matrix @ x)
 
-    elif backend == "Callable":
+    elif backend == "numpy":
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.numpy(manifold)
         def cost(x):
             return -np.inner(x, matrix @ x)
 
-        @pymanopt.function.Callable(manifold)
+        @pymanopt.function.numpy(manifold)
         def egrad(x):
             return -2 * matrix @ x
 
-    elif backend == "PyTorch":
+    elif backend == "pytorch":
         matrix_ = torch.from_numpy(matrix)
 
-        @pymanopt.function.PyTorch(manifold)
+        @pymanopt.function.pytorch(manifold)
         def cost(x):
             return -torch.matmul(x, torch.matmul(matrix_, x))
 
-    elif backend == "TensorFlow":
+    elif backend == "tensorflow":
 
-        @pymanopt.function.TensorFlow(manifold)
+        @pymanopt.function.tensorflow(manifold)
         def cost(x):
             return -tf.tensordot(x, tf.tensordot(matrix, x, axes=1), axes=1)
 

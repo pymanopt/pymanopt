@@ -32,9 +32,15 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     exponential. To force the use of a second-order approximation, call
     manifold.retr = manifold.retr2 after creating M. This switches from a
     QR-based computation to an SVD-based computation.
+
+    Args:
+        n: The dimension of the space that elements of the group act on.
+        k: The number of elements in the product of groups.
+        retraction: The type of retraction to use.
+            Possible choices are ``qr`` and ``polar``.
     """
 
-    def __init__(self, n, k=1):
+    def __init__(self, n, k=1, retraction="qr"):
         self._n = n
         self._k = k
 
@@ -47,71 +53,86 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         dimension = int(k * comb(n, 2))
         super().__init__(name, dimension)
 
-    def inner(self, X, U, V):
-        return np.tensordot(U, V, axes=U.ndim)
+        if retraction == "qr":
+            self.retr = self._retr_qr
+        elif retraction == "polar":
+            self.retr = self._retr_polar
+        else:
+            raise ValueError(f"Invalid retraction type '{retraction}'")
 
-    def norm(self, X, U):
-        return la.norm(U)
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return np.tensordot(
+            tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
+        )
+
+    def norm(self, point, tangent_vector):
+        return la.norm(tangent_vector)
 
     @property
     def typicaldist(self):
         return np.pi * np.sqrt(self._n * self._k)
 
-    def proj(self, X, H):
-        return multiskew(multiprod(multitransp(X), H))
+    def dist(self, point_a, point_b):
+        return self.norm(point_a, self.log(point_a, point_b))
 
-    def tangent(self, X, H):
-        return multiskew(H)
+    def proj(self, point, vector):
+        return multiskew(multiprod(multitransp(point), vector))
 
-    def tangent2ambient(self, X, U):
-        return multiprod(X, U)
+    def tangent(self, point, vector):
+        return multiskew(vector)
 
-    def ehess2rhess(self, X, egrad, ehess, H):
-        Xt = multitransp(X)
-        Xtegrad = multiprod(Xt, egrad)
+    def tangent2ambient(self, point, tangent_vector):
+        return multiprod(point, tangent_vector)
+
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        Xt = multitransp(point)
+        Xtegrad = multiprod(Xt, euclidean_gradient)
         symXtegrad = multisym(Xtegrad)
-        Xtehess = multiprod(Xt, ehess)
-        return multiskew(Xtehess - multiprod(H, symXtegrad))
+        Xtehess = multiprod(Xt, euclidean_hvp)
+        return multiskew(Xtehess - multiprod(tangent_vector, symXtegrad))
 
-    def retr(self, X, U):
-        def retri(Y):
-            Q, R = la.qr(Y)
-            return Q @ np.diag(np.sign(np.sign(np.diag(R)) + 0.5))
+    def _retr_qr(self, point, tangent_vector):
+        def retri(array):
+            q, r = la.qr(array)
+            return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
 
-        Y = X + multiprod(X, U)
+        Y = point + multiprod(point, tangent_vector)
         if self._k == 1:
             return retri(Y)
-        else:
-            for i in range(self._k):
-                Y[i] = retri(Y[i])
-            return Y
 
-    def retr2(self, X, U):
-        def retr2i(Y):
-            U, _, Vt = la.svd(Y)
-            return U @ Vt
-
-        Y = X + multiprod(X, U)
-        if self._k == 1:
-            return retr2i(Y)
-        else:
-            for i in range(self._k):
-                Y[i] = retr2i(Y[i])
+        for i in range(self._k):
+            Y[i] = retri(Y[i])
         return Y
 
-    def exp(self, X, U):
-        expU = U
-        if self._k == 1:
-            return multiprod(X, expm(expU))
-        else:
-            for i in range(self._k):
-                expU[i] = expm(expU[i])
-            return multiprod(X, expU)
+    def _retr_polar(self, point, tangent_vector):
+        def retri(array):
+            u, _, vt = la.svd(array)
+            return u @ vt
 
-    def log(self, X, Y):
-        U = multiprod(multitransp(X), Y)
+        Y = point + multiprod(point, tangent_vector)
+        if self._k == 1:
+            return retri(Y)
+
+        for i in range(self._k):
+            Y[i] = retri(Y[i])
+        return Y
+
+    def exp(self, point, tangent_vector):
+        tv = np.copy(tangent_vector)
+        if self._k == 1:
+            return multiprod(point, expm(tv))
+
+        for i in range(self._k):
+            tv[i] = expm(tv[i])
+        return multiprod(point, tv)
+
+    def log(self, point_a, point_b):
+        U = multiprod(multitransp(point_a), point_b)
         if self._k == 1:
             return multiskew(np.real(logm(U)))
+
         for i in range(self._k):
             U[i] = np.real(logm(U[i]))
         return multiskew(U)
@@ -155,23 +176,22 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             return S.reshape(n, n)
         return S
 
-    def randvec(self, X):
-        U = self._randskew(self._n, self._k)
-        nrmU = np.sqrt(np.tensordot(U, U, axes=U.ndim))
-        return U / nrmU
+    def randvec(self, point):
+        tangent_vector = self._randskew(self._n, self._k)
+        return tangent_vector / np.sqrt(
+            np.tensordot(
+                tangent_vector, tangent_vector, axes=tangent_vector.ndim
+            )
+        )
 
-    def zerovec(self, X):
+    def zerovec(self, point):
         if self._k == 1:
             return np.zeros((self._n, self._n))
         return np.zeros((self._k, self._n, self._n))
 
-    def transp(self, x1, x2, d):
-        return d
+    def transp(self, point_a, point_b, tangent_vector_a):
+        return tangent_vector_a
 
-    def pairmean(self, X, Y):
-        V = self.log(X, Y)
-        Y = self.exp(X, 0.5 * V)
-        return Y
-
-    def dist(self, x, y):
-        return self.norm(x, self.log(x, y))
+    def pairmean(self, point_a, point_b):
+        V = self.log(point_a, point_b)
+        return self.exp(point_a, 0.5 * V)

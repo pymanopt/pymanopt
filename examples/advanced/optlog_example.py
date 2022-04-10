@@ -11,7 +11,7 @@ if __name__ == "__main__":
     X = np.diag([3, 2, 1]).dot(np.random.randn(3, 200))
     manifold = Stiefel(3, 2)
 
-    @pymanopt.function.Autograd(manifold)
+    @pymanopt.function.autograd(manifold)
     def cost(w):
         return np.sum(np.sum((X - np.dot(w, np.dot(w.T, X))) ** 2))
 

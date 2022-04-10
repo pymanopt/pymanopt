@@ -1,148 +1,9 @@
 import numpy as np
 from numpy import linalg as la
 from numpy import random as rnd
-from scipy.linalg import expm
 from scipy.linalg import solve_continuous_lyapunov as lyap
 
-from pymanopt.manifolds.manifold import (
-    EuclideanEmbeddedSubmanifold,
-    Manifold,
-    RetrAsExpMixin,
-)
-from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
-
-
-class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
-    """Manifold of symmetric positive definite matrices.
-
-    Notes:
-        The geometry is based on the discussion in chapter 6 of [Bha2007]_.
-        Also see [SH2015]_ for more details.
-    """
-
-    def __init__(self, n, k=1):
-        self._n = n
-        self._k = k
-
-        if k == 1:
-            name = f"Manifold of positive definite {n}x{n} matrices"
-        else:
-            name = (
-                f"Product manifold of {k} positive definite {n}x{n} matrices"
-            )
-        dimension = int(k * n * (n + 1) / 2)
-        super().__init__(name, dimension)
-
-    @property
-    def typicaldist(self):
-        return np.sqrt(self.dim)
-
-    def dist(self, x, y):
-        # Adapted from equation 6.13 of "Positive definite matrices". The
-        # Cholesky decomposition gives the same result as matrix sqrt. There
-        # may be more efficient ways to compute this.
-        c = la.cholesky(x)
-        c_inv = la.inv(c)
-        logm = multilog(
-            multiprod(multiprod(c_inv, y), multitransp(c_inv)), pos_def=True
-        )
-        return la.norm(logm)
-
-    def inner(self, x, u, v):
-        xinvu = la.solve(x, u)
-        if u is v:
-            xinvv = xinvu
-        else:
-            xinvv = la.solve(x, v)
-        return np.tensordot(xinvu, multitransp(xinvv), axes=x.ndim)
-
-    def proj(self, X, G):
-        return multisym(G)
-
-    def egrad2rgrad(self, x, u):
-        # TODO: Check that this is correct
-        return multiprod(multiprod(x, multisym(u)), x)
-
-    def ehess2rhess(self, x, egrad, ehess, u):
-        # TODO: Check that this is correct
-        return multiprod(multiprod(x, multisym(ehess)), x) + multisym(
-            multiprod(multiprod(u, multisym(egrad)), x)
-        )
-
-    def norm(self, x, u):
-        return np.sqrt(self.inner(x, u, u))
-
-    def rand(self):
-        # The way this is done is arbitrary. I think the space of p.d.
-        # matrices would have infinite measure w.r.t. the Riemannian metric
-        # (cf. integral 0-inf [ln(x)] dx = inf) so impossible to have a
-        # 'uniform' distribution.
-
-        # Generate eigenvalues between 1 and 2
-        d = np.ones((self._k, self._n, 1)) + rnd.rand(self._k, self._n, 1)
-
-        # Generate an orthogonal matrix. Annoyingly qr decomp isn't
-        # vectorized so need to use a for loop. Could be done using
-        # svd but this is slower for bigger matrices.
-        u = np.zeros((self._k, self._n, self._n))
-        for i in range(self._k):
-            u[i], r = la.qr(rnd.randn(self._n, self._n))
-
-        if self._k == 1:
-            return multiprod(u, d * multitransp(u))[0]
-        return multiprod(u, d * multitransp(u))
-
-    def randvec(self, x):
-        k = self._k
-        n = self._n
-        if k == 1:
-            u = multisym(rnd.randn(n, n))
-        else:
-            u = multisym(rnd.randn(k, n, n))
-        return u / self.norm(x, u)
-
-    def transp(self, x1, x2, d):
-        return d
-
-    def exp(self, x, u):
-        # TODO: Check which method is faster depending on n, k.
-        x_inv_u = la.solve(x, u)
-        if self._k > 1:
-            e = np.zeros(np.shape(x))
-            for i in range(self._k):
-                e[i] = expm(x_inv_u[i])
-        else:
-            e = expm(x_inv_u)
-        return multiprod(x, e)
-        # This alternative implementation is sometimes faster though less
-        # stable. It can return a matrix with small negative determinant.
-        #    c = la.cholesky(x)
-        #    c_inv = la.inv(c)
-        #    e = multiexp(multiprod(multiprod(c_inv, u), multitransp(c_inv)),
-        #                 sym=True)
-        #    return multiprod(multiprod(c, e), multitransp(c))
-
-    retr = exp
-
-    def log(self, x, y):
-        c = la.cholesky(x)
-        c_inv = la.inv(c)
-        logm = multilog(
-            multiprod(multiprod(c_inv, y), multitransp(c_inv)), pos_def=True
-        )
-        return multiprod(multiprod(c, logm), multitransp(c))
-
-    def zerovec(self, x):
-        k = self._k
-        n = self._n
-        if k == 1:
-            return np.zeros((n, n))
-        return np.zeros((k, n, n))
-
-
-# TODO(nkoep): This could either stay in here (seeing how it's a manifold of
-#              psd matrices, or in fixed_rank. Alternatively, move this one and
-#              the next class to a dedicated 'psd_fixed_rank' module.
+from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
 
 
 class _PSDFixedRank(Manifold, RetrAsExpMixin):
@@ -155,44 +16,46 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def typicaldist(self):
         return 10 + self._k
 
-    def inner(self, Y, U, V):
-        # Euclidean metric on the total space.
-        return float(np.tensordot(U, V))
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return np.tensordot(
+            tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
+        )
 
-    def norm(self, Y, U):
-        return la.norm(U, "fro")
+    def norm(self, point, tangent_vector):
+        return la.norm(tangent_vector, "fro")
 
-    def proj(self, Y, H):
-        # Projection onto the horizontal space
-        YtY = Y.T @ Y
-        AS = Y.T @ H - H.T @ Y
+    def proj(self, point, vector):
+        YtY = point.T @ point
+        AS = point.T @ vector - vector.T @ point
         Omega = lyap(YtY, AS)
-        return H - Y @ Omega
+        return vector - point @ Omega
 
-    def egrad2rgrad(self, Y, egrad):
-        return egrad
+    def egrad2rgrad(self, point, euclidean_gradient):
+        return euclidean_gradient
 
-    def ehess2rhess(self, Y, egrad, ehess, U):
-        return self.proj(Y, ehess)
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        return self.proj(point, euclidean_hvp)
 
-    def retr(self, Y, U):
-        return Y + U
+    def retr(self, point, tangent_vector):
+        return point + tangent_vector
 
     def rand(self):
         return rnd.randn(self._n, self._k)
 
-    def randvec(self, Y):
-        H = self.rand()
-        P = self.proj(Y, H)
-        return self._normalize(P)
+    def randvec(self, point):
+        random_vector = self.rand()
+        tangent_vector = self.proj(point, random_vector)
+        return self._normalize(tangent_vector)
 
-    def transp(self, Y, Z, U):
-        return self.proj(Z, U)
+    def transp(self, point_a, point_b, tangent_vector_a):
+        return self.proj(point_b, tangent_vector_a)
 
-    def _normalize(self, Y):
-        return Y / self.norm(None, Y)
+    def _normalize(self, array):
+        return array / self.norm(None, array)
 
-    def zerovec(self, X):
+    def zerovec(self, point):
         return np.zeros((self._n, self._k))
 
 
@@ -264,16 +127,21 @@ class PSDFixedRankComplex(_PSDFixedRank):
         dimension = 2 * k * n - k * k
         super().__init__(n, k, name, dimension)
 
-    def inner(self, Y, U, V):
-        return 2 * float(np.tensordot(U, V).real)
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return (
+            2
+            * np.tensordot(
+                tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
+            ).real
+        )
 
-    def norm(self, Y, U):
-        return np.sqrt(self.inner(Y, U, U))
+    def norm(self, point, tangent_vector):
+        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
-    def dist(self, U, V):
-        S, _, D = la.svd(V.T.conj() @ U)
-        E = U - V @ S @ D
-        return self.inner(None, E, E) / 2
+    def dist(self, point_a, point_b):
+        s, _, d = la.svd(point_b.T.conj() @ point_a)
+        e = point_a - point_b @ s @ d
+        return self.inner(None, e, e) / 2
 
     def rand(self):
         rand_ = super().rand
@@ -325,63 +193,60 @@ class Elliptope(Manifold, RetrAsExpMixin):
     def typicaldist(self):
         return 10 * self._k
 
-    def inner(self, Y, U, V):
-        return float(np.tensordot(U, V))
+    def inner(self, point, tangent_vector_a, tangent_vector_b):
+        return np.tensordot(
+            tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
+        )
 
-    def norm(self, Y, U):
-        return np.sqrt(self.inner(Y, U, U))
+    def norm(self, point, tangent_vector):
+        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
-    # Projection onto the tangent space, i.e., on the tangent space of
-    # ||Y[i, :]||_2 = 1
-    def proj(self, Y, H):
-        eta = self._project_rows(Y, H)
-
-        # Projection onto the horizontal space
-        YtY = Y.T @ Y
-        AS = Y.T @ eta - H.T @ Y
+    def proj(self, point, vector):
+        eta = self._project_rows(point, vector)
+        YtY = point.T @ point
+        AS = point.T @ eta - vector.T @ point
         Omega = lyap(YtY, -AS)
-        return eta - Y @ (Omega - Omega.T) / 2
+        return eta - point @ (Omega - Omega.T) / 2
 
-    def retr(self, Y, U):
-        return self._normalize_rows(Y + U)
+    def retr(self, point, tangent_vector):
+        return self._normalize_rows(point + tangent_vector)
 
-    # Euclidean gradient to Riemannian gradient conversion. We only need the
-    # ambient space projection: the remainder of the projection function is not
-    # necessary because the Euclidean gradient must already be orthogonal to
-    # the vertical space.
-    def egrad2rgrad(self, Y, egrad):
-        return self._project_rows(Y, egrad)
+    def egrad2rgrad(self, point, euclidean_gradient):
+        return self._project_rows(point, euclidean_gradient)
 
-    def ehess2rhess(self, Y, egrad, ehess, U):
-        scaling_grad = (egrad * Y).sum(axis=1)
-        hess = ehess - U * scaling_grad[:, np.newaxis]
-
-        scaling_hess = (U * egrad + Y * ehess).sum(axis=1)
-        hess -= Y * scaling_hess[:, np.newaxis]
-
-        return self.proj(Y, hess)
+    def ehess2rhess(
+        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    ):
+        scaling_grad = (euclidean_gradient * point).sum(axis=1)
+        hess = euclidean_hvp - tangent_vector * scaling_grad[:, np.newaxis]
+        scaling_hess = (
+            tangent_vector * euclidean_gradient + point * euclidean_hvp
+        ).sum(axis=1)
+        hess -= point * scaling_hess[:, np.newaxis]
+        return self.proj(point, hess)
 
     def rand(self):
         return self._normalize_rows(rnd.randn(self._n, self._k))
 
-    def randvec(self, Y):
-        H = self.proj(Y, self.rand())
-        return H / self.norm(Y, H)
+    def randvec(self, point):
+        tangent_vector = self.proj(point, self.rand())
+        return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, Y, Z, U):
-        return self.proj(Z, U)
+    def transp(self, point_a, point_b, tangent_vector_a):
+        return self.proj(point_b, tangent_vector_a)
 
-    def _normalize_rows(self, Y):
-        """Return an l2-row-normalized copy of the matrix Y."""
-        return Y / la.norm(Y, axis=1)[:, np.newaxis]
+    def _normalize_rows(self, array):
+        """Return an l2-row-normalized copy of an array."""
+        return array / la.norm(array, axis=1)[:, np.newaxis]
 
-    # Orthogonal projection of each row of H to the tangent space at the
-    # corresponding row of X, seen as a point on a sphere.
-    def _project_rows(self, Y, H):
+    def _project_rows(self, point, vector):
+        """Orthogonal projection of each row of H to the tangent space at the
+        corresponding row of X, seen as a point on a sphere.
+        """
         # Compute the inner product between each vector H[i, :] with its root
         # point Y[i, :], i.e., Y[i, :].T * H[i, :]. Returns a row vector.
-        inners = (Y * H).sum(axis=1)
-        return H - Y * inners[:, np.newaxis]
+        inner_products = (point * vector).sum(axis=1)
+        return vector - point * inner_products[:, np.newaxis]
 
-    def zerovec(self, X):
+    def zerovec(self, point):
         return np.zeros((self._n, self._k))
