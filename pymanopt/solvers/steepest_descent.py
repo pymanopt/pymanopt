@@ -66,7 +66,7 @@ class SteepestDescent(Solver):
         if verbosity >= 1:
             print("Optimizing...")
         if verbosity >= 2:
-            iter_format_length = int(np.log10(self._maxiter)) + 1
+            iter_format_length = int(np.log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
                     ("Iteration", f"{iter_format_length}d"),
@@ -97,7 +97,7 @@ class SteepestDescent(Solver):
 
             column_printer.print_row([iter, cost, gradnorm])
 
-            if self._logverbosity >= 2:
+            if self._log_verbosity >= 2:
                 self._append_optlog(iter, x, cost, gradnorm=gradnorm)
 
             # Descent direction is minus the gradient
@@ -118,7 +118,7 @@ class SteepestDescent(Solver):
                     print("")
                 break
 
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return x
         else:
             self._stop_optlog(

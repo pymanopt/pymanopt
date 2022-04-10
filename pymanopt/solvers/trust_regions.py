@@ -426,7 +426,7 @@ class TrustRegions(Solver):
                     print("")
                 break
 
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return x
         else:
             self._stop_optlog(

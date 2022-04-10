@@ -6,30 +6,33 @@ class Solver(metaclass=abc.ABCMeta):
     """Abstract base class for Pymanopt solvers.
 
     Args:
-        maxtime: Upper bound on the run time of a solver in seconds.
-        maxiter: The maximum number of iterations to perform.
-        mingradnorm: Termination threshold for the norm of the gradient.
-        minstepsize: Termination threshold for the line search step size.
-        maxcostevals: Maximum number of allowed cost function evaluations.
-        logverbosity: Level of information logged by the solver while it
-            operates: 0 is silent, 2 ist most verbose.
+        max_time: Upper bound on the run time of a solver in seconds.
+        max_iterations: The maximum number of iterations to perform.
+        gradient_norm_tolerance: Termination threshold for the norm of the
+            gradient.
+        step_size_tolerance: Termination threshold for the line search step
+            size.
+        max_cost_evaluations: Maximum number of allowed cost function
+            evaluations.
+        log_verbosity: Level of information logged by the solver while it
+            operates: 0 is silent, 2 is most verbose.
     """
 
     def __init__(
         self,
-        maxtime=1000,
-        maxiter=1000,
-        mingradnorm=1e-6,
-        minstepsize=1e-10,
-        maxcostevals=5000,
-        logverbosity=0,
+        max_time=1000,
+        max_iterations=1000,
+        gradient_norm_tolerance=1e-6,
+        step_size_tolerance=1e-10,
+        max_cost_evaluations=5000,
+        log_verbosity=0,
     ):
-        self._maxtime = maxtime
-        self._maxiter = maxiter
-        self._mingradnorm = mingradnorm
-        self._minstepsize = minstepsize
-        self._maxcostevals = maxcostevals
-        self._logverbosity = logverbosity
+        self._max_time = max_time
+        self._max_iterations = max_iterations
+        self._gradient_norm_tolerance = gradient_norm_tolerance
+        self._step_size_tolerance = step_size_tolerance
+        self._max_cost_evaluations = max_cost_evaluations
+        self._log_verbosity = log_verbosity
         self._optlog = None
 
     def __str__(self):
@@ -58,48 +61,48 @@ class Solver(metaclass=abc.ABCMeta):
         stepsize=float("inf"),
         costevals=-1,
     ):
-        runtime = time.time() - time0
+        run_time = time.time() - time0
         reason = None
-        if time.time() >= time0 + self._maxtime:
+        if time.time() >= time0 + self._max_time:
             reason = f"Terminated - max time reached after {iter} iterations."
-        elif iter >= self._maxiter:
+        elif iter >= self._max_iterations:
             reason = (
                 "Terminated - max iterations reached after "
-                f"{runtime:.2f} seconds."
+                f"{run_time:.2f} seconds."
             )
-        elif gradnorm < self._mingradnorm:
+        elif gradnorm < self._gradient_norm_tolerance:
             reason = (
                 f"Terminated - min grad norm reached after {iter} "
-                f"iterations, {runtime:.2f} seconds."
+                f"iterations, {run_time:.2f} seconds."
             )
-        elif stepsize < self._minstepsize:
+        elif stepsize < self._step_size_tolerance:
             reason = (
                 f"Terminated - min stepsize reached after {iter} iterations, "
-                f"{runtime:.2f} seconds."
+                f"{run_time:.2f} seconds."
             )
-        elif costevals >= self._maxcostevals:
+        elif costevals >= self._max_cost_evaluations:
             reason = (
                 "Terminated - max cost evals reached after "
-                f"{runtime:.2f} seconds."
+                f"{run_time:.2f} seconds."
             )
         return reason
 
     def _start_optlog(self, solverparams=None, extraiterfields=None):
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             self._optlog = None
         else:
             self._optlog = {
                 "solver": str(self),
                 "stoppingcriteria": {
-                    "maxtime": self._maxtime,
-                    "maxiter": self._maxiter,
-                    "mingradnorm": self._mingradnorm,
-                    "minstepsize": self._minstepsize,
-                    "maxcostevals": self._maxcostevals,
+                    "max_time": self._max_time,
+                    "max_iterations": self._max_iterations,
+                    "gradient_norm_tolerance": self._gradient_norm_tolerance,
+                    "step_size_tolerance": self._step_size_tolerance,
+                    "max_cost_evaluations": self._max_cost_evaluations,
                 },
                 "solverparams": solverparams,
             }
-        if self._logverbosity >= 2:
+        if self._log_verbosity >= 2:
             if extraiterfields:
                 self._optlog["iterations"] = {
                     "iteration": [],

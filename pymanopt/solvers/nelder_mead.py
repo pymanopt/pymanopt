@@ -25,7 +25,7 @@ def compute_centroid(manifold, points):
             [manifold.log(y, point) for point in points], manifold.zerovec(y)
         )
 
-    solver = SteepestDescent(maxiter=15)
+    solver = SteepestDescent(max_iterations=15)
     problem = pymanopt.Problem(manifold, objective, grad=gradient, verbosity=0)
     return solver.solve(problem)
 
@@ -37,8 +37,8 @@ class NelderMead(Solver):
     algorithm.
 
     Args:
-        maxcostevals: Maximum number of allowed cost function evaluations.
-        maxiter: Maximum number of allowed iterations.
+        max_cost_evaluations: Maximum number of allowed cost function evaluations.
+        max_iterations: Maximum number of allowed iterations.
         reflection: Determines how far to reflect away from the worst vertex:
             stretched (reflection > 1), compressed (0 < reflection < 1),
             or exact (reflection = 1).
@@ -48,8 +48,8 @@ class NelderMead(Solver):
 
     def __init__(
         self,
-        maxcostevals=None,
-        maxiter=None,
+        max_cost_evaluations=None,
+        max_iterations=None,
         reflection=1,
         expansion=2,
         contraction=0.5,
@@ -58,8 +58,8 @@ class NelderMead(Solver):
     ):
         super().__init__(*args, **kwargs)
 
-        self._maxcostevals = maxcostevals
-        self._maxiter = maxiter
+        self._max_cost_evaluations = max_cost_evaluations
+        self._max_iterations = max_iterations
         self._reflection = reflection
         self._expansion = expansion
         self._contraction = contraction
@@ -86,10 +86,10 @@ class NelderMead(Solver):
         # dimension of the manifold to limit the parameter range, so we have to
         # defer proper initialization until this point.
         dim = manifold.dim
-        if self._maxcostevals is None:
-            self._maxcostevals = max(1000, 2 * dim)
-        if self._maxiter is None:
-            self._maxiter = max(2000, 4 * dim)
+        if self._max_cost_evaluations is None:
+            self._max_cost_evaluations = max(1000, 2 * dim)
+        if self._max_iterations is None:
+            self._max_iterations = max(2000, 4 * dim)
 
         # If no initial simplex x is given by the user, generate one at random.
         num_points = int(dim + 1)
@@ -220,7 +220,7 @@ class NelderMead(Solver):
                 costs[i] = objective(x[i])
             costevals += dim
 
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return x[0]
         else:
             self._stop_optlog(

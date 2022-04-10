@@ -6,13 +6,13 @@ class LineSearchBackTracking:
         contraction_factor=0.5,
         optimism=2,
         suff_decr=1e-4,
-        maxiter=25,
+        max_iterations=25,
         initial_stepsize=1,
     ):
         self.contraction_factor = contraction_factor
         self.optimism = optimism
         self.suff_decr = suff_decr
-        self.maxiter = maxiter
+        self.max_iterations = max_iterations
         self.initial_stepsize = initial_stepsize
 
         self._oldf0 = None
@@ -52,7 +52,7 @@ class LineSearchBackTracking:
         # Backtrack while the Armijo criterion is not satisfied
         while (
             newf > f0 + self.suff_decr * alpha * df0
-            and step_count <= self.maxiter
+            and step_count <= self.max_iterations
         ):
 
             # Reduce the step size
@@ -83,12 +83,12 @@ class LineSearchAdaptive:
         self,
         contraction_factor=0.5,
         suff_decr=0.5,
-        maxiter=10,
+        max_iterations=10,
         initial_stepsize=1,
     ):
         self._contraction_factor = contraction_factor
         self._suff_decr = suff_decr
-        self._maxiter = maxiter
+        self._max_iterations = max_iterations
         self._initial_stepsize = initial_stepsize
         self._oldalpha = None
 
@@ -107,7 +107,7 @@ class LineSearchAdaptive:
 
         while (
             newf > f0 + self._suff_decr * alpha * df0
-            and cost_evaluations <= self._maxiter
+            and cost_evaluations <= self._max_iterations
         ):
             # Reduce the step size.
             alpha *= self._contraction_factor

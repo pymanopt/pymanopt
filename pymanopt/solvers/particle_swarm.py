@@ -15,8 +15,8 @@ class ParticleSwarm(Solver):
     algorithm.
 
     Args:
-        maxcostevals: Maximum number of allowed cost evaluations.
-        maxiter: Maximum number of allowed iterations.
+        max_cost_evaluations: Maximum number of allowed cost evaluations.
+        max_iterations: Maximum number of allowed iterations.
         populationsize: Size of the considered swarm population.
         nostalgia: Quantifies performance relative to past performances.
         social: Quantifies performance relative to neighbors.
@@ -24,8 +24,8 @@ class ParticleSwarm(Solver):
 
     def __init__(
         self,
-        maxcostevals=None,
-        maxiter=None,
+        max_cost_evaluations=None,
+        max_iterations=None,
         populationsize=None,
         nostalgia=1.4,
         social=1.4,
@@ -34,8 +34,8 @@ class ParticleSwarm(Solver):
     ):
         super().__init__(*args, **kwargs)
 
-        self._maxcostevals = maxcostevals
-        self._maxiter = maxiter
+        self._max_cost_evaluations = max_cost_evaluations
+        self._max_iterations = max_iterations
         self._populationsize = populationsize
         self._nostalgia = nostalgia
         self._social = social
@@ -62,10 +62,10 @@ class ParticleSwarm(Solver):
         # dimension of the manifold to limit the parameter range, so we have to
         # defer proper initialization until this point.
         dim = man.dim
-        if self._maxcostevals is None:
-            self._maxcostevals = max(5000, 2 * dim)
-        if self._maxiter is None:
-            self._maxiter = max(500, 4 * dim)
+        if self._max_cost_evaluations is None:
+            self._max_cost_evaluations = max(5000, 2 * dim)
+        if self._max_iterations is None:
+            self._max_iterations = max(500, 4 * dim)
         if self._populationsize is None:
             self._populationsize = min(40, 10 * dim)
 
@@ -104,7 +104,7 @@ class ParticleSwarm(Solver):
         xbest = x[imin]
 
         if verbosity >= 2:
-            iter_format_length = int(np.log10(self._maxiter)) + 1
+            iter_format_length = int(np.log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
                     ("Iteration", f"{iter_format_length}d"),
@@ -143,8 +143,8 @@ class ParticleSwarm(Solver):
                 break
 
             # Compute the inertia factor which we linearly decrease from 0.9 to
-            # 0.4 from iter = 0 to iter = maxiter.
-            w = 0.4 + 0.5 * (1 - iter / self._maxiter)
+            # 0.4 from iter = 0 to iter = max_iterations.
+            w = 0.4 + 0.5 * (1 - iter / self._max_iterations)
 
             # Compute the velocities.
             for i, xi in enumerate(x):
@@ -185,7 +185,7 @@ class ParticleSwarm(Solver):
                         xbest = xi
             costevals += self._populationsize
 
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return xbest
         else:
             self._stop_optlog(

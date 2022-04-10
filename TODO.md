@@ -2,9 +2,13 @@
 
 ### Issues
 
-### 1.0:
+#### #169:
+  - Problem(verbosity) vs. Solver(log_verbosity)
   - Return namedtupleS from solver's 'solve' method
   - Clean up solver argument names
+
+### 1.0:
+  - #169
   - Renaming:
     # Short names
     * dim
