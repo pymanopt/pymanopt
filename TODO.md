@@ -3,9 +3,8 @@
 ### Issues
 
 #### #169:
-  - Problem(verbosity) vs. Solver(log_verbosity)
-  - Return namedtupleS from solver's 'solve' method
   - Clean up solver argument names
+  - Return namedtupleS from solver's 'solve' method
 
 ### 1.0:
   - #169
@@ -25,6 +24,8 @@
     * zerovec -> zero_vector
     * typicaldist -> typical_dist
     * pairmean -> point_mean
+    * linesearch -> line_searcher
+    * precon -> preconditioner
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp

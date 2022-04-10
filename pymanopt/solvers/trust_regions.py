@@ -114,7 +114,6 @@ class TrustRegions(Solver):
         Delta0=None,
     ):
         man = problem.manifold
-        verbosity = problem.verbosity
 
         if maxinner is None:
             maxinner = man.dim
@@ -161,9 +160,9 @@ class TrustRegions(Solver):
         consecutive_TRminus = 0
 
         # ** Display:
-        if verbosity >= 1:
+        if self._verbosity >= 1:
             print("Optimizing...")
-        if verbosity >= 2:
+        if self._verbosity >= 2:
             print(f"{' ':44s}f: {fx:+.6e}   |grad|: {norm_grad:.6e}")
 
         self._start_optlog()
@@ -337,7 +336,7 @@ class TrustRegions(Solver):
                 Delta = Delta / 4
                 consecutive_TRplus = 0
                 consecutive_TRminus = consecutive_TRminus + 1
-                if consecutive_TRminus >= 5 and verbosity >= 1:
+                if consecutive_TRminus >= 5 and self._verbosity >= 1:
                     consecutive_TRminus = -np.inf
                     print(
                         " +++ Detected many consecutive TR- (radius "
@@ -363,7 +362,7 @@ class TrustRegions(Solver):
                 Delta = min(2 * Delta, Delta_bar)
                 consecutive_TRminus = 0
                 consecutive_TRplus = consecutive_TRplus + 1
-                if consecutive_TRplus >= 5 and verbosity >= 1:
+                if consecutive_TRplus >= 5 and self._verbosity >= 1:
                     consecutive_TRplus = -np.inf
                     print(
                         " +++ Detected many consecutive TR+ (radius "
@@ -399,13 +398,13 @@ class TrustRegions(Solver):
             k = k + 1
 
             # ** Display:
-            if verbosity == 2:
+            if self._verbosity == 2:
                 print(
                     f"{accstr:.3s} {trstr:.3s}   k: {k:5d}     num_inner: "
                     f"{numit:5d}     f: {fx:+e}   |grad|: "
                     f"{norm_grad:e}   {srstr:s}"
                 )
-            elif verbosity > 2:
+            elif self._verbosity > 2:
                 if self.use_rand and used_cauchy:
                     print("USED CAUCHY POINT")
                 print(
@@ -421,7 +420,7 @@ class TrustRegions(Solver):
             )
 
             if stop_reason:
-                if verbosity >= 1:
+                if self._verbosity >= 1:
                     print(stop_reason)
                     print("")
                 break

@@ -151,10 +151,10 @@ def cost(S, v):
     return -np.sum(loglikvec)
 
 
-problem = Problem(manifold=manifold, cost=cost, verbosity=1)
+problem = Problem(manifold=manifold, cost=cost)
 
 # (3) Instantiate a Pymanopt solver
-solver = SteepestDescent()
+solver = SteepestDescent(verbosity=1)
 
 # let Pymanopt do the rest
 Xopt = solver.solve(problem)

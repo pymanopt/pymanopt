@@ -75,10 +75,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = Grassmann(num_rows, subspace_dimension)
     cost, egrad, ehess = create_cost_egrad_ehess(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
-    if quiet:
-        problem.verbosity = 0
 
-    solver = TrustRegions()
+    solver = TrustRegions(verbosity=2 * int(not quiet))
     estimated_spanning_set = solver.solve(
         problem, Delta_bar=8 * np.sqrt(subspace_dimension)
     )

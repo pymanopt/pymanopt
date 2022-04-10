@@ -25,8 +25,8 @@ def compute_centroid(manifold, points):
             [manifold.log(y, point) for point in points], manifold.zerovec(y)
         )
 
-    solver = SteepestDescent(max_iterations=15)
-    problem = pymanopt.Problem(manifold, objective, grad=gradient, verbosity=0)
+    solver = SteepestDescent(max_iterations=15, verbosity=0)
+    problem = pymanopt.Problem(manifold, objective, grad=gradient)
     return solver.solve(problem)
 
 
@@ -79,7 +79,6 @@ class NelderMead(Solver):
             algorithm terminated before convergence.
         """
         manifold = problem.manifold
-        verbosity = problem.verbosity
         objective = problem.cost
 
         # Choose proper default algorithm parameters. We need to know about the
@@ -127,7 +126,7 @@ class NelderMead(Solver):
         while True:
             iter += 1
 
-            if verbosity >= 2:
+            if self._verbosity >= 2:
                 print(
                     f"Cost evals: {costevals:7d}\t"
                     f"Best cost: {costs[0]:+.8e}"
@@ -142,7 +141,7 @@ class NelderMead(Solver):
                 time0, iter=iter, costevals=costevals
             )
             if stop_reason:
-                if verbosity >= 1:
+                if self._verbosity >= 1:
                     print(stop_reason)
                     print("")
                 break
@@ -161,7 +160,7 @@ class NelderMead(Solver):
             # If the reflected point is honorable, drop the worst point,
             # replace it by the reflected point and start a new iteration.
             if costr >= costs[0] and costr < costs[-2]:
-                if verbosity >= 2:
+                if self._verbosity >= 2:
                     print("Reflection")
                 costs[-1] = costr
                 x[-1] = xr
@@ -173,13 +172,13 @@ class NelderMead(Solver):
                 coste = objective(xe)
                 costevals += 1
                 if coste < costr:
-                    if verbosity >= 2:
+                    if self._verbosity >= 2:
                         print("Expansion")
                     costs[-1] = coste
                     x[-1] = xe
                     continue
                 else:
-                    if verbosity >= 2:
+                    if self._verbosity >= 2:
                         print("Reflection (failed expansion)")
                     costs[-1] = costr
                     x[-1] = xr
@@ -194,7 +193,7 @@ class NelderMead(Solver):
                     costoc = objective(xoc)
                     costevals += 1
                     if costoc <= costr:
-                        if verbosity >= 2:
+                        if self._verbosity >= 2:
                             print("Outside contraction")
                         costs[-1] = costoc
                         x[-1] = xoc
@@ -205,14 +204,14 @@ class NelderMead(Solver):
                     costic = objective(xic)
                     costevals += 1
                     if costic <= costs[-1]:
-                        if verbosity >= 2:
+                        if self._verbosity >= 2:
                             print("Inside contraction")
                         costs[-1] = costic
                         x[-1] = xic
                         continue
 
             # If we get here, shrink the simplex around x[0].
-            if verbosity >= 2:
+            if self._verbosity >= 2:
                 print("Shrinkage")
             x0 = x[0]
             for i in np.arange(1, dim + 1):

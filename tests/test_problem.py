@@ -30,11 +30,6 @@ class TestProblem(TestCase):
 
     def test_attribute_override(self):
         problem = pymanopt.Problem(self.man, self.cost)
-        with self.assertRaises(ValueError):
-            problem.verbosity = "0"
-        with self.assertRaises(ValueError):
-            problem.verbosity = -1
-        problem.verbosity = 2
         with self.assertRaises(AttributeError):
             problem.manifold = None
 

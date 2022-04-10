@@ -79,7 +79,6 @@ class ConjugateGradient(Solver):
             algorithm terminated before convergence.
         """
         man = problem.manifold
-        verbosity = problem.verbosity
         objective = problem.cost
         gradient = problem.grad
 
@@ -93,9 +92,9 @@ class ConjugateGradient(Solver):
         else:
             x = initial_point
 
-        if verbosity >= 1:
+        if self._verbosity >= 1:
             print("Optimizing...")
-        if verbosity >= 2:
+        if self._verbosity >= 2:
             iter_format_length = int(np.log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
@@ -144,7 +143,7 @@ class ConjugateGradient(Solver):
             )
 
             if stop_reason:
-                if verbosity >= 1:
+                if self._verbosity >= 1:
                     print(stop_reason)
                     print("")
                 break
@@ -158,7 +157,7 @@ class ConjugateGradient(Solver):
             # to a steepest descent step, which discards the past information.
             if df0 >= 0:
                 # Or we switch to the negative gradient direction.
-                if verbosity >= 3:
+                if self._verbosity >= 3:
                     print(
                         "Conjugate gradient info: got an ascent direction "
                         f"(df0 = {df0:.2f}), reset to the (preconditioned) "

@@ -55,7 +55,6 @@ class ParticleSwarm(Solver):
             algorithm terminated before convergence.
         """
         man = problem.manifold
-        verbosity = problem.verbosity
         objective = problem.cost
 
         # Choose proper default algorithm parameters. We need to know about the
@@ -103,7 +102,7 @@ class ParticleSwarm(Solver):
         fbest = costs[imin]
         xbest = x[imin]
 
-        if verbosity >= 2:
+        if self._verbosity >= 2:
             iter_format_length = int(np.log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
@@ -137,7 +136,7 @@ class ParticleSwarm(Solver):
                 if stop_reason is not None:
                     break
             if stop_reason:
-                if verbosity >= 1:
+                if self._verbosity >= 1:
                     print(stop_reason)
                     print("")
                 break

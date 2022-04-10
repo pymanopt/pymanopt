@@ -49,7 +49,6 @@ class SteepestDescent(Solver):
             algorithm terminated before convergence.
         """
         man = problem.manifold
-        verbosity = problem.verbosity
         objective = problem.cost
         gradient = problem.grad
 
@@ -63,9 +62,9 @@ class SteepestDescent(Solver):
         else:
             x = initial_point
 
-        if verbosity >= 1:
+        if self._verbosity >= 1:
             print("Optimizing...")
-        if verbosity >= 2:
+        if self._verbosity >= 2:
             iter_format_length = int(np.log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
@@ -113,7 +112,7 @@ class SteepestDescent(Solver):
             )
 
             if stop_reason:
-                if verbosity >= 1:
+                if self._verbosity >= 1:
                     print(stop_reason)
                     print("")
                 break

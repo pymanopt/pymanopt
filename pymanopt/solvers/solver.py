@@ -14,6 +14,8 @@ class Solver(metaclass=abc.ABCMeta):
             size.
         max_cost_evaluations: Maximum number of allowed cost function
             evaluations.
+        verbosity: Level of information printed by the solver while it
+            operates: 0 is silent, 2 is most verbose.
         log_verbosity: Level of information logged by the solver while it
             operates: 0 is silent, 2 is most verbose.
     """
@@ -25,14 +27,17 @@ class Solver(metaclass=abc.ABCMeta):
         min_gradient_norm=1e-6,
         min_step_size=1e-10,
         max_cost_evaluations=5000,
-        log_verbosity=0,
+        verbosity: int = 2,
+        log_verbosity: int = 0,
     ):
         self._max_time = max_time
         self._max_iterations = max_iterations
         self._min_gradient_norm = min_gradient_norm
         self._min_step_size = min_step_size
         self._max_cost_evaluations = max_cost_evaluations
+        self._verbosity = verbosity
         self._log_verbosity = log_verbosity
+
         self._optlog = None
 
     def __str__(self):

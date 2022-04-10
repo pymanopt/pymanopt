@@ -66,10 +66,10 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = PSDFixedRank(num_rows, rank)
     cost, egrad, ehess = create_cost_egrad_ehess(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
-    if quiet:
-        problem.verbosity = 0
 
-    solver = TrustRegions(max_iterations=500, min_step_size=1e-6)
+    solver = TrustRegions(
+        max_iterations=500, min_step_size=1e-6, verbosity=2 * int(not quiet)
+    )
     low_rank_factor_estimate = solver.solve(problem)
 
     if quiet:

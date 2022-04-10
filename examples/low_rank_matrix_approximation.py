@@ -67,10 +67,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = FixedRankEmbedded(m, n, rank)
     cost, egrad = create_cost_egrad(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
-    if quiet:
-        problem.verbosity = 0
 
-    solver = ConjugateGradient()
+    solver = ConjugateGradient(verbosity=2 * int(not quiet))
     (
         left_singular_vectors,
         singular_values,

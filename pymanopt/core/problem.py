@@ -37,8 +37,6 @@ class Problem:
         hess: The Riemannian Hessian-vector product, i.e., the directional
             derivative of ``grad`` in the direction of a tangent vector.
             As with ``grad`` this usually need not be provided explicitly.
-        verbosity: Level of information printed by the solver while it
-            operates: 0 is silent, 2 is most verbose.
     """
 
     def __init__(
@@ -50,7 +48,6 @@ class Problem:
         grad: Optional[Function] = None,
         hess: Optional[Function] = None,
         precon: Optional[Callable] = None,
-        verbosity: int = 2,
     ):
         self.manifold = manifold
 
@@ -87,16 +84,8 @@ class Problem:
 
         self.precon = precon
 
-        self.verbosity = verbosity
-
     def __setattr__(self, key, value):
         if hasattr(self, key):
-            if key == "verbosity" and (
-                not isinstance(value, int) or value < 0
-            ):
-                raise ValueError(
-                    "Verbosity level must be an nonnegative integer"
-                )
             if key in ("manifold", "precon"):
                 raise AttributeError(f"Cannot override '{key}' attribute")
         super().__setattr__(key, value)

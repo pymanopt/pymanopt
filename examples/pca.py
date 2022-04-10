@@ -81,10 +81,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = Stiefel(dimension, num_components)
     cost, egrad, ehess = create_cost_egrad_ehess(manifold, samples, backend)
     problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
-    if quiet:
-        problem.verbosity = 0
 
-    solver = TrustRegions()
+    solver = TrustRegions(verbosity=2 * int(not quiet))
     # from pymanopt.solvers import ConjugateGradient
     # solver = ConjugateGradient()
     estimated_span_matrix = solver.solve(problem)

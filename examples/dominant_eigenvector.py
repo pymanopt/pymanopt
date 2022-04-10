@@ -59,10 +59,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = Sphere(n)
     cost, egrad = create_cost_egrad(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
-    if quiet:
-        problem.verbosity = 0
 
-    solver = SteepestDescent()
+    solver = SteepestDescent(verbosity=2 * int(not quiet))
     estimated_dominant_eigenvector = solver.solve(problem)
 
     if quiet:

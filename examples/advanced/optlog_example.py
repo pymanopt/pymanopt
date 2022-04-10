@@ -15,8 +15,8 @@ if __name__ == "__main__":
     def cost(w):
         return np.sum(np.sum((X - np.dot(w, np.dot(w.T, X))) ** 2))
 
-    solver = SteepestDescent(logverbosity=2)
-    problem = pymanopt.Problem(manifold, cost, verbosity=0)
+    solver = SteepestDescent(verbosity=0, log_verbosity=2)
+    problem = pymanopt.Problem(manifold, cost)
     wopt, optlog = solver.solve(problem)
 
     print("Optimization log:")
