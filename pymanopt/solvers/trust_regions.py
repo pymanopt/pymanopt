@@ -79,7 +79,7 @@ class TrustRegions(Solver):
 
     def __init__(
         self,
-        miniter=3,
+        min_outer_iterations=3,
         kappa=0.1,
         theta=1.0,
         rho_prime=0.1,
@@ -97,7 +97,7 @@ class TrustRegions(Solver):
         """
         super().__init__(*args, **kwargs)
 
-        self.miniter = miniter
+        self.min_outer_iterations = min_outer_iterations
         self.kappa = kappa
         self.theta = theta
         self.rho_prime = rho_prime
@@ -140,7 +140,7 @@ class TrustRegions(Solver):
             x = initial_point
 
         # Initializations
-        time0 = time.time()
+        start_time = time.time()
 
         # k counts the outer (TR) iterations. The semantic is that k counts the
         # number of iterations fully executed so far.
@@ -165,7 +165,7 @@ class TrustRegions(Solver):
         if self._verbosity >= 2:
             print(f"{' ':44s}f: {fx:+.6e}   |grad|: {norm_grad:.6e}")
 
-        self._start_optlog()
+        self._start_log()
 
         while True:
             # *************************
@@ -415,23 +415,28 @@ class TrustRegions(Solver):
                 print(f"        rho : {rho:e}")
 
             # ** CHECK STOPPING criteria
-            stop_reason = self._check_stopping_criterion(
-                time0, gradnorm=norm_grad, iter=k
+            stopping_criterion = self._check_stopping_criterion(
+                start_time, gradient_norm=norm_grad, iteration=k
             )
 
-            if stop_reason:
+            if stopping_criterion:
                 if self._verbosity >= 1:
-                    print(stop_reason)
+                    print(stopping_criterion)
                     print("")
                 break
 
         if self._log_verbosity <= 0:
             return x
         else:
-            self._stop_optlog(
-                x, fx, stop_reason, time0, gradnorm=norm_grad, iter=k
+            self._stop_log(
+                x,
+                fx,
+                stopping_criterion,
+                start_time,
+                gradient_norm=norm_grad,
+                iteration=k,
             )
-            return x, self._optlog
+            return x, self._log
 
     def _truncated_conjugate_gradient(
         self, problem, x, fgradx, eta, Delta, theta, kappa, mininner, maxinner

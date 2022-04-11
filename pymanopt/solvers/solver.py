@@ -38,7 +38,7 @@ class Solver(metaclass=abc.ABCMeta):
         self._verbosity = verbosity
         self._log_verbosity = log_verbosity
 
-        self._optlog = None
+        self._log = None
 
     def __str__(self):
         return type(self).__name__
@@ -60,95 +60,97 @@ class Solver(metaclass=abc.ABCMeta):
 
     def _check_stopping_criterion(
         self,
-        time0,
-        iter=-1,
-        gradnorm=float("inf"),
-        stepsize=float("inf"),
-        costevals=-1,
+        start_time,
+        iteration=-1,
+        gradient_norm=float("inf"),
+        step_size=float("inf"),
+        cost_evaluations=-1,
     ):
-        run_time = time.time() - time0
+        run_time = time.time() - start_time
         reason = None
-        if time.time() >= time0 + self._max_time:
-            reason = f"Terminated - max time reached after {iter} iterations."
-        elif iter >= self._max_iterations:
+        if time.time() >= start_time + self._max_time:
+            reason = (
+                f"Terminated - max time reached after {iteration} iterations."
+            )
+        elif iteration >= self._max_iterations:
             reason = (
                 "Terminated - max iterations reached after "
                 f"{run_time:.2f} seconds."
             )
-        elif gradnorm < self._min_gradient_norm:
+        elif gradient_norm < self._min_gradient_norm:
             reason = (
-                f"Terminated - min grad norm reached after {iter} "
+                f"Terminated - min grad norm reached after {iteration} "
                 f"iterations, {run_time:.2f} seconds."
             )
-        elif stepsize < self._min_step_size:
+        elif step_size < self._min_step_size:
             reason = (
-                f"Terminated - min stepsize reached after {iter} iterations, "
+                f"Terminated - min step_size reached after {iteration} iterations, "
                 f"{run_time:.2f} seconds."
             )
-        elif costevals >= self._max_cost_evaluations:
+        elif cost_evaluations >= self._max_cost_evaluations:
             reason = (
                 "Terminated - max cost evals reached after "
                 f"{run_time:.2f} seconds."
             )
         return reason
 
-    def _start_optlog(self, solverparams=None, extraiterfields=None):
+    def _start_log(self, solver_parameters=None, extraiterfields=None):
         if self._log_verbosity <= 0:
-            self._optlog = None
+            self._log = None
         else:
-            self._optlog = {
+            self._log = {
                 "solver": str(self),
-                "stoppingcriteria": {
+                "stopping_criteria": {
                     "max_time": self._max_time,
                     "max_iterations": self._max_iterations,
                     "min_gradient_norm": self._min_gradient_norm,
                     "min_step_size": self._min_step_size,
                     "max_cost_evaluations": self._max_cost_evaluations,
                 },
-                "solverparams": solverparams,
+                "solver_parameters": solver_parameters,
             }
         if self._log_verbosity >= 2:
             if extraiterfields:
-                self._optlog["iterations"] = {
+                self._log["iterations"] = {
                     "iteration": [],
                     "time": [],
                     "x": [],
                     "f(x)": [],
                 }
                 for field in extraiterfields:
-                    self._optlog["iterations"][field] = []
+                    self._log["iterations"][field] = []
 
-    def _append_optlog(self, iteration, x, fx, **kwargs):
+    def _append_log(self, iteration, x, fx, **kwargs):
         # In case not every iteration is being logged
-        self._optlog["iterations"]["iteration"].append(iteration)
-        self._optlog["iterations"]["time"].append(time.time())
-        self._optlog["iterations"]["x"].append(x)
-        self._optlog["iterations"]["f(x)"].append(fx)
+        self._log["iterations"]["iteration"].append(iteration)
+        self._log["iterations"]["time"].append(time.time())
+        self._log["iterations"]["x"].append(x)
+        self._log["iterations"]["f(x)"].append(fx)
         for key in kwargs:
-            self._optlog["iterations"][key].append(kwargs[key])
+            self._log["iterations"][key].append(kwargs[key])
 
-    def _stop_optlog(
+    def _stop_log(
         self,
         x,
         objective,
-        stop_reason,
-        time0,
-        stepsize=float("inf"),
-        gradnorm=float("inf"),
-        iter=-1,
-        costevals=-1,
+        stopping_criterion,
+        start_time,
+        step_size=float("inf"),
+        gradient_norm=float("inf"),
+        iteration=-1,
+        cost_evaluations=-1,
     ):
-        self._optlog["stoppingreason"] = stop_reason
-        self._optlog["final_values"] = {
+        self._log["stopping_criterion"] = stopping_criterion
+        self._log["final_values"] = {
             "x": x,
             "f(x)": objective,
-            "time": time.time() - time0,
+            "time": time.time() - start_time,
         }
-        if stepsize is not float("inf"):
-            self._optlog["final_values"]["stepsize"] = stepsize
-        if gradnorm is not float("inf"):
-            self._optlog["final_values"]["gradnorm"] = gradnorm
-        if iter != -1:
-            self._optlog["final_values"]["iterations"] = iter
-        if costevals != -1:
-            self._optlog["final_values"]["costevals"] = costevals
+        if step_size is not float("inf"):
+            self._log["final_values"]["step_size"] = step_size
+        if gradient_norm is not float("inf"):
+            self._log["final_values"]["gradient_norm"] = gradient_norm
+        if iteration != -1:
+            self._log["final_values"]["iterations"] = iteration
+        if cost_evaluations != -1:
+            self._log["final_values"]["cost_evaluations"] = cost_evaluations

@@ -108,27 +108,27 @@ class NelderMead(Solver):
         # Compute objective-related quantities for x, and setup a function
         # evaluations counter.
         costs = np.array([objective(xi) for xi in x])
-        costevals = dim + 1
+        cost_evaluations = dim + 1
 
         # Sort simplex points by cost.
         order = np.argsort(costs)
         costs = costs[order]
         x = [x[i] for i in order]
 
-        # Iteration counter (at any point, iter is the number of fully executed
+        # Iteration counter (at any point, iteration is the number of fully executed
         # iterations so far).
-        iter = 0
+        iteration = 0
 
-        time0 = time.time()
+        start_time = time.time()
 
-        self._start_optlog()
+        self._start_log()
 
         while True:
-            iter += 1
+            iteration += 1
 
             if self._verbosity >= 2:
                 print(
-                    f"Cost evals: {costevals:7d}\t"
+                    f"Cost evals: {cost_evaluations:7d}\t"
                     f"Best cost: {costs[0]:+.8e}"
                 )
 
@@ -137,12 +137,14 @@ class NelderMead(Solver):
             costs = costs[order]
             x = [x[i] for i in order]
 
-            stop_reason = self._check_stopping_criterion(
-                time0, iter=iter, costevals=costevals
+            stopping_criterion = self._check_stopping_criterion(
+                start_time,
+                iteration=iteration,
+                cost_evaluations=cost_evaluations,
             )
-            if stop_reason:
+            if stopping_criterion:
                 if self._verbosity >= 1:
-                    print(stop_reason)
+                    print(stopping_criterion)
                     print("")
                 break
 
@@ -155,7 +157,7 @@ class NelderMead(Solver):
             # Reflection step
             xr = manifold.retr(xbar, -self._reflection * vec)
             costr = objective(xr)
-            costevals += 1
+            cost_evaluations += 1
 
             # If the reflected point is honorable, drop the worst point,
             # replace it by the reflected point and start a new iteration.
@@ -170,7 +172,7 @@ class NelderMead(Solver):
             if costr < costs[0]:
                 xe = manifold.retr(xbar, -self._expansion * vec)
                 coste = objective(xe)
-                costevals += 1
+                cost_evaluations += 1
                 if coste < costr:
                     if self._verbosity >= 2:
                         print("Expansion")
@@ -191,7 +193,7 @@ class NelderMead(Solver):
                     # do an outside contraction
                     xoc = manifold.retr(xbar, -self._contraction * vec)
                     costoc = objective(xoc)
-                    costevals += 1
+                    cost_evaluations += 1
                     if costoc <= costr:
                         if self._verbosity >= 2:
                             print("Outside contraction")
@@ -202,7 +204,7 @@ class NelderMead(Solver):
                     # do an inside contraction
                     xic = manifold.retr(xbar, self._contraction * vec)
                     costic = objective(xic)
-                    costevals += 1
+                    cost_evaluations += 1
                     if costic <= costs[-1]:
                         if self._verbosity >= 2:
                             print("Inside contraction")
@@ -217,17 +219,17 @@ class NelderMead(Solver):
             for i in np.arange(1, dim + 1):
                 x[i] = manifold.pairmean(x0, x[i])
                 costs[i] = objective(x[i])
-            costevals += dim
+            cost_evaluations += dim
 
         if self._log_verbosity <= 0:
             return x[0]
         else:
-            self._stop_optlog(
+            self._stop_log(
                 x[0],
                 objective(x[0]),
-                stop_reason,
-                time0,
-                costevals=costevals,
-                iter=iter,
+                stopping_criterion,
+                start_time,
+                cost_evaluations=cost_evaluations,
+                iteration=iteration,
             )
-            return x[0], self._optlog
+            return x[0], self._log

@@ -39,4 +39,4 @@ Riemannian Trust Regions Algorithm
 Line-Search Methods
 ===================
 
-.. automodule:: pymanopt.solvers.linesearch
+.. automodule:: pymanopt.solvers.line_search
