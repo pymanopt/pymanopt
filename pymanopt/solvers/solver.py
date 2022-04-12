@@ -1,5 +1,8 @@
 import abc
+import collections
 import time
+
+import numpy as np
 
 
 class Solver(metaclass=abc.ABCMeta):
@@ -62,8 +65,8 @@ class Solver(metaclass=abc.ABCMeta):
         self,
         start_time,
         iteration=-1,
-        gradient_norm=float("inf"),
-        step_size=float("inf"),
+        gradient_norm=np.inf,
+        step_size=np.inf,
         cost_evaluations=-1,
     ):
         run_time = time.time() - start_time
@@ -94,7 +97,7 @@ class Solver(metaclass=abc.ABCMeta):
             )
         return reason
 
-    def _start_log(self, solver_parameters=None, extraiterfields=None):
+    def _start_log(self, solver_parameters=None):
         if self._log_verbosity <= 0:
             self._log = None
         else:
@@ -110,24 +113,22 @@ class Solver(metaclass=abc.ABCMeta):
                 "solver_parameters": solver_parameters,
             }
         if self._log_verbosity >= 2:
-            if extraiterfields:
-                self._log["iterations"] = {
-                    "iteration": [],
-                    "time": [],
-                    "x": [],
-                    "f(x)": [],
-                }
-                for field in extraiterfields:
-                    self._log["iterations"][field] = []
+            self._log["iterations"] = collections.defaultdict(list)
 
     def _append_log(self, iteration, x, fx, **kwargs):
-        # In case not every iteration is being logged
+        if self._log_verbosity < 2:
+            return
+        overlapping_keys = set(kwargs.keys()).intersection(
+            ["iteration", "time", "x", "f(x)"]
+        )
+        if overlapping_keys:
+            raise ValueError(f"Cannot use '{overlapping_keys}' as log key(s)")
         self._log["iterations"]["iteration"].append(iteration)
         self._log["iterations"]["time"].append(time.time())
         self._log["iterations"]["x"].append(x)
         self._log["iterations"]["f(x)"].append(fx)
-        for key in kwargs:
-            self._log["iterations"][key].append(kwargs[key])
+        for key, value in kwargs.items():
+            self._log["iterations"][key].append(value)
 
     def _stop_log(
         self,
@@ -135,8 +136,8 @@ class Solver(metaclass=abc.ABCMeta):
         objective,
         stopping_criterion,
         start_time,
-        step_size=float("inf"),
-        gradient_norm=float("inf"),
+        step_size=np.inf,
+        gradient_norm=np.inf,
         iteration=-1,
         cost_evaluations=-1,
     ):
@@ -146,9 +147,9 @@ class Solver(metaclass=abc.ABCMeta):
             "f(x)": objective,
             "time": time.time() - start_time,
         }
-        if step_size is not float("inf"):
+        if step_size != np.inf:
             self._log["final_values"]["step_size"] = step_size
-        if gradient_norm is not float("inf"):
+        if gradient_norm != np.inf:
             self._log["final_values"]["gradient_norm"] = gradient_norm
         if iteration != -1:
             self._log["final_values"]["iterations"] = iteration

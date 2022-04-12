@@ -78,10 +78,7 @@ class SteepestDescent(Solver):
 
         column_printer.print_header()
 
-        self._start_log(
-            extraiterfields=["gradient_norm"],
-            solver_parameters={"line_searcherer": line_searcher},
-        )
+        self._start_log(solver_parameters={"line_searcherer": line_searcher})
 
         # Initialize iteration counter and timer
         iteration = 0
@@ -96,10 +93,7 @@ class SteepestDescent(Solver):
 
             column_printer.print_row([iteration, cost, gradient_norm])
 
-            if self._log_verbosity >= 2:
-                self._append_log(
-                    iteration, x, cost, gradient_norm=gradient_norm
-                )
+            self._append_log(iteration, x, cost, gradient_norm=gradient_norm)
 
             # Descent direction is minus the gradient
             desc_dir = -grad

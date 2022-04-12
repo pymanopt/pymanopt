@@ -3,7 +3,6 @@
 ### Issues
 
 #### #169:
-  - Clean up solver argument names (clean up trust region arguments)
   - Return namedtupleS from solver's 'solve' method
   - Clean up iteration counters
 
@@ -25,8 +24,6 @@
     * zerovec -> zero_vector
     * typicaldist -> typical_dist
     * pairmean -> point_mean
-    * precon -> preconditioner
-    * extraiterfields
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp

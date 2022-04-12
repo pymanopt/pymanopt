@@ -119,7 +119,6 @@ class ConjugateGradient(Solver):
         desc_dir = -Pgrad
 
         self._start_log(
-            extraiterfields=["gradient_norm"],
             solver_parameters={
                 "beta_rule": self._beta_rule,
                 "orth_value": self._orth_value,
@@ -135,10 +134,9 @@ class ConjugateGradient(Solver):
         while True:
             column_printer.print_row([iteration, cost, gradient_norm])
 
-            if self._log_verbosity >= 2:
-                self._append_log(
-                    iteration, x, cost, gradient_norm=gradient_norm
-                )
+            self._append_log(
+                iteration, x, cost, gradient_norm=gradient_norm
+            )
 
             stopping_criterion = self._check_stopping_criterion(
                 start_time,
