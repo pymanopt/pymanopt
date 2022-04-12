@@ -444,7 +444,7 @@ class TrustRegions(Solver):
         man = problem.manifold
         inner = man.inner
         hess = problem.hess
-        precon = problem.precon
+        preconditioner = problem.preconditioner
 
         if not self.use_rand:  # and therefore, eta == 0
             Heta = man.zerovec(x)
@@ -462,7 +462,7 @@ class TrustRegions(Solver):
 
         # Precondition the residual
         if not self.use_rand:
-            z = precon(x, r)
+            z = preconditioner(x, r)
         else:
             z = r
 
@@ -595,7 +595,7 @@ class TrustRegions(Solver):
 
             # Precondition the residual.
             if not self.use_rand:
-                z = precon(x, r)
+                z = preconditioner(x, r)
             else:
                 z = r
 

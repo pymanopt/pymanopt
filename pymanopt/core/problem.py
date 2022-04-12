@@ -47,7 +47,7 @@ class Problem:
         ehess: Optional[Function] = None,
         grad: Optional[Function] = None,
         hess: Optional[Function] = None,
-        precon: Optional[Callable] = None,
+        preconditioner: Optional[Callable] = None,
     ):
         self.manifold = manifold
 
@@ -77,16 +77,16 @@ class Problem:
             hess = self._wrap_hessian_vector_product(hess)
         self._hess = hess
 
-        if precon is None:
+        if preconditioner is None:
 
-            def precon(x, d):
-                return d
+            def preconditioner(point, tangent_vector):
+                return tangent_vector
 
-        self.precon = precon
+        self.preconditioner = preconditioner
 
     def __setattr__(self, key, value):
         if hasattr(self, key):
-            if key in ("manifold", "precon"):
+            if key in ("manifold", "preconditioner"):
                 raise AttributeError(f"Cannot override '{key}' attribute")
         super().__setattr__(key, value)
 
