@@ -79,7 +79,7 @@ class TrustRegions(Solver):
 
     def __init__(
         self,
-        min_outer_iterations=3,
+        miniter=3,
         kappa=0.1,
         theta=1.0,
         rho_prime=0.1,
@@ -97,7 +97,7 @@ class TrustRegions(Solver):
         """
         super().__init__(*args, **kwargs)
 
-        self.min_outer_iterations = min_outer_iterations
+        self.miniter = miniter
         self.kappa = kappa
         self.theta = theta
         self.rho_prime = rho_prime

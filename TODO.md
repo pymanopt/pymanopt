@@ -50,6 +50,7 @@
   - Add callback mechanism to allow for custom termination criteria
 
 ### 2.0.x:
+  - Refactor TrustRegions implementation and update parameter names
   - Rewrite core/manifolds
     * in jax with jit support, or
     * using a backend abstraction as in geomstats (potentially shared with
