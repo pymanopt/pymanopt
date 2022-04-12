@@ -8,7 +8,7 @@ Solvers
 Solver
 ------
 
-.. automodule:: pymanopt.solvers._solver
+.. automodule:: pymanopt.solvers.solver
 
 Conjugate Gradients
 -------------------

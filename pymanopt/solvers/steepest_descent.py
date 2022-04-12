@@ -3,8 +3,8 @@ from copy import deepcopy
 
 import numpy as np
 
-from pymanopt.solvers._solver import Solver
 from pymanopt.solvers.line_search import BackTrackingLineSearcher
+from pymanopt.solvers.solver import Solver
 from pymanopt.tools import printer
 
 

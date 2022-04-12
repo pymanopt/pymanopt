@@ -4,7 +4,7 @@ import numpy as np
 import numpy.random as rnd
 
 from pymanopt import tools
-from pymanopt.solvers._solver import Solver
+from pymanopt.solvers.solver import Solver
 from pymanopt.tools import printer
 
 

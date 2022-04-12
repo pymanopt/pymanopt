@@ -55,7 +55,7 @@ import time
 
 import numpy as np
 
-from pymanopt.solvers._solver import Solver
+from pymanopt.solvers.solver import Solver
 
 
 class TrustRegions(Solver):
