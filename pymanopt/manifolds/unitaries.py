@@ -158,7 +158,7 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
             U = rnd.randn((N, 1, 1)) + 1j * rnd.randn((N, 1, 1))
             return U / np.abs(U)
 
-        U = np.zeros((N, n, n))
+        U = np.zeros((N, n, n), dtype=complex)
 
         for i in range(N):
             # Generated as such, Q is uniformly distributed over O(n), the set

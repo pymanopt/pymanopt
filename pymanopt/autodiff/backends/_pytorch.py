@@ -24,12 +24,15 @@ class PyTorchBackend(Backend):
         return torch is not None and torch.__version__ >= "0.4.1"
 
     @staticmethod
-    def _from_numpy(array):
+    def _from_numpy(array: np.ndarray):
         """Wrap numpy ndarray ``array`` in a torch tensor.
 
         Since torch does not support negative strides, we create a copy of the
         array to reset the strides in that case.
         """
+        if isinstance(array, torch.Tensor):
+            return array
+        
         strides = np.array(array.strides)
         if np.any(strides < 0):
             warnings.warn(
