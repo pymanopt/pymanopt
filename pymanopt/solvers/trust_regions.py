@@ -142,9 +142,9 @@ class TrustRegions(Solver):
         # Initializations
         start_time = time.time()
 
-        # k counts the outer (TR) iterations. The semantic is that k counts the
-        # number of iterations fully executed so far.
-        k = 0
+        # Number of outer (TR) iterations. The semantic is that `iteration`
+        # counts the number of iterations fully executed so far.
+        iteration = 0
 
         # Initialize solution and companion measures: f(x), fgrad(x)
         fx = cost(x)
@@ -168,6 +168,8 @@ class TrustRegions(Solver):
         self._initialize_log()
 
         while True:
+            iteration += 1
+
             # *************************
             # ** Begin TR Subproblem **
             # *************************
@@ -394,13 +396,10 @@ class TrustRegions(Solver):
                 # accept = False
                 accstr = "REJ"
 
-            # k is the number of iterations we have accomplished.
-            k = k + 1
-
             # ** Display:
             if self._verbosity == 2:
                 print(
-                    f"{accstr:.3s} {trstr:.3s}   k: {k:5d}     num_inner: "
+                    f"{accstr:.3s} {trstr:.3s}   k: {iteration:5d}     num_inner: "
                     f"{numit:5d}     f: {fx:+e}   |grad|: "
                     f"{norm_grad:e}   {srstr:s}"
                 )
@@ -408,7 +407,7 @@ class TrustRegions(Solver):
                 if self.use_rand and used_cauchy:
                     print("USED CAUCHY POINT")
                 print(
-                    f"{accstr:.3s} {trstr:.3s}    k: {k:5d}     num_inner: "
+                    f"{accstr:.3s} {trstr:.3s}    k: {iteration:5d}     num_inner: "
                     f"{numit:5d}     {srstr:s}"
                 )
                 print(f"       f(x) : {fx:+e}     |grad| : {norm_grad:e}")
@@ -416,7 +415,9 @@ class TrustRegions(Solver):
 
             # ** CHECK STOPPING criteria
             stopping_criterion = self._check_stopping_criterion(
-                start_time, gradient_norm=norm_grad, iteration=k
+                start_time=start_time,
+                gradient_norm=norm_grad,
+                iteration=iteration,
             )
 
             if stopping_criterion:

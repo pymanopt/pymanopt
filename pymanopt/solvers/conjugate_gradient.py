@@ -132,6 +132,8 @@ class ConjugateGradient(Solver):
         start_time = time.time()
 
         while True:
+            iteration += 1
+
             column_printer.print_row([iteration, cost, gradient_norm])
 
             self._add_log_entry(
@@ -144,7 +146,7 @@ class ConjugateGradient(Solver):
             stopping_criterion = self._check_stopping_criterion(
                 start_time=start_time,
                 gradient_norm=gradient_norm,
-                iteration=iteration + 1,
+                iteration=iteration,
                 step_size=step_size,
             )
 
@@ -243,8 +245,6 @@ class ConjugateGradient(Solver):
             Pgrad = Pnewgrad
             gradient_norm = newgradient_norm
             gradPgrad = newgradPnewgrad
-
-            iteration += 1
 
         if self._log_verbosity <= 0:
             return x

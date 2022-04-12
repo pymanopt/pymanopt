@@ -4,7 +4,6 @@
 
 #### #169:
   - Return namedtupleS from solver's 'solve' method
-  - Clean up iteration counters
 
 ### 1.0:
   - #169

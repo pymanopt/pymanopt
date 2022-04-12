@@ -87,11 +87,12 @@ class SteepestDescent(Solver):
         start_time = time.time()
 
         while True:
+            iteration += 1
+
             # Calculate new cost, grad and gradient_norm
             cost = objective(x)
             grad = gradient(x)
             gradient_norm = man.norm(x, grad)
-            iteration += 1
 
             column_printer.print_row([iteration, cost, gradient_norm])
 
