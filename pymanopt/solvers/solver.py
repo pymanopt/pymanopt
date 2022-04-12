@@ -126,7 +126,7 @@ class Solver(metaclass=abc.ABCMeta):
         for key, value in kwargs.items():
             self._log["iterations"][key].append(value)
 
-    def _finish_log(
+    def _finalize_log(
         self,
         *,
         x,

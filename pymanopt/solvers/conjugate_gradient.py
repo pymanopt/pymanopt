@@ -249,7 +249,7 @@ class ConjugateGradient(Solver):
         if self._log_verbosity <= 0:
             return x
         else:
-            self._finish_log(
+            self._finalize_log(
                 x=x,
                 objective=cost,
                 stopping_criterion=stopping_criterion,

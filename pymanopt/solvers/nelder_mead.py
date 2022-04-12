@@ -224,7 +224,7 @@ class NelderMead(Solver):
         if self._log_verbosity <= 0:
             return x[0]
         else:
-            self._finish_log(
+            self._finalize_log(
                 x=x[0],
                 objective=objective(x[0]),
                 stopping_criterion=stopping_criterion,

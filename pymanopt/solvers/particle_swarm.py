@@ -189,7 +189,7 @@ class ParticleSwarm(Solver):
         if self._log_verbosity <= 0:
             return xbest
         else:
-            self._finish_log(
+            self._finalize_log(
                 x=xbest,
                 objective=fbest,
                 stopping_criterion=stopping_criterion,

@@ -127,7 +127,7 @@ class SteepestDescent(Solver):
         if self._log_verbosity <= 0:
             return x
         else:
-            self._finish_log(
+            self._finalize_log(
                 x=x,
                 objective=objective(x),
                 stopping_criterion=stopping_criterion,
