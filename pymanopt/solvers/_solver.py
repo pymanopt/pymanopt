@@ -63,6 +63,7 @@ class Solver(metaclass=abc.ABCMeta):
 
     def _check_stopping_criterion(
         self,
+        *,
         start_time,
         iteration=-1,
         gradient_norm=np.inf,
@@ -97,7 +98,7 @@ class Solver(metaclass=abc.ABCMeta):
             )
         return reason
 
-    def _start_log(self, solver_parameters=None):
+    def _initialize_log(self, *, solver_parameters=None):
         if self._log_verbosity <= 0:
             self._log = None
         else:
@@ -115,23 +116,19 @@ class Solver(metaclass=abc.ABCMeta):
         if self._log_verbosity >= 2:
             self._log["iterations"] = collections.defaultdict(list)
 
-    def _append_log(self, iteration, x, fx, **kwargs):
+    def _add_log_entry(self, *, iteration, x, objective, **kwargs):
         if self._log_verbosity < 2:
             return
-        overlapping_keys = set(kwargs.keys()).intersection(
-            ["iteration", "time", "x", "f(x)"]
-        )
-        if overlapping_keys:
-            raise ValueError(f"Cannot use '{overlapping_keys}' as log key(s)")
-        self._log["iterations"]["iteration"].append(iteration)
         self._log["iterations"]["time"].append(time.time())
+        self._log["iterations"]["iteration"].append(iteration)
         self._log["iterations"]["x"].append(x)
-        self._log["iterations"]["f(x)"].append(fx)
+        self._log["iterations"]["objective"].append(objective)
         for key, value in kwargs.items():
             self._log["iterations"][key].append(value)
 
-    def _stop_log(
+    def _finish_log(
         self,
+        *,
         x,
         objective,
         stopping_criterion,
@@ -144,7 +141,7 @@ class Solver(metaclass=abc.ABCMeta):
         self._log["stopping_criterion"] = stopping_criterion
         self._log["final_values"] = {
             "x": x,
-            "f(x)": objective,
+            "objective": objective,
             "time": time.time() - start_time,
         }
         if step_size != np.inf:

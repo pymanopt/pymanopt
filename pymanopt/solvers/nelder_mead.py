@@ -4,7 +4,7 @@ import numpy as np
 
 import pymanopt
 from pymanopt import tools
-from pymanopt.solvers.solver import Solver
+from pymanopt.solvers._solver import Solver
 from pymanopt.solvers.steepest_descent import SteepestDescent
 
 
