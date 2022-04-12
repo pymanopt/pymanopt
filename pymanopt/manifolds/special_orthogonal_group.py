@@ -1,5 +1,5 @@
 """
-Module containing manifolds of n-dimensional unitaries
+Module containing manifolds of n-dimensional rotations.
 """
 
 import numpy as np
@@ -9,35 +9,23 @@ from scipy.linalg import expm, logm
 from scipy.special import comb
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multiprod, multihconj, multiherm, multiskewh
+from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
 
 
-class Unitaries(EuclideanEmbeddedSubmanifold):
-    """
-    Returns a manifold structure to optimize over unitary matrices.
-    
-    manifold = Unitaries(n)
-    manifold = Unitaries(n, k)
-
-    Unitary group: deals with arrays U of size n x n x k (or n x n if k = 1,
-    which is the default) such that each n x n matrix is unitary, that is,
-        X.conj().T @ X = eye(n) if k = 1, or
-        X[i].conj().T @ X[i] = eye(n) for i = 1 : k if k > 1.
-
-    This is a description of U(n)^k with the induced metric from the
-    embedding space (C^nxn)^k, i.e., this manifold is a Riemannian
-    submanifold of (C^nxn)^k endowed with the usual real inner product on
-    C^nxn, namely, <A, B> = real(trace(A.conj().T @ B)).
-
-    This is important:
-    Tangent vectors are represented in the Lie algebra, i.e., as
-    skew-Hermitian matrices. Use the function M.tangent2ambient(X, H) to
+class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
+    """The special orthogonal group.
+    Special orthogonal group (the manifold of rotations): deals with matrices
+    X of size k x n x n (or n x n if k = 1, which is the default) such that
+    each n x n matrix is orthogonal, with determinant 1, i.e.,
+    dot(X.T, X) = eye(n) if k = 1, or dot(X[i].T, X[i]) = eye(n) if k > 1.
+    This is a description of SO(n)^k with the induced metric from the
+    embedding space (R^nxn)^k, i.e., this manifold is a Riemannian
+    submanifold of (R^nxn)^k endowed with the usual trace inner product.
+    Tangent vectors are represented in the Lie algebra, i.e., as skew
+    symmetric matrices. Use the function manifold.tangent2ambient(X, H) to
     switch from the Lie algebra representation to the embedding space
     representation. This is often necessary when defining
     problem.ehess(X, H).
-    as the input H will then be a skew-Hermitian matrix (but the output must
-    not be, as the output is the Hessian in the embedding Euclidean space.)
-
     By default, the retraction is only a first-order approximation of the
     exponential. To force the use of a second-order approximation, call
     manifold.retr = manifold.retr2 after creating manifold object. This switches from a
@@ -54,12 +42,12 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
         self._k = k
 
         if k == 1:
-            name = f"Unitary group U({n})"
+            name = f"Special orthogonal group SO({n})"
         elif k > 1:
-            name = f"Product unitary group U({n})^{k}"
+            name = f"Sphecial orthogonal group SO({n})^{k}"
         else:
             raise ValueError("k must be an integer no less than 1.")
-        dimension = int(k * n**2)
+        dimension = int(k * comb(n, 2))
         super().__init__(name, dimension)
 
         if retraction == "qr":
@@ -71,7 +59,7 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
 
     def inner(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
-            tangent_vector_a.conj(), tangent_vector_b, axes=tangent_vector_a.ndim
+            tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
@@ -85,10 +73,10 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
         return self.norm(point_a, self.log(point_a, point_b))
 
     def proj(self, point, vector):
-        return multiskewh(multiprod(multihconj(point), vector))
+        return multiskew(multiprod(multitransp(point), vector))
 
     def tangent(self, point, vector):
-        return multiskewh(vector)
+        return multiskew(vector)
 
     def tangent2ambient(self, point, tangent_vector):
         return multiprod(point, tangent_vector)
@@ -96,14 +84,12 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
     def ehess2rhess(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
-        Xt = multihconj(point)
+        Xt = multitransp(point)
         Xtegrad = multiprod(Xt, euclidean_gradient)
-        symXtegrad = multiherm(Xtegrad)
+        symXtegrad = multisym(Xtegrad)
         Xtehess = multiprod(Xt, euclidean_hvp)
-        return multiskewh(Xtehess - multiprod(tangent_vector, symXtegrad))
+        return multiskew(Xtehess - multiprod(tangent_vector, symXtegrad))
 
-    # QR-based retraction or Polar-based retraction
-    # QR-based retraction
     def _retr_qr(self, point, tangent_vector):
         def retri(array):
             q, r = la.qr(array)
@@ -117,7 +103,6 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
             Y[i] = retri(Y[i])
         return Y
 
-    # Polar-based retraction
     def _retr_polar(self, point, tangent_vector):
         def retri(array):
             u, _, vt = la.svd(array)
@@ -140,57 +125,61 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
             tv[i] = expm(tv[i])
         return multiprod(point, tv)
 
-    
     def log(self, point_a, point_b):
         U = multiprod(multitransp(point_a), point_b)
         if self._k == 1:
-            return multiskewh(logm(U))
+            return multiskew(np.real(logm(U)))
 
         for i in range(self._k):
-            U[i] = logm(U[i])
-        return multiskewh(U)
+            U[i] = np.real(logm(U[i]))
+        return multiskew(U)
 
     @staticmethod
-    def _randunitary(n, N=1):
-        # Generates uniformly random unitary matrices.
-
+    def _randrot(n, N=1):
         if n == 1:
-            U = rnd.randn((N, 1, 1)) + 1j * rnd.randn((N, 1, 1))
-            return U / np.abs(U)
+            return np.ones((N, 1, 1))
 
-        U = np.zeros((N, n, n))
-
+        R = np.zeros((N, n, n))
         for i in range(N):
-            # Generated as such, Q is uniformly distributed over O(n), the set
-            # of orthogonal matrices.
-            A = rnd.randn(n, n) + 1j * rnd.randn(n, n)
+            # Generated as such, Q is uniformly distributed over O(n), the
+            # group of orthogonal n-by-n matrices.
+            A = rnd.randn(n, n)
             Q, RR = la.qr(A)
-            U[i] = Q
+            # TODO(nkoep): Add a proper reference to Mezzadri 2007.
+            Q = Q @ np.diag(np.sign(np.diag(RR)))
+
+            # If Q is in O(n) but not in SO(n), we permute the two first
+            # columns of Q such that det(new Q) = -det(Q), hence the new Q will
+            # be in SO(n), uniformly distributed.
+            if la.det(Q) < 0:
+                Q[:, [0, 1]] = Q[:, [1, 0]]
+            R[i] = Q
 
         if N == 1:
-            return U.reshape(n, n)
-        return U
-
+            return R.reshape(n, n)
+        return R
 
     def rand(self):
-        return self._randunitary(self._n, self._k)
+        return self._randrot(self._n, self._k)
 
     @staticmethod
-    def _randskewh(n, N=1):
-        # Generate random skew-hermitian matrices with normal entries.
+    def _randskew(n, N=1):
         idxs = np.triu_indices(n, 1)
         S = np.zeros((N, n, n))
         for i in range(N):
             S[i][idxs] = rnd.randn(int(n * (n - 1) / 2))
-            S = S - multihconj(S)
+            S = S - multitransp(S)
         if N == 1:
             return S.reshape(n, n)
         return S
 
     def randvec(self, point):
-        tangent_vector = self._randskewh(self._n, self._k)
-        nrmU = np.sqrt(np.tensordot(tangent_vector.conj(), tangent_vector, axes=tangent_vector.ndim))
-        return tangent_vector / nrmU
+        tangent_vector = self._randskew(self._n, self._k)
+        return tangent_vector / np.sqrt(
+            np.tensordot(
+                tangent_vector, tangent_vector, axes=tangent_vector.ndim
+            )
+        )
 
     def zerovec(self, point):
         if self._k == 1:

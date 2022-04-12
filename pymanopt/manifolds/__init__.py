@@ -11,6 +11,7 @@ __all__ = [
     "Product",
     "SkewSymmetric",
     "SpecialOrthogonalGroup",
+    "Unitaries",
     "Sphere",
     "SphereSubspaceComplementIntersection",
     "SphereSubspaceIntersection",
@@ -36,3 +37,4 @@ from .sphere import (
 )
 from .stiefel import Stiefel
 from .strictly_positive_vectors import StrictlyPositiveVectors
+from .unitaries import Unitaries
