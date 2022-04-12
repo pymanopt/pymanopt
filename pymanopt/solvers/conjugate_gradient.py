@@ -118,7 +118,7 @@ class ConjugateGradient(Solver):
         # Initial descent direction is the negative gradient
         desc_dir = -Pgrad
 
-        self._start_log(
+        self._initialize_log(
             solver_parameters={
                 "beta_rule": self._beta_rule,
                 "orth_value": self._orth_value,
@@ -134,12 +134,15 @@ class ConjugateGradient(Solver):
         while True:
             column_printer.print_row([iteration, cost, gradient_norm])
 
-            self._append_log(
-                iteration, x, cost, gradient_norm=gradient_norm
+            self._add_log_entry(
+                iteration=iteration,
+                x=x,
+                objective=cost,
+                gradient_norm=gradient_norm,
             )
 
             stopping_criterion = self._check_stopping_criterion(
-                start_time,
+                start_time=start_time,
                 gradient_norm=gradient_norm,
                 iteration=iteration + 1,
                 step_size=step_size,
@@ -246,11 +249,11 @@ class ConjugateGradient(Solver):
         if self._log_verbosity <= 0:
             return x
         else:
-            self._stop_log(
-                x,
-                cost,
-                stopping_criterion,
-                start_time,
+            self._finish_log(
+                x=x,
+                objective=cost,
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
                 step_size=step_size,
                 gradient_norm=gradient_norm,
                 iteration=iteration,

@@ -116,7 +116,7 @@ class ParticleSwarm(Solver):
 
         column_printer.print_header()
 
-        self._start_log()
+        self._initialize_log()
 
         # Iteration counter (at any point, iteration is the number of fully executed
         # iterations so far).
@@ -131,7 +131,7 @@ class ParticleSwarm(Solver):
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):
                 stopping_criterion = self._check_stopping_criterion(
-                    start_time,
+                    start_time=start_time,
                     iteration=iteration,
                     cost_evaluations=cost_evaluations,
                 )
@@ -189,11 +189,11 @@ class ParticleSwarm(Solver):
         if self._log_verbosity <= 0:
             return xbest
         else:
-            self._stop_log(
-                xbest,
-                fbest,
-                stopping_criterion,
-                start_time,
+            self._finish_log(
+                x=xbest,
+                objective=fbest,
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
                 cost_evaluations=cost_evaluations,
                 iteration=iteration,
             )

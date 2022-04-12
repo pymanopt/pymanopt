@@ -121,7 +121,7 @@ class NelderMead(Solver):
 
         start_time = time.time()
 
-        self._start_log()
+        self._initialize_log()
 
         while True:
             iteration += 1
@@ -138,7 +138,7 @@ class NelderMead(Solver):
             x = [x[i] for i in order]
 
             stopping_criterion = self._check_stopping_criterion(
-                start_time,
+                start_time=start_time,
                 iteration=iteration,
                 cost_evaluations=cost_evaluations,
             )
@@ -224,11 +224,11 @@ class NelderMead(Solver):
         if self._log_verbosity <= 0:
             return x[0]
         else:
-            self._stop_log(
-                x[0],
-                objective(x[0]),
-                stopping_criterion,
-                start_time,
+            self._finish_log(
+                x=x[0],
+                objective=objective(x[0]),
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
                 cost_evaluations=cost_evaluations,
                 iteration=iteration,
             )

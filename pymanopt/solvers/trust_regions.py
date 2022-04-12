@@ -165,7 +165,7 @@ class TrustRegions(Solver):
         if self._verbosity >= 2:
             print(f"{' ':44s}f: {fx:+.6e}   |grad|: {norm_grad:.6e}")
 
-        self._start_log()
+        self._initialize_log()
 
         while True:
             # *************************
@@ -428,13 +428,13 @@ class TrustRegions(Solver):
         if self._log_verbosity <= 0:
             return x
         else:
-            self._stop_log(
-                x,
-                fx,
-                stopping_criterion,
-                start_time,
+            self._finish_log(
+                x=x,
+                objective=fx,
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
                 gradient_norm=norm_grad,
-                iteration=k,
+                iteration=iteration,
             )
             return x, self._log
 
