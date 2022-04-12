@@ -2,10 +2,9 @@
 
 ### Issues
 
-#### #169:
-  - Return namedtupleS from solver's 'solve' method
-
 ### 1.0:
+  - Return namedtuple from solver's 'solve' method
+  - Change terminology from "solvers" to "optimizers"
   - #169
   - Renaming:
     # Short names
