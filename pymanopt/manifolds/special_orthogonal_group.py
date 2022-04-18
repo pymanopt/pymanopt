@@ -137,8 +137,11 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     @staticmethod
     def _randrot(n, N=1):
         if n == 1:
-            return np.ones((N, 1, 1))
-
+            R = np.ones((N, 1, 1))
+            if N == 1:
+                return R.reshape(n, n)
+            return R
+        
         R = np.zeros((N, n, n))
         for i in range(N):
             # Generated as such, Q is uniformly distributed over O(n), the
