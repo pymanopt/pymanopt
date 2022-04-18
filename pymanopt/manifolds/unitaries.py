@@ -155,7 +155,7 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
         # Generates uniformly random unitary matrices.
 
         if n == 1:
-            U = rnd.randn((N, 1, 1)) + 1j * rnd.randn((N, 1, 1))
+            U = rnd.randn(N, 1, 1) + 1j * rnd.randn(N, 1, 1)
             return U / np.abs(U)
 
         U = np.zeros((N, n, n), dtype=complex)
