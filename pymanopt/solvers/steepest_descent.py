@@ -79,7 +79,7 @@ class SteepestDescent(Solver):
         column_printer.print_header()
 
         self._initialize_log(
-            solver_parameters={"line_searcherer": line_searcher}
+            solver_parameters={"line_searcher": line_searcher}
         )
 
         # Initialize iteration counter and timer

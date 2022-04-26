@@ -122,7 +122,7 @@ class ConjugateGradient(Solver):
             solver_parameters={
                 "beta_rule": self._beta_rule,
                 "orth_value": self._orth_value,
-                "line_searcherer": line_searcher,
+                "line_searcher": line_searcher,
             },
         )
 
