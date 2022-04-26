@@ -1,69 +1,76 @@
+import enum
 import time
 from copy import deepcopy
 
 import numpy as np
 
-from pymanopt import tools
-from pymanopt.solvers.linesearch import LineSearchAdaptive
+from pymanopt.solvers.line_search import AdaptiveLineSearcher
 from pymanopt.solvers.solver import Solver
 from pymanopt.tools import printer
 
 
-# TODO: Use Python's enum module.
-BetaTypes = tools.make_enum(
-    "BetaTypes",
-    "FletcherReeves PolakRibiere HestenesStiefel HagerZhang".split(),
-)
+class BetaRule(enum.Enum):
+    FletcherReeves = enum.auto()
+    PolakRibiere = enum.auto()
+    HestenesStiefel = enum.auto()
+    HagerZhang = enum.auto()
 
 
 class ConjugateGradient(Solver):
     """Riemannian conjugate gradient method.
 
     Perform optimization using nonlinear conjugate gradient method with
-    linesearch.
+    line_searcher.
     This method first computes the gradient of the cost function, and then
     optimizes by moving in a direction that is conjugate to all previous search
     directions.
 
     Args:
-        beta_type: Conjugate gradient beta rule used to construct the new
-            search direction.
+        beta_rule: Conjugate gradient beta rule used to construct the new
+            search direction. Valid choices are ``{"FletcherReeves",
+            "PolakRibiere", "HestenesStiefel", "HagerZhang"}``.
         orth_value: Parameter for Powell's restart strategy.
             An infinite value disables this strategy.
             See in code formula for the specific criterion used.
-        linesearch: The line search method.
+        line_searcher: The line search method.
     """
 
     def __init__(
         self,
-        beta_type=BetaTypes.HestenesStiefel,
+        beta_rule: str = "HestenesStiefel",
         orth_value=np.inf,
-        linesearch=None,
+        line_searcher=None,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
 
-        self._beta_type = beta_type
+        beta_rules = list(map(str, BetaRule.__members__))
+        if beta_rule not in beta_rules:
+            raise ValueError(
+                f"Invalid beta rule {beta_rule}. Should be one of "
+                f"{beta_rules}."
+            )
+        self._beta_rule = beta_rule
         self._orth_value = orth_value
 
-        if linesearch is None:
-            self._linesearch = LineSearchAdaptive()
+        if line_searcher is None:
+            self._line_searcher = AdaptiveLineSearcher()
         else:
-            self._linesearch = linesearch
-        self.linesearch = None
+            self._line_searcher = line_searcher
+        self.line_searcher = None
 
-    def solve(self, problem, x=None, reuselinesearch=False):
+    def solve(self, problem, initial_point=None, reuse_line_searcher=False):
         """Run CG method.
 
         Args:
             problem: Pymanopt problem class instance exposing the cost function
                 and the manifold to optimize over.
                 The class must either
-            x: Initial point on the manifold.
+            initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
-            reuselinesearch: Whether to reuse the previous linesearch object.
+            reuse_line_searcher: Whether to reuse the previous line searcher.
                 Allows to use information from a previous call to
                 :meth:`solve`.
 
@@ -72,25 +79,26 @@ class ConjugateGradient(Solver):
             algorithm terminated before convergence.
         """
         man = problem.manifold
-        verbosity = problem.verbosity
         objective = problem.cost
         gradient = problem.grad
 
-        if not reuselinesearch or self.linesearch is None:
-            self.linesearch = deepcopy(self._linesearch)
-        linesearch = self.linesearch
+        if not reuse_line_searcher or self.line_searcher is None:
+            self.line_searcher = deepcopy(self._line_searcher)
+        line_searcher = self.line_searcher
 
         # If no starting point is specified, generate one at random.
-        if x is None:
+        if initial_point is None:
             x = man.rand()
+        else:
+            x = initial_point
 
-        if verbosity >= 1:
+        if self._verbosity >= 1:
             print("Optimizing...")
-        if verbosity >= 2:
-            iter_format_length = int(np.log10(self._maxiter)) + 1
+        if self._verbosity >= 2:
+            iteration_format_length = int(np.log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
-                    ("Iteration", f"{iter_format_length}d"),
+                    ("Iteration", f"{iteration_format_length}d"),
                     ("Cost", "+.16e"),
                     ("Gradient norm", ".8e"),
                 ]
@@ -103,40 +111,48 @@ class ConjugateGradient(Solver):
         # Calculate initial cost-related quantities
         cost = objective(x)
         grad = gradient(x)
-        gradnorm = man.norm(x, grad)
-        Pgrad = problem.precon(x, grad)
+        gradient_norm = man.norm(x, grad)
+        Pgrad = problem.preconditioner(x, grad)
         gradPgrad = man.inner(x, grad, Pgrad)
 
         # Initial descent direction is the negative gradient
         desc_dir = -Pgrad
 
-        self._start_optlog(
-            extraiterfields=["gradnorm"],
-            solverparams={
-                "beta_type": self._beta_type,
+        self._initialize_log(
+            solver_parameters={
+                "beta_rule": self._beta_rule,
                 "orth_value": self._orth_value,
-                "linesearcher": linesearch,
+                "line_searcher": line_searcher,
             },
         )
 
         # Initialize iteration counter and timer
-        iter = 0
-        stepsize = np.nan
-        time0 = time.time()
+        iteration = 0
+        step_size = np.nan
+        start_time = time.time()
 
         while True:
-            column_printer.print_row([iter, cost, gradnorm])
+            iteration += 1
 
-            if self._logverbosity >= 2:
-                self._append_optlog(iter, x, cost, gradnorm=gradnorm)
+            column_printer.print_row([iteration, cost, gradient_norm])
 
-            stop_reason = self._check_stopping_criterion(
-                time0, gradnorm=gradnorm, iter=iter + 1, stepsize=stepsize
+            self._add_log_entry(
+                iteration=iteration,
+                x=x,
+                objective=cost,
+                gradient_norm=gradient_norm,
             )
 
-            if stop_reason:
-                if verbosity >= 1:
-                    print(stop_reason)
+            stopping_criterion = self._check_stopping_criterion(
+                start_time=start_time,
+                gradient_norm=gradient_norm,
+                iteration=iteration,
+                step_size=step_size,
+            )
+
+            if stopping_criterion:
+                if self._verbosity >= 1:
+                    print(stopping_criterion)
                     print("")
                 break
 
@@ -149,7 +165,7 @@ class ConjugateGradient(Solver):
             # to a steepest descent step, which discards the past information.
             if df0 >= 0:
                 # Or we switch to the negative gradient direction.
-                if verbosity >= 3:
+                if self._verbosity >= 3:
                     print(
                         "Conjugate gradient info: got an ascent direction "
                         f"(df0 = {df0:.2f}), reset to the (preconditioned) "
@@ -160,15 +176,15 @@ class ConjugateGradient(Solver):
                 df0 = -gradPgrad
 
             # Execute line search
-            stepsize, newx = linesearch.search(
+            step_size, newx = line_searcher.search(
                 objective, man, x, desc_dir, cost, df0
             )
 
             # Compute the new cost-related quantities for newx
             newcost = objective(newx)
             newgrad = gradient(newx)
-            newgradnorm = man.norm(newx, newgrad)
-            Pnewgrad = problem.precon(newx, newgrad)
+            newgradient_norm = man.norm(newx, newgrad)
+            Pnewgrad = problem.preconditioner(newx, newgrad)
             newgradPnewgrad = man.inner(newx, newgrad, Pnewgrad)
 
             # Apply the CG scheme to compute the next search direction
@@ -183,13 +199,14 @@ class ConjugateGradient(Solver):
             else:
                 desc_dir = man.transp(x, newx, desc_dir)
 
-                if self._beta_type == BetaTypes.FletcherReeves:
+                # TODO(nkoep): Define closures for these in the constructor.
+                if self._beta_rule == "FletcherReeves":
                     beta = newgradPnewgrad / gradPgrad
-                elif self._beta_type == BetaTypes.PolakRibiere:
+                elif self._beta_rule == "PolakRibiere":
                     diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
                     beta = max(0, ip_diff / gradPgrad)
-                elif self._beta_type == BetaTypes.HestenesStiefel:
+                elif self._beta_rule == "HestenesStiefel":
                     diff = newgrad - oldgrad
                     ip_diff = man.inner(newx, Pnewgrad, diff)
                     try:
@@ -199,7 +216,7 @@ class ConjugateGradient(Solver):
                     # if ip_diff = man.inner(newx, diff, desc_dir) = 0
                     except ZeroDivisionError:
                         beta = 1
-                elif self._beta_type == BetaTypes.HagerZhang:
+                elif self._beta_rule == "HagerZhang":
                     diff = newgrad - oldgrad
                     Poldgrad = man.transp(x, newx, Pgrad)
                     Pdiff = Pnewgrad - Poldgrad
@@ -214,16 +231,10 @@ class ConjugateGradient(Solver):
                     beta = numo / deno
                     # Robustness (see Hager-Zhang paper mentioned above)
                     desc_dir_norm = man.norm(newx, desc_dir)
-                    eta_HZ = -1 / (desc_dir_norm * min(0.01, gradnorm))
+                    eta_HZ = -1 / (desc_dir_norm * min(0.01, gradient_norm))
                     beta = max(beta, eta_HZ)
                 else:
-                    types = ", ".join(
-                        [f"BetaTypes.{t}" for t in BetaTypes._fields]
-                    )
-                    raise ValueError(
-                        f"Unknown beta_type {self._beta_type}. Should be one "
-                        f"of {types}."
-                    )
+                    raise AssertionError("unreachable")
 
                 desc_dir = -Pnewgrad + beta * desc_dir
 
@@ -232,21 +243,19 @@ class ConjugateGradient(Solver):
             cost = newcost
             grad = newgrad
             Pgrad = Pnewgrad
-            gradnorm = newgradnorm
+            gradient_norm = newgradient_norm
             gradPgrad = newgradPnewgrad
 
-            iter += 1
-
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return x
         else:
-            self._stop_optlog(
-                x,
-                cost,
-                stop_reason,
-                time0,
-                stepsize=stepsize,
-                gradnorm=gradnorm,
-                iter=iter,
+            self._finalize_log(
+                x=x,
+                objective=cost,
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
+                step_size=step_size,
+                gradient_norm=gradient_norm,
+                iteration=iteration,
             )
-            return x, self._optlog
+            return x, self._log

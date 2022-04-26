@@ -3,7 +3,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from pymanopt.solvers.linesearch import LineSearchBackTracking
+from pymanopt.solvers.line_search import BackTrackingLineSearcher
 from pymanopt.solvers.solver import Solver
 from pymanopt.tools import printer
 
@@ -17,30 +17,30 @@ class SteepestDescent(Solver):
     opposite direction to the gradient).
 
     Args:
-        linesearch: The line search method.
+        line_searcher: The line search method.
     """
 
-    def __init__(self, linesearch=None, *args, **kwargs):
+    def __init__(self, line_searcher=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if linesearch is None:
-            self._linesearch = LineSearchBackTracking()
+        if line_searcher is None:
+            self._line_searcher = BackTrackingLineSearcher()
         else:
-            self._linesearch = linesearch
-        self.linesearch = None
+            self._line_searcher = line_searcher
+        self.line_searcher = None
 
     # Function to solve optimisation problem using steepest descent.
-    def solve(self, problem, x=None, reuselinesearch=False):
+    def solve(self, problem, initial_point=None, reuse_line_searcher=False):
         """Run steepest descent algorithm.
 
         Args:
             problem: Pymanopt problem class instance exposing the cost function
                 and the manifold to optimize over.
                 The class must either
-            x: Initial point on the manifold.
+            initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
-            reuselinesearch: Whether to reuse the previous linesearch object.
+            reuse_line_searcher: Whether to reuse the previous line searcher.
                 Allows to use information from a previous call to
                 :meth:`solve`.
 
@@ -49,25 +49,26 @@ class SteepestDescent(Solver):
             algorithm terminated before convergence.
         """
         man = problem.manifold
-        verbosity = problem.verbosity
         objective = problem.cost
         gradient = problem.grad
 
-        if not reuselinesearch or self.linesearch is None:
-            self.linesearch = deepcopy(self._linesearch)
-        linesearch = self.linesearch
+        if not reuse_line_searcher or self.line_searcher is None:
+            self.line_searcher = deepcopy(self._line_searcher)
+        line_searcher = self.line_searcher
 
         # If no starting point is specified, generate one at random.
-        if x is None:
+        if initial_point is None:
             x = man.rand()
+        else:
+            x = initial_point
 
-        if verbosity >= 1:
+        if self._verbosity >= 1:
             print("Optimizing...")
-        if verbosity >= 2:
-            iter_format_length = int(np.log10(self._maxiter)) + 1
+        if self._verbosity >= 2:
+            iteration_format_length = int(np.log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
-                    ("Iteration", f"{iter_format_length}d"),
+                    ("Iteration", f"{iteration_format_length}d"),
                     ("Cost", "+.16e"),
                     ("Gradient norm", ".8e"),
                 ]
@@ -77,55 +78,62 @@ class SteepestDescent(Solver):
 
         column_printer.print_header()
 
-        self._start_optlog(
-            extraiterfields=["gradnorm"],
-            solverparams={"linesearcher": linesearch},
+        self._initialize_log(
+            solver_parameters={"line_searcher": line_searcher}
         )
 
         # Initialize iteration counter and timer
-        iter = 0
-        time0 = time.time()
+        iteration = 0
+        start_time = time.time()
 
         while True:
-            # Calculate new cost, grad and gradnorm
+            iteration += 1
+
+            # Calculate new cost, grad and gradient_norm
             cost = objective(x)
             grad = gradient(x)
-            gradnorm = man.norm(x, grad)
-            iter = iter + 1
+            gradient_norm = man.norm(x, grad)
 
-            column_printer.print_row([iter, cost, gradnorm])
+            column_printer.print_row([iteration, cost, gradient_norm])
 
-            if self._logverbosity >= 2:
-                self._append_optlog(iter, x, cost, gradnorm=gradnorm)
+            self._add_log_entry(
+                iteration=iteration,
+                x=x,
+                objective=cost,
+                gradient_norm=gradient_norm,
+            )
 
             # Descent direction is minus the gradient
             desc_dir = -grad
 
             # Perform line-search
-            stepsize, x = linesearch.search(
-                objective, man, x, desc_dir, cost, -(gradnorm**2)
+            step_size, x = line_searcher.search(
+                objective, man, x, desc_dir, cost, -(gradient_norm**2)
             )
 
-            stop_reason = self._check_stopping_criterion(
-                time0, stepsize=stepsize, gradnorm=gradnorm, iter=iter
+            stopping_criterion = self._check_stopping_criterion(
+                start_time=start_time,
+                step_size=step_size,
+                gradient_norm=gradient_norm,
+                iteration=iteration,
             )
 
-            if stop_reason:
-                if verbosity >= 1:
-                    print(stop_reason)
+            if stopping_criterion:
+                if self._verbosity >= 1:
+                    print(stopping_criterion)
                     print("")
                 break
 
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return x
         else:
-            self._stop_optlog(
-                x,
-                objective(x),
-                stop_reason,
-                time0,
-                stepsize=stepsize,
-                gradnorm=gradnorm,
-                iter=iter,
+            self._finalize_log(
+                x=x,
+                objective=objective(x),
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
+                step_size=step_size,
+                gradient_norm=gradient_norm,
+                iteration=iteration,
             )
-            return x, self._optlog
+            return x, self._log

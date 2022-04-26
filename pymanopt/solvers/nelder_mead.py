@@ -25,8 +25,8 @@ def compute_centroid(manifold, points):
             [manifold.log(y, point) for point in points], manifold.zerovec(y)
         )
 
-    solver = SteepestDescent(maxiter=15)
-    problem = pymanopt.Problem(manifold, objective, grad=gradient, verbosity=0)
+    solver = SteepestDescent(max_iterations=15, verbosity=0)
+    problem = pymanopt.Problem(manifold, objective, grad=gradient)
     return solver.solve(problem)
 
 
@@ -37,8 +37,8 @@ class NelderMead(Solver):
     algorithm.
 
     Args:
-        maxcostevals: Maximum number of allowed cost function evaluations.
-        maxiter: Maximum number of allowed iterations.
+        max_cost_evaluations: Maximum number of allowed cost function evaluations.
+        max_iterations: Maximum number of allowed iterations.
         reflection: Determines how far to reflect away from the worst vertex:
             stretched (reflection > 1), compressed (0 < reflection < 1),
             or exact (reflection = 1).
@@ -48,8 +48,8 @@ class NelderMead(Solver):
 
     def __init__(
         self,
-        maxcostevals=None,
-        maxiter=None,
+        max_cost_evaluations=None,
+        max_iterations=None,
         reflection=1,
         expansion=2,
         contraction=0.5,
@@ -58,19 +58,19 @@ class NelderMead(Solver):
     ):
         super().__init__(*args, **kwargs)
 
-        self._maxcostevals = maxcostevals
-        self._maxiter = maxiter
+        self._max_cost_evaluations = max_cost_evaluations
+        self._max_iterations = max_iterations
         self._reflection = reflection
         self._expansion = expansion
         self._contraction = contraction
 
-    def solve(self, problem, x=None):
+    def solve(self, problem, initial_point=None):
         """Run Nelder-Mead algorithm.
 
         Args:
             problem: Pymanopt problem class instance exposing the cost function
                 and the manifold to optimize over.
-            x: Initial point on the manifold.
+            initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
 
@@ -79,52 +79,56 @@ class NelderMead(Solver):
             algorithm terminated before convergence.
         """
         manifold = problem.manifold
-        verbosity = problem.verbosity
         objective = problem.cost
 
         # Choose proper default algorithm parameters. We need to know about the
         # dimension of the manifold to limit the parameter range, so we have to
         # defer proper initialization until this point.
         dim = manifold.dim
-        if self._maxcostevals is None:
-            self._maxcostevals = max(1000, 2 * dim)
-        if self._maxiter is None:
-            self._maxiter = max(2000, 4 * dim)
+        if self._max_cost_evaluations is None:
+            self._max_cost_evaluations = max(1000, 2 * dim)
+        if self._max_iterations is None:
+            self._max_iterations = max(2000, 4 * dim)
 
         # If no initial simplex x is given by the user, generate one at random.
         num_points = int(dim + 1)
-        if x is None:
+        if initial_point is None:
             x = [manifold.rand() for _ in range(num_points)]
-        elif not tools.is_sequence(x) or len(x) != num_points:
+        elif (
+            tools.is_sequence(initial_point)
+            and len(initial_point) != num_points
+        ):
+            x = initial_point
+        else:
             raise ValueError(
-                f"The initial simplex x must be a sequence of {num_points} "
-                "points"
+                "The initial simplex `initial_point` must be a sequence of "
+                f"{num_points} points"
             )
 
         # Compute objective-related quantities for x, and setup a function
         # evaluations counter.
         costs = np.array([objective(xi) for xi in x])
-        costevals = dim + 1
+        cost_evaluations = dim + 1
 
         # Sort simplex points by cost.
         order = np.argsort(costs)
         costs = costs[order]
         x = [x[i] for i in order]
 
-        # Iteration counter (at any point, iter is the number of fully executed
+        # Iteration counter (at any point, iteration is the number of fully executed
         # iterations so far).
-        iter = 0
+        iteration = 0
 
-        time0 = time.time()
+        start_time = time.time()
 
-        self._start_optlog()
+        self._initialize_log()
 
         while True:
-            iter += 1
+            iteration += 1
 
-            if verbosity >= 2:
+            if self._verbosity >= 2:
                 print(
-                    f"Cost evals: {costevals:7d}\t"
+                    f"Cost evals: {cost_evaluations:7d}\t"
                     f"Best cost: {costs[0]:+.8e}"
                 )
 
@@ -133,12 +137,14 @@ class NelderMead(Solver):
             costs = costs[order]
             x = [x[i] for i in order]
 
-            stop_reason = self._check_stopping_criterion(
-                time0, iter=iter, costevals=costevals
+            stopping_criterion = self._check_stopping_criterion(
+                start_time=start_time,
+                iteration=iteration,
+                cost_evaluations=cost_evaluations,
             )
-            if stop_reason:
-                if verbosity >= 1:
-                    print(stop_reason)
+            if stopping_criterion:
+                if self._verbosity >= 1:
+                    print(stopping_criterion)
                     print("")
                 break
 
@@ -151,12 +157,12 @@ class NelderMead(Solver):
             # Reflection step
             xr = manifold.retr(xbar, -self._reflection * vec)
             costr = objective(xr)
-            costevals += 1
+            cost_evaluations += 1
 
             # If the reflected point is honorable, drop the worst point,
             # replace it by the reflected point and start a new iteration.
             if costr >= costs[0] and costr < costs[-2]:
-                if verbosity >= 2:
+                if self._verbosity >= 2:
                     print("Reflection")
                 costs[-1] = costr
                 x[-1] = xr
@@ -166,15 +172,15 @@ class NelderMead(Solver):
             if costr < costs[0]:
                 xe = manifold.retr(xbar, -self._expansion * vec)
                 coste = objective(xe)
-                costevals += 1
+                cost_evaluations += 1
                 if coste < costr:
-                    if verbosity >= 2:
+                    if self._verbosity >= 2:
                         print("Expansion")
                     costs[-1] = coste
                     x[-1] = xe
                     continue
                 else:
-                    if verbosity >= 2:
+                    if self._verbosity >= 2:
                         print("Reflection (failed expansion)")
                     costs[-1] = costr
                     x[-1] = xr
@@ -187,9 +193,9 @@ class NelderMead(Solver):
                     # do an outside contraction
                     xoc = manifold.retr(xbar, -self._contraction * vec)
                     costoc = objective(xoc)
-                    costevals += 1
+                    cost_evaluations += 1
                     if costoc <= costr:
-                        if verbosity >= 2:
+                        if self._verbosity >= 2:
                             print("Outside contraction")
                         costs[-1] = costoc
                         x[-1] = xoc
@@ -198,32 +204,32 @@ class NelderMead(Solver):
                     # do an inside contraction
                     xic = manifold.retr(xbar, self._contraction * vec)
                     costic = objective(xic)
-                    costevals += 1
+                    cost_evaluations += 1
                     if costic <= costs[-1]:
-                        if verbosity >= 2:
+                        if self._verbosity >= 2:
                             print("Inside contraction")
                         costs[-1] = costic
                         x[-1] = xic
                         continue
 
             # If we get here, shrink the simplex around x[0].
-            if verbosity >= 2:
+            if self._verbosity >= 2:
                 print("Shrinkage")
             x0 = x[0]
             for i in np.arange(1, dim + 1):
                 x[i] = manifold.pairmean(x0, x[i])
                 costs[i] = objective(x[i])
-            costevals += dim
+            cost_evaluations += dim
 
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return x[0]
         else:
-            self._stop_optlog(
-                x[0],
-                objective(x[0]),
-                stop_reason,
-                time0,
-                costevals=costevals,
-                iter=iter,
+            self._finalize_log(
+                x=x[0],
+                objective=objective(x[0]),
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
+                cost_evaluations=cost_evaluations,
+                iteration=iteration,
             )
-            return x[0], self._optlog
+            return x[0], self._log

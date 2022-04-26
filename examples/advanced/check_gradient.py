@@ -61,8 +61,6 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     # Create the problem structure.
     problem = Problem(manifold=manifold, cost=cost, egrad=egrad)
-    if quiet:
-        problem.verbosity = 0
 
     # Numerically check gradient consistency (optional).
     check_gradient(problem)

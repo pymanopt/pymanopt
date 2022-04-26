@@ -3,8 +3,8 @@
 ### Issues
 
 ### 1.0:
-  - Return namedtupleS from solver's 'solve' method
-  - Clean up solver argument names
+  - Return 'Result' object from solver's 'solve' method
+  - Change terminology from "solvers" to "optimizers"
   - Renaming:
     # Short names
     * dim
@@ -29,6 +29,7 @@
 
 ### 1.0.x:
   - Use weingarten map for oblique manifold and Stiefel
+  - Change "beta_rule" of CG optimizer to internal enum representation
 
 ### 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
@@ -48,7 +49,9 @@
   - Add callback mechanism to allow for custom termination criteria
 
 ### 2.0.x:
+  - Refactor TrustRegions implementation and update parameter names
   - Rewrite core/manifolds
     * in jax with jit support, or
     * using a backend abstraction as in geomstats (potentially shared with
       geomstats)
+  - Revist "reuse_line_searcher"

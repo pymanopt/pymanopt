@@ -59,7 +59,7 @@ def check_directional_derivative(problem, x=None, d=None):
     df0 = problem.manifold.inner(x, grad, d)
 
     # Compute the value of f at points on the geodesic (or approximation
-    # of it) originating from x, along direction d, for stepsizes in a
+    # of it) originating from x, along direction d, for step_sizes in a
     # large range given by h.
     h = np.logspace(-8, 0, 51)
     value = np.zeros_like(h)
@@ -99,7 +99,7 @@ def check_directional_derivative(problem, x=None, d=None):
             "magnitude for h."
         )
         # In a numerically reasonable neighborhood, the error should
-        # decrease as the square of the stepsize, i.e., in loglog scale,
+        # decrease as the square of the step_size, i.e., in loglog scale,
         # the error should have a slope of 2.
         window_len = 10
         # Despite not all coordinates of the model being close to the true

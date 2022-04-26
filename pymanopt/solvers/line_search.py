@@ -1,19 +1,19 @@
-class LineSearchBackTracking:
+class BackTrackingLineSearcher:
     """Back-tracking line-search algorithm."""
 
     def __init__(
         self,
         contraction_factor=0.5,
         optimism=2,
-        suff_decr=1e-4,
-        maxiter=25,
-        initial_stepsize=1,
+        sufficient_decrease=1e-4,
+        max_iterations=25,
+        initial_step_size=1,
     ):
         self.contraction_factor = contraction_factor
         self.optimism = optimism
-        self.suff_decr = suff_decr
-        self.maxiter = maxiter
-        self.initial_stepsize = initial_stepsize
+        self.sufficient_decrease = sufficient_decrease
+        self.max_iterations = max_iterations
+        self.initial_step_size = initial_step_size
 
         self._oldf0 = None
 
@@ -28,7 +28,7 @@ class LineSearchBackTracking:
             df0: Directional derivative at ``x`` along ``d``.
 
         Returns:
-            A tuple ``(stepsize, newx)`` where ``stepsize`` is the norm of the
+            A tuple ``(step_size, newx)`` where ``step_size`` is the norm of the
             vector retracted to reach the suggested iterate ``newx`` from
             ``x``.
         """
@@ -41,7 +41,7 @@ class LineSearchBackTracking:
             # Look a little further
             alpha *= self.optimism
         else:
-            alpha = self.initial_stepsize / norm_d
+            alpha = self.initial_step_size / norm_d
         alpha = float(alpha)
 
         # Make the chosen step and compute the cost there.
@@ -51,8 +51,8 @@ class LineSearchBackTracking:
 
         # Backtrack while the Armijo criterion is not satisfied
         while (
-            newf > f0 + self.suff_decr * alpha * df0
-            and step_count <= self.maxiter
+            newf > f0 + self.sufficient_decrease * alpha * df0
+            and step_count <= self.max_iterations
         ):
 
             # Reduce the step size
@@ -69,27 +69,27 @@ class LineSearchBackTracking:
             alpha = 0
             newx = x
 
-        stepsize = alpha * norm_d
+        step_size = alpha * norm_d
 
         self._oldf0 = f0
 
-        return stepsize, newx
+        return step_size, newx
 
 
-class LineSearchAdaptive:
-    """Adaptive line-search."""
+class AdaptiveLineSearcher:
+    """Adaptive line-search algorithm."""
 
     def __init__(
         self,
         contraction_factor=0.5,
-        suff_decr=0.5,
-        maxiter=10,
-        initial_stepsize=1,
+        sufficient_decrease=0.5,
+        max_iterations=10,
+        initial_step_size=1,
     ):
         self._contraction_factor = contraction_factor
-        self._suff_decr = suff_decr
-        self._maxiter = maxiter
-        self._initial_stepsize = initial_stepsize
+        self._sufficient_decrease = sufficient_decrease
+        self._max_iterations = max_iterations
+        self._initial_step_size = initial_step_size
         self._oldalpha = None
 
     def search(self, objective, man, x, d, f0, df0):
@@ -98,7 +98,7 @@ class LineSearchAdaptive:
         if self._oldalpha is not None:
             alpha = self._oldalpha
         else:
-            alpha = self._initial_stepsize / norm_d
+            alpha = self._initial_step_size / norm_d
         alpha = float(alpha)
 
         newx = man.retr(x, alpha * d)
@@ -106,8 +106,8 @@ class LineSearchAdaptive:
         cost_evaluations = 1
 
         while (
-            newf > f0 + self._suff_decr * alpha * df0
-            and cost_evaluations <= self._maxiter
+            newf > f0 + self._sufficient_decrease * alpha * df0
+            and cost_evaluations <= self._max_iterations
         ):
             # Reduce the step size.
             alpha *= self._contraction_factor
@@ -122,11 +122,11 @@ class LineSearchAdaptive:
             alpha = 0
             newx = x
 
-        stepsize = alpha * norm_d
+        step_size = alpha * norm_d
 
         # Store a suggestion for what the next initial step size trial should
         # be. On average we intend to do only one extra cost evaluation. Notice
-        # how the suggestion is not about stepsize but about alpha. This is the
+        # how the suggestion is not about step_size but about alpha. This is the
         # reason why this line search is not invariant under rescaling of the
         # search direction d.
 
@@ -138,4 +138,4 @@ class LineSearchAdaptive:
         else:
             self._oldalpha = 2 * alpha
 
-        return stepsize, newx
+        return step_size, newx

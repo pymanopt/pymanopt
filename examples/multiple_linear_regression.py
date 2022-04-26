@@ -62,7 +62,7 @@ def create_cost_egrad_ehess(manifold, samples, targets, backend):
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     num_samples, num_weights = 200, 3
 
-    solver = TrustRegions()
+    solver = TrustRegions(verbosity=0)
     manifold = Euclidean(3)
 
     for k in range(5):
@@ -72,9 +72,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         cost, egrad, ehess = create_cost_egrad_ehess(
             manifold, samples, targets, backend
         )
-        problem = pymanopt.Problem(
-            manifold, cost, egrad=egrad, ehess=ehess, verbosity=0
-        )
+        problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
 
         estimated_weights = solver.solve(problem)
         if not quiet:

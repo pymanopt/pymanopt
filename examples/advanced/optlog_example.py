@@ -8,16 +8,16 @@ from pymanopt.solvers import SteepestDescent
 
 
 if __name__ == "__main__":
-    X = np.diag([3, 2, 1]).dot(np.random.randn(3, 200))
+    X = np.diag([3, 2, 1]) @ np.random.randn(3, 200)
     manifold = Stiefel(3, 2)
 
     @pymanopt.function.autograd(manifold)
     def cost(w):
-        return np.sum(np.sum((X - np.dot(w, np.dot(w.T, X))) ** 2))
+        return np.sum(np.sum((X - w @ w.T @ X) ** 2))
 
-    solver = SteepestDescent(logverbosity=2)
-    problem = pymanopt.Problem(manifold, cost, verbosity=0)
-    wopt, optlog = solver.solve(problem)
+    solver = SteepestDescent(verbosity=0, log_verbosity=2)
+    problem = pymanopt.Problem(manifold, cost)
+    wopt, log = solver.solve(problem)
 
     print("Optimization log:")
-    pprint.pprint(optlog)
+    pprint.pprint(log)

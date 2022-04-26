@@ -107,14 +107,13 @@ class TrustRegions(Solver):
     def solve(
         self,
         problem,
-        x=None,
+        initial_point=None,
         mininner=1,
         maxinner=None,
         Delta_bar=None,
         Delta0=None,
     ):
         man = problem.manifold
-        verbosity = problem.verbosity
 
         if maxinner is None:
             maxinner = man.dim
@@ -135,15 +134,17 @@ class TrustRegions(Solver):
         hess = problem.hess
 
         # If no starting point is specified, generate one at random.
-        if x is None:
+        if initial_point is None:
             x = man.rand()
+        else:
+            x = initial_point
 
         # Initializations
-        time0 = time.time()
+        start_time = time.time()
 
-        # k counts the outer (TR) iterations. The semantic is that k counts the
-        # number of iterations fully executed so far.
-        k = 0
+        # Number of outer (TR) iterations. The semantic is that `iteration`
+        # counts the number of iterations fully executed so far.
+        iteration = 0
 
         # Initialize solution and companion measures: f(x), fgrad(x)
         fx = cost(x)
@@ -159,14 +160,16 @@ class TrustRegions(Solver):
         consecutive_TRminus = 0
 
         # ** Display:
-        if verbosity >= 1:
+        if self._verbosity >= 1:
             print("Optimizing...")
-        if verbosity >= 2:
+        if self._verbosity >= 2:
             print(f"{' ':44s}f: {fx:+.6e}   |grad|: {norm_grad:.6e}")
 
-        self._start_optlog()
+        self._initialize_log()
 
         while True:
+            iteration += 1
+
             # *************************
             # ** Begin TR Subproblem **
             # *************************
@@ -335,7 +338,7 @@ class TrustRegions(Solver):
                 Delta = Delta / 4
                 consecutive_TRplus = 0
                 consecutive_TRminus = consecutive_TRminus + 1
-                if consecutive_TRminus >= 5 and verbosity >= 1:
+                if consecutive_TRminus >= 5 and self._verbosity >= 1:
                     consecutive_TRminus = -np.inf
                     print(
                         " +++ Detected many consecutive TR- (radius "
@@ -361,7 +364,7 @@ class TrustRegions(Solver):
                 Delta = min(2 * Delta, Delta_bar)
                 consecutive_TRminus = 0
                 consecutive_TRplus = consecutive_TRplus + 1
-                if consecutive_TRplus >= 5 and verbosity >= 1:
+                if consecutive_TRplus >= 5 and self._verbosity >= 1:
                     consecutive_TRplus = -np.inf
                     print(
                         " +++ Detected many consecutive TR+ (radius "
@@ -393,44 +396,48 @@ class TrustRegions(Solver):
                 # accept = False
                 accstr = "REJ"
 
-            # k is the number of iterations we have accomplished.
-            k = k + 1
-
             # ** Display:
-            if verbosity == 2:
+            if self._verbosity == 2:
                 print(
-                    f"{accstr:.3s} {trstr:.3s}   k: {k:5d}     num_inner: "
+                    f"{accstr:.3s} {trstr:.3s}   k: {iteration:5d}     num_inner: "
                     f"{numit:5d}     f: {fx:+e}   |grad|: "
                     f"{norm_grad:e}   {srstr:s}"
                 )
-            elif verbosity > 2:
+            elif self._verbosity > 2:
                 if self.use_rand and used_cauchy:
                     print("USED CAUCHY POINT")
                 print(
-                    f"{accstr:.3s} {trstr:.3s}    k: {k:5d}     num_inner: "
+                    f"{accstr:.3s} {trstr:.3s}    k: {iteration:5d}     num_inner: "
                     f"{numit:5d}     {srstr:s}"
                 )
                 print(f"       f(x) : {fx:+e}     |grad| : {norm_grad:e}")
                 print(f"        rho : {rho:e}")
 
             # ** CHECK STOPPING criteria
-            stop_reason = self._check_stopping_criterion(
-                time0, gradnorm=norm_grad, iter=k
+            stopping_criterion = self._check_stopping_criterion(
+                start_time=start_time,
+                gradient_norm=norm_grad,
+                iteration=iteration,
             )
 
-            if stop_reason:
-                if verbosity >= 1:
-                    print(stop_reason)
+            if stopping_criterion:
+                if self._verbosity >= 1:
+                    print(stopping_criterion)
                     print("")
                 break
 
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return x
         else:
-            self._stop_optlog(
-                x, fx, stop_reason, time0, gradnorm=norm_grad, iter=k
+            self._finalize_log(
+                x=x,
+                objective=fx,
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
+                gradient_norm=norm_grad,
+                iteration=iteration,
             )
-            return x, self._optlog
+            return x, self._log
 
     def _truncated_conjugate_gradient(
         self, problem, x, fgradx, eta, Delta, theta, kappa, mininner, maxinner
@@ -438,7 +445,7 @@ class TrustRegions(Solver):
         man = problem.manifold
         inner = man.inner
         hess = problem.hess
-        precon = problem.precon
+        preconditioner = problem.preconditioner
 
         if not self.use_rand:  # and therefore, eta == 0
             Heta = man.zerovec(x)
@@ -456,7 +463,7 @@ class TrustRegions(Solver):
 
         # Precondition the residual
         if not self.use_rand:
-            z = precon(x, r)
+            z = preconditioner(x, r)
         else:
             z = r
 
@@ -589,7 +596,7 @@ class TrustRegions(Solver):
 
             # Precondition the residual.
             if not self.use_rand:
-                z = precon(x, r)
+                z = preconditioner(x, r)
             else:
                 z = r
 

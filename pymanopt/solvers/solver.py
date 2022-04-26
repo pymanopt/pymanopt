@@ -1,139 +1,154 @@
 import abc
+import collections
 import time
+
+import numpy as np
 
 
 class Solver(metaclass=abc.ABCMeta):
     """Abstract base class for Pymanopt solvers.
 
     Args:
-        maxtime: Upper bound on the run time of a solver in seconds.
-        maxiter: The maximum number of iterations to perform.
-        mingradnorm: Termination threshold for the norm of the gradient.
-        minstepsize: Termination threshold for the line search step size.
-        maxcostevals: Maximum number of allowed cost function evaluations.
-        logverbosity: Level of information logged by the solver while it
-            operates: 0 is silent, 2 ist most verbose.
+        max_time: Upper bound on the run time of a solver in seconds.
+        max_iterations: The maximum number of iterations to perform.
+        min_gradient_norm: Termination threshold for the norm of the
+            gradient.
+        min_step_size: Termination threshold for the line search step
+            size.
+        max_cost_evaluations: Maximum number of allowed cost function
+            evaluations.
+        verbosity: Level of information printed by the solver while it
+            operates: 0 is silent, 2 is most verbose.
+        log_verbosity: Level of information logged by the solver while it
+            operates: 0 is silent, 2 is most verbose.
     """
 
     def __init__(
         self,
-        maxtime=1000,
-        maxiter=1000,
-        mingradnorm=1e-6,
-        minstepsize=1e-10,
-        maxcostevals=5000,
-        logverbosity=0,
+        max_time=1000,
+        max_iterations=1000,
+        min_gradient_norm=1e-6,
+        min_step_size=1e-10,
+        max_cost_evaluations=5000,
+        verbosity: int = 2,
+        log_verbosity: int = 0,
     ):
-        self._maxtime = maxtime
-        self._maxiter = maxiter
-        self._mingradnorm = mingradnorm
-        self._minstepsize = minstepsize
-        self._maxcostevals = maxcostevals
-        self._logverbosity = logverbosity
-        self._optlog = None
+        self._max_time = max_time
+        self._max_iterations = max_iterations
+        self._min_gradient_norm = min_gradient_norm
+        self._min_step_size = min_step_size
+        self._max_cost_evaluations = max_cost_evaluations
+        self._verbosity = verbosity
+        self._log_verbosity = log_verbosity
+
+        self._log = None
 
     def __str__(self):
         return type(self).__name__
 
     @abc.abstractmethod
-    def solve(self, problem, x=None):
+    def solve(self, problem, initial_point=None, *args, **kwargs):
         """Run a solver on a given optimization problem.
 
-        Solve the given :class:`pymanopt.core.problem.Problem` starting from
-        ``x`` if provided or from a random initial guess if not.
+        Args:
+            problem: Pymanopt problem class instance exposing the cost function
+                and the manifold to optimize over.
+                The class must either
+            initial_point: Initial point on the manifold.
+                If no value is provided then a starting point will be randomly
+                generated.
+            *args: Potential solver-specific positional arguments.
+            **kwargs: Potential solver-specific keyword arguments.
         """
 
     def _check_stopping_criterion(
         self,
-        time0,
-        iter=-1,
-        gradnorm=float("inf"),
-        stepsize=float("inf"),
-        costevals=-1,
+        *,
+        start_time,
+        iteration=-1,
+        gradient_norm=np.inf,
+        step_size=np.inf,
+        cost_evaluations=-1,
     ):
-        runtime = time.time() - time0
+        run_time = time.time() - start_time
         reason = None
-        if time.time() >= time0 + self._maxtime:
-            reason = f"Terminated - max time reached after {iter} iterations."
-        elif iter >= self._maxiter:
+        if time.time() >= start_time + self._max_time:
+            reason = (
+                f"Terminated - max time reached after {iteration} iterations."
+            )
+        elif iteration >= self._max_iterations:
             reason = (
                 "Terminated - max iterations reached after "
-                f"{runtime:.2f} seconds."
+                f"{run_time:.2f} seconds."
             )
-        elif gradnorm < self._mingradnorm:
+        elif gradient_norm < self._min_gradient_norm:
             reason = (
-                f"Terminated - min grad norm reached after {iter} "
-                f"iterations, {runtime:.2f} seconds."
+                f"Terminated - min grad norm reached after {iteration} "
+                f"iterations, {run_time:.2f} seconds."
             )
-        elif stepsize < self._minstepsize:
+        elif step_size < self._min_step_size:
             reason = (
-                f"Terminated - min stepsize reached after {iter} iterations, "
-                f"{runtime:.2f} seconds."
+                f"Terminated - min step_size reached after {iteration} iterations, "
+                f"{run_time:.2f} seconds."
             )
-        elif costevals >= self._maxcostevals:
+        elif cost_evaluations >= self._max_cost_evaluations:
             reason = (
                 "Terminated - max cost evals reached after "
-                f"{runtime:.2f} seconds."
+                f"{run_time:.2f} seconds."
             )
         return reason
 
-    def _start_optlog(self, solverparams=None, extraiterfields=None):
-        if self._logverbosity <= 0:
-            self._optlog = None
+    def _initialize_log(self, *, solver_parameters=None):
+        if self._log_verbosity <= 0:
+            self._log = None
         else:
-            self._optlog = {
+            self._log = {
                 "solver": str(self),
-                "stoppingcriteria": {
-                    "maxtime": self._maxtime,
-                    "maxiter": self._maxiter,
-                    "mingradnorm": self._mingradnorm,
-                    "minstepsize": self._minstepsize,
-                    "maxcostevals": self._maxcostevals,
+                "stopping_criteria": {
+                    "max_time": self._max_time,
+                    "max_iterations": self._max_iterations,
+                    "min_gradient_norm": self._min_gradient_norm,
+                    "min_step_size": self._min_step_size,
+                    "max_cost_evaluations": self._max_cost_evaluations,
                 },
-                "solverparams": solverparams,
+                "solver_parameters": solver_parameters,
             }
-        if self._logverbosity >= 2:
-            if extraiterfields:
-                self._optlog["iterations"] = {
-                    "iteration": [],
-                    "time": [],
-                    "x": [],
-                    "f(x)": [],
-                }
-                for field in extraiterfields:
-                    self._optlog["iterations"][field] = []
+        if self._log_verbosity >= 2:
+            self._log["iterations"] = collections.defaultdict(list)
 
-    def _append_optlog(self, iteration, x, fx, **kwargs):
-        # In case not every iteration is being logged
-        self._optlog["iterations"]["iteration"].append(iteration)
-        self._optlog["iterations"]["time"].append(time.time())
-        self._optlog["iterations"]["x"].append(x)
-        self._optlog["iterations"]["f(x)"].append(fx)
-        for key in kwargs:
-            self._optlog["iterations"][key].append(kwargs[key])
+    def _add_log_entry(self, *, iteration, x, objective, **kwargs):
+        if self._log_verbosity < 2:
+            return
+        self._log["iterations"]["time"].append(time.time())
+        self._log["iterations"]["iteration"].append(iteration)
+        self._log["iterations"]["x"].append(x)
+        self._log["iterations"]["objective"].append(objective)
+        for key, value in kwargs.items():
+            self._log["iterations"][key].append(value)
 
-    def _stop_optlog(
+    def _finalize_log(
         self,
+        *,
         x,
         objective,
-        stop_reason,
-        time0,
-        stepsize=float("inf"),
-        gradnorm=float("inf"),
-        iter=-1,
-        costevals=-1,
+        stopping_criterion,
+        start_time,
+        step_size=np.inf,
+        gradient_norm=np.inf,
+        iteration=-1,
+        cost_evaluations=-1,
     ):
-        self._optlog["stoppingreason"] = stop_reason
-        self._optlog["final_values"] = {
+        self._log["stopping_criterion"] = stopping_criterion
+        self._log["final_values"] = {
             "x": x,
-            "f(x)": objective,
-            "time": time.time() - time0,
+            "objective": objective,
+            "time": time.time() - start_time,
         }
-        if stepsize is not float("inf"):
-            self._optlog["final_values"]["stepsize"] = stepsize
-        if gradnorm is not float("inf"):
-            self._optlog["final_values"]["gradnorm"] = gradnorm
-        if iter != -1:
-            self._optlog["final_values"]["iterations"] = iter
-        if costevals != -1:
-            self._optlog["final_values"]["costevals"] = costevals
+        if step_size != np.inf:
+            self._log["final_values"]["step_size"] = step_size
+        if gradient_norm != np.inf:
+            self._log["final_values"]["gradient_norm"] = gradient_norm
+        if iteration != -1:
+            self._log["final_values"]["iterations"] = iteration
+        if cost_evaluations != -1:
+            self._log["final_values"]["cost_evaluations"] = cost_evaluations

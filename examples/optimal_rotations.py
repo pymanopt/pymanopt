@@ -72,10 +72,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = SpecialOrthogonalGroup(n, k)
     cost, egrad = create_cost_egrad(manifold, ABt, backend)
     problem = pymanopt.Problem(manifold, cost, egrad=egrad)
-    if quiet:
-        problem.verbosity = 0
 
-    solver = SteepestDescent()
+    solver = SteepestDescent(verbosity=2 * int(not quiet))
     X = solver.solve(problem)
 
     if not quiet:

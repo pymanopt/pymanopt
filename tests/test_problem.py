@@ -30,11 +30,6 @@ class TestProblem(TestCase):
 
     def test_attribute_override(self):
         problem = pymanopt.Problem(self.man, self.cost)
-        with self.assertRaises(ValueError):
-            problem.verbosity = "0"
-        with self.assertRaises(ValueError):
-            problem.verbosity = -1
-        problem.verbosity = 2
         with self.assertRaises(AttributeError):
             problem.manifold = None
 
@@ -48,7 +43,7 @@ class TestProblem(TestCase):
             return tf.reduce_sum(X) + tf.reduce_sum(Y)
 
         problem = pymanopt.Problem(manifold=manifold, cost=cost)
-        solver = TrustRegions(maxiter=1)
+        solver = TrustRegions(max_iterations=1)
         Xopt, Yopt = solver.solve(problem)
         self.assertEqual(Xopt.shape, (3, 3))
         self.assertEqual(Yopt.shape, (3, 3))

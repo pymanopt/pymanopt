@@ -3,6 +3,7 @@ import time
 import numpy as np
 import numpy.random as rnd
 
+from pymanopt import tools
 from pymanopt.solvers.solver import Solver
 from pymanopt.tools import printer
 
@@ -14,18 +15,18 @@ class ParticleSwarm(Solver):
     algorithm.
 
     Args:
-        maxcostevals: Maximum number of allowed cost evaluations.
-        maxiter: Maximum number of allowed iterations.
-        populationsize: Size of the considered swarm population.
+        max_cost_evaluations: Maximum number of allowed cost evaluations.
+        max_iterations: Maximum number of allowed iterations.
+        population_size: Size of the considered swarm population.
         nostalgia: Quantifies performance relative to past performances.
         social: Quantifies performance relative to neighbors.
     """
 
     def __init__(
         self,
-        maxcostevals=None,
-        maxiter=None,
-        populationsize=None,
+        max_cost_evaluations=None,
+        max_iterations=None,
+        population_size=None,
         nostalgia=1.4,
         social=1.4,
         *args,
@@ -33,19 +34,19 @@ class ParticleSwarm(Solver):
     ):
         super().__init__(*args, **kwargs)
 
-        self._maxcostevals = maxcostevals
-        self._maxiter = maxiter
-        self._populationsize = populationsize
+        self._max_cost_evaluations = max_cost_evaluations
+        self._max_iterations = max_iterations
+        self._population_size = population_size
         self._nostalgia = nostalgia
         self._social = social
 
-    def solve(self, problem, x=None):
+    def solve(self, problem, initial_point=None):
         """Run PSO algorithm.
 
         Args:
             problem: Pymanopt problem class instance exposing the cost function
                 and the manifold to optimize over.
-            x: Initial point on the manifold.
+            initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
 
@@ -54,33 +55,33 @@ class ParticleSwarm(Solver):
             algorithm terminated before convergence.
         """
         man = problem.manifold
-        verbosity = problem.verbosity
         objective = problem.cost
 
         # Choose proper default algorithm parameters. We need to know about the
         # dimension of the manifold to limit the parameter range, so we have to
         # defer proper initialization until this point.
         dim = man.dim
-        if self._maxcostevals is None:
-            self._maxcostevals = max(5000, 2 * dim)
-        if self._maxiter is None:
-            self._maxiter = max(500, 4 * dim)
-        if self._populationsize is None:
-            self._populationsize = min(40, 10 * dim)
+        if self._max_cost_evaluations is None:
+            self._max_cost_evaluations = max(5000, 2 * dim)
+        if self._max_iterations is None:
+            self._max_iterations = max(500, 4 * dim)
+        if self._population_size is None:
+            self._population_size = min(40, 10 * dim)
 
         # If no initial population x is given by the user, generate one at
         # random.
-        if x is None:
-            x = [man.rand() for i in range(int(self._populationsize))]
-        elif not hasattr(x, "__iter__"):
-            raise ValueError("The initial population x must be iterable")
-        else:
-            if len(x) != self._populationsize:
+        if initial_point is None:
+            x = [man.rand() for i in range(int(self._population_size))]
+        elif tools.is_sequence(initial_point):
+            if len(initial_point) != self._population_size:
                 print(
                     "The population size was forced to the size of "
                     "the given initial population"
                 )
-                self._populationsize = len(x)
+                self._population_size = len(initial_point)
+            x = initial_point
+        else:
+            raise ValueError("The initial population must be iterable")
 
         # Initialize personal best positions to the initial population.
         y = list(x)
@@ -94,18 +95,18 @@ class ParticleSwarm(Solver):
         # Compute cost for each particle xi.
         costs = np.array([objective(xi) for xi in x])
         fy = list(costs)
-        costevals = self._populationsize
+        cost_evaluations = self._population_size
 
         # Identify the best particle and store its cost/position.
         imin = costs.argmin()
         fbest = costs[imin]
         xbest = x[imin]
 
-        if verbosity >= 2:
-            iter_format_length = int(np.log10(self._maxiter)) + 1
+        if self._verbosity >= 2:
+            iteration_format_length = int(np.log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
-                    ("Iteration", f"{iter_format_length}d"),
+                    ("Iteration", f"{iteration_format_length}d"),
                     ("Cost evaluations", "7d"),
                     ("Best cost", "+.8e"),
                 ]
@@ -115,34 +116,36 @@ class ParticleSwarm(Solver):
 
         column_printer.print_header()
 
-        self._start_optlog()
+        self._initialize_log()
 
-        # Iteration counter (at any point, iter is the number of fully executed
+        # Iteration counter (at any point, iteration is the number of fully executed
         # iterations so far).
-        iter = 0
-        time0 = time.time()
+        iteration = 0
+        start_time = time.time()
 
         while True:
-            iter += 1
+            iteration += 1
 
-            column_printer.print_row([iter, costevals, fbest])
+            column_printer.print_row([iteration, cost_evaluations, fbest])
 
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):
-                stop_reason = self._check_stopping_criterion(
-                    time0, iter=iter, costevals=costevals
+                stopping_criterion = self._check_stopping_criterion(
+                    start_time=start_time,
+                    iteration=iteration,
+                    cost_evaluations=cost_evaluations,
                 )
-                if stop_reason is not None:
+                if stopping_criterion is not None:
                     break
-            if stop_reason:
-                if verbosity >= 1:
-                    print(stop_reason)
+            if stopping_criterion:
+                if self._verbosity >= 1:
+                    print(stopping_criterion)
                     print("")
                 break
 
             # Compute the inertia factor which we linearly decrease from 0.9 to
-            # 0.4 from iter = 0 to iter = maxiter.
-            w = 0.4 + 0.5 * (1 - iter / self._maxiter)
+            # 0.4 from iteration = 0 to iteration = max_iterations.
+            w = 0.4 + 0.5 * (1 - iteration / self._max_iterations)
 
             # Compute the velocities.
             for i, xi in enumerate(x):
@@ -181,17 +184,17 @@ class ParticleSwarm(Solver):
                     if fy[i] < fbest:
                         fbest = fy[i]
                         xbest = xi
-            costevals += self._populationsize
+            cost_evaluations += self._population_size
 
-        if self._logverbosity <= 0:
+        if self._log_verbosity <= 0:
             return xbest
         else:
-            self._stop_optlog(
-                xbest,
-                fbest,
-                stop_reason,
-                time0,
-                costevals=costevals,
-                iter=iter,
+            self._finalize_log(
+                x=xbest,
+                objective=fbest,
+                stopping_criterion=stopping_criterion,
+                start_time=start_time,
+                cost_evaluations=cost_evaluations,
+                iteration=iteration,
             )
-            return xbest, self._optlog
+            return xbest, self._log
