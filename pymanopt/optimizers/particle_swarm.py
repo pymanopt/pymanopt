@@ -4,11 +4,11 @@ import numpy as np
 import numpy.random as rnd
 
 from pymanopt import tools
-from pymanopt.solvers.solver import Solver
+from pymanopt.optimizers.optimizer import Optimizer
 from pymanopt.tools import printer
 
 
-class ParticleSwarm(Solver):
+class ParticleSwarm(Optimizer):
     """Particle swarm optimization (PSO) method.
 
     Perform optimization using the derivative-free particle swarm optimization
@@ -40,7 +40,7 @@ class ParticleSwarm(Solver):
         self._nostalgia = nostalgia
         self._social = social
 
-    def solve(self, problem, initial_point=None):
+    def run(self, problem, initial_point=None):
         """Run PSO algorithm.
 
         Args:

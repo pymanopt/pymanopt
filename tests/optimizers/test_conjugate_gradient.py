@@ -1,4 +1,4 @@
-from pymanopt.solvers import ConjugateGradient
+from pymanopt.optimizers import ConjugateGradient
 
 from .._test import TestCase
 

@@ -7,7 +7,7 @@ from numpy import random as rnd
 import pymanopt
 from examples._tools import ExampleRunner
 from pymanopt.manifolds import Sphere
-from pymanopt.solvers import SteepestDescent
+from pymanopt.optimizers import SteepestDescent
 
 
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
@@ -60,8 +60,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     cost, egrad = create_cost_egrad(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
 
-    solver = SteepestDescent(verbosity=2 * int(not quiet))
-    estimated_dominant_eigenvector = solver.solve(problem)
+    optimizer = SteepestDescent(verbosity=2 * int(not quiet))
+    estimated_dominant_eigenvector = optimizer.run(problem)
 
     if quiet:
         return

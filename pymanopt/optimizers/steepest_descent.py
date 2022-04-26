@@ -3,13 +3,13 @@ from copy import deepcopy
 
 import numpy as np
 
-from pymanopt.solvers.line_search import BackTrackingLineSearcher
-from pymanopt.solvers.solver import Solver
+from pymanopt.optimizers.line_search import BackTrackingLineSearcher
+from pymanopt.optimizers.optimizer import Optimizer
 from pymanopt.tools import printer
 
 
-class SteepestDescent(Solver):
-    """Riemannian steepest descent solver.
+class SteepestDescent(Optimizer):
+    """Riemannian steepest descent algorithm.
 
     Perform optimization using gradient descent with line search.
     This method first computes the gradient of the objective, and then
@@ -30,7 +30,7 @@ class SteepestDescent(Solver):
         self.line_searcher = None
 
     # Function to solve optimisation problem using steepest descent.
-    def solve(self, problem, initial_point=None, reuse_line_searcher=False):
+    def run(self, problem, initial_point=None, reuse_line_searcher=False):
         """Run steepest descent algorithm.
 
         Args:
@@ -79,7 +79,7 @@ class SteepestDescent(Solver):
         column_printer.print_header()
 
         self._initialize_log(
-            solver_parameters={"line_searcher": line_searcher}
+            optimizer_parameters={"line_searcher": line_searcher}
         )
 
         # Initialize iteration counter and timer

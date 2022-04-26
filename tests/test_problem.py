@@ -5,7 +5,7 @@ from numpy import testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import Product, Sphere, Stiefel
-from pymanopt.solvers import TrustRegions
+from pymanopt.optimizers import TrustRegions
 
 from ._test import TestCase
 
@@ -43,7 +43,7 @@ class TestProblem(TestCase):
             return tf.reduce_sum(X) + tf.reduce_sum(Y)
 
         problem = pymanopt.Problem(manifold=manifold, cost=cost)
-        solver = TrustRegions(max_iterations=1)
-        Xopt, Yopt = solver.solve(problem)
+        optimizer = TrustRegions(max_iterations=1)
+        Xopt, Yopt = optimizer.run(problem)
         self.assertEqual(Xopt.shape, (3, 3))
         self.assertEqual(Yopt.shape, (3, 3))

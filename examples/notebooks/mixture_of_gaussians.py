@@ -121,7 +121,7 @@ from autograd.scipy.special import logsumexp
 import pymanopt
 from pymanopt import Problem
 from pymanopt.manifolds import Euclidean, Product, SymmetricPositiveDefinite
-from pymanopt.solvers import SteepestDescent
+from pymanopt.optimizers import SteepestDescent
 
 
 # (1) Instantiate the manifold
@@ -153,11 +153,11 @@ def cost(S, v):
 
 problem = Problem(manifold=manifold, cost=cost)
 
-# (3) Instantiate a Pymanopt solver
-solver = SteepestDescent(verbosity=1)
+# (3) Instantiate a Pymanopt optimizer
+optimizer = SteepestDescent(verbosity=1)
 
 # let Pymanopt do the rest
-Xopt = solver.solve(problem)
+Xopt = optimizer.run(problem)
 # -
 
 # Once Pymanopt has finished the optimisation we can obtain the inferred parameters as follows:
@@ -202,7 +202,7 @@ print(pihat[2])
 
 # ## When Things Go Astray
 #
-# A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [BackTrackingLineSearcher](https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/line_search.py)) -- here we demonstrate this approach:
+# A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [BackTrackingLineSearcher](https://github.com/pymanopt/pymanopt/blob/master/pymanopt/optimizers/line_search.py)) -- here we demonstrate this approach:
 
 
 class LineSearchMoG:

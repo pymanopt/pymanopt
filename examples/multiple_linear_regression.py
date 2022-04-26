@@ -7,7 +7,7 @@ from numpy import random as rnd
 import pymanopt
 from examples._tools import ExampleRunner
 from pymanopt.manifolds import Euclidean
-from pymanopt.solvers import TrustRegions
+from pymanopt.optimizers import TrustRegions
 
 
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
@@ -62,7 +62,7 @@ def create_cost_egrad_ehess(manifold, samples, targets, backend):
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     num_samples, num_weights = 200, 3
 
-    solver = TrustRegions(verbosity=0)
+    optimizer = TrustRegions(verbosity=0)
     manifold = Euclidean(3)
 
     for k in range(5):
@@ -74,7 +74,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         )
         problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
 
-        estimated_weights = solver.solve(problem)
+        estimated_weights = optimizer.run(problem)
         if not quiet:
             print(f"Run {k + 1}")
             print(

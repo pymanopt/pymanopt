@@ -55,10 +55,10 @@ import time
 
 import numpy as np
 
-from pymanopt.solvers.solver import Solver
+from pymanopt.optimizers.optimizer import Optimizer
 
 
-class TrustRegions(Solver):
+class TrustRegions(Optimizer):
     (
         NEGATIVE_CURVATURE,
         EXCEEDED_TR,
@@ -88,7 +88,7 @@ class TrustRegions(Solver):
         *args,
         **kwargs,
     ):
-        """Riemannian Trust-Regions solver.
+        """Riemannian Trust-Regions algorithm.
 
         Second-order method that approximates the objective function by a
         quadratic surface and then updates the current estimate based on that.
@@ -104,7 +104,7 @@ class TrustRegions(Solver):
         self.use_rand = use_rand
         self.rho_regularization = rho_regularization
 
-    def solve(
+    def run(
         self,
         problem,
         initial_point=None,
