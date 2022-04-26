@@ -3,9 +3,8 @@
 ### Issues
 
 ### 1.0:
-  - Return namedtuple from solver's 'solve' method
+  - Return 'Result' object from solver's 'solve' method
   - Change terminology from "solvers" to "optimizers"
-  - #169
   - Renaming:
     # Short names
     * dim
@@ -30,6 +29,7 @@
 
 ### 1.0.x:
   - Use weingarten map for oblique manifold and Stiefel
+  - Change "beta_rule" of CG optimizer to internal enum representation
 
 ### 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
@@ -54,3 +54,4 @@
     * in jax with jit support, or
     * using a backend abstraction as in geomstats (potentially shared with
       geomstats)
+  - Revist "reuse_line_searcher"
