@@ -225,7 +225,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def tangent(self, point, vector):
+    def to_tangent_space(self, point, vector):
         """Re-tangentialize a vector.
 
         This method guarantees that ``vector`` is indeed a tangent vector

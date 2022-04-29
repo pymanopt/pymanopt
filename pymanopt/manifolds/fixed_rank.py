@@ -202,14 +202,14 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         vt = self._stiefel_n.rand().T
         return _FixedRankPoint(u, s, vt)
 
-    def tangent(self, point, vector):
+    def to_tangent_space(self, point, vector):
         """Project components of ``vector`` to tangent space at ``point``.
 
         Given ``vector`` in tangent vector format, projects its components Up
         and Vp such that they satisfy the tangent space constraints up to
         numerical errors.
-        If ``vector`` was indeed a tangent vector at ``point``, this should
-        barely affect ``vector``.
+        If ``vector`` was already in the tangent space at ``point``, this
+        method should barely have any effect.
         """
         u, _, vt = point
         Up = vector.Up - u @ u.T @ vector.Up
@@ -221,7 +221,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         Vp = np.random.randn(self._n, self._k)
         M = np.random.randn(self._k, self._k)
 
-        tangent_vector = self.tangent(
+        tangent_vector = self.to_tangent_space(
             point, _FixedRankTangentVector(Up, M, Vp)
         )
         return tangent_vector / self.norm(point, tangent_vector)

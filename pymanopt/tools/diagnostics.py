@@ -155,7 +155,7 @@ def check_gradient(problem, x=None, d=None):
 
     grad = problem.grad(x)
     try:
-        projected_grad = problem.manifold.tangent(x, grad)
+        projected_grad = problem.manifold.to_tangent_space(x, grad)
     except NotImplementedError:
         print(
             "Pymanopt was unable to verify that the gradient is indeed a "

@@ -78,7 +78,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     def projection(self, point, vector):
         return multiskew(multiprod(multitransp(point), vector))
 
-    def tangent(self, point, vector):
+    def to_tangent_space(self, point, vector):
         return multiskew(vector)
 
     def tangent_to_ambient(self, point, tangent_vector):
