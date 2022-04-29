@@ -47,9 +47,9 @@ class TestElliptopeManifold(TestCase):
     # Ulogexp = s.log(X, s.exp(X, U))
     # np_testing.assert_array_almost_equal(U, Ulogexp)
 
-    # def test_pairmean(self):
+    # def test_pair_mean(self):
     # s = self.man
     # X = s.rand()
     # Y = s.rand()
-    # Z = s.pairmean(X, Y)
+    # Z = s.pair_mean(X, Y)
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

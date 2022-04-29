@@ -73,9 +73,9 @@ class TestProductManifold(TestCase):
         np_testing.assert_array_almost_equal(U[0], Ulogexp[0])
         np_testing.assert_array_almost_equal(U[1], Ulogexp[1])
 
-    def test_pairmean(self):
+    def test_pair_mean(self):
         s = self.man
         X = s.rand()
         Y = s.rand()
-        Z = s.pairmean(X, Y)
+        Z = s.pair_mean(X, Y)
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

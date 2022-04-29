@@ -192,6 +192,6 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     def transport(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a
 
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         V = self.log(point_a, point_b)
         return self.exp(point_a, 0.5 * V)

@@ -105,8 +105,8 @@ class Product(Manifold):
             point_a, point_b, tangent_vector_a
         )
 
-    def pairmean(self, point_a, point_b):
-        return self._dispatch("pairmean")(point_a, point_b)
+    def pair_mean(self, point_a, point_b):
+        return self._dispatch("pair_mean")(point_a, point_b)
 
     def zerovec(self, point):
         return self._dispatch("zerovec", reduction=_ProductTangentVector)(

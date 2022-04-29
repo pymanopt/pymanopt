@@ -216,7 +216,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         """Computes the intrinsic mean of two points on the manifold.
 
         Returns the intrinsic mean of two points ``X`` and ``Y`` on the

@@ -86,7 +86,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(point_b, tangent_vector_a)
 
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         return self._normalize(point_a + point_b)
 
     def zerovec(self, point):

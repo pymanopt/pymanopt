@@ -90,11 +90,11 @@ class TestSingleGrassmannManifold(TestCase):
         # v is 0
         np_testing.assert_almost_equal(0, self.man.norm(x, u - v))
 
-    # def test_pairmean(self):
+    # def test_pair_mean(self):
     # s = self.man
     # X = s.rand()
     # Y = s.rand()
-    # Z = s.pairmean(X, Y)
+    # Z = s.pair_mean(X, Y)
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
@@ -207,9 +207,9 @@ class TestMultiGrassmannManifold(TestCase):
         # v is 0
         np_testing.assert_almost_equal(0, self.man.norm(x, u - v))
 
-    # def test_pairmean(self):
+    # def test_pair_mean(self):
     # s = self.man
     # X = s.rand()
     # Y = s.rand()
-    # Z = s.pairmean(X, Y)
+    # Z = s.pair_mean(X, Y)
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

@@ -217,7 +217,7 @@ class NelderMead(Optimizer):
                 print("Shrinkage")
             x0 = x[0]
             for i in np.arange(1, dim + 1):
-                x[i] = manifold.pairmean(x0, x[i])
+                x[i] = manifold.pair_mean(x0, x[i])
                 costs[i] = objective(x[i])
             cost_evaluations += dim
 
