@@ -82,7 +82,7 @@ class TestSphereManifold(TestCase):
             self.man.ehess2rhess(x, egrad, ehess, u),
         )
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
@@ -121,7 +121,7 @@ class TestSphereManifold(TestCase):
 
         assert np.linalg.norm(u - v) > 1e-3
 
-    def test_transp(self):
+    def test_transport(self):
         # Should be the same as proj
         s = self.man
         x = s.rand()

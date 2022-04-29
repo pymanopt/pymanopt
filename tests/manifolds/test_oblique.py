@@ -23,7 +23,7 @@ class TestObliqueManifold(TestCase):
 
     # def test_ehess2rhess(self):
 
-    # def test_retr(self):
+    # def test_retraction(self):
 
     # def test_egrad2rgrad(self):
 
@@ -33,7 +33,7 @@ class TestObliqueManifold(TestCase):
 
     # def test_randvec(self):
 
-    # def test_transp(self):
+    # def test_transport(self):
 
     def test_exp_log_inverse(self):
         s = self.man

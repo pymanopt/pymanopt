@@ -210,7 +210,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         np_testing.assert_almost_equal(1, man.norm(x, u))
         assert la.norm(u - v) > 1e-3
 
-    def test_transp(self):
+    def test_transport(self):
         man = self.man
         x = man.rand()
         y = man.rand()
@@ -230,7 +230,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         u = u * 1e-6
         np_testing.assert_allclose(man.exp(x, u), x + u)
 
-    def test_retr(self):
+    def test_retraction(self):
         # Check that result is on manifold and for small vectors
         # retr(x, u) = x + u.
         man = self.man

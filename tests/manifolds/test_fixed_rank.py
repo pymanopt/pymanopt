@@ -105,7 +105,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         assert la.norm(x[1] - y[1]) > 1e-6
         assert la.norm(x[2] - y[2]) > 1e-6
 
-    def test_transp(self):
+    def test_transport(self):
         s = self.man
         x = s.rand()
         y = s.rand()
@@ -159,7 +159,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
     def test_ehess2rhess(self):
         pass
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()

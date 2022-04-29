@@ -61,7 +61,7 @@ class TestSingleStiefelManifold(TestCase):
         V = self.man.randvec(X)
         assert la.norm(U - V) > 1e-6
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
@@ -95,7 +95,7 @@ class TestSingleStiefelManifold(TestCase):
         u = self.man.randvec(x)
         np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
 
-    # def test_transp(self):
+    # def test_transport(self):
 
     def test_exp(self):
         # Check that exp lies on the manifold and that exp of a small vector u
@@ -200,7 +200,7 @@ class TestMultiStiefelManifold(TestCase):
         V = self.man.randvec(X)
         assert la.norm(U - V) > 1e-6
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
@@ -225,7 +225,7 @@ class TestMultiStiefelManifold(TestCase):
         u = self.man.randvec(x)
         np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
 
-    # def test_transp(self):
+    # def test_transport(self):
 
     def test_exp(self):
         # Check that exp lies on the manifold and that exp of a small vector u

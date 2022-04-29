@@ -38,7 +38,7 @@ class TestSingleGrassmannManifold(TestCase):
             self.man.ehess2rhess(x, egrad, ehess, u),
         )
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
@@ -70,7 +70,7 @@ class TestSingleGrassmannManifold(TestCase):
 
     # def test_randvec(self):
 
-    # def test_transp(self):
+    # def test_transport(self):
 
     def test_exp_log_inverse(self):
         s = self.man
@@ -139,7 +139,7 @@ class TestMultiGrassmannManifold(TestCase):
         Hproj = H - multiprod(X, multiprod(multitransp(X), H))
         np_testing.assert_allclose(Hproj, self.man.proj(X, H))
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
@@ -187,7 +187,7 @@ class TestMultiGrassmannManifold(TestCase):
         V = self.man.randvec(X)
         assert la.norm(U - V) > 1e-6
 
-    # def test_transp(self):
+    # def test_transport(self):
 
     def test_exp_log_inverse(self):
         s = self.man

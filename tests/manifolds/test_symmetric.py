@@ -49,7 +49,7 @@ class TestSymmetricManifold(TestCase):
             e.ehess2rhess(x, egrad, ehess, u), multisym(ehess)
         )
 
-    def test_retr(self):
+    def test_retraction(self):
         e = self.man
         x = e.rand()
         u = e.randvec(x)
@@ -85,7 +85,7 @@ class TestSymmetricManifold(TestCase):
         np_testing.assert_almost_equal(la.norm(u), 1)
         assert la.norm(u - v) > 1e-6
 
-    def test_transp(self):
+    def test_transport(self):
         e = self.man
         x = e.rand()
         y = e.rand()

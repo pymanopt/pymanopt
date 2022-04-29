@@ -80,7 +80,7 @@ class TestStrictlyPositiveVectors(TestCase):
         v = self.man.log(x, y)
         np_testing.assert_almost_equal(self.man.norm(x, u - v), 0)
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
@@ -94,4 +94,4 @@ class TestStrictlyPositiveVectors(TestCase):
         xretru = self.man.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
-        # def test_transp(self):
+        # def test_transport(self):

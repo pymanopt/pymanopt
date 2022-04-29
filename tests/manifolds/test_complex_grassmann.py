@@ -100,7 +100,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         # v is 0
         np_testing.assert_almost_equal(0, self.man.norm(X, U - V))
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
@@ -213,7 +213,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         # v is 0
         np_testing.assert_almost_equal(0, self.man.norm(X, U - V))
 
-    def test_retr(self):
+    def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
