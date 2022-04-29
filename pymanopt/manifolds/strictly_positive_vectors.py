@@ -49,7 +49,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         vector = rnd.randn(self._n, self._k)
         return vector / self.norm(point, vector)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros(self._n, self._k)
 
     def dist(self, point_a, point_b):

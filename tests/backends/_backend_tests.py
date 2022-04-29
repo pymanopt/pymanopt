@@ -22,7 +22,7 @@ def manifold_factory(point_layout):
         proj = _generic
         rand = _generic
         randvec = _generic
-        zerovec = _generic
+        zero_vector = _generic
 
     return CustomManifold()
 

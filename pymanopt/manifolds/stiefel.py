@@ -132,7 +132,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
             Y[i] = np.bmat([point[i], tangent_vector[i]]) @ W @ Z
         return Y
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         if self._k == 1:
             return np.zeros((self._n, self._p))
         return np.zeros((self._k, self._n, self._p))

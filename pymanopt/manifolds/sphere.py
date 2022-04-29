@@ -70,7 +70,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
     def pair_mean(self, point_a, point_b):
         return self._normalize(point_a + point_b)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros(self._shape)
 
     def _normalize(self, array):

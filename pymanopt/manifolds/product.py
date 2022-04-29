@@ -108,8 +108,8 @@ class Product(Manifold):
     def pair_mean(self, point_a, point_b):
         return self._dispatch("pair_mean")(point_a, point_b)
 
-    def zerovec(self, point):
-        return self._dispatch("zerovec", reduction=_ProductTangentVector)(
+    def zero_vector(self, point):
+        return self._dispatch("zero_vector", reduction=_ProductTangentVector)(
             point
         )
 

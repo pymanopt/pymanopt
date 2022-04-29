@@ -140,7 +140,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """Returns a random vector in the tangent space at ``point``."""
 
     @abc.abstractmethod
-    def zerovec(self, point):
+    def zero_vector(self, point):
         """Returns the zero vector in the tangent space at ``point``."""
 
     # Methods which are only required by certain optimizers.

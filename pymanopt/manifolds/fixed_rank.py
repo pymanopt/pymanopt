@@ -253,7 +253,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
             point_b, self.tangent2ambient(point_a, tangent_vector_a)
         )
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return _FixedRankTangentVector(
             np.zeros((self._m, self._k)),
             np.zeros((self._k, self._k)),

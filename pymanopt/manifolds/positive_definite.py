@@ -120,7 +120,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         )
         return multiprod(multiprod(c, logm), multitransp(c))
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         k = self._k
         n = self._n
         if k == 1:

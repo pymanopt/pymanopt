@@ -184,7 +184,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             )
         )
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         if self._k == 1:
             return np.zeros((self._n, self._n))
         return np.zeros((self._k, self._n, self._n))

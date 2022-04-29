@@ -22,7 +22,8 @@ def compute_centroid(manifold, points):
         if manifold.num_values == 1:
             (y,) = y
         return -sum(
-            [manifold.log(y, point) for point in points], manifold.zerovec(y)
+            [manifold.log(y, point) for point in points],
+            manifold.zero_vector(y),
         )
 
     optimizer = SteepestDescent(max_iterations=15, verbosity=0)

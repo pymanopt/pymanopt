@@ -16,7 +16,7 @@ class _GrassmannBase(Manifold):
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(point_b, tangent_vector_a)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         if self._k == 1:
             return np.zeros((self._n, self._p))
         return np.zeros((self._k, self._n, self._p))

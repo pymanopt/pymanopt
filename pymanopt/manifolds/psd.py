@@ -55,7 +55,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def _normalize(self, array):
         return array / self.norm(None, array)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros((self._n, self._k))
 
 
@@ -248,5 +248,5 @@ class Elliptope(Manifold, RetrAsExpMixin):
         inner_products = (point * vector).sum(axis=1)
         return vector - point * inner_products[:, np.newaxis]
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros((self._n, self._k))

@@ -59,7 +59,7 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def pair_mean(self, point_a, point_b):
         return (point_a + point_b) / 2
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros(self._shape)
 
 

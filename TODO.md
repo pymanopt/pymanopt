@@ -9,7 +9,6 @@
     * rand -> random_point
     * randvec -> random_vector
     * tangent -> to_tangent_space
-    * zerovec -> zero_vector
     * tangent2ambient -> tangent_to_ambient
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp

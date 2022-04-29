@@ -177,7 +177,7 @@ class TrustRegions(Optimizer):
             # Determine eta0
             if not self.use_rand:
                 # Pick the zero vector
-                eta = man.zerovec(x)
+                eta = man.zero_vector(x)
             else:
                 # Random vector in T_x M (this has to be very small)
                 eta = 1e-6 * man.randvec(x)
@@ -448,7 +448,7 @@ class TrustRegions(Optimizer):
         preconditioner = problem.preconditioner
 
         if not self.use_rand:  # and therefore, eta == 0
-            Heta = man.zerovec(x)
+            Heta = man.zero_vector(x)
             r = fgradx
             e_Pe = 0
         else:  # and therefore, no preconditioner
