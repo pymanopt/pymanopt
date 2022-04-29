@@ -1,7 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -66,7 +65,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         return
 
     # Calculate the actual solution by a conventional eigenvalue decomposition.
-    eigenvalues, eigenvectors = la.eig(matrix)
+    eigenvalues, eigenvectors = np.linalg.eig(matrix)
     dominant_eigenvector = eigenvectors[:, np.argmax(eigenvalues)]
 
     # Make sure both vectors have the same direction. Both are valid
@@ -78,15 +77,17 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         estimated_dominant_eigenvector = -estimated_dominant_eigenvector
 
     # Print information about the solution.
-    print("l2-norm of x:", la.norm(dominant_eigenvector))
-    print("l2-norm of xopt:", la.norm(estimated_dominant_eigenvector))
+    print("l2-norm of x:", np.linalg.norm(dominant_eigenvector))
+    print("l2-norm of xopt:", np.linalg.norm(estimated_dominant_eigenvector))
     print(
         "Solution found:",
         np.allclose(
             dominant_eigenvector, estimated_dominant_eigenvector, atol=1e-6
         ),
     )
-    error_norm = la.norm(dominant_eigenvector - estimated_dominant_eigenvector)
+    error_norm = np.linalg.norm(
+        dominant_eigenvector - estimated_dominant_eigenvector
+    )
     print("l2-error:", error_norm)
 
 

@@ -1,7 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -79,7 +78,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     C = X.T @ X
     print("Diagonal elements:", np.diag(C))
-    print("Eigenvalues:", np.sort(la.eig(C)[0].real)[::-1])
+    print("Eigenvalues:", np.sort(np.linalg.eig(C)[0].real)[::-1])
 
 
 if __name__ == "__main__":

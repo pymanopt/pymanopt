@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as la
 from scipy.linalg import solve_continuous_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
@@ -21,7 +20,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector, "fro")
+        return np.linalg.norm(tangent_vector, "fro")
 
     def projection(self, point, vector):
         YtY = point.T @ point
@@ -138,7 +137,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
         return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
     def dist(self, point_a, point_b):
-        s, _, d = la.svd(point_b.T.conj() @ point_a)
+        s, _, d = np.linalg.svd(point_b.T.conj() @ point_a)
         e = point_a - point_b @ s @ d
         return self.inner(None, e, e) / 2
 
@@ -236,7 +235,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
 
     def _normalize_rows(self, array):
         """Return an l2-row-normalized copy of an array."""
-        return array / la.norm(array, axis=1)[:, np.newaxis]
+        return array / np.linalg.norm(array, axis=1)[:, np.newaxis]
 
     def _project_rows(self, point, vector):
         """Orthogonal projection of each row of H to the tangent space at the

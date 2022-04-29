@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import FixedRankEmbedded
@@ -101,9 +100,9 @@ class TestFixedRankEmbeddedManifold(TestCase):
         np_testing.assert_allclose(x[0].T @ x[0], np.eye(self.k), atol=1e-6)
         np_testing.assert_allclose(x[2] @ x[2].T, np.eye(self.k), atol=1e-6)
 
-        assert la.norm(x[0] - y[0]) > 1e-6
-        assert la.norm(x[1] - y[1]) > 1e-6
-        assert la.norm(x[2] - y[2]) > 1e-6
+        assert np.linalg.norm(x[0] - y[0]) > 1e-6
+        assert np.linalg.norm(x[1] - y[1]) > 1e-6
+        assert np.linalg.norm(x[2] - y[2]) > 1e-6
 
     def test_transport(self):
         s = self.man

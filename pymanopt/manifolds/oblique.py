@@ -1,5 +1,4 @@
 import numpy as np
-import numpy.linalg as la
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -31,12 +30,12 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
         XY = (point_a * point_b).sum(0)
         XY[XY > 1] = 1
-        return la.norm(np.arccos(XY))
+        return np.linalg.norm(np.arccos(XY))
 
     def projection(self, point, vector):
         return vector - point * ((point * vector).sum(0)[np.newaxis, :])
@@ -88,4 +87,4 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         return np.zeros((self._m, self._n))
 
     def _normalize_columns(self, array):
-        return array / la.norm(array, axis=0)[np.newaxis, :]
+        return array / np.linalg.norm(array, axis=0)[np.newaxis, :]

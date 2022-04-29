@@ -1,7 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -25,7 +24,7 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
 
         @pymanopt.function.numpy(manifold)
         def cost(Y):
-            return la.norm(Y @ Y.T - matrix, "fro") ** 2
+            return np.linalg.norm(Y @ Y.T - matrix, "fro") ** 2
 
         @pymanopt.function.numpy(manifold)
         def egrad(Y):
@@ -74,11 +73,11 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         return
 
-    print("Rank of target matrix:", la.matrix_rank(matrix))
+    print("Rank of target matrix:", np.linalg.matrix_rank(matrix))
     matrix_estimate = low_rank_factor_estimate @ low_rank_factor_estimate.T
     print(
         "Frobenius norm error of low-rank estimate:",
-        la.norm(matrix - matrix_estimate),
+        np.linalg.norm(matrix - matrix_estimate),
     )
 
 

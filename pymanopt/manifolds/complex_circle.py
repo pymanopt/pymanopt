@@ -1,5 +1,4 @@
 import numpy as np
-import numpy.linalg as la
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -25,10 +24,10 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         return (tangent_vector_a.conj() @ tangent_vector_b).real
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        return la.norm(np.arccos((point_a.conj() * point_b).real))
+        return np.linalg.norm(np.arccos((point_a.conj() * point_b).real))
 
     @property
     def typical_dist(self):

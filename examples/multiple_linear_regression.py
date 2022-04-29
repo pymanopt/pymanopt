@@ -1,7 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -26,7 +25,7 @@ def create_cost_egrad_ehess(manifold, samples, targets, backend):
 
         @pymanopt.function.numpy(manifold)
         def cost(weights):
-            return la.norm(targets - samples @ weights) ** 2
+            return np.linalg.norm(targets - samples @ weights) ** 2
 
         @pymanopt.function.numpy(manifold)
         def egrad(weights):
@@ -81,7 +80,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
                 "closed form solution (bottom)"
             )
             print(estimated_weights)
-            print(la.pinv(samples) @ targets)
+            print(np.linalg.pinv(samples) @ targets)
             print("")
 
 

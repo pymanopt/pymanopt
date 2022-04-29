@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as la
 from scipy.linalg import expm
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
@@ -33,20 +32,20 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 
     def dist(self, point_a, point_b):
         # Adapted from equation (6.13) of [Bha2007].
-        c = la.cholesky(point_a)
-        c_inv = la.inv(c)
+        c = np.linalg.cholesky(point_a)
+        c_inv = np.linalg.inv(c)
         logm = multilog(
             multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
             pos_def=True,
         )
-        return la.norm(logm)
+        return np.linalg.norm(logm)
 
     def inner(self, point, tangent_vector_a, tangent_vector_b):
-        p_inv_tv_a = la.solve(point, tangent_vector_a)
+        p_inv_tv_a = np.linalg.solve(point, tangent_vector_a)
         if tangent_vector_a is tangent_vector_b:
             p_inv_tv_b = p_inv_tv_a
         else:
-            p_inv_tv_b = la.solve(point, tangent_vector_b)
+            p_inv_tv_b = np.linalg.solve(point, tangent_vector_b)
         return np.tensordot(
             p_inv_tv_a, multitransp(p_inv_tv_b), axes=tangent_vector_a.ndim
         )
@@ -82,7 +81,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         # Generate an orthogonal matrix.
         u = np.zeros((self._k, self._n, self._n))
         for i in range(self._k):
-            u[i], _ = la.qr(np.random.randn(self._n, self._n))
+            u[i], _ = np.linalg.qr(np.random.randn(self._n, self._n))
 
         if self._k == 1:
             return multiprod(u, d * multitransp(u))[0]
@@ -101,7 +100,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return tangent_vector_b
 
     def exp(self, point, tangent_vector):
-        p_inv_tv = la.solve(point, tangent_vector)
+        p_inv_tv = np.linalg.solve(point, tangent_vector)
         if self._k > 1:
             e = np.zeros(np.shape(point))
             for i in range(self._k):
@@ -113,8 +112,8 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
     retraction = exp
 
     def log(self, point_a, point_b):
-        c = la.cholesky(point_a)
-        c_inv = la.inv(c)
+        c = np.linalg.cholesky(point_a)
+        c_inv = np.linalg.inv(c)
         logm = multilog(
             multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
             pos_def=True,

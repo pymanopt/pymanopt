@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as la
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -52,7 +51,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         return np.zeros(self._n, self._k)
 
     def dist(self, point_a, point_b):
-        return la.norm(
+        return np.linalg.norm(
             np.log(point_a) - np.log(point_b), axis=0, keepdims=True
         )
 

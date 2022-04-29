@@ -1,7 +1,6 @@
 import warnings
 
 import numpy as np
-import numpy.linalg as la
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -29,7 +28,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
         inner = max(min(self.inner(point_a, point_a, point_b), 1), -1)
@@ -73,7 +72,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         return np.zeros(self._shape)
 
     def _normalize(self, array):
-        return array / la.norm(array)
+        return array / np.linalg.norm(array)
 
 
 class Sphere(_SphereBase):
@@ -145,9 +144,9 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     def __init__(self, matrix):
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
-        q, _ = la.qr(matrix)
+        q, _ = np.linalg.qr(matrix)
         projector = q @ q.T
-        subspace_dimension = la.matrix_rank(projector)
+        subspace_dimension = np.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors intersecting a "
             f"{subspace_dimension}-dimensional subspace"
@@ -169,9 +168,9 @@ class SphereSubspaceComplementIntersection(
     def __init__(self, matrix):
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
-        q, _ = la.qr(matrix)
+        q, _ = np.linalg.qr(matrix)
         projector = np.eye(m) - q @ q.T
-        subspace_dimension = la.matrix_rank(projector)
+        subspace_dimension = np.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors orthogonal "
             f"to a {subspace_dimension}-dimensional subspace"

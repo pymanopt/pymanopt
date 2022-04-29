@@ -1,7 +1,6 @@
 import warnings
 
 import autograd.numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import (
@@ -46,7 +45,7 @@ class TestSphereManifold(TestCase):
     def test_projection(self):
         #  Construct a random point X on the manifold.
         X = np.random.randn(self.m, self.n)
-        X /= la.norm(X, "fro")
+        X /= np.linalg.norm(X, "fro")
 
         #  Construct a vector H in the ambient space.
         H = np.random.randn(self.m, self.n)
@@ -60,7 +59,7 @@ class TestSphereManifold(TestCase):
         # Should be the same as proj
         #  Construct a random point X on the manifold.
         X = np.random.randn(self.m, self.n)
-        X /= la.norm(X, "fro")
+        X /= np.linalg.norm(X, "fro")
 
         #  Construct a vector H in the ambient space.
         H = np.random.randn(self.m, self.n)
@@ -88,7 +87,7 @@ class TestSphereManifold(TestCase):
         u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
-        np_testing.assert_almost_equal(la.norm(xretru), 1)
+        np_testing.assert_almost_equal(np.linalg.norm(xretru), 1)
 
         u = u * 1e-6
         xretru = self.man.retraction(x, u)
@@ -98,14 +97,14 @@ class TestSphereManifold(TestCase):
         x = self.man.rand()
         u = self.man.random_tangent_vector(x)
 
-        np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
+        np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         s = self.man
         x = s.rand()
-        np_testing.assert_almost_equal(la.norm(x), 1)
+        np_testing.assert_almost_equal(np.linalg.norm(x), 1)
         y = s.rand()
         assert np.linalg.norm(x - y) > 1e-3
 
@@ -193,7 +192,7 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
     def test_dim_rand(self):
         n = 100
         U = np.random.randn(n, n // 3)
-        dim = la.matrix_rank(U) - 1
+        dim = np.linalg.matrix_rank(U) - 1
         man = SphereSubspaceIntersection(U)
         self.assertEqual(man.dim, dim)
 
@@ -243,11 +242,11 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         U = np.random.randn(n, n // 3)
         # By the rank-nullity theorem the orthogonal complement of span(U) has
         # dimension n - rank(U).
-        dim = n - la.matrix_rank(U) - 1
+        dim = n - np.linalg.matrix_rank(U) - 1
         man = SphereSubspaceComplementIntersection(U)
         self.assertEqual(man.dim, dim)
 
         # Test if a random element really lies in the left null space of U.
         x = man.rand()
-        np_testing.assert_almost_equal(la.norm(x), 1)
+        np_testing.assert_almost_equal(np.linalg.norm(x), 1)
         np_testing.assert_array_almost_equal(U.T @ x, np.zeros(U.shape[1]))

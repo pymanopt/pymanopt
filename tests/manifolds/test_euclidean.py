@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Euclidean
@@ -24,7 +23,7 @@ class TestEuclideanManifold(TestCase):
     def test_dist(self):
         e = self.man
         x, y = np.random.randn(2, self.m, self.n)
-        np_testing.assert_almost_equal(e.dist(x, y), la.norm(x - y))
+        np_testing.assert_almost_equal(e.dist(x, y), np.linalg.norm(x - y))
 
     def test_inner(self):
         e = self.man
@@ -69,7 +68,7 @@ class TestEuclideanManifold(TestCase):
         x = e.rand()
         y = e.rand()
         assert np.shape(x) == (self.m, self.n)
-        assert la.norm(x - y) > 1e-6
+        assert np.linalg.norm(x - y) > 1e-6
 
     def test_random_tangent_vector(self):
         e = self.man
@@ -77,8 +76,8 @@ class TestEuclideanManifold(TestCase):
         u = e.random_tangent_vector(x)
         v = e.random_tangent_vector(x)
         assert np.shape(u) == (self.m, self.n)
-        np_testing.assert_almost_equal(la.norm(u), 1)
-        assert la.norm(u - v) > 1e-6
+        np_testing.assert_almost_equal(np.linalg.norm(u), 1)
+        assert np.linalg.norm(u - v) > 1e-6
 
     def test_transport(self):
         e = self.man

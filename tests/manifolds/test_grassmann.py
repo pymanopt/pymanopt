@@ -1,5 +1,4 @@
 import autograd.numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Grassmann
@@ -65,7 +64,7 @@ class TestSingleGrassmannManifold(TestCase):
             multiprod(multitransp(X), X), np.eye(self.n), atol=1e-10
         )
         Y = self.man.rand()
-        assert la.norm(X - Y) > 1e-6
+        assert np.linalg.norm(X - Y) > 1e-6
 
     # def test_random_tangent_vector(self):
 
@@ -161,7 +160,7 @@ class TestMultiGrassmannManifold(TestCase):
     def test_norm(self):
         x = self.man.rand()
         u = self.man.random_tangent_vector(x)
-        np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
+        np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
@@ -171,7 +170,7 @@ class TestMultiGrassmannManifold(TestCase):
             multiprod(multitransp(X), X), multieye(self.k, self.n), atol=1e-10
         )
         Y = self.man.rand()
-        assert la.norm(X - Y) > 1e-6
+        assert np.linalg.norm(X - Y) > 1e-6
 
     def test_random_tangent_vector(self):
         # Make sure things generated are in tangent space and if you generate
@@ -184,7 +183,7 @@ class TestMultiGrassmannManifold(TestCase):
             atol=1e-10,
         )
         V = self.man.random_tangent_vector(X)
-        assert la.norm(U - V) > 1e-6
+        assert np.linalg.norm(U - V) > 1e-6
 
     # def test_transport(self):
 

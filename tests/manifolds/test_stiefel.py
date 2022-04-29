@@ -1,5 +1,4 @@
 import autograd.numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Stiefel
@@ -25,14 +24,14 @@ class TestSingleStiefelManifold(TestCase):
     # def test_dist(self):
 
     def test_inner(self):
-        X = la.qr(np.random.randn(self.m, self.n))[0]
+        X = np.linalg.qr(np.random.randn(self.m, self.n))[0]
         A, B = np.random.randn(2, self.m, self.n)
         np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
     def test_projection(self):
         # Construct a random point X on the manifold.
         X = np.random.randn(self.m, self.n)
-        X = la.qr(X)[0]
+        X = np.linalg.qr(X)[0]
 
         # Construct a vector H in the ambient space.
         H = np.random.randn(self.m, self.n)
@@ -58,7 +57,7 @@ class TestSingleStiefelManifold(TestCase):
             multisym(X.T @ U), np.zeros((self.n, self.n)), atol=1e-10
         )
         V = self.man.random_tangent_vector(X)
-        assert la.norm(U - V) > 1e-6
+        assert np.linalg.norm(U - V) > 1e-6
 
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
@@ -92,7 +91,7 @@ class TestSingleStiefelManifold(TestCase):
     def test_norm(self):
         x = self.man.rand()
         u = self.man.random_tangent_vector(x)
-        np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
+        np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
 
     # def test_transport(self):
 
@@ -197,7 +196,7 @@ class TestMultiStiefelManifold(TestCase):
             atol=1e-10,
         )
         V = self.man.random_tangent_vector(X)
-        assert la.norm(U - V) > 1e-6
+        assert np.linalg.norm(U - V) > 1e-6
 
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
@@ -222,7 +221,7 @@ class TestMultiStiefelManifold(TestCase):
     def test_norm(self):
         x = self.man.rand()
         u = self.man.random_tangent_vector(x)
-        np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
+        np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
 
     # def test_transport(self):
 

@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 from scipy.linalg import expm, logm
 
@@ -72,7 +71,7 @@ class TestMulti(TestCase):
 
     def test_multilog_singlemat(self):
         a = np.diag(np.random.rand(self.m))
-        q, r = la.qr(np.random.randn(self.m, self.m))
+        q, r = np.linalg.qr(np.random.randn(self.m, self.m))
         # A is a positive definite matrix
         A = q @ a @ q.T
         np_testing.assert_allclose(multilog(A, pos_def=True), logm(A))
@@ -82,7 +81,7 @@ class TestMulti(TestCase):
         L = np.zeros((self.k, self.m, self.m))
         for i in range(self.k):
             a = np.diag(np.random.rand(self.m))
-            q, r = la.qr(np.random.randn(self.m, self.m))
+            q, r = np.linalg.qr(np.random.randn(self.m, self.m))
             A[i] = q @ a @ q.T
             L[i] = logm(A[i])
         np_testing.assert_allclose(multilog(A, pos_def=True), L)

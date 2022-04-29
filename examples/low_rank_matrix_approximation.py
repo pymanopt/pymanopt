@@ -1,7 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -27,7 +26,7 @@ def create_cost_egrad(manifold, matrix, backend):
         @pymanopt.function.numpy(manifold)
         def cost(u, s, vt):
             X = u @ np.diag(s) @ vt
-            return la.norm(X - matrix) ** 2
+            return np.linalg.norm(X - matrix) ** 2
 
         @pymanopt.function.numpy(manifold)
         def egrad(u, s, vt):
@@ -80,7 +79,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     )
 
     if not quiet:
-        u, s, vt = la.svd(matrix, full_matrices=False)
+        u, s, vt = np.linalg.svd(matrix, full_matrices=False)
         indices = np.argsort(s)[-rank:]
         low_rank_solution = (
             u[:, indices] @ np.diag(s[indices]) @ vt[indices, :]
@@ -95,7 +94,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         print()
         print(
             "Frobenius norm error:",
-            la.norm(low_rank_approximation - low_rank_solution),
+            np.linalg.norm(low_rank_approximation - low_rank_solution),
         )
         print()
 

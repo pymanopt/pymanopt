@@ -1,5 +1,4 @@
 import autograd.numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import ComplexGrassmann
@@ -61,7 +60,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
             multiprod(multihconj(X), X), np.eye(self.n), atol=1e-10
         )
         Y = self.man.rand()
-        assert la.norm(X - Y) > 1e-6
+        assert np.linalg.norm(X - Y) > 1e-6
         assert np.iscomplex(X).all()
 
     def test_random_tangent_vector(self):
@@ -75,7 +74,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
             multiprod(multihconj(X), G), np.zeros((self.n, self.n)), atol=1e-10
         )
         H = self.man.random_tangent_vector(X)
-        assert la.norm(G - H) > 1e-6
+        assert np.linalg.norm(G - H) > 1e-6
         assert np.iscomplex(G).all()
 
     def test_dist(self):
@@ -163,7 +162,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
     def test_norm(self):
         X = self.man.rand()
         U = self.man.random_tangent_vector(X)
-        np_testing.assert_almost_equal(self.man.norm(X, U), la.norm(U))
+        np_testing.assert_almost_equal(self.man.norm(X, U), np.linalg.norm(U))
         assert np.isreal(self.man.norm(X, U))
 
     def test_rand(self):
@@ -174,7 +173,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
             multiprod(multihconj(X), X), multieye(self.k, self.n), atol=1e-10
         )
         Y = self.man.rand()
-        assert la.norm(X - Y) > 1e-6
+        assert np.linalg.norm(X - Y) > 1e-6
         assert np.iscomplex(X).all()
 
     def test_random_tangent_vector(self):
@@ -188,7 +187,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
             atol=1e-10,
         )
         V = self.man.random_tangent_vector(X)
-        assert la.norm(U - V) > 1e-6
+        assert np.linalg.norm(U - V) > 1e-6
         assert np.iscomplex(U).all()
 
     def test_dist(self):

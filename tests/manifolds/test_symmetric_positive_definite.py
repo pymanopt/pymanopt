@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 from scipy.linalg import eigvalsh, expm
 
@@ -27,7 +26,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         np_testing.assert_allclose(x, multisym(x))
 
         # Check positivity of eigenvalues
-        w = la.eigvalsh(x)
+        w = np.linalg.eigvalsh(x)
         assert (w > [0]).all()
 
     def test_dist(self):
@@ -53,7 +52,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
 
         # Test invariance under inversion
         np_testing.assert_almost_equal(
-            man.dist(x, y), man.dist(la.inv(y), la.inv(x))
+            man.dist(x, y), man.dist(np.linalg.inv(y), np.linalg.inv(x))
         )
 
         # Test congruence-invariance
@@ -66,7 +65,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         man = self.man
         x = man.rand()
         u = man.random_tangent_vector(x)
-        e = expm(la.solve(x, u))
+        e = expm(np.linalg.solve(x, u))
 
         np_testing.assert_allclose(multiprod(x, e), man.exp(x, u))
         u = u * 1e-6
@@ -81,12 +80,14 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         v = man.random_tangent_vector(x)
         np_testing.assert_allclose(multisym(u), u)
         np_testing.assert_almost_equal(1, man.norm(x, u))
-        assert la.norm(u - v) > 1e-3
+        assert np.linalg.norm(u - v) > 1e-3
 
     def test_norm(self):
         man = self.man
         x = man.rand()
-        np.testing.assert_almost_equal(man.norm(np.eye(self.n), x), la.norm(x))
+        np.testing.assert_almost_equal(
+            man.norm(np.eye(self.n), x), np.linalg.norm(x)
+        )
 
     def test_exp_log_inverse(self):
         man = self.man
@@ -179,7 +180,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         man = self.man
         x = man.rand()
         Id = np.array(self.k * [np.eye(self.n)])
-        np.testing.assert_almost_equal(man.norm(Id, x), la.norm(x))
+        np.testing.assert_almost_equal(man.norm(Id, x), np.linalg.norm(x))
 
     def test_rand(self):
         # Just test that rand returns a point on the manifold and two
@@ -195,7 +196,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         np_testing.assert_allclose(x, multisym(x))
 
         # Check positivity of eigenvalues
-        w = la.eigvalsh(x)
+        w = np.linalg.eigvalsh(x)
         assert (w > [[0]]).all()
 
     def test_random_tangent_vector(self):
@@ -207,7 +208,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         v = man.random_tangent_vector(x)
         np_testing.assert_allclose(multisym(u), u)
         np_testing.assert_almost_equal(1, man.norm(x, u))
-        assert la.norm(u - v) > 1e-3
+        assert np.linalg.norm(u - v) > 1e-3
 
     def test_transport(self):
         man = self.man
@@ -224,7 +225,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         u = man.random_tangent_vector(x)
         e = np.zeros((self.k, self.n, self.n))
         for i in range(self.k):
-            e[i] = expm(la.solve(x[i], u[i]))
+            e[i] = expm(np.linalg.solve(x[i], u[i]))
         np_testing.assert_allclose(multiprod(x, e), man.exp(x, u))
         u = u * 1e-6
         np_testing.assert_allclose(man.exp(x, u), x + u)
@@ -242,7 +243,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         np_testing.assert_allclose(y, multisym(y))
 
         # Check positivity of eigenvalues
-        w = la.eigvalsh(y)
+        w = np.linalg.eigvalsh(y)
         assert (w > [[0]]).all()
 
         u = u * 1e-6

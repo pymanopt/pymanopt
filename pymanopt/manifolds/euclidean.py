@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg as la
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.tools.multi import multiskew, multisym
@@ -24,10 +23,10 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        return la.norm(point_a - point_b)
+        return np.linalg.norm(point_a - point_b)
 
     def projection(self, point, vector):
         return vector

@@ -1,5 +1,4 @@
 import autograd.numpy as np
-from numpy import linalg as la
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import StrictlyPositiveVectors
@@ -34,7 +33,7 @@ class TestStrictlyPositiveVectors(TestCase):
         u = self.man.random_tangent_vector(x)
         x_u = (1.0 / x) * u
         np_testing.assert_almost_equal(
-            la.norm(x_u, axis=0, keepdims=True), self.man.norm(x, u)
+            np.linalg.norm(x_u, axis=0, keepdims=True), self.man.norm(x, u)
         )
 
     def test_rand(self):
@@ -51,7 +50,7 @@ class TestStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         g = self.man.random_tangent_vector(x)
         h = self.man.random_tangent_vector(x)
-        assert (la.norm(g - h, axis=0) > 1e-6).all()
+        assert (np.linalg.norm(g - h, axis=0) > 1e-6).all()
         np_testing.assert_almost_equal(self.man.norm(x, g), 1)
 
     def test_dist(self):

@@ -1,7 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -66,11 +65,11 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         return
 
     # Calculate the actual solution by normalizing the columns of matrix.
-    X = matrix / la.norm(matrix, axis=0)[np.newaxis, :]
+    X = matrix / np.linalg.norm(matrix, axis=0)[np.newaxis, :]
 
     # Print information about the solution.
     print("Solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
-    print("Frobenius-error: %f" % la.norm(X - Xopt))
+    print("Frobenius-error: %f" % np.linalg.norm(X - Xopt))
 
 
 if __name__ == "__main__":

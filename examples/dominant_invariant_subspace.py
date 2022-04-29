@@ -1,7 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -83,7 +82,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         return
 
-    eigenvalues, eigenvectors = la.eig(matrix)
+    eigenvalues, eigenvectors = np.linalg.eig(matrix)
     column_indices = np.argsort(eigenvalues)[-subspace_dimension:]
     spanning_set = eigenvectors[:, column_indices]
     print(

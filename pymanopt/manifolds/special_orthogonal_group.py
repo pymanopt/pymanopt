@@ -1,7 +1,6 @@
 """Module containing manifolds of n-dimensional rotations."""
 
 import numpy as np
-from numpy import linalg as la
 from scipy.linalg import expm, logm
 from scipy.special import comb
 
@@ -65,7 +64,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     @property
     def typical_dist(self):
@@ -97,7 +96,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
 
     def _retraction_qr(self, point, tangent_vector):
         def retri(array):
-            q, r = la.qr(array)
+            q, r = np.linalg.qr(array)
             return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
 
         Y = point + multiprod(point, tangent_vector)
@@ -110,7 +109,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
 
     def _retraction_polar(self, point, tangent_vector):
         def retri(array):
-            u, _, vt = la.svd(array)
+            u, _, vt = np.linalg.svd(array)
             return u @ vt
 
         Y = point + multiprod(point, tangent_vector)
@@ -149,14 +148,14 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             # Generated as such, Q is uniformly distributed over O(n), the
             # group of orthogonal n-by-n matrices.
             A = np.random.randn(n, n)
-            Q, RR = la.qr(A)
+            Q, RR = np.linalg.qr(A)
             # TODO(nkoep): Add a proper reference to Mezzadri 2007.
             Q = Q @ np.diag(np.sign(np.diag(RR)))
 
             # If Q is in O(n) but not in SO(n), we permute the two first
             # columns of Q such that det(new Q) = -det(Q), hence the new Q will
             # be in SO(n), uniformly distributed.
-            if la.det(Q) < 0:
+            if np.linalg.det(Q) < 0:
                 Q[:, [0, 1]] = Q[:, [1, 0]]
             R[i] = Q
 
