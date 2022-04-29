@@ -62,7 +62,7 @@ class Product(Manifold):
         )(point_a, point_b)
 
     def projection(self, point, vector):
-        return self._dispatch("proj", reduction=_ProductTangentVector)(
+        return self._dispatch("projection", reduction=_ProductTangentVector)(
             point, vector
         )
 
@@ -82,7 +82,7 @@ class Product(Manifold):
         return self._dispatch("exp")(point, tangent_vector)
 
     def retraction(self, point, tangent_vector):
-        return self._dispatch("retr")(point, tangent_vector)
+        return self._dispatch("retraction")(point, tangent_vector)
 
     def log(self, point_a, point_b):
         return self._dispatch("log", reduction=_ProductTangentVector)(
@@ -101,7 +101,7 @@ class Product(Manifold):
         )(point)
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self._dispatch("transp", reduction=_ProductTangentVector)(
+        return self._dispatch("transport", reduction=_ProductTangentVector)(
             point_a, point_b, tangent_vector_a
         )
 
