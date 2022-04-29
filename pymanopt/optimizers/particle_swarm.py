@@ -170,7 +170,7 @@ class ParticleSwarm(Optimizer):
             # Update positions, personal bests and global best.
             for i, xi in enumerate(x):
                 # Compute new position of particle i.
-                x[i] = man.retr(xi, v[i])
+                x[i] = man.retraction(xi, v[i])
                 # Compute new cost of particle i.
                 fxi = objective(xi)
 

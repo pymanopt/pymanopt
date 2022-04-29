@@ -62,7 +62,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         tangent_vector_new[not_mask] = point[not_mask]
         return tangent_vector_new
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._normalize(point + tangent_vector)
 
     def log(self, x1, x2):

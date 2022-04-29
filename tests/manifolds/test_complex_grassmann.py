@@ -106,14 +106,14 @@ class TestSingleComplexGrassmannManifold(TestCase):
         x = self.man.rand()
         u = self.man.randvec(x)
 
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
 
         np_testing.assert_allclose(
             multiprod(multihconj(xretru), xretru), np.eye(self.n), atol=1e-10
         )
 
         u = u * 1e-6
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
 
@@ -219,7 +219,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         x = self.man.rand()
         u = self.man.randvec(x)
 
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
 
         np_testing.assert_allclose(
             multiprod(multihconj(xretru), xretru),
@@ -228,5 +228,5 @@ class TestMultiComplexGrassmannManifold(TestCase):
         )
 
         u = u * 1e-6
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)

@@ -56,7 +56,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
         HsymXtG = multiprod(tangent_vector, symXtG)
         return self.proj(point, euclidean_hvp - HsymXtG)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         if self._k == 1:
             q, r = np.linalg.qr(point + tangent_vector)
             return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))

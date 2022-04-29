@@ -171,7 +171,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
     # SIAM J. Optim., 22 (2012), pp. 135-158.
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         u, s, vt = point
         du, ds, dvt = tangent_vector
 

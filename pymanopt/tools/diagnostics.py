@@ -69,7 +69,7 @@ def check_directional_derivative(problem, x=None, d=None):
         try:
             y = problem.manifold.exp(x, h_k * d)
         except NotImplementedError:
-            y = problem.manifold.retr(x, h_k * d)
+            y = problem.manifold.retraction(x, h_k * d)
         value[k] = problem.cost(y)
 
     # Compute the linear approximation of the cost function using f0 and

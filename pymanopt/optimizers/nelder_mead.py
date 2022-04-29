@@ -155,7 +155,7 @@ class NelderMead(Optimizer):
             vec = manifold.log(xbar, x[-1])
 
             # Reflection step
-            xr = manifold.retr(xbar, -self._reflection * vec)
+            xr = manifold.retraction(xbar, -self._reflection * vec)
             costr = objective(xr)
             cost_evaluations += 1
 
@@ -170,7 +170,7 @@ class NelderMead(Optimizer):
 
             # If the reflected point is better than the best point, expand.
             if costr < costs[0]:
-                xe = manifold.retr(xbar, -self._expansion * vec)
+                xe = manifold.retraction(xbar, -self._expansion * vec)
                 coste = objective(xe)
                 cost_evaluations += 1
                 if coste < costr:
@@ -191,7 +191,7 @@ class NelderMead(Optimizer):
             if costr >= costs[-2]:
                 if costr < costs[-1]:
                     # do an outside contraction
-                    xoc = manifold.retr(xbar, -self._contraction * vec)
+                    xoc = manifold.retraction(xbar, -self._contraction * vec)
                     costoc = objective(xoc)
                     cost_evaluations += 1
                     if costoc <= costr:
@@ -202,7 +202,7 @@ class NelderMead(Optimizer):
                         continue
                 else:
                     # do an inside contraction
-                    xic = manifold.retr(xbar, self._contraction * vec)
+                    xic = manifold.retraction(xbar, self._contraction * vec)
                     costic = objective(xic)
                     cost_evaluations += 1
                     if costic <= costs[-1]:

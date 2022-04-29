@@ -53,7 +53,7 @@ class TestSymmetricManifold(TestCase):
         e = self.man
         x = e.rand()
         u = e.randvec(x)
-        np_testing.assert_allclose(e.retr(x, u), x + u)
+        np_testing.assert_allclose(e.retraction(x, u), x + u)
 
     def test_egrad2rgrad(self):
         e = self.man

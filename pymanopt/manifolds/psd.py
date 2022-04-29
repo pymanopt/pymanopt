@@ -38,7 +38,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     ):
         return self.proj(point, euclidean_hvp)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return point + tangent_vector
 
     def rand(self):
@@ -208,7 +208,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         Omega = lyap(YtY, -AS)
         return eta - point @ (Omega - Omega.T) / 2
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._normalize_rows(point + tangent_vector)
 
     def egrad2rgrad(self, point, euclidean_gradient):

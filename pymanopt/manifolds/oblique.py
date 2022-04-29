@@ -58,7 +58,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         )
         return target_point
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._normalize_columns(point + tangent_vector)
 
     def log(self, point_a, point_b):

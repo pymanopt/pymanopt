@@ -5,19 +5,12 @@
 ### 1.0:
   - Return 'Result' object from optimizer's 'run' method
   - Renaming:
-    # Short names
-    * dim
-    * dist
-    * exp
-    * log
     # Long forms
     * rand -> random_point
     * randvec -> random_vector
-    * retr -> retract
-    * proj -> project
+    * proj -> projection
     * tangent -> to_tangent_space
     * zerovec -> zero_vector
-    * pairmean -> pair_mean
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp

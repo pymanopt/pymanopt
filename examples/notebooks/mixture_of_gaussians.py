@@ -291,7 +291,7 @@ class LineSearchMoG:
         return step_size, newx
 
     def _newxnewf(self, x, d, objective, manifold):
-        newx = manifold.retr(x, d)
+        newx = manifold.retraction(x, d)
         try:
             newf = objective(newx)
         except np.linalg.LinAlgError:

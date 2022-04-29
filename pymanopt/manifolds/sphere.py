@@ -46,7 +46,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         norm = self.norm(point, tangent_vector)
         return point * np.cos(norm) + tangent_vector * np.sinc(norm / np.pi)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._normalize(point + tangent_vector)
 
     def log(self, point_a, point_b):

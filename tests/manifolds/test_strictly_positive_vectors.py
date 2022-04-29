@@ -86,12 +86,12 @@ class TestStrictlyPositiveVectors(TestCase):
         x = self.man.rand()
         u = self.man.randvec(x)
 
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
 
         assert (xretru > 0).all()
 
         u = u * 1e-6
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
         # def test_transp(self):

@@ -77,7 +77,7 @@ class Grassmann(_GrassmannBase):
         HXtG = multiprod(tangent_vector, XtG)
         return PXehess - HXtG
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         # We do not need to worry about flipping signs of columns here,
         # since only the column space is important, not the actual
         # columns. Compare this with the Stiefel manifold.
@@ -190,7 +190,7 @@ class ComplexGrassmann(_GrassmannBase):
         HXHG = multiprod(tangent_vector, XHG)
         return PXehess - HXHG
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         # We do not need to worry about flipping signs of columns here,
         # since only the column space is important, not the actual
         # columns. Compare this with the Stiefel manifold.

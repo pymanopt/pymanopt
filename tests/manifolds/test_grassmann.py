@@ -44,14 +44,14 @@ class TestSingleGrassmannManifold(TestCase):
         x = self.man.rand()
         u = self.man.randvec(x)
 
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
 
         np_testing.assert_allclose(
             multiprod(multitransp(xretru), xretru), np.eye(self.n), atol=1e-10
         )
 
         u = u * 1e-6
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
     # def test_egrad2rgrad(self):
@@ -145,7 +145,7 @@ class TestMultiGrassmannManifold(TestCase):
         x = self.man.rand()
         u = self.man.randvec(x)
 
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
 
         np_testing.assert_allclose(
             multiprod(multitransp(xretru), xretru),
@@ -154,7 +154,7 @@ class TestMultiGrassmannManifold(TestCase):
         )
 
         u = u * 1e-6
-        xretru = self.man.retr(x, u)
+        xretru = self.man.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
     # def test_egrad2rgrad(self):

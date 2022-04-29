@@ -165,13 +165,13 @@ class TestFixedRankEmbeddedManifold(TestCase):
         x = self.man.rand()
         u = self.man.randvec(x)
 
-        y = self.man.retr(x, u)
+        y = self.man.retraction(x, u)
 
         np_testing.assert_allclose(y[0].T @ y[0], np.eye(self.k), atol=1e-6)
         np_testing.assert_allclose(y[2] @ y[2].T, np.eye(self.k), atol=1e-6)
 
         u = u * 1e-6
-        y = self.man.retr(x, u)
+        y = self.man.retraction(x, u)
         y = y[0] @ np.diag(y[1]) @ y[2]
 
         u = self.man.tangent2ambient(x, u)

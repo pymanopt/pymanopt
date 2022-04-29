@@ -244,7 +244,7 @@ class TrustRegions(Optimizer):
             # norm_eta = man.norm(x, eta)
 
             # Compute the tentative next iterate (the proposal)
-            x_prop = man.retr(x, eta)
+            x_prop = man.retraction(x, eta)
 
             # Compute the function value of the proposal
             fx_prop = cost(x_prop)

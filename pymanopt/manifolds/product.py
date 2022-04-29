@@ -81,7 +81,7 @@ class Product(Manifold):
     def exp(self, point, tangent_vector):
         return self._dispatch("exp")(point, tangent_vector)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._dispatch("retr")(point, tangent_vector)
 
     def log(self, point_a, point_b):

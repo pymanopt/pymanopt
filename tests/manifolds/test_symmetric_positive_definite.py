@@ -236,7 +236,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         man = self.man
         x = man.rand()
         u = man.randvec(x)
-        y = man.retr(x, u)
+        y = man.retraction(x, u)
 
         assert np.shape(y) == (self.k, self.n, self.n)
         # Check symmetry
@@ -247,7 +247,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         assert (w > [[0]]).all()
 
         u = u * 1e-6
-        np_testing.assert_allclose(man.retr(x, u), x + u)
+        np_testing.assert_allclose(man.retraction(x, u), x + u)
 
     def test_exp_log_inverse(self):
         man = self.man

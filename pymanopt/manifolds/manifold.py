@@ -15,7 +15,7 @@ class RetrAsExpMixin:
             "Using retraction instead.",
             RuntimeWarning,
         )
-        return self.retr(point, tangent_vector)
+        return self.retraction(point, tangent_vector)
 
 
 class Manifold(metaclass=abc.ABCMeta):
@@ -180,7 +180,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         """Retracts a tangent vector back to the manifold.
 
         This generalizes the exponential map, and is often more efficient to
@@ -206,7 +206,7 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @_raise_not_implemented_error
     def transport(self, point_a, point_b, tangent_vector_a):
-        """Transport a tangent vector between different tangent spaces.
+        """Compute transport of tangent vectors between tangent spaces.
 
         This may either be a vector transport (a generalization of parallel
         transport) as defined in section 8.1 of [AMS2008]_, or a transporter

@@ -63,7 +63,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     def exp(self, point, tangent_vector):
         return point * np.exp((1.0 / point) * tangent_vector)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return point + tangent_vector
 
     def log(self, point_a, point_b):
