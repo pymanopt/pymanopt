@@ -56,7 +56,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         )
 
         # Test congruence-invariance
-        a = np.random.randn(self.n, self.n)  # must be invertible
+        a = np.random.normal(size=(self.n, self.n))  # must be invertible
         axa = multiprod(multiprod(a, x), multitransp(a))
         aya = multiprod(multiprod(a, y), multitransp(a))
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(axa, aya))
@@ -137,7 +137,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         k = self.k
         n = self.n
         x = man.random_point()
-        a, b = np.random.randn(2, k, n, n)
+        a, b = np.random.normal(size=(2, k, n, n))
         np.testing.assert_almost_equal(
             np.tensordot(a, b.transpose((0, 2, 1)), axes=a.ndim),
             man.inner(x, multiprod(x, a), multiprod(x, b)),
@@ -146,13 +146,13 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
     def test_projection(self):
         man = self.man
         x = man.random_point()
-        a = np.random.randn(self.k, self.n, self.n)
+        a = np.random.normal(size=(self.k, self.n, self.n))
         np.testing.assert_allclose(man.projection(x, a), multisym(a))
 
     def test_egrad2rgrad(self):
         man = self.man
         x = man.random_point()
-        u = np.random.randn(self.k, self.n, self.n)
+        u = np.random.normal(size=(self.k, self.n, self.n))
         np.testing.assert_allclose(
             man.egrad2rgrad(x, u), multiprod(multiprod(x, multisym(u)), x)
         )
@@ -163,7 +163,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         n = self.n
         k = self.k
         x = man.random_point()
-        egrad, ehess = np.random.randn(2, k, n, n)
+        egrad, ehess = np.random.normal(size=(2, k, n, n))
         u = man.random_tangent_vector(x)
 
         Hess = multiprod(multiprod(x, multisym(ehess)), x) + 2 * multisym(

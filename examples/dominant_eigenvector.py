@@ -51,7 +51,7 @@ def create_cost_egrad(manifold, matrix, backend):
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     n = 128
-    matrix = np.random.randn(n, n)
+    matrix = np.random.normal(size=(n, n))
     matrix = 0.5 * (matrix + matrix.T)
 
     manifold = Sphere(n)

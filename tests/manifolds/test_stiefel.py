@@ -24,17 +24,17 @@ class TestSingleStiefelManifold(TestCase):
     # def test_dist(self):
 
     def test_inner(self):
-        X = np.linalg.qr(np.random.randn(self.m, self.n))[0]
-        A, B = np.random.randn(2, self.m, self.n)
+        X = np.linalg.qr(np.random.normal(size=(self.m, self.n)))[0]
+        A, B = np.random.normal(size=(2, self.m, self.n))
         np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
     def test_projection(self):
         # Construct a random point X on the manifold.
-        X = np.random.randn(self.m, self.n)
+        X = np.random.normal(size=(self.m, self.n))
         X = np.linalg.qr(X)[0]
 
         # Construct a vector H in the ambient space.
-        H = np.random.randn(self.m, self.n)
+        H = np.random.normal(size=(self.m, self.n))
 
         # Compare the projections.
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
@@ -78,8 +78,8 @@ class TestSingleStiefelManifold(TestCase):
         # Test this function at some randomly generated point.
         x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
-        egrad = np.random.randn(self.m, self.n)
-        ehess = np.random.randn(self.m, self.n)
+        egrad = np.random.normal(size=(self.m, self.n))
+        ehess = np.random.normal(size=(self.m, self.n))
 
         np_testing.assert_allclose(
             testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
@@ -163,7 +163,7 @@ class TestMultiStiefelManifold(TestCase):
         X = self.man.random_point()
 
         # Construct a vector H in the ambient space.
-        H = np.random.randn(self.k, self.m, self.n)
+        H = np.random.normal(size=(self.k, self.m, self.n))
 
         # Compare the projections.
         Hproj = (

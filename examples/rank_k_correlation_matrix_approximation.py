@@ -62,7 +62,7 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     num_rows = 10
     rank = 3
-    matrix = np.random.randn(num_rows, num_rows)
+    matrix = np.random.normal(size=(num_rows, num_rows))
     matrix = 0.5 * (matrix + matrix.T)
 
     # Solve the problem with pymanopt.

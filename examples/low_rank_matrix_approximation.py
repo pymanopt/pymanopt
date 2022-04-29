@@ -60,7 +60,7 @@ def create_cost_egrad(manifold, matrix, backend):
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m, n, rank = 5, 4, 2
-    matrix = np.random.randn(m, n)
+    matrix = np.random.normal(size=(m, n))
 
     manifold = FixedRankEmbedded(m, n, rank)
     cost, egrad = create_cost_egrad(manifold, matrix, backend)

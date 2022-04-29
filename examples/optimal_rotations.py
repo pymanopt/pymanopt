@@ -65,8 +65,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m = 10
     k = 10
 
-    A = np.random.randn(k, n, m)
-    B = np.random.randn(k, n, m)
+    A = np.random.normal(size=(k, n, m))
+    B = np.random.normal(size=(k, n, m))
     ABt = np.array([Ak @ Bk.T for Ak, Bk in zip(A, B)])
 
     manifold = SpecialOrthogonalGroup(n, k)

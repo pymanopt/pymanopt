@@ -22,7 +22,7 @@ class TestProblem(TestCase):
 
     def test_prepare(self):
         problem = pymanopt.Problem(self.man, self.cost)
-        x = np.random.randn(self.n)
+        x = np.random.normal(size=self.n)
         np_testing.assert_allclose(
             2 * x * np.exp(np.sum(x**2)), problem.egrad(x)
         )

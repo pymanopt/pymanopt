@@ -22,7 +22,7 @@ class TestEuclideanManifold(TestCase):
 
     def test_dist(self):
         e = self.man
-        x, y = np.random.randn(2, self.m, self.n)
+        x, y = np.random.normal(size=(2, self.m, self.n))
         np_testing.assert_almost_equal(e.dist(x, y), np.linalg.norm(x - y))
 
     def test_inner(self):
@@ -42,7 +42,7 @@ class TestEuclideanManifold(TestCase):
         e = self.man
         x = e.random_point()
         u = e.random_tangent_vector(x)
-        egrad, ehess = np.random.randn(2, self.m, self.n)
+        egrad, ehess = np.random.normal(size=(2, self.m, self.n))
         np_testing.assert_allclose(e.ehess2rhess(x, egrad, ehess, u), ehess)
 
     def test_retraction(self):
@@ -60,7 +60,7 @@ class TestEuclideanManifold(TestCase):
     def test_norm(self):
         e = self.man
         x = e.random_point()
-        u = np.random.randn(self.m, self.n)
+        u = np.random.normal(size=(self.m, self.n))
         np_testing.assert_almost_equal(np.sqrt(np.sum(u**2)), e.norm(x, u))
 
     def test_rand(self):

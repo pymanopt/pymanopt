@@ -75,7 +75,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     dimension = 3
     num_samples = 200
     num_components = 2
-    samples = np.random.randn(num_samples, dimension) @ np.diag([3, 2, 1])
+    samples = np.random.normal(size=(num_samples, dimension)) @ np.diag(
+        [3, 2, 1]
+    )
     samples -= samples.mean(axis=0)
 
     manifold = Stiefel(dimension, num_components)

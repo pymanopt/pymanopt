@@ -55,11 +55,11 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         return factor * vector
 
     def random_point(self):
-        point = np.random.randn(*self._shape)
+        point = np.random.normal(size=self._shape)
         return self._normalize(point)
 
     def random_tangent_vector(self, point):
-        vector = np.random.randn(*self._shape)
+        vector = np.random.normal(size=self._shape)
         return self._normalize(self.projection(point, vector))
 
     def transport(self, point_a, point_b, tangent_vector_a):

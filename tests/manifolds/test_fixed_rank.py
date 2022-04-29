@@ -41,7 +41,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
     def test_proj_range(self):
         m = self.man
         x = m.random_point()
-        v = np.random.randn(self.m, self.n)
+        v = np.random.normal(size=(self.m, self.n))
 
         g = m.projection(x, v)
         # Check that g is a true tangent vector
@@ -58,7 +58,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         # the distance.
         m = self.man
         x = self.man.random_point()
-        v = np.random.randn(self.m, self.n)
+        v = np.random.normal(size=(self.m, self.n))
 
         g = m.projection(x, v)
         # Displace g a little
@@ -116,28 +116,28 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
     def test_apply_ambient(self):
         m = self.man
-        z = np.random.randn(self.m, self.n)
+        z = np.random.normal(size=(self.m, self.n))
 
         # Set u, s, v so that z = u @ s @ v.T
         u, s, v = np.linalg.svd(z, full_matrices=False)
         s = np.diag(s)
         v = v.T
 
-        w = np.random.randn(self.n, self.n)
+        w = np.random.normal(size=(self.n, self.n))
 
         np_testing.assert_allclose(z @ w, m._apply_ambient(z, w))
         np_testing.assert_allclose(z @ w, m._apply_ambient((u, s, v), w))
 
     def test_apply_ambient_transpose(self):
         m = self.man
-        z = np.random.randn(self.n, self.m)
+        z = np.random.normal(size=(self.n, self.m))
 
         # Set u, s, v so that z = u @ s @ v.T
         u, s, v = np.linalg.svd(z, full_matrices=False)
         s = np.diag(s)
         v = v.T
 
-        w = np.random.randn(self.n, self.n)
+        w = np.random.normal(size=(self.n, self.n))
 
         np_testing.assert_allclose(z.T @ w, m._apply_ambient_transpose(z, w))
         np_testing.assert_allclose(
@@ -189,9 +189,9 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
         f = 1 / (s[..., np.newaxis, :] ** 2 - s[..., :, np.newaxis] ** 2 + i)
 
-        du = np.random.randn(self.m, self.k)
-        ds = np.random.randn(self.k)
-        dvt = np.random.randn(self.k, self.n)
+        du = np.random.normal(size=(self.m, self.k))
+        ds = np.random.normal(size=self.k)
+        dvt = np.random.normal(size=(self.k, self.n))
 
         Up = (np.eye(self.m) - u @ u.T) @ du @ np.linalg.inv(np.diag(s))
         M = (

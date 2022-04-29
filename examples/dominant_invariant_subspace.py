@@ -67,7 +67,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     """
     num_rows = 128
     subspace_dimension = 3
-    matrix = np.random.randn(num_rows, num_rows)
+    matrix = np.random.normal(size=(num_rows, num_rows))
     matrix = 0.5 * (matrix + matrix.T)
 
     manifold = Grassmann(num_rows, subspace_dimension)

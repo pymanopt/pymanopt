@@ -13,7 +13,7 @@ class TestProblemBackendInterface(TestCase):
         self.n = n = 10
         self.rank = rank = 3
 
-        A = np.random.randn(m, n)
+        A = np.random.normal(size=(m, n))
         self.manifold = Product([FixedRankEmbedded(m, n, rank), Euclidean(n)])
 
         @pymanopt.function.autograd(self.manifold)

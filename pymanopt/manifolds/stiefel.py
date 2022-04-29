@@ -72,17 +72,19 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
 
     def random_point(self):
         if self._k == 1:
-            matrix = np.random.randn(self._n, self._p)
+            matrix = np.random.normal(size=(self._n, self._p))
             q, _ = np.linalg.qr(matrix)
             return q
 
         point = np.zeros((self._k, self._n, self._p))
         for i in range(self._k):
-            point[i], _ = np.linalg.qr(np.random.randn(self._n, self._p))
+            point[i], _ = np.linalg.qr(
+                np.random.normal(size=(self._n, self._p))
+            )
         return point
 
     def random_tangent_vector(self, point):
-        vector = np.random.randn(*np.shape(point))
+        vector = np.random.normal(size=point.shape)
         vector = self.projection(point, vector)
         return vector / np.linalg.norm(vector)
 

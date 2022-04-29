@@ -22,7 +22,7 @@ class TestSymmetricManifold(TestCase):
 
     def test_dist(self):
         e = self.man
-        x, y = np.random.randn(2, self.k, self.n, self.n)
+        x, y = np.random.normal(size=(2, self.k, self.n, self.n))
         np_testing.assert_almost_equal(e.dist(x, y), np.linalg.norm(x - y))
 
     def test_inner(self):
@@ -35,14 +35,14 @@ class TestSymmetricManifold(TestCase):
     def test_projection(self):
         e = self.man
         x = e.random_point()
-        u = np.random.randn(self.k, self.n, self.n)
+        u = np.random.normal(size=(self.k, self.n, self.n))
         np_testing.assert_allclose(e.projection(x, u), multisym(u))
 
     def test_ehess2rhess(self):
         e = self.man
         x = e.random_point()
         u = e.random_tangent_vector(x)
-        egrad, ehess = np.random.randn(2, self.k, self.n, self.n)
+        egrad, ehess = np.random.normal(size=(2, self.k, self.n, self.n))
         np_testing.assert_allclose(
             e.ehess2rhess(x, egrad, ehess, u), multisym(ehess)
         )
@@ -62,7 +62,7 @@ class TestSymmetricManifold(TestCase):
     def test_norm(self):
         e = self.man
         x = e.random_point()
-        u = np.random.randn(self.n, self.n, self.k)
+        u = np.random.normal(size=(self.n, self.n, self.k))
         np_testing.assert_almost_equal(np.sqrt(np.sum(u**2)), e.norm(x, u))
 
     def test_rand(self):

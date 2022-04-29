@@ -90,17 +90,17 @@ class Grassmann(_GrassmannBase):
     # matrix.
     def random_point(self):
         if self._k == 1:
-            X = np.random.randn(self._n, self._p)
+            X = np.random.normal(size=(self._n, self._p))
             q, _ = np.linalg.qr(X)
             return q
 
         X = np.zeros((self._k, self._n, self._p))
         for i in range(self._k):
-            X[i], _ = np.linalg.qr(np.random.randn(self._n, self._p))
+            X[i], _ = np.linalg.qr(np.random.normal(size=(self._n, self._p)))
         return X
 
     def random_tangent_vector(self, point):
-        tangent_vector = np.random.randn(*np.shape(point))
+        tangent_vector = np.random.normal(size=point.shape)
         tangent_vector = self.projection(point, tangent_vector)
         return tangent_vector / np.linalg.norm(tangent_vector)
 
@@ -203,8 +203,8 @@ class ComplexGrassmann(_GrassmannBase):
         if self._k == 1:
             point, _ = np.linalg.qr(
                 (
-                    np.random.randn(self._n, self._p)
-                    + 1j * np.random.randn(self._n, self._p)
+                    np.random.normal(size=(self._n, self._p))
+                    + 1j * np.random.normal(size=(self._n, self._p))
                 )
             )
             return point
@@ -213,16 +213,16 @@ class ComplexGrassmann(_GrassmannBase):
         for i in range(self._k):
             point[i], _ = np.linalg.qr(
                 (
-                    np.random.randn(self._n, self._p)
-                    + 1j * np.random.randn(self._n, self._p)
+                    np.random.normal(size=(self._n, self._p))
+                    + 1j * np.random.normal(size=(self._n, self._p))
                 )
             )
         return point
 
     def random_tangent_vector(self, point):
-        tangent_vector = np.random.randn(
-            *np.shape(point)
-        ) + 1j * np.random.randn(*np.shape(point))
+        tangent_vector = np.random.normal(
+            size=point.shape
+        ) + 1j * np.random.normal(size=point.shape)
         tangent_vector = self.projection(point, tangent_vector)
         return tangent_vector / np.linalg.norm(tangent_vector)
 

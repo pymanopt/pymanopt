@@ -217,9 +217,9 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return _FixedRankTangentVector(Up, vector.M, Vp)
 
     def random_tangent_vector(self, point):
-        Up = np.random.randn(self._m, self._k)
-        Vp = np.random.randn(self._n, self._k)
-        M = np.random.randn(self._k, self._k)
+        Up = np.random.normal(size=(self._m, self._k))
+        Vp = np.random.normal(size=(self._n, self._k))
+        M = np.random.normal(size=(self._k, self._k))
 
         tangent_vector = self.to_tangent_space(
             point, _FixedRankTangentVector(Up, M, Vp)

@@ -52,7 +52,7 @@ def create_cost_egrad(manifold, matrix, backend):
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m = 5
     n = 8
-    matrix = np.random.randn(m, n)
+    matrix = np.random.normal(size=(m, n))
 
     manifold = Oblique(m, n)
     cost, egrad = create_cost_egrad(manifold, matrix, backend)

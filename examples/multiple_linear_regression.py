@@ -64,8 +64,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = Euclidean(3)
 
     for k in range(5):
-        samples = np.random.randn(num_samples, num_weights)
-        targets = np.random.randn(num_samples)
+        samples = np.random.normal(size=(num_samples, num_weights))
+        targets = np.random.normal(size=num_samples)
 
         cost, egrad, ehess = create_cost_egrad_ehess(
             manifold, samples, targets, backend

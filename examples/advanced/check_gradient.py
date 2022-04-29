@@ -55,7 +55,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = Sphere(n)
 
     # Generate random problem data.
-    matrix = np.random.randn(n, n)
+    matrix = np.random.normal(size=(n, n))
     matrix = 0.5 * (matrix + matrix.T)
     cost, egrad = create_cost_egrad(manifold, matrix, backend)
 

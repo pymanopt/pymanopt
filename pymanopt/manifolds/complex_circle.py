@@ -74,11 +74,12 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     def random_point(self):
         dimension = self._dimension
         return self._normalize(
-            np.random.randn(dimension) + 1j * np.random.randn(dimension)
+            np.random.normal(size=dimension)
+            + 1j * np.random.normal(size=dimension)
         )
 
     def random_tangent_vector(self, point):
-        tangent_vector = np.random.randn(self._dimension) * 1j * point
+        tangent_vector = np.random.normal(size=self._dimension) * 1j * point
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):

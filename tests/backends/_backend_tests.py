@@ -44,7 +44,7 @@ class TestUnaryFunction(unittest.TestCase):
         assert cost is not None
         n = self.n
 
-        x = np.random.randn(n)
+        x = np.random.normal(size=n)
 
         # Test whether cost function accepts single argument.
         self.assertAlmostEqual(np.sum(x**2), cost(x))
@@ -54,7 +54,7 @@ class TestUnaryFunction(unittest.TestCase):
         np_testing.assert_allclose(2 * x, egrad(x))
 
         # Test the Hessian.
-        u = np.random.randn(self.n)
+        u = np.random.normal(size=self.n)
 
         # Test whether Hessian accepts two regular arguments.
         ehess = cost.compute_hessian_vector_product()
@@ -84,8 +84,8 @@ class TestNaryFunction(unittest.TestCase):
         assert cost is not None
         n = self.n
 
-        x = np.random.randn(n)
-        y = np.random.randn(n)
+        x = np.random.normal(size=n)
+        y = np.random.normal(size=n)
 
         self.assertAlmostEqual(x @ y, cost(x, y))
 
@@ -100,8 +100,8 @@ class TestNaryFunction(unittest.TestCase):
         np_testing.assert_allclose(g_y, x)
 
         # Test the Hessian-vector product.
-        u = np.random.randn(n)
-        v = np.random.randn(n)
+        u = np.random.normal(size=n)
+        v = np.random.normal(size=n)
 
         ehess = cost.compute_hessian_vector_product()
         h = ehess(x, y, u, v)
@@ -137,7 +137,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
         assert cost is not None
         n = self.n
 
-        x, y, z = [np.random.randn(n) for _ in range(3)]
+        x, y, z = [np.random.normal(size=n) for _ in range(3)]
 
         self.assertAlmostEqual(np.sum(x**2 + y + z**3), cost(x, y, z))
 
@@ -156,7 +156,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
         np_testing.assert_allclose(g_z, 3 * z**2)
 
         # Test the Hessian.
-        u, v, w = [np.random.randn(n) for _ in range(3)]
+        u, v, w = [np.random.normal(size=n) for _ in range(3)]
 
         ehess = cost.compute_hessian_vector_product()
         h = ehess(x, y, z, u, v, w)
@@ -182,8 +182,8 @@ class TestVector(unittest.TestCase):
 
         n = self.n = 15
 
-        Y = self.Y = np.random.randn(n)
-        A = self.A = np.random.randn(n)
+        Y = self.Y = np.random.normal(size=n)
+        A = self.A = np.random.normal(size=n)
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y**2))
@@ -225,8 +225,8 @@ class TestMatrix(unittest.TestCase):
         m = self.m = 10
         n = self.n = 15
 
-        Y = self.Y = np.random.randn(m, n)
-        A = self.A = np.random.randn(m, n)
+        Y = self.Y = np.random.normal(size=(m, n))
+        A = self.A = np.random.normal(size=(m, n))
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y**2))
@@ -272,8 +272,8 @@ class TestTensor3(unittest.TestCase):
         n2 = self.n2 = 4
         n3 = self.n3 = 5
 
-        Y = self.Y = np.random.randn(n1, n2, n3)
-        A = self.A = np.random.randn(n1, n2, n3)
+        Y = self.Y = np.random.normal(size=(n1, n2, n3))
+        A = self.A = np.random.normal(size=(n1, n2, n3))
 
         # Calculate correct cost and grad...
         self.correct_cost = np.exp(np.sum(Y**2))
@@ -322,14 +322,14 @@ class TestMixed(unittest.TestCase):
         n6 = self.n6 = 8
 
         self.y = y = (
-            np.random.randn(n1),
-            np.random.randn(n2, n3),
-            np.random.randn(n4, n5, n6),
+            np.random.normal(size=n1),
+            np.random.normal(size=(n2, n3)),
+            np.random.normal(size=(n4, n5, n6)),
         )
         self.a = a = (
-            np.random.randn(n1),
-            np.random.randn(n2, n3),
-            np.random.randn(n4, n5, n6),
+            np.random.normal(size=n1),
+            np.random.normal(size=(n2, n3)),
+            np.random.normal(size=(n4, n5, n6)),
         )
 
         self.correct_cost = (

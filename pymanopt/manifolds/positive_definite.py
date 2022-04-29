@@ -81,7 +81,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         # Generate an orthogonal matrix.
         u = np.zeros((self._k, self._n, self._n))
         for i in range(self._k):
-            u[i], _ = np.linalg.qr(np.random.randn(self._n, self._n))
+            u[i], _ = np.linalg.qr(np.random.normal(size=(self._n, self._n)))
 
         if self._k == 1:
             return multiprod(u, d * multitransp(u))[0]
@@ -91,9 +91,9 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         k = self._k
         n = self._n
         if k == 1:
-            tangent_vector = multisym(np.random.randn(n, n))
+            tangent_vector = multisym(np.random.normal(size=(n, n)))
         else:
-            tangent_vector = multisym(np.random.randn(k, n, n))
+            tangent_vector = multisym(np.random.normal(size=(k, n, n)))
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_b):

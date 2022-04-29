@@ -29,8 +29,8 @@ class TestSingleComplexGrassmannManifold(TestCase):
         # Test proj(proj(X)) == proj(X)
         # and proj(X) belongs to the horizontal space of Stiefel
         X = self.man.random_point()
-        U = np.random.randn(self.m, self.n) + 1j * np.random.randn(
-            self.m, self.n
+        U = np.random.normal(size=(self.m, self.n)) + 1j * np.random.normal(
+            size=(self.m, self.n)
         )
         proj_U = self.man.projection(X, U)
         proj_proj_U = self.man.projection(X, proj_U)
@@ -145,9 +145,9 @@ class TestMultiComplexGrassmannManifold(TestCase):
         # Test proj(proj(X)) == proj(X) and proj(X)
         # belongs to the horizontal space of Stiefel
         X = self.man.random_point()
-        U = np.random.randn(self.k, self.m, self.n) + 1j * np.random.randn(
-            self.k, self.m, self.n
-        )
+        U = np.random.normal(
+            size=(self.k, self.m, self.n)
+        ) + 1j * np.random.normal(size=(self.k, self.m, self.n))
         proj_U = self.man.projection(X, U)
         proj_proj_U = self.man.projection(X, proj_U)
 
