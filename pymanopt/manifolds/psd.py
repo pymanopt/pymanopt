@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 from scipy.linalg import solve_continuous_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
@@ -42,7 +41,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         return point + tangent_vector
 
     def rand(self):
-        return rnd.randn(self._n, self._k)
+        return np.random.randn(self._n, self._k)
 
     def random_tangent_vector(self, point):
         random_vector = self.rand()
@@ -226,7 +225,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         return self.projection(point, hess)
 
     def rand(self):
-        return self._normalize_rows(rnd.randn(self._n, self._k))
+        return self._normalize_rows(np.random.randn(self._n, self._k))
 
     def random_tangent_vector(self, point):
         tangent_vector = self.projection(point, self.rand())

@@ -1,6 +1,5 @@
 import numpy as np
 import numpy.linalg as la
-import numpy.random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -72,10 +71,10 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         return vector * factors
 
     def rand(self):
-        return self._normalize_columns(rnd.randn(self._m, self._n))
+        return self._normalize_columns(np.random.randn(self._m, self._n))
 
     def random_tangent_vector(self, point):
-        vector = rnd.randn(*point.shape)
+        vector = np.random.randn(*point.shape)
         tangent_vector = self.projection(point, vector)
         return tangent_vector / self.norm(point, tangent_vector)
 

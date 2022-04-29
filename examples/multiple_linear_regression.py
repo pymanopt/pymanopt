@@ -2,7 +2,6 @@ import autograd.numpy as np
 import tensorflow as tf
 import torch
 from numpy import linalg as la
-from numpy import random as rnd
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -66,8 +65,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = Euclidean(3)
 
     for k in range(5):
-        samples = rnd.randn(num_samples, num_weights)
-        targets = rnd.randn(num_samples)
+        samples = np.random.randn(num_samples, num_weights)
+        targets = np.random.randn(num_samples)
 
         cost, egrad, ehess = create_cost_egrad_ehess(
             manifold, samples, targets, backend

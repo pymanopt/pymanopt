@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 from pymanopt.tools.multi import multiskew, multisym
@@ -47,7 +46,7 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
         return point_b - point_a
 
     def rand(self):
-        return rnd.randn(*self._shape)
+        return np.random.randn(*self._shape)
 
     def random_tangent_vector(self, point):
         tangent_vector = self.rand()
@@ -116,7 +115,7 @@ class Symmetric(_Euclidean):
         return multisym(euclidean_hvp)
 
     def rand(self):
-        return multisym(rnd.randn(*self._shape))
+        return multisym(np.random.randn(*self._shape))
 
     def random_tangent_vector(self, point):
         tangent_vector = self.rand()
@@ -151,7 +150,7 @@ class SkewSymmetric(_Euclidean):
         return multiskew(euclidean_hvp)
 
     def rand(self):
-        return multiskew(rnd.randn(*self._shape))
+        return multiskew(np.random.randn(*self._shape))
 
     def random_tangent_vector(self, point):
         tangent_vector = self.rand()

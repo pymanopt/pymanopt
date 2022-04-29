@@ -1,6 +1,5 @@
 import autograd.numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import ComplexGrassmann
@@ -31,7 +30,9 @@ class TestSingleComplexGrassmannManifold(TestCase):
         # Test proj(proj(X)) == proj(X)
         # and proj(X) belongs to the horizontal space of Stiefel
         X = self.man.rand()
-        U = rnd.randn(self.m, self.n) + 1j * rnd.randn(self.m, self.n)
+        U = np.random.randn(self.m, self.n) + 1j * np.random.randn(
+            self.m, self.n
+        )
         proj_U = self.man.projection(X, U)
         proj_proj_U = self.man.projection(X, proj_U)
 
@@ -145,7 +146,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         # Test proj(proj(X)) == proj(X) and proj(X)
         # belongs to the horizontal space of Stiefel
         X = self.man.rand()
-        U = rnd.randn(self.k, self.m, self.n) + 1j * rnd.randn(
+        U = np.random.randn(self.k, self.m, self.n) + 1j * np.random.randn(
             self.k, self.m, self.n
         )
         proj_U = self.man.projection(X, U)

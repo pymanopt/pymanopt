@@ -2,7 +2,6 @@ import warnings
 
 import numpy as np
 import numpy.linalg as la
-import numpy.random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -57,11 +56,11 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         return factor * vector
 
     def rand(self):
-        point = rnd.randn(*self._shape)
+        point = np.random.randn(*self._shape)
         return self._normalize(point)
 
     def random_tangent_vector(self, point):
-        vector = rnd.randn(*self._shape)
+        vector = np.random.randn(*self._shape)
         return self._normalize(self.projection(point, vector))
 
     def transport(self, point_a, point_b, tangent_vector_a):

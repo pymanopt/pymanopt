@@ -1,7 +1,6 @@
 import time
 
 import numpy as np
-import numpy.random as rnd
 
 from pymanopt import tools
 from pymanopt.optimizers.optimizer import Optimizer
@@ -159,8 +158,10 @@ class ParticleSwarm(Optimizer):
                 # Compute the new velocity of particle i, composed of three
                 # contributions.
                 inertia = w * man.transport(xiprev, xi, vi)
-                nostalgia = rnd.rand() * self._nostalgia * man.log(xi, yi)
-                social = rnd.rand() * self._social * man.log(xi, xbest)
+                nostalgia = (
+                    np.random.rand() * self._nostalgia * man.log(xi, yi)
+                )
+                social = np.random.rand() * self._social * man.log(xi, xbest)
 
                 v[i] = inertia + nostalgia + social
 

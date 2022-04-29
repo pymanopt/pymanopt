@@ -2,7 +2,6 @@
 
 import numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 from scipy.linalg import expm, logm
 from scipy.special import comb
 
@@ -149,7 +148,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         for i in range(N):
             # Generated as such, Q is uniformly distributed over O(n), the
             # group of orthogonal n-by-n matrices.
-            A = rnd.randn(n, n)
+            A = np.random.randn(n, n)
             Q, RR = la.qr(A)
             # TODO(nkoep): Add a proper reference to Mezzadri 2007.
             Q = Q @ np.diag(np.sign(np.diag(RR)))
@@ -173,7 +172,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         idxs = np.triu_indices(n, 1)
         S = np.zeros((N, n, n))
         for i in range(N):
-            S[i][idxs] = rnd.randn(int(n * (n - 1) / 2))
+            S[i][idxs] = np.random.randn(int(n * (n - 1) / 2))
             S = S - multitransp(S)
         if N == 1:
             return S.reshape(n, n)

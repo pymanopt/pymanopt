@@ -2,7 +2,6 @@ import autograd.numpy as np
 import tensorflow as tf
 import torch
 from numpy import linalg as la
-from numpy import random as rnd
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -54,7 +53,7 @@ def create_cost_egrad(manifold, matrix, backend):
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m = 5
     n = 8
-    matrix = rnd.randn(m, n)
+    matrix = np.random.randn(m, n)
 
     manifold = Oblique(m, n)
     cost, egrad = create_cost_egrad(manifold, matrix, backend)

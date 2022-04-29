@@ -1,6 +1,5 @@
 import numpy as np
 import numpy.linalg as la
-import numpy.random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -76,11 +75,11 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     def rand(self):
         dimension = self._dimension
         return self._normalize(
-            rnd.randn(dimension) + 1j * rnd.randn(dimension)
+            np.random.randn(dimension) + 1j * np.random.randn(dimension)
         )
 
     def random_tangent_vector(self, point):
-        tangent_vector = rnd.randn(self._dimension) * 1j * point
+        tangent_vector = np.random.randn(self._dimension) * 1j * point
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):

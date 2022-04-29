@@ -1,6 +1,5 @@
 import numpy as np
 import tensorflow as tf
-from numpy import random as rnd
 from numpy import testing as np_testing
 
 import pymanopt
@@ -23,7 +22,7 @@ class TestProblem(TestCase):
 
     def test_prepare(self):
         problem = pymanopt.Problem(self.man, self.cost)
-        x = rnd.randn(self.n)
+        x = np.random.randn(self.n)
         np_testing.assert_allclose(
             2 * x * np.exp(np.sum(x**2)), problem.egrad(x)
         )

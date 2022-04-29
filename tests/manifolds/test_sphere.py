@@ -2,7 +2,6 @@ import warnings
 
 import autograd.numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import (
@@ -46,11 +45,11 @@ class TestSphereManifold(TestCase):
 
     def test_projection(self):
         #  Construct a random point X on the manifold.
-        X = rnd.randn(self.m, self.n)
+        X = np.random.randn(self.m, self.n)
         X /= la.norm(X, "fro")
 
         #  Construct a vector H in the ambient space.
-        H = rnd.randn(self.m, self.n)
+        H = np.random.randn(self.m, self.n)
 
         #  Compare the projections.
         np_testing.assert_array_almost_equal(
@@ -60,11 +59,11 @@ class TestSphereManifold(TestCase):
     def test_egrad2rgrad(self):
         # Should be the same as proj
         #  Construct a random point X on the manifold.
-        X = rnd.randn(self.m, self.n)
+        X = np.random.randn(self.m, self.n)
         X /= la.norm(X, "fro")
 
         #  Construct a vector H in the ambient space.
-        H = rnd.randn(self.m, self.n)
+        H = np.random.randn(self.m, self.n)
 
         #  Compare the projections.
         np_testing.assert_array_almost_equal(
@@ -74,8 +73,8 @@ class TestSphereManifold(TestCase):
     def test_ehess2rhess(self):
         x = self.man.rand()
         u = self.man.random_tangent_vector(x)
-        egrad = rnd.randn(self.m, self.n)
-        ehess = rnd.randn(self.m, self.n)
+        egrad = np.random.randn(self.m, self.n)
+        ehess = np.random.randn(self.m, self.n)
 
         np_testing.assert_allclose(
             testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
@@ -172,7 +171,7 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
         self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
 
     def test_projection(self):
-        h = rnd.randn(self.n)
+        h = np.random.randn(self.n)
         x = self.man.rand()
         p = self.man.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
@@ -193,7 +192,7 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
 
     def test_dim_rand(self):
         n = 100
-        U = rnd.randn(n, n // 3)
+        U = np.random.randn(n, n // 3)
         dim = la.matrix_rank(U) - 1
         man = SphereSubspaceIntersection(U)
         self.assertEqual(man.dim, dim)
@@ -219,7 +218,7 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
 
     def test_projection(self):
-        h = rnd.randn(self.n)
+        h = np.random.randn(self.n)
         x = self.man.rand()
         p = self.man.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
@@ -241,7 +240,7 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
 
     def test_dim_rand(self):
         n = 100
-        U = rnd.randn(n, n // 3)
+        U = np.random.randn(n, n // 3)
         # By the rank-nullity theorem the orthogonal complement of span(U) has
         # dimension n - rank(U).
         dim = n - la.matrix_rank(U) - 1

@@ -1,6 +1,5 @@
 import autograd.numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import StrictlyPositiveVectors
@@ -24,7 +23,7 @@ class TestStrictlyPositiveVectors(TestCase):
     def test_projection(self):
         # Test proj(proj(X)) == proj(X)
         x = self.man.rand()
-        u = rnd.randn(self.n)
+        u = np.random.randn(self.n)
         proj_u = self.man.projection(x, u)
         proj_proj_u = self.man.projection(x, proj_u)
 

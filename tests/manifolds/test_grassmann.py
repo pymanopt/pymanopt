@@ -1,6 +1,5 @@
 import autograd.numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Grassmann
@@ -30,8 +29,8 @@ class TestSingleGrassmannManifold(TestCase):
         # Test this function at some randomly generated point.
         x = self.man.rand()
         u = self.man.random_tangent_vector(x)
-        egrad = rnd.randn(self.m, self.n)
-        ehess = rnd.randn(self.m, self.n)
+        egrad = np.random.randn(self.m, self.n)
+        ehess = np.random.randn(self.m, self.n)
 
         np_testing.assert_allclose(
             testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
@@ -133,7 +132,7 @@ class TestMultiGrassmannManifold(TestCase):
         X = self.man.rand()
 
         # Construct a vector H in the ambient space.
-        H = rnd.randn(self.k, self.m, self.n)
+        H = np.random.randn(self.k, self.m, self.n)
 
         # Compare the projections.
         Hproj = H - multiprod(X, multiprod(multitransp(X), H))

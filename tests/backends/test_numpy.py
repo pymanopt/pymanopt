@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import random as rnd
 from numpy import testing as np_testing
 
 import pymanopt
@@ -30,12 +29,12 @@ class TestNumPyBackend(TestCase):
 
     def test_nary_cost_function(self):
         n = self.n
-        x, y = [rnd.randn(n) for _ in range(2)]
+        x, y = [np.random.randn(n) for _ in range(2)]
         np_testing.assert_allclose(np.sum(x * y), self.nary_cost(x, y))
 
     def test_nested_nary_cost_function(self):
         n = self.n
-        x, y, z = [rnd.randn(n) for _ in range(3)]
+        x, y, z = [np.random.randn(n) for _ in range(3)]
         np_testing.assert_allclose(
             np.sum(x**2 * y + 3 * z), self.nested_nary_cost(x, y, z)
         )

@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Symmetric
@@ -24,7 +23,7 @@ class TestSymmetricManifold(TestCase):
 
     def test_dist(self):
         e = self.man
-        x, y = rnd.randn(2, self.k, self.n, self.n)
+        x, y = np.random.randn(2, self.k, self.n, self.n)
         np_testing.assert_almost_equal(e.dist(x, y), la.norm(x - y))
 
     def test_inner(self):
@@ -44,7 +43,7 @@ class TestSymmetricManifold(TestCase):
         e = self.man
         x = e.rand()
         u = e.random_tangent_vector(x)
-        egrad, ehess = rnd.randn(2, self.k, self.n, self.n)
+        egrad, ehess = np.random.randn(2, self.k, self.n, self.n)
         np_testing.assert_allclose(
             e.ehess2rhess(x, egrad, ehess, u), multisym(ehess)
         )
@@ -64,7 +63,7 @@ class TestSymmetricManifold(TestCase):
     def test_norm(self):
         e = self.man
         x = e.rand()
-        u = rnd.randn(self.n, self.n, self.k)
+        u = np.random.randn(self.n, self.n, self.k)
         np_testing.assert_almost_equal(np.sqrt(np.sum(u**2)), e.norm(x, u))
 
     def test_rand(self):

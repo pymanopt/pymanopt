@@ -2,7 +2,6 @@ import autograd.numpy as np
 import tensorflow as tf
 import torch
 from numpy import linalg as la
-from numpy import random as rnd
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -60,7 +59,7 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     num_rows = 1000
     rank = 5
-    low_rank_factor = rnd.randn(num_rows, rank)
+    low_rank_factor = np.random.randn(num_rows, rank)
     matrix = low_rank_factor @ low_rank_factor.T
 
     manifold = PSDFixedRank(num_rows, rank)

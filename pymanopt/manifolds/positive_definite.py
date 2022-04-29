@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import linalg as la
-from numpy import random as rnd
 from scipy.linalg import expm
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
@@ -76,12 +75,14 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 
     def rand(self):
         # Generate eigenvalues between 1 and 2.
-        d = np.ones((self._k, self._n, 1)) + rnd.rand(self._k, self._n, 1)
+        d = np.ones((self._k, self._n, 1)) + np.random.rand(
+            self._k, self._n, 1
+        )
 
         # Generate an orthogonal matrix.
         u = np.zeros((self._k, self._n, self._n))
         for i in range(self._k):
-            u[i], _ = la.qr(rnd.randn(self._n, self._n))
+            u[i], _ = la.qr(np.random.randn(self._n, self._n))
 
         if self._k == 1:
             return multiprod(u, d * multitransp(u))[0]
@@ -91,9 +92,9 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         k = self._k
         n = self._n
         if k == 1:
-            tangent_vector = multisym(rnd.randn(n, n))
+            tangent_vector = multisym(np.random.randn(n, n))
         else:
-            tangent_vector = multisym(rnd.randn(k, n, n))
+            tangent_vector = multisym(np.random.randn(k, n, n))
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_b):
