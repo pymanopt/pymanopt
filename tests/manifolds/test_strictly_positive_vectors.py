@@ -21,12 +21,12 @@ class TestStrictlyPositiveVectors(TestCase):
         h = self.man.randvec(x)
         assert (self.man.inner(x, g, h).shape == np.array([1, self.k])).all()
 
-    def test_proj(self):
+    def test_projection(self):
         # Test proj(proj(X)) == proj(X)
         x = self.man.rand()
         u = rnd.randn(self.n)
-        proj_u = self.man.proj(x, u)
-        proj_proj_u = self.man.proj(x, proj_u)
+        proj_u = self.man.projection(x, u)
+        proj_proj_u = self.man.projection(x, proj_u)
 
         np_testing.assert_allclose(proj_u, proj_proj_u)
 

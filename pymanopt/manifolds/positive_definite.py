@@ -52,7 +52,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
             p_inv_tv_a, multitransp(p_inv_tv_b), axes=tangent_vector_a.ndim
         )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return multisym(vector)
 
     def egrad2rgrad(self, point, euclidean_gradient):

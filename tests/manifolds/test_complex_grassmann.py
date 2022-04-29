@@ -16,7 +16,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         self.k = k = 1
         self.man = ComplexGrassmann(m, n, k=k)
 
-        self.proj = lambda x, u: u - x @ x.T @ u
+        self.projection = lambda x, u: u - x @ x.T @ u
 
     def test_inner(self):
         X = self.man.rand()
@@ -27,13 +27,13 @@ class TestSingleComplexGrassmannManifold(TestCase):
         )
         assert np.isreal(self.man.inner(X, G, H))
 
-    def test_proj(self):
+    def test_projection(self):
         # Test proj(proj(X)) == proj(X)
         # and proj(X) belongs to the horizontal space of Stiefel
         X = self.man.rand()
         U = rnd.randn(self.m, self.n) + 1j * rnd.randn(self.m, self.n)
-        proj_U = self.man.proj(X, U)
-        proj_proj_U = self.man.proj(X, proj_U)
+        proj_U = self.man.projection(X, U)
+        proj_proj_U = self.man.projection(X, proj_U)
 
         np_testing.assert_allclose(proj_U, proj_proj_U)
 
@@ -141,15 +141,15 @@ class TestMultiComplexGrassmannManifold(TestCase):
         )
         assert np.isreal(self.man.inner(X, G, H))
 
-    def test_proj(self):
+    def test_projection(self):
         # Test proj(proj(X)) == proj(X) and proj(X)
         # belongs to the horizontal space of Stiefel
         X = self.man.rand()
         U = rnd.randn(self.k, self.m, self.n) + 1j * rnd.randn(
             self.k, self.m, self.n
         )
-        proj_U = self.man.proj(X, U)
-        proj_proj_U = self.man.proj(X, proj_U)
+        proj_U = self.man.projection(X, U)
+        proj_proj_U = self.man.projection(X, proj_U)
 
         np_testing.assert_allclose(proj_U, proj_proj_U)
 

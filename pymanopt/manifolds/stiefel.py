@@ -43,7 +43,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - multiprod(
             point, multisym(multiprod(multitransp(point), vector))
         )
@@ -54,7 +54,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
         XtG = multiprod(multitransp(point), euclidean_gradient)
         symXtG = multisym(XtG)
         HsymXtG = multiprod(tangent_vector, symXtG)
-        return self.proj(point, euclidean_hvp - HsymXtG)
+        return self.projection(point, euclidean_hvp - HsymXtG)
 
     def retraction(self, point, tangent_vector):
         if self._k == 1:
@@ -83,11 +83,11 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
 
     def randvec(self, point):
         vector = np.random.randn(*np.shape(point))
-        vector = self.proj(point, vector)
+        vector = self.projection(point, vector)
         return vector / np.linalg.norm(vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+        return self.projection(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):
         if self._k == 1:

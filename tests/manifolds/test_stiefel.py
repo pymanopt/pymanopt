@@ -16,7 +16,7 @@ class TestSingleStiefelManifold(TestCase):
         self.n = n = 2
         self.k = k = 1
         self.man = Stiefel(m, n, k=k)
-        self.proj = lambda x, u: u - x @ (x.T @ u + u.T @ x) / 2
+        self.projection = lambda x, u: u - x @ (x.T @ u + u.T @ x) / 2
 
     def test_dim(self):
         assert self.man.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
@@ -30,7 +30,7 @@ class TestSingleStiefelManifold(TestCase):
         A, B = rnd.randn(2, self.m, self.n)
         np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
-    def test_proj(self):
+    def test_projection(self):
         # Construct a random point X on the manifold.
         X = rnd.randn(self.m, self.n)
         X = la.qr(X)[0]
@@ -40,7 +40,7 @@ class TestSingleStiefelManifold(TestCase):
 
         # Compare the projections.
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
-        np_testing.assert_allclose(Hproj, self.man.proj(X, H))
+        np_testing.assert_allclose(Hproj, self.man.projection(X, H))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
@@ -84,7 +84,7 @@ class TestSingleStiefelManifold(TestCase):
         ehess = rnd.randn(self.m, self.n)
 
         np_testing.assert_allclose(
-            testing.ehess2rhess(self.proj)(x, egrad, ehess, u),
+            testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
             self.man.ehess2rhess(x, egrad, ehess, u),
         )
 
@@ -160,7 +160,7 @@ class TestMultiStiefelManifold(TestCase):
         B = self.man.randvec(X)
         np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
-    def test_proj(self):
+    def test_projection(self):
         # Construct a random point X on the manifold.
         X = self.man.rand()
 
@@ -175,7 +175,7 @@ class TestMultiStiefelManifold(TestCase):
             )
             / 2
         )
-        np_testing.assert_allclose(Hproj, self.man.proj(X, H))
+        np_testing.assert_allclose(Hproj, self.man.projection(X, H))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that

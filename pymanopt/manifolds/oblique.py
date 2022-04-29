@@ -39,14 +39,14 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         XY[XY > 1] = 1
         return la.norm(np.arccos(XY))
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - point * ((point * vector).sum(0)[np.newaxis, :])
 
     def ehess2rhess(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         # TODO(nkoep): Implement 'weingarten' instead.
-        PXehess = self.proj(point, euclidean_hvp)
+        PXehess = self.projection(point, euclidean_hvp)
         return PXehess - tangent_vector * (
             (point * euclidean_gradient).sum(0)[np.newaxis, :]
         )
@@ -62,7 +62,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         return self._normalize_columns(point + tangent_vector)
 
     def log(self, point_a, point_b):
-        vector = self.proj(point_a, point_b - point_a)
+        vector = self.projection(point_a, point_b - point_a)
         distances = np.arccos((point_a * point_b).sum(0))
         norms = np.sqrt((vector**2).sum(0)).real
         # Try to avoid zero-division when both distances and norms are almost
@@ -76,11 +76,11 @@ class Oblique(EuclideanEmbeddedSubmanifold):
 
     def randvec(self, point):
         vector = rnd.randn(*point.shape)
-        tangent_vector = self.proj(point, vector)
+        tangent_vector = self.projection(point, vector)
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+        return self.projection(point_b, tangent_vector_a)
 
     def pair_mean(self, point_a, point_b):
         return self._normalize_columns(point_a + point_b)

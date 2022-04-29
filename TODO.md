@@ -8,9 +8,9 @@
     # Long forms
     * rand -> random_point
     * randvec -> random_vector
-    * proj -> projection
     * tangent -> to_tangent_space
     * zerovec -> zero_vector
+    * tangent2ambient -> tangent_to_ambient
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp

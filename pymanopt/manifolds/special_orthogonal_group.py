@@ -75,7 +75,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     def dist(self, point_a, point_b):
         return self.norm(point_a, self.log(point_a, point_b))
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return multiskew(multiprod(multitransp(point), vector))
 
     def tangent(self, point, vector):

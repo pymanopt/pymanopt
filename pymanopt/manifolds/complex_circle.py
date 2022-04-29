@@ -35,15 +35,15 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     def typical_dist(self):
         return np.pi * np.sqrt(self._dimension)
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - (vector.conj() * point).real * point
 
-    tangent = proj
+    tangent = projection
 
     def ehess2rhess(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
-        return self.proj(
+        return self.projection(
             point,
             euclidean_hvp
             - (point * euclidean_gradient.conj()).real * tangent_vector,
@@ -66,7 +66,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         return self._normalize(point + tangent_vector)
 
     def log(self, x1, x2):
-        v = self.proj(x1, x2 - x1)
+        v = self.projection(x1, x2 - x1)
         abs_v = np.abs(v)
         di = np.arccos((x1.conj() * x2).real)
         factors = di / abs_v
@@ -84,7 +84,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+        return self.projection(point_b, tangent_vector_a)
 
     def pair_mean(self, point_a, point_b):
         return self._normalize(point_a + point_b)

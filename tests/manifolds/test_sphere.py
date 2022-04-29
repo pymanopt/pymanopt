@@ -22,7 +22,7 @@ class TestSphereManifold(TestCase):
         self.man = Sphere(m, n)
 
         # For automatic testing of ehess2rhess
-        self.proj = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
+        self.projection = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
 
     def test_dim(self):
         assert self.man.dim == self.m * self.n - 1
@@ -44,7 +44,7 @@ class TestSphereManifold(TestCase):
         v = s.randvec(x)
         np_testing.assert_almost_equal(np.sum(u * v), s.inner(x, u, v))
 
-    def test_proj(self):
+    def test_projection(self):
         #  Construct a random point X on the manifold.
         X = rnd.randn(self.m, self.n)
         X /= la.norm(X, "fro")
@@ -54,7 +54,7 @@ class TestSphereManifold(TestCase):
 
         #  Compare the projections.
         np_testing.assert_array_almost_equal(
-            H - X * np.trace(X.T @ H), self.man.proj(X, H)
+            H - X * np.trace(X.T @ H), self.man.projection(X, H)
         )
 
     def test_egrad2rgrad(self):
@@ -78,7 +78,7 @@ class TestSphereManifold(TestCase):
         ehess = rnd.randn(self.m, self.n)
 
         np_testing.assert_allclose(
-            testing.ehess2rhess(self.proj)(x, egrad, ehess, u),
+            testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
             self.man.ehess2rhess(x, egrad, ehess, u),
         )
 
@@ -128,7 +128,7 @@ class TestSphereManifold(TestCase):
         y = s.rand()
         u = s.randvec(x)
 
-        np_testing.assert_allclose(s.transport(x, y, u), s.proj(y, u))
+        np_testing.assert_allclose(s.transport(x, y, u), s.projection(y, u))
 
     def test_exp_log_inverse(self):
         s = self.man
@@ -171,10 +171,10 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
         # The manifold only consists of two isolated points (cf. `setUp()`).
         self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
 
-    def test_proj(self):
+    def test_projection(self):
         h = rnd.randn(self.n)
         x = self.man.rand()
-        p = self.man.proj(x, h)
+        p = self.man.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
         np_testing.assert_array_almost_equal(p, np.zeros(self.n))
@@ -218,10 +218,10 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         p = np.array([-1, 1]) / np.sqrt(2)
         self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
 
-    def test_proj(self):
+    def test_projection(self):
         h = rnd.randn(self.n)
         x = self.man.rand()
-        p = self.man.proj(x, h)
+        p = self.man.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
         np_testing.assert_array_almost_equal(p, np.zeros(self.n))

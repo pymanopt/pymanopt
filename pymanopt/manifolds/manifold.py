@@ -124,7 +124,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         """Projects vector in the ambient space on the tangent space."""
 
     @abc.abstractmethod
@@ -251,15 +251,15 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
     """
 
     def egrad2rgrad(self, point, euclidean_gradient):
-        return self.proj(point, euclidean_gradient)
+        return self.projection(point, euclidean_gradient)
 
     def ehess2rhess(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
-        normal_gradient = euclidean_gradient - self.proj(
+        normal_gradient = euclidean_gradient - self.projection(
             point, euclidean_gradient
         )
-        return self.proj(point, euclidean_hvp) + self.weingarten(
+        return self.projection(point, euclidean_hvp) + self.weingarten(
             point, tangent_vector, normal_gradient
         )
 

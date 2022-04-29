@@ -19,7 +19,7 @@ class TestObliqueManifold(TestCase):
 
     # def test_inner(self):
 
-    # def test_proj(self):
+    # def test_projection(self):
 
     # def test_ehess2rhess(self):
 

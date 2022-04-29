@@ -36,7 +36,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
             keepdims=True,
         )
 
-    def proj(self, point, tangent_vector):
+    def projection(self, point, tangent_vector):
         return tangent_vector
 
     def norm(self, point, tangent_vector):

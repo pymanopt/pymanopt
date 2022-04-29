@@ -30,7 +30,7 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def dist(self, point_a, point_b):
         return la.norm(point_a - point_b)
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector
 
     def ehess2rhess(
@@ -107,7 +107,7 @@ class Symmetric(_Euclidean):
         dimension = int(k * n * (n + 1) / 2)
         super().__init__(name, dimension, *shape)
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return multisym(vector)
 
     def ehess2rhess(
@@ -142,7 +142,7 @@ class SkewSymmetric(_Euclidean):
         dimension = int(k * n * (n - 1) / 2)
         super().__init__(name, dimension, *shape)
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return multiskew(vector)
 
     def ehess2rhess(

@@ -143,11 +143,11 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
             man.inner(x, multiprod(x, a), multiprod(x, b)),
         )
 
-    def test_proj(self):
+    def test_projection(self):
         man = self.man
         x = man.rand()
         a = rnd.randn(self.k, self.n, self.n)
-        np.testing.assert_allclose(man.proj(x, a), multisym(a))
+        np.testing.assert_allclose(man.projection(x, a), multisym(a))
 
     def test_egrad2rgrad(self):
         man = self.man

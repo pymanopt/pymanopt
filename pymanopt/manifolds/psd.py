@@ -24,7 +24,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def norm(self, point, tangent_vector):
         return la.norm(tangent_vector, "fro")
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         YtY = point.T @ point
         AS = point.T @ vector - vector.T @ point
         Omega = lyap(YtY, AS)
@@ -36,7 +36,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def ehess2rhess(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
-        return self.proj(point, euclidean_hvp)
+        return self.projection(point, euclidean_hvp)
 
     def retraction(self, point, tangent_vector):
         return point + tangent_vector
@@ -46,11 +46,11 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
 
     def randvec(self, point):
         random_vector = self.rand()
-        tangent_vector = self.proj(point, random_vector)
+        tangent_vector = self.projection(point, random_vector)
         return self._normalize(tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+        return self.projection(point_b, tangent_vector_a)
 
     def _normalize(self, array):
         return array / self.norm(None, array)
@@ -201,7 +201,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
     def norm(self, point, tangent_vector):
         return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         eta = self._project_rows(point, vector)
         YtY = point.T @ point
         AS = point.T @ eta - vector.T @ point
@@ -223,17 +223,17 @@ class Elliptope(Manifold, RetrAsExpMixin):
             tangent_vector * euclidean_gradient + point * euclidean_hvp
         ).sum(axis=1)
         hess -= point * scaling_hess[:, np.newaxis]
-        return self.proj(point, hess)
+        return self.projection(point, hess)
 
     def rand(self):
         return self._normalize_rows(rnd.randn(self._n, self._k))
 
     def randvec(self, point):
-        tangent_vector = self.proj(point, self.rand())
+        tangent_vector = self.projection(point, self.rand())
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+        return self.projection(point_b, tangent_vector_a)
 
     def _normalize_rows(self, array):
         """Return an l2-row-normalized copy of an array."""

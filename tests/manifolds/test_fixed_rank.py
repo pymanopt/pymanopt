@@ -44,7 +44,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         x = m.rand()
         v = np.random.randn(self.m, self.n)
 
-        g = m.proj(x, v)
+        g = m.projection(x, v)
         # Check that g is a true tangent vector
         np_testing.assert_allclose(
             g[0].T @ x[0], np.zeros((self.k, self.k)), atol=1e-6
@@ -53,7 +53,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
             g[2].T @ x[2].T, np.zeros((self.k, self.k)), atol=1e-6
         )
 
-    def test_proj(self):
+    def test_projection(self):
         # Verify that proj gives the closest point within the tangent space
         # by displacing the result slightly and checking that this increases
         # the distance.
@@ -61,7 +61,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         x = self.man.rand()
         v = np.random.randn(self.m, self.n)
 
-        g = m.proj(x, v)
+        g = m.projection(x, v)
         # Displace g a little
         g_disp = g + 0.01 * m.randvec(x)
 
@@ -78,7 +78,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         e = self.man
         x = e.rand()
         u = e.randvec(x)
-        A = e.proj(x, e.tangent2ambient(x, u))
+        A = e.projection(x, e.tangent2ambient(x, u))
         B = u
         # diff = [A[k]-B[k] for k in range(len(A))]
         np_testing.assert_allclose(A[0], B[0])
@@ -111,7 +111,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         y = s.rand()
         u = s.randvec(x)
         A = s.transport(x, y, u)
-        B = s.proj(y, s.tangent2ambient(x, u))
+        B = s.projection(y, s.tangent2ambient(x, u))
         diff = [A[k] - B[k] for k in range(len(A))]
         np_testing.assert_almost_equal(s.norm(y, diff), 0)
 

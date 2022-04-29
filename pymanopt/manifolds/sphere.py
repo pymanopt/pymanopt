@@ -36,7 +36,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         inner = max(min(self.inner(point_a, point_a, point_b), 1), -1)
         return np.arccos(inner)
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - self.inner(point, point, vector) * point
 
     def weingarten(self, point, tangent_vector, normal_vector):
@@ -50,7 +50,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         return self._normalize(point + tangent_vector)
 
     def log(self, point_a, point_b):
-        vector = self.proj(point_a, point_b - point_a)
+        vector = self.projection(point_a, point_b - point_a)
         distance = self.dist(point_a, point_b)
         epsilon = np.finfo(np.float64).eps
         factor = (distance + epsilon) / (self.norm(point_a, vector) + epsilon)
@@ -62,10 +62,10 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
 
     def randvec(self, point):
         vector = rnd.randn(*self._shape)
-        return self._normalize(self.proj(point, vector))
+        return self._normalize(self.projection(point, vector))
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+        return self.projection(point_b, tangent_vector_a)
 
     def pair_mean(self, point_a, point_b):
         return self._normalize(point_a + point_b)
@@ -123,8 +123,8 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
                 "The span matrix cannot have fewer rows than columns"
             )
 
-    def proj(self, point, vector):
-        return self._subspace_projector @ super().proj(point, vector)
+    def projection(self, point, vector):
+        return self._subspace_projector @ super().projection(point, vector)
 
     def rand(self):
         point = super().rand()

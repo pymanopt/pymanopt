@@ -61,7 +61,7 @@ class Product(Manifold):
             reduction=lambda values: np.sqrt(np.sum(values)),
         )(point_a, point_b)
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return self._dispatch("proj", reduction=_ProductTangentVector)(
             point, vector
         )

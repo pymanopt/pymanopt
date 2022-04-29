@@ -46,7 +46,7 @@ def ehess2rhess(proj):
     explicitly.
     """
     # Differentiate proj w.r.t. the first argument
-    d_proj = jacobian(proj)
+    jacobian_proj = jacobian(proj)
     return lambda x, egrad, ehess, u: proj(
-        x, ehess + np.tensordot(d_proj(x, egrad), u, axes=u.ndim)
+        x, ehess + np.tensordot(jacobian_proj(x, egrad), u, axes=u.ndim)
     )

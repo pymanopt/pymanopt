@@ -14,7 +14,7 @@ class _GrassmannBase(Manifold):
         return np.linalg.norm(tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+        return self.projection(point_b, tangent_vector_a)
 
     def zerovec(self, point):
         if self._k == 1:
@@ -22,7 +22,7 @@ class _GrassmannBase(Manifold):
         return np.zeros((self._k, self._n, self._p))
 
     def egrad2rgrad(self, point, euclidean_gradient):
-        return self.proj(point, euclidean_gradient)
+        return self.projection(point, euclidean_gradient)
 
 
 class Grassmann(_GrassmannBase):
@@ -66,13 +66,13 @@ class Grassmann(_GrassmannBase):
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - multiprod(point, multiprod(multitransp(point), vector))
 
     def ehess2rhess(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
-        PXehess = self.proj(point, euclidean_hvp)
+        PXehess = self.projection(point, euclidean_hvp)
         XtG = multiprod(multitransp(point), euclidean_gradient)
         HXtG = multiprod(tangent_vector, XtG)
         return PXehess - HXtG
@@ -101,7 +101,7 @@ class Grassmann(_GrassmannBase):
 
     def randvec(self, point):
         tangent_vector = np.random.randn(*np.shape(point))
-        tangent_vector = self.proj(point, tangent_vector)
+        tangent_vector = self.projection(point, tangent_vector)
         return tangent_vector / np.linalg.norm(tangent_vector)
 
     def exp(self, point, tangent_vector):
@@ -179,13 +179,13 @@ class ComplexGrassmann(_GrassmannBase):
             )
         )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - multiprod(point, multiprod(multihconj(point), vector))
 
     def ehess2rhess(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
-        PXehess = self.proj(point, euclidean_hvp)
+        PXehess = self.projection(point, euclidean_hvp)
         XHG = multiprod(multihconj(point), euclidean_gradient)
         HXHG = multiprod(tangent_vector, XHG)
         return PXehess - HXHG
@@ -223,7 +223,7 @@ class ComplexGrassmann(_GrassmannBase):
         tangent_vector = np.random.randn(
             *np.shape(point)
         ) + 1j * np.random.randn(*np.shape(point))
-        tangent_vector = self.proj(point, tangent_vector)
+        tangent_vector = self.projection(point, tangent_vector)
         return tangent_vector / np.linalg.norm(tangent_vector)
 
     def exp(self, point, tangent_vector):

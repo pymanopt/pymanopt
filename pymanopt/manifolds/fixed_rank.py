@@ -110,7 +110,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
             return vector[2] @ vector[1] @ vector[0].T @ matrix
         return vector.T @ matrix
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         """Project vector to tangent space.
 
         Note that ``vector`` must either be an m x n matrix from the ambient
@@ -249,7 +249,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return U, S, V
 
     def transport(self, point_a, point_b, tangent_vector_a):
-        return self.proj(
+        return self.projection(
             point_b, self.tangent2ambient(point_a, tangent_vector_a)
         )
 

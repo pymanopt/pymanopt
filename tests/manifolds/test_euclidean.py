@@ -34,11 +34,11 @@ class TestEuclideanManifold(TestCase):
         z = e.randvec(x)
         np_testing.assert_almost_equal(np.sum(y * z), e.inner(x, y, z))
 
-    def test_proj(self):
+    def test_projection(self):
         e = self.man
         x = e.rand()
         u = e.randvec(x)
-        np_testing.assert_allclose(e.proj(x, u), u)
+        np_testing.assert_allclose(e.projection(x, u), u)
 
     def test_ehess2rhess(self):
         e = self.man

@@ -17,7 +17,7 @@ class TestSingleGrassmannManifold(TestCase):
         self.k = k = 1
         self.man = Grassmann(m, n, k=k)
 
-        self.proj = lambda x, u: u - x @ x.T @ u
+        self.projection = lambda x, u: u - x @ x.T @ u
 
     def test_dist(self):
         x = self.man.rand()
@@ -34,7 +34,7 @@ class TestSingleGrassmannManifold(TestCase):
         ehess = rnd.randn(self.m, self.n)
 
         np_testing.assert_allclose(
-            testing.ehess2rhess(self.proj)(x, egrad, ehess, u),
+            testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
             self.man.ehess2rhess(x, egrad, ehess, u),
         )
 
@@ -105,7 +105,7 @@ class TestMultiGrassmannManifold(TestCase):
         self.k = k = 3
         self.man = Grassmann(m, n, k=k)
 
-        self.proj = lambda x, u: u - x @ x.T @ u
+        self.projection = lambda x, u: u - x @ x.T @ u
 
     def test_dim(self):
         assert self.man.dim == self.k * (self.m * self.n - self.n**2)
@@ -128,7 +128,7 @@ class TestMultiGrassmannManifold(TestCase):
         B = self.man.randvec(X)
         np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
-    def test_proj(self):
+    def test_projection(self):
         # Construct a random point X on the manifold.
         X = self.man.rand()
 
@@ -137,7 +137,7 @@ class TestMultiGrassmannManifold(TestCase):
 
         # Compare the projections.
         Hproj = H - multiprod(X, multiprod(multitransp(X), H))
-        np_testing.assert_allclose(Hproj, self.man.proj(X, H))
+        np_testing.assert_allclose(Hproj, self.man.projection(X, H))
 
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
