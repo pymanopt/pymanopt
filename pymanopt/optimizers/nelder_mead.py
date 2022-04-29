@@ -94,7 +94,7 @@ class NelderMead(Optimizer):
         # If no initial simplex x is given by the user, generate one at random.
         num_points = int(dim + 1)
         if initial_point is None:
-            x = [manifold.rand() for _ in range(num_points)]
+            x = [manifold.random_point() for _ in range(num_points)]
         elif (
             tools.is_sequence(initial_point)
             and len(initial_point) != num_points

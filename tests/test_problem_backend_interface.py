@@ -27,11 +27,11 @@ class TestProblemBackendInterface(TestCase):
         self.problem = pymanopt.Problem(self.manifold, self.cost)
 
     def test_cost_function(self):
-        (u, s, vt), x = self.manifold.rand()
+        (u, s, vt), x = self.manifold.random_point()
         self.cost(u, s, vt, x)
 
     def test_gradient(self):
-        (u, s, vt), x = self.manifold.rand()
+        (u, s, vt), x = self.manifold.random_point()
         gu, gs, gvt, gx = self.gradient(u, s, vt, x)
         self.assertEqual(gu.shape, (self.m, self.rank))
         self.assertEqual(gs.shape, (self.rank,))
@@ -39,8 +39,8 @@ class TestProblemBackendInterface(TestCase):
         self.assertEqual(gx.shape, (self.n,))
 
     def test_hessian_vector_product(self):
-        (u, s, vt), x = self.manifold.rand()
-        (a, b, c), d = self.manifold.rand()
+        (u, s, vt), x = self.manifold.random_point()
+        (a, b, c), d = self.manifold.random_point()
         hu, hs, hvt, hx = self.hvp(u, s, vt, x, a, b, c, d)
         self.assertEqual(hu.shape, (self.m, self.rank))
         self.assertEqual(hs.shape, (self.rank,))
@@ -49,13 +49,13 @@ class TestProblemBackendInterface(TestCase):
 
     def test_problem_cost(self):
         cost = self.problem.cost
-        X = self.manifold.rand()
+        X = self.manifold.random_point()
         (u, s, vt), x = X
         np_testing.assert_allclose(cost(X), self.cost(u, s, vt, x))
 
     def test_problem_egrad(self):
         egrad = self.problem.egrad
-        X = self.manifold.rand()
+        X = self.manifold.random_point()
         (u, s, vt), x = X
         G = egrad(X)
         (gu, gs, gvt), gx = G
@@ -64,8 +64,8 @@ class TestProblemBackendInterface(TestCase):
 
     def test_problem_hessian_vector_product(self):
         ehess = self.problem.ehess
-        X = self.manifold.rand()
-        U = self.manifold.rand()
+        X = self.manifold.random_point()
+        U = self.manifold.random_point()
         H = ehess(X, U)
 
         (u, s, vt), x = X

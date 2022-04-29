@@ -135,7 +135,7 @@ class TrustRegions(Optimizer):
 
         # If no starting point is specified, generate one at random.
         if initial_point is None:
-            x = man.rand()
+            x = man.random_point()
         else:
             x = initial_point
 

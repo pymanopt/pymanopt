@@ -71,7 +71,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         factors[di <= 1e-6] = 1
         return v * factors
 
-    def rand(self):
+    def random_point(self):
         dimension = self._dimension
         return self._normalize(
             np.random.randn(dimension) + 1j * np.random.randn(dimension)

@@ -54,7 +54,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         factor = (distance + epsilon) / (self.norm(point_a, vector) + epsilon)
         return factor * vector
 
-    def rand(self):
+    def random_point(self):
         point = np.random.randn(*self._shape)
         return self._normalize(point)
 
@@ -124,8 +124,8 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
     def projection(self, point, vector):
         return self._subspace_projector @ super().projection(point, vector)
 
-    def rand(self):
-        point = super().rand()
+    def random_point(self):
+        point = super().random_point()
         return self._normalize(self._subspace_projector @ point)
 
     def random_tangent_vector(self, point):

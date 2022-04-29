@@ -70,7 +70,7 @@ class TestMulti(TestCase):
         np_testing.assert_allclose(A, multieye(self.k, self.n))
 
     def test_multilog_singlemat(self):
-        a = np.diag(np.random.rand(self.m))
+        a = np.diag(np.random.uniform(size=self.m))
         q, r = np.linalg.qr(np.random.randn(self.m, self.m))
         # A is a positive definite matrix
         A = q @ a @ q.T
@@ -80,7 +80,7 @@ class TestMulti(TestCase):
         A = np.zeros((self.k, self.m, self.m))
         L = np.zeros((self.k, self.m, self.m))
         for i in range(self.k):
-            a = np.diag(np.random.rand(self.m))
+            a = np.diag(np.random.uniform(size=self.m))
             q, r = np.linalg.qr(np.random.randn(self.m, self.m))
             A[i] = q @ a @ q.T
             L[i] = logm(A[i])

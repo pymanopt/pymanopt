@@ -302,6 +302,6 @@ class LineSearchMoG:
                     for k in range(newx[0].shape[0])
                 ]
             )
-            x[0][replace, :, :] = manifold.rand()[0][replace, :, :]
+            x[0][replace, :, :] = manifold.random_point()[0][replace, :, :]
             return x, objective(x), True
         return newx, newf, False

@@ -40,7 +40,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     def norm(self, point, tangent_vector):
         return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
-    def rand(self):
+    def random_point(self):
         return np.random.uniform(low=1e-6, high=1, size=(self._n, self._k))
 
     def random_tangent_vector(self, point):

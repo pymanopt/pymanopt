@@ -19,7 +19,7 @@ def manifold_factory(point_layout):
         inner = _generic
         norm = _generic
         projection = _generic
-        rand = _generic
+        random_point = _generic
         random_tangent_vector = _generic
         zero_vector = _generic
 

@@ -132,7 +132,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """Computes the norm of a tangent vector at a point on the manifold."""
 
     @abc.abstractmethod
-    def rand(self):
+    def random_point(self):
         """Returns a random point on the manifold."""
 
     @abc.abstractmethod

@@ -69,7 +69,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         factors = (distances + epsilon) / (norms + epsilon)
         return vector * factors
 
-    def rand(self):
+    def random_point(self):
         return self._normalize_columns(np.random.randn(self._m, self._n))
 
     def random_tangent_vector(self, point):

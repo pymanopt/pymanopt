@@ -37,15 +37,15 @@ class TestObliqueManifold(TestCase):
 
     def test_exp_log_inverse(self):
         s = self.man
-        x = s.rand()
-        y = s.rand()
+        x = s.random_point()
+        y = s.random_point()
         u = s.log(x, y)
         z = s.exp(x, u)
         np_testing.assert_almost_equal(0, s.dist(y, z), decimal=6)
 
     def test_log_exp_inverse(self):
         s = self.man
-        x = s.rand()
+        x = s.random_point()
         u = s.random_tangent_vector(x)
         y = s.exp(x, u)
         v = s.log(x, y)
@@ -55,7 +55,7 @@ class TestObliqueManifold(TestCase):
 
     def test_pair_mean(self):
         s = self.man
-        X = s.rand()
-        Y = s.rand()
+        X = s.random_point()
+        Y = s.random_point()
         Z = s.pair_mean(X, Y)
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

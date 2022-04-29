@@ -21,7 +21,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
     def test_dist(self):
         e = self.man
-        a = e.rand()
+        a = e.random_point()
         x = e.random_tangent_vector(a)
         y = e.random_tangent_vector(a)
         with self.assertRaises(NotImplementedError):
@@ -29,7 +29,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
     def test_inner(self):
         e = self.man
-        x = e.rand()
+        x = e.random_point()
         a = e.random_tangent_vector(x)
         b = e.random_tangent_vector(x)
         # First embed in the ambient space
@@ -40,7 +40,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
     def test_proj_range(self):
         m = self.man
-        x = m.rand()
+        x = m.random_point()
         v = np.random.randn(self.m, self.n)
 
         g = m.projection(x, v)
@@ -57,7 +57,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         # by displacing the result slightly and checking that this increases
         # the distance.
         m = self.man
-        x = self.man.rand()
+        x = self.man.random_point()
         v = np.random.randn(self.m, self.n)
 
         g = m.projection(x, v)
@@ -75,7 +75,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
     def test_proj_tangents(self):
         # Verify that proj leaves tangent vectors unchanged
         e = self.man
-        x = e.rand()
+        x = e.random_point()
         u = e.random_tangent_vector(x)
         A = e.projection(x, e.tangent_to_ambient(x, u))
         B = u
@@ -86,14 +86,14 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
     def test_norm(self):
         e = self.man
-        x = e.rand()
+        x = e.random_point()
         u = e.random_tangent_vector(x)
         np_testing.assert_almost_equal(np.sqrt(e.inner(x, u, u)), e.norm(x, u))
 
     def test_rand(self):
         e = self.man
-        x = e.rand()
-        y = e.rand()
+        x = e.random_point()
+        y = e.random_point()
         assert np.shape(x[0]) == (self.m, self.k)
         assert np.shape(x[1]) == (self.k,)
         assert np.shape(x[2]) == (self.k, self.n)
@@ -106,8 +106,8 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
     def test_transport(self):
         s = self.man
-        x = s.rand()
-        y = s.rand()
+        x = s.random_point()
+        y = s.random_point()
         u = s.random_tangent_vector(x)
         A = s.transport(x, y, u)
         B = s.projection(y, s.tangent_to_ambient(x, u))
@@ -146,7 +146,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
     def test_tangent_to_ambient(self):
         m = self.man
-        x = m.rand()
+        x = m.random_point()
         z = m.random_tangent_vector(x)
 
         z_ambient = x[0] @ z[1] @ x[2] + z[0] @ x[2] + x[0] @ z[2].T
@@ -161,7 +161,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
 
         y = self.man.retraction(x, u)
@@ -182,7 +182,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
     def test_egrad2rgrad(self):
         # Verify that egrad2rgrad and proj are equivalent.
         m = self.man
-        x = m.rand()
+        x = m.random_point()
         u, s, vt = x
 
         i = np.eye(self.k)
@@ -209,7 +209,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
     def test_random_tangent_vector(self):
         e = self.man
-        x = e.rand()
+        x = e.random_point()
         u = e.random_tangent_vector(x)
 
         # Check that u is a tangent vector

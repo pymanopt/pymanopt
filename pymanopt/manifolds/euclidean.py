@@ -44,11 +44,11 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def log(self, point_a, point_b):
         return point_b - point_a
 
-    def rand(self):
+    def random_point(self):
         return np.random.randn(*self._shape)
 
     def random_tangent_vector(self, point):
-        tangent_vector = self.rand()
+        tangent_vector = self.random_point()
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -113,11 +113,11 @@ class Symmetric(_Euclidean):
     ):
         return multisym(euclidean_hvp)
 
-    def rand(self):
+    def random_point(self):
         return multisym(np.random.randn(*self._shape))
 
     def random_tangent_vector(self, point):
-        tangent_vector = self.rand()
+        tangent_vector = self.random_point()
         return multisym(tangent_vector / self.norm(point, tangent_vector))
 
 
@@ -148,9 +148,9 @@ class SkewSymmetric(_Euclidean):
     ):
         return multiskew(euclidean_hvp)
 
-    def rand(self):
+    def random_point(self):
         return multiskew(np.random.randn(*self._shape))
 
     def random_tangent_vector(self, point):
-        tangent_vector = self.rand()
+        tangent_vector = self.random_point()
         return multiskew(tangent_vector / self.norm(point, tangent_vector))

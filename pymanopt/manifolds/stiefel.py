@@ -70,7 +70,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)
 
-    def rand(self):
+    def random_point(self):
         if self._k == 1:
             matrix = np.random.randn(self._n, self._p)
             q, _ = np.linalg.qr(matrix)

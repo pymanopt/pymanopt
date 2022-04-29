@@ -39,11 +39,11 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def retraction(self, point, tangent_vector):
         return point + tangent_vector
 
-    def rand(self):
+    def random_point(self):
         return np.random.randn(self._n, self._k)
 
     def random_tangent_vector(self, point):
-        random_vector = self.rand()
+        random_vector = self.random_point()
         tangent_vector = self.projection(point, random_vector)
         return self._normalize(tangent_vector)
 
@@ -141,7 +141,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
         e = point_a - point_b @ s @ d
         return self.inner(None, e, e) / 2
 
-    def rand(self):
+    def random_point(self):
         rand_ = super().rand
         return rand_() + 1j * rand_()
 
@@ -223,11 +223,11 @@ class Elliptope(Manifold, RetrAsExpMixin):
         hess -= point * scaling_hess[:, np.newaxis]
         return self.projection(point, hess)
 
-    def rand(self):
+    def random_point(self):
         return self._normalize_rows(np.random.randn(self._n, self._k))
 
     def random_tangent_vector(self, point):
-        tangent_vector = self.projection(point, self.rand())
+        tangent_vector = self.projection(point, self.random_point())
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):

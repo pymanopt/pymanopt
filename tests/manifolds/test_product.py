@@ -23,8 +23,8 @@ class TestProductManifold(TestCase):
         )
 
     def test_dist(self):
-        X = self.man.rand()
-        Y = self.man.rand()
+        X = self.man.random_point()
+        Y = self.man.random_point()
         np_testing.assert_equal(
             self.man.dist(X, Y),
             np.sqrt(
@@ -36,7 +36,7 @@ class TestProductManifold(TestCase):
     def test_tangent_vector_multiplication(self):
         # Regression test for https://github.com/pymanopt/pymanopt/issues/49.
         man = Product((Euclidean(12), Grassmann(12, 3)))
-        x = man.rand()
+        x = man.random_point()
         eta = man.random_tangent_vector(x)
         np.float64(1.0) * eta
 
@@ -60,14 +60,14 @@ class TestProductManifold(TestCase):
 
     def test_exp_log_inverse(self):
         s = self.man
-        X = s.rand()
-        Y = s.rand()
+        X = s.random_point()
+        Y = s.random_point()
         Yexplog = s.exp(X, tangent_vector=s.log(X, Y))
         np_testing.assert_almost_equal(s.dist(point_a=Y, point_b=Yexplog), 0)
 
     def test_log_exp_inverse(self):
         s = self.man
-        X = s.rand()
+        X = s.random_point()
         U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
         np_testing.assert_array_almost_equal(U[0], Ulogexp[0])
@@ -75,7 +75,7 @@ class TestProductManifold(TestCase):
 
     def test_pair_mean(self):
         s = self.man
-        X = s.rand()
-        Y = s.rand()
+        X = s.random_point()
+        Y = s.random_point()
         Z = s.pair_mean(X, Y)
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

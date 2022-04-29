@@ -18,15 +18,15 @@ class TestSingleGrassmannManifold(TestCase):
         self.projection = lambda x, u: u - x @ x.T @ u
 
     def test_dist(self):
-        x = self.man.rand()
-        y = self.man.rand()
+        x = self.man.random_point()
+        y = self.man.random_point()
         np_testing.assert_almost_equal(
             self.man.dist(x, y), self.man.norm(x, self.man.log(x, y))
         )
 
     def test_ehess2rhess(self):
         # Test this function at some randomly generated point.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
         egrad = np.random.randn(self.m, self.n)
         ehess = np.random.randn(self.m, self.n)
@@ -39,7 +39,7 @@ class TestSingleGrassmannManifold(TestCase):
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
@@ -59,11 +59,11 @@ class TestSingleGrassmannManifold(TestCase):
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         np_testing.assert_allclose(
             multiprod(multitransp(X), X), np.eye(self.n), atol=1e-10
         )
-        Y = self.man.rand()
+        Y = self.man.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
 
     # def test_random_tangent_vector(self):
@@ -72,15 +72,15 @@ class TestSingleGrassmannManifold(TestCase):
 
     def test_exp_log_inverse(self):
         s = self.man
-        x = s.rand()
-        y = s.rand()
+        x = s.random_point()
+        y = s.random_point()
         u = s.log(x, y)
         z = s.exp(x, u)
         np_testing.assert_almost_equal(0, self.man.dist(y, z), decimal=5)
 
     def test_log_exp_inverse(self):
         s = self.man
-        x = s.rand()
+        x = s.random_point()
         u = s.random_tangent_vector(x)
         y = s.exp(x, u)
         v = s.log(x, y)
@@ -90,8 +90,8 @@ class TestSingleGrassmannManifold(TestCase):
 
     # def test_pair_mean(self):
     # s = self.man
-    # X = s.rand()
-    # Y = s.rand()
+    # X = s.random_point()
+    # Y = s.random_point()
     # Z = s.pair_mean(X, Y)
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
@@ -114,21 +114,21 @@ class TestMultiGrassmannManifold(TestCase):
         )
 
     def test_dist(self):
-        x = self.man.rand()
-        y = self.man.rand()
+        x = self.man.random_point()
+        y = self.man.random_point()
         np_testing.assert_almost_equal(
             self.man.dist(x, y), self.man.norm(x, self.man.log(x, y))
         )
 
     def test_inner(self):
-        X = self.man.rand()
+        X = self.man.random_point()
         A = self.man.random_tangent_vector(X)
         B = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
     def test_projection(self):
         # Construct a random point X on the manifold.
-        X = self.man.rand()
+        X = self.man.random_point()
 
         # Construct a vector H in the ambient space.
         H = np.random.randn(self.k, self.m, self.n)
@@ -140,7 +140,7 @@ class TestMultiGrassmannManifold(TestCase):
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
@@ -158,24 +158,24 @@ class TestMultiGrassmannManifold(TestCase):
     # def test_egrad2rgrad(self):
 
     def test_norm(self):
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
         np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         np_testing.assert_allclose(
             multiprod(multitransp(X), X), multieye(self.k, self.n), atol=1e-10
         )
-        Y = self.man.rand()
+        Y = self.man.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
 
     def test_random_tangent_vector(self):
         # Make sure things generated are in tangent space and if you generate
         # two then they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         U = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(
             multisym(multiprod(multitransp(X), U)),
@@ -189,15 +189,15 @@ class TestMultiGrassmannManifold(TestCase):
 
     def test_exp_log_inverse(self):
         s = self.man
-        x = s.rand()
-        y = s.rand()
+        x = s.random_point()
+        y = s.random_point()
         u = s.log(x, y)
         z = s.exp(x, u)
         np_testing.assert_almost_equal(0, self.man.dist(y, z))
 
     def test_log_exp_inverse(self):
         s = self.man
-        x = s.rand()
+        x = s.random_point()
         u = s.random_tangent_vector(x)
         y = s.exp(x, u)
         v = s.log(x, y)
@@ -207,7 +207,7 @@ class TestMultiGrassmannManifold(TestCase):
 
     # def test_pair_mean(self):
     # s = self.man
-    # X = s.rand()
-    # Y = s.rand()
+    # X = s.random_point()
+    # Y = s.random_point()
     # Z = s.pair_mean(X, Y)
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

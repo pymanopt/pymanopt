@@ -42,7 +42,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
     Then the shapes will be as follows:
 
-    >>> u, s, vt = manifold.rand()
+    >>> u, s, vt = manifold.random_point()
     >>> u.shape
     (5, 3)
     >>> s.shape
@@ -196,10 +196,10 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     def norm(self, point, tangent_vector):
         return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
-    def rand(self):
-        u = self._stiefel_m.rand()
-        s = np.sort(np.random.rand(self._k))[::-1]
-        vt = self._stiefel_n.rand().T
+    def random_point(self):
+        u = self._stiefel_m.random_point()
+        s = np.sort(np.random.uniform(size=self._k))[::-1]
+        vt = self._stiefel_n.random_point().T
         return _FixedRankPoint(u, s, vt)
 
     def to_tangent_space(self, point, vector):

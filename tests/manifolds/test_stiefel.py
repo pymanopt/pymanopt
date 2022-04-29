@@ -43,15 +43,15 @@ class TestSingleStiefelManifold(TestCase):
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         np_testing.assert_allclose(X.T @ X, np.eye(self.n), atol=1e-10)
-        Y = self.man.rand()
+        Y = self.man.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
 
     def test_random_tangent_vector(self):
         # Make sure things generated are in tangent space and if you generate
         # two then they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         U = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(
             multisym(X.T @ U), np.zeros((self.n, self.n)), atol=1e-10
@@ -62,7 +62,7 @@ class TestSingleStiefelManifold(TestCase):
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
@@ -76,7 +76,7 @@ class TestSingleStiefelManifold(TestCase):
 
     def test_ehess2rhess(self):
         # Test this function at some randomly generated point.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
         egrad = np.random.randn(self.m, self.n)
         ehess = np.random.randn(self.m, self.n)
@@ -89,7 +89,7 @@ class TestSingleStiefelManifold(TestCase):
     # def test_egrad2rgrad(self):
 
     def test_norm(self):
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
         np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
 
@@ -99,7 +99,7 @@ class TestSingleStiefelManifold(TestCase):
         # Check that exp lies on the manifold and that exp of a small vector u
         # is close to x + u.
         s = self.man
-        x = s.rand()
+        x = s.random_point()
         u = s.random_tangent_vector(x)
 
         xexpu = s.exp(x, u)
@@ -113,22 +113,22 @@ class TestSingleStiefelManifold(TestCase):
 
     # def test_exp_log_inverse(self):
     # s = self.man
-    # X = s.rand()
+    # X = s.random_point()
     # U = s.random_tangent_vector(X)
     # Uexplog = s.exp(X, s.log(X, U))
     # np_testing.assert_array_almost_equal(U, Uexplog)
 
     # def test_log_exp_inverse(self):
     # s = self.man
-    # X = s.rand()
+    # X = s.random_point()
     # U = s.random_tangent_vector(X)
     # Ulogexp = s.log(X, s.exp(X, U))
     # np_testing.assert_array_almost_equal(U, Ulogexp)
 
     # def test_pair_mean(self):
     # s = self.man
-    # X = s.rand()
-    # Y = s.rand()
+    # X = s.random_point()
+    # Y = s.random_point()
     # Z = s.pair_mean(X, Y)
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
@@ -153,14 +153,14 @@ class TestMultiStiefelManifold(TestCase):
     # def test_dist(self):
 
     def test_inner(self):
-        X = self.man.rand()
+        X = self.man.random_point()
         A = self.man.random_tangent_vector(X)
         B = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
     def test_projection(self):
         # Construct a random point X on the manifold.
-        X = self.man.rand()
+        X = self.man.random_point()
 
         # Construct a vector H in the ambient space.
         H = np.random.randn(self.k, self.m, self.n)
@@ -178,17 +178,17 @@ class TestMultiStiefelManifold(TestCase):
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         np_testing.assert_allclose(
             multiprod(multitransp(X), X), multieye(self.k, self.n), atol=1e-10
         )
-        Y = self.man.rand()
+        Y = self.man.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
 
     def test_random_tangent_vector(self):
         # Make sure things generated are in tangent space and if you generate
         # two then they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         U = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(
             multisym(multiprod(multitransp(X), U)),
@@ -201,7 +201,7 @@ class TestMultiStiefelManifold(TestCase):
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
@@ -219,7 +219,7 @@ class TestMultiStiefelManifold(TestCase):
     # def test_egrad2rgrad(self):
 
     def test_norm(self):
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
         np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
 
@@ -229,7 +229,7 @@ class TestMultiStiefelManifold(TestCase):
         # Check that exp lies on the manifold and that exp of a small vector u
         # is close to x + u.
         s = self.man
-        x = s.rand()
+        x = s.random_point()
         u = s.random_tangent_vector(x)
 
         xexpu = s.exp(x, u)
@@ -245,21 +245,21 @@ class TestMultiStiefelManifold(TestCase):
 
     # def test_exp_log_inverse(self):
     # s = self.man
-    # X = s.rand()
+    # X = s.random_point()
     # U = s.random_tangent_vector(X)
     # Uexplog = s.exp(X, s.log(X, U))
     # np_testing.assert_array_almost_equal(U, Uexplog)
 
     # def test_log_exp_inverse(self):
     # s = self.man
-    # X = s.rand()
+    # X = s.random_point()
     # U = s.random_tangent_vector(X)
     # Ulogexp = s.log(X, s.exp(X, U))
     # np_testing.assert_array_almost_equal(U, Ulogexp)
 
     # def test_pair_mean(self):
     # s = self.man
-    # X = s.rand()
-    # Y = s.rand()
+    # X = s.random_point()
+    # Y = s.random_point()
     # Z = s.pair_mean(X, Y)
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

@@ -70,7 +70,7 @@ class ParticleSwarm(Optimizer):
         # If no initial population x is given by the user, generate one at
         # random.
         if initial_point is None:
-            x = [man.rand() for i in range(int(self._population_size))]
+            x = [man.random_point() for i in range(int(self._population_size))]
         elif tools.is_sequence(initial_point):
             if len(initial_point) != self._population_size:
                 print(
@@ -159,9 +159,11 @@ class ParticleSwarm(Optimizer):
                 # contributions.
                 inertia = w * man.transport(xiprev, xi, vi)
                 nostalgia = (
-                    np.random.rand() * self._nostalgia * man.log(xi, yi)
+                    np.random.uniform() * self._nostalgia * man.log(xi, yi)
                 )
-                social = np.random.rand() * self._social * man.log(xi, xbest)
+                social = (
+                    np.random.uniform() * self._social * man.log(xi, xbest)
+                )
 
                 v[i] = inertia + nostalgia + social
 

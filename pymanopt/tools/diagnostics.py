@@ -49,7 +49,7 @@ def check_directional_derivative(problem, x=None, d=None):
             "If d is provided, x must be too, " "since d is tangent at x."
         )
     if x is None:
-        x = problem.manifold.rand()
+        x = problem.manifold.random_point()
     if d is None:
         d = problem.manifold.random_tangent_vector(x)
 
@@ -132,7 +132,7 @@ def check_gradient(problem, x=None, d=None):
             "If d is provided, x must be too, since d is tangent at x."
         )
     if x is None:
-        x = problem.manifold.rand()
+        x = problem.manifold.random_point()
     if d is None:
         d = problem.manifold.random_tangent_vector(x)
 

@@ -89,8 +89,8 @@ class Product(Manifold):
             point_a, point_b
         )
 
-    def rand(self):
-        return self._dispatch("rand")()
+    def random_point(self):
+        return self._dispatch("random_point")()
 
     def random_tangent_vector(self, point):
         scale = len(self.manifolds) ** (-1 / 2)

@@ -72,10 +72,10 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
     def norm(self, point, tangent_vector):
         return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
 
-    def rand(self):
+    def random_point(self):
         # Generate eigenvalues between 1 and 2.
-        d = np.ones((self._k, self._n, 1)) + np.random.rand(
-            self._k, self._n, 1
+        d = np.ones((self._k, self._n, 1)) + np.random.uniform(
+            size=(self._k, self._n, 1)
         )
 
         # Generate an orthogonal matrix.

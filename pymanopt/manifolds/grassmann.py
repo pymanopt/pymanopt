@@ -88,7 +88,7 @@ class Grassmann(_GrassmannBase):
 
     # Generate random Grassmann point using qr of random normally distributed
     # matrix.
-    def rand(self):
+    def random_point(self):
         if self._k == 1:
             X = np.random.randn(self._n, self._p)
             q, _ = np.linalg.qr(X)
@@ -199,7 +199,7 @@ class ComplexGrassmann(_GrassmannBase):
         u, _, vh = np.linalg.svd(point + tangent_vector, full_matrices=False)
         return multiprod(u, vh)
 
-    def rand(self):
+    def random_point(self):
         if self._k == 1:
             point, _ = np.linalg.qr(
                 (

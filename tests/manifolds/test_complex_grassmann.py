@@ -17,7 +17,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         self.projection = lambda x, u: u - x @ x.T @ u
 
     def test_inner(self):
-        X = self.man.rand()
+        X = self.man.random_point()
         G = self.man.random_tangent_vector(X)
         H = self.man.random_tangent_vector(X)
         np_testing.assert_almost_equal(
@@ -28,7 +28,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
     def test_projection(self):
         # Test proj(proj(X)) == proj(X)
         # and proj(X) belongs to the horizontal space of Stiefel
-        X = self.man.rand()
+        X = self.man.random_point()
         U = np.random.randn(self.m, self.n) + 1j * np.random.randn(
             self.m, self.n
         )
@@ -44,7 +44,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         )
 
     def test_norm(self):
-        X = self.man.rand()
+        X = self.man.random_point()
         U = self.man.random_tangent_vector(X)
         np_testing.assert_almost_equal(
             np.trace(np.conjugate(U.T) @ U), self.man.norm(X, U)
@@ -55,11 +55,11 @@ class TestSingleComplexGrassmannManifold(TestCase):
         # Just make sure that things generated are on the manifold
         # and that if you generate two they are not equal.
         # Test also that matrices are complex.
-        X = self.man.rand()
+        X = self.man.random_point()
         np_testing.assert_allclose(
             multiprod(multihconj(X), X), np.eye(self.n), atol=1e-10
         )
-        Y = self.man.rand()
+        Y = self.man.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
         assert np.iscomplex(X).all()
 
@@ -68,7 +68,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         # complex Stiefel manifold
         # and that if you generate two they are not equal.
         # Test also that matrices are complex.
-        X = self.man.rand()
+        X = self.man.random_point()
         G = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(
             multiprod(multihconj(X), G), np.zeros((self.n, self.n)), atol=1e-10
@@ -78,21 +78,21 @@ class TestSingleComplexGrassmannManifold(TestCase):
         assert np.iscomplex(G).all()
 
     def test_dist(self):
-        X = self.man.rand()
-        Y = self.man.rand()
+        X = self.man.random_point()
+        Y = self.man.random_point()
         np_testing.assert_almost_equal(
             self.man.norm(X, self.man.log(X, Y)), self.man.dist(X, Y)
         )
 
     def test_exp_log_inverse(self):
-        X = self.man.rand()
-        Y = self.man.rand()
+        X = self.man.random_point()
+        Y = self.man.random_point()
         U = self.man.log(X, Y)
         Z = self.man.exp(X, U)
         np_testing.assert_almost_equal(0, self.man.dist(Y, Z), decimal=5)
 
     def test_log_exp_inverse(self):
-        X = self.man.rand()
+        X = self.man.random_point()
         U = self.man.random_tangent_vector(X)
         Y = self.man.exp(X, U)
         V = self.man.log(X, Y)
@@ -103,7 +103,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
@@ -133,7 +133,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         )
 
     def test_inner(self):
-        X = self.man.rand()
+        X = self.man.random_point()
         G = self.man.random_tangent_vector(X)
         H = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(
@@ -144,7 +144,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
     def test_projection(self):
         # Test proj(proj(X)) == proj(X) and proj(X)
         # belongs to the horizontal space of Stiefel
-        X = self.man.rand()
+        X = self.man.random_point()
         U = np.random.randn(self.k, self.m, self.n) + 1j * np.random.randn(
             self.k, self.m, self.n
         )
@@ -160,7 +160,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         )
 
     def test_norm(self):
-        X = self.man.rand()
+        X = self.man.random_point()
         U = self.man.random_tangent_vector(X)
         np_testing.assert_almost_equal(self.man.norm(X, U), np.linalg.norm(U))
         assert np.isreal(self.man.norm(X, U))
@@ -168,18 +168,18 @@ class TestMultiComplexGrassmannManifold(TestCase):
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         np_testing.assert_allclose(
             multiprod(multihconj(X), X), multieye(self.k, self.n), atol=1e-10
         )
-        Y = self.man.rand()
+        Y = self.man.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
         assert np.iscomplex(X).all()
 
     def test_random_tangent_vector(self):
         # Make sure things generated are in tangent space and if you generate
         # two then they are not equal.
-        X = self.man.rand()
+        X = self.man.random_point()
         U = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(
             multisym(multiprod(multihconj(X), U)),
@@ -191,21 +191,21 @@ class TestMultiComplexGrassmannManifold(TestCase):
         assert np.iscomplex(U).all()
 
     def test_dist(self):
-        X = self.man.rand()
-        Y = self.man.rand()
+        X = self.man.random_point()
+        Y = self.man.random_point()
         np_testing.assert_almost_equal(
             self.man.dist(X, Y), self.man.norm(X, self.man.log(X, Y))
         )
 
     def test_exp_log_inverse(self):
-        X = self.man.rand()
-        Y = self.man.rand()
+        X = self.man.random_point()
+        Y = self.man.random_point()
         U = self.man.log(X, Y)
         Z = self.man.exp(X, U)
         np_testing.assert_almost_equal(0, self.man.dist(Y, Z), decimal=5)
 
     def test_log_exp_inverse(self):
-        X = self.man.rand()
+        X = self.man.random_point()
         U = self.man.random_tangent_vector(X)
         Y = self.man.exp(X, U)
         V = self.man.log(X, Y)
@@ -216,7 +216,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.rand()
+        x = self.man.random_point()
         u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)

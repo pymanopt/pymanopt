@@ -163,7 +163,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             return R.reshape(n, n)
         return R
 
-    def rand(self):
+    def random_point(self):
         return self._randrot(self._n, self._k)
 
     @staticmethod

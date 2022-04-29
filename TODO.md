@@ -2,16 +2,16 @@
 
 ### Issues
 
-### 1.0:
-  - Return 'Result' object from optimizer's 'run' method
+#### #110:
   - Renaming:
-    # Long forms
-    * rand -> random_point
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp
     * egrad2rgrad -> euclidean_to_riemannian_gradient
     * ehess2rhess -> euclidean_to_riemannian_hvp
+
+### 1.0:
+  - Return 'Result' object from optimizer's 'run' method
 
 ### 1.0.x:
   - Use weingarten map for oblique manifold and Stiefel
