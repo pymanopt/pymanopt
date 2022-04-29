@@ -90,7 +90,7 @@ class ParticleSwarm(Optimizer):
         xprev = list(x)
 
         # Initialize velocities for each particle.
-        v = [man.randvec(xi) for xi in x]
+        v = [man.random_tangent_vector(xi) for xi in x]
 
         # Compute cost for each particle xi.
         costs = np.array([objective(xi) for xi in x])

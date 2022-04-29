@@ -45,7 +45,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     def rand(self):
         return rnd.uniform(low=1e-6, high=1, size=(self._n, self._k))
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         vector = rnd.randn(self._n, self._k)
         return vector / self.norm(point, vector)
 

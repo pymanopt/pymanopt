@@ -60,7 +60,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         point = rnd.randn(*self._shape)
         return self._normalize(point)
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         vector = rnd.randn(*self._shape)
         return self._normalize(self.projection(point, vector))
 
@@ -130,8 +130,8 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
         point = super().rand()
         return self._normalize(self._subspace_projector @ point)
 
-    def randvec(self, point):
-        vector = super().randvec(point)
+    def random_tangent_vector(self, point):
+        vector = super().random_tangent_vector(point)
         return self._normalize(self._subspace_projector @ vector)
 
 

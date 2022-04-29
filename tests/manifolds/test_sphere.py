@@ -40,8 +40,8 @@ class TestSphereManifold(TestCase):
     def test_inner(self):
         s = self.man
         x = s.rand()
-        u = s.randvec(x)
-        v = s.randvec(x)
+        u = s.random_tangent_vector(x)
+        v = s.random_tangent_vector(x)
         np_testing.assert_almost_equal(np.sum(u * v), s.inner(x, u, v))
 
     def test_projection(self):
@@ -73,7 +73,7 @@ class TestSphereManifold(TestCase):
 
     def test_ehess2rhess(self):
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
         egrad = rnd.randn(self.m, self.n)
         ehess = rnd.randn(self.m, self.n)
 
@@ -86,7 +86,7 @@ class TestSphereManifold(TestCase):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
         np_testing.assert_almost_equal(la.norm(xretru), 1)
@@ -97,7 +97,7 @@ class TestSphereManifold(TestCase):
 
     def test_norm(self):
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
 
         np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
 
@@ -110,13 +110,13 @@ class TestSphereManifold(TestCase):
         y = s.rand()
         assert np.linalg.norm(x - y) > 1e-3
 
-    def test_randvec(self):
+    def test_random_tangent_vector(self):
         # Just make sure that things generated are in the tangent space and
         # that if you generate two they are not equal.
         s = self.man
         x = s.rand()
-        u = s.randvec(x)
-        v = s.randvec(x)
+        u = s.random_tangent_vector(x)
+        v = s.random_tangent_vector(x)
         np_testing.assert_almost_equal(np.tensordot(x, u), 0)
 
         assert np.linalg.norm(u - v) > 1e-3
@@ -126,7 +126,7 @@ class TestSphereManifold(TestCase):
         s = self.man
         x = s.rand()
         y = s.rand()
-        u = s.randvec(x)
+        u = s.random_tangent_vector(x)
 
         np_testing.assert_allclose(s.transport(x, y, u), s.projection(y, u))
 
@@ -140,7 +140,7 @@ class TestSphereManifold(TestCase):
     def test_log_exp_inverse(self):
         s = self.man
         X = s.rand()
-        U = s.randvec(X)
+        U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
         np_testing.assert_array_almost_equal(U, Ulogexp)
 

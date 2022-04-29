@@ -79,7 +79,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
             rnd.randn(dimension) + 1j * rnd.randn(dimension)
         )
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = rnd.randn(self._dimension) * 1j * point
         return tangent_vector / self.norm(point, tangent_vector)
 

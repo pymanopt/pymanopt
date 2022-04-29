@@ -176,7 +176,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             return S.reshape(n, n)
         return S
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = self._randskew(self._n, self._k)
         return tangent_vector / np.sqrt(
             np.tensordot(

@@ -99,7 +99,7 @@ class Grassmann(_GrassmannBase):
             X[i], _ = np.linalg.qr(np.random.randn(self._n, self._p))
         return X
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = np.random.randn(*np.shape(point))
         tangent_vector = self.projection(point, tangent_vector)
         return tangent_vector / np.linalg.norm(tangent_vector)
@@ -219,7 +219,7 @@ class ComplexGrassmann(_GrassmannBase):
             )
         return point
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = np.random.randn(
             *np.shape(point)
         ) + 1j * np.random.randn(*np.shape(point))

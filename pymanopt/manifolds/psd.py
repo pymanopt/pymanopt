@@ -44,7 +44,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def rand(self):
         return rnd.randn(self._n, self._k)
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         random_vector = self.rand()
         tangent_vector = self.projection(point, random_vector)
         return self._normalize(tangent_vector)
@@ -228,7 +228,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
     def rand(self):
         return self._normalize_rows(rnd.randn(self._n, self._k))
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = self.projection(point, self.rand())
         return tangent_vector / self.norm(point, tangent_vector)
 

@@ -136,7 +136,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """Returns a random point on the manifold."""
 
     @abc.abstractmethod
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         """Returns a random vector in the tangent space at ``point``."""
 
     @abc.abstractmethod

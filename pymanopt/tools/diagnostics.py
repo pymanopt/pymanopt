@@ -51,7 +51,7 @@ def check_directional_derivative(problem, x=None, d=None):
     if x is None:
         x = problem.manifold.rand()
     if d is None:
-        d = problem.manifold.randvec(x)
+        d = problem.manifold.random_tangent_vector(x)
 
     # Compute the value f0 of f at x and directional derivative at x along d.
     f0 = problem.cost(x)
@@ -134,7 +134,7 @@ def check_gradient(problem, x=None, d=None):
     if x is None:
         x = problem.manifold.rand()
     if d is None:
-        d = problem.manifold.randvec(x)
+        d = problem.manifold.random_tangent_vector(x)
 
     h, err, segment, poly = check_directional_derivative(problem, x, d)
 

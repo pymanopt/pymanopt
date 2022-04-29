@@ -7,7 +7,6 @@
   - Renaming:
     # Long forms
     * rand -> random_point
-    * randvec -> random_vector
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp

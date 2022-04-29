@@ -49,7 +49,7 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def rand(self):
         return rnd.randn(*self._shape)
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = self.rand()
         return tangent_vector / self.norm(point, tangent_vector)
 
@@ -118,7 +118,7 @@ class Symmetric(_Euclidean):
     def rand(self):
         return multisym(rnd.randn(*self._shape))
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = self.rand()
         return multisym(tangent_vector / self.norm(point, tangent_vector))
 
@@ -153,6 +153,6 @@ class SkewSymmetric(_Euclidean):
     def rand(self):
         return multiskew(rnd.randn(*self._shape))
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = self.rand()
         return multiskew(tangent_vector / self.norm(point, tangent_vector))

@@ -17,8 +17,8 @@ class TestStrictlyPositiveVectors(TestCase):
 
     def test_inner(self):
         x = self.man.rand()
-        g = self.man.randvec(x)
-        h = self.man.randvec(x)
+        g = self.man.random_tangent_vector(x)
+        h = self.man.random_tangent_vector(x)
         assert (self.man.inner(x, g, h).shape == np.array([1, self.k])).all()
 
     def test_projection(self):
@@ -32,7 +32,7 @@ class TestStrictlyPositiveVectors(TestCase):
 
     def test_norm(self):
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
         x_u = (1.0 / x) * u
         np_testing.assert_almost_equal(
             la.norm(x_u, axis=0, keepdims=True), self.man.norm(x, u)
@@ -46,12 +46,12 @@ class TestStrictlyPositiveVectors(TestCase):
         y = self.man.rand()
         assert (self.man.dist(x, y)).all() > 1e-6
 
-    def test_randvec(self):
+    def test_random_tangent_vector(self):
         # Just make sure that if you generate two they are not equal.
         # check also if unit norm
         x = self.man.rand()
-        g = self.man.randvec(x)
-        h = self.man.randvec(x)
+        g = self.man.random_tangent_vector(x)
+        h = self.man.random_tangent_vector(x)
         assert (la.norm(g - h, axis=0) > 1e-6).all()
         np_testing.assert_almost_equal(self.man.norm(x, g), 1)
 
@@ -75,7 +75,7 @@ class TestStrictlyPositiveVectors(TestCase):
 
     def test_log_exp_inverse(self):
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
         y = self.man.exp(x, u)
         v = self.man.log(x, y)
         np_testing.assert_almost_equal(self.man.norm(x, u - v), 0)
@@ -84,7 +84,7 @@ class TestStrictlyPositiveVectors(TestCase):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
 

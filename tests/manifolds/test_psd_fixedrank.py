@@ -29,21 +29,21 @@ class TestPSDFixedRankManifold(TestCase):
 
     # def test_rand(self):
 
-    # def test_randvec(self):
+    # def test_random_tangent_vector(self):
 
     # def test_transport(self):
 
     # def test_exp_log_inverse(self):
     # s = self.man
     # X = s.rand()
-    # U = s.randvec(X)
+    # U = s.random_tangent_vector(X)
     # Uexplog = s.exp(X, s.log(X, U))
     # np_testing.assert_array_almost_equal(U, Uexplog)
 
     # def test_log_exp_inverse(self):
     # s = self.man
     # X = s.rand()
-    # U = s.randvec(X)
+    # U = s.random_tangent_vector(X)
     # Ulogexp = s.log(X, s.exp(X, U))
     # np_testing.assert_array_almost_equal(U, Ulogexp)
 

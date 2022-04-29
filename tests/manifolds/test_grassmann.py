@@ -29,7 +29,7 @@ class TestSingleGrassmannManifold(TestCase):
     def test_ehess2rhess(self):
         # Test this function at some randomly generated point.
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
         egrad = rnd.randn(self.m, self.n)
         ehess = rnd.randn(self.m, self.n)
 
@@ -42,7 +42,7 @@ class TestSingleGrassmannManifold(TestCase):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
 
@@ -68,7 +68,7 @@ class TestSingleGrassmannManifold(TestCase):
         Y = self.man.rand()
         assert la.norm(X - Y) > 1e-6
 
-    # def test_randvec(self):
+    # def test_random_tangent_vector(self):
 
     # def test_transport(self):
 
@@ -83,7 +83,7 @@ class TestSingleGrassmannManifold(TestCase):
     def test_log_exp_inverse(self):
         s = self.man
         x = s.rand()
-        u = s.randvec(x)
+        u = s.random_tangent_vector(x)
         y = s.exp(x, u)
         v = s.log(x, y)
         # Check that the manifold difference between the tangent vectors u and
@@ -124,8 +124,8 @@ class TestMultiGrassmannManifold(TestCase):
 
     def test_inner(self):
         X = self.man.rand()
-        A = self.man.randvec(X)
-        B = self.man.randvec(X)
+        A = self.man.random_tangent_vector(X)
+        B = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
 
     def test_projection(self):
@@ -143,7 +143,7 @@ class TestMultiGrassmannManifold(TestCase):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
 
         xretru = self.man.retraction(x, u)
 
@@ -161,7 +161,7 @@ class TestMultiGrassmannManifold(TestCase):
 
     def test_norm(self):
         x = self.man.rand()
-        u = self.man.randvec(x)
+        u = self.man.random_tangent_vector(x)
         np_testing.assert_almost_equal(self.man.norm(x, u), la.norm(u))
 
     def test_rand(self):
@@ -174,17 +174,17 @@ class TestMultiGrassmannManifold(TestCase):
         Y = self.man.rand()
         assert la.norm(X - Y) > 1e-6
 
-    def test_randvec(self):
+    def test_random_tangent_vector(self):
         # Make sure things generated are in tangent space and if you generate
         # two then they are not equal.
         X = self.man.rand()
-        U = self.man.randvec(X)
+        U = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(
             multisym(multiprod(multitransp(X), U)),
             np.zeros((self.k, self.n, self.n)),
             atol=1e-10,
         )
-        V = self.man.randvec(X)
+        V = self.man.random_tangent_vector(X)
         assert la.norm(U - V) > 1e-6
 
     # def test_transport(self):
@@ -200,7 +200,7 @@ class TestMultiGrassmannManifold(TestCase):
     def test_log_exp_inverse(self):
         s = self.man
         x = s.rand()
-        u = s.randvec(x)
+        u = s.random_tangent_vector(x)
         y = s.exp(x, u)
         v = s.log(x, y)
         # Check that the manifold difference between the tangent vectors u and

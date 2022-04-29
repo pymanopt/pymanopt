@@ -31,7 +31,7 @@ class TestObliqueManifold(TestCase):
 
     # def test_rand(self):
 
-    # def test_randvec(self):
+    # def test_random_tangent_vector(self):
 
     # def test_transport(self):
 
@@ -46,7 +46,7 @@ class TestObliqueManifold(TestCase):
     def test_log_exp_inverse(self):
         s = self.man
         x = s.rand()
-        u = s.randvec(x)
+        u = s.random_tangent_vector(x)
         y = s.exp(x, u)
         v = s.log(x, y)
         # Check that the manifold difference between the tangent vectors u and

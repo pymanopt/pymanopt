@@ -87,7 +87,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
             return multiprod(u, d * multitransp(u))[0]
         return multiprod(u, d * multitransp(u))
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         k = self._k
         n = self._n
         if k == 1:

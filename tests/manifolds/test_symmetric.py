@@ -30,8 +30,8 @@ class TestSymmetricManifold(TestCase):
     def test_inner(self):
         e = self.man
         x = e.rand()
-        y = e.randvec(x)
-        z = e.randvec(x)
+        y = e.random_tangent_vector(x)
+        z = e.random_tangent_vector(x)
         np_testing.assert_almost_equal(np.sum(y * z), e.inner(x, y, z))
 
     def test_projection(self):
@@ -43,7 +43,7 @@ class TestSymmetricManifold(TestCase):
     def test_ehess2rhess(self):
         e = self.man
         x = e.rand()
-        u = e.randvec(x)
+        u = e.random_tangent_vector(x)
         egrad, ehess = rnd.randn(2, self.k, self.n, self.n)
         np_testing.assert_allclose(
             e.ehess2rhess(x, egrad, ehess, u), multisym(ehess)
@@ -52,13 +52,13 @@ class TestSymmetricManifold(TestCase):
     def test_retraction(self):
         e = self.man
         x = e.rand()
-        u = e.randvec(x)
+        u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.retraction(x, u), x + u)
 
     def test_egrad2rgrad(self):
         e = self.man
         x = e.rand()
-        u = e.randvec(x)
+        u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.egrad2rgrad(x, u), u)
 
     def test_norm(self):
@@ -75,11 +75,11 @@ class TestSymmetricManifold(TestCase):
         np_testing.assert_allclose(x, multisym(x))
         assert la.norm(x - y) > 1e-6
 
-    def test_randvec(self):
+    def test_random_tangent_vector(self):
         e = self.man
         x = e.rand()
-        u = e.randvec(x)
-        v = e.randvec(x)
+        u = e.random_tangent_vector(x)
+        v = e.random_tangent_vector(x)
         assert np.shape(u) == (self.k, self.n, self.n)
         np_testing.assert_allclose(u, multisym(u))
         np_testing.assert_almost_equal(la.norm(u), 1)
@@ -89,7 +89,7 @@ class TestSymmetricManifold(TestCase):
         e = self.man
         x = e.rand()
         y = e.rand()
-        u = e.randvec(x)
+        u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.transport(x, y, u), u)
 
     def test_exp_log_inverse(self):
@@ -102,7 +102,7 @@ class TestSymmetricManifold(TestCase):
     def test_log_exp_inverse(self):
         s = self.man
         X = s.rand()
-        U = s.randvec(X)
+        U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
         np_testing.assert_array_almost_equal(U, Ulogexp)
 

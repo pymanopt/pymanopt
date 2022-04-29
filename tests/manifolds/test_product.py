@@ -37,7 +37,7 @@ class TestProductManifold(TestCase):
         # Regression test for https://github.com/pymanopt/pymanopt/issues/49.
         man = Product((Euclidean(12), Grassmann(12, 3)))
         x = man.rand()
-        eta = man.randvec(x)
+        eta = man.random_tangent_vector(x)
         np.float64(1.0) * eta
 
     # def test_inner(self):
@@ -54,7 +54,7 @@ class TestProductManifold(TestCase):
 
     # def test_rand(self):
 
-    # def test_randvec(self):
+    # def test_random_tangent_vector(self):
 
     # def test_transport(self):
 
@@ -68,7 +68,7 @@ class TestProductManifold(TestCase):
     def test_log_exp_inverse(self):
         s = self.man
         X = s.rand()
-        U = s.randvec(X)
+        U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
         np_testing.assert_array_almost_equal(U[0], Ulogexp[0])
         np_testing.assert_array_almost_equal(U[1], Ulogexp[1])

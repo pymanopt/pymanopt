@@ -180,7 +180,7 @@ class TrustRegions(Optimizer):
                 eta = man.zero_vector(x)
             else:
                 # Random vector in T_x M (this has to be very small)
-                eta = 1e-6 * man.randvec(x)
+                eta = 1e-6 * man.random_tangent_vector(x)
                 # Must be inside trust region
                 while man.norm(x, eta) > Delta:
                     eta = np.sqrt(np.sqrt(np.spacing(1))) * eta

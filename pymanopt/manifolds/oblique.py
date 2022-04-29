@@ -74,7 +74,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def rand(self):
         return self._normalize_columns(rnd.randn(self._m, self._n))
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         vector = rnd.randn(*point.shape)
         tangent_vector = self.projection(point, vector)
         return tangent_vector / self.norm(point, tangent_vector)

@@ -66,20 +66,20 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
     def test_exp(self):
         man = self.man
         x = man.rand()
-        u = man.randvec(x)
+        u = man.random_tangent_vector(x)
         e = expm(la.solve(x, u))
 
         np_testing.assert_allclose(multiprod(x, e), man.exp(x, u))
         u = u * 1e-6
         np_testing.assert_allclose(man.exp(x, u), x + u)
 
-    def test_randvec(self):
-        # Just test that randvec returns an element of the tangent space
-        # with norm 1 and that two randvecs are different.
+    def test_random_tangent_vector(self):
+        # Just test that random_tangent_vector returns an element of the tangent space
+        # with norm 1 and that two random_tangent_vectors are different.
         man = self.man
         x = man.rand()
-        u = man.randvec(x)
-        v = man.randvec(x)
+        u = man.random_tangent_vector(x)
+        v = man.random_tangent_vector(x)
         np_testing.assert_allclose(multisym(u), u)
         np_testing.assert_almost_equal(1, man.norm(x, u))
         assert la.norm(u - v) > 1e-3
@@ -99,7 +99,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
     def test_log_exp_inverse(self):
         man = self.man
         x = man.rand()
-        u = man.randvec(x)
+        u = man.random_tangent_vector(x)
         y = man.exp(x, u)
         np_testing.assert_allclose(man.log(x, y), u)
 
@@ -164,7 +164,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         k = self.k
         x = man.rand()
         egrad, ehess = rnd.randn(2, k, n, n)
-        u = man.randvec(x)
+        u = man.random_tangent_vector(x)
 
         Hess = multiprod(multiprod(x, multisym(ehess)), x) + 2 * multisym(
             multiprod(multiprod(u, multisym(egrad)), x)
@@ -199,13 +199,13 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         w = la.eigvalsh(x)
         assert (w > [[0]]).all()
 
-    def test_randvec(self):
-        # Just test that randvec returns an element of the tangent space
-        # with norm 1 and that two randvecs are different.
+    def test_random_tangent_vector(self):
+        # Just test that random_tangent_vector returns an element of the tangent space
+        # with norm 1 and that two random_tangent_vectors are different.
         man = self.man
         x = man.rand()
-        u = man.randvec(x)
-        v = man.randvec(x)
+        u = man.random_tangent_vector(x)
+        v = man.random_tangent_vector(x)
         np_testing.assert_allclose(multisym(u), u)
         np_testing.assert_almost_equal(1, man.norm(x, u))
         assert la.norm(u - v) > 1e-3
@@ -214,7 +214,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         man = self.man
         x = man.rand()
         y = man.rand()
-        u = man.randvec(x)
+        u = man.random_tangent_vector(x)
         np_testing.assert_allclose(man.transport(x, y, u), u)
 
     def test_exp(self):
@@ -222,7 +222,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         # exp(x, u) = x + u.
         man = self.man
         x = man.rand()
-        u = man.randvec(x)
+        u = man.random_tangent_vector(x)
         e = np.zeros((self.k, self.n, self.n))
         for i in range(self.k):
             e[i] = expm(la.solve(x[i], u[i]))
@@ -235,7 +235,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         # retr(x, u) = x + u.
         man = self.man
         x = man.rand()
-        u = man.randvec(x)
+        u = man.random_tangent_vector(x)
         y = man.retraction(x, u)
 
         assert np.shape(y) == (self.k, self.n, self.n)
@@ -259,6 +259,6 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
     def test_log_exp_inverse(self):
         man = self.man
         x = man.rand()
-        u = man.randvec(x)
+        u = man.random_tangent_vector(x)
         y = man.exp(x, u)
         np_testing.assert_allclose(man.log(x, y), u)
