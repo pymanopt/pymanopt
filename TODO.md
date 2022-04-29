@@ -3,8 +3,7 @@
 ### Issues
 
 ### 1.0:
-  - Return 'Result' object from solver's 'solve' method
-  - Change terminology from "solvers" to "optimizers"
+  - Return 'Result' object from optimizer's 'run' method
   - Renaming:
     # Short names
     * dim
@@ -20,7 +19,7 @@
     * tangent -> to_tangent_space
     * zerovec -> zero_vector
     * typicaldist -> typical_dist
-    * pairmean -> point_mean
+    * pairmean -> pair_mean
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp
@@ -38,10 +37,10 @@
     require a generic 'tangent2ambient' method. See 'FixedRankEmbedded'.
   - Add default implementation for tangent?
   - attrs
-  - Refactor solver implementations
+  - Refactor optimizer implementations
   - Add complex manifolds #125
   - Add jax backend #115
-  - Add L-BFGS (and other quasi-Newton) solver
+  - Add L-BFGS and other quasi-Newton optimizers
   - Use forward-over-reverse mode hvps where possible
   - Add patience parameter to terminate optimization if
     cost does not improve anymore #114

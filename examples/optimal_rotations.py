@@ -5,7 +5,7 @@ import torch
 import pymanopt
 from examples._tools import ExampleRunner
 from pymanopt.manifolds import SpecialOrthogonalGroup
-from pymanopt.solvers import SteepestDescent
+from pymanopt.optimizers import SteepestDescent
 
 
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
@@ -73,8 +73,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     cost, egrad = create_cost_egrad(manifold, ABt, backend)
     problem = pymanopt.Problem(manifold, cost, egrad=egrad)
 
-    solver = SteepestDescent(verbosity=2 * int(not quiet))
-    X = solver.solve(problem)
+    optimizer = SteepestDescent(verbosity=2 * int(not quiet))
+    X = optimizer.run(problem)
 
     if not quiet:
         Xopt = np.array([compute_optimal_solution(ABtk) for ABtk in ABt])

@@ -7,7 +7,7 @@ from numpy import random as rnd
 import pymanopt
 from examples._tools import ExampleRunner
 from pymanopt.manifolds import Grassmann
-from pymanopt.solvers import TrustRegions
+from pymanopt.optimizers import TrustRegions
 
 
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
@@ -76,8 +76,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     cost, egrad, ehess = create_cost_egrad_ehess(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
 
-    solver = TrustRegions(verbosity=2 * int(not quiet))
-    estimated_spanning_set = solver.solve(
+    optimizer = TrustRegions(verbosity=2 * int(not quiet))
+    estimated_spanning_set = optimizer.run(
         problem, Delta_bar=8 * np.sqrt(subspace_dimension)
     )
 

@@ -7,7 +7,7 @@ from numpy import random as rnd
 import pymanopt
 from examples._tools import ExampleRunner
 from pymanopt.manifolds import Oblique
-from pymanopt.solvers import TrustRegions
+from pymanopt.optimizers import TrustRegions
 
 
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
@@ -72,8 +72,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     cost, egrad, ehess = create_cost_egrad_ehess(manifold, matrix, backend)
     problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
 
-    solver = TrustRegions(verbosity=2 * int(not quiet))
-    X = solver.solve(problem)
+    optimizer = TrustRegions(verbosity=2 * int(not quiet))
+    X = optimizer.run(problem)
 
     if quiet:
         return

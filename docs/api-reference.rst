@@ -9,6 +9,6 @@ API Reference
    manifolds.rst
    autodiff.rst
    problem.rst
-   solvers.rst
+   optimizers.rst
    tools.rst
    bibliography.rst

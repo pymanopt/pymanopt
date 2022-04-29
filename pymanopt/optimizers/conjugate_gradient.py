@@ -4,8 +4,8 @@ from copy import deepcopy
 
 import numpy as np
 
-from pymanopt.solvers.line_search import AdaptiveLineSearcher
-from pymanopt.solvers.solver import Solver
+from pymanopt.optimizers.line_search import AdaptiveLineSearcher
+from pymanopt.optimizers.optimizer import Optimizer
 from pymanopt.tools import printer
 
 
@@ -16,7 +16,7 @@ class BetaRule(enum.Enum):
     HagerZhang = enum.auto()
 
 
-class ConjugateGradient(Solver):
+class ConjugateGradient(Optimizer):
     """Riemannian conjugate gradient method.
 
     Perform optimization using nonlinear conjugate gradient method with
@@ -60,7 +60,7 @@ class ConjugateGradient(Solver):
             self._line_searcher = line_searcher
         self.line_searcher = None
 
-    def solve(self, problem, initial_point=None, reuse_line_searcher=False):
+    def run(self, problem, initial_point=None, reuse_line_searcher=False):
         """Run CG method.
 
         Args:
@@ -72,7 +72,7 @@ class ConjugateGradient(Solver):
                 generated.
             reuse_line_searcher: Whether to reuse the previous line searcher.
                 Allows to use information from a previous call to
-                :meth:`solve`.
+                :meth:`run`.
 
         Returns:
             Local minimum of the cost function, or the most recent iterate if
@@ -119,7 +119,7 @@ class ConjugateGradient(Solver):
         desc_dir = -Pgrad
 
         self._initialize_log(
-            solver_parameters={
+            optimizer_parameters={
                 "beta_rule": self._beta_rule,
                 "orth_value": self._orth_value,
                 "line_searcher": line_searcher,

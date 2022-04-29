@@ -23,12 +23,12 @@ class Manifold(metaclass=abc.ABCMeta):
 
     Abstract base class setting out a template for manifold classes.
 
-    Not all methods are required by all solvers.
-    In particular, first order gradient based solvers such as
-    :mod:`pymanopt.solvers.steepest_descent` and
-    :mod:`pymanopt.solvers.conjugate_gradient` require :meth:`egrad2rgrad` to
+    Not all methods are required by all optimizers.
+    In particular, first order gradient based optimizers such as
+    :mod:`pymanopt.optimizers.steepest_descent` and
+    :mod:`pymanopt.optimizers.conjugate_gradient` require :meth:`egrad2rgrad` to
     be implemented but not :meth:`ehess2rhess`.
-    Second order solvers such as :mod:`pymanopt.solvers.trust_regions` will
+    Second order optimizers such as :mod:`pymanopt.optimizers.trust_regions` will
     require :meth:`ehess2rhess`.
     """
 
@@ -90,8 +90,8 @@ class Manifold(metaclass=abc.ABCMeta):
     def typicaldist(self):
         """Returns the `scale` of the manifold.
 
-        This is used by the trust-regions solver to determine default initial
-        and maximal trust-region radii.
+        This is used by the trust-regions optimizer to determine default
+        initial and maximal trust-region radii.
         """
         raise NotImplementedError(
             f"Manifold '{self.__class__.__name__}' does not provide a "
@@ -143,7 +143,7 @@ class Manifold(metaclass=abc.ABCMeta):
     def zerovec(self, point):
         """Returns the zero vector in the tangent space at ``point``."""
 
-    # Methods which are only required by certain solvers.
+    # Methods which are only required by certain optimizers.
 
     def _raise_not_implemented_error(method):
         @functools.wraps(method)
@@ -242,7 +242,7 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
     Similarly, if the Weingarten map (also known as shape operator) is provided
     via implementing the :meth:`weingarten` method, the class provides a
     generic implementation of the :meth:`ehess2rhess` method required by
-    second-order solvers to translate Euclidean Hessian-vector products to
+    second-order optimizers to translate Euclidean Hessian-vector products to
     their Riemannian counterparts.
 
     Notes:

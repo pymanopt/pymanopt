@@ -4,8 +4,8 @@ import numpy as np
 
 import pymanopt
 from pymanopt import tools
-from pymanopt.solvers.solver import Solver
-from pymanopt.solvers.steepest_descent import SteepestDescent
+from pymanopt.optimizers.optimizer import Optimizer
+from pymanopt.optimizers.steepest_descent import SteepestDescent
 
 
 def compute_centroid(manifold, points):
@@ -25,12 +25,12 @@ def compute_centroid(manifold, points):
             [manifold.log(y, point) for point in points], manifold.zerovec(y)
         )
 
-    solver = SteepestDescent(max_iterations=15, verbosity=0)
+    optimizer = SteepestDescent(max_iterations=15, verbosity=0)
     problem = pymanopt.Problem(manifold, objective, grad=gradient)
-    return solver.solve(problem)
+    return optimizer.minimize(problem)
 
 
-class NelderMead(Solver):
+class NelderMead(Optimizer):
     """Nelder-Mead alglorithm.
 
     Perform optimization using the derivative-free Nelder-Mead minimization
@@ -64,7 +64,7 @@ class NelderMead(Solver):
         self._expansion = expansion
         self._contraction = contraction
 
-    def solve(self, problem, initial_point=None):
+    def run(self, problem, initial_point=None):
         """Run Nelder-Mead algorithm.
 
         Args:

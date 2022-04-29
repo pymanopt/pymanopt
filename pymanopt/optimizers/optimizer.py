@@ -5,11 +5,11 @@ import time
 import numpy as np
 
 
-class Solver(metaclass=abc.ABCMeta):
-    """Abstract base class for Pymanopt solvers.
+class Optimizer(metaclass=abc.ABCMeta):
+    """Abstract base class for Pymanopt optimizers.
 
     Args:
-        max_time: Upper bound on the run time of a solver in seconds.
+        max_time: Upper bound on the run time of an optimizer in seconds.
         max_iterations: The maximum number of iterations to perform.
         min_gradient_norm: Termination threshold for the norm of the
             gradient.
@@ -17,9 +17,9 @@ class Solver(metaclass=abc.ABCMeta):
             size.
         max_cost_evaluations: Maximum number of allowed cost function
             evaluations.
-        verbosity: Level of information printed by the solver while it
+        verbosity: Level of information printed by the optimizer while it
             operates: 0 is silent, 2 is most verbose.
-        log_verbosity: Level of information logged by the solver while it
+        log_verbosity: Level of information logged by the optimizer while it
             operates: 0 is silent, 2 is most verbose.
     """
 
@@ -47,8 +47,8 @@ class Solver(metaclass=abc.ABCMeta):
         return type(self).__name__
 
     @abc.abstractmethod
-    def solve(self, problem, initial_point=None, *args, **kwargs):
-        """Run a solver on a given optimization problem.
+    def run(self, problem, initial_point=None, *args, **kwargs):
+        """Run an optimizer on a given optimization problem.
 
         Args:
             problem: Pymanopt problem class instance exposing the cost function
@@ -57,8 +57,8 @@ class Solver(metaclass=abc.ABCMeta):
             initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
-            *args: Potential solver-specific positional arguments.
-            **kwargs: Potential solver-specific keyword arguments.
+            *args: Potential optimizer-specific positional arguments.
+            **kwargs: Potential optimizer-specific keyword arguments.
         """
 
     def _check_stopping_criterion(
@@ -98,12 +98,12 @@ class Solver(metaclass=abc.ABCMeta):
             )
         return reason
 
-    def _initialize_log(self, *, solver_parameters=None):
+    def _initialize_log(self, *, optimizer_parameters=None):
         if self._log_verbosity <= 0:
             self._log = None
         else:
             self._log = {
-                "solver": str(self),
+                "optimizer": str(self),
                 "stopping_criteria": {
                     "max_time": self._max_time,
                     "max_iterations": self._max_iterations,
@@ -111,7 +111,7 @@ class Solver(metaclass=abc.ABCMeta):
                     "min_step_size": self._min_step_size,
                     "max_cost_evaluations": self._max_cost_evaluations,
                 },
-                "solver_parameters": solver_parameters,
+                "optimizer_parameters": optimizer_parameters,
             }
         if self._log_verbosity >= 2:
             self._log["iterations"] = collections.defaultdict(list)

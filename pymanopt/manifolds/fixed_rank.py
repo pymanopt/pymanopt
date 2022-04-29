@@ -21,7 +21,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         * The implementation follows the embedded geometry described in
           [Van2013]_.
         * The class is currently not compatible with the
-          :class:`pymanopt.solvers.TrustRegions` solver.
+          :class:`pymanopt.optimizers.TrustRegions` optimizer.
 
     Manifold of ``m x n`` real matrices of fixed rank ``k``.
     For efficiency purposes, Pymanopt does not represent points on this
@@ -165,8 +165,8 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return _FixedRankTangentVector(Up, M, Vp)
 
     # TODO(nkoep): Implement the 'weingarten' method to support the
-    # trust-region solver, cf.
-    # https://sites.uclouvain.be/absil/2013-01/Weingarten_07PA_techrep.pdf
+    #              trust-region optimizer, cf.
+    #              https://sites.uclouvain.be/absil/2013-01/Weingarten_07PA_techrep.pdf
 
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
