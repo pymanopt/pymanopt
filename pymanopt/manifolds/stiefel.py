@@ -86,7 +86,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
         vector = self.proj(point, vector)
         return vector / np.linalg.norm(vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):

@@ -110,7 +110,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         x = s.rand()
         y = s.rand()
         u = s.randvec(x)
-        A = s.transp(x, y, u)
+        A = s.transport(x, y, u)
         B = s.proj(y, s.tangent2ambient(x, u))
         diff = [A[k] - B[k] for k in range(len(A))]
         np_testing.assert_almost_equal(s.norm(y, diff), 0)

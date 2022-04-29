@@ -79,7 +79,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         tangent_vector = self.proj(point, vector)
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(point_b, tangent_vector_a)
 
     def pairmean(self, point_a, point_b):

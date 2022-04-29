@@ -158,7 +158,7 @@ class ParticleSwarm(Optimizer):
 
                 # Compute the new velocity of particle i, composed of three
                 # contributions.
-                inertia = w * man.transp(xiprev, xi, vi)
+                inertia = w * man.transport(xiprev, xi, vi)
                 nostalgia = rnd.rand() * self._nostalgia * man.log(xi, yi)
                 social = rnd.rand() * self._social * man.log(xi, xbest)
 

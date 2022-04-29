@@ -100,7 +100,7 @@ class Product(Manifold):
             reduction=_ProductTangentVector,
         )(point)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self._dispatch("transp", reduction=_ProductTangentVector)(
             point_a, point_b, tangent_vector_a
         )

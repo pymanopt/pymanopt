@@ -215,7 +215,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         x = man.rand()
         y = man.rand()
         u = man.randvec(x)
-        np_testing.assert_allclose(man.transp(x, y, u), u)
+        np_testing.assert_allclose(man.transport(x, y, u), u)
 
     def test_exp(self):
         # Test against manopt implementation, test that for small vectors

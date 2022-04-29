@@ -11,7 +11,6 @@
     * exp
     * log
     # Long forms
-    * transp -> transporter
     * rand -> random_point
     * randvec -> random_vector
     * retr -> retraction

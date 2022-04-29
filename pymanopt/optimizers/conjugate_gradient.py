@@ -188,7 +188,7 @@ class ConjugateGradient(Optimizer):
             newgradPnewgrad = man.inner(newx, newgrad, Pnewgrad)
 
             # Apply the CG scheme to compute the next search direction
-            oldgrad = man.transp(x, newx, grad)
+            oldgrad = man.transport(x, newx, grad)
             orth_grads = man.inner(newx, oldgrad, Pnewgrad) / newgradPnewgrad
 
             # Powell's restart strategy (see page 12 of Hager and Zhang's
@@ -197,7 +197,7 @@ class ConjugateGradient(Optimizer):
                 beta = 0
                 desc_dir = -Pnewgrad
             else:
-                desc_dir = man.transp(x, newx, desc_dir)
+                desc_dir = man.transport(x, newx, desc_dir)
 
                 # TODO(nkoep): Define closures for these in the constructor.
                 if self._beta_rule == "FletcherReeves":
@@ -218,7 +218,7 @@ class ConjugateGradient(Optimizer):
                         beta = 1
                 elif self._beta_rule == "HagerZhang":
                     diff = newgrad - oldgrad
-                    Poldgrad = man.transp(x, newx, Pgrad)
+                    Poldgrad = man.transport(x, newx, Pgrad)
                     Pdiff = Pnewgrad - Poldgrad
                     deno = man.inner(newx, diff, desc_dir)
                     numo = man.inner(newx, diff, Pnewgrad)

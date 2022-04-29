@@ -128,7 +128,7 @@ class TestSphereManifold(TestCase):
         y = s.rand()
         u = s.randvec(x)
 
-        np_testing.assert_allclose(s.transp(x, y, u), s.proj(y, u))
+        np_testing.assert_allclose(s.transport(x, y, u), s.proj(y, u))
 
     def test_exp_log_inverse(self):
         s = self.man

@@ -205,11 +205,12 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         """Transport a tangent vector between different tangent spaces.
 
-        The vector transport generalizes the concept of parallel transport, and
-        is often more efficient to compute numerically.
+        This may either be a vector transport (a generalization of parallel
+        transport) as defined in section 8.1 of [AMS2008]_, or a transporter
+        (see e.g. section 10.5 of [Bou2020]_).
         It transports a vector ``tangent_vector_a`` in the tangent space at
         ``point_a`` to the tangent space at `point_b`.
         """

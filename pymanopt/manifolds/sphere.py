@@ -64,7 +64,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         vector = rnd.randn(*self._shape)
         return self._normalize(self.proj(point, vector))
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(point_b, tangent_vector_a)
 
     def pairmean(self, point_a, point_b):

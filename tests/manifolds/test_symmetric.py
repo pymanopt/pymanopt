@@ -90,7 +90,7 @@ class TestSymmetricManifold(TestCase):
         x = e.rand()
         y = e.rand()
         u = e.randvec(x)
-        np_testing.assert_allclose(e.transp(x, y, u), u)
+        np_testing.assert_allclose(e.transport(x, y, u), u)
 
     def test_exp_log_inverse(self):
         s = self.man

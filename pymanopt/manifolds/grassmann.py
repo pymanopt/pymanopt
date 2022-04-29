@@ -13,7 +13,7 @@ class _GrassmannBase(Manifold):
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(point_b, tangent_vector_a)
 
     def zerovec(self, point):

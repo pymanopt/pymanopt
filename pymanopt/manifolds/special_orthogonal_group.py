@@ -189,7 +189,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             return np.zeros((self._n, self._n))
         return np.zeros((self._k, self._n, self._n))
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a
 
     def pairmean(self, point_a, point_b):

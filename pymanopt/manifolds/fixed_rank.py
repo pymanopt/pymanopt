@@ -248,7 +248,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         V = np.hstack(([vt.T, tangent_vector.Vp]))
         return U, S, V
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(
             point_b, self.tangent2ambient(point_a, tangent_vector_a)
         )

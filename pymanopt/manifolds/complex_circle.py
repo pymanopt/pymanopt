@@ -83,7 +83,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         tangent_vector = rnd.randn(self._dimension) * 1j * point
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(point_b, tangent_vector_a)
 
     def pairmean(self, point_a, point_b):

@@ -49,7 +49,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         tangent_vector = self.proj(point, random_vector)
         return self._normalize(tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(point_b, tangent_vector_a)
 
     def _normalize(self, array):
@@ -232,7 +232,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         tangent_vector = self.proj(point, self.rand())
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return self.proj(point_b, tangent_vector_a)
 
     def _normalize_rows(self, array):

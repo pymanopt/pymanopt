@@ -96,7 +96,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
             tangent_vector = multisym(rnd.randn(k, n, n))
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_b):
+    def transport(self, point_a, point_b, tangent_vector_b):
         return tangent_vector_b
 
     def exp(self, point, tangent_vector):
