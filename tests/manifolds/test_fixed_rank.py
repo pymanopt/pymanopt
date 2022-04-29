@@ -66,8 +66,8 @@ class TestFixedRankEmbeddedManifold(TestCase):
         g_disp = g + 0.01 * m.randvec(x)
 
         # Return to the ambient representation
-        g = m.tangent2ambient(x, g)
-        g_disp = m.tangent2ambient(x, g_disp)
+        g = m.tangent_to_ambient(x, g)
+        g_disp = m.tangent_to_ambient(x, g_disp)
         g = g[0] @ g[1] @ g[2].T
         g_disp = g_disp[0] @ g_disp[1] @ g_disp[2].T
 
@@ -78,7 +78,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         e = self.man
         x = e.rand()
         u = e.randvec(x)
-        A = e.projection(x, e.tangent2ambient(x, u))
+        A = e.projection(x, e.tangent_to_ambient(x, u))
         B = u
         # diff = [A[k]-B[k] for k in range(len(A))]
         np_testing.assert_allclose(A[0], B[0])
@@ -111,7 +111,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         y = s.rand()
         u = s.randvec(x)
         A = s.transport(x, y, u)
-        B = s.projection(y, s.tangent2ambient(x, u))
+        B = s.projection(y, s.tangent_to_ambient(x, u))
         diff = [A[k] - B[k] for k in range(len(A))]
         np_testing.assert_almost_equal(s.norm(y, diff), 0)
 
@@ -145,14 +145,14 @@ class TestFixedRankEmbeddedManifold(TestCase):
             z.T @ w, m._apply_ambient_transpose((u, s, v), w)
         )
 
-    def test_tangent2ambient(self):
+    def test_tangent_to_ambient(self):
         m = self.man
         x = m.rand()
         z = m.randvec(x)
 
         z_ambient = x[0] @ z[1] @ x[2] + z[0] @ x[2] + x[0] @ z[2].T
 
-        u, s, v = m.tangent2ambient(x, z)
+        u, s, v = m.tangent_to_ambient(x, z)
 
         np_testing.assert_allclose(z_ambient, u @ s @ v.T)
 
@@ -174,7 +174,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         y = self.man.retraction(x, u)
         y = y[0] @ np.diag(y[1]) @ y[2]
 
-        u = self.man.tangent2ambient(x, u)
+        u = self.man.tangent_to_ambient(x, u)
         u = u[0] @ u[1] @ u[2].T
         x = x[0] @ np.diag(x[1]) @ x[2]
 

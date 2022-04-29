@@ -9,7 +9,6 @@
     * rand -> random_point
     * randvec -> random_vector
     * tangent -> to_tangent_space
-    * tangent2ambient -> tangent_to_ambient
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp
     * egrad, ehess -> euclidean_gradient, euclidean_hvp
@@ -24,7 +23,7 @@
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
     transport simply by orthogonal projection of the tangent vector translated
     in the ambient space. For this, 'EuclideanEmbeddedSubmanifold' would
-    require a generic 'tangent2ambient' method. See 'FixedRankEmbedded'.
+    require a generic 'tangent_to_ambient' method. See 'FixedRankEmbedded'.
   - Add default implementation for tangent?
   - attrs
   - Refactor optimizer implementations

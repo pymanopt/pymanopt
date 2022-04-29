@@ -226,7 +226,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         )
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def tangent2ambient(self, point, tangent_vector):
+    def tangent_to_ambient(self, point, tangent_vector):
         """Represent tangent vector in ambient space.
 
         Transforms a tangent vector Z represented as a structure (Up, M, Vp)
@@ -250,7 +250,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(
-            point_b, self.tangent2ambient(point_a, tangent_vector_a)
+            point_b, self.tangent_to_ambient(point_a, tangent_vector_a)
         )
 
     def zero_vector(self, point):
