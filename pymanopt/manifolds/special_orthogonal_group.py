@@ -29,9 +29,9 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     problem.ehess(X, H).
 
     By default, the retraction is only a first-order approximation of the
-    exponential. To force the use of a second-order approximation, call
-    manifold.retr = manifold.retr2 after creating M. This switches from a
-    QR-based computation to an SVD-based computation.
+    exponential. To force the use of a second-order approximation, instantiate
+    the class with ``SpecialOrthogonalGroup(n, k, retraction="polar")``.
+    This switches from a QR-based computation to an SVD-based computation.
 
     Args:
         n: The dimension of the space that elements of the group act on.
@@ -54,9 +54,9 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
         if retraction == "qr":
-            self.retr = self._retr_qr
+            self._retraction = self._retraction_qr
         elif retraction == "polar":
-            self.retr = self._retr_polar
+            self._retractionretr = self._retraction_polar
         else:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
@@ -93,7 +93,10 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         Xtehess = multiprod(Xt, euclidean_hvp)
         return multiskew(Xtehess - multiprod(tangent_vector, symXtegrad))
 
-    def _retr_qr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
+        return self._retraction(point, tangent_vector)
+
+    def _retraction_qr(self, point, tangent_vector):
         def retri(array):
             q, r = la.qr(array)
             return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
@@ -106,7 +109,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             Y[i] = retri(Y[i])
         return Y
 
-    def _retr_polar(self, point, tangent_vector):
+    def _retraction_polar(self, point, tangent_vector):
         def retri(array):
             u, _, vt = la.svd(array)
             return u @ vt

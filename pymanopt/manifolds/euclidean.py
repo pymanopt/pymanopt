@@ -41,7 +41,7 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def exp(self, point, tangent_vector):
         return point + tangent_vector
 
-    retr = exp
+    retraction = exp
 
     def log(self, point_a, point_b):
         return point_b - point_a

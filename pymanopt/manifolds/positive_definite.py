@@ -109,7 +109,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
             e = expm(p_inv_tv)
         return multiprod(point, e)
 
-    retr = exp
+    retraction = exp
 
     def log(self, point_a, point_b):
         c = la.cholesky(point_a)
