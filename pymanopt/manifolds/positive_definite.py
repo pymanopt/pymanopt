@@ -29,7 +29,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(self.dim)
 
     def dist(self, point_a, point_b):

@@ -13,7 +13,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return 10 + self._k
 
     def inner(self, point, tangent_vector_a, tangent_vector_b):
@@ -190,7 +190,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return 10 * self._k
 
     def inner(self, point, tangent_vector_a, tangent_vector_b):

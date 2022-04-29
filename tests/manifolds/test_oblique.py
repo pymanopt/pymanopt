@@ -13,7 +13,7 @@ class TestObliqueManifold(TestCase):
 
     # def test_dim(self):
 
-    # def test_typicaldist(self):
+    # def test_typical_dist(self):
 
     # def test_dist(self):
 

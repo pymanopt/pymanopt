@@ -27,8 +27,8 @@ class TestSphereManifold(TestCase):
     def test_dim(self):
         assert self.man.dim == self.m * self.n - 1
 
-    def test_typicaldist(self):
-        np_testing.assert_almost_equal(self.man.typicaldist, np.pi)
+    def test_typical_dist(self):
+        np_testing.assert_almost_equal(self.man.typical_dist, np.pi)
 
     def test_dist(self):
         s = self.man

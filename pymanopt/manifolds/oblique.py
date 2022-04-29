@@ -23,7 +23,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.pi * np.sqrt(self._n)
 
     def inner(self, point, tangent_vector_a, tangent_vector_b):

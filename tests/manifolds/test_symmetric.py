@@ -18,9 +18,9 @@ class TestSymmetricManifold(TestCase):
     def test_dim(self):
         assert self.man.dim == 0.5 * self.k * self.n * (self.n + 1)
 
-    def test_typicaldist(self):
+    def test_typical_dist(self):
         man = self.man
-        np_testing.assert_almost_equal(man.typicaldist, np.sqrt(man.dim))
+        np_testing.assert_almost_equal(man.typical_dist, np.sqrt(man.dim))
 
     def test_dist(self):
         e = self.man

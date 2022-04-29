@@ -87,7 +87,7 @@ class Manifold(metaclass=abc.ABCMeta):
     # Manifold properties that subclasses can define
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         """Returns the `scale` of the manifold.
 
         This is used by the trust-regions optimizer to determine default
@@ -95,7 +95,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError(
             f"Manifold '{self.__class__.__name__}' does not provide a "
-            "'typicaldist' property"
+            "'typical_dist' property"
         )
 
     # Abstract methods that subclasses must implement.

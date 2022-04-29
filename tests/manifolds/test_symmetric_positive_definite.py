@@ -116,9 +116,9 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         k = self.k
         np_testing.assert_equal(man.dim, 0.5 * k * n * (n + 1))
 
-    def test_typicaldist(self):
+    def test_typical_dist(self):
         man = self.man
-        np_testing.assert_equal(man.typicaldist, np.sqrt(man.dim))
+        np_testing.assert_equal(man.typical_dist, np.sqrt(man.dim))
 
     def test_dist(self):
         # n = self.n

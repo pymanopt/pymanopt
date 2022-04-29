@@ -32,7 +32,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         return la.norm(np.arccos((point_a.conj() * point_b).real))
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.pi * np.sqrt(self._dimension)
 
     def proj(self, point, vector):

@@ -89,7 +89,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension, point_layout=3)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return self.dim
 
     def inner(self, point, tangent_vector_a, tangent_vector_b):

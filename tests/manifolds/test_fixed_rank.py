@@ -17,8 +17,8 @@ class TestFixedRankEmbeddedManifold(TestCase):
     def test_dim(self):
         assert self.man.dim == (self.m + self.n - self.k) * self.k
 
-    def test_typicaldist(self):
-        assert self.man.dim == self.man.typicaldist
+    def test_typical_dist(self):
+        assert self.man.dim == self.man.typical_dist
 
     def test_dist(self):
         e = self.man

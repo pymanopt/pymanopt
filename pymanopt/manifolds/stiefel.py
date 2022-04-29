@@ -35,7 +35,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(self._p * self._k)
 
     def inner(self, point, tangent_vector_a, tangent_vector_b):

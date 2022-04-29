@@ -127,9 +127,9 @@ class TestMultiComplexGrassmannManifold(TestCase):
     def test_dim(self):
         assert self.man.dim == self.k * 2 * (self.m * self.n - self.n**2)
 
-    def test_typicaldist(self):
+    def test_typical_dist(self):
         np_testing.assert_almost_equal(
-            self.man.typicaldist, np.sqrt(self.n * self.k)
+            self.man.typical_dist, np.sqrt(self.n * self.k)
         )
 
     def test_inner(self):

@@ -7,7 +7,7 @@ from pymanopt.tools.multi import multihconj, multiprod, multitransp
 
 class _GrassmannBase(Manifold):
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(self._p * self._k)
 
     def norm(self, point, tangent_vector):

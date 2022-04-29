@@ -69,7 +69,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         return la.norm(tangent_vector)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.pi * np.sqrt(self._n * self._k)
 
     def dist(self, point_a, point_b):

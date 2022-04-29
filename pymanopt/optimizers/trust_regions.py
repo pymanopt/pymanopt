@@ -123,7 +123,7 @@ class TrustRegions(Optimizer):
         # automatically be some fraction of the provided Delta_bar.
         if Delta_bar is None:
             try:
-                Delta_bar = man.typicaldist
+                Delta_bar = man.typical_dist
             except NotImplementedError:
                 Delta_bar = np.sqrt(man.dim)
         if Delta0 is None:

@@ -21,7 +21,7 @@ class TestSingleStiefelManifold(TestCase):
     def test_dim(self):
         assert self.man.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
 
-    # def test_typicaldist(self):
+    # def test_typical_dist(self):
 
     # def test_dist(self):
 
@@ -147,9 +147,9 @@ class TestMultiStiefelManifold(TestCase):
             2 * self.m - self.n - 1
         )
 
-    def test_typicaldist(self):
+    def test_typical_dist(self):
         np_testing.assert_almost_equal(
-            self.man.typicaldist, np.sqrt(self.n * self.k)
+            self.man.typical_dist, np.sqrt(self.n * self.k)
         )
 
     # def test_dist(self):

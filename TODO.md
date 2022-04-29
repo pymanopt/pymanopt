@@ -13,11 +13,10 @@
     # Long forms
     * rand -> random_point
     * randvec -> random_vector
-    * retr -> retraction
-    * proj -> projection
+    * retr -> retract
+    * proj -> project
     * tangent -> to_tangent_space
     * zerovec -> zero_vector
-    * typicaldist -> typical_dist
     * pairmean -> pair_mean
     # Undecided
     * grad, hess -> riemannian_gradient, riemannian_hvp

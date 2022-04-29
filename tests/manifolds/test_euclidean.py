@@ -17,9 +17,9 @@ class TestEuclideanManifold(TestCase):
     def test_dim(self):
         assert self.man.dim == self.m * self.n
 
-    def test_typicaldist(self):
+    def test_typical_dist(self):
         np_testing.assert_almost_equal(
-            self.man.typicaldist, np.sqrt(self.m * self.n)
+            self.man.typical_dist, np.sqrt(self.m * self.n)
         )
 
     def test_dist(self):

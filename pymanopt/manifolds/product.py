@@ -22,9 +22,9 @@ class Product(Manifold):
         super().__init__(name, dimension, point_layout=point_layout)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(
-            np.sum([manifold.typicaldist**2 for manifold in self.manifolds])
+            np.sum([manifold.typical_dist**2 for manifold in self.manifolds])
         )
 
     def _dispatch(
