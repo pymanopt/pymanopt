@@ -13,11 +13,13 @@ class TestStrictlyPositiveVectors(TestCase):
         self.k = k = 2
         self.man = StrictlyPositiveVectors(n, k=k)
 
-    def test_inner(self):
+    def test_inner_product(self):
         x = self.man.random_point()
         g = self.man.random_tangent_vector(x)
         h = self.man.random_tangent_vector(x)
-        assert (self.man.inner(x, g, h).shape == np.array([1, self.k])).all()
+        assert (
+            self.man.inner_product(x, g, h).shape == np.array([1, self.k])
+        ).all()
 
     def test_projection(self):
         # Test proj(proj(X)) == proj(X)

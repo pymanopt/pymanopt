@@ -23,10 +23,12 @@ class TestSingleStiefelManifold(TestCase):
 
     # def test_dist(self):
 
-    def test_inner(self):
+    def test_inner_product(self):
         X = np.linalg.qr(np.random.normal(size=(self.m, self.n)))[0]
         A, B = np.random.normal(size=(2, self.m, self.n))
-        np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
+        np_testing.assert_allclose(
+            np.sum(A * B), self.man.inner_product(X, A, B)
+        )
 
     def test_projection(self):
         # Construct a random point X on the manifold.
@@ -152,11 +154,13 @@ class TestMultiStiefelManifold(TestCase):
 
     # def test_dist(self):
 
-    def test_inner(self):
+    def test_inner_product(self):
         X = self.man.random_point()
         A = self.man.random_tangent_vector(X)
         B = self.man.random_tangent_vector(X)
-        np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
+        np_testing.assert_allclose(
+            np.sum(A * B), self.man.inner_product(X, A, B)
+        )
 
     def test_projection(self):
         # Construct a random point X on the manifold.

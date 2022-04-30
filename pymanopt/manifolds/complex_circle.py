@@ -20,7 +20,7 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
             name = f"Product manifold of complex circles (S^1)^{dimension}"
         super().__init__(name, dimension)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return (tangent_vector_a.conj() @ tangent_vector_b).real
 
     def norm(self, point, tangent_vector):

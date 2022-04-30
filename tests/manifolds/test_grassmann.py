@@ -120,11 +120,13 @@ class TestMultiGrassmannManifold(TestCase):
             self.man.dist(x, y), self.man.norm(x, self.man.log(x, y))
         )
 
-    def test_inner(self):
+    def test_inner_product(self):
         X = self.man.random_point()
         A = self.man.random_tangent_vector(X)
         B = self.man.random_tangent_vector(X)
-        np_testing.assert_allclose(np.sum(A * B), self.man.inner(X, A, B))
+        np_testing.assert_allclose(
+            np.sum(A * B), self.man.inner_product(X, A, B)
+        )
 
     def test_projection(self):
         # Construct a random point X on the manifold.

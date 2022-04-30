@@ -24,7 +24,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def typical_dist(self):
         return np.pi * np.sqrt(self._n)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )

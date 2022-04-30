@@ -210,7 +210,7 @@ class TrustRegions(Optimizer):
                 used_cauchy = False
                 # Check the curvature
                 Hg = hess(x, fgradx)
-                g_Hg = man.inner(x, fgradx, Hg)
+                g_Hg = man.inner_product(x, fgradx, Hg)
                 if g_Hg <= 0:
                     tau_c = 1
                 else:
@@ -224,13 +224,13 @@ class TrustRegions(Optimizer):
                 # returned eta, we might as well keep the best of them.
                 mdle = (
                     fx
-                    + man.inner(x, fgradx, eta)
-                    + 0.5 * man.inner(x, Heta, eta)
+                    + man.inner_product(x, fgradx, eta)
+                    + 0.5 * man.inner_product(x, Heta, eta)
                 )
                 mdlec = (
                     fx
-                    + man.inner(x, fgradx, eta_c)
-                    + 0.5 * man.inner(x, Heta_c, eta_c)
+                    + man.inner_product(x, fgradx, eta_c)
+                    + 0.5 * man.inner_product(x, Heta_c, eta_c)
                 )
                 if mdlec < mdle:
                     eta = eta_c
@@ -252,7 +252,9 @@ class TrustRegions(Optimizer):
             # Will we accept the proposal or not? Check the performance of the
             # quadratic model against the actual cost.
             rhonum = fx - fx_prop
-            rhoden = -man.inner(x, fgradx, eta) - 0.5 * man.inner(x, eta, Heta)
+            rhoden = -man.inner_product(
+                x, fgradx, eta
+            ) - 0.5 * man.inner_product(x, eta, Heta)
 
             # rhonum could be anything.
             # rhoden should be nonnegative, as guaranteed by tCG, baring
@@ -443,7 +445,7 @@ class TrustRegions(Optimizer):
         self, problem, x, fgradx, eta, Delta, theta, kappa, mininner, maxinner
     ):
         man = problem.manifold
-        inner = man.inner
+        inner = man.inner_product
         hess = problem.hess
         preconditioner = problem.preconditioner
 

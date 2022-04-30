@@ -101,7 +101,7 @@ class Manifold(metaclass=abc.ABCMeta):
     # Abstract methods that subclasses must implement.
 
     @abc.abstractmethod
-    def inner(
+    def inner_product(
         self,
         point: np.ndarray,
         tangent_vector_a: np.ndarray,

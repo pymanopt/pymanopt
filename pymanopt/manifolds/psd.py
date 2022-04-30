@@ -14,7 +14,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def typical_dist(self):
         return 10 + self._k
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
@@ -111,7 +111,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
     i.e., YY^* does not change. Therefore, M is the set of equivalence
     classes and is a Riemannian quotient manifold C^{nk}/U(k)
     where C^{nk} is the set of all complex matrix of size nxk of full rank.
-    The metric is the usual real-trace inner product, that is,
+    The metric is the usual real trace inner product, that is,
     it is the usual metric for the complex plane identified with R^2.
 
     Notice that this manifold is not complete: if optimization leads Y to be
@@ -125,7 +125,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
         dimension = 2 * k * n - k * k
         super().__init__(n, k, name, dimension)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return (
             2
             * np.tensordot(
@@ -134,12 +134,14 @@ class PSDFixedRankComplex(_PSDFixedRank):
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
     def dist(self, point_a, point_b):
         s, _, d = np.linalg.svd(point_b.T.conj() @ point_a)
         e = point_a - point_b @ s @ d
-        return self.inner(None, e, e) / 2
+        return self.inner_product(None, e, e) / 2
 
     def random_point(self):
         rand_ = super().rand
@@ -191,13 +193,15 @@ class Elliptope(Manifold, RetrAsExpMixin):
     def typical_dist(self):
         return 10 * self._k
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
     def projection(self, point, vector):
         eta = self._project_rows(point, vector)

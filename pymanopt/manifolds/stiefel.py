@@ -38,7 +38,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
     def typical_dist(self):
         return np.sqrt(self._p * self._k)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )

@@ -16,14 +16,15 @@ class TestSingleComplexGrassmannManifold(TestCase):
 
         self.projection = lambda x, u: u - x @ x.T @ u
 
-    def test_inner(self):
+    def test_inner_product(self):
         X = self.man.random_point()
         G = self.man.random_tangent_vector(X)
         H = self.man.random_tangent_vector(X)
         np_testing.assert_almost_equal(
-            np.real(np.trace(np.conjugate(G.T) @ H)), self.man.inner(X, G, H)
+            np.real(np.trace(np.conjugate(G.T) @ H)),
+            self.man.inner_product(X, G, H),
         )
-        assert np.isreal(self.man.inner(X, G, H))
+        assert np.isreal(self.man.inner_product(X, G, H))
 
     def test_projection(self):
         # Test proj(proj(X)) == proj(X)
@@ -132,14 +133,15 @@ class TestMultiComplexGrassmannManifold(TestCase):
             self.man.typical_dist, np.sqrt(self.n * self.k)
         )
 
-    def test_inner(self):
+    def test_inner_product(self):
         X = self.man.random_point()
         G = self.man.random_tangent_vector(X)
         H = self.man.random_tangent_vector(X)
         np_testing.assert_allclose(
-            np.real(np.sum(np.conjugate(G) * H)), self.man.inner(X, G, H)
+            np.real(np.sum(np.conjugate(G) * H)),
+            self.man.inner_product(X, G, H),
         )
-        assert np.isreal(self.man.inner(X, G, H))
+        assert np.isreal(self.man.inner_product(X, G, H))
 
     def test_projection(self):
         # Test proj(proj(X)) == proj(X) and proj(X)

@@ -56,7 +56,7 @@ def check_directional_derivative(problem, x=None, d=None):
     # Compute the value f0 of f at x and directional derivative at x along d.
     f0 = problem.cost(x)
     grad = problem.grad(x)
-    df0 = problem.manifold.inner(x, grad, d)
+    df0 = problem.manifold.inner_product(x, grad, d)
 
     # Compute the value of f at points on the geodesic (or approximation
     # of it) originating from x, along direction d, for step_sizes in a

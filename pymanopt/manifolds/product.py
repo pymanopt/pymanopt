@@ -47,10 +47,12 @@ class Product(Manifold):
         return wrapper
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
-        return self._dispatch("inner", reduction=np.sum)(
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
+        return self._dispatch("inner_product", reduction=np.sum)(
             point, tangent_vector_a, tangent_vector_b
         )
 

@@ -26,7 +26,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
     def typical_dist(self):
         return np.sqrt(self.dim)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         inv_x = 1.0 / point
         return np.sum(
             inv_x * tangent_vector_a * inv_x * tangent_vector_b,
@@ -38,7 +38,9 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         return vector
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
     def random_point(self):
         return np.random.uniform(low=1e-6, high=1, size=(self._n, self._k))

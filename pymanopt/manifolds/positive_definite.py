@@ -40,7 +40,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         )
         return np.linalg.norm(logm)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         p_inv_tv_a = np.linalg.solve(point, tangent_vector_a)
         if tangent_vector_a is tangent_vector_b:
             p_inv_tv_b = p_inv_tv_a
@@ -70,7 +70,9 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
     def random_point(self):
         # Generate eigenvalues between 1 and 2.

@@ -92,7 +92,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     def typical_dist(self):
         return self.dim
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.sum(
             np.tensordot(a, b)
             for (a, b) in zip(tangent_vector_a, tangent_vector_b)
@@ -192,7 +192,9 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         return _FixedRankPoint(U, S, V.T)
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
     def random_point(self):
         u = self._stiefel_m.random_point()

@@ -35,12 +35,12 @@ class TestSphereManifold(TestCase):
         correct_dist = np.arccos(np.tensordot(x, y))
         np_testing.assert_almost_equal(correct_dist, s.dist(x, y))
 
-    def test_inner(self):
+    def test_inner_product(self):
         s = self.man
         x = s.random_point()
         u = s.random_tangent_vector(x)
         v = s.random_tangent_vector(x)
-        np_testing.assert_almost_equal(np.sum(u * v), s.inner(x, u, v))
+        np_testing.assert_almost_equal(np.sum(u * v), s.inner_product(x, u, v))
 
     def test_projection(self):
         #  Construct a random point X on the manifold.

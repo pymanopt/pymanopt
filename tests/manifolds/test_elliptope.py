@@ -15,7 +15,7 @@ class TestElliptopeManifold(TestCase):
 
     # def test_dist(self):
 
-    # def test_inner(self):
+    # def test_inner_product(self):
 
     # def test_projection(self):
 

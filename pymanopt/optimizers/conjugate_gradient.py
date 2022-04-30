@@ -113,7 +113,7 @@ class ConjugateGradient(Optimizer):
         grad = gradient(x)
         gradient_norm = man.norm(x, grad)
         Pgrad = problem.preconditioner(x, grad)
-        gradPgrad = man.inner(x, grad, Pgrad)
+        gradPgrad = man.inner_product(x, grad, Pgrad)
 
         # Initial descent direction is the negative gradient
         desc_dir = -Pgrad
@@ -158,7 +158,7 @@ class ConjugateGradient(Optimizer):
 
             # The line search algorithms require the directional derivative of
             # the cost at the current point x along the search direction.
-            df0 = man.inner(x, grad, desc_dir)
+            df0 = man.inner_product(x, grad, desc_dir)
 
             # If we didn't get a descent direction: restart, i.e., switch to
             # the negative gradient. Equivalent to resetting the CG direction
@@ -185,11 +185,13 @@ class ConjugateGradient(Optimizer):
             newgrad = gradient(newx)
             newgradient_norm = man.norm(newx, newgrad)
             Pnewgrad = problem.preconditioner(newx, newgrad)
-            newgradPnewgrad = man.inner(newx, newgrad, Pnewgrad)
+            newgradPnewgrad = man.inner_product(newx, newgrad, Pnewgrad)
 
             # Apply the CG scheme to compute the next search direction
             oldgrad = man.transport(x, newx, grad)
-            orth_grads = man.inner(newx, oldgrad, Pnewgrad) / newgradPnewgrad
+            orth_grads = (
+                man.inner_product(newx, oldgrad, Pnewgrad) / newgradPnewgrad
+            )
 
             # Powell's restart strategy (see page 12 of Hager and Zhang's
             # survey on conjugate gradient methods, for example)
@@ -204,28 +206,29 @@ class ConjugateGradient(Optimizer):
                     beta = newgradPnewgrad / gradPgrad
                 elif self._beta_rule == "PolakRibiere":
                     diff = newgrad - oldgrad
-                    ip_diff = man.inner(newx, Pnewgrad, diff)
+                    ip_diff = man.inner_product(newx, Pnewgrad, diff)
                     beta = max(0, ip_diff / gradPgrad)
                 elif self._beta_rule == "HestenesStiefel":
                     diff = newgrad - oldgrad
-                    ip_diff = man.inner(newx, Pnewgrad, diff)
+                    ip_diff = man.inner_product(newx, Pnewgrad, diff)
                     try:
                         beta = max(
-                            0, ip_diff / man.inner(newx, diff, desc_dir)
+                            0,
+                            ip_diff / man.inner_product(newx, diff, desc_dir),
                         )
-                    # if ip_diff = man.inner(newx, diff, desc_dir) = 0
+                    # if ip_diff = man.inner_product(newx, diff, desc_dir) = 0
                     except ZeroDivisionError:
                         beta = 1
                 elif self._beta_rule == "HagerZhang":
                     diff = newgrad - oldgrad
                     Poldgrad = man.transport(x, newx, Pgrad)
                     Pdiff = Pnewgrad - Poldgrad
-                    deno = man.inner(newx, diff, desc_dir)
-                    numo = man.inner(newx, diff, Pnewgrad)
+                    deno = man.inner_product(newx, diff, desc_dir)
+                    numo = man.inner_product(newx, diff, Pnewgrad)
                     numo -= (
                         2
-                        * man.inner(newx, diff, Pdiff)
-                        * man.inner(newx, desc_dir, newgrad)
+                        * man.inner_product(newx, diff, Pdiff)
+                        * man.inner_product(newx, desc_dir, newgrad)
                         / deno
                     )
                     beta = numo / deno

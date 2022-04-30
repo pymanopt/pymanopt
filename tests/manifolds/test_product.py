@@ -40,7 +40,7 @@ class TestProductManifold(TestCase):
         eta = man.random_tangent_vector(x)
         np.float64(1.0) * eta
 
-    # def test_inner(self):
+    # def test_inner_product(self):
 
     # def test_projection(self):
 

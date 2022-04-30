@@ -22,7 +22,7 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
     def typical_dist(self):
         return np.pi
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
@@ -31,14 +31,16 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         return np.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        inner = max(min(self.inner(point_a, point_a, point_b), 1), -1)
+        inner = max(min(self.inner_product(point_a, point_a, point_b), 1), -1)
         return np.arccos(inner)
 
     def projection(self, point, vector):
-        return vector - self.inner(point, point, vector) * point
+        return vector - self.inner_product(point, point, vector) * point
 
     def weingarten(self, point, tangent_vector, normal_vector):
-        return -self.inner(point, point, normal_vector) * tangent_vector
+        return (
+            -self.inner_product(point, point, normal_vector) * tangent_vector
+        )
 
     def exp(self, point, tangent_vector):
         norm = self.norm(point, tangent_vector)

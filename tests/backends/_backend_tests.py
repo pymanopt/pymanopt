@@ -16,7 +16,7 @@ def manifold_factory(point_layout):
         def _generic(self, *args, **kwargs):
             pass
 
-        inner = _generic
+        inner_product = _generic
         norm = _generic
         projection = _generic
         random_point = _generic

@@ -15,7 +15,7 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def typical_dist(self):
         return np.sqrt(self.dim)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return float(
             np.tensordot(
                 tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim

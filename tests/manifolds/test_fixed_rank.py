@@ -27,7 +27,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         with self.assertRaises(NotImplementedError):
             e.dist(x, y)
 
-    def test_inner(self):
+    def test_inner_product(self):
         e = self.man
         x = e.random_point()
         a = e.random_tangent_vector(x)
@@ -36,7 +36,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         A = x[0] @ a[1] @ x[2] + a[0] @ x[2] + x[0] @ a[2].T
         B = x[0] @ b[1] @ x[2] + b[0] @ x[2] + x[0] @ b[2].T
         trueinner = np.sum(A * B)
-        np_testing.assert_almost_equal(trueinner, e.inner(x, a, b))
+        np_testing.assert_almost_equal(trueinner, e.inner_product(x, a, b))
 
     def test_proj_range(self):
         m = self.man
@@ -88,7 +88,9 @@ class TestFixedRankEmbeddedManifold(TestCase):
         e = self.man
         x = e.random_point()
         u = e.random_tangent_vector(x)
-        np_testing.assert_almost_equal(np.sqrt(e.inner(x, u, u)), e.norm(x, u))
+        np_testing.assert_almost_equal(
+            np.sqrt(e.inner_product(x, u, u)), e.norm(x, u)
+        )
 
     def test_rand(self):
         e = self.man

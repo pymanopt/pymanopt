@@ -61,7 +61,7 @@ class Grassmann(_GrassmannBase):
         s = np.arccos(s)
         return np.linalg.norm(s)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
@@ -170,7 +170,7 @@ class ComplexGrassmann(_GrassmannBase):
         s = np.arccos(s)
         return np.linalg.norm(np.real(s))
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.real(
             np.tensordot(
                 np.conjugate(tangent_vector_a),

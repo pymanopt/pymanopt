@@ -58,7 +58,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         else:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )

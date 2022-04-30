@@ -25,12 +25,12 @@ class TestEuclideanManifold(TestCase):
         x, y = np.random.normal(size=(2, self.m, self.n))
         np_testing.assert_almost_equal(e.dist(x, y), np.linalg.norm(x - y))
 
-    def test_inner(self):
+    def test_inner_product(self):
         e = self.man
         x = e.random_point()
         y = e.random_tangent_vector(x)
         z = e.random_tangent_vector(x)
-        np_testing.assert_almost_equal(np.sum(y * z), e.inner(x, y, z))
+        np_testing.assert_almost_equal(np.sum(y * z), e.inner_product(x, y, z))
 
     def test_projection(self):
         e = self.man
