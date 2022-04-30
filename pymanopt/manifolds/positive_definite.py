@@ -96,8 +96,8 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
             tangent_vector = multisym(np.random.normal(size=(k, n, n)))
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def transport(self, point_a, point_b, tangent_vector_b):
-        return tangent_vector_b
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return tangent_vector_a
 
     def exp(self, point, tangent_vector):
         p_inv_tv = np.linalg.solve(point, tangent_vector)

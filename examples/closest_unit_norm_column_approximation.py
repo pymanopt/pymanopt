@@ -68,8 +68,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     X = matrix / np.linalg.norm(matrix, axis=0)[np.newaxis, :]
 
     # Print information about the solution.
-    print("Solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
-    print("Frobenius-error: %f" % np.linalg.norm(X - Xopt))
+    print("Solution found:", np.allclose(X, Xopt, rtol=1e-3))
+    print("Frobenius-error:", np.linalg.norm(X - Xopt))
 
 
 if __name__ == "__main__":

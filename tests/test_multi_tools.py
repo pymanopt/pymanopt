@@ -71,7 +71,7 @@ class TestMulti(TestCase):
 
     def test_multilog_singlemat(self):
         a = np.diag(np.random.uniform(size=self.m))
-        q, r = np.linalg.qr(np.random.normal(size=(self.m, self.m)))
+        q, _ = np.linalg.qr(np.random.normal(size=(self.m, self.m)))
         # A is a positive definite matrix
         A = q @ a @ q.T
         np_testing.assert_allclose(multilog(A, pos_def=True), logm(A))
