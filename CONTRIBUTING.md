@@ -36,18 +36,18 @@ Push a feature branch to your fork and [submit a pull request][pr]. Refer to
 By making a contribution (pull requesting or committing) to the Pymanopt
 project you certify that
 
-  * you have the right to submit it to Pymanopt.
+* you have the right to submit it to Pymanopt.
 
-  * you created the contribution/modification; or you based it on previous work
-    that, to the best of your knowledge, is covered by a compatible open source
-    license; or someone who did one of the former provided you with this
-    contribution/modification and you are submitting it without changes.
+* you created the contribution/modification; or you based it on previous work
+  that, to the best of your knowledge, is covered by a compatible open source
+  license; or someone who did one of the former provided you with this
+  contribution/modification and you are submitting it without changes.
 
-  * you understand and agree that your contribution/modification to this
-    project is public and that a record of it (including all information you
-    submit with it, including copyright notices and your sign-off) is
-    maintained indefinitely and may be redistributed consistent with Pymanopt's
-    3-clause BSD license or the open source license(s) involved.
+* you understand and agree that your contribution/modification to this
+  project is public and that a record of it (including all information you
+  submit with it, including copyright notices and your sign-off) is
+  maintained indefinitely and may be redistributed consistent with Pymanopt's
+  3-clause BSD license or the open source license(s) involved.
 
 To make your certification explicit we borrow the "sign-off" procedure
 from the Linux kernel project, i.e., each commit message should contain

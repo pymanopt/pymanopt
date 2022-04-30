@@ -81,7 +81,7 @@ class TestMulti(TestCase):
         L = np.zeros((self.k, self.m, self.m))
         for i in range(self.k):
             a = np.diag(np.random.uniform(size=self.m))
-            q, r = np.linalg.qr(np.random.normal(size=(self.m, self.m)))
+            q, _ = np.linalg.qr(np.random.normal(size=(self.m, self.m)))
             A[i] = q @ a @ q.T
             L[i] = logm(A[i])
         np_testing.assert_allclose(multilog(A, pos_def=True), L)

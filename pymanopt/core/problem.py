@@ -19,7 +19,7 @@ class Problem:
             returns a real scalar.
             If any decorator other than
             :func:`pymanopt.function.numpy` is used the gradient and
-            Hessian-vector production functions are computed automatically if
+            Hessian-vector production functions are generated automatically if
             needed and no ``(e)grad`` or ``(e)hess`` arguments are provided.
         egrad: The Euclidean gradient, i.e., the gradient of the cost function
             in the typical sense in the ambient space.

@@ -21,7 +21,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     submanifold of (R^nxn)^k endowed with the usual trace inner product.
 
     Tangent vectors are represented in the Lie algebra, i.e., as skew
-    symmetric matrices. Use the function manifold.tangent_to_ambient(X, H) to
+    symmetric matrices. Use the function manifold.embedding(X, H) to
     switch from the Lie algebra representation to the embedding space
     representation. This is often necessary when defining
     problem.ehess(X, H).
@@ -79,7 +79,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     def to_tangent_space(self, point, vector):
         return multiskew(vector)
 
-    def tangent_to_ambient(self, point, tangent_vector):
+    def embedding(self, point, tangent_vector):
         return multiprod(point, tangent_vector)
 
     def ehess2rhess(

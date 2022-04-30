@@ -185,12 +185,10 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         )
         # Numpy svd outputs St as a 1d vector, not a matrix.
         Ut, St, Vt = np.linalg.svd(T, full_matrices=False)
-        # Transpose because numpy outputs it the wrong way.
-        Vt = Vt.T
 
         U = np.hstack((u, Qu)) @ Ut[:, : self._k]
         S = St[: self._k] + np.spacing(1)
-        V = np.hstack((vt.T, Qv)) @ Vt[:, : self._k]
+        V = np.hstack((vt.T, Qv)) @ Vt.T[:, : self._k]
         return _FixedRankPoint(U, S, V.T)
 
     def norm(self, point, tangent_vector):
@@ -226,7 +224,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         )
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def tangent_to_ambient(self, point, tangent_vector):
+    def embedding(self, point, tangent_vector):
         """Represent tangent vector in ambient space.
 
         Transforms a tangent vector Z represented as a structure (Up, M, Vp)
@@ -250,7 +248,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(
-            point_b, self.tangent_to_ambient(point_a, tangent_vector_a)
+            point_b, self.embedding(point_a, tangent_vector_a)
         )
 
     def zero_vector(self, point):
