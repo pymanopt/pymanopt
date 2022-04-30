@@ -61,14 +61,14 @@ class TestProductManifold(TestCase):
     # def test_transport(self):
 
     def test_exp_log_inverse(self):
-        s = self.man
+        s = self.manifold
         X = s.random_point()
         Y = s.random_point()
         Yexplog = s.exp(X, tangent_vector=s.log(X, Y))
         np_testing.assert_almost_equal(s.dist(point_a=Y, point_b=Yexplog), 0)
 
     def test_log_exp_inverse(self):
-        s = self.man
+        s = self.manifold
         X = s.random_point()
         U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
@@ -76,7 +76,7 @@ class TestProductManifold(TestCase):
         np_testing.assert_array_almost_equal(U[1], Ulogexp[1])
 
     def test_pair_mean(self):
-        s = self.man
+        s = self.manifold
         X = s.random_point()
         Y = s.random_point()
         Z = s.pair_mean(X, Y)

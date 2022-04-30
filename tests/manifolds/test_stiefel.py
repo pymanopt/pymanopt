@@ -102,7 +102,7 @@ class TestSingleStiefelManifold(TestCase):
     def test_exp(self):
         # Check that exp lies on the manifold and that exp of a small vector u
         # is close to x + u.
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         u = s.random_tangent_vector(x)
 
@@ -116,21 +116,21 @@ class TestSingleStiefelManifold(TestCase):
         np_testing.assert_allclose(xexpu, x + u)
 
     # def test_exp_log_inverse(self):
-    # s = self.man
+    # s = self.manifold
     # X = s.random_point()
     # U = s.random_tangent_vector(X)
     # Uexplog = s.exp(X, s.log(X, U))
     # np_testing.assert_array_almost_equal(U, Uexplog)
 
     # def test_log_exp_inverse(self):
-    # s = self.man
+    # s = self.manifold
     # X = s.random_point()
     # U = s.random_tangent_vector(X)
     # Ulogexp = s.log(X, s.exp(X, U))
     # np_testing.assert_array_almost_equal(U, Ulogexp)
 
     # def test_pair_mean(self):
-    # s = self.man
+    # s = self.manifold
     # X = s.random_point()
     # Y = s.random_point()
     # Z = s.pair_mean(X, Y)
@@ -236,7 +236,7 @@ class TestMultiStiefelManifold(TestCase):
     def test_exp(self):
         # Check that exp lies on the manifold and that exp of a small vector u
         # is close to x + u.
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         u = s.random_tangent_vector(x)
 
@@ -252,21 +252,21 @@ class TestMultiStiefelManifold(TestCase):
         np_testing.assert_allclose(xexpu, x + u)
 
     # def test_exp_log_inverse(self):
-    # s = self.man
+    # s = self.manifold
     # X = s.random_point()
     # U = s.random_tangent_vector(X)
     # Uexplog = s.exp(X, s.log(X, U))
     # np_testing.assert_array_almost_equal(U, Uexplog)
 
     # def test_log_exp_inverse(self):
-    # s = self.man
+    # s = self.manifold
     # X = s.random_point()
     # U = s.random_tangent_vector(X)
     # Ulogexp = s.log(X, s.exp(X, U))
     # np_testing.assert_array_almost_equal(U, Ulogexp)
 
     # def test_pair_mean(self):
-    # s = self.man
+    # s = self.manifold
     # X = s.random_point()
     # Y = s.random_point()
     # Z = s.pair_mean(X, Y)

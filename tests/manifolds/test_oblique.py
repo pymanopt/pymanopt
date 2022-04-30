@@ -36,7 +36,7 @@ class TestObliqueManifold(TestCase):
     # def test_transport(self):
 
     def test_exp_log_inverse(self):
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         y = s.random_point()
         u = s.log(x, y)
@@ -44,7 +44,7 @@ class TestObliqueManifold(TestCase):
         np_testing.assert_almost_equal(0, s.dist(y, z), decimal=6)
 
     def test_log_exp_inverse(self):
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         u = s.random_tangent_vector(x)
         y = s.exp(x, u)
@@ -54,7 +54,7 @@ class TestObliqueManifold(TestCase):
         np_testing.assert_almost_equal(0, s.norm(x, u - v))
 
     def test_pair_mean(self):
-        s = self.man
+        s = self.manifold
         X = s.random_point()
         Y = s.random_point()
         Z = s.pair_mean(X, Y)

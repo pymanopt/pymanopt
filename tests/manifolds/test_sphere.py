@@ -29,14 +29,14 @@ class TestSphereManifold(TestCase):
         np_testing.assert_almost_equal(self.manifold.typical_dist, np.pi)
 
     def test_dist(self):
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         y = s.random_point()
         correct_dist = np.arccos(np.tensordot(x, y))
         np_testing.assert_almost_equal(correct_dist, s.dist(x, y))
 
     def test_inner_product(self):
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         u = s.random_tangent_vector(x)
         v = s.random_tangent_vector(x)
@@ -104,7 +104,7 @@ class TestSphereManifold(TestCase):
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         np_testing.assert_almost_equal(np.linalg.norm(x), 1)
         y = s.random_point()
@@ -113,7 +113,7 @@ class TestSphereManifold(TestCase):
     def test_random_tangent_vector(self):
         # Just make sure that things generated are in the tangent space and
         # that if you generate two they are not equal.
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         u = s.random_tangent_vector(x)
         v = s.random_tangent_vector(x)
@@ -123,7 +123,7 @@ class TestSphereManifold(TestCase):
 
     def test_transport(self):
         # Should be the same as proj
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         y = s.random_point()
         u = s.random_tangent_vector(x)
@@ -131,21 +131,21 @@ class TestSphereManifold(TestCase):
         np_testing.assert_allclose(s.transport(x, y, u), s.projection(y, u))
 
     def test_exp_log_inverse(self):
-        s = self.man
+        s = self.manifold
         X = s.random_point()
         Y = s.random_point()
         Yexplog = s.exp(X, s.log(X, Y))
         np_testing.assert_array_almost_equal(Y, Yexplog)
 
     def test_log_exp_inverse(self):
-        s = self.man
+        s = self.manifold
         X = s.random_point()
         U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
         np_testing.assert_array_almost_equal(U, Ulogexp)
 
     def test_pair_mean(self):
-        s = self.man
+        s = self.manifold
         X = s.random_point()
         Y = s.random_point()
         Z = s.pair_mean(X, Y)

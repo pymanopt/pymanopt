@@ -72,7 +72,7 @@ class TestSingleGrassmannManifold(TestCase):
     # def test_transport(self):
 
     def test_exp_log_inverse(self):
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         y = s.random_point()
         u = s.log(x, y)
@@ -80,7 +80,7 @@ class TestSingleGrassmannManifold(TestCase):
         np_testing.assert_almost_equal(0, self.manifold.dist(y, z), decimal=5)
 
     def test_log_exp_inverse(self):
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         u = s.random_tangent_vector(x)
         y = s.exp(x, u)
@@ -90,7 +90,7 @@ class TestSingleGrassmannManifold(TestCase):
         np_testing.assert_almost_equal(0, self.manifold.norm(x, u - v))
 
     # def test_pair_mean(self):
-    # s = self.man
+    # s = self.manifold
     # X = s.random_point()
     # Y = s.random_point()
     # Z = s.pair_mean(X, Y)
@@ -194,7 +194,7 @@ class TestMultiGrassmannManifold(TestCase):
     # def test_transport(self):
 
     def test_exp_log_inverse(self):
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         y = s.random_point()
         u = s.log(x, y)
@@ -202,7 +202,7 @@ class TestMultiGrassmannManifold(TestCase):
         np_testing.assert_almost_equal(0, self.manifold.dist(y, z))
 
     def test_log_exp_inverse(self):
-        s = self.man
+        s = self.manifold
         x = s.random_point()
         u = s.random_tangent_vector(x)
         y = s.exp(x, u)
@@ -212,7 +212,7 @@ class TestMultiGrassmannManifold(TestCase):
         np_testing.assert_almost_equal(0, self.manifold.norm(x, u - v))
 
     # def test_pair_mean(self):
-    # s = self.man
+    # s = self.manifold
     # X = s.random_point()
     # Y = s.random_point()
     # Z = s.pair_mean(X, Y)

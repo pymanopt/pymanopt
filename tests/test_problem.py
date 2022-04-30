@@ -14,21 +14,21 @@ class TestProblem(TestCase):
         self.n = 15
         self.manifold = Sphere(self.n)
 
-        @pymanopt.function.tensorflow(self.man)
+        @pymanopt.function.tensorflow(self.manifold)
         def cost(X):
             return tf.exp(tf.reduce_sum(X**2))
 
         self.cost = cost
 
     def test_prepare(self):
-        problem = pymanopt.Problem(self.man, self.cost)
+        problem = pymanopt.Problem(self.manifold, self.cost)
         x = np.random.normal(size=self.n)
         np_testing.assert_allclose(
             2 * x * np.exp(np.sum(x**2)), problem.egrad(x)
         )
 
     def test_attribute_override(self):
-        problem = pymanopt.Problem(self.man, self.cost)
+        problem = pymanopt.Problem(self.manifold, self.cost)
         with self.assertRaises(AttributeError):
             problem.manifold = None
 
