@@ -34,8 +34,8 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
             keepdims=True,
         )
 
-    def projection(self, point, tangent_vector):
-        return tangent_vector
+    def projection(self, point, vector):
+        return vector
 
     def norm(self, point, tangent_vector):
         return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
