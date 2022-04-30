@@ -11,13 +11,13 @@ class TestFixedRankEmbeddedManifold(TestCase):
         self.m = m = 10
         self.n = n = 5
         self.k = k = 3
-        self.man = FixedRankEmbedded(m, n, k)
+        self.manifold = FixedRankEmbedded(m, n, k)
 
     def test_dim(self):
-        assert self.man.dim == (self.m + self.n - self.k) * self.k
+        assert self.manifold.dim == (self.m + self.n - self.k) * self.k
 
     def test_typical_dist(self):
-        assert self.man.dim == self.man.typical_dist
+        assert self.manifold.dim == self.manifold.typical_dist
 
     def test_dist(self):
         e = self.man
@@ -57,7 +57,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         # by displacing the result slightly and checking that this increases
         # the distance.
         m = self.man
-        x = self.man.random_point()
+        x = self.manifold.random_point()
         v = np.random.normal(size=(self.m, self.n))
 
         g = m.projection(x, v)
@@ -163,19 +163,19 @@ class TestFixedRankEmbeddedManifold(TestCase):
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
 
-        y = self.man.retraction(x, u)
+        y = self.manifold.retraction(x, u)
 
         np_testing.assert_allclose(y[0].T @ y[0], np.eye(self.k), atol=1e-6)
         np_testing.assert_allclose(y[2] @ y[2].T, np.eye(self.k), atol=1e-6)
 
         u = u * 1e-6
-        y = self.man.retraction(x, u)
+        y = self.manifold.retraction(x, u)
         y = y[0] @ np.diag(y[1]) @ y[2]
 
-        u = self.man.embedding(x, u)
+        u = self.manifold.embedding(x, u)
         u = u[0] @ u[1] @ u[2].T
         x = x[0] @ np.diag(x[1]) @ x[2]
 

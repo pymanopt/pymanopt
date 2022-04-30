@@ -10,14 +10,14 @@ class TestEuclideanManifold(TestCase):
     def setUp(self):
         self.m = m = 10
         self.n = n = 5
-        self.man = Euclidean(m, n)
+        self.manifold = Euclidean(m, n)
 
     def test_dim(self):
-        assert self.man.dim == self.m * self.n
+        assert self.manifold.dim == self.m * self.n
 
     def test_typical_dist(self):
         np_testing.assert_almost_equal(
-            self.man.typical_dist, np.sqrt(self.m * self.n)
+            self.manifold.typical_dist, np.sqrt(self.m * self.n)
         )
 
     def test_dist(self):

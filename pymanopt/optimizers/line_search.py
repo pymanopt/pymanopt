@@ -92,8 +92,8 @@ class AdaptiveLineSearcher:
         self._initial_step_size = initial_step_size
         self._oldalpha = None
 
-    def search(self, objective, man, x, d, f0, df0):
-        norm_d = man.norm(x, d)
+    def search(self, objective, manifold, x, d, f0, df0):
+        norm_d = manifold.norm(x, d)
 
         if self._oldalpha is not None:
             alpha = self._oldalpha
@@ -101,7 +101,7 @@ class AdaptiveLineSearcher:
             alpha = self._initial_step_size / norm_d
         alpha = float(alpha)
 
-        newx = man.retraction(x, alpha * d)
+        newx = manifold.retraction(x, alpha * d)
         newf = objective(newx)
         cost_evaluations = 1
 
@@ -113,7 +113,7 @@ class AdaptiveLineSearcher:
             alpha *= self._contraction_factor
 
             # Look closer down the line.
-            newx = man.retraction(x, alpha * d)
+            newx = manifold.retraction(x, alpha * d)
             newf = objective(newx)
 
             cost_evaluations += 1

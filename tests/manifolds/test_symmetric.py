@@ -11,14 +11,16 @@ class TestSymmetricManifold(TestCase):
     def setUp(self):
         self.n = n = 10
         self.k = k = 5
-        self.man = Symmetric(n, k)
+        self.manifold = Symmetric(n, k)
 
     def test_dim(self):
-        assert self.man.dim == 0.5 * self.k * self.n * (self.n + 1)
+        assert self.manifold.dim == 0.5 * self.k * self.n * (self.n + 1)
 
     def test_typical_dist(self):
-        man = self.man
-        np_testing.assert_almost_equal(man.typical_dist, np.sqrt(man.dim))
+        manifold = self.man
+        np_testing.assert_almost_equal(
+            manifold.typical_dist, np.sqrt(manifold.dim)
+        )
 
     def test_dist(self):
         e = self.man

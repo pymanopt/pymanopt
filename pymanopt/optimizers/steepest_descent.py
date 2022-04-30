@@ -48,7 +48,7 @@ class SteepestDescent(Optimizer):
             Local minimum of the cost function, or the most recent iterate if
             algorithm terminated before convergence.
         """
-        man = problem.manifold
+        manifold = problem.manifold
         objective = problem.cost
         gradient = problem.grad
 
@@ -58,7 +58,7 @@ class SteepestDescent(Optimizer):
 
         # If no starting point is specified, generate one at random.
         if initial_point is None:
-            x = man.random_point()
+            x = manifold.random_point()
         else:
             x = initial_point
 
@@ -92,7 +92,7 @@ class SteepestDescent(Optimizer):
             # Calculate new cost, grad and gradient_norm
             cost = objective(x)
             grad = gradient(x)
-            gradient_norm = man.norm(x, grad)
+            gradient_norm = manifold.norm(x, grad)
 
             column_printer.print_row([iteration, cost, gradient_norm])
 
@@ -108,7 +108,7 @@ class SteepestDescent(Optimizer):
 
             # Perform line-search
             step_size, x = line_searcher.search(
-                objective, man, x, desc_dir, cost, -(gradient_norm**2)
+                objective, manifold, x, desc_dir, cost, -(gradient_norm**2)
             )
 
             stopping_criterion = self._check_stopping_criterion(

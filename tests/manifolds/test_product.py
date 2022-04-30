@@ -12,21 +12,23 @@ class TestProductManifold(TestCase):
         self.n = n = 50
         self.euclidean = Euclidean(m, n)
         self.sphere = Sphere(n)
-        self.man = Product([self.euclidean, self.sphere])
+        self.manifold = Product([self.euclidean, self.sphere])
 
     def test_dim(self):
-        np_testing.assert_equal(self.man.dim, self.m * self.n + self.n - 1)
+        np_testing.assert_equal(
+            self.manifold.dim, self.m * self.n + self.n - 1
+        )
 
     def test_typical_dist(self):
         np_testing.assert_equal(
-            self.man.typical_dist, np.sqrt((self.m * self.n) + np.pi**2)
+            self.manifold.typical_dist, np.sqrt((self.m * self.n) + np.pi**2)
         )
 
     def test_dist(self):
-        X = self.man.random_point()
-        Y = self.man.random_point()
+        X = self.manifold.random_point()
+        Y = self.manifold.random_point()
         np_testing.assert_equal(
-            self.man.dist(X, Y),
+            self.manifold.dist(X, Y),
             np.sqrt(
                 self.euclidean.dist(X[0], Y[0]) ** 2
                 + self.sphere.dist(X[1], Y[1]) ** 2
@@ -35,9 +37,9 @@ class TestProductManifold(TestCase):
 
     def test_tangent_vector_multiplication(self):
         # Regression test for https://github.com/pymanopt/pymanopt/issues/49.
-        man = Product((Euclidean(12), Grassmann(12, 3)))
-        x = man.random_point()
-        eta = man.random_tangent_vector(x)
+        manifold = Product((Euclidean(12), Grassmann(12, 3)))
+        x = manifold.random_point()
+        eta = manifold.random_tangent_vector(x)
         np.float64(1.0) * eta
 
     # def test_inner_product(self):

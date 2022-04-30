@@ -13,11 +13,11 @@ class TestSingleStiefelManifold(TestCase):
         self.m = m = 20
         self.n = n = 2
         self.k = k = 1
-        self.man = Stiefel(m, n, k=k)
+        self.manifold = Stiefel(m, n, k=k)
         self.projection = lambda x, u: u - x @ (x.T @ u + u.T @ x) / 2
 
     def test_dim(self):
-        assert self.man.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
+        assert self.manifold.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
 
     # def test_typical_dist(self):
 
@@ -27,7 +27,7 @@ class TestSingleStiefelManifold(TestCase):
         X = np.linalg.qr(np.random.normal(size=(self.m, self.n)))[0]
         A, B = np.random.normal(size=(2, self.m, self.n))
         np_testing.assert_allclose(
-            np.sum(A * B), self.man.inner_product(X, A, B)
+            np.sum(A * B), self.manifold.inner_product(X, A, B)
         )
 
     def test_projection(self):
@@ -40,60 +40,62 @@ class TestSingleStiefelManifold(TestCase):
 
         # Compare the projections.
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
-        np_testing.assert_allclose(Hproj, self.man.projection(X, H))
+        np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
-        X = self.man.random_point()
+        X = self.manifold.random_point()
         np_testing.assert_allclose(X.T @ X, np.eye(self.n), atol=1e-10)
-        Y = self.man.random_point()
+        Y = self.manifold.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
 
     def test_random_tangent_vector(self):
         # Make sure things generated are in tangent space and if you generate
         # two then they are not equal.
-        X = self.man.random_point()
-        U = self.man.random_tangent_vector(X)
+        X = self.manifold.random_point()
+        U = self.manifold.random_tangent_vector(X)
         np_testing.assert_allclose(
             multisym(X.T @ U), np.zeros((self.n, self.n)), atol=1e-10
         )
-        V = self.man.random_tangent_vector(X)
+        V = self.manifold.random_tangent_vector(X)
         assert np.linalg.norm(U - V) > 1e-6
 
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
 
-        xretru = self.man.retraction(x, u)
+        xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(
             xretru.T @ xretru, np.eye(self.n, self.n), atol=1e-10
         )
 
         u = u * 1e-6
-        xretru = self.man.retraction(x, u)
+        xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
     def test_ehess2rhess(self):
         # Test this function at some randomly generated point.
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
         egrad = np.random.normal(size=(self.m, self.n))
         ehess = np.random.normal(size=(self.m, self.n))
 
         np_testing.assert_allclose(
             testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
-            self.man.ehess2rhess(x, egrad, ehess, u),
+            self.manifold.ehess2rhess(x, egrad, ehess, u),
         )
 
     # def test_egrad2rgrad(self):
 
     def test_norm(self):
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
-        np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
+        np_testing.assert_almost_equal(
+            self.manifold.norm(x, u), np.linalg.norm(u)
+        )
 
     # def test_transport(self):
 
@@ -140,31 +142,31 @@ class TestMultiStiefelManifold(TestCase):
         self.m = m = 10
         self.n = n = 3
         self.k = k = 3
-        self.man = Stiefel(m, n, k=k)
+        self.manifold = Stiefel(m, n, k=k)
 
     def test_dim(self):
-        assert self.man.dim == 0.5 * self.k * self.n * (
+        assert self.manifold.dim == 0.5 * self.k * self.n * (
             2 * self.m - self.n - 1
         )
 
     def test_typical_dist(self):
         np_testing.assert_almost_equal(
-            self.man.typical_dist, np.sqrt(self.n * self.k)
+            self.manifold.typical_dist, np.sqrt(self.n * self.k)
         )
 
     # def test_dist(self):
 
     def test_inner_product(self):
-        X = self.man.random_point()
-        A = self.man.random_tangent_vector(X)
-        B = self.man.random_tangent_vector(X)
+        X = self.manifold.random_point()
+        A = self.manifold.random_tangent_vector(X)
+        B = self.manifold.random_tangent_vector(X)
         np_testing.assert_allclose(
-            np.sum(A * B), self.man.inner_product(X, A, B)
+            np.sum(A * B), self.manifold.inner_product(X, A, B)
         )
 
     def test_projection(self):
         # Construct a random point X on the manifold.
-        X = self.man.random_point()
+        X = self.manifold.random_point()
 
         # Construct a vector H in the ambient space.
         H = np.random.normal(size=(self.k, self.m, self.n))
@@ -177,38 +179,38 @@ class TestMultiStiefelManifold(TestCase):
             )
             / 2
         )
-        np_testing.assert_allclose(Hproj, self.man.projection(X, H))
+        np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
-        X = self.man.random_point()
+        X = self.manifold.random_point()
         np_testing.assert_allclose(
             multiprod(multitransp(X), X), multieye(self.k, self.n), atol=1e-10
         )
-        Y = self.man.random_point()
+        Y = self.manifold.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
 
     def test_random_tangent_vector(self):
         # Make sure things generated are in tangent space and if you generate
         # two then they are not equal.
-        X = self.man.random_point()
-        U = self.man.random_tangent_vector(X)
+        X = self.manifold.random_point()
+        U = self.manifold.random_tangent_vector(X)
         np_testing.assert_allclose(
             multisym(multiprod(multitransp(X), U)),
             np.zeros((self.k, self.n, self.n)),
             atol=1e-10,
         )
-        V = self.man.random_tangent_vector(X)
+        V = self.manifold.random_tangent_vector(X)
         assert np.linalg.norm(U - V) > 1e-6
 
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
 
-        xretru = self.man.retraction(x, u)
+        xretru = self.manifold.retraction(x, u)
 
         np_testing.assert_allclose(
             multiprod(multitransp(xretru), xretru),
@@ -217,15 +219,17 @@ class TestMultiStiefelManifold(TestCase):
         )
 
         u = u * 1e-6
-        xretru = self.man.retraction(x, u)
+        xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
     # def test_egrad2rgrad(self):
 
     def test_norm(self):
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
-        np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
+        np_testing.assert_almost_equal(
+            self.manifold.norm(x, u), np.linalg.norm(u)
+        )
 
     # def test_transport(self):
 

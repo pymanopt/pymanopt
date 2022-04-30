@@ -17,16 +17,16 @@ class TestSphereManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
-        self.man = Sphere(m, n)
+        self.manifold = Sphere(m, n)
 
         # For automatic testing of ehess2rhess
         self.projection = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
 
     def test_dim(self):
-        assert self.man.dim == self.m * self.n - 1
+        assert self.manifold.dim == self.m * self.n - 1
 
     def test_typical_dist(self):
-        np_testing.assert_almost_equal(self.man.typical_dist, np.pi)
+        np_testing.assert_almost_equal(self.manifold.typical_dist, np.pi)
 
     def test_dist(self):
         s = self.man
@@ -52,7 +52,7 @@ class TestSphereManifold(TestCase):
 
         #  Compare the projections.
         np_testing.assert_array_almost_equal(
-            H - X * np.trace(X.T @ H), self.man.projection(X, H)
+            H - X * np.trace(X.T @ H), self.manifold.projection(X, H)
         )
 
     def test_egrad2rgrad(self):
@@ -66,38 +66,40 @@ class TestSphereManifold(TestCase):
 
         #  Compare the projections.
         np_testing.assert_array_almost_equal(
-            H - X * np.trace(X.T @ H), self.man.egrad2rgrad(X, H)
+            H - X * np.trace(X.T @ H), self.manifold.egrad2rgrad(X, H)
         )
 
     def test_ehess2rhess(self):
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
         egrad = np.random.normal(size=(self.m, self.n))
         ehess = np.random.normal(size=(self.m, self.n))
 
         np_testing.assert_allclose(
             testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
-            self.man.ehess2rhess(x, egrad, ehess, u),
+            self.manifold.ehess2rhess(x, egrad, ehess, u),
         )
 
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
 
-        xretru = self.man.retraction(x, u)
+        xretru = self.manifold.retraction(x, u)
         np_testing.assert_almost_equal(np.linalg.norm(xretru), 1)
 
         u = u * 1e-6
-        xretru = self.man.retraction(x, u)
+        xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
     def test_norm(self):
-        x = self.man.random_point()
-        u = self.man.random_tangent_vector(x)
+        x = self.manifold.random_point()
+        u = self.manifold.random_tangent_vector(x)
 
-        np_testing.assert_almost_equal(self.man.norm(x, u), np.linalg.norm(u))
+        np_testing.assert_almost_equal(
+            self.manifold.norm(x, u), np.linalg.norm(u)
+        )
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold and that
@@ -158,21 +160,21 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
         # manifold as it only consits of isolated points in R^2.
         self.U = np.ones((self.n, 1)) / np.sqrt(2)
         with warnings.catch_warnings(record=True):
-            self.man = SphereSubspaceIntersection(self.U)
+            self.manifold = SphereSubspaceIntersection(self.U)
 
     def test_dim(self):
-        self.assertEqual(self.man.dim, 0)
+        self.assertEqual(self.manifold.dim, 0)
 
     def test_rand(self):
-        x = self.man.random_point()
+        x = self.manifold.random_point()
         p = np.ones(2) / np.sqrt(2)
         # The manifold only consists of two isolated points (cf. `setUp()`).
         self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
 
     def test_projection(self):
         h = np.random.normal(size=self.n)
-        x = self.man.random_point()
-        p = self.man.projection(x, h)
+        x = self.manifold.random_point()
+        p = self.manifold.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
         np_testing.assert_array_almost_equal(p, np.zeros(self.n))
@@ -180,21 +182,21 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
     def test_dim_1(self):
         U = np.zeros((3, 2))
         U[0, 0] = U[1, 1] = 1
-        man = SphereSubspaceIntersection(U)
+        manifold = SphereSubspaceIntersection(U)
         # U spans the x-y plane, therefore the manifold consists of the
         # 1-sphere in the x-y plane, and has dimension 1.
-        self.assertEqual(man.dim, 1)
+        self.assertEqual(manifold.dim, 1)
         # Check if a random element from the manifold has vanishing
         # z-component.
-        x = man.random_point()
+        x = manifold.random_point()
         np_testing.assert_almost_equal(x[-1], 0)
 
     def test_dim_rand(self):
         n = 100
         U = np.random.normal(size=(n, n // 3))
         dim = np.linalg.matrix_rank(U) - 1
-        man = SphereSubspaceIntersection(U)
-        self.assertEqual(man.dim, dim)
+        manifold = SphereSubspaceIntersection(U)
+        self.assertEqual(manifold.dim, dim)
 
 
 class TestSphereSubspaceComplementIntersectionManifold(TestCase):
@@ -206,20 +208,20 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         # R^2.
         self.U = np.ones((self.n, 1)) / np.sqrt(2)
         with warnings.catch_warnings(record=True):
-            self.man = SphereSubspaceComplementIntersection(self.U)
+            self.manifold = SphereSubspaceComplementIntersection(self.U)
 
     def test_dim(self):
-        self.assertEqual(self.man.dim, 0)
+        self.assertEqual(self.manifold.dim, 0)
 
     def test_rand(self):
-        x = self.man.random_point()
+        x = self.manifold.random_point()
         p = np.array([-1, 1]) / np.sqrt(2)
         self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
 
     def test_projection(self):
         h = np.random.normal(size=self.n)
-        x = self.man.random_point()
-        p = self.man.projection(x, h)
+        x = self.manifold.random_point()
+        p = self.manifold.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
         np_testing.assert_array_almost_equal(p, np.zeros(self.n))
@@ -227,14 +229,14 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
     def test_dim_1(self):
         U = np.zeros((3, 1))
         U[-1, -1] = 1
-        man = SphereSubspaceComplementIntersection(U)
+        manifold = SphereSubspaceComplementIntersection(U)
         # U spans the z-axis with its orthogonal complement being the x-y
         # plane, therefore the manifold consists of the 1-sphere in the x-y
         # plane, and has dimension 1.
-        self.assertEqual(man.dim, 1)
+        self.assertEqual(manifold.dim, 1)
         # Check if a random element from the manifold has vanishing
         # z-component.
-        x = man.random_point()
+        x = manifold.random_point()
         np_testing.assert_almost_equal(x[-1], 0)
 
     def test_dim_rand(self):
@@ -243,10 +245,10 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         # By the rank-nullity theorem the orthogonal complement of span(U) has
         # dimension n - rank(U).
         dim = n - np.linalg.matrix_rank(U) - 1
-        man = SphereSubspaceComplementIntersection(U)
-        self.assertEqual(man.dim, dim)
+        manifold = SphereSubspaceComplementIntersection(U)
+        self.assertEqual(manifold.dim, dim)
 
         # Test if a random element really lies in the left null space of U.
-        x = man.random_point()
+        x = manifold.random_point()
         np_testing.assert_almost_equal(np.linalg.norm(x), 1)
         np_testing.assert_array_almost_equal(U.T @ x, np.zeros(U.shape[1]))

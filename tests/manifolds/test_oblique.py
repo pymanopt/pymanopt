@@ -9,7 +9,7 @@ class TestObliqueManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
-        self.man = Oblique(m, n)
+        self.manifold = Oblique(m, n)
 
     # def test_dim(self):
 

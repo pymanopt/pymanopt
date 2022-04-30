@@ -12,7 +12,7 @@ from ._test import TestCase
 class TestProblem(TestCase):
     def setUp(self):
         self.n = 15
-        self.man = Sphere(self.n)
+        self.manifold = Sphere(self.n)
 
         @pymanopt.function.tensorflow(self.man)
         def cost(X):

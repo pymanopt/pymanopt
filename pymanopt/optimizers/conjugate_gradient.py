@@ -78,7 +78,7 @@ class ConjugateGradient(Optimizer):
             Local minimum of the cost function, or the most recent iterate if
             algorithm terminated before convergence.
         """
-        man = problem.manifold
+        manifold = problem.manifold
         objective = problem.cost
         gradient = problem.grad
 
@@ -88,7 +88,7 @@ class ConjugateGradient(Optimizer):
 
         # If no starting point is specified, generate one at random.
         if initial_point is None:
-            x = man.random_point()
+            x = manifold.random_point()
         else:
             x = initial_point
 
@@ -111,9 +111,9 @@ class ConjugateGradient(Optimizer):
         # Calculate initial cost-related quantities
         cost = objective(x)
         grad = gradient(x)
-        gradient_norm = man.norm(x, grad)
+        gradient_norm = manifold.norm(x, grad)
         Pgrad = problem.preconditioner(x, grad)
-        gradPgrad = man.inner_product(x, grad, Pgrad)
+        gradPgrad = manifold.inner_product(x, grad, Pgrad)
 
         # Initial descent direction is the negative gradient
         desc_dir = -Pgrad
@@ -158,7 +158,7 @@ class ConjugateGradient(Optimizer):
 
             # The line search algorithms require the directional derivative of
             # the cost at the current point x along the search direction.
-            df0 = man.inner_product(x, grad, desc_dir)
+            df0 = manifold.inner_product(x, grad, desc_dir)
 
             # If we didn't get a descent direction: restart, i.e., switch to
             # the negative gradient. Equivalent to resetting the CG direction
@@ -177,20 +177,21 @@ class ConjugateGradient(Optimizer):
 
             # Execute line search
             step_size, newx = line_searcher.search(
-                objective, man, x, desc_dir, cost, df0
+                objective, manifold, x, desc_dir, cost, df0
             )
 
             # Compute the new cost-related quantities for newx
             newcost = objective(newx)
             newgrad = gradient(newx)
-            newgradient_norm = man.norm(newx, newgrad)
+            newgradient_norm = manifold.norm(newx, newgrad)
             Pnewgrad = problem.preconditioner(newx, newgrad)
-            newgradPnewgrad = man.inner_product(newx, newgrad, Pnewgrad)
+            newgradPnewgrad = manifold.inner_product(newx, newgrad, Pnewgrad)
 
             # Apply the CG scheme to compute the next search direction
-            oldgrad = man.transport(x, newx, grad)
+            oldgrad = manifold.transport(x, newx, grad)
             orth_grads = (
-                man.inner_product(newx, oldgrad, Pnewgrad) / newgradPnewgrad
+                manifold.inner_product(newx, oldgrad, Pnewgrad)
+                / newgradPnewgrad
             )
 
             # Powell's restart strategy (see page 12 of Hager and Zhang's
@@ -199,41 +200,42 @@ class ConjugateGradient(Optimizer):
                 beta = 0
                 desc_dir = -Pnewgrad
             else:
-                desc_dir = man.transport(x, newx, desc_dir)
+                desc_dir = manifold.transport(x, newx, desc_dir)
 
                 # TODO(nkoep): Define closures for these in the constructor.
                 if self._beta_rule == "FletcherReeves":
                     beta = newgradPnewgrad / gradPgrad
                 elif self._beta_rule == "PolakRibiere":
                     diff = newgrad - oldgrad
-                    ip_diff = man.inner_product(newx, Pnewgrad, diff)
+                    ip_diff = manifold.inner_product(newx, Pnewgrad, diff)
                     beta = max(0, ip_diff / gradPgrad)
                 elif self._beta_rule == "HestenesStiefel":
                     diff = newgrad - oldgrad
-                    ip_diff = man.inner_product(newx, Pnewgrad, diff)
+                    ip_diff = manifold.inner_product(newx, Pnewgrad, diff)
                     try:
                         beta = max(
                             0,
-                            ip_diff / man.inner_product(newx, diff, desc_dir),
+                            ip_diff
+                            / manifold.inner_product(newx, diff, desc_dir),
                         )
-                    # if ip_diff = man.inner_product(newx, diff, desc_dir) = 0
+                    # if ip_diff = manifold.inner_product(newx, diff, desc_dir) = 0
                     except ZeroDivisionError:
                         beta = 1
                 elif self._beta_rule == "HagerZhang":
                     diff = newgrad - oldgrad
-                    Poldgrad = man.transport(x, newx, Pgrad)
+                    Poldgrad = manifold.transport(x, newx, Pgrad)
                     Pdiff = Pnewgrad - Poldgrad
-                    deno = man.inner_product(newx, diff, desc_dir)
-                    numo = man.inner_product(newx, diff, Pnewgrad)
+                    deno = manifold.inner_product(newx, diff, desc_dir)
+                    numo = manifold.inner_product(newx, diff, Pnewgrad)
                     numo -= (
                         2
-                        * man.inner_product(newx, diff, Pdiff)
-                        * man.inner_product(newx, desc_dir, newgrad)
+                        * manifold.inner_product(newx, diff, Pdiff)
+                        * manifold.inner_product(newx, desc_dir, newgrad)
                         / deno
                     )
                     beta = numo / deno
                     # Robustness (see Hager-Zhang paper mentioned above)
-                    desc_dir_norm = man.norm(newx, desc_dir)
+                    desc_dir_norm = manifold.norm(newx, desc_dir)
                     eta_HZ = -1 / (desc_dir_norm * min(0.01, gradient_norm))
                     beta = max(beta, eta_HZ)
                 else:
