@@ -11,7 +11,7 @@ from pymanopt.optimizers import SteepestDescent
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_and_euclidean_gradient(manifold, ABt, backend):
+def create_cost_and_derivates(manifold, ABt, backend):
     euclidean_gradient = None
 
     if backend == "autograd":
@@ -70,7 +70,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     ABt = np.array([Ak @ Bk.T for Ak, Bk in zip(A, B)])
 
     manifold = SpecialOrthogonalGroup(n, k)
-    cost, euclidean_gradient = create_cost_and_euclidean_gradient(
+    cost, euclidean_gradient = create_cost_and_derivates(
         manifold, ABt, backend
     )
     problem = pymanopt.Problem(

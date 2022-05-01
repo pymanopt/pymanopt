@@ -31,7 +31,7 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def projection(self, point, vector):
         return vector
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         return euclidean_hvp
@@ -108,7 +108,7 @@ class Symmetric(_Euclidean):
     def projection(self, point, vector):
         return multisym(vector)
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         return multisym(euclidean_hvp)
@@ -143,7 +143,7 @@ class SkewSymmetric(_Euclidean):
     def projection(self, point, vector):
         return multiskew(vector)
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         return multiskew(euclidean_hvp)

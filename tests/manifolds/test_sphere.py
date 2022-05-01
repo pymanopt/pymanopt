@@ -19,7 +19,7 @@ class TestSphereManifold(TestCase):
         self.n = n = 50
         self.manifold = Sphere(m, n)
 
-        # For automatic testing of ehess2rhess
+        # For automatic testing of euclidean_to_riemannian_hvp
         self.projection = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
 
     def test_dim(self):
@@ -70,15 +70,17 @@ class TestSphereManifold(TestCase):
             self.manifold.euclidean_to_riemannian_gradient(X, H),
         )
 
-    def test_ehess2rhess(self):
+    def test_euclidean_to_riemannian_hvp(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
         egrad = np.random.normal(size=(self.m, self.n))
         ehess = np.random.normal(size=(self.m, self.n))
 
         np_testing.assert_allclose(
-            testing.ehess2rhess(self.projection)(x, egrad, ehess, u),
-            self.manifold.ehess2rhess(x, egrad, ehess, u),
+            testing.euclidean_to_riemannian_hvp(self.projection)(
+                x, egrad, ehess, u
+            ),
+            self.manifold.euclidean_to_riemannian_hvp(x, egrad, ehess, u),
         )
 
     def test_retraction(self):

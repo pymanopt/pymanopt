@@ -131,7 +131,7 @@ class TrustRegions(Optimizer):
 
         cost = problem.cost
         gradient = problem.riemannian_gradient
-        hess = problem.hess
+        hess = problem.riemannian_hvp
 
         # If no starting point is specified, generate one at random.
         if initial_point is None:
@@ -446,7 +446,7 @@ class TrustRegions(Optimizer):
     ):
         manifold = problem.manifold
         inner = manifold.inner_product
-        hess = problem.hess
+        hess = problem.riemannian_hvp
         preconditioner = problem.preconditioner
 
         if not self.use_rand:  # and therefore, eta == 0

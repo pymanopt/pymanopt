@@ -62,7 +62,7 @@ class TestProblemBackendInterface(TestCase):
             np_testing.assert_allclose(ga, gb)
 
     def test_problem_hessian_vector_product(self):
-        ehess = self.problem.ehess
+        ehess = self.problem.euclidean_hvp
         X = self.manifold.random_point()
         U = self.manifold.random_point()
         H = ehess(X, U)

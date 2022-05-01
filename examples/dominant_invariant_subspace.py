@@ -11,8 +11,8 @@ from pymanopt.optimizers import TrustRegions
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_and_euclidean_gradient_ehess(manifold, matrix, backend):
-    euclidean_gradient = ehess = None
+def create_cost_and_derivates(manifold, matrix, backend):
+    euclidean_gradient = euclidean_hvp = None
 
     if backend == "autograd":
 
@@ -31,7 +31,7 @@ def create_cost_and_euclidean_gradient_ehess(manifold, matrix, backend):
             return -(matrix + matrix.T) @ X
 
         @pymanopt.function.numpy(manifold)
-        def ehess(X, H):
+        def euclidean_hvp(X, H):
             return -(matrix + matrix.T) @ H
 
     elif backend == "pytorch":
@@ -54,7 +54,7 @@ def create_cost_and_euclidean_gradient_ehess(manifold, matrix, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, euclidean_gradient, ehess
+    return cost, euclidean_gradient, euclidean_hvp
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
@@ -71,11 +71,14 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = 0.5 * (matrix + matrix.T)
 
     manifold = Grassmann(num_rows, subspace_dimension)
-    cost, euclidean_gradient, ehess = create_cost_and_euclidean_gradient_ehess(
+    cost, euclidean_gradient, euclidean_hvp = create_cost_and_derivates(
         manifold, matrix, backend
     )
     problem = pymanopt.Problem(
-        manifold, cost, euclidean_gradient=euclidean_gradient, ehess=ehess
+        manifold,
+        cost,
+        euclidean_gradient=euclidean_gradient,
+        euclidean_hvp=euclidean_hvp,
     )
 
     optimizer = TrustRegions(verbosity=2 * int(not quiet))

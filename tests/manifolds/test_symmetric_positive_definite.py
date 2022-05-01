@@ -165,7 +165,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
             multiprod(multiprod(x, multisym(u)), x),
         )
 
-    def test_ehess2rhess(self):
+    def test_euclidean_to_riemannian_hvp(self):
         # Use manopt's slow method
         manifold = self.manifold
         n = self.n
@@ -181,7 +181,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         # Correction factor for the non-constant metric
         Hess = Hess - multisym(multiprod(multiprod(u, multisym(egrad)), x))
         np_testing.assert_almost_equal(
-            Hess, manifold.ehess2rhess(x, egrad, ehess, u)
+            Hess, manifold.euclidean_to_riemannian_hvp(x, egrad, ehess, u)
         )
 
     def test_norm(self):

@@ -24,7 +24,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     symmetric matrices. Use the function manifold.embedding(X, H) to
     switch from the Lie algebra representation to the embedding space
     representation. This is often necessary when defining
-    problem.ehess(X, H).
+    problem.euclidean_hvp(X, H).
 
     By default, the retraction is only a first-order approximation of the
     exponential. To force the use of a second-order approximation, instantiate
@@ -82,7 +82,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     def embedding(self, point, tangent_vector):
         return multiprod(point, tangent_vector)
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         Xt = multitransp(point)

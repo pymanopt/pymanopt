@@ -12,7 +12,7 @@ from pymanopt.tools.diagnostics import check_gradient
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_and_euclidean_gradient(manifold, matrix, backend):
+def create_cost_and_derivates(manifold, matrix, backend):
     euclidean_gradient = None
 
     if backend == "autograd":
@@ -57,7 +57,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # Generate random problem data.
     matrix = np.random.normal(size=(n, n))
     matrix = 0.5 * (matrix + matrix.T)
-    cost, euclidean_gradient = create_cost_and_euclidean_gradient(
+    cost, euclidean_gradient = create_cost_and_derivates(
         manifold, matrix, backend
     )
 

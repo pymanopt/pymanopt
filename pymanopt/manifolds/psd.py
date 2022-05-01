@@ -31,7 +31,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         return self.projection(point, euclidean_hvp)
@@ -216,7 +216,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self._project_rows(point, euclidean_gradient)
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         scaling_grad = (euclidean_gradient * point).sum(axis=1)

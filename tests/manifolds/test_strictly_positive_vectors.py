@@ -65,7 +65,7 @@ class TestStrictlyPositiveVectors(TestCase):
             self.manifold.norm(x, u), self.manifold.dist(x, y)
         )
 
-    # def test_ehess2rhess(self):
+    # def test_euclidean_to_riemannian_hvp(self):
 
     def test_exp_log_inverse(self):
         x = self.manifold.random_point()

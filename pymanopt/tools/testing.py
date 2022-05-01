@@ -2,9 +2,9 @@
 
 Notes:
     The functions :func:`rgrad`, :func:`euclidean_to_riemannian_gradient`,
-    :func:`ehess` and :func:`ehess2rhess` will only be correct if the manifold
-    is a submanifold of Euclidean space, that is if the projection is an
-    orthogonal projection onto the tangent space.
+    :func:`ehess` and :func:`euclidean_to_riemannian_hvp` will only be correct
+    if the manifold is a submanifold of Euclidean space, that is if the
+    projection is an orthogonal projection onto the tangent space.
 """
 
 import numpy as np
@@ -29,16 +29,16 @@ def euclidean_to_riemannian_gradient(projector):
     return converter
 
 
-def ehess2rhess(projector):
-    """Generates an ehess2rhess function.
+def euclidean_to_riemannian_hvp(projector):
+    """Generates an euclidean_to_riemannian_hvp function.
 
-    Specifically, ``ehess2rhess(proj)(point, euclidean_gradient, euclidean_hvp,
-    tangent_vector)`` converts the Euclidean Hessian-vector product
-    ``euclidean_hvp`` at a point ``point`` to a Riemannian Hessian-vector
-    product, i.e., the directional derivative of the gradient in the tangent
-    direction ``tangent_vector``.
-    Similar to :func:`rhess`, this is not efficient as it computes the Jacobian
-    explicitly.
+    Specifically, ``euclidean_to_riemannian_hvp(proj)(point,
+    euclidean_gradient, euclidean_hvp, tangent_vector)`` converts the Euclidean
+    Hessian-vector product ``euclidean_hvp`` at a point ``point`` to a
+    Riemannian Hessian-vector product, i.e., the directional derivative of the
+    gradient in the tangent direction ``tangent_vector``.
+    Similar to :func:`riemannian_hvp`, this is not efficient as it computes the
+    Jacobian explicitly.
     """
     jacobian_projector = jacobian(projector)
 

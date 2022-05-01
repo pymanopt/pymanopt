@@ -69,7 +69,7 @@ class Grassmann(_GrassmannBase):
     def projection(self, point, vector):
         return vector - multiprod(point, multiprod(multitransp(point), vector))
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         PXehess = self.projection(point, euclidean_hvp)
@@ -182,7 +182,7 @@ class ComplexGrassmann(_GrassmannBase):
     def projection(self, point, vector):
         return vector - multiprod(point, multiprod(multihconj(point), vector))
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         PXehess = self.projection(point, euclidean_hvp)

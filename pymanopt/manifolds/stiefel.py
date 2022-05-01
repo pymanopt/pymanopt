@@ -48,7 +48,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
             point, multisym(multiprod(multitransp(point), vector))
         )
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         XtG = multiprod(multitransp(point), euclidean_gradient)

@@ -1,10 +1,6 @@
 # TODO/Roadmap
 
 ## 1.0:
-  - #173: Renaming
-    * hess -> riemannian_hvp
-    * ehess -> euclidean_hvp
-    * ehess2rhess -> euclidean_to_riemannian_hvp
   - Return 'Result' object from optimizer's 'run' method
 
 ## 1.0.x:

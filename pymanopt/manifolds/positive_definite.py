@@ -57,7 +57,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         # TODO: Check that this is correct
         return multiprod(multiprod(point, multisym(euclidean_gradient)), point)
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         # TODO: Check that this is correct

@@ -40,7 +40,7 @@ class Oblique(EuclideanEmbeddedSubmanifold):
     def projection(self, point, vector):
         return vector - point * ((point * vector).sum(0)[np.newaxis, :])
 
-    def ehess2rhess(
+    def euclidean_to_riemannian_hvp(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector
     ):
         # TODO(nkoep): Implement 'weingarten' instead.

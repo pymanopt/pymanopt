@@ -11,7 +11,7 @@ from pymanopt.optimizers import ConjugateGradient
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_and_euclidean_gradient(manifold, matrix, backend):
+def create_cost_and_derivates(manifold, matrix, backend):
     euclidean_gradient = None
 
     if backend == "autograd":
@@ -55,7 +55,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = np.random.normal(size=(m, n))
 
     manifold = Oblique(m, n)
-    cost, euclidean_gradient = create_cost_and_euclidean_gradient(
+    cost, euclidean_gradient = create_cost_and_derivates(
         manifold, matrix, backend
     )
     problem = pymanopt.Problem(
