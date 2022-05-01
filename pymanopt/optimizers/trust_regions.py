@@ -130,7 +130,7 @@ class TrustRegions(Optimizer):
             Delta0 = Delta_bar / 8
 
         cost = problem.cost
-        grad = problem.grad
+        gradient = problem.riemannian_gradient
         hess = problem.hess
 
         # If no starting point is specified, generate one at random.
@@ -148,7 +148,7 @@ class TrustRegions(Optimizer):
 
         # Initialize solution and companion measures: f(x), fgrad(x)
         fx = cost(x)
-        fgradx = grad(x)
+        fgradx = gradient(x)
         norm_grad = manifold.norm(x, fgradx)
 
         # Initialize the trust region radius
@@ -392,7 +392,7 @@ class TrustRegions(Optimizer):
                 accstr = "acc"
                 x = x_prop
                 fx = fx_prop
-                fgradx = grad(x)
+                fgradx = gradient(x)
                 norm_grad = manifold.norm(x, fgradx)
             else:
                 # accept = False

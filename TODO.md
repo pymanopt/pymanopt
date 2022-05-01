@@ -2,9 +2,8 @@
 
 ## 1.0:
   - #173: Renaming
-    * grad, hess -> riemannian_gradient, riemannian_hvp
-    * egrad, ehess -> euclidean_gradient, euclidean_hvp
-    * egrad2rgrad -> euclidean_to_riemannian_gradient
+    * hess -> riemannian_hvp
+    * ehess -> euclidean_hvp
     * ehess2rhess -> euclidean_to_riemannian_hvp
   - Return 'Result' object from optimizer's 'run' method
 

@@ -181,8 +181,8 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
         np_testing.assert_allclose(y, x + u, atol=1e-5)
 
-    def test_egrad2rgrad(self):
-        # Verify that egrad2rgrad and proj are equivalent.
+    def test_euclidean_to_riemannian_gradient(self):
+        # Verify that euclidean_to_riemannian_gradient and proj are equivalent.
         m = self.manifold
         x = m.random_point()
         u, s, vt = x
@@ -203,7 +203,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         )
         Vp = (np.eye(self.n) - vt.T @ vt) @ dvt.T @ np.linalg.inv(np.diag(s))
 
-        up, m, vp = m.egrad2rgrad(x, (du, ds, dvt))
+        up, m, vp = m.euclidean_to_riemannian_gradient(x, (du, ds, dvt))
 
         np_testing.assert_allclose(Up, up)
         np_testing.assert_allclose(M, m)

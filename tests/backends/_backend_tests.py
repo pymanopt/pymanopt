@@ -50,8 +50,8 @@ class TestUnaryFunction(unittest.TestCase):
         self.assertAlmostEqual(np.sum(x**2), cost(x))
 
         # Test whether gradient accepts single argument.
-        egrad = cost.compute_gradient()
-        np_testing.assert_allclose(2 * x, egrad(x))
+        euclidean_gradient = cost.compute_gradient()
+        np_testing.assert_allclose(2 * x, euclidean_gradient(x))
 
         # Test the Hessian.
         u = np.random.normal(size=self.n)
@@ -89,8 +89,8 @@ class TestNaryFunction(unittest.TestCase):
 
         self.assertAlmostEqual(x @ y, cost(x, y))
 
-        egrad = cost.compute_gradient()
-        g = egrad(x, y)
+        euclidean_gradient = cost.compute_gradient()
+        g = euclidean_gradient(x, y)
         self.assertIsInstance(g, (list, tuple))
         self.assertEqual(len(g), 2)
         for gi in g:
@@ -141,8 +141,8 @@ class TestNaryParameterGrouping(unittest.TestCase):
 
         self.assertAlmostEqual(np.sum(x**2 + y + z**3), cost(x, y, z))
 
-        egrad = cost.compute_gradient()
-        g = egrad(x, y, z)
+        euclidean_gradient = cost.compute_gradient()
+        g = euclidean_gradient(x, y, z)
 
         self.assertIsInstance(g, (list, tuple))
         self.assertEqual(len(g), 3)

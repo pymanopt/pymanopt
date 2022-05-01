@@ -156,12 +156,13 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         a = np.random.normal(size=(self.k, self.n, self.n))
         np.testing.assert_allclose(manifold.projection(x, a), multisym(a))
 
-    def test_egrad2rgrad(self):
+    def test_euclidean_to_riemannian_gradient(self):
         manifold = self.manifold
         x = manifold.random_point()
         u = np.random.normal(size=(self.k, self.n, self.n))
         np.testing.assert_allclose(
-            manifold.egrad2rgrad(x, u), multiprod(multiprod(x, multisym(u)), x)
+            manifold.euclidean_to_riemannian_gradient(x, u),
+            multiprod(multiprod(x, multisym(u)), x),
         )
 
     def test_ehess2rhess(self):

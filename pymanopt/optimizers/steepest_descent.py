@@ -50,7 +50,7 @@ class SteepestDescent(Optimizer):
         """
         manifold = problem.manifold
         objective = problem.cost
-        gradient = problem.grad
+        gradient = problem.riemannian_gradient
 
         if not reuse_line_searcher or self.line_searcher is None:
             self.line_searcher = deepcopy(self._line_searcher)

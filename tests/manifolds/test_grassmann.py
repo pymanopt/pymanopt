@@ -53,7 +53,7 @@ class TestSingleGrassmannManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
-    # def test_egrad2rgrad(self):
+    # def test_euclidean_to_riemannian_gradient(self):
 
     # def test_norm(self):
 
@@ -159,7 +159,7 @@ class TestMultiGrassmannManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
-    # def test_egrad2rgrad(self):
+    # def test_euclidean_to_riemannian_gradient(self):
 
     def test_norm(self):
         x = self.manifold.random_point()

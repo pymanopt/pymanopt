@@ -11,8 +11,8 @@ from pymanopt.optimizers import ConjugateGradient
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_egrad(manifold, matrix, backend):
-    egrad = None
+def create_cost_and_euclidean_gradient(manifold, matrix, backend):
+    euclidean_gradient = None
 
     if backend == "autograd":
 
@@ -27,7 +27,7 @@ def create_cost_egrad(manifold, matrix, backend):
             return 0.5 * np.sum((X - matrix) ** 2)
 
         @pymanopt.function.numpy(manifold)
-        def egrad(X):
+        def euclidean_gradient(X):
             return X - matrix
 
     elif backend == "pytorch":
@@ -46,7 +46,7 @@ def create_cost_egrad(manifold, matrix, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad
+    return cost, euclidean_gradient
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
@@ -55,8 +55,12 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = np.random.normal(size=(m, n))
 
     manifold = Oblique(m, n)
-    cost, egrad = create_cost_egrad(manifold, matrix, backend)
-    problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
+    cost, euclidean_gradient = create_cost_and_euclidean_gradient(
+        manifold, matrix, backend
+    )
+    problem = pymanopt.Problem(
+        manifold, cost, euclidean_gradient=euclidean_gradient
+    )
 
     optimizer = ConjugateGradient(verbosity=2 * int(not quiet))
     Xopt = optimizer.run(problem)

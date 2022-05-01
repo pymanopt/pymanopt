@@ -55,7 +55,7 @@ def check_directional_derivative(problem, x=None, d=None):
 
     # Compute the value f0 of f at x and directional derivative at x along d.
     f0 = problem.cost(x)
-    grad = problem.grad(x)
+    grad = problem.riemannian_gradient(x)
     df0 = problem.manifold.inner_product(x, grad, d)
 
     # Compute the value of f at points on the geodesic (or approximation
@@ -153,14 +153,14 @@ def check_gradient(problem, x=None, d=None):
     )
     plt.show()
 
-    grad = problem.grad(x)
+    grad = problem.riemannian_gradient(x)
     try:
         projected_grad = problem.manifold.to_tangent_space(x, grad)
     except NotImplementedError:
         print(
             "Pymanopt was unable to verify that the gradient is indeed a "
             f"tangent vector since {problem.manifold.__class__.__name__} does "
-            "not provide a 'tangent' method."
+            "not provide a 'to_tangent_space' implementation."
         )
     else:
         residual = grad - projected_grad

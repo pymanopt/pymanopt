@@ -53,7 +53,7 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
     def projection(self, point, vector):
         return multisym(vector)
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         # TODO: Check that this is correct
         return multiprod(multiprod(point, multisym(euclidean_gradient)), point)
 

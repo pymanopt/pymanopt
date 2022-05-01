@@ -53,11 +53,10 @@ class TestProblemBackendInterface(TestCase):
         (u, s, vt), x = X
         np_testing.assert_allclose(cost(X), self.cost(u, s, vt, x))
 
-    def test_problem_egrad(self):
-        egrad = self.problem.egrad
+    def test_problem_euclidean_grad(self):
         X = self.manifold.random_point()
         (u, s, vt), x = X
-        G = egrad(X)
+        G = self.problem.euclidean_gradient(X)
         (gu, gs, gvt), gx = G
         for ga, gb in zip((gu, gs, gvt, gx), self.gradient(u, s, vt, x)):
             np_testing.assert_allclose(ga, gb)

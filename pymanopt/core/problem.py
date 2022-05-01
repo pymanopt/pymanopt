@@ -21,15 +21,16 @@ class Problem:
             :func:`pymanopt.function.numpy` is used the gradient and
             Hessian-vector production functions are generated automatically if
             needed and no ``(e)grad`` or ``(e)hess`` arguments are provided.
-        egrad: The Euclidean gradient, i.e., the gradient of the cost function
-            in the typical sense in the ambient space.
+        euclidean_gradient: The Euclidean gradient, i.e., the gradient of the
+            cost function in the typical sense in the ambient space.
             The returned value need not belong to the tangent space of
             ``manifold``.
         ehess: The Euclidean Hessian-vector product, i.e., the directional
-            derivative of ``egrad`` in the direction of a tangent vector.
-        grad: The Riemannian gradient.
-            For embeddes submanifolds this is simply the projection of
-            ``egrad`` on the tangent space of ``manifold``.
+            derivative of ``euclidean_gradient`` in the direction of a tangent
+            vector.
+        riemannian_gradient: The Riemannian gradient.
+            For embedded submanifolds this is simply the projection of
+            ``euclidean_gradient`` on the tangent space of ``manifold``.
             In most cases this need not be provided and the Riemannian gradient
             is instead computed internally.
             If provided, the function needs to return a vector in the tangent
@@ -43,9 +44,10 @@ class Problem:
         self,
         manifold: Manifold,
         cost: Function,
-        egrad: Optional[Function] = None,
+        *,
+        euclidean_gradient: Optional[Function] = None,
         ehess: Optional[Function] = None,
-        grad: Optional[Function] = None,
+        riemannian_gradient: Optional[Function] = None,
         hess: Optional[Function] = None,
         preconditioner: Optional[Callable] = None,
     ):
@@ -53,9 +55,9 @@ class Problem:
 
         for function, name in (
             (cost, "cost"),
-            (egrad, "egrad"),
+            (euclidean_gradient, "euclidean_gradient"),
             (ehess, "ehess"),
-            (grad, "grad"),
+            (riemannian_gradient, "riemannian_gradient"),
             (hess, "hess"),
         ):
             self._validate_function(function, name)
@@ -63,16 +65,16 @@ class Problem:
         self._original_cost = cost
         self._cost = self._wrap_function(cost)
 
-        if egrad is not None:
-            egrad = self._wrap_gradient(egrad)
-        self._egrad = egrad
+        if euclidean_gradient is not None:
+            euclidean_gradient = self._wrap_gradient(euclidean_gradient)
+        self._euclidean_gradient = euclidean_gradient
         if ehess is not None:
             ehess = self._wrap_hessian_vector_product(ehess)
         self._ehess = ehess
 
-        if grad is not None:
-            grad = self._wrap_gradient(grad)
-        self._grad = grad
+        if riemannian_gradient is not None:
+            riemannian_gradient = self._wrap_gradient(riemannian_gradient)
+        self._riemannian_gradient = riemannian_gradient
         if hess is not None:
             hess = self._wrap_hessian_vector_product(hess)
         self._hess = hess
@@ -209,23 +211,24 @@ class Problem:
         return self._cost
 
     @property
-    def egrad(self):
-        if self._egrad is None:
-            self._egrad = self._wrap_gradient(
+    def euclidean_gradient(self):
+        if self._euclidean_gradient is None:
+            self._euclidean_gradient = self._wrap_gradient(
                 self._original_cost.compute_gradient()
             )
-        return self._egrad
+        return self._euclidean_gradient
 
     @property
-    def grad(self):
-        if self._grad is None:
-            egrad = self.egrad
+    def riemannian_gradient(self):
+        if self._riemannian_gradient is None:
 
-            def grad(x):
-                return self.manifold.egrad2rgrad(x, egrad(x))
+            def riemannian_gradient(x):
+                return self.manifold.euclidean_to_riemannian_gradient(
+                    x, self.euclidean_gradient(x)
+                )
 
-            self._grad = grad
-        return self._grad
+            self._riemannian_gradient = riemannian_gradient
+        return self._riemannian_gradient
 
     @property
     def ehess(self):
@@ -242,7 +245,7 @@ class Problem:
 
             def hess(x, a):
                 return self.manifold.ehess2rhess(
-                    x, self.egrad(x), ehess(x, a), a
+                    x, self.euclidean_gradient(x), ehess(x, a), a
                 )
 
             self._hess = hess

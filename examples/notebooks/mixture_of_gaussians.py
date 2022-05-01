@@ -151,7 +151,7 @@ def cost(S, v):
     return -np.sum(loglikvec)
 
 
-problem = Problem(manifold=manifold, cost=cost)
+problem = Problem(manifold, cost)
 
 # (3) Instantiate a Pymanopt optimizer
 optimizer = SteepestDescent(verbosity=1)

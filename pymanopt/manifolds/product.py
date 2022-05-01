@@ -68,10 +68,10 @@ class Product(Manifold):
             point, vector
         )
 
-    def egrad2rgrad(self, point, euclidean_gradient):
-        return self._dispatch("egrad2rgrad", reduction=_ProductTangentVector)(
-            point, euclidean_gradient
-        )
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        return self._dispatch(
+            "euclidean_to_riemannian_gradient", reduction=_ProductTangentVector
+        )(point, euclidean_gradient)
 
     def ehess2rhess(
         self, point, euclidean_gradient, euclidean_hvp, tangent_vector

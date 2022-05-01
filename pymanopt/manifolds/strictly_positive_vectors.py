@@ -57,7 +57,7 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
             np.log(point_a) - np.log(point_b), axis=0, keepdims=True
         )
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient * point**2
 
     def exp(self, point, tangent_vector):

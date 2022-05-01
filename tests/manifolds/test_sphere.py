@@ -55,7 +55,7 @@ class TestSphereManifold(TestCase):
             H - X * np.trace(X.T @ H), self.manifold.projection(X, H)
         )
 
-    def test_egrad2rgrad(self):
+    def test_euclidean_to_riemannian_gradient(self):
         # Should be the same as proj
         #  Construct a random point X on the manifold.
         X = np.random.normal(size=(self.m, self.n))
@@ -66,7 +66,8 @@ class TestSphereManifold(TestCase):
 
         #  Compare the projections.
         np_testing.assert_array_almost_equal(
-            H - X * np.trace(X.T @ H), self.manifold.egrad2rgrad(X, H)
+            H - X * np.trace(X.T @ H),
+            self.manifold.euclidean_to_riemannian_gradient(X, H),
         )
 
     def test_ehess2rhess(self):

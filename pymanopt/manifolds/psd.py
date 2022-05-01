@@ -28,7 +28,7 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         Omega = lyap(YtY, AS)
         return vector - point @ Omega
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient
 
     def ehess2rhess(
@@ -213,7 +213,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
     def retraction(self, point, tangent_vector):
         return self._normalize_rows(point + tangent_vector)
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self._project_rows(point, euclidean_gradient)
 
     def ehess2rhess(

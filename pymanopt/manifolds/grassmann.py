@@ -21,7 +21,7 @@ class _GrassmannBase(Manifold):
             return np.zeros((self._n, self._p))
         return np.zeros((self._k, self._n, self._p))
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(point, euclidean_gradient)
 
 

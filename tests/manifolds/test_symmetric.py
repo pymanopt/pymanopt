@@ -55,11 +55,11 @@ class TestSymmetricManifold(TestCase):
         u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.retraction(x, u), x + u)
 
-    def test_egrad2rgrad(self):
+    def test_euclidean_to_riemannian_gradient(self):
         e = self.manifold
         x = e.random_point()
         u = e.random_tangent_vector(x)
-        np_testing.assert_allclose(e.egrad2rgrad(x, u), u)
+        np_testing.assert_allclose(e.euclidean_to_riemannian_gradient(x, u), u)
 
     def test_norm(self):
         e = self.manifold

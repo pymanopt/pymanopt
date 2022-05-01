@@ -26,7 +26,7 @@ class Manifold(metaclass=abc.ABCMeta):
     Not all methods are required by all optimizers.
     In particular, first order gradient based optimizers such as
     :mod:`pymanopt.optimizers.steepest_descent` and
-    :mod:`pymanopt.optimizers.conjugate_gradient` require :meth:`egrad2rgrad` to
+    :mod:`pymanopt.optimizers.conjugate_gradient` require :meth:`euclidean_to_riemannian_gradient` to
     be implemented but not :meth:`ehess2rhess`.
     Second order optimizers such as :mod:`pymanopt.optimizers.trust_regions` will
     require :meth:`ehess2rhess`.
@@ -160,7 +160,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """The geodesic distance between two points on the manifold."""
 
     @_raise_not_implemented_error
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         """Converts the Euclidean to the Riemannian gradient.
 
         For embedded submanifolds of Euclidean space, this is simply the
@@ -239,7 +239,7 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
     """Embedded submanifolds of Euclidean space.
 
     This class provides a generic way to project Euclidean gradients to their
-    Riemannian counterparts via the :meth:`egrad2rgrad` method.
+    Riemannian counterparts via the :meth:`euclidean_to_riemannian_gradient` method.
     Similarly, if the Weingarten map (also known as shape operator) is provided
     via implementing the :meth:`weingarten` method, the class provides a
     generic implementation of the :meth:`ehess2rhess` method required by
@@ -250,7 +250,7 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
         Refer to [AMT2013]_ for the exact definition of the Weingarten map.
     """
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(point, euclidean_gradient)
 
     def ehess2rhess(

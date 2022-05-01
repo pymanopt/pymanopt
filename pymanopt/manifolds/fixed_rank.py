@@ -129,7 +129,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
         return _FixedRankTangentVector(Up, M, Vp)
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         """Convert Euclidean to Riemannian gradient.
 
         Assuming that the cost function being optimized has been defined

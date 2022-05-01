@@ -25,7 +25,7 @@ class TestObliqueManifold(TestCase):
 
     # def test_retraction(self):
 
-    # def test_egrad2rgrad(self):
+    # def test_euclidean_to_riemannian_gradient(self):
 
     # def test_norm(self):
 
