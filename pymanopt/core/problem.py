@@ -65,6 +65,17 @@ class Problem:
         ):
             self._validate_function(function, name)
 
+        if euclidean_gradient is not None and riemannian_gradient is not None:
+            raise ValueError(
+                "Only 'euclidean_gradient' or 'riemannian_gradient' should be "
+                "provided, not both"
+            )
+        if euclidean_hvp is not None and riemannian_hvp is not None:
+            raise ValueError(
+                "Only 'euclidean_hvp' or 'riemannian_hvp' should be provided, "
+                "not both"
+            )
+
         self._original_cost = cost
         self._cost = self._wrap_function(cost)
 
