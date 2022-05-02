@@ -27,7 +27,9 @@ def compute_centroid(manifold, points):
         )
 
     optimizer = SteepestDescent(max_iterations=15, verbosity=0)
-    problem = pymanopt.Problem(manifold, objective, grad=gradient)
+    problem = pymanopt.Problem(
+        manifold, objective, riemannian_gradient=gradient
+    )
     return optimizer.minimize(problem)
 
 
@@ -38,7 +40,8 @@ class NelderMead(Optimizer):
     algorithm.
 
     Args:
-        max_cost_evaluations: Maximum number of allowed cost function evaluations.
+        max_cost_evaluations: Maximum number of allowed cost function
+            evaluations.
         max_iterations: Maximum number of allowed iterations.
         reflection: Determines how far to reflect away from the worst vertex:
             stretched (reflection > 1), compressed (0 < reflection < 1),
