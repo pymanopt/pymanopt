@@ -236,18 +236,27 @@ class Manifold(metaclass=abc.ABCMeta):
 
 
 class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
-    """Embedded submanifolds of Euclidean space.
+    """Base class for Riemannian submanifolds of Euclidean space.
 
     This class provides a generic way to project Euclidean gradients to their
-    Riemannian counterparts via the :meth:`euclidean_to_riemannian_gradient` method.
+    Riemannian counterparts via the :meth:`euclidean_to_riemannian_gradient`
+    method.
     Similarly, if the Weingarten map (also known as shape operator) is provided
     via implementing the :meth:`weingarten` method, the class provides a
-    generic implementation of the :meth:`euclidean_to_riemannian_hvp` method required by
-    second-order optimizers to translate Euclidean Hessian-vector products to
-    their Riemannian counterparts.
+    generic implementation of the :meth:`euclidean_to_riemannian_hvp` method
+    required by second-order optimizers to translate Euclidean Hessian-vector
+    products to their Riemannian counterparts.
 
     Notes:
-        Refer to [AMT2013]_ for the exact definition of the Weingarten map.
+        This class is based the definition of "Riemannian submanifolds"
+        according to definition 3.47 in [Bou2020]_.
+        As such manifolds deriving from this class are assumed to be embedded
+        submanifolds of Euclidean space with the Riemannian metric inherited
+        from the embedding space obtained by restricting it to the tangent
+        space at a given point.
+
+        For the exact definition of the Weingarten map refer to [AMT2013]_ and
+        the notes in section 5.11 of [Bou2020]_.
     """
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
