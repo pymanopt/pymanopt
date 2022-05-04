@@ -27,6 +27,7 @@ class Positive(Manifold):
         The Riemannian metric is the bi-invariant metric for positive definite
         matrices from chapter 6 of [Bha2007]_ on individual scalar coordinates
         of the matrix.
+        See also section 11.4 of [Bou2020]_.
 
         The parallel transport that is used when `use_parallel_transport` is
         `True` is taken from [SH2015]_.
