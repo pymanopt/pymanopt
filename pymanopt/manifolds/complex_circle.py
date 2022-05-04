@@ -63,10 +63,10 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
     def retraction(self, point, tangent_vector):
         return self._normalize(point + tangent_vector)
 
-    def log(self, x1, x2):
-        v = self.projection(x1, x2 - x1)
+    def log(self, point_a, point_b):
+        v = self.projection(point_a, point_b - point_a)
         abs_v = np.abs(v)
-        di = np.arccos((x1.conj() * x2).real)
+        di = np.arccos((point_a.conj() * point_b).real)
         factors = di / abs_v
         factors[di <= 1e-6] = 1
         return v * factors
