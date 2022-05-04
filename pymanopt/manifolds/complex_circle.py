@@ -1,9 +1,9 @@
 import numpy as np
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
-class ComplexCircle(EuclideanEmbeddedSubmanifold):
+class ComplexCircle(RiemannianSubmanifold):
     """Manifold of unit-modulus complex numbers.
 
     Description of vectors z in C^n (complex) such that each component z(i)

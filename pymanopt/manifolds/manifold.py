@@ -235,7 +235,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
 
-class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
+class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
     """Base class for Riemannian submanifolds of Euclidean space.
 
     This class provides a generic way to project Euclidean gradients to their

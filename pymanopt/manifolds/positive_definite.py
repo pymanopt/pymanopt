@@ -1,11 +1,11 @@
 import numpy as np
 from scipy.linalg import expm
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
 
 
-class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
+class SymmetricPositiveDefinite(RiemannianSubmanifold):
     """Manifold of symmetric positive definite matrices.
 
     Notes:

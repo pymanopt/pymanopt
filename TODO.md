@@ -10,8 +10,8 @@
 ## 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
     transport simply by orthogonal projection of the tangent vector translated
-    in the ambient space. For this, 'EuclideanEmbeddedSubmanifold' would
-    require a generic 'tangent_to_ambient' method. See 'FixedRankEmbedded'.
+    in the ambient space. For this, 'RiemannianSubmanifold' would require a
+    generic 'tangent_to_ambient' method. See 'FixedRankEmbedded'.
   - Add default implementation for `to_tangent_space`?
   - attrs
   - Refactor optimizer implementations

@@ -4,12 +4,12 @@ import collections
 
 import numpy as np
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
-class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
+class FixedRankEmbedded(RiemannianSubmanifold):
     r"""Manifold of fixed rank matrices.
 
     Args:

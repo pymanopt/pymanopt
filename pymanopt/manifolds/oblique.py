@@ -1,9 +1,9 @@
 import numpy as np
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
-class Oblique(EuclideanEmbeddedSubmanifold):
+class Oblique(RiemannianSubmanifold):
     """Manifold of matrices with unit-norm columns.
 
     Oblique manifold: deals with matrices of size m-by-n such that each column

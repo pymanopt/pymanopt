@@ -4,11 +4,11 @@ import numpy as np
 from scipy.linalg import expm, logm
 from scipy.special import comb
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
 
 
-class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
+class SpecialOrthogonalGroup(RiemannianSubmanifold):
     """The special orthogonal group.
 
     Special orthogonal group (the manifold of rotations): deals with matrices

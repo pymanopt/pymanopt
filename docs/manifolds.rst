@@ -21,7 +21,7 @@ We plan to implement more depending on the needs of users, so if there is a
 particular manifold you would like to optimize over, please let us know.
 If you wish to implement your own manifold for Pymanopt, you will
 need to inherit from the abstract :class:`pymanopt.manifolds.manifold.Manifold`
-or :class:`pymanopt.manifolds.manifold.EuclideanEmbeddedSubmanifold` base
+or :class:`pymanopt.manifolds.manifold.RiemannianSubmanifold` base
 class.
 
 Manifold

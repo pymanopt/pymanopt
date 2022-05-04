@@ -2,10 +2,10 @@ import warnings
 
 import numpy as np
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
-class _SphereBase(EuclideanEmbeddedSubmanifold):
+class _SphereBase(RiemannianSubmanifold):
     """Base class for tensors with unit Frobenius norm.
 
     Notes:

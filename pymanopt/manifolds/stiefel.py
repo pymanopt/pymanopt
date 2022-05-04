@@ -1,11 +1,11 @@
 import numpy as np
 from scipy.linalg import expm
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import multiprod, multisym, multitransp
 
 
-class Stiefel(EuclideanEmbeddedSubmanifold):
+class Stiefel(RiemannianSubmanifold):
     """The Stiefel manifold.
 
     The optional argument k allows the user to optimize over the product of k
