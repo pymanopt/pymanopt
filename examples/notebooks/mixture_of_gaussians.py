@@ -151,7 +151,7 @@ def cost(S, v):
     return -np.sum(loglikvec)
 
 
-problem = Problem(manifold=manifold, cost=cost)
+problem = Problem(manifold, cost)
 
 # (3) Instantiate a Pymanopt optimizer
 optimizer = SteepestDescent(verbosity=1)
@@ -291,7 +291,7 @@ class LineSearchMoG:
         return step_size, newx
 
     def _newxnewf(self, x, d, objective, manifold):
-        newx = manifold.retr(x, d)
+        newx = manifold.retraction(x, d)
         try:
             newf = objective(newx)
         except np.linalg.LinAlgError:
@@ -302,6 +302,6 @@ class LineSearchMoG:
                     for k in range(newx[0].shape[0])
                 ]
             )
-            x[0][replace, :, :] = manifold.rand()[0][replace, :, :]
+            x[0][replace, :, :] = manifold.random_point()[0][replace, :, :]
             return x, objective(x), True
         return newx, newf, False

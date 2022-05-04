@@ -49,14 +49,14 @@ def check_directional_derivative(problem, x=None, d=None):
             "If d is provided, x must be too, " "since d is tangent at x."
         )
     if x is None:
-        x = problem.manifold.rand()
+        x = problem.manifold.random_point()
     if d is None:
-        d = problem.manifold.randvec(x)
+        d = problem.manifold.random_tangent_vector(x)
 
     # Compute the value f0 of f at x and directional derivative at x along d.
     f0 = problem.cost(x)
-    grad = problem.grad(x)
-    df0 = problem.manifold.inner(x, grad, d)
+    grad = problem.riemannian_gradient(x)
+    df0 = problem.manifold.inner_product(x, grad, d)
 
     # Compute the value of f at points on the geodesic (or approximation
     # of it) originating from x, along direction d, for step_sizes in a
@@ -69,7 +69,7 @@ def check_directional_derivative(problem, x=None, d=None):
         try:
             y = problem.manifold.exp(x, h_k * d)
         except NotImplementedError:
-            y = problem.manifold.retr(x, h_k * d)
+            y = problem.manifold.retraction(x, h_k * d)
         value[k] = problem.cost(y)
 
     # Compute the linear approximation of the cost function using f0 and
@@ -132,9 +132,9 @@ def check_gradient(problem, x=None, d=None):
             "If d is provided, x must be too, since d is tangent at x."
         )
     if x is None:
-        x = problem.manifold.rand()
+        x = problem.manifold.random_point()
     if d is None:
-        d = problem.manifold.randvec(x)
+        d = problem.manifold.random_tangent_vector(x)
 
     h, err, segment, poly = check_directional_derivative(problem, x, d)
 
@@ -153,14 +153,14 @@ def check_gradient(problem, x=None, d=None):
     )
     plt.show()
 
-    grad = problem.grad(x)
+    grad = problem.riemannian_gradient(x)
     try:
-        projected_grad = problem.manifold.tangent(x, grad)
+        projected_grad = problem.manifold.to_tangent_space(x, grad)
     except NotImplementedError:
         print(
             "Pymanopt was unable to verify that the gradient is indeed a "
             f"tangent vector since {problem.manifold.__class__.__name__} does "
-            "not provide a 'tangent' method."
+            "not provide a 'to_tangent_space' implementation."
         )
     else:
         residual = grad - projected_grad

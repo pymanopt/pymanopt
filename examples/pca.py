@@ -11,8 +11,8 @@ from pymanopt.optimizers import TrustRegions
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_egrad_ehess(manifold, samples, backend):
-    egrad = ehess = None
+def create_cost_and_derivates(manifold, samples, backend):
+    euclidean_gradient = euclidean_hessian = None
 
     if backend == "autograd":
 
@@ -27,7 +27,7 @@ def create_cost_egrad_ehess(manifold, samples, backend):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
 
         @pymanopt.function.numpy(manifold)
-        def egrad(w):
+        def euclidean_gradient(w):
             return (
                 -2
                 * (
@@ -38,7 +38,7 @@ def create_cost_egrad_ehess(manifold, samples, backend):
             )
 
         @pymanopt.function.numpy(manifold)
-        def ehess(w, h):
+        def euclidean_hessian(w, h):
             return -2 * (
                 samples.T @ (samples - samples @ w @ h.T) @ w
                 + samples.T @ (samples - samples @ h @ w.T) @ w
@@ -68,19 +68,28 @@ def create_cost_egrad_ehess(manifold, samples, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad, ehess
+    return cost, euclidean_gradient, euclidean_hessian
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     dimension = 3
     num_samples = 200
     num_components = 2
-    samples = np.random.randn(num_samples, dimension) @ np.diag([3, 2, 1])
+    samples = np.random.normal(size=(num_samples, dimension)) @ np.diag(
+        [3, 2, 1]
+    )
     samples -= samples.mean(axis=0)
 
     manifold = Stiefel(dimension, num_components)
-    cost, egrad, ehess = create_cost_egrad_ehess(manifold, samples, backend)
-    problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
+    cost, euclidean_gradient, euclidean_hessian = create_cost_and_derivates(
+        manifold, samples, backend
+    )
+    problem = pymanopt.Problem(
+        manifold,
+        cost,
+        euclidean_gradient=euclidean_gradient,
+        euclidean_hessian=euclidean_hessian,
+    )
 
     optimizer = TrustRegions(verbosity=2 * int(not quiet))
     estimated_span_matrix = optimizer.run(problem)

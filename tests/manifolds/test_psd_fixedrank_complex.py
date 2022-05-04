@@ -11,45 +11,45 @@ class TestPSDFixedRankComplexManifold(TestCase):
 
     # def test_dim(self):
 
-    # def test_typicaldist(self):
+    # def test_typical_dist(self):
 
     # def test_dist(self):
 
-    # def test_inner(self):
+    # def test_inner_product(self):
 
-    # def test_proj(self):
+    # def test_projection(self):
 
-    # def test_ehess2rhess(self):
+    # def test_euclidean_to_riemannian_hessian(self):
 
-    # def test_retr(self):
+    # def test_retraction(self):
 
-    # def test_egrad2rgrad(self):
+    # def test_euclidean_to_riemannian_gradient(self):
 
     # def test_norm(self):
 
     # def test_rand(self):
 
-    # def test_randvec(self):
+    # def test_random_tangent_vector(self):
 
-    # def test_transp(self):
+    # def test_transport(self):
 
     # def test_exp_log_inverse(self):
-    # s = self.man
-    # X = s.rand()
-    # U = s.randvec(X)
+    # s = self.manifold
+    # X = s.random_point()
+    # U = s.random_tangent_vector(X)
     # Uexplog = s.exp(X, s.log(X, U))
     # np_testing.assert_array_almost_equal(U, Uexplog)
 
     # def test_log_exp_inverse(self):
-    # s = self.man
-    # X = s.rand()
-    # U = s.randvec(X)
+    # s = self.manifold
+    # X = s.random_point()
+    # U = s.random_tangent_vector(X)
     # Ulogexp = s.log(X, s.exp(X, U))
     # np_testing.assert_array_almost_equal(U, Ulogexp)
 
-    # def test_pairmean(self):
-    # s = self.man
-    # X = s.rand()
-    # Y = s.rand()
-    # Z = s.pairmean(X, Y)
+    # def test_pair_mean(self):
+    # s = self.manifold
+    # X = s.random_point()
+    # Y = s.random_point()
+    # Z = s.pair_mean(X, Y)
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

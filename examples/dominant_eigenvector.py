@@ -1,8 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
-from numpy import random as rnd
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -13,8 +11,8 @@ from pymanopt.optimizers import SteepestDescent
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_egrad(manifold, matrix, backend):
-    egrad = None
+def create_cost_and_derivates(manifold, matrix, backend):
+    euclidean_gradient = None
 
     if backend == "autograd":
 
@@ -29,7 +27,7 @@ def create_cost_egrad(manifold, matrix, backend):
             return -np.inner(x, matrix @ x)
 
         @pymanopt.function.numpy(manifold)
-        def egrad(x):
+        def euclidean_gradient(x):
             return -2 * matrix @ x
 
     elif backend == "pytorch":
@@ -48,17 +46,21 @@ def create_cost_egrad(manifold, matrix, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad
+    return cost, euclidean_gradient
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     n = 128
-    matrix = rnd.randn(n, n)
+    matrix = np.random.normal(size=(n, n))
     matrix = 0.5 * (matrix + matrix.T)
 
     manifold = Sphere(n)
-    cost, egrad = create_cost_egrad(manifold, matrix, backend)
-    problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
+    cost, euclidean_gradient = create_cost_and_derivates(
+        manifold, matrix, backend
+    )
+    problem = pymanopt.Problem(
+        manifold, cost, euclidean_gradient=euclidean_gradient
+    )
 
     optimizer = SteepestDescent(verbosity=2 * int(not quiet))
     estimated_dominant_eigenvector = optimizer.run(problem)
@@ -67,7 +69,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         return
 
     # Calculate the actual solution by a conventional eigenvalue decomposition.
-    eigenvalues, eigenvectors = la.eig(matrix)
+    eigenvalues, eigenvectors = np.linalg.eig(matrix)
     dominant_eigenvector = eigenvectors[:, np.argmax(eigenvalues)]
 
     # Make sure both vectors have the same direction. Both are valid
@@ -79,15 +81,17 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         estimated_dominant_eigenvector = -estimated_dominant_eigenvector
 
     # Print information about the solution.
-    print("l2-norm of x:", la.norm(dominant_eigenvector))
-    print("l2-norm of xopt:", la.norm(estimated_dominant_eigenvector))
+    print("l2-norm of x:", np.linalg.norm(dominant_eigenvector))
+    print("l2-norm of xopt:", np.linalg.norm(estimated_dominant_eigenvector))
     print(
         "Solution found:",
         np.allclose(
             dominant_eigenvector, estimated_dominant_eigenvector, atol=1e-6
         ),
     )
-    error_norm = la.norm(dominant_eigenvector - estimated_dominant_eigenvector)
+    error_norm = np.linalg.norm(
+        dominant_eigenvector - estimated_dominant_eigenvector
+    )
     print("l2-error:", error_norm)
 
 

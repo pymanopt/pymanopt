@@ -7,22 +7,22 @@ from pymanopt.tools.multi import multihconj, multiprod, multitransp
 
 class _GrassmannBase(Manifold):
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(self._p * self._k)
 
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(point_b, tangent_vector_a)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         if self._k == 1:
             return np.zeros((self._n, self._p))
         return np.zeros((self._k, self._n, self._p))
 
-    def egrad2rgrad(self, point, euclidean_gradient):
-        return self.proj(point, euclidean_gradient)
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        return self.projection(point, euclidean_gradient)
 
 
 class Grassmann(_GrassmannBase):
@@ -61,23 +61,23 @@ class Grassmann(_GrassmannBase):
         s = np.arccos(s)
         return np.linalg.norm(s)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - multiprod(point, multiprod(multitransp(point), vector))
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        PXehess = self.proj(point, euclidean_hvp)
+        PXehess = self.projection(point, euclidean_hessian)
         XtG = multiprod(multitransp(point), euclidean_gradient)
         HXtG = multiprod(tangent_vector, XtG)
         return PXehess - HXtG
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         # We do not need to worry about flipping signs of columns here,
         # since only the column space is important, not the actual
         # columns. Compare this with the Stiefel manifold.
@@ -88,20 +88,20 @@ class Grassmann(_GrassmannBase):
 
     # Generate random Grassmann point using qr of random normally distributed
     # matrix.
-    def rand(self):
+    def random_point(self):
         if self._k == 1:
-            X = np.random.randn(self._n, self._p)
+            X = np.random.normal(size=(self._n, self._p))
             q, _ = np.linalg.qr(X)
             return q
 
         X = np.zeros((self._k, self._n, self._p))
         for i in range(self._k):
-            X[i], _ = np.linalg.qr(np.random.randn(self._n, self._p))
+            X[i], _ = np.linalg.qr(np.random.normal(size=(self._n, self._p)))
         return X
 
-    def randvec(self, point):
-        tangent_vector = np.random.randn(*np.shape(point))
-        tangent_vector = self.proj(point, tangent_vector)
+    def random_tangent_vector(self, point):
+        tangent_vector = np.random.normal(size=point.shape)
+        tangent_vector = self.projection(point, tangent_vector)
         return tangent_vector / np.linalg.norm(tangent_vector)
 
     def exp(self, point, tangent_vector):
@@ -170,7 +170,7 @@ class ComplexGrassmann(_GrassmannBase):
         s = np.arccos(s)
         return np.linalg.norm(np.real(s))
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.real(
             np.tensordot(
                 np.conjugate(tangent_vector_a),
@@ -179,18 +179,18 @@ class ComplexGrassmann(_GrassmannBase):
             )
         )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - multiprod(point, multiprod(multihconj(point), vector))
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        PXehess = self.proj(point, euclidean_hvp)
+        PXehess = self.projection(point, euclidean_hessian)
         XHG = multiprod(multihconj(point), euclidean_gradient)
         HXHG = multiprod(tangent_vector, XHG)
         return PXehess - HXHG
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         # We do not need to worry about flipping signs of columns here,
         # since only the column space is important, not the actual
         # columns. Compare this with the Stiefel manifold.
@@ -199,12 +199,12 @@ class ComplexGrassmann(_GrassmannBase):
         u, _, vh = np.linalg.svd(point + tangent_vector, full_matrices=False)
         return multiprod(u, vh)
 
-    def rand(self):
+    def random_point(self):
         if self._k == 1:
             point, _ = np.linalg.qr(
                 (
-                    np.random.randn(self._n, self._p)
-                    + 1j * np.random.randn(self._n, self._p)
+                    np.random.normal(size=(self._n, self._p))
+                    + 1j * np.random.normal(size=(self._n, self._p))
                 )
             )
             return point
@@ -213,17 +213,17 @@ class ComplexGrassmann(_GrassmannBase):
         for i in range(self._k):
             point[i], _ = np.linalg.qr(
                 (
-                    np.random.randn(self._n, self._p)
-                    + 1j * np.random.randn(self._n, self._p)
+                    np.random.normal(size=(self._n, self._p))
+                    + 1j * np.random.normal(size=(self._n, self._p))
                 )
             )
         return point
 
-    def randvec(self, point):
-        tangent_vector = np.random.randn(
-            *np.shape(point)
-        ) + 1j * np.random.randn(*np.shape(point))
-        tangent_vector = self.proj(point, tangent_vector)
+    def random_tangent_vector(self, point):
+        tangent_vector = np.random.normal(
+            size=point.shape
+        ) + 1j * np.random.normal(size=point.shape)
+        tangent_vector = self.projection(point, tangent_vector)
         return tangent_vector / np.linalg.norm(tangent_vector)
 
     def exp(self, point, tangent_vector):

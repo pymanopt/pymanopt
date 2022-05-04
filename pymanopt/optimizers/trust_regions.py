@@ -113,29 +113,29 @@ class TrustRegions(Optimizer):
         Delta_bar=None,
         Delta0=None,
     ):
-        man = problem.manifold
+        manifold = problem.manifold
 
         if maxinner is None:
-            maxinner = man.dim
+            maxinner = manifold.dim
 
         # Set default Delta_bar and Delta0 separately to deal with additional
         # logic: if Delta_bar is provided but not Delta0, let Delta0
         # automatically be some fraction of the provided Delta_bar.
         if Delta_bar is None:
             try:
-                Delta_bar = man.typicaldist
+                Delta_bar = manifold.typical_dist
             except NotImplementedError:
-                Delta_bar = np.sqrt(man.dim)
+                Delta_bar = np.sqrt(manifold.dim)
         if Delta0 is None:
             Delta0 = Delta_bar / 8
 
         cost = problem.cost
-        grad = problem.grad
-        hess = problem.hess
+        gradient = problem.riemannian_gradient
+        hess = problem.riemannian_hessian
 
         # If no starting point is specified, generate one at random.
         if initial_point is None:
-            x = man.rand()
+            x = manifold.random_point()
         else:
             x = initial_point
 
@@ -148,8 +148,8 @@ class TrustRegions(Optimizer):
 
         # Initialize solution and companion measures: f(x), fgrad(x)
         fx = cost(x)
-        fgradx = grad(x)
-        norm_grad = man.norm(x, fgradx)
+        fgradx = gradient(x)
+        norm_grad = manifold.norm(x, fgradx)
 
         # Initialize the trust region radius
         Delta = Delta0
@@ -177,12 +177,12 @@ class TrustRegions(Optimizer):
             # Determine eta0
             if not self.use_rand:
                 # Pick the zero vector
-                eta = man.zerovec(x)
+                eta = manifold.zero_vector(x)
             else:
                 # Random vector in T_x M (this has to be very small)
-                eta = 1e-6 * man.randvec(x)
+                eta = 1e-6 * manifold.random_tangent_vector(x)
                 # Must be inside trust region
-                while man.norm(x, eta) > Delta:
+                while manifold.norm(x, eta) > Delta:
                     eta = np.sqrt(np.sqrt(np.spacing(1))) * eta
 
             # Solve TR subproblem approximately
@@ -210,7 +210,7 @@ class TrustRegions(Optimizer):
                 used_cauchy = False
                 # Check the curvature
                 Hg = hess(x, fgradx)
-                g_Hg = man.inner(x, fgradx, Hg)
+                g_Hg = manifold.inner_product(x, fgradx, Hg)
                 if g_Hg <= 0:
                     tau_c = 1
                 else:
@@ -224,13 +224,13 @@ class TrustRegions(Optimizer):
                 # returned eta, we might as well keep the best of them.
                 mdle = (
                     fx
-                    + man.inner(x, fgradx, eta)
-                    + 0.5 * man.inner(x, Heta, eta)
+                    + manifold.inner_product(x, fgradx, eta)
+                    + 0.5 * manifold.inner_product(x, Heta, eta)
                 )
                 mdlec = (
                     fx
-                    + man.inner(x, fgradx, eta_c)
-                    + 0.5 * man.inner(x, Heta_c, eta_c)
+                    + manifold.inner_product(x, fgradx, eta_c)
+                    + 0.5 * manifold.inner_product(x, Heta_c, eta_c)
                 )
                 if mdlec < mdle:
                     eta = eta_c
@@ -241,10 +241,10 @@ class TrustRegions(Optimizer):
             # useful for some user-defined stopping criteria. If this is not
             # cheap for specific applications (compared to evaluating the
             # cost), we should reconsider this.
-            # norm_eta = man.norm(x, eta)
+            # norm_eta = manifold.norm(x, eta)
 
             # Compute the tentative next iterate (the proposal)
-            x_prop = man.retr(x, eta)
+            x_prop = manifold.retraction(x, eta)
 
             # Compute the function value of the proposal
             fx_prop = cost(x_prop)
@@ -252,7 +252,9 @@ class TrustRegions(Optimizer):
             # Will we accept the proposal or not? Check the performance of the
             # quadratic model against the actual cost.
             rhonum = fx - fx_prop
-            rhoden = -man.inner(x, fgradx, eta) - 0.5 * man.inner(x, eta, Heta)
+            rhoden = -manifold.inner_product(
+                x, fgradx, eta
+            ) - 0.5 * manifold.inner_product(x, eta, Heta)
 
             # rhonum could be anything.
             # rhoden should be nonnegative, as guaranteed by tCG, baring
@@ -390,8 +392,8 @@ class TrustRegions(Optimizer):
                 accstr = "acc"
                 x = x_prop
                 fx = fx_prop
-                fgradx = grad(x)
-                norm_grad = man.norm(x, fgradx)
+                fgradx = gradient(x)
+                norm_grad = manifold.norm(x, fgradx)
             else:
                 # accept = False
                 accstr = "REJ"
@@ -442,13 +444,13 @@ class TrustRegions(Optimizer):
     def _truncated_conjugate_gradient(
         self, problem, x, fgradx, eta, Delta, theta, kappa, mininner, maxinner
     ):
-        man = problem.manifold
-        inner = man.inner
-        hess = problem.hess
+        manifold = problem.manifold
+        inner = manifold.inner_product
+        hess = problem.riemannian_hessian
         preconditioner = problem.preconditioner
 
         if not self.use_rand:  # and therefore, eta == 0
-            Heta = man.zerovec(x)
+            Heta = manifold.zero_vector(x)
             r = fgradx
             e_Pe = 0
         else:  # and therefore, no preconditioner

@@ -1,8 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
-from numpy import random as rnd
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -13,8 +11,8 @@ from pymanopt.optimizers import ConjugateGradient
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_egrad(manifold, matrix, backend):
-    egrad = None
+def create_cost_and_derivates(manifold, matrix, backend):
+    euclidean_gradient = None
 
     if backend == "autograd":
 
@@ -28,10 +26,10 @@ def create_cost_egrad(manifold, matrix, backend):
         @pymanopt.function.numpy(manifold)
         def cost(u, s, vt):
             X = u @ np.diag(s) @ vt
-            return la.norm(X - matrix) ** 2
+            return np.linalg.norm(X - matrix) ** 2
 
         @pymanopt.function.numpy(manifold)
-        def egrad(u, s, vt):
+        def euclidean_gradient(u, s, vt):
             X = u @ np.diag(s) @ vt
             S = np.diag(s)
             gu = 2 * (X - matrix) @ (S @ vt).T
@@ -57,16 +55,20 @@ def create_cost_egrad(manifold, matrix, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad
+    return cost, euclidean_gradient
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m, n, rank = 5, 4, 2
-    matrix = rnd.randn(m, n)
+    matrix = np.random.normal(size=(m, n))
 
     manifold = FixedRankEmbedded(m, n, rank)
-    cost, egrad = create_cost_egrad(manifold, matrix, backend)
-    problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
+    cost, euclidean_gradient = create_cost_and_derivates(
+        manifold, matrix, backend
+    )
+    problem = pymanopt.Problem(
+        manifold, cost, euclidean_gradient=euclidean_gradient
+    )
 
     optimizer = ConjugateGradient(verbosity=2 * int(not quiet))
     (
@@ -81,7 +83,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     )
 
     if not quiet:
-        u, s, vt = la.svd(matrix, full_matrices=False)
+        u, s, vt = np.linalg.svd(matrix, full_matrices=False)
         indices = np.argsort(s)[-rank:]
         low_rank_solution = (
             u[:, indices] @ np.diag(s[indices]) @ vt[indices, :]
@@ -96,7 +98,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         print()
         print(
             "Frobenius norm error:",
-            la.norm(low_rank_approximation - low_rank_solution),
+            np.linalg.norm(low_rank_approximation - low_rank_solution),
         )
         print()
 

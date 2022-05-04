@@ -15,7 +15,7 @@ class RetrAsExpMixin:
             "Using retraction instead.",
             RuntimeWarning,
         )
-        return self.retr(point, tangent_vector)
+        return self.retraction(point, tangent_vector)
 
 
 class Manifold(metaclass=abc.ABCMeta):
@@ -26,10 +26,10 @@ class Manifold(metaclass=abc.ABCMeta):
     Not all methods are required by all optimizers.
     In particular, first order gradient based optimizers such as
     :mod:`pymanopt.optimizers.steepest_descent` and
-    :mod:`pymanopt.optimizers.conjugate_gradient` require :meth:`egrad2rgrad` to
-    be implemented but not :meth:`ehess2rhess`.
+    :mod:`pymanopt.optimizers.conjugate_gradient` require :meth:`euclidean_to_riemannian_gradient` to
+    be implemented but not :meth:`euclidean_to_riemannian_hessian`.
     Second order optimizers such as :mod:`pymanopt.optimizers.trust_regions` will
-    require :meth:`ehess2rhess`.
+    require :meth:`euclidean_to_riemannian_hessian`.
     """
 
     def __init__(self, name, dimension, point_layout=1):
@@ -87,7 +87,7 @@ class Manifold(metaclass=abc.ABCMeta):
     # Manifold properties that subclasses can define
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         """Returns the `scale` of the manifold.
 
         This is used by the trust-regions optimizer to determine default
@@ -95,13 +95,13 @@ class Manifold(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError(
             f"Manifold '{self.__class__.__name__}' does not provide a "
-            "'typicaldist' property"
+            "'typical_dist' property"
         )
 
     # Abstract methods that subclasses must implement.
 
     @abc.abstractmethod
-    def inner(
+    def inner_product(
         self,
         point: np.ndarray,
         tangent_vector_a: np.ndarray,
@@ -124,7 +124,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         """Projects vector in the ambient space on the tangent space."""
 
     @abc.abstractmethod
@@ -132,15 +132,15 @@ class Manifold(metaclass=abc.ABCMeta):
         """Computes the norm of a tangent vector at a point on the manifold."""
 
     @abc.abstractmethod
-    def rand(self):
+    def random_point(self):
         """Returns a random point on the manifold."""
 
     @abc.abstractmethod
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         """Returns a random vector in the tangent space at ``point``."""
 
     @abc.abstractmethod
-    def zerovec(self, point):
+    def zero_vector(self, point):
         """Returns the zero vector in the tangent space at ``point``."""
 
     # Methods which are only required by certain optimizers.
@@ -160,7 +160,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """The geodesic distance between two points on the manifold."""
 
     @_raise_not_implemented_error
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         """Converts the Euclidean to the Riemannian gradient.
 
         For embedded submanifolds of Euclidean space, this is simply the
@@ -168,19 +168,19 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         """Converts the Euclidean to the Riemannian Hessian.
 
         This converts the Euclidean Hessian-vector product (hvp)
-        ``euclidean_hvp`` of a function at a point ``point`` along a tangent
+        ``euclidean_hessian`` of a function at a point ``point`` along a tangent
         vector ``tangent_vector`` to the Riemannian hvp of ``point`` along
         ``tangent_vector`` on the manifold.
         """
 
     @_raise_not_implemented_error
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         """Retracts a tangent vector back to the manifold.
 
         This generalizes the exponential map, and is often more efficient to
@@ -205,17 +205,18 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def transp(self, point_a, point_b, tangent_vector_a):
-        """Transport a tangent vector between different tangent spaces.
+    def transport(self, point_a, point_b, tangent_vector_a):
+        """Compute transport of tangent vectors between tangent spaces.
 
-        The vector transport generalizes the concept of parallel transport, and
-        is often more efficient to compute numerically.
+        This may either be a vector transport (a generalization of parallel
+        transport) as defined in section 8.1 of [AMS2008]_, or a transporter
+        (see e.g. section 10.5 of [Bou2020]_).
         It transports a vector ``tangent_vector_a`` in the tangent space at
         ``point_a`` to the tangent space at `point_b`.
         """
 
     @_raise_not_implemented_error
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         """Computes the intrinsic mean of two points on the manifold.
 
         Returns the intrinsic mean of two points ``X`` and ``Y`` on the
@@ -224,7 +225,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def tangent(self, point, vector):
+    def to_tangent_space(self, point, vector):
         """Re-tangentialize a vector.
 
         This method guarantees that ``vector`` is indeed a tangent vector
@@ -238,10 +239,10 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
     """Embedded submanifolds of Euclidean space.
 
     This class provides a generic way to project Euclidean gradients to their
-    Riemannian counterparts via the :meth:`egrad2rgrad` method.
+    Riemannian counterparts via the :meth:`euclidean_to_riemannian_gradient` method.
     Similarly, if the Weingarten map (also known as shape operator) is provided
     via implementing the :meth:`weingarten` method, the class provides a
-    generic implementation of the :meth:`ehess2rhess` method required by
+    generic implementation of the :meth:`euclidean_to_riemannian_hessian` method required by
     second-order optimizers to translate Euclidean Hessian-vector products to
     their Riemannian counterparts.
 
@@ -249,16 +250,16 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
         Refer to [AMT2013]_ for the exact definition of the Weingarten map.
     """
 
-    def egrad2rgrad(self, point, euclidean_gradient):
-        return self.proj(point, euclidean_gradient)
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        return self.projection(point, euclidean_gradient)
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        normal_gradient = euclidean_gradient - self.proj(
+        normal_gradient = euclidean_gradient - self.projection(
             point, euclidean_gradient
         )
-        return self.proj(point, euclidean_hvp) + self.weingarten(
+        return self.projection(point, euclidean_hessian) + self.weingarten(
             point, tangent_vector, normal_gradient
         )
 

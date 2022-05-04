@@ -1,7 +1,6 @@
 import time
 
 import numpy as np
-import numpy.random as rnd
 
 from pymanopt import tools
 from pymanopt.optimizers.optimizer import Optimizer
@@ -54,13 +53,13 @@ class ParticleSwarm(Optimizer):
             Local minimum of the cost function, or the most recent iterate if
             algorithm terminated before convergence.
         """
-        man = problem.manifold
+        manifold = problem.manifold
         objective = problem.cost
 
         # Choose proper default algorithm parameters. We need to know about the
         # dimension of the manifold to limit the parameter range, so we have to
         # defer proper initialization until this point.
-        dim = man.dim
+        dim = manifold.dim
         if self._max_cost_evaluations is None:
             self._max_cost_evaluations = max(5000, 2 * dim)
         if self._max_iterations is None:
@@ -71,7 +70,10 @@ class ParticleSwarm(Optimizer):
         # If no initial population x is given by the user, generate one at
         # random.
         if initial_point is None:
-            x = [man.rand() for i in range(int(self._population_size))]
+            x = [
+                manifold.random_point()
+                for i in range(int(self._population_size))
+            ]
         elif tools.is_sequence(initial_point):
             if len(initial_point) != self._population_size:
                 print(
@@ -90,7 +92,7 @@ class ParticleSwarm(Optimizer):
         xprev = list(x)
 
         # Initialize velocities for each particle.
-        v = [man.randvec(xi) for xi in x]
+        v = [manifold.random_tangent_vector(xi) for xi in x]
 
         # Compute cost for each particle xi.
         costs = np.array([objective(xi) for xi in x])
@@ -158,9 +160,17 @@ class ParticleSwarm(Optimizer):
 
                 # Compute the new velocity of particle i, composed of three
                 # contributions.
-                inertia = w * man.transp(xiprev, xi, vi)
-                nostalgia = rnd.rand() * self._nostalgia * man.log(xi, yi)
-                social = rnd.rand() * self._social * man.log(xi, xbest)
+                inertia = w * manifold.transport(xiprev, xi, vi)
+                nostalgia = (
+                    np.random.uniform()
+                    * self._nostalgia
+                    * manifold.log(xi, yi)
+                )
+                social = (
+                    np.random.uniform()
+                    * self._social
+                    * manifold.log(xi, xbest)
+                )
 
                 v[i] = inertia + nostalgia + social
 
@@ -170,7 +180,7 @@ class ParticleSwarm(Optimizer):
             # Update positions, personal bests and global best.
             for i, xi in enumerate(x):
                 # Compute new position of particle i.
-                x[i] = man.retr(xi, v[i])
+                x[i] = manifold.retraction(xi, v[i])
                 # Compute new cost of particle i.
                 fxi = objective(xi)
 

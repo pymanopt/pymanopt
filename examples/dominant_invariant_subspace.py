@@ -1,8 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
-from numpy import random as rnd
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -13,8 +11,8 @@ from pymanopt.optimizers import TrustRegions
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_egrad_ehess(manifold, matrix, backend):
-    egrad = ehess = None
+def create_cost_and_derivates(manifold, matrix, backend):
+    euclidean_gradient = euclidean_hessian = None
 
     if backend == "autograd":
 
@@ -29,11 +27,11 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
             return -np.trace(X.T @ matrix @ X)
 
         @pymanopt.function.numpy(manifold)
-        def egrad(X):
+        def euclidean_gradient(X):
             return -(matrix + matrix.T) @ X
 
         @pymanopt.function.numpy(manifold)
-        def ehess(X, H):
+        def euclidean_hessian(X, H):
             return -(matrix + matrix.T) @ H
 
     elif backend == "pytorch":
@@ -50,13 +48,13 @@ def create_cost_egrad_ehess(manifold, matrix, backend):
             return -tf.tensordot(X, tf.matmul(matrix, X), axes=2)
 
         @pymanopt.function.tensorflow(manifold)
-        def egrad(X):
+        def euclidean_gradient(X):
             return -tf.matmul(matrix + matrix.T, X)
 
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad, ehess
+    return cost, euclidean_gradient, euclidean_hessian
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
@@ -69,12 +67,19 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     """
     num_rows = 128
     subspace_dimension = 3
-    matrix = rnd.randn(num_rows, num_rows)
+    matrix = np.random.normal(size=(num_rows, num_rows))
     matrix = 0.5 * (matrix + matrix.T)
 
     manifold = Grassmann(num_rows, subspace_dimension)
-    cost, egrad, ehess = create_cost_egrad_ehess(manifold, matrix, backend)
-    problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
+    cost, euclidean_gradient, euclidean_hessian = create_cost_and_derivates(
+        manifold, matrix, backend
+    )
+    problem = pymanopt.Problem(
+        manifold,
+        cost,
+        euclidean_gradient=euclidean_gradient,
+        euclidean_hessian=euclidean_hessian,
+    )
 
     optimizer = TrustRegions(verbosity=2 * int(not quiet))
     estimated_spanning_set = optimizer.run(
@@ -84,7 +89,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     if quiet:
         return
 
-    eigenvalues, eigenvectors = la.eig(matrix)
+    eigenvalues, eigenvectors = np.linalg.eig(matrix)
     column_indices = np.argsort(eigenvalues)[-subspace_dimension:]
     spanning_set = eigenvectors[:, column_indices]
     print(

@@ -35,28 +35,28 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(self._p * self._k)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - multiprod(
             point, multisym(multiprod(multitransp(point), vector))
         )
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         XtG = multiprod(multitransp(point), euclidean_gradient)
         symXtG = multisym(XtG)
         HsymXtG = multiprod(tangent_vector, symXtG)
-        return self.proj(point, euclidean_hvp - HsymXtG)
+        return self.projection(point, euclidean_hessian - HsymXtG)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         if self._k == 1:
             q, r = np.linalg.qr(point + tangent_vector)
             return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
@@ -70,24 +70,26 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)
 
-    def rand(self):
+    def random_point(self):
         if self._k == 1:
-            matrix = np.random.randn(self._n, self._p)
+            matrix = np.random.normal(size=(self._n, self._p))
             q, _ = np.linalg.qr(matrix)
             return q
 
         point = np.zeros((self._k, self._n, self._p))
         for i in range(self._k):
-            point[i], _ = np.linalg.qr(np.random.randn(self._n, self._p))
+            point[i], _ = np.linalg.qr(
+                np.random.normal(size=(self._n, self._p))
+            )
         return point
 
-    def randvec(self, point):
-        vector = np.random.randn(*np.shape(point))
-        vector = self.proj(point, vector)
+    def random_tangent_vector(self, point):
+        vector = np.random.normal(size=point.shape)
+        vector = self.projection(point, vector)
         return vector / np.linalg.norm(vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):
         if self._k == 1:
@@ -132,7 +134,7 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
             Y[i] = np.bmat([point[i], tangent_vector[i]]) @ W @ Z
         return Y
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         if self._k == 1:
             return np.zeros((self._n, self._p))
         return np.zeros((self._k, self._n, self._p))

@@ -43,11 +43,11 @@ project you certify that
   license; or someone who did one of the former provided you with this
   contribution/modification and you are submitting it without changes.
 
-* you understand and agree that your contribution/modification to this project
-  is public and that a record of it (including all information you submit with
-  it, including copyright notices and your sign-off) is maintained indefinitely
-  and may be redistributed consistent with Pymanopt's 3-clause BSD license or
-  the open source license(s) involved.
+* you understand and agree that your contribution/modification to this
+  project is public and that a record of it (including all information you
+  submit with it, including copyright notices and your sign-off) is
+  maintained indefinitely and may be redistributed consistent with Pymanopt's
+  3-clause BSD license or the open source license(s) involved.
 
 To make your certification explicit we borrow the "sign-off" procedure
 from the Linux kernel project, i.e., each commit message should contain

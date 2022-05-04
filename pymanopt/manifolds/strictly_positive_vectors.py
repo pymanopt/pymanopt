@@ -1,6 +1,4 @@
 import numpy as np
-from numpy import linalg as la
-from numpy import random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -25,10 +23,10 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(self.dim)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         inv_x = 1.0 / point
         return np.sum(
             inv_x * tangent_vector_a * inv_x * tangent_vector_b,
@@ -36,34 +34,36 @@ class StrictlyPositiveVectors(EuclideanEmbeddedSubmanifold):
             keepdims=True,
         )
 
-    def proj(self, point, tangent_vector):
-        return tangent_vector
+    def projection(self, point, vector):
+        return vector
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
-    def rand(self):
-        return rnd.uniform(low=1e-6, high=1, size=(self._n, self._k))
+    def random_point(self):
+        return np.random.uniform(low=1e-6, high=1, size=(self._n, self._k))
 
-    def randvec(self, point):
-        vector = rnd.randn(self._n, self._k)
+    def random_tangent_vector(self, point):
+        vector = np.random.normal(size=(self._n, self._k))
         return vector / self.norm(point, vector)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros(self._n, self._k)
 
     def dist(self, point_a, point_b):
-        return la.norm(
+        return np.linalg.norm(
             np.log(point_a) - np.log(point_b), axis=0, keepdims=True
         )
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient * point**2
 
     def exp(self, point, tangent_vector):
         return point * np.exp((1.0 / point) * tangent_vector)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return point + tangent_vector
 
     def log(self, point_a, point_b):

@@ -1,6 +1,4 @@
 import numpy as np
-from numpy import linalg as la
-from numpy import random as rnd
 from scipy.linalg import solve_continuous_lyapunov as lyap
 
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
@@ -13,49 +11,49 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return 10 + self._k
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector, "fro")
+        return np.linalg.norm(tangent_vector, "fro")
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         YtY = point.T @ point
         AS = point.T @ vector - vector.T @ point
         Omega = lyap(YtY, AS)
         return vector - point @ Omega
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return self.proj(point, euclidean_hvp)
+        return self.projection(point, euclidean_hessian)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return point + tangent_vector
 
-    def rand(self):
-        return rnd.randn(self._n, self._k)
+    def random_point(self):
+        return np.random.normal(size=(self._n, self._k))
 
-    def randvec(self, point):
-        random_vector = self.rand()
-        tangent_vector = self.proj(point, random_vector)
+    def random_tangent_vector(self, point):
+        random_vector = self.random_point()
+        tangent_vector = self.projection(point, random_vector)
         return self._normalize(tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(point_b, tangent_vector_a)
 
     def _normalize(self, array):
         return array / self.norm(None, array)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros((self._n, self._k))
 
 
@@ -113,7 +111,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
     i.e., YY^* does not change. Therefore, M is the set of equivalence
     classes and is a Riemannian quotient manifold C^{nk}/U(k)
     where C^{nk} is the set of all complex matrix of size nxk of full rank.
-    The metric is the usual real-trace inner product, that is,
+    The metric is the usual real trace inner product, that is,
     it is the usual metric for the complex plane identified with R^2.
 
     Notice that this manifold is not complete: if optimization leads Y to be
@@ -127,7 +125,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
         dimension = 2 * k * n - k * k
         super().__init__(n, k, name, dimension)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return (
             2
             * np.tensordot(
@@ -136,14 +134,16 @@ class PSDFixedRankComplex(_PSDFixedRank):
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
     def dist(self, point_a, point_b):
-        s, _, d = la.svd(point_b.T.conj() @ point_a)
+        s, _, d = np.linalg.svd(point_b.T.conj() @ point_a)
         e = point_a - point_b @ s @ d
-        return self.inner(None, e, e) / 2
+        return self.inner_product(None, e, e) / 2
 
-    def rand(self):
+    def random_point(self):
         rand_ = super().rand
         return rand_() + 1j * rand_()
 
@@ -190,54 +190,56 @@ class Elliptope(Manifold, RetrAsExpMixin):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return 10 * self._k
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         eta = self._project_rows(point, vector)
         YtY = point.T @ point
         AS = point.T @ eta - vector.T @ point
         Omega = lyap(YtY, -AS)
         return eta - point @ (Omega - Omega.T) / 2
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._normalize_rows(point + tangent_vector)
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self._project_rows(point, euclidean_gradient)
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         scaling_grad = (euclidean_gradient * point).sum(axis=1)
-        hess = euclidean_hvp - tangent_vector * scaling_grad[:, np.newaxis]
+        hess = euclidean_hessian - tangent_vector * scaling_grad[:, np.newaxis]
         scaling_hess = (
-            tangent_vector * euclidean_gradient + point * euclidean_hvp
+            tangent_vector * euclidean_gradient + point * euclidean_hessian
         ).sum(axis=1)
         hess -= point * scaling_hess[:, np.newaxis]
-        return self.proj(point, hess)
+        return self.projection(point, hess)
 
-    def rand(self):
-        return self._normalize_rows(rnd.randn(self._n, self._k))
+    def random_point(self):
+        return self._normalize_rows(np.random.normal(size=(self._n, self._k)))
 
-    def randvec(self, point):
-        tangent_vector = self.proj(point, self.rand())
+    def random_tangent_vector(self, point):
+        tangent_vector = self.projection(point, self.random_point())
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(point_b, tangent_vector_a)
 
     def _normalize_rows(self, array):
         """Return an l2-row-normalized copy of an array."""
-        return array / la.norm(array, axis=1)[:, np.newaxis]
+        return array / np.linalg.norm(array, axis=1)[:, np.newaxis]
 
     def _project_rows(self, point, vector):
         """Orthogonal projection of each row of H to the tangent space at the
@@ -248,5 +250,5 @@ class Elliptope(Manifold, RetrAsExpMixin):
         inner_products = (point * vector).sum(axis=1)
         return vector - point * inner_products[:, np.newaxis]
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros((self._n, self._k))

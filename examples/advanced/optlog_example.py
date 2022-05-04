@@ -8,7 +8,7 @@ from pymanopt.optimizers import SteepestDescent
 
 
 if __name__ == "__main__":
-    X = np.diag([3, 2, 1]) @ np.random.randn(3, 200)
+    X = np.diag([3, 2, 1]) @ np.random.normal(size=(3, 200))
     manifold = Stiefel(3, 2)
 
     @pymanopt.function.autograd(manifold)

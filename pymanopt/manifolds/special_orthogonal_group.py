@@ -1,8 +1,6 @@
 """Module containing manifolds of n-dimensional rotations."""
 
 import numpy as np
-from numpy import linalg as la
-from numpy import random as rnd
 from scipy.linalg import expm, logm
 from scipy.special import comb
 
@@ -23,15 +21,15 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     submanifold of (R^nxn)^k endowed with the usual trace inner product.
 
     Tangent vectors are represented in the Lie algebra, i.e., as skew
-    symmetric matrices. Use the function manifold.tangent2ambient(X, H) to
+    symmetric matrices. Use the function manifold.embedding(X, H) to
     switch from the Lie algebra representation to the embedding space
     representation. This is often necessary when defining
-    problem.ehess(X, H).
+    problem.euclidean_hessian(X, H).
 
     By default, the retraction is only a first-order approximation of the
-    exponential. To force the use of a second-order approximation, call
-    manifold.retr = manifold.retr2 after creating M. This switches from a
-    QR-based computation to an SVD-based computation.
+    exponential. To force the use of a second-order approximation, instantiate
+    the class with ``SpecialOrthogonalGroup(n, k, retraction="polar")``.
+    This switches from a QR-based computation to an SVD-based computation.
 
     Args:
         n: The dimension of the space that elements of the group act on.
@@ -54,48 +52,51 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
         if retraction == "qr":
-            self.retr = self._retr_qr
+            self._retraction = self._retraction_qr
         elif retraction == "polar":
-            self.retr = self._retr_polar
+            self._retractionretr = self._retraction_polar
         else:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.pi * np.sqrt(self._n * self._k)
 
     def dist(self, point_a, point_b):
         return self.norm(point_a, self.log(point_a, point_b))
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return multiskew(multiprod(multitransp(point), vector))
 
-    def tangent(self, point, vector):
+    def to_tangent_space(self, point, vector):
         return multiskew(vector)
 
-    def tangent2ambient(self, point, tangent_vector):
+    def embedding(self, point, tangent_vector):
         return multiprod(point, tangent_vector)
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         Xt = multitransp(point)
         Xtegrad = multiprod(Xt, euclidean_gradient)
         symXtegrad = multisym(Xtegrad)
-        Xtehess = multiprod(Xt, euclidean_hvp)
+        Xtehess = multiprod(Xt, euclidean_hessian)
         return multiskew(Xtehess - multiprod(tangent_vector, symXtegrad))
 
-    def _retr_qr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
+        return self._retraction(point, tangent_vector)
+
+    def _retraction_qr(self, point, tangent_vector):
         def retri(array):
-            q, r = la.qr(array)
+            q, r = np.linalg.qr(array)
             return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
 
         Y = point + multiprod(point, tangent_vector)
@@ -106,9 +107,9 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             Y[i] = retri(Y[i])
         return Y
 
-    def _retr_polar(self, point, tangent_vector):
+    def _retraction_polar(self, point, tangent_vector):
         def retri(array):
-            u, _, vt = la.svd(array)
+            u, _, vt = np.linalg.svd(array)
             return u @ vt
 
         Y = point + multiprod(point, tangent_vector)
@@ -146,15 +147,15 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         for i in range(N):
             # Generated as such, Q is uniformly distributed over O(n), the
             # group of orthogonal n-by-n matrices.
-            A = rnd.randn(n, n)
-            Q, RR = la.qr(A)
+            A = np.random.normal(size=(n, n))
+            Q, RR = np.linalg.qr(A)
             # TODO(nkoep): Add a proper reference to Mezzadri 2007.
             Q = Q @ np.diag(np.sign(np.diag(RR)))
 
             # If Q is in O(n) but not in SO(n), we permute the two first
             # columns of Q such that det(new Q) = -det(Q), hence the new Q will
             # be in SO(n), uniformly distributed.
-            if la.det(Q) < 0:
+            if np.linalg.det(Q) < 0:
                 Q[:, [0, 1]] = Q[:, [1, 0]]
             R[i] = Q
 
@@ -162,7 +163,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             return R.reshape(n, n)
         return R
 
-    def rand(self):
+    def random_point(self):
         return self._randrot(self._n, self._k)
 
     @staticmethod
@@ -170,13 +171,13 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         idxs = np.triu_indices(n, 1)
         S = np.zeros((N, n, n))
         for i in range(N):
-            S[i][idxs] = rnd.randn(int(n * (n - 1) / 2))
+            S[i][idxs] = np.random.normal(size=int(n * (n - 1) / 2))
             S = S - multitransp(S)
         if N == 1:
             return S.reshape(n, n)
         return S
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = self._randskew(self._n, self._k)
         return tangent_vector / np.sqrt(
             np.tensordot(
@@ -184,14 +185,14 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             )
         )
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         if self._k == 1:
             return np.zeros((self._n, self._n))
         return np.zeros((self._k, self._n, self._n))
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a
 
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         V = self.log(point_a, point_b)
         return self.exp(point_a, 0.5 * V)

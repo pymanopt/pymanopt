@@ -93,7 +93,7 @@ optimizers.
     def cost(point):
         return -point @ matrix @ point
 
-    problem = pymanopt.Problem(manifold=manifold, cost=cost)
+    problem = pymanopt.Problem(manifold, cost)
 
     optimizer = pymanopt.optimizers.SteepestDescent()
     solution = optimizer.run(problem)

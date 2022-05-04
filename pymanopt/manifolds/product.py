@@ -22,9 +22,9 @@ class Product(Manifold):
         super().__init__(name, dimension, point_layout=point_layout)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(
-            np.sum([manifold.typicaldist**2 for manifold in self.manifolds])
+            np.sum([manifold.typical_dist**2 for manifold in self.manifolds])
         )
 
     def _dispatch(
@@ -47,10 +47,12 @@ class Product(Manifold):
         return wrapper
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
-        return self._dispatch("inner", reduction=np.sum)(
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
+        return self._dispatch("inner_product", reduction=np.sum)(
             point, tangent_vector_a, tangent_vector_b
         )
 
@@ -61,55 +63,55 @@ class Product(Manifold):
             reduction=lambda values: np.sqrt(np.sum(values)),
         )(point_a, point_b)
 
-    def proj(self, point, vector):
-        return self._dispatch("proj", reduction=_ProductTangentVector)(
+    def projection(self, point, vector):
+        return self._dispatch("projection", reduction=_ProductTangentVector)(
             point, vector
         )
 
-    def egrad2rgrad(self, point, euclidean_gradient):
-        return self._dispatch("egrad2rgrad", reduction=_ProductTangentVector)(
-            point, euclidean_gradient
-        )
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        return self._dispatch(
+            "euclidean_to_riemannian_gradient", reduction=_ProductTangentVector
+        )(point, euclidean_gradient)
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return self._dispatch("ehess2rhess", reduction=_ProductTangentVector)(
-            point, euclidean_gradient, euclidean_hvp, tangent_vector
-        )
+        return self._dispatch(
+            "euclidean_to_riemannian_hessian", reduction=_ProductTangentVector
+        )(point, euclidean_gradient, euclidean_hessian, tangent_vector)
 
     def exp(self, point, tangent_vector):
         return self._dispatch("exp")(point, tangent_vector)
 
-    def retr(self, point, tangent_vector):
-        return self._dispatch("retr")(point, tangent_vector)
+    def retraction(self, point, tangent_vector):
+        return self._dispatch("retraction")(point, tangent_vector)
 
     def log(self, point_a, point_b):
         return self._dispatch("log", reduction=_ProductTangentVector)(
             point_a, point_b
         )
 
-    def rand(self):
-        return self._dispatch("rand")()
+    def random_point(self):
+        return self._dispatch("random_point")()
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         scale = len(self.manifolds) ** (-1 / 2)
         return self._dispatch(
-            "randvec",
+            "random_tangent_vector",
             transform=lambda value: scale * value,
             reduction=_ProductTangentVector,
         )(point)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self._dispatch("transp", reduction=_ProductTangentVector)(
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self._dispatch("transport", reduction=_ProductTangentVector)(
             point_a, point_b, tangent_vector_a
         )
 
-    def pairmean(self, point_a, point_b):
-        return self._dispatch("pairmean")(point_a, point_b)
+    def pair_mean(self, point_a, point_b):
+        return self._dispatch("pair_mean")(point_a, point_b)
 
-    def zerovec(self, point):
-        return self._dispatch("zerovec", reduction=_ProductTangentVector)(
+    def zero_vector(self, point):
+        return self._dispatch("zero_vector", reduction=_ProductTangentVector)(
             point
         )
 

@@ -1,8 +1,6 @@
 import autograd.numpy as np
 import tensorflow as tf
 import torch
-from numpy import linalg as la
-from numpy import random as rnd
 
 import pymanopt
 from examples._tools import ExampleRunner
@@ -13,8 +11,8 @@ from pymanopt.optimizers import ConjugateGradient
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_egrad(manifold, matrix, backend):
-    egrad = None
+def create_cost_and_derivates(manifold, matrix, backend):
+    euclidean_gradient = None
 
     if backend == "autograd":
 
@@ -29,7 +27,7 @@ def create_cost_egrad(manifold, matrix, backend):
             return 0.5 * np.sum((X - matrix) ** 2)
 
         @pymanopt.function.numpy(manifold)
-        def egrad(X):
+        def euclidean_gradient(X):
             return X - matrix
 
     elif backend == "pytorch":
@@ -48,17 +46,21 @@ def create_cost_egrad(manifold, matrix, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad
+    return cost, euclidean_gradient
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m = 5
     n = 8
-    matrix = rnd.randn(m, n)
+    matrix = np.random.normal(size=(m, n))
 
     manifold = Oblique(m, n)
-    cost, egrad = create_cost_egrad(manifold, matrix, backend)
-    problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad)
+    cost, euclidean_gradient = create_cost_and_derivates(
+        manifold, matrix, backend
+    )
+    problem = pymanopt.Problem(
+        manifold, cost, euclidean_gradient=euclidean_gradient
+    )
 
     optimizer = ConjugateGradient(verbosity=2 * int(not quiet))
     Xopt = optimizer.run(problem)
@@ -67,11 +69,11 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         return
 
     # Calculate the actual solution by normalizing the columns of matrix.
-    X = matrix / la.norm(matrix, axis=0)[np.newaxis, :]
+    X = matrix / np.linalg.norm(matrix, axis=0)[np.newaxis, :]
 
     # Print information about the solution.
-    print("Solution found: %s" % np.allclose(X, Xopt, rtol=1e-3))
-    print("Frobenius-error: %f" % la.norm(X - Xopt))
+    print("Solution found:", np.allclose(X, Xopt, rtol=1e-3))
+    print("Frobenius-error:", np.linalg.norm(X - Xopt))
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
     Then the shapes will be as follows:
 
-    >>> u, s, vt = manifold.rand()
+    >>> u, s, vt = manifold.random_point()
     >>> u.shape
     (5, 3)
     >>> s.shape
@@ -89,10 +89,10 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension, point_layout=3)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return self.dim
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.sum(
             np.tensordot(a, b)
             for (a, b) in zip(tangent_vector_a, tangent_vector_b)
@@ -110,7 +110,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
             return vector[2] @ vector[1] @ vector[0].T @ matrix
         return vector.T @ matrix
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         """Project vector to tangent space.
 
         Note that ``vector`` must either be an m x n matrix from the ambient
@@ -129,7 +129,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
 
         return _FixedRankTangentVector(Up, M, Vp)
 
-    def egrad2rgrad(self, point, euclidean_gradient):
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         """Convert Euclidean to Riemannian gradient.
 
         Assuming that the cost function being optimized has been defined
@@ -171,7 +171,7 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
     # SIAM J. Optim., 22 (2012), pp. 135-158.
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         u, s, vt = point
         du, ds, dvt = tangent_vector
 
@@ -185,48 +185,48 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         )
         # Numpy svd outputs St as a 1d vector, not a matrix.
         Ut, St, Vt = np.linalg.svd(T, full_matrices=False)
-        # Transpose because numpy outputs it the wrong way.
-        Vt = Vt.T
 
         U = np.hstack((u, Qu)) @ Ut[:, : self._k]
         S = St[: self._k] + np.spacing(1)
-        V = np.hstack((vt.T, Qv)) @ Vt[:, : self._k]
+        V = np.hstack((vt.T, Qv)) @ Vt.T[:, : self._k]
         return _FixedRankPoint(U, S, V.T)
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
-    def rand(self):
-        u = self._stiefel_m.rand()
-        s = np.sort(np.random.rand(self._k))[::-1]
-        vt = self._stiefel_n.rand().T
+    def random_point(self):
+        u = self._stiefel_m.random_point()
+        s = np.sort(np.random.uniform(size=self._k))[::-1]
+        vt = self._stiefel_n.random_point().T
         return _FixedRankPoint(u, s, vt)
 
-    def tangent(self, point, vector):
+    def to_tangent_space(self, point, vector):
         """Project components of ``vector`` to tangent space at ``point``.
 
         Given ``vector`` in tangent vector format, projects its components Up
         and Vp such that they satisfy the tangent space constraints up to
         numerical errors.
-        If ``vector`` was indeed a tangent vector at ``point``, this should
-        barely affect ``vector``.
+        If ``vector`` was already in the tangent space at ``point``, this
+        method should barely have any effect.
         """
         u, _, vt = point
         Up = vector.Up - u @ u.T @ vector.Up
         Vp = vector.Vp - vt.T @ vt @ vector.Vp
         return _FixedRankTangentVector(Up, vector.M, Vp)
 
-    def randvec(self, point):
-        Up = np.random.randn(self._m, self._k)
-        Vp = np.random.randn(self._n, self._k)
-        M = np.random.randn(self._k, self._k)
+    def random_tangent_vector(self, point):
+        Up = np.random.normal(size=(self._m, self._k))
+        Vp = np.random.normal(size=(self._n, self._k))
+        M = np.random.normal(size=(self._k, self._k))
 
-        tangent_vector = self.tangent(
+        tangent_vector = self.to_tangent_space(
             point, _FixedRankTangentVector(Up, M, Vp)
         )
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def tangent2ambient(self, point, tangent_vector):
+    def embedding(self, point, tangent_vector):
         """Represent tangent vector in ambient space.
 
         Transforms a tangent vector Z represented as a structure (Up, M, Vp)
@@ -248,12 +248,12 @@ class FixedRankEmbedded(EuclideanEmbeddedSubmanifold):
         V = np.hstack(([vt.T, tangent_vector.Vp]))
         return U, S, V
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(
-            point_b, self.tangent2ambient(point_a, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(
+            point_b, self.embedding(point_a, tangent_vector_a)
         )
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return _FixedRankTangentVector(
             np.zeros((self._m, self._k)),
             np.zeros((self._k, self._k)),

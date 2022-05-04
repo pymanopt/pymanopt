@@ -1,8 +1,6 @@
 import warnings
 
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
 
 from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
 
@@ -21,60 +19,62 @@ class _SphereBase(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.pi
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        inner = max(min(self.inner(point_a, point_a, point_b), 1), -1)
+        inner = max(min(self.inner_product(point_a, point_a, point_b), 1), -1)
         return np.arccos(inner)
 
-    def proj(self, point, vector):
-        return vector - self.inner(point, point, vector) * point
+    def projection(self, point, vector):
+        return vector - self.inner_product(point, point, vector) * point
 
     def weingarten(self, point, tangent_vector, normal_vector):
-        return -self.inner(point, point, normal_vector) * tangent_vector
+        return (
+            -self.inner_product(point, point, normal_vector) * tangent_vector
+        )
 
     def exp(self, point, tangent_vector):
         norm = self.norm(point, tangent_vector)
         return point * np.cos(norm) + tangent_vector * np.sinc(norm / np.pi)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._normalize(point + tangent_vector)
 
     def log(self, point_a, point_b):
-        vector = self.proj(point_a, point_b - point_a)
+        vector = self.projection(point_a, point_b - point_a)
         distance = self.dist(point_a, point_b)
         epsilon = np.finfo(np.float64).eps
         factor = (distance + epsilon) / (self.norm(point_a, vector) + epsilon)
         return factor * vector
 
-    def rand(self):
-        point = rnd.randn(*self._shape)
+    def random_point(self):
+        point = np.random.normal(size=self._shape)
         return self._normalize(point)
 
-    def randvec(self, point):
-        vector = rnd.randn(*self._shape)
-        return self._normalize(self.proj(point, vector))
+    def random_tangent_vector(self, point):
+        vector = np.random.normal(size=self._shape)
+        return self._normalize(self.projection(point, vector))
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(point_b, tangent_vector_a)
 
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         return self._normalize(point_a + point_b)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros(self._shape)
 
     def _normalize(self, array):
-        return array / la.norm(array)
+        return array / np.linalg.norm(array)
 
 
 class Sphere(_SphereBase):
@@ -123,15 +123,15 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
                 "The span matrix cannot have fewer rows than columns"
             )
 
-    def proj(self, point, vector):
-        return self._subspace_projector @ super().proj(point, vector)
+    def projection(self, point, vector):
+        return self._subspace_projector @ super().projection(point, vector)
 
-    def rand(self):
-        point = super().rand()
+    def random_point(self):
+        point = super().random_point()
         return self._normalize(self._subspace_projector @ point)
 
-    def randvec(self, point):
-        vector = super().randvec(point)
+    def random_tangent_vector(self, point):
+        vector = super().random_tangent_vector(point)
         return self._normalize(self._subspace_projector @ vector)
 
 
@@ -146,9 +146,9 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     def __init__(self, matrix):
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
-        q, _ = la.qr(matrix)
+        q, _ = np.linalg.qr(matrix)
         projector = q @ q.T
-        subspace_dimension = la.matrix_rank(projector)
+        subspace_dimension = np.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors intersecting a "
             f"{subspace_dimension}-dimensional subspace"
@@ -170,9 +170,9 @@ class SphereSubspaceComplementIntersection(
     def __init__(self, matrix):
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
-        q, _ = la.qr(matrix)
+        q, _ = np.linalg.qr(matrix)
         projector = np.eye(m) - q @ q.T
-        subspace_dimension = la.matrix_rank(projector)
+        subspace_dimension = np.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors orthogonal "
             f"to a {subspace_dimension}-dimensional subspace"
