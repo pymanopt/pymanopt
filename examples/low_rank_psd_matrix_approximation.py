@@ -12,7 +12,7 @@ SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, matrix, backend):
-    euclidean_gradient = euclidean_hvp = None
+    euclidean_gradient = euclidean_hessian = None
 
     if backend == "autograd":
 
@@ -31,7 +31,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return 4 * (Y @ Y.T - matrix) @ Y
 
         @pymanopt.function.numpy(manifold)
-        def euclidean_hvp(Y, U):
+        def euclidean_hessian(Y, U):
             return 4 * ((Y @ U.T + U @ Y.T) @ Y + (Y @ Y.T - matrix) @ U)
 
     elif backend == "pytorch":
@@ -52,7 +52,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, euclidean_gradient, euclidean_hvp
+    return cost, euclidean_gradient, euclidean_hessian
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
@@ -62,14 +62,14 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     matrix = low_rank_factor @ low_rank_factor.T
 
     manifold = PSDFixedRank(num_rows, rank)
-    cost, euclidean_gradient, euclidean_hvp = create_cost_and_derivates(
+    cost, euclidean_gradient, euclidean_hessian = create_cost_and_derivates(
         manifold, matrix, backend
     )
     problem = pymanopt.Problem(
         manifold,
         cost,
         euclidean_gradient=euclidean_gradient,
-        euclidean_hvp=euclidean_hvp,
+        euclidean_hessian=euclidean_hessian,
     )
 
     optimizer = TrustRegions(

@@ -21,7 +21,7 @@ class TestObliqueManifold(TestCase):
 
     # def test_projection(self):
 
-    # def test_euclidean_to_riemannian_hvp(self):
+    # def test_euclidean_to_riemannian_hessian(self):
 
     # def test_retraction(self):
 

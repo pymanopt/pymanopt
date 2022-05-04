@@ -27,9 +27,9 @@ class Manifold(metaclass=abc.ABCMeta):
     In particular, first order gradient based optimizers such as
     :mod:`pymanopt.optimizers.steepest_descent` and
     :mod:`pymanopt.optimizers.conjugate_gradient` require :meth:`euclidean_to_riemannian_gradient` to
-    be implemented but not :meth:`euclidean_to_riemannian_hvp`.
+    be implemented but not :meth:`euclidean_to_riemannian_hessian`.
     Second order optimizers such as :mod:`pymanopt.optimizers.trust_regions` will
-    require :meth:`euclidean_to_riemannian_hvp`.
+    require :meth:`euclidean_to_riemannian_hessian`.
     """
 
     def __init__(self, name, dimension, point_layout=1):
@@ -168,13 +168,13 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         """Converts the Euclidean to the Riemannian Hessian.
 
         This converts the Euclidean Hessian-vector product (hvp)
-        ``euclidean_hvp`` of a function at a point ``point`` along a tangent
+        ``euclidean_hessian`` of a function at a point ``point`` along a tangent
         vector ``tangent_vector`` to the Riemannian hvp of ``point`` along
         ``tangent_vector`` on the manifold.
         """
@@ -242,7 +242,7 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
     Riemannian counterparts via the :meth:`euclidean_to_riemannian_gradient` method.
     Similarly, if the Weingarten map (also known as shape operator) is provided
     via implementing the :meth:`weingarten` method, the class provides a
-    generic implementation of the :meth:`euclidean_to_riemannian_hvp` method required by
+    generic implementation of the :meth:`euclidean_to_riemannian_hessian` method required by
     second-order optimizers to translate Euclidean Hessian-vector products to
     their Riemannian counterparts.
 
@@ -253,13 +253,13 @@ class EuclideanEmbeddedSubmanifold(Manifold, metaclass=abc.ABCMeta):
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(point, euclidean_gradient)
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         normal_gradient = euclidean_gradient - self.projection(
             point, euclidean_gradient
         )
-        return self.projection(point, euclidean_hvp) + self.weingarten(
+        return self.projection(point, euclidean_hessian) + self.weingarten(
             point, tangent_vector, normal_gradient
         )
 

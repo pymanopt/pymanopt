@@ -38,12 +38,12 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
 
     tangent = projection
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         return self.projection(
             point,
-            euclidean_hvp
+            euclidean_hessian
             - (point * euclidean_gradient.conj()).real * tangent_vector,
         )
 

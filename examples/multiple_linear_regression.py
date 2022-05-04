@@ -12,7 +12,7 @@ SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, samples, targets, backend):
-    euclidean_gradient = euclidean_hvp = None
+    euclidean_gradient = euclidean_hessian = None
 
     if backend == "autograd":
 
@@ -32,7 +32,7 @@ def create_cost_and_derivates(manifold, samples, targets, backend):
             return -2 * samples.T @ (targets - samples @ weights)
 
         @pymanopt.function.numpy(manifold)
-        def euclidean_hvp(weights, vector):
+        def euclidean_hessian(weights, vector):
             return 2 * samples.T @ samples @ vector
 
     elif backend == "pytorch":
@@ -54,7 +54,7 @@ def create_cost_and_derivates(manifold, samples, targets, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, euclidean_gradient, euclidean_hvp
+    return cost, euclidean_gradient, euclidean_hessian
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
@@ -70,13 +70,13 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         (
             cost,
             euclidean_gradient,
-            euclidean_hvp,
+            euclidean_hessian,
         ) = create_cost_and_derivates(manifold, samples, targets, backend)
         problem = pymanopt.Problem(
             manifold,
             cost,
             euclidean_gradient=euclidean_gradient,
-            euclidean_hvp=euclidean_hvp,
+            euclidean_hessian=euclidean_hessian,
         )
 
         estimated_weights = optimizer.run(problem)

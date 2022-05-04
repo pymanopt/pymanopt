@@ -21,7 +21,7 @@ class Problem:
             :func:`pymanopt.function.numpy` is used the gradient and
             Hessian-vector production functions are generated automatically if
             needed and no ``{euclidean,riemannian}_gradient`` or
-            ``{euclidean,riemannian}_hvp`` arguments are provided.
+            ``{euclidean,riemannian}_hessian`` arguments are provided.
         euclidean_gradient: The Euclidean gradient, i.e., the gradient of the
             cost function in the typical sense in the ambient space.
             The returned value need not belong to the tangent space of
@@ -33,10 +33,10 @@ class Problem:
             is instead computed internally.
             If provided, the function needs to return a vector in the tangent
             space of ``manifold``.
-        euclidean_hvp: The Euclidean Hessian-vector product, i.e., the directional
+        euclidean_hessian: The Euclidean Hessian-vector product, i.e., the directional
             derivative of ``euclidean_gradient`` in the direction of a tangent
             vector.
-        riemannian_hvp: The Riemannian Hessian-vector product, i.e., the directional
+        riemannian_hessian: The Riemannian Hessian-vector product, i.e., the directional
             derivative of ``riemannian_gradient`` in the direction of a tangent
             vector.
             As with ``riemannian_gradient`` this usually need not be provided
@@ -50,8 +50,8 @@ class Problem:
         *,
         euclidean_gradient: Optional[Function] = None,
         riemannian_gradient: Optional[Function] = None,
-        euclidean_hvp: Optional[Function] = None,
-        riemannian_hvp: Optional[Function] = None,
+        euclidean_hessian: Optional[Function] = None,
+        riemannian_hessian: Optional[Function] = None,
         preconditioner: Optional[Callable] = None,
     ):
         self.manifold = manifold
@@ -59,9 +59,9 @@ class Problem:
         for function, name in (
             (cost, "cost"),
             (euclidean_gradient, "euclidean_gradient"),
-            (euclidean_hvp, "euclidean_hvp"),
+            (euclidean_hessian, "euclidean_hessian"),
             (riemannian_gradient, "riemannian_gradient"),
-            (riemannian_hvp, "riemannian_hvp"),
+            (riemannian_hessian, "riemannian_hessian"),
         ):
             self._validate_function(function, name)
 
@@ -70,9 +70,9 @@ class Problem:
                 "Only 'euclidean_gradient' or 'riemannian_gradient' should be "
                 "provided, not both"
             )
-        if euclidean_hvp is not None and riemannian_hvp is not None:
+        if euclidean_hessian is not None and riemannian_hessian is not None:
             raise ValueError(
-                "Only 'euclidean_hvp' or 'riemannian_hvp' should be provided, "
+                "Only 'euclidean_hessian' or 'riemannian_hessian' should be provided, "
                 "not both"
             )
 
@@ -82,16 +82,20 @@ class Problem:
         if euclidean_gradient is not None:
             euclidean_gradient = self._wrap_gradient(euclidean_gradient)
         self._euclidean_gradient = euclidean_gradient
-        if euclidean_hvp is not None:
-            euclidean_hvp = self._wrap_hessian_vector_product(euclidean_hvp)
-        self._euclidean_hvp = euclidean_hvp
+        if euclidean_hessian is not None:
+            euclidean_hessian = self._wrap_hessian_vector_product(
+                euclidean_hessian
+            )
+        self._euclidean_hessian = euclidean_hessian
 
         if riemannian_gradient is not None:
             riemannian_gradient = self._wrap_gradient(riemannian_gradient)
         self._riemannian_gradient = riemannian_gradient
-        if riemannian_hvp is not None:
-            riemannian_hvp = self._wrap_hessian_vector_product(riemannian_hvp)
-        self._riemannian_hvp = riemannian_hvp
+        if riemannian_hessian is not None:
+            riemannian_hessian = self._wrap_hessian_vector_product(
+                riemannian_hessian
+            )
+        self._riemannian_hessian = riemannian_hessian
 
         if preconditioner is None:
 
@@ -245,22 +249,22 @@ class Problem:
         return self._riemannian_gradient
 
     @property
-    def euclidean_hvp(self):
-        if self._euclidean_hvp is None:
-            self._euclidean_hvp = self._wrap_hessian_vector_product(
+    def euclidean_hessian(self):
+        if self._euclidean_hessian is None:
+            self._euclidean_hessian = self._wrap_hessian_vector_product(
                 self._original_cost.compute_hessian_vector_product()
             )
-        return self._euclidean_hvp
+        return self._euclidean_hessian
 
     @property
-    def riemannian_hvp(self):
-        if self._riemannian_hvp is None:
-            euclidean_hvp = self.euclidean_hvp
+    def riemannian_hessian(self):
+        if self._riemannian_hessian is None:
+            euclidean_hessian = self.euclidean_hessian
 
-            def riemannian_hvp(x, a):
-                return self.manifold.euclidean_to_riemannian_hvp(
-                    x, self.euclidean_gradient(x), euclidean_hvp(x, a), a
+            def riemannian_hessian(x, a):
+                return self.manifold.euclidean_to_riemannian_hessian(
+                    x, self.euclidean_gradient(x), euclidean_hessian(x, a), a
                 )
 
-            self._riemannian_hvp = riemannian_hvp
-        return self._riemannian_hvp
+            self._riemannian_hessian = riemannian_hessian
+        return self._riemannian_hessian

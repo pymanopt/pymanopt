@@ -48,13 +48,13 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
             point, multisym(multiprod(multitransp(point), vector))
         )
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         XtG = multiprod(multitransp(point), euclidean_gradient)
         symXtG = multisym(XtG)
         HsymXtG = multiprod(tangent_vector, symXtG)
-        return self.projection(point, euclidean_hvp - HsymXtG)
+        return self.projection(point, euclidean_hessian - HsymXtG)
 
     def retraction(self, point, tangent_vector):
         if self._k == 1:

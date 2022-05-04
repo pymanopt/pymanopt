@@ -31,10 +31,10 @@ class _Euclidean(EuclideanEmbeddedSubmanifold):
     def projection(self, point, vector):
         return vector
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return euclidean_hvp
+        return euclidean_hessian
 
     def exp(self, point, tangent_vector):
         return point + tangent_vector
@@ -108,10 +108,10 @@ class Symmetric(_Euclidean):
     def projection(self, point, vector):
         return multisym(vector)
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return multisym(euclidean_hvp)
+        return multisym(euclidean_hessian)
 
     def random_point(self):
         return multisym(np.random.normal(size=self._shape))
@@ -143,10 +143,10 @@ class SkewSymmetric(_Euclidean):
     def projection(self, point, vector):
         return multiskew(vector)
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return multiskew(euclidean_hvp)
+        return multiskew(euclidean_hessian)
 
     def random_point(self):
         return multiskew(np.random.normal(size=self._shape))
