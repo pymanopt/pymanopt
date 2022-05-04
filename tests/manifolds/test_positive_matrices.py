@@ -3,7 +3,6 @@ from numpy import testing as np_testing
 
 from pymanopt.manifolds import Positive
 
-# from pymanopt.tools import testing
 from .._test import TestCase
 
 
