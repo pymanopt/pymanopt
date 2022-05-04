@@ -2,9 +2,10 @@
 
 ## 1.0:
   - Return 'Result' object from optimizer's 'run' method
+  - Clean up all docstrings of manifolds
 
 ## 1.0.x:
-  - Use weingarten map for oblique manifold and Stiefel
+  - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices
   - Change "beta_rule" of CG optimizer to internal enum representation
 
 ## 1.1.x:

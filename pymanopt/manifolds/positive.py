@@ -10,9 +10,8 @@ class Positive(Manifold):
         m: The number of rows.
         n: The number of columns.
         k: The number of matrices in the product.
-        use_parallel_transport: Flag whether to use a proper transport
-            for :meth:`transport` or a transporter (the
-            default).
+        use_parallel_transport: Flag whether to use a parallel transport for
+            :meth:`transport` or a transporter (the default).
 
     Notes:
         A point on the manifold is represented as an array of size ``m x n``
@@ -79,7 +78,7 @@ class Positive(Manifold):
     def random_point(self):
         point = np.exp(np.random.normal(size=(self._k, self._m, self._n)))
         if self._k == 1:
-            return point.squeeze(0)
+            return point.reshape(self._m, self._n)
         return point
 
     def random_tangent_vector(self, point):

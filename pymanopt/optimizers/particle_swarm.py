@@ -120,8 +120,8 @@ class ParticleSwarm(Optimizer):
 
         self._initialize_log()
 
-        # Iteration counter (at any point, iteration is the number of fully executed
-        # iterations so far).
+        # Iteration counter (at any point, iteration is the number of fully
+        # executed iterations so far).
         iteration = 0
         start_time = time.time()
 

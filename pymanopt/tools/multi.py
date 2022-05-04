@@ -57,8 +57,8 @@ def multisym(A):
 def multiskew(A):
     """Vectorized matrix skew-symmetrization.
 
-    Same as :func:`multisym`, but returns an array where each matrix ``A[i]``
-    is skew-symmetric, i.e., the components of ``A`` satisfy ``A[i] ==
+    Similar to :func:`multisym`, but returns an array where each matrix
+    ``A[i]`` is skew-symmetric, i.e., the components of ``A`` satisfy ``A[i] ==
     -A[i].T``.
     """
     return 0.5 * (A - multitransp(A))

@@ -28,8 +28,8 @@ class BackTrackingLineSearcher:
             df0: Directional derivative at ``x`` along ``d``.
 
         Returns:
-            A tuple ``(step_size, newx)`` where ``step_size`` is the norm of the
-            vector retracted to reach the suggested iterate ``newx`` from
+            A tuple ``(step_size, newx)`` where ``step_size`` is the norm of
+            the vector retracted to reach the suggested iterate ``newx`` from
             ``x``.
         """
         # Compute the norm of the search direction
@@ -126,9 +126,9 @@ class AdaptiveLineSearcher:
 
         # Store a suggestion for what the next initial step size trial should
         # be. On average we intend to do only one extra cost evaluation. Notice
-        # how the suggestion is not about step_size but about alpha. This is the
-        # reason why this line search is not invariant under rescaling of the
-        # search direction d.
+        # how the suggestion is not about step_size but about alpha. This is
+        # the reason why this line search is not invariant under rescaling of
+        # the search direction d.
 
         # If things go reasonably well, try to keep pace.
         if cost_evaluations == 2:

@@ -88,8 +88,8 @@ class Optimizer(metaclass=abc.ABCMeta):
             )
         elif step_size < self._min_step_size:
             reason = (
-                f"Terminated - min step_size reached after {iteration} iterations, "
-                f"{run_time:.2f} seconds."
+                f"Terminated - min step_size reached after {iteration} "
+                f"iterations, {run_time:.2f} seconds."
             )
         elif cost_evaluations >= self._max_cost_evaluations:
             reason = (

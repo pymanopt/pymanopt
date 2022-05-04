@@ -401,16 +401,16 @@ class TrustRegions(Optimizer):
             # ** Display:
             if self._verbosity == 2:
                 print(
-                    f"{accstr:.3s} {trstr:.3s}   k: {iteration:5d}     num_inner: "
-                    f"{numit:5d}     f: {fx:+e}   |grad|: "
+                    f"{accstr:.3s} {trstr:.3s}   k: {iteration:5d}     "
+                    f"num_inner: {numit:5d}     f: {fx:+e}   |grad|: "
                     f"{norm_grad:e}   {srstr:s}"
                 )
             elif self._verbosity > 2:
                 if self.use_rand and used_cauchy:
                     print("USED CAUCHY POINT")
                 print(
-                    f"{accstr:.3s} {trstr:.3s}    k: {iteration:5d}     num_inner: "
-                    f"{numit:5d}     {srstr:s}"
+                    f"{accstr:.3s} {trstr:.3s}    k: {iteration:5d}     "
+                    f"num_inner: {numit:5d}     {srstr:s}"
                 )
                 print(f"       f(x) : {fx:+e}     |grad| : {norm_grad:e}")
                 print(f"        rho : {rho:e}")

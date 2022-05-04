@@ -99,13 +99,13 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         )
 
     def _apply_ambient(self, vector, matrix):
-        """Right-multiply a matrix to a vector in ambient space."""
+        """Right-multiply a matrix to vector in ambient space."""
         if isinstance(vector, (list, tuple)):
             return vector[0] @ vector[1] @ vector[2].T @ matrix
         return vector @ matrix
 
     def _apply_ambient_transpose(self, vector, matrix):
-        """Right-multiply a matrix to transpose of a vector in ambient space."""
+        """Right-multiply a matrix to transpose of vector in ambient space."""
         if isinstance(vector, (list, tuple)):
             return vector[2] @ vector[1] @ vector[0].T @ matrix
         return vector.T @ matrix
@@ -163,10 +163,6 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         )
 
         return _FixedRankTangentVector(Up, M, Vp)
-
-    # TODO(nkoep): Implement the 'weingarten' method to support the
-    #              trust-region optimizer, cf.
-    #              https://sites.uclouvain.be/absil/2013-01/Weingarten_07PA_techrep.pdf
 
     # This retraction is second order, following general results from
     # Absil, Malick, "Projection-like retractions on matrix manifolds",
