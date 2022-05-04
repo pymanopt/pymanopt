@@ -14,22 +14,22 @@ class Positive(Manifold):
             :meth:`transport` or a transporter (the default).
 
     Notes:
-        A point on the manifold is represented as an array of size ``m x n``
-        (when ``k`` is 1) and ``k x m x n`` otherwise.
+        Points on the manifold are represented as arrays of size ``m x n``
+        (when ``k`` is 1), and ``k x m x n`` otherwise.
 
         The tangent spaces of the manifold correspond to copies of :math:`\R^{m
         \times n}`.
         As such, tangent vectors are represented as arrays of the same shape as
-        points on the manifold without any positivity restrictions of the
+        points on the manifold without any positivity constraints on the
         individual elements.
 
         The Riemannian metric is the bi-invariant metric for positive definite
         matrices from chapter 6 of [Bha2007]_ on individual scalar coordinates
-        of the matrix.
-        See also section 11.4 of [Bou2020]_.
+        of matrices.
+        See also section 11.4 of [Bou2020]_ for further details.
 
-        The parallel transport that is used when `use_parallel_transport` is
-        `True` is taken from [SH2015]_.
+        The parallel transport that is used when ``use_parallel_transport`` is
+        ``True`` is taken from [SH2015]_.
     """
 
     def __init__(
