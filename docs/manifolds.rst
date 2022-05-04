@@ -79,10 +79,10 @@ Fixed-Rank Matrices
 
 .. automodule:: pymanopt.manifolds.fixed_rank
 
-Strictly-Positive Vectors
--------------------------
+Positive Matrices
+-----------------
 
-.. automodule:: pymanopt.manifolds.strictly_positive_vectors
+.. automodule:: pymanopt.manifolds.positive
 
 Product Manifold
 ----------------
