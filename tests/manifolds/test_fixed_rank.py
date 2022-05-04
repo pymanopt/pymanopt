@@ -157,7 +157,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
 
         np_testing.assert_allclose(z_ambient, u @ s @ v.T)
 
-    def test_euclidean_to_riemannian_hvp(self):
+    def test_euclidean_to_riemannian_hessian(self):
         pass
 
     def test_retraction(self):

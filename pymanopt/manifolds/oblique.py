@@ -39,11 +39,11 @@ class Oblique(RiemannianSubmanifold):
     def projection(self, point, vector):
         return vector - point * ((point * vector).sum(0)[np.newaxis, :])
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         # TODO(nkoep): Implement 'weingarten' instead.
-        PXehess = self.projection(point, euclidean_hvp)
+        PXehess = self.projection(point, euclidean_hessian)
         return PXehess - tangent_vector * (
             (point * euclidean_gradient).sum(0)[np.newaxis, :]
         )

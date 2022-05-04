@@ -28,9 +28,9 @@ class Manifold(metaclass=abc.ABCMeta):
     :mod:`pymanopt.optimizers.steepest_descent` and
     :mod:`pymanopt.optimizers.conjugate_gradient` require
     :meth:`euclidean_to_riemannian_gradient` to be implemented but not
-    :meth:`euclidean_to_riemannian_hvp`.
-    Second order optimizers such as :mod:`pymanopt.optimizers.trust_regions`
-    will require :meth:`euclidean_to_riemannian_hvp`.
+    :meth:`euclidean_to_riemannian_hessian`.
+    Second-order optimizers such as :class:`pymanopt.optimizers.TrustRegions`
+    will require :meth:`euclidean_to_riemannian_hessian`.
     """
 
     def __init__(self, name, dimension, point_layout=1):
@@ -169,13 +169,13 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @_raise_not_implemented_error
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         """Converts the Euclidean to the Riemannian Hessian.
 
         This converts the Euclidean Hessian-vector product (hvp)
-        ``euclidean_hvp`` of a function at a point ``point`` along a tangent
+        ``euclidean_hessian`` of a function at a point ``point`` along a tangent
         vector ``tangent_vector`` to the Riemannian hvp of ``point`` along
         ``tangent_vector`` on the manifold.
         """
@@ -243,10 +243,10 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
     their Riemannian counterparts via the
     :meth:`euclidean_to_riemannian_gradient` method.
     Similarly, if the Weingarten map (also known as shape operator) is provided
-    by implementing the :meth:`weingarten` method, the class provides a
-    generic implementation of the :meth:`euclidean_to_riemannian_hvp` method
-    required by second-order optimizers to translate Euclidean Hessian-vector
-    products to their Riemannian counterparts.
+    via implementing the :meth:`weingarten` method, the class provides a
+    generic implementation of the :meth:`euclidean_to_riemannian_hessian`
+    method required by second-order optimizers to translate Euclidean
+    Hessian-vector products to their Riemannian counterparts.
 
     Notes:
         This class follows definition 3.47 in [Bou2020]_ of "Riemannian
@@ -263,13 +263,13 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(point, euclidean_gradient)
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         normal_gradient = euclidean_gradient - self.projection(
             point, euclidean_gradient
         )
-        return self.projection(point, euclidean_hvp) + self.weingarten(
+        return self.projection(point, euclidean_hessian) + self.weingarten(
             point, tangent_vector, normal_gradient
         )
 

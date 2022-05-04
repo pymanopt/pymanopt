@@ -73,12 +73,12 @@ class Product(Manifold):
             "euclidean_to_riemannian_gradient", reduction=_ProductTangentVector
         )(point, euclidean_gradient)
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         return self._dispatch(
-            "euclidean_to_riemannian_hvp", reduction=_ProductTangentVector
-        )(point, euclidean_gradient, euclidean_hvp, tangent_vector)
+            "euclidean_to_riemannian_hessian", reduction=_ProductTangentVector
+        )(point, euclidean_gradient, euclidean_hessian, tangent_vector)
 
     def exp(self, point, tangent_vector):
         return self._dispatch("exp")(point, tangent_vector)

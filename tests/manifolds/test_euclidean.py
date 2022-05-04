@@ -38,13 +38,13 @@ class TestEuclideanManifold(TestCase):
         u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.projection(x, u), u)
 
-    def test_euclidean_to_riemannian_hvp(self):
+    def test_euclidean_to_riemannian_hessian(self):
         e = self.manifold
         x = e.random_point()
         u = e.random_tangent_vector(x)
         egrad, ehess = np.random.normal(size=(2, self.m, self.n))
         np_testing.assert_allclose(
-            e.euclidean_to_riemannian_hvp(x, egrad, ehess, u), ehess
+            e.euclidean_to_riemannian_hessian(x, egrad, ehess, u), ehess
         )
 
     def test_retraction(self):

@@ -57,12 +57,12 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
         # TODO: Check that this is correct
         return multiprod(multiprod(point, multisym(euclidean_gradient)), point)
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         # TODO: Check that this is correct
         return multiprod(
-            multiprod(point, multisym(euclidean_hvp)), point
+            multiprod(point, multisym(euclidean_hessian)), point
         ) + multisym(
             multiprod(
                 multiprod(tangent_vector, multisym(euclidean_gradient)), point

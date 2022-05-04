@@ -76,7 +76,7 @@ class TestSingleStiefelManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
-    def test_euclidean_to_riemannian_hvp(self):
+    def test_euclidean_to_riemannian_hessian(self):
         # Test this function at some randomly generated point.
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
@@ -84,10 +84,10 @@ class TestSingleStiefelManifold(TestCase):
         ehess = np.random.normal(size=(self.m, self.n))
 
         np_testing.assert_allclose(
-            testing.euclidean_to_riemannian_hvp(self.projection)(
+            testing.euclidean_to_riemannian_hessian(self.projection)(
                 x, egrad, ehess, u
             ),
-            self.manifold.euclidean_to_riemannian_hvp(x, egrad, ehess, u),
+            self.manifold.euclidean_to_riemannian_hessian(x, egrad, ehess, u),
         )
 
     # def test_euclidean_to_riemannian_gradient(self):
