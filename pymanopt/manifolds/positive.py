@@ -87,7 +87,7 @@ class Positive(Manifold):
         return vector / self.norm(point, vector)
 
     def zero_vector(self, point):
-        return np.zeros(*point.shape)
+        return np.zeros(point.shape)
 
     def dist(self, point_a, point_b):
         log_ratio = np.log(point_a) - np.log(point_b)
