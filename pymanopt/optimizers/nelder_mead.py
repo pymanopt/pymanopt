@@ -30,7 +30,7 @@ def compute_centroid(manifold, points):
     problem = pymanopt.Problem(
         manifold, objective, riemannian_gradient=gradient
     )
-    return optimizer.minimize(problem)
+    return optimizer.run(problem)
 
 
 class NelderMead(Optimizer):
