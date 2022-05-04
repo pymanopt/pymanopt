@@ -18,13 +18,13 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
         @pymanopt.function.autograd(manifold)
         def cost(x):
-            return -np.inner(x, matrix @ x)
+            return -x.T @ matrix @ x
 
     elif backend == "numpy":
 
         @pymanopt.function.numpy(manifold)
         def cost(x):
-            return -np.inner(x, matrix @ x)
+            return -x.T @ matrix @ x
 
         @pymanopt.function.numpy(manifold)
         def euclidean_gradient(x):
@@ -35,7 +35,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
         @pymanopt.function.pytorch(manifold)
         def cost(x):
-            return -torch.matmul(x, torch.matmul(matrix_, x))
+            return -x.t() @ matrix_ @ x
 
     elif backend == "tensorflow":
 
