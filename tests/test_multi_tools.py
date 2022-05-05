@@ -89,11 +89,11 @@ class TestMulti(TestCase):
             L[i] = logm(A[i])
         np_testing.assert_allclose(multilogm(A, positive_definite=True), L)
 
-    def test_multilogm_hermitian(self):
+    def test_multilogm_complex_positive_definite(self):
         shape = (self.k, self.m, self.m)
         A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
         A = multiprod(A, multihconj(A))
-        # Compare fast path for conjugate symmetric matrices vs. general slow
+        # Compare fast path for positive definite matrices vs. general slow
         # one.
         np_testing.assert_allclose(
             multilogm(A, positive_definite=True),
@@ -113,7 +113,7 @@ class TestMulti(TestCase):
             e[i] = expm(A[i])
         np_testing.assert_allclose(multiexpm(A, symmetric=True), e)
 
-    def test_multiexpm_hermitian(self):
+    def test_multiexpm_conjugate_symmetric(self):
         shape = (self.k, self.m, self.m)
         A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
         A = 0.5 * (A + multihconj(A))
