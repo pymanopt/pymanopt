@@ -69,7 +69,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     B = np.random.normal(size=(k, n, m))
     ABt = np.array([Ak @ Bk.T for Ak, Bk in zip(A, B)])
 
-    manifold = SpecialOrthogonalGroup(n, k)
+    manifold = SpecialOrthogonalGroup(n, k=k)
     cost, euclidean_gradient = create_cost_and_derivates(
         manifold, ABt, backend
     )

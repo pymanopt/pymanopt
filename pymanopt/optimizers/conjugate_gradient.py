@@ -218,7 +218,6 @@ class ConjugateGradient(Optimizer):
                             ip_diff
                             / manifold.inner_product(newx, diff, desc_dir),
                         )
-                    # if ip_diff = manifold.inner_product(newx, diff, desc_dir) = 0
                     except ZeroDivisionError:
                         beta = 1
                 elif self._beta_rule == "HagerZhang":

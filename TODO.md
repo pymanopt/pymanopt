@@ -2,17 +2,18 @@
 
 ## 1.0:
   - Return 'Result' object from optimizer's 'run' method
+  - Clean up all docstrings of manifolds
   - Replace optlog example with a test case
 
 ## 1.0.x:
-  - Use weingarten map for oblique manifold and Stiefel
+  - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices
   - Change "beta_rule" of CG optimizer to internal enum representation
 
 ## 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
     transport simply by orthogonal projection of the tangent vector translated
-    in the ambient space. For this, 'EuclideanEmbeddedSubmanifold' would
-    require a generic 'tangent_to_ambient' method. See 'FixedRankEmbedded'.
+    in the ambient space. For this, 'RiemannianSubmanifold' would require a
+    generic 'tangent_to_ambient' method. See 'FixedRankEmbedded'.
   - Add default implementation for `to_tangent_space`?
   - attrs
   - Refactor optimizer implementations

@@ -1,10 +1,10 @@
 import numpy as np
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import multiskew, multisym
 
 
-class _Euclidean(EuclideanEmbeddedSubmanifold):
+class _Euclidean(RiemannianSubmanifold):
     """Shared base class for subspace manifolds of Euclidean space."""
 
     def __init__(self, name, dimension, *shape):

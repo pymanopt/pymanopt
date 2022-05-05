@@ -4,11 +4,11 @@ import numpy as np
 from scipy.linalg import expm, logm
 from scipy.special import comb
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
 
 
-class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
+class SpecialOrthogonalGroup(RiemannianSubmanifold):
     """The special orthogonal group.
 
     Special orthogonal group (the manifold of rotations): deals with matrices
@@ -24,7 +24,7 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
     symmetric matrices. Use the function manifold.embedding(X, H) to
     switch from the Lie algebra representation to the embedding space
     representation. This is often necessary when defining
-    problem.euclidean_hessian(X, H).
+    ``problem.euclidean_hessian``.
 
     By default, the retraction is only a first-order approximation of the
     exponential. To force the use of a second-order approximation, instantiate
@@ -36,9 +36,13 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
         k: The number of elements in the product of groups.
         retraction: The type of retraction to use.
             Possible choices are ``qr`` and ``polar``.
+
+    Notes:
+        The procedure to generate random rotation matrices sampled uniformly
+        from the Haar measure is detailed in [Mez2006]_.
     """
 
-    def __init__(self, n, k=1, retraction="qr"):
+    def __init__(self, n, *, k=1, retraction="qr"):
         self._n = n
         self._k = k
 
@@ -138,52 +142,40 @@ class SpecialOrthogonalGroup(EuclideanEmbeddedSubmanifold):
             U[i] = np.real(logm(U[i]))
         return multiskew(U)
 
-    @staticmethod
-    def _randrot(n, N=1):
+    def random_point(self):
+        n, k = self._n, self._k
         if n == 1:
-            return np.ones((N, 1, 1))
+            R = np.ones((k, 1, 1))
+        else:
+            R = np.zeros((k, n, n))
+            for i in range(k):
+                # Generated as such, Q is uniformly distributed over O(n), the
+                # group of orthogonal n-by-n matrices.
+                A = np.random.normal(size=(n, n))
+                Q, RR = np.linalg.qr(A)
+                Q = Q @ np.diag(np.sign(np.diag(RR)))
 
-        R = np.zeros((N, n, n))
-        for i in range(N):
-            # Generated as such, Q is uniformly distributed over O(n), the
-            # group of orthogonal n-by-n matrices.
-            A = np.random.normal(size=(n, n))
-            Q, RR = np.linalg.qr(A)
-            # TODO(nkoep): Add a proper reference to Mezzadri 2007.
-            Q = Q @ np.diag(np.sign(np.diag(RR)))
+                # If Q is in O(n) but not in SO(n), we permute the two first
+                # columns of Q such that det(new Q) = -det(Q), hence the new Q
+                # will be in SO(n), uniformly distributed.
+                if np.linalg.det(Q) < 0:
+                    Q[:, [0, 1]] = Q[:, [1, 0]]
+                R[i] = Q
 
-            # If Q is in O(n) but not in SO(n), we permute the two first
-            # columns of Q such that det(new Q) = -det(Q), hence the new Q will
-            # be in SO(n), uniformly distributed.
-            if np.linalg.det(Q) < 0:
-                Q[:, [0, 1]] = Q[:, [1, 0]]
-            R[i] = Q
-
-        if N == 1:
+        if k == 1:
             return R.reshape(n, n)
         return R
 
-    def random_point(self):
-        return self._randrot(self._n, self._k)
-
-    @staticmethod
-    def _randskew(n, N=1):
-        idxs = np.triu_indices(n, 1)
-        S = np.zeros((N, n, n))
-        for i in range(N):
-            S[i][idxs] = np.random.normal(size=int(n * (n - 1) / 2))
-            S = S - multitransp(S)
-        if N == 1:
-            return S.reshape(n, n)
-        return S
-
     def random_tangent_vector(self, point):
-        tangent_vector = self._randskew(self._n, self._k)
-        return tangent_vector / np.sqrt(
-            np.tensordot(
-                tangent_vector, tangent_vector, axes=tangent_vector.ndim
-            )
-        )
+        n, k = self._n, self._k
+        idxs = np.triu_indices(n, 1)
+        vector = np.zeros((k, n, n))
+        for i in range(k):
+            vector[i][idxs] = np.random.normal(size=int(n * (n - 1) / 2))
+            vector = vector - multitransp(vector)
+        if k == 1:
+            vector = vector.reshape(n, n)
+        return vector / np.sqrt(np.tensordot(vector, vector, axes=vector.ndim))
 
     def zero_vector(self, point):
         if self._k == 1:

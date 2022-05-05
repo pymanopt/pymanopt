@@ -1,17 +1,17 @@
 import numpy as np
 from scipy.linalg import expm
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import multiprod, multisym, multitransp
 
 
-class Stiefel(EuclideanEmbeddedSubmanifold):
+class Stiefel(RiemannianSubmanifold):
     """The Stiefel manifold.
 
     The optional argument k allows the user to optimize over the product of k
     Stiefels.
     Elements are represented as n x p matrices (if k == 1), and as k x n x p
-    matrices if k > 1 (Note that this is different to manopt!).
+    matrices if k > 1.
     """
 
     def __init__(self, n, p, k=1):

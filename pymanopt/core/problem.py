@@ -33,12 +33,12 @@ class Problem:
             is instead computed internally.
             If provided, the function needs to return a vector in the tangent
             space of ``manifold``.
-        euclidean_hessian: The Euclidean Hessian-vector product, i.e., the directional
-            derivative of ``euclidean_gradient`` in the direction of a tangent
-            vector.
-        riemannian_hessian: The Riemannian Hessian-vector product, i.e., the directional
-            derivative of ``riemannian_gradient`` in the direction of a tangent
-            vector.
+        euclidean_hessian: The Euclidean Hessian-vector product, i.e., the
+            directional derivative of ``euclidean_gradient`` in the direction
+            of a tangent vector.
+        riemannian_hessian: The Riemannian Hessian-vector product, i.e., the
+            directional derivative of ``riemannian_gradient`` in the direction
+            of a tangent vector.
             As with ``riemannian_gradient`` this usually need not be provided
             explicitly.
     """

@@ -6,6 +6,7 @@ __all__ = [
     "FixedRankEmbedded",
     "Grassmann",
     "Oblique",
+    "Positive",
     "PSDFixedRank",
     "PSDFixedRankComplex",
     "Product",
@@ -15,7 +16,6 @@ __all__ = [
     "SphereSubspaceComplementIntersection",
     "SphereSubspaceIntersection",
     "Stiefel",
-    "StrictlyPositiveVectors",
     "Symmetric",
     "SymmetricPositiveDefinite",
 ]
@@ -25,6 +25,7 @@ from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
 from .grassmann import ComplexGrassmann, Grassmann
 from .oblique import Oblique
+from .positive import Positive
 from .positive_definite import SymmetricPositiveDefinite
 from .product import Product
 from .psd import Elliptope, PSDFixedRank, PSDFixedRankComplex
@@ -35,4 +36,3 @@ from .sphere import (
     SphereSubspaceIntersection,
 )
 from .stiefel import Stiefel
-from .strictly_positive_vectors import StrictlyPositiveVectors

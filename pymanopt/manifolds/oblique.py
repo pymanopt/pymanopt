@@ -1,16 +1,15 @@
 import numpy as np
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
-class Oblique(EuclideanEmbeddedSubmanifold):
-    """Manifold of matrices w/ unit-norm columns.
+class Oblique(RiemannianSubmanifold):
+    """Manifold of matrices with unit-norm columns.
 
     Oblique manifold: deals with matrices of size m-by-n such that each column
     has unit 2-norm, i.e., is a point on the unit sphere in R^m. The metric
     is such that the oblique manifold is a Riemannian submanifold of the
-    space of m-by-n matrices with the usual trace inner product, i.e., the
-    usual metric.
+    space of m-by-n matrices with the usual trace inner product.
     """
 
     def __init__(self, m, n):

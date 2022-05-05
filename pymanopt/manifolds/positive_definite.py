@@ -1,16 +1,23 @@
 import numpy as np
-from scipy.linalg import expm
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.tools.multi import (
+    multiexpm,
+    multilogm,
+    multiprod,
+    multisym,
+    multitransp,
+)
 
 
-class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
+class SymmetricPositiveDefinite(RiemannianSubmanifold):
     """Manifold of symmetric positive definite matrices.
 
     Notes:
         The geometry is based on the discussion in chapter 6 of [Bha2007]_.
         Also see [SH2015]_ for more details.
+
+        The second-order retraction is taken from [JVV20212]_.
     """
 
     def __init__(self, n, k=1):
@@ -31,12 +38,11 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return np.sqrt(self.dim)
 
     def dist(self, point_a, point_b):
-        # Adapted from equation (6.13) of [Bha2007].
         c = np.linalg.cholesky(point_a)
         c_inv = np.linalg.inv(c)
-        logm = multilog(
+        logm = multilogm(
             multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
-            pos_def=True,
+            positive_definite=True,
         )
         return np.linalg.norm(logm)
 
@@ -103,22 +109,21 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
 
     def exp(self, point, tangent_vector):
         p_inv_tv = np.linalg.solve(point, tangent_vector)
-        if self._k > 1:
-            e = np.zeros(np.shape(point))
-            for i in range(self._k):
-                e[i] = expm(p_inv_tv[i])
-        else:
-            e = expm(p_inv_tv)
+        e = multiexpm(p_inv_tv, symmetric=False)
         return multiprod(point, e)
 
-    retraction = exp
+    def retraction(self, point, tangent_vector):
+        p_inv_tv = np.linalg.solve(point, tangent_vector)
+        return multisym(
+            point + tangent_vector + multiprod(tangent_vector, p_inv_tv) / 2
+        )
 
     def log(self, point_a, point_b):
         c = np.linalg.cholesky(point_a)
         c_inv = np.linalg.inv(c)
-        logm = multilog(
+        logm = multilogm(
             multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
-            pos_def=True,
+            positive_definite=True,
         )
         return multiprod(multiprod(c, logm), multitransp(c))
 

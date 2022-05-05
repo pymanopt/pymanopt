@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.linalg
 
 
 def multiprod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
@@ -40,7 +41,7 @@ def multitransp(A):
 
 
 def multihconj(A):
-    """Vectorized matrix Hermitian conjugate."""
+    """Vectorized matrix conjugate transpose."""
     return np.conjugate(multitransp(A))
 
 
@@ -57,8 +58,8 @@ def multisym(A):
 def multiskew(A):
     """Vectorized matrix skew-symmetrization.
 
-    Same as :func:`multisym`, but returns an array where each matrix ``A[i]``
-    is skew-symmetric, i.e., the components of ``A`` satisfy ``A[i] ==
+    Similar to :func:`multisym`, but returns an array where each matrix
+    ``A[i]`` is skew-symmetric, i.e., the components of ``A`` satisfy ``A[i] ==
     -A[i].T``.
     """
     return 0.5 * (A - multitransp(A))
@@ -69,21 +70,21 @@ def multieye(k, n):
     return np.tile(np.eye(n), (k, 1, 1))
 
 
-def multilog(A, pos_def=False):
+def multilogm(A, *, positive_definite=False):
     """Vectorized matrix logarithm."""
-    if not pos_def:
-        raise NotImplementedError
+    if not positive_definite:
+        return np.vectorize(scipy.linalg.logm, signature="(m,m)->(m,m)")(A)
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.log(w), axis=-1)
-    return multiprod(v, w * multitransp(v))
+    return multiprod(v, w * multihconj(v))
 
 
-def multiexp(A, sym=False):
+def multiexpm(A, *, symmetric=False):
     """Vectorized matrix exponential."""
-    if not sym:
-        raise NotImplementedError
+    if not symmetric:
+        return np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")(A)
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.exp(w), axis=-1)
-    return multiprod(v, w * multitransp(v))
+    return multiprod(v, w * multihconj(v))

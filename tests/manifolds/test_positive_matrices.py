@@ -1,43 +1,30 @@
 import autograd.numpy as np
 from numpy import testing as np_testing
 
-from pymanopt.manifolds import StrictlyPositiveVectors
+from pymanopt.manifolds import Positive
 
-# from pymanopt.tools import testing
 from .._test import TestCase
 
 
-class TestStrictlyPositiveVectors(TestCase):
+class TestPositiveVectors(TestCase):
     def setUp(self):
-        self.n = n = 3
+        self.m = m = 3
+        self.n = n = 1
         self.k = k = 2
-        self.manifold = StrictlyPositiveVectors(n, k=k)
+        self.manifold = Positive(m, n, k=k)
 
     def test_inner_product(self):
         x = self.manifold.random_point()
         g = self.manifold.random_tangent_vector(x)
         h = self.manifold.random_tangent_vector(x)
-        assert (
-            self.manifold.inner_product(x, g, h).shape == np.array([1, self.k])
-        ).all()
-
-    def test_projection(self):
-        # Test proj(proj(X)) == proj(X)
-        x = self.manifold.random_point()
-        u = np.random.normal(size=self.n)
-        proj_u = self.manifold.projection(x, u)
-        proj_proj_u = self.manifold.projection(x, proj_u)
-
-        np_testing.assert_allclose(proj_u, proj_proj_u)
+        assert self.manifold.inner_product(
+            x, g, h
+        ) == self.manifold.inner_product(x, h, g)
 
     def test_norm(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
-        x_u = (1.0 / x) * u
-        np_testing.assert_almost_equal(
-            np.linalg.norm(x_u, axis=0, keepdims=True),
-            self.manifold.norm(x, u),
-        )
+        assert self.manifold.norm(x, u) > 0
 
     def test_rand(self):
         # Just make sure that things generated are on the manifold
@@ -53,8 +40,7 @@ class TestStrictlyPositiveVectors(TestCase):
         x = self.manifold.random_point()
         g = self.manifold.random_tangent_vector(x)
         h = self.manifold.random_tangent_vector(x)
-        assert (np.linalg.norm(g - h, axis=0) > 1e-6).all()
-        np_testing.assert_almost_equal(self.manifold.norm(x, g), 1)
+        assert (np.linalg.norm(g - h, axis=(1, 2)) > 1e-6).all()
 
     def test_dist(self):
         # To implement norm of log(x, y)
@@ -64,8 +50,6 @@ class TestStrictlyPositiveVectors(TestCase):
         np_testing.assert_almost_equal(
             self.manifold.norm(x, u), self.manifold.dist(x, y)
         )
-
-    # def test_euclidean_to_riemannian_hessian(self):
 
     def test_exp_log_inverse(self):
         x = self.manifold.random_point()
@@ -94,5 +78,3 @@ class TestStrictlyPositiveVectors(TestCase):
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
-
-        # def test_transport(self):
