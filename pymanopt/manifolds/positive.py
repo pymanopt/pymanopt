@@ -95,11 +95,11 @@ class Positive(Manifold):
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient * point**2
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         return (
-            euclidean_hvp * point**2
+            euclidean_hessian * point**2
             + tangent_vector * euclidean_gradient * point
         )
 
