@@ -227,7 +227,6 @@ class NelderMead(Optimizer):
 
         x = x[0]
         cost = objective(x)
-        cost_evaluations += 1
         return self._return_result(
             start_time=start_time,
             point=x,

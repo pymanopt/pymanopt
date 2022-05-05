@@ -132,7 +132,7 @@ class SteepestDescent(Optimizer):
             cost=objective(x),
             iterations=iteration,
             stopping_criterion=stopping_criterion,
-            cost_evaluations=iteration + 1,
+            cost_evaluations=iteration,
             step_size=step_size,
             gradient_norm=gradient_norm,
         )
