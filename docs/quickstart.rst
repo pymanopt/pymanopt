@@ -96,15 +96,15 @@ optimizers.
     problem = pymanopt.Problem(manifold, cost)
 
     optimizer = pymanopt.optimizers.SteepestDescent()
-    solution = optimizer.run(problem)
+    result = optimizer.run(problem)
 
     eigenvalues, eigenvectors = anp.linalg.eig(matrix)
     dominant_eigenvector = eigenvectors[:, eigenvalues.argmax()]
 
     print("Dominant eigenvector:", dominant_eigenvector)
-    print("Pymanopt solution:", solution)
+    print("Pymanopt solution:", result.point)
 
-Running this example will produce (something like) the following output:
+Running this example will produce (something like) the following:
 
 .. code-block:: none
 
