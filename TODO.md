@@ -2,7 +2,6 @@
 
 ## 1.0:
   - Clean up all docstrings of manifolds
-  - Replace optlog example with a test case
 
 ## 1.0.x:
   - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices

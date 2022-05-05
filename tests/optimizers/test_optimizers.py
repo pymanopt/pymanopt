@@ -31,3 +31,22 @@ class TestOptimizers(TestCase):
         assert result.time != 0
         assert result.iterations <= self.max_iterations
         assert isinstance(result.stopping_criterion, str)
+
+    def test_optimization_log(self):
+        optimizer = pymanopt.optimizers.ConjugateGradient(
+            max_iterations=self.max_iterations, verbosity=0
+        )
+        result = optimizer.run(self.problem)
+        assert (
+            result.log["stopping_criteria"]["max_iterations"]
+            == self.max_iterations
+        )
+        assert result.log["iterations"] is None
+
+        optimizer = pymanopt.optimizers.ConjugateGradient(
+            max_iterations=self.max_iterations, verbosity=0, log_verbosity=1
+        )
+        result = optimizer.run(self.problem)
+        iterations = result.log["iterations"]
+        assert iterations is not None
+        assert len(iterations["cost"]) == result.iterations
