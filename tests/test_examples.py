@@ -13,7 +13,7 @@ from examples import (
     pca,
     rank_k_correlation_matrix_approximation,
 )
-from examples.advanced import check_gradient
+from examples.advanced import check_gradient, check_retraction
 
 from ._test import TestCase
 
@@ -63,3 +63,8 @@ class TestExamples(TestCase):
     def test_check_gradient(self, backend):
         matplotlib.use("Agg")
         check_gradient.run(backend)
+
+    @params(*check_retraction.SUPPORTED_BACKENDS)
+    def test_check_retraction(self, backend):
+        matplotlib.use("Agg")
+        check_retraction.run(backend)

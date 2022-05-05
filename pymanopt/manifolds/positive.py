@@ -28,6 +28,8 @@ class Positive(Manifold):
         of matrices.
         See also section 11.4 of [Bou2020]_ for further details.
 
+        The second-order retraction is taken from [JVV20212]_.
+
         The parallel transport that is used when ``use_parallel_transport`` is
         ``True`` is taken from [SH2015]_.
     """
@@ -95,11 +97,11 @@ class Positive(Manifold):
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient * point**2
 
-    def euclidean_to_riemannian_hvp(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         return (
-            euclidean_hvp * point**2
+            euclidean_hessian * point**2
             + tangent_vector * euclidean_gradient * point
         )
 
@@ -109,7 +111,8 @@ class Positive(Manifold):
     def log(self, point_a, point_b):
         return point_a * (np.log(point_b) - np.log(point_a))
 
-    retraction = exp
+    def retraction(self, point, tangent_vector):
+        return point + tangent_vector + tangent_vector**2 / point / 2
 
     def _transporter(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a
