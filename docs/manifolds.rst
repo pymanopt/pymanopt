@@ -69,8 +69,8 @@ Symmetric Positive Definite Matrices
 
 .. automodule:: pymanopt.manifolds.positive_definite
 
-Manifold of Positive Semidefinite Matrices
-------------------------------------------
+Positive Semidefinite Matrices
+------------------------------
 
 .. automodule:: pymanopt.manifolds.psd
 

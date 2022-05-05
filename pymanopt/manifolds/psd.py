@@ -58,66 +58,83 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
 
 
 class PSDFixedRank(_PSDFixedRank):
-    """Manifold of fixed-rank positive semidefinite (PSD) matrices.
+    r"""Manifold of fixed-rank positive semidefinite (PSD) matrices.
 
-    A point X on the manifold is parameterized as YY^T where Y is a matrix of
-    size nxk. As such, X is symmetric, positive semidefinite. We restrict to
-    full-rank Y's, such that X has rank exactly k. The point X is numerically
-    represented by Y (this is more efficient than working with X, which may
-    be big). Tangent vectors are represented as matrices of the same size as
-    Y, call them Ydot, so that Xdot = Y Ydot' + Ydot Y. The metric is the
-    canonical Euclidean metric on Y.
+    Args:
+        n: Number of rows and columns of a point in the ambient space.
+        k: Rank of matrices in the ambient space.
 
-    Since for any orthogonal Q of size k, it holds that (YQ)(YQ)' = YY',
-    we "group" all matrices of the form YQ in an equivalence class. The set
-    of equivalence classes is a Riemannian quotient manifold, implemented
-    here.
+    Notes:
+        A point :math:`\vmX` on the manifold is parameterized as :math:`\vmX =
+        \vmY\transp{\vmY}` where :math:`\vmY` is a real matrix of size ``n x
+        k`` and rank ``k``.
+        As such, :math:`\vmX` is symmetric, positive semidefinite with rank
+        ``k``.
 
-    Notice that this manifold is not complete: if optimization leads Y to be
-    rank-deficient, the geometry will break down. Hence, this geometry should
-    only be used if it is expected that the points of interest will have rank
-    exactly k. Reduce k if that is not the case.
+        Tangent vectors :math:`\dot{\vmY}` are represented as matrices of the
+        same size as points on the manifold so that tangent vectors in the
+        ambient space :math:`\R^{n \times n}` correspond to :math:`\dot{\vmX} =
+        \vmY\transp{\dot{\vmY}} + \dot{\vmY}\transp{\vmY}`.
+        The metric is the canonical Euclidean metric on :math:`\R^{n \times
+        k}`.
 
-    An alternative, complete, geometry for positive semidefinite matrices of
-    rank k is described in Bonnabel and Sepulchre 2009, "Riemannian Metric
-    and Geometric Mean for Positive Semidefinite Matrices of Fixed Rank",
-    SIAM Journal on Matrix Analysis and Applications.
+        Since for any orthogonal matrix :math:`\vmQ` of size :math:`k \times k`
+        it holds that :math:`\vmY\vmQ\transp{(\vmY\vmQ)} = \vmY\transp{\vmY}`,
+        we identify all matrices of the form :math:`\vmY\vmQ` with an
+        equivalence class.
+        This set of equivalence classes then forms a Riemannian quotient
+        manifold which is implemented here.
 
-    The geometry implemented here is the simplest case of the 2010 paper:
-    M. Journee, P.-A. Absil, F. Bach and R. Sepulchre,
-    "Low-Rank Optimization on the Cone of Positive Semidefinite Matrices".
-    Paper link: http://www.di.ens.fr/~fbach/journee2010_sdp.pdf
+        Notice that this manifold is not complete: if optimization leads points
+        to be rank-deficient, the geometry will break down.
+        Hence, this geometry should only be used if it is expected that the
+        points of interest will have rank exactly ``k``.
+        Reduce ``k`` if that is not the case.
+
+        The quotient geometry implemented here is the simplest case presented
+        in [JBA+2010]_.
     """
 
-    def __init__(self, n, k):
+    def __init__(self, n: int, k: int):
         name = f"Quotient manifold of {n}x{n} psd matrices of rank {k}"
         dimension = int(k * n - k * (k - 1) / 2)
         super().__init__(n, k, name, dimension)
 
 
 class PSDFixedRankComplex(_PSDFixedRank):
-    """Manifold of fixed-rank Hermitian positive semidefinite (PSD) matrices.
+    r"""Manifold of fixed-rank Hermitian positive semidefinite (PSD) matrices.
 
-    Manifold of n-by-n complex Hermitian positive semidefinite matrices of
-    fixed rank k. This follows the quotient geometry described
-    in Sarod Yatawatta's 2013 paper:
-    "Radio interferometric calibration using a Riemannian manifold", ICASSP.
+    Args:
+        n: Number of rows and columns of a point in the ambient space.
+        k: Rank of matrices in the ambient space.
 
-    Paper link: http://dx.doi.org/10.1109/ICASSP.2013.6638382.
+    Notes:
+        A point :math:`\vmX` on the manifold is parameterized as :math:`\vmX =
+        \vmY\conj{\vmY}`, where :math:`\vmY` is a complex matrix of size ``n x
+        k`` and rank ``k``.
 
-    A point X on the manifold M is parameterized as YY^*, where Y is a
-    complex matrix of size nxk of full rank. For any point Y on the manifold M,
-    given any kxk complex unitary matrix U, we say Y*U  is equivalent to Y,
-    i.e., YY^* does not change. Therefore, M is the set of equivalence
-    classes and is a Riemannian quotient manifold C^{nk}/U(k)
-    where C^{nk} is the set of all complex matrix of size nxk of full rank.
-    The metric is the usual real trace inner product, that is,
-    it is the usual metric for the complex plane identified with R^2.
+        Tangent vectors are represented as matrices of the same shape as points
+        on the manifold.
 
-    Notice that this manifold is not complete: if optimization leads Y to be
-    rank-deficient, the geometry will break down. Hence, this geometry should
-    only be used if it is expected that the points of interest will have rank
-    exactly k. Reduce k if that is not the case.
+        For any point :math:`\vmY` on the manifold, given any complex unitary
+        matrix :math:`\vmU \in \C^{k \times k}`, we say
+        :math:`\vmY\vmU` is equivalent to :math:`\vmY` since :math:`\vmY`
+        and :math:`\vmY\vmU` are indistinguishable in the ambient space
+        :math:`\C^{n \times n}`, i.e., :math:`\vmX = \vmY\vmU\conj{(\vmY\vmU)} =
+        \vmY\conj{\vmY}`.
+        Therefore, the set of equivalence classes forms a Riemannian
+        quotient manifold :math:`\C^{n \times k} / \U(k)` where :math:`\U(k)`
+        denotes the unitary group.
+        The metric is the usual real trace inner product.
+
+        Notice that this manifold is not complete: if optimization leads points
+        to be rank-deficient, the geometry will break down.
+        Hence, this geometry should only be used if it is expected that the
+        points of interest will have rank exactly ``k``.
+        Reduce ``k`` if that is not the case.
+
+        The implementation follows the quotient geometry originally described
+        in [Yat2013]_.
     """
 
     def __init__(self, n, k):
@@ -149,33 +166,46 @@ class PSDFixedRankComplex(_PSDFixedRank):
 
 
 class Elliptope(Manifold, RetrAsExpMixin):
-    """Manifold of fixed-rank PSD matrices with unit diagonal elements.
+    r"""Manifold of fixed-rank PSD matrices with unit diagonal elements.
 
-    A point X on the manifold is parameterized as YY^T where Y is a matrix of
-    size nxk. As such, X is symmetric, positive semidefinite. We restrict to
-    full-rank Y's, such that X has rank exactly k. The point X is numerically
-    represented by Y (this is more efficient than working with X, which may be
-    big). Tangent vectors are represented as matrices of the same size as Y,
-    call them Ydot, so that Xdot = Y Ydot' + Ydot Y and diag(Xdot) == 0. The
-    metric is the canonical Euclidean metric on Y.
+    Args:
+        n: Number of rows and columns of a point in the ambient space.
+        k: Rank of matrices in the ambient space.
 
-    The diagonal constraints on X (X(i, i) == 1 for all i) translate to
-    unit-norm constraints on the rows of Y: norm(Y(i, :)) == 1 for all i.  The
-    set of such Y's forms the oblique manifold. But because for any orthogonal
-    Q of size k, it holds that (YQ)(YQ)' = YY', we "group" all matrices of the
-    form YQ in an equivalence class. The set of equivalence classes is a
-    Riemannian quotient manifold, implemented here.
+    Notes:
+        A point :math:`\vmX` on the manifold is parameterized as :math:`\vmX =
+        \vmY\transp{\vmY}` where :math:`\vmY` is a matrix of size ``n x k`` and
+        rank ``k``.
+        As such, :math:`\vmX` is symmetric, positive semidefinite with rank
+        ``k``.
 
-    Note that this geometry formally breaks down at rank-deficient Y's.  This
-    does not appear to be a major issue in practice when optimization
-    algorithms converge to rank-deficient Y's, but convergence theorems no
-    longer hold. As an alternative, you may use the oblique manifold (it has
-    larger dimension, but does not break down at rank drop.)
+        Tangent vectors are represented as matrices of the same size as points
+        on the manifold so that tangent vectors in the ambient space are of the
+        form :math:`\dot{\vmX} = \vmY \transp{\dot{\vmY}} +
+        \dot{\vmY}\transp{\vmY}` and :math:`\dot{X}_{ii} = 0`.
+        The metric is the canonical Euclidean metric on :math:`\R^{n \times
+        k}`.
 
-    The geometry is taken from the 2010 paper:
-    M. Journee, P.-A. Absil, F. Bach and R. Sepulchre,
-    "Low-Rank Optimization on the Cone of Positive Semidefinite Matrices".
-    Paper link: http://www.di.ens.fr/~fbach/journee2010_sdp.pdf
+        The diagonal constraints on :math:`X_{ii} = 1` translate to unit-norm
+        constraints on the rows of :math:`\vmY`: :math:`\norm{\vmy_i} = 1`
+        where :math:`\vmy_i` denotes the i-th column of :math:`\transp{\vmY}`.
+        Without any further restrictions, this coincides with the oblique
+        manifold (see :class:`pymanopt.manifolds.oblique.Oblique`).
+        However, since for any orthogonal matrix :math:`\vmQ` of size ``k``, it
+        holds that :math:`\vmY\vmQ\transp{(\vmY\vmQ)} = \vmY\transp{\vmY}`, we
+        "group" all matrices of the form :math:`\vmY\vmQ` in an equivalence
+        class.
+        This set of equivalence classes is a Riemannian quotient manifold that
+        is implemented here.
+
+        Note that this geometry formally breaks down at rank-deficient points.
+        This does not appear to be a major issue in practice when optimization
+        algorithms converge to rank-deficient points, but convergence theorems
+        no longer hold.
+        As an alternative, you may try using the oblique manifold since it does
+        not break down at rank drop.
+
+        The geometry is taken from [JBA+2010]_.
     """
 
     def __init__(self, n, k):
@@ -238,15 +268,9 @@ class Elliptope(Manifold, RetrAsExpMixin):
         return self.projection(point_b, tangent_vector_a)
 
     def _normalize_rows(self, array):
-        """Return an l2-row-normalized copy of an array."""
         return array / np.linalg.norm(array, axis=1)[:, np.newaxis]
 
     def _project_rows(self, point, vector):
-        """Orthogonal projection of each row of H to the tangent space at the
-        corresponding row of X, seen as a point on a sphere.
-        """
-        # Compute the inner product between each vector H[i, :] with its root
-        # point Y[i, :], i.e., Y[i, :].T * H[i, :]. Returns a row vector.
         inner_products = (point * vector).sum(axis=1)
         return vector - point * inner_products[:, np.newaxis]
 

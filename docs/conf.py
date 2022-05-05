@@ -97,11 +97,16 @@ katex_autorender_path = (
 latex_macros = r"""
     \def \manM   {\mathcal{M}}
     \def \R      {\mathbb{R}}
+    \def \C      {\mathbb{C}}
+    \def \U      {\mathrm{U}}
     \def \Id     {\mathrm{Id}}
     \def \set    #1{\{#1\}}
     \def \inner  #2{\langle #1, #2 \rangle}
     \def \opt    #1{#1^\star}
     \def \sphere {\mathcal{S}}
+    \def \transp #1{#1^\top}
+    \def \conj   #1{#1^*}
+    \def \norm   #1{\|#1\|}
 """
 # Generate macros for boldface letters.
 latex_macros += "\n".join(
