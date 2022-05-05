@@ -83,7 +83,7 @@ def check_directional_derivative(problem, x=None, d=None):
         print(
             "Directional derivative check. "
             "It seems the linear model is exact: "
-            "Model error is numerically zero for all h."
+            "model error is numerically zero for all h."
         )
         # The 1st order model is exact: all errors are (numerically) zero.
         # Fit line from all points, use log scale only in h.
@@ -170,3 +170,87 @@ def check_gradient(problem, x=None, d=None):
             "If it is far from 0, then the gradient "
             "is not in the tangent space."
         )
+
+
+def check_retraction(manifold, point=None, tangent_vector=None):
+    """Check order of agreement between a retraction and the exponential."""
+
+    if point is None:
+        point = manifold.random_point()
+        tangent_vector = manifold.random_tangent_vector(point)
+    elif tangent_vector is None:
+        tangent_vector = manifold.random_tangent_vector(point)
+
+    manifold_class = manifold.__class__.__name__
+    try:
+        manifold.exp(point, tangent_vector)
+    except AttributeError:
+        raise RuntimeError(
+            f"The manifold '{manifold_class}' provides no exponential map as "
+            "reference to compare the retraction."
+        )
+    try:
+        manifold.retraction(point, tangent_vector)
+    except AttributeError:
+        raise RuntimeError(
+            f"The manifold '{manifold_class}' provides no retraction."
+        )
+    try:
+        manifold.retraction(point, tangent_vector)
+    except NotImplementedError:
+        raise RuntimeError(
+            f"This manifold '{manifold_class}'provides no distance map which "
+            "is required to run this check."
+        )
+
+    # Compare the retraction and the exponential over steps of varying
+    # length, on a wide log-scale.
+    step_sizes = np.logspace(-12, 0, 251)
+    errors = np.zeros(step_sizes.shape)
+    for k, step_size in enumerate(step_sizes):
+        errors[k] = manifold.dist(
+            manifold.exp(point, step_size * tangent_vector),
+            manifold.retraction(point, step_size * tangent_vector),
+        )
+
+    # Figure out the slope of the error in log-log, by identifying a piece of
+    # the error curve which is mostly linear.
+    window_length = 10
+    segment, poly = identify_linear_piece(
+        np.log10(step_sizes), np.log10(errors), window_length
+    )
+
+    print(
+        "The slope must be at least 2 to have a proper retraction.\n"
+        "For the retraction to be second order, the slope should be 3.\n"
+        f"It appears the slope is: {poly[0]}.\n"
+        "Note: if the implementation of the exponential map and the\n"
+        "retraction are identical, this should be zero: "
+        f"{np.linalg.norm(errors)}.\n"
+        "In that case, the slope test is irrelevant.",
+    )
+
+    plt.figure()
+    # Plot the difference between the exponential and the retraction over that
+    # span of steps on a doubly-logarithmic scale.
+    plt.loglog(step_sizes, errors)
+    plt.plot(
+        [1e-12, 1e0], [1e-30, 1e6], linestyle="--", color="k", label="Slope 3"
+    )
+    plt.plot(
+        [1e-14, 1e0], [1e-20, 1e8], linestyle=":", color="k", label="Slope 2"
+    )
+    plt.legend()
+
+    plt.loglog(
+        step_sizes[segment],
+        10 ** np.polyval(poly, np.log10(step_sizes[segment])),
+        linewidth=3,
+    )
+    plt.xlabel("Step size multiplier t")
+    plt.ylabel("Distance between exp(x, v, t) and retraction(x, v, t)")
+    plt.title(
+        "Retraction check.\nA slope of 2 is required for a valid retraction, "
+        "3 is desired."
+    )
+    plt.show()
