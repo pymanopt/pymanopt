@@ -77,7 +77,7 @@ def multilog(A, pos_def=False):
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.log(w), axis=-1)
-    return multiprod(v, w * multitransp(v))
+    return multiprod(v, w * multihconj(v))
 
 
 def multiexp(A, sym=False):
@@ -87,4 +87,4 @@ def multiexp(A, sym=False):
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.exp(w), axis=-1)
-    return multiprod(v, w * multitransp(v))
+    return multiprod(v, w * multihconj(v))
