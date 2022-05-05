@@ -5,6 +5,7 @@ from scipy.linalg import expm, logm
 from pymanopt.tools.multi import (
     multiexp,
     multieye,
+    multihconj,
     multilog,
     multiprod,
     multisym,
@@ -74,7 +75,9 @@ class TestMulti(TestCase):
         q, _ = np.linalg.qr(np.random.normal(size=(self.m, self.m)))
         # A is a positive definite matrix
         A = q @ a @ q.T
-        np_testing.assert_allclose(multilog(A, pos_def=True), logm(A))
+        np_testing.assert_allclose(
+            multilog(A, positive_definite=True), logm(A)
+        )
 
     def test_multilog(self):
         A = np.zeros((self.k, self.m, self.m))
@@ -84,17 +87,38 @@ class TestMulti(TestCase):
             q, _ = np.linalg.qr(np.random.normal(size=(self.m, self.m)))
             A[i] = q @ a @ q.T
             L[i] = logm(A[i])
-        np_testing.assert_allclose(multilog(A, pos_def=True), L)
+        np_testing.assert_allclose(multilog(A, positive_definite=True), L)
+
+    def test_multilog_hermitian(self):
+        shape = (self.k, self.m, self.m)
+        A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
+        A = multiprod(A, multihconj(A))
+        # Compare fast path for conjugate symmetric matrices vs. general slow
+        # one.
+        np_testing.assert_allclose(
+            multilog(A, positive_definite=True),
+            multilog(A, positive_definite=False),
+        )
 
     def test_multiexp_singlemat(self):
         # A is a positive definite matrix
         A = np.random.normal(size=(self.m, self.m))
         A = A + A.T
-        np_testing.assert_allclose(multiexp(A, sym=True), expm(A))
+        np_testing.assert_allclose(multiexp(A, symmetric=True), expm(A))
 
     def test_multiexp(self):
         A = multisym(np.random.normal(size=(self.k, self.m, self.m)))
         e = np.zeros((self.k, self.m, self.m))
         for i in range(self.k):
             e[i] = expm(A[i])
-        np_testing.assert_allclose(multiexp(A, sym=True), e)
+        np_testing.assert_allclose(multiexp(A, symmetric=True), e)
+
+    def test_multiexp_hermitian(self):
+        shape = (self.k, self.m, self.m)
+        A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
+        A = 0.5 * (A + multihconj(A))
+        # Compare fast path for conjugate symmetric matrices vs. general slow
+        # one.
+        np_testing.assert_allclose(
+            multiexp(A, symmetric=True), multiexp(A, symmetric=False)
+        )

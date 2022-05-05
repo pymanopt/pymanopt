@@ -70,9 +70,9 @@ def multieye(k, n):
     return np.tile(np.eye(n), (k, 1, 1))
 
 
-def multilog(A, pos_def=False):
+def multilog(A, *, positive_definite=False):
     """Vectorized matrix logarithm."""
-    if not pos_def:
+    if not positive_definite:
         return np.vectorize(scipy.linalg.logm, signature="(m,m)->(m,m)")(A)
 
     w, v = np.linalg.eigh(A)
@@ -80,9 +80,9 @@ def multilog(A, pos_def=False):
     return multiprod(v, w * multihconj(v))
 
 
-def multiexp(A, sym=False):
+def multiexp(A, *, symmetric=False):
     """Vectorized matrix exponential."""
-    if not sym:
+    if not symmetric:
         return np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")(A)
 
     w, v = np.linalg.eigh(A)
