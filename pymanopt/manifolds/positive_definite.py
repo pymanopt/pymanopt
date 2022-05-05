@@ -17,7 +17,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
         The geometry is based on the discussion in chapter 6 of [Bha2007]_.
         Also see [SH2015]_ for more details.
 
-        The second-order retraction is taken from [JVV20212]_.
+        The second-order retraction is taken from [JVV2012]_.
     """
 
     def __init__(self, n, k=1):
