@@ -8,7 +8,7 @@ from pymanopt.manifolds import Sphere
 from .._test import TestCase
 
 
-class TestSolvers(TestCase):
+class TestOptimizers(TestCase):
     def setUp(self):
         n = 32
         matrix = np.random.normal(size=(n, n))
