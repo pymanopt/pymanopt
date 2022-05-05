@@ -2,8 +2,8 @@ import numpy as np
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
-    multiexp,
-    multilog,
+    multiexpm,
+    multilogm,
     multiprod,
     multisym,
     multitransp,
@@ -40,7 +40,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
     def dist(self, point_a, point_b):
         c = np.linalg.cholesky(point_a)
         c_inv = np.linalg.inv(c)
-        logm = multilog(
+        logm = multilogm(
             multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
             positive_definite=True,
         )
@@ -109,7 +109,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
 
     def exp(self, point, tangent_vector):
         p_inv_tv = np.linalg.solve(point, tangent_vector)
-        e = multiexp(p_inv_tv, symmetric=False)
+        e = multiexpm(p_inv_tv, symmetric=False)
         return multiprod(point, e)
 
     def retraction(self, point, tangent_vector):
@@ -121,7 +121,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
     def log(self, point_a, point_b):
         c = np.linalg.cholesky(point_a)
         c_inv = np.linalg.inv(c)
-        logm = multilog(
+        logm = multilogm(
             multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
             positive_definite=True,
         )
