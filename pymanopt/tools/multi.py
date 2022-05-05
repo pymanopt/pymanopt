@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.linalg
 
 
 def multiprod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
@@ -40,7 +41,7 @@ def multitransp(A):
 
 
 def multihconj(A):
-    """Vectorized matrix Hermitian conjugate."""
+    """Vectorized matrix conjugate transpose."""
     return np.conjugate(multitransp(A))
 
 
@@ -72,7 +73,7 @@ def multieye(k, n):
 def multilog(A, pos_def=False):
     """Vectorized matrix logarithm."""
     if not pos_def:
-        raise NotImplementedError
+        return np.vectorize(scipy.linalg.logm, signature="(m,m)->(m,m)")(A)
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.log(w), axis=-1)
@@ -82,7 +83,7 @@ def multilog(A, pos_def=False):
 def multiexp(A, sym=False):
     """Vectorized matrix exponential."""
     if not sym:
-        raise NotImplementedError
+        return np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")(A)
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.exp(w), axis=-1)
