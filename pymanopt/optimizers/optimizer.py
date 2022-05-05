@@ -27,7 +27,7 @@ class Optimizer(metaclass=abc.ABCMeta):
         max_time: Upper bound on the run time of an optimizer in seconds.
         max_iterations: The maximum number of iterations to perform.
         min_gradient_norm: Termination threshold for the norm of the
-            gradient.
+            (Riemannian) gradient.
         min_step_size: Termination threshold for the line search step
             size.
         max_cost_evaluations: Maximum number of allowed cost function
