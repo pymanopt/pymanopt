@@ -62,9 +62,7 @@ class Optimizer(metaclass=abc.ABCMeta):
         return type(self).__name__
 
     @abc.abstractmethod
-    def run(
-        self, problem, initial_point=None, *args, **kwargs
-    ) -> OptimizerResult:
+    def run(self, problem, *, initial_point=None, **kwargs) -> OptimizerResult:
         """Run an optimizer on a given optimization problem.
 
         Args:

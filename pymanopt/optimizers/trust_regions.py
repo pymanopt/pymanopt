@@ -107,6 +107,7 @@ class TrustRegions(Optimizer):
     def run(
         self,
         problem,
+        *,
         initial_point=None,
         mininner=1,
         maxinner=None,

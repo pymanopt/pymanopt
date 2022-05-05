@@ -61,7 +61,7 @@ class ConjugateGradient(Optimizer):
         self.line_searcher = None
 
     def run(
-        self, problem, initial_point=None, reuse_line_searcher=False
+        self, problem, *, initial_point=None, reuse_line_searcher=False
     ) -> OptimizerResult:
         """Run CG method.
 

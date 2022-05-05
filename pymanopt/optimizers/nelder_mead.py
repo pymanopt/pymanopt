@@ -68,7 +68,7 @@ class NelderMead(Optimizer):
         self._expansion = expansion
         self._contraction = contraction
 
-    def run(self, problem, initial_point=None) -> OptimizerResult:
+    def run(self, problem, *, initial_point=None) -> OptimizerResult:
         """Run Nelder-Mead algorithm.
 
         Args:
