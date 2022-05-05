@@ -11,6 +11,8 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
     Notes:
         The geometry is based on the discussion in chapter 6 of [Bha2007]_.
         Also see [SH2015]_ for more details.
+
+        The second-order retraction is taken from [JVV20212]_.
     """
 
     def __init__(self, n, k=1):
@@ -111,7 +113,11 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
             e = expm(p_inv_tv)
         return multiprod(point, e)
 
-    retraction = exp
+    def retraction(self, point, tangent_vector):
+        p_inv_tv = np.linalg.solve(point, tangent_vector)
+        return multisym(
+            point + tangent_vector + multiprod(tangent_vector, p_inv_tv) / 2
+        )
 
     def log(self, point_a, point_b):
         c = np.linalg.cholesky(point_a)
