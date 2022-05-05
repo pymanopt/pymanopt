@@ -77,7 +77,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         max_iterations=1e5,
         verbosity=2 * int(not quiet),
     )
-    Yopt = optimizer.run(problem)
+    Yopt = optimizer.run(problem).point
 
     if quiet:
         return

@@ -5,7 +5,7 @@ from copy import deepcopy
 import numpy as np
 
 from pymanopt.optimizers.line_search import AdaptiveLineSearcher
-from pymanopt.optimizers.optimizer import Optimizer
+from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
 
@@ -60,7 +60,9 @@ class ConjugateGradient(Optimizer):
             self._line_searcher = line_searcher
         self.line_searcher = None
 
-    def run(self, problem, initial_point=None, reuse_line_searcher=False):
+    def run(
+        self, problem, initial_point=None, reuse_line_searcher=False
+    ) -> OptimizerResult:
         """Run CG method.
 
         Args:
@@ -138,8 +140,8 @@ class ConjugateGradient(Optimizer):
 
             self._add_log_entry(
                 iteration=iteration,
-                x=x,
-                objective=cost,
+                point=x,
+                cost=cost,
                 gradient_norm=gradient_norm,
             )
 
@@ -250,16 +252,13 @@ class ConjugateGradient(Optimizer):
             gradient_norm = newgradient_norm
             gradPgrad = newgradPnewgrad
 
-        if self._log_verbosity <= 0:
-            return x
-        else:
-            self._finalize_log(
-                x=x,
-                objective=cost,
-                stopping_criterion=stopping_criterion,
-                start_time=start_time,
-                step_size=step_size,
-                gradient_norm=gradient_norm,
-                iteration=iteration,
-            )
-            return x, self._log
+        return self._return_result(
+            start_time=start_time,
+            point=x,
+            cost=cost,
+            iterations=iteration,
+            stopping_criterion=stopping_criterion,
+            cost_evaluations=iteration,
+            step_size=step_size,
+            gradient_norm=gradient_norm,
+        )

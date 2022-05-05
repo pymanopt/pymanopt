@@ -75,7 +75,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     optimizer = TrustRegions(
         max_iterations=500, min_step_size=1e-6, verbosity=2 * int(not quiet)
     )
-    low_rank_factor_estimate = optimizer.run(problem)
+    low_rank_factor_estimate = optimizer.run(problem).point
 
     if quiet:
         return

@@ -43,6 +43,6 @@ class TestProblem(TestCase):
 
         problem = pymanopt.Problem(manifold, cost)
         optimizer = TrustRegions(max_iterations=1)
-        Xopt, Yopt = optimizer.run(problem)
+        Xopt, Yopt = optimizer.run(problem).point
         self.assertEqual(Xopt.shape, (3, 3))
         self.assertEqual(Yopt.shape, (3, 3))

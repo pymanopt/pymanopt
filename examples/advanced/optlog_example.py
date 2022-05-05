@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     optimizer = SteepestDescent(verbosity=0, log_verbosity=2)
     problem = pymanopt.Problem(manifold, cost)
-    wopt, log = optimizer.run(problem)
+    wopt, log = optimizer.run(problem).point
 
     print("Optimization log:")
     pprint.pprint(log)

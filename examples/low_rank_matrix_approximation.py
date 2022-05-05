@@ -75,7 +75,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         left_singular_vectors,
         singular_values,
         right_singular_vectors,
-    ) = optimizer.run(problem)
+    ) = optimizer.run(problem).point
     low_rank_approximation = (
         left_singular_vectors
         @ np.diag(singular_values)

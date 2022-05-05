@@ -78,7 +78,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     )
 
     optimizer = SteepestDescent(verbosity=2 * int(not quiet))
-    X = optimizer.run(problem)
+    X = optimizer.run(problem).point
 
     if not quiet:
         Xopt = np.array([compute_optimal_solution(ABtk) for ABtk in ABt])

@@ -84,7 +84,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     optimizer = TrustRegions(verbosity=2 * int(not quiet))
     estimated_spanning_set = optimizer.run(
         problem, Delta_bar=8 * np.sqrt(subspace_dimension)
-    )
+    ).point
 
     if quiet:
         return
