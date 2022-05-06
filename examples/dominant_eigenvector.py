@@ -63,7 +63,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     )
 
     optimizer = SteepestDescent(verbosity=2 * int(not quiet))
-    estimated_dominant_eigenvector = optimizer.run(problem)
+    estimated_dominant_eigenvector = optimizer.run(problem).point
 
     if quiet:
         return

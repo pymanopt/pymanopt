@@ -4,7 +4,7 @@ import numpy as np
 
 import pymanopt
 from pymanopt import tools
-from pymanopt.optimizers.optimizer import Optimizer
+from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.optimizers.steepest_descent import SteepestDescent
 
 
@@ -30,7 +30,7 @@ def compute_centroid(manifold, points):
     problem = pymanopt.Problem(
         manifold, objective, riemannian_gradient=gradient
     )
-    return optimizer.run(problem)
+    return optimizer.run(problem).point
 
 
 class NelderMead(Optimizer):
@@ -68,7 +68,7 @@ class NelderMead(Optimizer):
         self._expansion = expansion
         self._contraction = contraction
 
-    def run(self, problem, initial_point=None):
+    def run(self, problem, initial_point=None) -> OptimizerResult:
         """Run Nelder-Mead algorithm.
 
         Args:
@@ -225,15 +225,13 @@ class NelderMead(Optimizer):
                 costs[i] = objective(x[i])
             cost_evaluations += dim
 
-        if self._log_verbosity <= 0:
-            return x[0]
-        else:
-            self._finalize_log(
-                x=x[0],
-                objective=objective(x[0]),
-                stopping_criterion=stopping_criterion,
-                start_time=start_time,
-                cost_evaluations=cost_evaluations,
-                iteration=iteration,
-            )
-            return x[0], self._log
+        x = x[0]
+        cost = objective(x)
+        return self._return_result(
+            start_time=start_time,
+            point=x,
+            cost=cost,
+            iterations=iteration,
+            stopping_criterion=stopping_criterion,
+            cost_evaluations=cost_evaluations,
+        )

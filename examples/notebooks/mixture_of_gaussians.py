@@ -157,7 +157,7 @@ problem = Problem(manifold, cost)
 optimizer = SteepestDescent(verbosity=1)
 
 # let Pymanopt do the rest
-Xopt = optimizer.run(problem)
+Xopt = optimizer.run(problem).point
 # -
 
 # Once Pymanopt has finished the optimisation we can obtain the inferred parameters as follows:

@@ -92,7 +92,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     )
 
     optimizer = TrustRegions(verbosity=2 * int(not quiet))
-    estimated_span_matrix = optimizer.run(problem)
+    estimated_span_matrix = optimizer.run(problem).point
 
     if quiet:
         return

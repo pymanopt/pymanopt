@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 from pymanopt import tools
-from pymanopt.optimizers.optimizer import Optimizer
+from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
 
@@ -39,7 +39,7 @@ class ParticleSwarm(Optimizer):
         self._nostalgia = nostalgia
         self._social = social
 
-    def run(self, problem, initial_point=None):
+    def run(self, problem, initial_point=None) -> OptimizerResult:
         """Run PSO algorithm.
 
         Args:
@@ -196,15 +196,11 @@ class ParticleSwarm(Optimizer):
                         xbest = xi
             cost_evaluations += self._population_size
 
-        if self._log_verbosity <= 0:
-            return xbest
-        else:
-            self._finalize_log(
-                x=xbest,
-                objective=fbest,
-                stopping_criterion=stopping_criterion,
-                start_time=start_time,
-                cost_evaluations=cost_evaluations,
-                iteration=iteration,
-            )
-            return xbest, self._log
+        return self._return_result(
+            start_time=start_time,
+            point=xbest,
+            cost=fbest,
+            iterations=iteration,
+            stopping_criterion=stopping_criterion,
+            cost_evaluations=cost_evaluations,
+        )

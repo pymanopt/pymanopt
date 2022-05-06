@@ -1,8 +1,23 @@
 import abc
 import collections
 import time
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 import numpy as np
+
+
+@dataclass
+class OptimizerResult:
+    point: Any
+    cost: float
+    iterations: int
+    stopping_criterion: str
+    time: float
+    cost_evaluations: Optional[int] = None
+    step_size: Optional[float] = None
+    gradient_norm: Optional[float] = None
+    log: Optional[Dict] = None
 
 
 class Optimizer(metaclass=abc.ABCMeta):
@@ -12,7 +27,7 @@ class Optimizer(metaclass=abc.ABCMeta):
         max_time: Upper bound on the run time of an optimizer in seconds.
         max_iterations: The maximum number of iterations to perform.
         min_gradient_norm: Termination threshold for the norm of the
-            gradient.
+            (Riemannian) gradient.
         min_step_size: Termination threshold for the line search step
             size.
         max_cost_evaluations: Maximum number of allowed cost function
@@ -20,16 +35,16 @@ class Optimizer(metaclass=abc.ABCMeta):
         verbosity: Level of information printed by the optimizer while it
             operates: 0 is silent, 2 is most verbose.
         log_verbosity: Level of information logged by the optimizer while it
-            operates: 0 is silent, 2 is most verbose.
+            operates: 0 logs nothing, 1 logs information for each iteration.
     """
 
     def __init__(
         self,
-        max_time=1000,
-        max_iterations=1000,
-        min_gradient_norm=1e-6,
-        min_step_size=1e-10,
-        max_cost_evaluations=5000,
+        max_time: float = 1000,
+        max_iterations: int = 1000,
+        min_gradient_norm: float = 1e-6,
+        min_step_size: float = 1e-10,
+        max_cost_evaluations: int = 5000,
         verbosity: int = 2,
         log_verbosity: int = 0,
     ):
@@ -47,7 +62,9 @@ class Optimizer(metaclass=abc.ABCMeta):
         return type(self).__name__
 
     @abc.abstractmethod
-    def run(self, problem, initial_point=None, *args, **kwargs):
+    def run(
+        self, problem, initial_point=None, *args, **kwargs
+    ) -> OptimizerResult:
         """Run an optimizer on a given optimization problem.
 
         Args:
@@ -59,7 +76,14 @@ class Optimizer(metaclass=abc.ABCMeta):
                 generated.
             *args: Potential optimizer-specific positional arguments.
             **kwargs: Potential optimizer-specific keyword arguments.
+        Returns:
+            The optimization result.
         """
+
+    def _return_result(self, *, start_time, **kwargs) -> OptimizerResult:
+        return OptimizerResult(
+            time=time.time() - start_time, log=self._log, **kwargs
+        )
 
     def _check_stopping_criterion(
         self,
@@ -99,56 +123,27 @@ class Optimizer(metaclass=abc.ABCMeta):
         return reason
 
     def _initialize_log(self, *, optimizer_parameters=None):
-        if self._log_verbosity <= 0:
-            self._log = None
-        else:
-            self._log = {
-                "optimizer": str(self),
-                "stopping_criteria": {
-                    "max_time": self._max_time,
-                    "max_iterations": self._max_iterations,
-                    "min_gradient_norm": self._min_gradient_norm,
-                    "min_step_size": self._min_step_size,
-                    "max_cost_evaluations": self._max_cost_evaluations,
-                },
-                "optimizer_parameters": optimizer_parameters,
-            }
-        if self._log_verbosity >= 2:
-            self._log["iterations"] = collections.defaultdict(list)
+        self._log = {
+            "optimizer": str(self),
+            "stopping_criteria": {
+                "max_time": self._max_time,
+                "max_iterations": self._max_iterations,
+                "min_gradient_norm": self._min_gradient_norm,
+                "min_step_size": self._min_step_size,
+                "max_cost_evaluations": self._max_cost_evaluations,
+            },
+            "optimizer_parameters": optimizer_parameters,
+            "iterations": collections.defaultdict(list)
+            if self._log_verbosity >= 1
+            else None,
+        }
 
-    def _add_log_entry(self, *, iteration, x, objective, **kwargs):
-        if self._log_verbosity < 2:
+    def _add_log_entry(self, *, iteration, point, cost, **kwargs):
+        if self._log_verbosity <= 0:
             return
         self._log["iterations"]["time"].append(time.time())
         self._log["iterations"]["iteration"].append(iteration)
-        self._log["iterations"]["x"].append(x)
-        self._log["iterations"]["objective"].append(objective)
+        self._log["iterations"]["point"].append(point)
+        self._log["iterations"]["cost"].append(cost)
         for key, value in kwargs.items():
             self._log["iterations"][key].append(value)
-
-    def _finalize_log(
-        self,
-        *,
-        x,
-        objective,
-        stopping_criterion,
-        start_time,
-        step_size=np.inf,
-        gradient_norm=np.inf,
-        iteration=-1,
-        cost_evaluations=-1,
-    ):
-        self._log["stopping_criterion"] = stopping_criterion
-        self._log["final_values"] = {
-            "x": x,
-            "objective": objective,
-            "time": time.time() - start_time,
-        }
-        if step_size != np.inf:
-            self._log["final_values"]["step_size"] = step_size
-        if gradient_norm != np.inf:
-            self._log["final_values"]["gradient_norm"] = gradient_norm
-        if iteration != -1:
-            self._log["final_values"]["iterations"] = iteration
-        if cost_evaluations != -1:
-            self._log["final_values"]["cost_evaluations"] = cost_evaluations

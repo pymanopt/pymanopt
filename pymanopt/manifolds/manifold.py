@@ -25,12 +25,13 @@ class Manifold(metaclass=abc.ABCMeta):
 
     Not all methods are required by all optimizers.
     In particular, first order gradient based optimizers such as
-    :mod:`pymanopt.optimizers.steepest_descent` and
-    :mod:`pymanopt.optimizers.conjugate_gradient` require
+    :mod:`pymanopt.optimizers.steepest_descent.SteepestDescent` and
+    :mod:`pymanopt.optimizers.conjugate_gradient.ConjugateGradient` require
     :meth:`euclidean_to_riemannian_gradient` to be implemented but not
     :meth:`euclidean_to_riemannian_hessian`.
-    Second-order optimizers such as :class:`pymanopt.optimizers.TrustRegions`
-    will require :meth:`euclidean_to_riemannian_hessian`.
+    Second-order optimizers such as
+    :class:`pymanopt.optimizers.trust_regions.TrustRegions` will require
+    :meth:`euclidean_to_riemannian_hessian`.
     """
 
     def __init__(self, name, dimension, point_layout=1):

@@ -79,7 +79,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
             euclidean_hessian=euclidean_hessian,
         )
 
-        estimated_weights = optimizer.run(problem)
+        estimated_weights = optimizer.run(problem).point
         if not quiet:
             print(f"Run {k + 1}")
             print(

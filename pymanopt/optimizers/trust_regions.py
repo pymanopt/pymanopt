@@ -55,7 +55,7 @@ import time
 
 import numpy as np
 
-from pymanopt.optimizers.optimizer import Optimizer
+from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 
 
 class TrustRegions(Optimizer):
@@ -112,7 +112,7 @@ class TrustRegions(Optimizer):
         maxinner=None,
         Delta_bar=None,
         Delta0=None,
-    ):
+    ) -> OptimizerResult:
         manifold = problem.manifold
 
         if maxinner is None:
@@ -428,18 +428,14 @@ class TrustRegions(Optimizer):
                     print("")
                 break
 
-        if self._log_verbosity <= 0:
-            return x
-        else:
-            self._finalize_log(
-                x=x,
-                objective=fx,
-                stopping_criterion=stopping_criterion,
-                start_time=start_time,
-                gradient_norm=norm_grad,
-                iteration=iteration,
-            )
-            return x, self._log
+        return self._return_result(
+            start_time=start_time,
+            point=x,
+            cost=fx,
+            iterations=iteration,
+            stopping_criterion=stopping_criterion,
+            gradient_norm=norm_grad,
+        )
 
     def _truncated_conjugate_gradient(
         self, problem, x, fgradx, eta, Delta, theta, kappa, mininner, maxinner

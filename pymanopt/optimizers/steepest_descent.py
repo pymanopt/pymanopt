@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 
 from pymanopt.optimizers.line_search import BackTrackingLineSearcher
-from pymanopt.optimizers.optimizer import Optimizer
+from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
 
@@ -30,7 +30,9 @@ class SteepestDescent(Optimizer):
         self.line_searcher = None
 
     # Function to solve optimisation problem using steepest descent.
-    def run(self, problem, initial_point=None, reuse_line_searcher=False):
+    def run(
+        self, problem, initial_point=None, reuse_line_searcher=False
+    ) -> OptimizerResult:
         """Run steepest descent algorithm.
 
         Args:
@@ -98,8 +100,8 @@ class SteepestDescent(Optimizer):
 
             self._add_log_entry(
                 iteration=iteration,
-                x=x,
-                objective=cost,
+                point=x,
+                cost=cost,
                 gradient_norm=gradient_norm,
             )
 
@@ -124,16 +126,13 @@ class SteepestDescent(Optimizer):
                     print("")
                 break
 
-        if self._log_verbosity <= 0:
-            return x
-        else:
-            self._finalize_log(
-                x=x,
-                objective=objective(x),
-                stopping_criterion=stopping_criterion,
-                start_time=start_time,
-                step_size=step_size,
-                gradient_norm=gradient_norm,
-                iteration=iteration,
-            )
-            return x, self._log
+        return self._return_result(
+            start_time=start_time,
+            point=x,
+            cost=objective(x),
+            iterations=iteration,
+            stopping_criterion=stopping_criterion,
+            cost_evaluations=iteration,
+            step_size=step_size,
+            gradient_norm=gradient_norm,
+        )

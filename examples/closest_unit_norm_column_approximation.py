@@ -63,7 +63,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     )
 
     optimizer = ConjugateGradient(verbosity=2 * int(not quiet))
-    Xopt = optimizer.run(problem)
+    Xopt = optimizer.run(problem).point
 
     if quiet:
         return

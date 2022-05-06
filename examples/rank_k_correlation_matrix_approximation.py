@@ -78,7 +78,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     )
 
     optimizer = TrustRegions(verbosity=2 * int(not quiet))
-    X = optimizer.run(problem)
+    X = optimizer.run(problem).point
 
     if quiet:
         return

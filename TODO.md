@@ -1,9 +1,7 @@
 # TODO/Roadmap
 
 ## 1.0:
-  - Return 'Result' object from optimizer's 'run' method
   - Clean up all docstrings of manifolds
-  - Replace optlog example with a test case
 
 ## 1.0.x:
   - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices
