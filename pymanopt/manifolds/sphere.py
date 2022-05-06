@@ -8,7 +8,7 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 class _SphereBase(RiemannianSubmanifold):
     """Base class for tensors with unit Frobenius norm.
 
-    Notes:
+    Note:
         The implementation of the Weingarten map is taken from [AMT2013]_.
     """
 

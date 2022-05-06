@@ -64,7 +64,7 @@ class PSDFixedRank(_PSDFixedRank):
         n: Number of rows and columns of a point in the ambient space.
         k: Rank of matrices in the ambient space.
 
-    Notes:
+    Note:
         A point :math:`\vmX` on the manifold is parameterized as :math:`\vmX =
         \vmY\transp{\vmY}` where :math:`\vmY` is a real matrix of size ``n x
         k`` and rank ``k``.
@@ -108,7 +108,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
         n: Number of rows and columns of a point in the ambient space.
         k: Rank of matrices in the ambient space.
 
-    Notes:
+    Note:
         A point :math:`\vmX` on the manifold is parameterized as :math:`\vmX =
         \vmY\conj{\vmY}`, where :math:`\vmY` is a complex matrix of size ``n x
         k`` and rank ``k``.
@@ -172,7 +172,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         n: Number of rows and columns of a point in the ambient space.
         k: Rank of matrices in the ambient space.
 
-    Notes:
+    Note:
         A point :math:`\vmX` on the manifold is parameterized as :math:`\vmX =
         \vmY\transp{\vmY}` where :math:`\vmY` is a matrix of size ``n x k`` and
         rank ``k``.

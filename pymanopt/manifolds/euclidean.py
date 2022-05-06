@@ -65,7 +65,7 @@ class Euclidean(_Euclidean):
     Args:
         *shape: Shape of points on the manifold.
 
-    Notes:
+    Note:
         If ``shape == (n,)``, this is the manifold of vectors with the
         standard Euclidean inner product, i.e., :math:`\R^n`.
         For ``shape == (m, n)``, it corresponds to the manifold of ``m x n``
@@ -97,7 +97,7 @@ class Symmetric(_Euclidean):
         n: Number of rows and columns of matrices.
         k: Number of elements in the product manifold.
 
-    Notes:
+    Note:
         Manifold of ``n x n`` symmetric matrices as a Riemannian submanifold of
         Euclidean space.
         If ``k > 1`` then this is the product manifold of ``k`` symmetric ``n x
@@ -139,7 +139,7 @@ class SkewSymmetric(_Euclidean):
         n: Number of rows and columns of matrices.
         k: Number of elements in the product manifold.
 
-    Notes:
+    Note:
         Manifold of ``n x n`` skew-symmetric matrices as a Riemannian
         submanifold of Euclidean space.
         If ``k > 1`` then this is the product manifold of ``k`` skew-symmetric

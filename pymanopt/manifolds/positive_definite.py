@@ -13,7 +13,7 @@ from pymanopt.tools.multi import (
 class SymmetricPositiveDefinite(RiemannianSubmanifold):
     """Manifold of symmetric positive definite matrices.
 
-    Notes:
+    Note:
         The geometry is based on the discussion in chapter 6 of [Bha2007]_.
         Also see [SH2015]_ for more details.
 

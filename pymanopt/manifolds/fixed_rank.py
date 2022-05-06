@@ -17,7 +17,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         n: The number of columns of the matrices.
         k: The rank of the matrices on the manifold.
 
-    Notes:
+    Note:
         * The implementation follows the embedded geometry described in
           [Van2013]_.
         * The class is currently not compatible with the
@@ -138,7 +138,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         and will be in the form of a tuple ``euclidean_gradient = (df/dU,
         df/dS, df/dV)``.
 
-        Notes:
+        Note:
             See https://j-towns.github.io/papers/svd-derivative.pdf for a
             detailed explanation of this implementation.
         """

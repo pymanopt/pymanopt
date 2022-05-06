@@ -1,9 +1,9 @@
 """Tools for testing numerical correctness in Pymanopt.
 
-Notes:
+Note:
     The functions :func:`rgrad`, :func:`euclidean_to_riemannian_gradient`,
-    :func:`ehess` and :func:`euclidean_to_riemannian_hessian` will only be correct
-    if the manifold is a submanifold of Euclidean space, that is if the
+    :func:`ehess` and :func:`euclidean_to_riemannian_hessian` will only be
+    correct if the manifold is a submanifold of Euclidean space, that is if the
     projection is an orthogonal projection onto the tangent space.
 """
 

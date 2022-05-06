@@ -13,7 +13,7 @@ class Positive(Manifold):
         use_parallel_transport: Flag whether to use a parallel transport for
             :meth:`transport` or a transporter (the default).
 
-    Notes:
+    Note:
         Points on the manifold are represented as arrays of size ``m x n``
         (when ``k`` is 1), and ``k x m x n`` otherwise.
 

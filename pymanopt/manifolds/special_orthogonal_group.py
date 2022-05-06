@@ -37,7 +37,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         retraction: The type of retraction to use.
             Possible choices are ``qr`` and ``polar``.
 
-    Notes:
+    Note:
         The procedure to generate random rotation matrices sampled uniformly
         from the Haar measure is detailed in [Mez2006]_.
     """

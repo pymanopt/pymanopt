@@ -12,7 +12,7 @@ class ComplexCircle(RiemannianSubmanifold):
     Args:
         n: The dimension of the underlying complex space.
 
-    Notes:
+    Note:
         The manifold structure is the Riemannian submanifold
         structure from the embedding space :math:`\R^2 \times \ldots \times
         \R^2`, i.e., the complex circle identified with the unit circle in the
