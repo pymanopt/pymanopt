@@ -75,7 +75,7 @@ class Euclidean(_Euclidean):
         corresponding to the usual tensor dot product.
     """
 
-    def __init__(self, *shape: int):
+    def __init__(self, *shape):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
