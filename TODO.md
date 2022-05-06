@@ -6,6 +6,7 @@
 ## 1.0.x:
   - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices
   - Change "beta_rule" of CG optimizer to internal enum representation
+  - Add re-tangentialization change from manopt's trustregions solver
 
 ## 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to

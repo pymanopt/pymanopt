@@ -5,8 +5,6 @@ from pymanopt.tools.multi import multiskew, multisym
 
 
 class _Euclidean(RiemannianSubmanifold):
-    """Shared base class for subspace manifolds of Euclidean space."""
-
     def __init__(self, name, dimension, *shape):
         self._shape = shape
         super().__init__(name, dimension)
@@ -62,14 +60,22 @@ class _Euclidean(RiemannianSubmanifold):
 
 
 class Euclidean(_Euclidean):
-    """Euclidean manifold.
+    r"""Euclidean manifold.
 
-    Euclidean manifold of shape ``(n1, n2, ..., nk)`` arrays.
-    Useful for unconstrained optimization problems or for unconstrained
-    hyperparameters as part of a product manifold.
+    Args:
+        *shape: Shape of points on the manifold.
+
+    Notes:
+        If ``shape == (n,)``, this is the manifold of vectors with the
+        standard Euclidean inner product, i.e., :math:`\R^n`.
+        For ``shape == (m, n)``, it corresponds to the manifold of ``m x n``
+        matrices equipped with the standard trace inner product.
+        For ``shape == (n1, n2, ..., nk)``, the class represents the manifold
+        of tensors of shape ``n1 x n2 x ... x nk`` with the inner product
+        corresponding to the usual tensor dot product.
     """
 
-    def __init__(self, *shape):
+    def __init__(self, *shape: int):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
@@ -85,15 +91,20 @@ class Euclidean(_Euclidean):
 
 
 class Symmetric(_Euclidean):
-    """Manifold of symmetric matrices.
+    """(Product) manifold of symmetric matrices.
 
-    Manifold of ``n x n`` symmetric matrices as a Riemannian submanifold of
-    Euclidean space.
-    If ``k > 1`` then this is the product manifold of ``k`` symmetric ``n x n``
-    matrices represented as arrays of shape ``(k, n, n)``.
+    Args:
+        n: Number of rows and columns of matrices.
+        k: Number of elements in the product manifold.
+
+    Notes:
+        Manifold of ``n x n`` symmetric matrices as a Riemannian submanifold of
+        Euclidean space.
+        If ``k > 1`` then this is the product manifold of ``k`` symmetric ``n x
+        n`` matrices represented as arrays of shape ``(k, n, n)``.
     """
 
-    def __init__(self, n, k=1):
+    def __init__(self, n: int, k: int = 1):
         if k == 1:
             shape = (n, n)
             name = f"Manifold of {n}x{n} symmetric matrices"
@@ -122,10 +133,17 @@ class Symmetric(_Euclidean):
 
 
 class SkewSymmetric(_Euclidean):
-    """The Euclidean space of n-by-n skew-symmetric matrices.
+    """(Product) manifold of skew-symmetric matrices.
 
-    If k > 1 then this is an array of shape (k, n, n) (product manifold)
-    containing k (n x n) matrices.
+    Args:
+        n: Number of rows and columns of matrices.
+        k: Number of elements in the product manifold.
+
+    Notes:
+        Manifold of ``n x n`` skew-symmetric matrices as a Riemannian
+        submanifold of Euclidean space.
+        If ``k > 1`` then this is the product manifold of ``k`` skew-symmetric
+        ``n x n`` matrices represented as arrays of shape ``(k, n, n)``.
     """
 
     def __init__(self, n, k=1):
