@@ -107,6 +107,7 @@ latex_macros = r"""
     \def \transp #1{#1^\top}
     \def \conj   #1{#1^*}
     \def \norm   #1{\|#1\|}
+    \def \abs    #1{|#1|}
 """
 # Generate macros for boldface letters.
 latex_macros += "\n".join(
