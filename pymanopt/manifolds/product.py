@@ -1,4 +1,5 @@
 import functools
+from typing import Sequence
 
 import numpy as np
 
@@ -7,9 +8,18 @@ from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
 class Product(Manifold):
-    """Product manifold, i.e., the cartesian product of multiple manifolds."""
+    """Cartesian product manifold.
 
-    def __init__(self, manifolds):
+    Points on the manifold and tangent vectors are represented as lists of
+    points and tangent vectors of the individual manifolds.
+    The metric is obtained by element-wise extension of the individual
+    manifolds.
+
+    Args:
+        manifolds: The collection of manifolds in the product.
+    """
+
+    def __init__(self, manifolds: Sequence[Manifold]):
         for manifold in manifolds:
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
