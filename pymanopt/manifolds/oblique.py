@@ -17,7 +17,7 @@ class Oblique(RiemannianSubmanifold):
         n: The number of columns of each matrix.
     """
 
-    def __init__(self, m, n):
+    def __init__(self, m: int, n: int):
         self._m = m
         self._n = n
         name = f"Oblique manifold OB({m},{n})"
