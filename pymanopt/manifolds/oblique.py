@@ -4,12 +4,17 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
 class Oblique(RiemannianSubmanifold):
-    """Manifold of matrices with unit-norm columns.
+    r"""Manifold of matrices with unit-norm columns.
 
-    Oblique manifold: deals with matrices of size m-by-n such that each column
-    has unit 2-norm, i.e., is a point on the unit sphere in R^m. The metric
-    is such that the oblique manifold is a Riemannian submanifold of the
-    space of m-by-n matrices with the usual trace inner product.
+    The oblique manifold deals with matrices of size ``m x n`` such that each
+    column has unit Euclidean norm, i.e., is a point on the unit sphere in
+    :math:`\R^m`.
+    The metric is such that the oblique manifold is a Riemannian submanifold of
+    the space of ``m x n`` matrices with the usual trace inner product.
+
+    Args:
+        m: The number of rows of each matrix.
+        n: The number of columns of each matrix.
     """
 
     def __init__(self, m, n):
