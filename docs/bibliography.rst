@@ -6,6 +6,8 @@ Bibliography
 .. Generate labels using the so-called AMS "authorship trigraph" style.
 .. Citations are ordered alphabetically.
 
+.. [AM2012] Absil, P-A., and Jérôme Malick. "Projection-like retractions on
+   matrix manifolds." SIAM Journal on Optimization 22.1 (2012): 135-158.
 .. [AMS2008] Absil, P-A., Robert Mahony, and Rodolphe
    Sepulchre. "Optimization algorithms on matrix manifolds."
    Princeton University Press, 2009.

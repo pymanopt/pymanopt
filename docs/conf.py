@@ -98,6 +98,7 @@ latex_macros = r"""
     \def \manM   {\mathcal{M}}
     \def \R      {\mathbb{R}}
     \def \C      {\mathbb{C}}
+    \def \O      {\mathrm{O}}
     \def \U      {\mathrm{U}}
     \def \Id     {\mathrm{Id}}
     \def \set    #1{\{#1\}}

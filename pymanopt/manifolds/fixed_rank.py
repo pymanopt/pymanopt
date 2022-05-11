@@ -13,68 +13,47 @@ class FixedRankEmbedded(RiemannianSubmanifold):
     r"""Manifold of fixed rank matrices.
 
     Args:
-        m: The number of rows of the matrices in the ambient space.
-        n: The number of columns of the matrices.
-        k: The rank of the matrices on the manifold.
+        m: The number of rows of matrices in the ambient space.
+        n: The number of columns of matrices in the ambient space.
+        k: The rank of matrices.
+
+    The manifold of ``m x n`` real matrices of fixed rank ``k``.
+    For efficiency purposes, points on the manifold are represented with a
+    truncated singular value decomposition instead of full matrices of size ``m
+    x n``.
+    Specifically, a point is represented as a tuple ``(u, s, vt)`` of three
+    arrays.
+    The arrays ``u``, ``s`` and ``vt`` have shapes ``(m, k)``, ``(k,)`` and
+    ``(k, n)``, respectively, and the rank ``k`` matrix which they represent
+    can be recovered by the product ``u @ np.diag(s) @ vt``.
+
+    Vectors ``Z`` in the ambient space are best represented as arrays of shape
+    ``(m, n)``.
+    If these are low-rank, they may also be represented as tuples of arrays
+    ``(U, S, V)`` such that ``Z = U @ S @ V.T``.
+    There are no restrictions on what ``U``, ``S`` and ``V`` are, as long as
+    their product as indicated yields a real ``m x n`` matrix.
+
+    Tangent vectors are represented as tuples of the form ``(Up, M, Vp)``.
+    The matrices ``Up`` (of size ``m x k``) and ``Vp`` (of size ``n x k``) obey
+    the conditions ``(Up.T @ U == 0).all()`` and ``(Vp.T @ V == 0).all()``.
+    The matrix ``M`` (of size ``k x k``) is arbitrary.
+    Such a structure corresponds to the tangent vector ``Z = u @ M @ vt + Up @
+    vt + u * Vp.T`` in the ambient space of ``m x n`` matrices at a point ``(u,
+    s, vt)``.
+
+    The chosen geometry yields a Riemannian submanifold of the embedding
+    space :math:`\R^{m \times n}` equipped with the usual trace inner product.
 
     Note:
         * The implementation follows the embedded geometry described in
           [Van2013]_.
         * The class is currently not compatible with the
-          :class:`pymanopt.optimizers.TrustRegions` optimizer.
-
-    Manifold of ``m x n`` real matrices of fixed rank ``k``.
-    For efficiency purposes, Pymanopt does not represent points on this
-    manifold explicitly using ``m x n`` matrices, but instead implicitly using
-    a truncated singular value decomposition.
-    Specifically, a point is represented by a tuple ``(u, s, vt)`` of three
-    numpy arrays.
-    The arrays ``u``, ``s`` and ``vt`` have shapes ``(m, k)``, ``(k,)`` and
-    ``(k, n)``, respectively, and the low rank matrix which they represent can
-    be recovered by the matrix product ``u * diag(s) * vt``.
-
-    For example, to optimize over the space of 5 x 4 matrices with rank 3, we
-
-    would need to
-
-    >>> import pymanopt.manifolds
-    >>> manifold = pymanopt.manifolds.FixedRankEmbedded(5, 4, 3)
-
-    Then the shapes will be as follows:
-
-    >>> u, s, vt = manifold.random_point()
-    >>> u.shape
-    (5, 3)
-    >>> s.shape
-    (3,)
-    >>> vt.shape
-    (3, 4)
-
-    and the full matrix can be recovered using the matrix product
-    ``u @ diag(s) @ vt``:
-
-    >>> import numpy as np
-    >>> X = u @ np.diag(s) @ vt
-
-    Tangent vectors are represented as a tuple ``(Up, M, Vp)``.
-    The matrices ``Up`` (of size ``m x k``) and ``Vp`` (of size ``n x k``) obey
-    ``Up' * U = 0 and Vp' * V = 0``.
-    The matrix ``M`` (of size ``k x k``) is arbitrary.
-    Such a structure corresponds to the
-    following tangent vector in the ambient space of ``m x n`` matrices: ``Z =
-    U * M * V' + Up * V' + U * Vp'``
-    where ``(U, S, V)`` is the current point and ``(Up, M, Vp)`` is the tangent
-    vector at that point.
-
-    Vectors in the ambient space are best represented as ``m x n`` matrices.
-    If these are low-rank, they may also be represented as structures with
-    ``U, S, V`` fields, such that ``Z = U * S * V'``.
-    There are no restrictions on what ``U``, ``S`` and ``V`` are, as long as
-    their product as indicated yields a real ``m x n`` matrix.
-
-    The chosen geometry yields a Riemannian submanifold of the embedding
-    space :math:`\R^(m \times n)` equipped with the usual trace (Frobenius)
-    inner product.
+          :class:`pymanopt.optimizers.trust_regions.TrustRegions` optimizer.
+        * Details on the implementation of
+          :meth:`euclidean_to_riemannian_gradient` can be found at
+          https://j-towns.github.io/papers/svd-derivative.pdf.
+        * The second-order retraction follows results presented in [AM2012]_.
     """
 
     def __init__(self, m: int, n: int, k: int):
@@ -99,25 +78,29 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         )
 
     def _apply_ambient(self, vector, matrix):
-        """Right-multiply a matrix to vector in ambient space."""
         if isinstance(vector, (list, tuple)):
             return vector[0] @ vector[1] @ vector[2].T @ matrix
         return vector @ matrix
 
     def _apply_ambient_transpose(self, vector, matrix):
-        """Right-multiply a matrix to transpose of vector in ambient space."""
         if isinstance(vector, (list, tuple)):
             return vector[2] @ vector[1] @ vector[0].T @ matrix
         return vector.T @ matrix
 
     def projection(self, point, vector):
-        """Project vector to tangent space.
+        """Project vector in the ambient space to the tangent space.
 
-        Note that ``vector`` must either be an m x n matrix from the ambient
-        space, or else a tuple (Uz, Sz, Vz), where Uz * Sz * Vz is in the
-        ambient space (of low-rank matrices).
-        This function then returns a tangent vector parameterized as
-        (Up, M, Vp).
+        Args:
+            point: A point on the manifold.
+            vector: A vector in the ambient space.
+
+        Returns:
+            A tangent vector parameterized as a ``(Up, M, Vp)``.
+
+        Note:
+            The argument ``vector`` must either be an array of shape ``(m, n)``
+            in the ambient space, or else a tuple ``(U, S, V)`` where ``U @ S @
+            V`` is in the ambient space (of low-rank matrices).
         """
         ZV = self._apply_ambient(vector, point[2].T)
         UtZV = point[0].T @ ZV
@@ -130,18 +113,6 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         return _FixedRankTangentVector(Up, M, Vp)
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
-        """Convert Euclidean to Riemannian gradient.
-
-        Assuming that the cost function being optimized has been defined
-        in terms of the low-rank singular value decomposition, the
-        gradient returned by the autodiff backends will have three components
-        and will be in the form of a tuple ``euclidean_gradient = (df/dU,
-        df/dS, df/dV)``.
-
-        Note:
-            See https://j-towns.github.io/papers/svd-derivative.pdf for a
-            detailed explanation of this implementation.
-        """
         u, s, vt = point
         du, ds, dvt = euclidean_gradient
 
@@ -164,9 +135,6 @@ class FixedRankEmbedded(RiemannianSubmanifold):
 
         return _FixedRankTangentVector(Up, M, Vp)
 
-    # This retraction is second order, following general results from
-    # Absil, Malick, "Projection-like retractions on matrix manifolds",
-    # SIAM J. Optim., 22 (2012), pp. 135-158.
     def retraction(self, point, tangent_vector):
         u, s, vt = point
         du, ds, dvt = tangent_vector
@@ -199,14 +167,6 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         return _FixedRankPoint(u, s, vt)
 
     def to_tangent_space(self, point, vector):
-        """Project components of ``vector`` to tangent space at ``point``.
-
-        Given ``vector`` in tangent vector format, projects its components Up
-        and Vp such that they satisfy the tangent space constraints up to
-        numerical errors.
-        If ``vector`` was already in the tangent space at ``point``, this
-        method should barely have any effect.
-        """
         u, _, vt = point
         Up = vector.Up - u @ u.T @ vector.Up
         Vp = vector.Vp - vt.T @ vt @ vector.Vp
@@ -223,21 +183,6 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         return tangent_vector / self.norm(point, tangent_vector)
 
     def embedding(self, point, tangent_vector):
-        """Represent tangent vector in ambient space.
-
-        Transforms a tangent vector Z represented as a structure (Up, M, Vp)
-        into a structure with fields (U, S, V) that represents that same
-        tangent vector in the ambient space of mxn matrices, as U*S*V'.
-        This matrix is equal to X.U*Z.M*X.V' + Z.Up*X.V' + X.U*Z.Vp'.
-        The latter is an mxn matrix, which could be too large to build
-        explicitly, and this is why we return a low-rank representation
-        instead.
-        Note that there are no guarantees on U, S and V other than that USV' is
-        the desired matrix.
-        In particular, U and V are not (in general) orthonormal and S is not
-        (in general) diagonal.
-        Currently, S is identity, but this might change.
-        """
         u, _, vt = point
         U = np.hstack((u @ tangent_vector.M + tangent_vector.Up, u))
         S = np.eye(2 * self._k)
