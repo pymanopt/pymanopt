@@ -99,6 +99,7 @@ latex_macros = r"""
     \def \R      {\mathbb{R}}
     \def \C      {\mathbb{C}}
     \def \O      {\mathrm{O}}
+    \def \SO     {\mathrm{SO}}
     \def \U      {\mathrm{U}}
     \def \Id     {\mathrm{Id}}
     \def \set    #1{\{#1\}}

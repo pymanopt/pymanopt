@@ -36,8 +36,8 @@ class FixedRankEmbedded(RiemannianSubmanifold):
 
     Tangent vectors are represented as tuples of the form ``(Up, M, Vp)``.
     The matrices ``Up`` (of size ``m x k``) and ``Vp`` (of size ``n x k``) obey
-    the conditions ``(Up.T @ U == 0).all()`` and ``(Vp.T @ V == 0).all()``.
-    The matrix ``M`` (of size ``k x k``) is arbitrary.
+    the conditions ``np.allclose(Up.T @ U, 0)`` and ``np.allclose(Vp.T @ V,
+    0)``. The matrix ``M`` (of size ``k x k``) is arbitrary.
     Such a structure corresponds to the tangent vector ``Z = u @ M @ vt + Up @
     vt + u * Vp.T`` in the ambient space of ``m x n`` matrices at a point ``(u,
     s, vt)``.
