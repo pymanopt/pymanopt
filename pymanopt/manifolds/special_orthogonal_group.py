@@ -28,11 +28,6 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
     The method :meth:`embedding` can be used to transform a tangent vector from
     its Lie algebra representation to the embedding space representation.
 
-    The default SVD-based retraction is only a first-order approximation of the
-    exponential map.
-    Use of a second-order retraction can be enabled by instantiating the class
-    with ``SpecialOrthogonalGroup(n, k, retraction="polar")``.
-
     Args:
         n: The dimension of the space that elements of the group act on.
         k: The number of elements in the product of groups.
@@ -40,6 +35,11 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
             Possible choices are ``qr`` and ``polar``.
 
     Note:
+        The default SVD-based retraction is only a first-order approximation of
+        the exponential map.
+        Use of a second-order retraction can be enabled by instantiating the
+        class with ``SpecialOrthogonalGroup(n, k, retraction="polar")``.
+
         The procedure to generate random rotation matrices sampled uniformly
         from the Haar measure is detailed in [Mez2006]_.
     """

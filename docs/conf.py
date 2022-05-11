@@ -101,6 +101,7 @@ latex_macros = r"""
     \def \O      {\mathrm{O}}
     \def \SO     {\mathrm{SO}}
     \def \U      {\mathrm{U}}
+    \def \St     {\mathrm{St}}
     \def \Id     {\mathrm{Id}}
     \def \set    #1{\{#1\}}
     \def \inner  #2{\langle #1, #2 \rangle}
