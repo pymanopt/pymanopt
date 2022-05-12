@@ -27,7 +27,7 @@ def manifold_factory(point_layout):
 
 
 class TestUnaryFunction(unittest.TestCase):
-    """Test cost function, gradient and hvp for a unary cost function.
+    """Test cost function, gradient and Hessian for a unary cost function.
 
     This test uses a cost function of the form::
 
@@ -63,7 +63,7 @@ class TestUnaryFunction(unittest.TestCase):
 
 
 class TestNaryFunction(unittest.TestCase):
-    """Test cost function, gradient and hvp for an nary cost function.
+    """Test cost function, gradient and Hessian for an nary cost function.
 
     This test uses a cost function of the form::
 
@@ -117,7 +117,7 @@ class TestNaryFunction(unittest.TestCase):
 
 
 class TestNaryParameterGrouping(unittest.TestCase):
-    """Test parameter grouping for cost function, gradient and hvp.
+    """Test parameter grouping for cost function, gradient and Hessian.
 
     This test assumes a cost function of the form::
 

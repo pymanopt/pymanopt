@@ -235,22 +235,22 @@ class Manifold(metaclass=abc.ABCMeta):
     ):
         """Converts the Euclidean to the Riemannian Hessian.
 
-        This converts the Euclidean Hessian-vector product (hvp)
-        ``euclidean_hessian`` of a function at a point ``point`` along a
-        tangent vector ``tangent_vector`` to the Riemannian hvp of ``point``
-        along ``tangent_vector`` on the manifold.
+        This converts the Euclidean Hessian ``euclidean_hessian`` of a function
+        at a point ``point`` along a tangent vector ``tangent_vector`` to the
+        Riemannian Hessian of ``point`` along ``tangent_vector`` on the
+        manifold.
 
         Args:
             point: The point on the manifold at which the Euclidean gradient
-                and hvp was evaluated.
+                and Hessian was evaluated.
             euclidean_gradient: The Euclidean gradient at ``point``.
-            euclidean_hessian: The Euclidean hvp at ``point`` along the
+            euclidean_hessian: The Euclidean Hessian at ``point`` along the
                 direction ``tangent_vector``.
             tangent_vector: The tangent vector in the direction of which the
-                Riemannian hvp is to be calculated.
+                Riemannian Hessian is to be calculated.
 
         Returns:
-            The Riemannian hvp as a tangent vector at ``point``.
+            The Riemannian Hessian as a tangent vector at ``point``.
         """
 
     @_raise_not_implemented_error

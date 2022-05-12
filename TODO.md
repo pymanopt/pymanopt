@@ -18,7 +18,6 @@
   - Add complex manifolds #125
   - Add jax backend #115
   - Add L-BFGS and other quasi-Newton optimizers
-  - Use forward-over-reverse mode hvps where possible
   - Add patience parameter to terminate optimization if cost does not improve
     anymore #114
   - Add constant step size line search method

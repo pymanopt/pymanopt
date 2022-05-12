@@ -16,14 +16,12 @@ For instance, for memory efficiency points on the
 represented as ``m x n`` matrices in the ambient space but as a singular value
 decomposition.
 As such a cost function defined on the manifold must accept three arguments
-``u``, ``s`` and ``vt``.
-Refer to the documentation of the respective manifold on how points are
-represented.
+``u``, ``s`` and ``vt``. Refer to the documentation of the respective manifold
+on how points are represented.
 
 New backends can be created by inheriting from the
 :class:`pymanopt.autodiff.backends._backend._Backend` class, and creating a
-backend decorator using
-:func:`pymanopt.autodiff.backend_decorator_factory`.
+backend decorator using :func:`pymanopt.autodiff.backend_decorator_factory`.
 
 .. automodule:: pymanopt.autodiff
 
