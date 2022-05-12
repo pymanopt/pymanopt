@@ -60,7 +60,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         if retraction == "qr":
             self._retraction = self._retraction_qr
         elif retraction == "polar":
-            self._retractionretr = self._retraction_polar
+            self._retraction = self._retraction_polar
         else:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
