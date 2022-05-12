@@ -1,13 +1,11 @@
 # TODO/Roadmap
 
-## 1.0:
-  - Clean up all docstrings of manifolds
-
 ## 1.0.x:
   - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices
   - Change "beta_rule" of CG optimizer to internal enum representation
   - Add re-tangentialization change from manopt's trustregions solver
   - Add polar retraction for Stiefel manifold
+  - Enable flake8-docstrings project-wide
 
 ## 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
