@@ -6,11 +6,6 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
 class _SphereBase(RiemannianSubmanifold):
-    """
-    Note:
-        The Weingarten map is taken from [AMT2013]_.
-    """
-
     def __init__(self, *shape, name, dimension):
         if len(shape) == 0:
             raise TypeError("Need at least one dimension.")
@@ -107,7 +102,11 @@ class Sphere(_SphereBase):
         super().__init__(*shape, name=name, dimension=dimension)
 
 
-Sphere.__doc__ += _SphereBase.__doc__
+DOCSTRING_NOTE = """
+    Note:
+        The Weingarten map is taken from [AMT2013]_.
+"""
+Sphere.__doc__ += DOCSTRING_NOTE
 
 
 class _SphereSubspaceIntersectionManifold(_SphereBase):
@@ -170,7 +169,7 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         super().__init__(projector, name, dimension)
 
 
-SphereSubspaceIntersection.__doc__ += _SphereBase.__doc__
+SphereSubspaceIntersection.__doc__ += DOCSTRING_NOTE
 
 
 class SphereSubspaceComplementIntersection(
@@ -201,4 +200,4 @@ class SphereSubspaceComplementIntersection(
         super().__init__(projector, name, dimension)
 
 
-SphereSubspaceComplementIntersection.__doc__ += _SphereBase.__doc__
+SphereSubspaceComplementIntersection.__doc__ += DOCSTRING_NOTE
