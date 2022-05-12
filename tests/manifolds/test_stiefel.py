@@ -19,10 +19,6 @@ class TestSingleStiefelManifold(TestCase):
     def test_dim(self):
         assert self.manifold.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
 
-    # def test_typical_dist(self):
-
-    # def test_dist(self):
-
     def test_inner_product(self):
         X = np.linalg.qr(np.random.normal(size=(self.m, self.n)))[0]
         A, B = np.random.normal(size=(2, self.m, self.n))
@@ -90,16 +86,12 @@ class TestSingleStiefelManifold(TestCase):
             self.manifold.euclidean_to_riemannian_hessian(x, egrad, ehess, u),
         )
 
-    # def test_euclidean_to_riemannian_gradient(self):
-
     def test_norm(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
         np_testing.assert_almost_equal(
             self.manifold.norm(x, u), np.linalg.norm(u)
         )
-
-    # def test_transport(self):
 
     def test_exp(self):
         # Check that exp lies on the manifold and that exp of a small vector u
@@ -155,8 +147,6 @@ class TestMultiStiefelManifold(TestCase):
         np_testing.assert_almost_equal(
             self.manifold.typical_dist, np.sqrt(self.n * self.k)
         )
-
-    # def test_dist(self):
 
     def test_inner_product(self):
         X = self.manifold.random_point()
@@ -224,16 +214,12 @@ class TestMultiStiefelManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
-    # def test_euclidean_to_riemannian_gradient(self):
-
     def test_norm(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
         np_testing.assert_almost_equal(
             self.manifold.norm(x, u), np.linalg.norm(u)
         )
-
-    # def test_transport(self):
 
     def test_exp(self):
         # Check that exp lies on the manifold and that exp of a small vector u

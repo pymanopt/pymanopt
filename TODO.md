@@ -7,6 +7,7 @@
   - Enable flake8-docstrings project-wide
   - Use vectorized QR decomposition for QR retractions of Stiefel / SO(n) (see
     also manopt's qr_unique)
+  - Add tests for alternative retractions of Stiefel / SO(n)
 
 ## 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
