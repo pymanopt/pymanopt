@@ -6,19 +6,6 @@ from typing import Sequence, Union
 import numpy as np
 
 
-class RetrAsExpMixin:
-    """Mixin which defers calls to the exponential map to the retraction."""
-
-    def exp(self, point, tangent_vector):
-        class_name = self.__class__.__name__
-        warnings.warn(
-            f"Exponential map for manifold '{class_name}' not available. "
-            "Using retraction instead.",
-            RuntimeWarning,
-        )
-        return self.retraction(point, tangent_vector)
-
-
 class Manifold(metaclass=abc.ABCMeta):
     """Riemannian manifold base class.
 
@@ -423,3 +410,18 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
         return self.projection(point, euclidean_hessian) + self.weingarten(
             point, tangent_vector, normal_gradient
         )
+
+
+class RetrAsExpMixin:
+    """Mixin which defers calls to the exponential map to the retraction."""
+
+    def exp(self, point, tangent_vector):
+        class_name = self.__class__.__name__
+        warnings.warn(
+            f"Exponential map for manifold '{class_name}' not available. "
+            "Using retraction instead.",
+            RuntimeWarning,
+        )
+        return self.retraction(point, tangent_vector)
+
+    exp.__doc__ = Manifold.exp.__doc__
