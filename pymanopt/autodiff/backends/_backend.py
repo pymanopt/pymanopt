@@ -57,7 +57,7 @@ class Backend(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def compute_gradient(self, function, num_arguments):
+    def generate_gradient_operator(self, function, num_arguments):
         """Creates a function to compute gradients of a function.
 
         Args:
@@ -70,7 +70,7 @@ class Backend(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def compute_hessian_vector_product(self, function, num_arguments):
+    def generate_hessian_operator(self, function, num_arguments):
         """Creates a function to compute Hessian-vector products of a function.
 
         Args:

@@ -21,8 +21,8 @@ class TestProblemBackendInterface(TestCase):
             return np.linalg.norm(((u * s) @ vt - A) @ x) ** 2
 
         self.cost = cost
-        self.gradient = self.cost.compute_gradient()
-        self.hessian = self.cost.compute_hessian_vector_product()
+        self.gradient = self.cost.get_gradient_operator()
+        self.hessian = self.cost.get_hessian_operator()
 
         self.problem = pymanopt.Problem(self.manifold, self.cost)
 
@@ -30,7 +30,7 @@ class TestProblemBackendInterface(TestCase):
         (u, s, vt), x = self.manifold.random_point()
         self.cost(u, s, vt, x)
 
-    def test_gradient(self):
+    def test_gradient_operator_shapes(self):
         (u, s, vt), x = self.manifold.random_point()
         gu, gs, gvt, gx = self.gradient(u, s, vt, x)
         self.assertEqual(gu.shape, (self.m, self.rank))
@@ -38,7 +38,7 @@ class TestProblemBackendInterface(TestCase):
         self.assertEqual(gvt.shape, (self.rank, self.n))
         self.assertEqual(gx.shape, (self.n,))
 
-    def test_hessian_vector_product(self):
+    def test_hessian_operator_shapes(self):
         (u, s, vt), x = self.manifold.random_point()
         (a, b, c), d = self.manifold.random_point()
         hu, hs, hvt, hx = self.hessian(u, s, vt, x, a, b, c, d)
@@ -53,7 +53,7 @@ class TestProblemBackendInterface(TestCase):
         (u, s, vt), x = X
         np_testing.assert_allclose(cost(X), self.cost(u, s, vt, x))
 
-    def test_problem_euclidean_grad(self):
+    def test_problem_gradient_operator(self):
         X = self.manifold.random_point()
         (u, s, vt), x = X
         G = self.problem.euclidean_gradient(X)
@@ -61,7 +61,7 @@ class TestProblemBackendInterface(TestCase):
         for ga, gb in zip((gu, gs, gvt, gx), self.gradient(u, s, vt, x)):
             np_testing.assert_allclose(ga, gb)
 
-    def test_problem_hessian_vector_product(self):
+    def test_problem_hessian_operator(self):
         ehess = self.problem.euclidean_hessian
         X = self.manifold.random_point()
         U = self.manifold.random_point()

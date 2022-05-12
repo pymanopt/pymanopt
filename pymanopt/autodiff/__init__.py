@@ -17,24 +17,24 @@ class Function:
         self._num_arguments = manifold.num_values
 
         self._gradient = None
-        self._hvp = None
+        self._hessian = None
 
     def __str__(self):
         return f"Function <{self._backend}>"
 
-    def compute_gradient(self):
+    def get_gradient_operator(self):
         if self._gradient is None:
-            self._gradient = self._backend.compute_gradient(
+            self._gradient = self._backend.generate_gradient_operator(
                 self._original_function, self._num_arguments
             )
         return self._gradient
 
-    def compute_hessian_vector_product(self):
-        if self._hvp is None:
-            self._hvp = self._backend.compute_hessian_vector_product(
+    def get_hessian_operator(self):
+        if self._hessian is None:
+            self._hessian = self._backend.generate_hessian_operator(
                 self._original_function, self._num_arguments
             )
-        return self._hvp
+        return self._hessian
 
     def __call__(self, *args, **kwargs):
         return self._function(*args, **kwargs)

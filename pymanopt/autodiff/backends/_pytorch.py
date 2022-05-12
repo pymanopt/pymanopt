@@ -56,7 +56,7 @@ class PyTorchBackend(Backend):
         return list(map(self._sanitize_gradient, tensors))
 
     @Backend._assert_backend_available
-    def compute_gradient(self, function, num_arguments):
+    def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
             torch_arguments = []
             for argument in args:
@@ -71,7 +71,7 @@ class PyTorchBackend(Backend):
         return gradient
 
     @Backend._assert_backend_available
-    def compute_hessian_vector_product(self, function, num_arguments):
+    def generate_hessian_operator(self, function, num_arguments):
         def hessian_vector_product(*args):
             points, vectors = bisect_sequence(args)
             torch_arguments = []

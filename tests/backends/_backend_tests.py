@@ -50,14 +50,14 @@ class TestUnaryFunction(unittest.TestCase):
         self.assertAlmostEqual(np.sum(x**2), cost(x))
 
         # Test whether gradient accepts single argument.
-        euclidean_gradient = cost.compute_gradient()
+        euclidean_gradient = cost.get_gradient_operator()
         np_testing.assert_allclose(2 * x, euclidean_gradient(x))
 
         # Test the Hessian.
         u = np.random.normal(size=self.n)
 
         # Test whether Hessian accepts two regular arguments.
-        ehess = cost.compute_hessian_vector_product()
+        ehess = cost.get_hessian_operator()
         # Test whether Hessian-vector product is correct.
         np_testing.assert_allclose(2 * u, ehess(x, u))
 
@@ -89,7 +89,7 @@ class TestNaryFunction(unittest.TestCase):
 
         self.assertAlmostEqual(x @ y, cost(x, y))
 
-        euclidean_gradient = cost.compute_gradient()
+        euclidean_gradient = cost.get_gradient_operator()
         g = euclidean_gradient(x, y)
         self.assertIsInstance(g, (list, tuple))
         self.assertEqual(len(g), 2)
@@ -103,7 +103,7 @@ class TestNaryFunction(unittest.TestCase):
         u = np.random.normal(size=n)
         v = np.random.normal(size=n)
 
-        ehess = cost.compute_hessian_vector_product()
+        ehess = cost.get_hessian_operator()
         h = ehess(x, y, u, v)
         self.assertIsInstance(h, (list, tuple))
         self.assertEqual(len(h), 2)
@@ -141,7 +141,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
 
         self.assertAlmostEqual(np.sum(x**2 + y + z**3), cost(x, y, z))
 
-        euclidean_gradient = cost.compute_gradient()
+        euclidean_gradient = cost.get_gradient_operator()
         g = euclidean_gradient(x, y, z)
 
         self.assertIsInstance(g, (list, tuple))
@@ -158,7 +158,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
         # Test the Hessian.
         u, v, w = [np.random.normal(size=n) for _ in range(3)]
 
-        ehess = cost.compute_hessian_vector_product()
+        ehess = cost.get_hessian_operator()
         h = ehess(x, y, z, u, v, w)
 
         # Test the type composition of the return value.
@@ -206,11 +206,11 @@ class TestVector(unittest.TestCase):
         np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.cost.compute_gradient()
+        grad = self.cost.get_gradient_operator()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.cost.compute_hessian_vector_product()
+        hess = self.cost.get_hessian_operator()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -252,11 +252,11 @@ class TestMatrix(unittest.TestCase):
         np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.cost.compute_gradient()
+        grad = self.cost.get_gradient_operator()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.cost.compute_hessian_vector_product()
+        hess = self.cost.get_hessian_operator()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -298,11 +298,11 @@ class TestTensor3(unittest.TestCase):
         np_testing.assert_allclose(self.correct_cost, self.cost(self.Y))
 
     def test_grad(self):
-        grad = self.cost.compute_gradient()
+        grad = self.cost.get_gradient_operator()
         np_testing.assert_allclose(self.correct_grad, grad(self.Y))
 
     def test_hessian(self):
-        hess = self.cost.compute_hessian_vector_product()
+        hess = self.cost.get_hessian_operator()
 
         # Now test hess
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
@@ -394,13 +394,13 @@ class TestMixed(unittest.TestCase):
         np_testing.assert_allclose(self.correct_cost, self.cost(*self.y))
 
     def test_grad(self):
-        grad = self.cost.compute_gradient()
+        grad = self.cost.get_gradient_operator()
         g = grad(*self.y)
         for k in range(len(g)):
             np_testing.assert_allclose(self.correct_grad[k], g[k])
 
     def test_hessian(self):
-        hess = self.cost.compute_hessian_vector_product()
+        hess = self.cost.get_hessian_operator()
 
         # Now test hess
         h = hess(*self.y, *self.a)

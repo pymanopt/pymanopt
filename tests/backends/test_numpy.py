@@ -41,6 +41,6 @@ class TestNumPyBackend(TestCase):
 
     def test_gradient_hessian_exceptions(self):
         with self.assertRaises(NotImplementedError):
-            self.cost.compute_gradient()
+            self.cost.get_gradient_operator()
         with self.assertRaises(NotImplementedError):
-            self.cost.compute_hessian_vector_product()
+            self.cost.get_hessian_operator()
