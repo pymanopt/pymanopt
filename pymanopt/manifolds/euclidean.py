@@ -63,7 +63,7 @@ class Euclidean(_Euclidean):
     r"""Euclidean manifold.
 
     Args:
-        *shape: Shape of points on the manifold.
+        shape: Shape of points on the manifold.
 
     Note:
         If ``shape == (n,)``, this is the manifold of vectors with the
@@ -75,7 +75,7 @@ class Euclidean(_Euclidean):
         corresponding to the usual tensor dot product.
     """
 
-    def __init__(self, *shape):
+    def __init__(self, *shape: int):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:

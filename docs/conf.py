@@ -38,9 +38,6 @@ extensions = [
 master_doc = "index"
 language = None
 
-# autodoc
-autodoc_typehints = "description"
-
 # Output options
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
@@ -56,11 +53,14 @@ templates_path = ["_templates"]
 html_context = {"doc_versions": get_doc_versions()}
 
 # autodoc
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "all"
 autodoc_default_options = {
     "member-order": "bysource",
     "members": True,
     "undoc-members": True,
     "show-inheritance": True,
+    "inherited-members": True,
 }
 
 # nbsphinx
@@ -101,6 +101,7 @@ latex_macros = r"""
     \def \O      {\mathrm{O}}
     \def \SO     {\mathrm{SO}}
     \def \U      {\mathrm{U}}
+    \def \E      {\mathcal{E}}
     \def \St     {\mathrm{St}}
     \def \Id     {\mathrm{Id}}
     \def \set    #1{\{#1\}}
