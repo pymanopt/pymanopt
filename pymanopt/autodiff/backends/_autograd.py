@@ -24,7 +24,7 @@ class AutogradBackend(Backend):
         return function
 
     @Backend._assert_backend_available
-    def compute_gradient(self, function, num_arguments):
+    def generate_gradient_operator(self, function, num_arguments):
         gradient = autograd.grad(function, argnum=list(range(num_arguments)))
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
@@ -47,7 +47,7 @@ class AutogradBackend(Backend):
         return autograd.grad(vector_dot_gradient, argnum)
 
     @Backend._assert_backend_available
-    def compute_hessian_vector_product(self, function, num_arguments):
+    def generate_hessian_operator(self, function, num_arguments):
         hessian_vector_product = self._hessian_vector_product(
             function, argnum=list(range(num_arguments))
         )

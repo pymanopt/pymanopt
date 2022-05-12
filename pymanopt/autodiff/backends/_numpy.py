@@ -19,5 +19,5 @@ class NumPyBackend(Backend):
             "backend"
         )
 
-    compute_gradient = _raise_not_implemented_error
-    compute_hessian_vector_product = _raise_not_implemented_error
+    generate_gradient_operator = _raise_not_implemented_error
+    generate_hessian_operator = _raise_not_implemented_error

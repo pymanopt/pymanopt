@@ -41,7 +41,7 @@ class TensorFlowBackend(Backend):
         return wrapper
 
     @Backend._assert_backend_available
-    def compute_gradient(self, function, num_arguments):
+    def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
             tf_arguments = []
             with tf.GradientTape() as tape:
@@ -58,7 +58,7 @@ class TensorFlowBackend(Backend):
         return gradient
 
     @Backend._assert_backend_available
-    def compute_hessian_vector_product(self, function, num_arguments):
+    def generate_hessian_operator(self, function, num_arguments):
         def hessian_vector_product(*args):
             arguments, vectors = bisect_sequence(args)
             tf_args = [self._from_numpy(arg) for arg in arguments]

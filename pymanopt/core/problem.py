@@ -17,11 +17,10 @@ class Problem:
         cost: A callable decorated with a decorator from
             :mod:`pymanopt.functions` which takes a point on a manifold and
             returns a real scalar.
-            If any decorator other than
-            :func:`pymanopt.function.numpy` is used the gradient and
-            Hessian-vector production functions are generated automatically if
-            needed and no ``{euclidean,riemannian}_gradient`` or
-            ``{euclidean,riemannian}_hessian`` arguments are provided.
+            If any decorator other than :func:`pymanopt.function.numpy` is
+            used, the gradient and Hessian functions are generated
+            automatically if needed and no ``{euclidean,riemannian}_gradient``
+            or ``{euclidean,riemannian}_hessian`` arguments are provided.
         euclidean_gradient: The Euclidean gradient, i.e., the gradient of the
             cost function in the typical sense in the ambient space.
             The returned value need not belong to the tangent space of
@@ -33,12 +32,12 @@ class Problem:
             is instead computed internally.
             If provided, the function needs to return a vector in the tangent
             space of ``manifold``.
-        euclidean_hessian: The Euclidean Hessian-vector product, i.e., the
-            directional derivative of ``euclidean_gradient`` in the direction
-            of a tangent vector.
-        riemannian_hessian: The Riemannian Hessian-vector product, i.e., the
-            directional derivative of ``riemannian_gradient`` in the direction
-            of a tangent vector.
+        euclidean_hessian: The Euclidean Hessian, i.e., the directional
+            derivative of ``euclidean_gradient`` in the direction of a tangent
+            vector.
+        riemannian_hessian: The Riemannian Hessian, i.e., the directional
+            derivative of ``riemannian_gradient`` in the direction of a tangent
+            vector.
             As with ``riemannian_gradient`` this usually need not be provided
             explicitly.
     """
@@ -80,19 +79,21 @@ class Problem:
         self._cost = self._wrap_function(cost)
 
         if euclidean_gradient is not None:
-            euclidean_gradient = self._wrap_gradient(euclidean_gradient)
+            euclidean_gradient = self._wrap_gradient_operator(
+                euclidean_gradient
+            )
         self._euclidean_gradient = euclidean_gradient
         if euclidean_hessian is not None:
-            euclidean_hessian = self._wrap_hessian_vector_product(
-                euclidean_hessian
-            )
+            euclidean_hessian = self._wrap_hessian_operator(euclidean_hessian)
         self._euclidean_hessian = euclidean_hessian
 
         if riemannian_gradient is not None:
-            riemannian_gradient = self._wrap_gradient(riemannian_gradient)
+            riemannian_gradient = self._wrap_gradient_operator(
+                riemannian_gradient
+            )
         self._riemannian_gradient = riemannian_gradient
         if riemannian_hessian is not None:
-            riemannian_hessian = self._wrap_hessian_vector_product(
+            riemannian_hessian = self._wrap_hessian_operator(
                 riemannian_hessian
             )
         self._riemannian_hessian = riemannian_hessian
@@ -190,20 +191,20 @@ class Problem:
 
         return wrapper
 
-    def _wrap_gradient(self, gradient):
+    def _wrap_gradient_operator(self, gradient):
         wrapped_gradient = self._wrap_function(gradient)
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (list, tuple)):
             return self._group_return_values(wrapped_gradient, point_layout)
         return wrapped_gradient
 
-    def _wrap_hessian_vector_product(self, hessian_vector_product):
+    def _wrap_hessian_operator(self, hessian_operator):
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (list, tuple)):
 
-            @functools.wraps(hessian_vector_product)
+            @functools.wraps(hessian_operator)
             def wrapper(point, vector):
-                return hessian_vector_product(
+                return hessian_operator(
                     *self._flatten_arguments(point, point_layout),
                     *self._flatten_arguments(vector, point_layout),
                 )
@@ -212,15 +213,15 @@ class Problem:
 
         if point_layout == 1:
 
-            @functools.wraps(hessian_vector_product)
+            @functools.wraps(hessian_operator)
             def wrapper(point, vector):
-                return hessian_vector_product(point, vector)
+                return hessian_operator(point, vector)
 
         else:
 
-            @functools.wraps(hessian_vector_product)
+            @functools.wraps(hessian_operator)
             def wrapper(point, vector):
-                return hessian_vector_product(*point, *vector)
+                return hessian_operator(*point, *vector)
 
         return wrapper
 
@@ -231,8 +232,8 @@ class Problem:
     @property
     def euclidean_gradient(self):
         if self._euclidean_gradient is None:
-            self._euclidean_gradient = self._wrap_gradient(
-                self._original_cost.compute_gradient()
+            self._euclidean_gradient = self._wrap_gradient_operator(
+                self._original_cost.get_gradient_operator()
             )
         return self._euclidean_gradient
 
@@ -251,8 +252,8 @@ class Problem:
     @property
     def euclidean_hessian(self):
         if self._euclidean_hessian is None:
-            self._euclidean_hessian = self._wrap_hessian_vector_product(
-                self._original_cost.compute_hessian_vector_product()
+            self._euclidean_hessian = self._wrap_hessian_operator(
+                self._original_cost.get_hessian_operator()
             )
         return self._euclidean_hessian
 
