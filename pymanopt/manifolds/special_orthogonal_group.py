@@ -114,17 +114,9 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return Y
 
     def _retraction_polar(self, point, tangent_vector):
-        def retri(array):
-            u, _, vt = np.linalg.svd(array)
-            return u @ vt
-
         Y = point + multiprod(point, tangent_vector)
-        if self._k == 1:
-            return retri(Y)
-
-        for i in range(self._k):
-            Y[i] = retri(Y[i])
-        return Y
+        u, _, vt = np.linalg.svd(Y)
+        return multiprod(u, vt)
 
     def exp(self, point, tangent_vector):
         tv = np.copy(tangent_vector)
