@@ -2,7 +2,7 @@ Manifolds
 =========
 
 The rigorous mathematical definition of a manifold is beyond the scope of this
-document.
+documentation.
 However, if you are unfamiliar with the idea, it is fine just to visualize it
 as a smooth subset of `Euclidean space
 <https://en.wikipedia.org/wiki/Euclidean_space>`_.
