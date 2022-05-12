@@ -94,3 +94,8 @@ def multiexpm(A, *, symmetric=False):
     if np.isrealobj(A):
         return np.real(expmA)
     return expmA
+
+
+def multiqr(A):
+    """Vectorized QR decomposition."""
+    return np.vectorize(np.linalg.qr, signature="(m,n)->(m,k),(k,n)")(A)

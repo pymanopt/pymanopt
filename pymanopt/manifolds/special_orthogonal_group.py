@@ -3,7 +3,13 @@ from scipy.linalg import expm, logm
 from scipy.special import comb
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
+from pymanopt.tools.multi import (
+    multiprod,
+    multiqr,
+    multiskew,
+    multisym,
+    multitransp,
+)
 
 
 class SpecialOrthogonalGroup(RiemannianSubmanifold):
@@ -99,17 +105,12 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return self._retraction(point, tangent_vector)
 
     def _retraction_qr(self, point, tangent_vector):
-        def retri(array):
-            q, r = np.linalg.qr(array)
-            return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
-
         Y = point + multiprod(point, tangent_vector)
+        q, r = multiqr(Y)
+        sign = np.sign(np.sign(np.diagonal(r, axis1=-2, axis2=-1)) + 0.5)
         if self._k == 1:
-            return retri(Y)
-
-        for i in range(self._k):
-            Y[i] = retri(Y[i])
-        return Y
+            return q * sign
+        return q * np.expand_dims(sign, axis=1)
 
     def _retraction_polar(self, point, tangent_vector):
         Y = point + multiprod(point, tangent_vector)
