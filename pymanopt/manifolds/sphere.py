@@ -6,15 +6,9 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
 class _SphereBase(RiemannianSubmanifold):
-    """Base class for tensors with unit Frobenius norm.
-
-    Notes:
-        The implementation of the Weingarten map is taken from [AMT2013]_.
-    """
-
     def __init__(self, *shape, name, dimension):
         if len(shape) == 0:
-            raise TypeError("Need shape parameters.")
+            raise TypeError("Need at least one dimension.")
         self._shape = shape
         super().__init__(name, dimension)
 
@@ -80,25 +74,39 @@ class _SphereBase(RiemannianSubmanifold):
 class Sphere(_SphereBase):
     r"""The sphere manifold.
 
-    Manifold of shape :math:`n_1 \times n_2 \times \ldots \times n_k` tensors
-    with unit 2-norm.
-    The metric is such that the sphere is a Riemannian submanifold of Euclidean
-    space.
+    Manifold of shape :math:`n_1 \times \ldots \times n_k` tensors with unit
+    Euclidean norm.
+    The norm is understood as the :math:`\ell_2`-norm of :math:`\E =
+    \R^{\sum_{i=1}^k n_i}` after identifying :math:`\R^{n_1 \times \ldots
+    \times n_k}` with :math:`\E`.
+    The metric is the one inherited from the usual Euclidean inner product that
+    induces :math:`\norm{\cdot}_2` on :math:`\E` such that the manifold forms a
+    Riemannian submanifold of Euclidean space.
+
+    Args:
+        shape: The shape of tensors.
     """
 
-    def __init__(self, *shape):
+    def __init__(self, *shape: int):
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
         if len(shape) == 1:
-            (n1,) = shape
-            name = f"Sphere manifold of {n1}-vectors"
+            (n,) = shape
+            name = f"Sphere manifold of {n}-vectors"
         elif len(shape) == 2:
-            n1, n2 = shape
-            name = f"Sphere manifold of {n1}x{n2} matrices"
+            m, n = shape
+            name = f"Sphere manifold of {m}x{n} matrices"
         else:
             name = f"Sphere manifold of shape {shape} tensors"
         dimension = np.prod(shape) - 1
         super().__init__(*shape, name=name, dimension=dimension)
+
+
+DOCSTRING_NOTE = """
+    Note:
+        The Weingarten map is taken from [AMT2013]_.
+"""
+Sphere.__doc__ += DOCSTRING_NOTE
 
 
 class _SphereSubspaceIntersectionManifold(_SphereBase):
@@ -138,9 +146,13 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
 class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     r"""Sphere-subspace intersection manifold.
 
-    Manifold of n-dimensional unit 2-norm vectors intersecting the
-    :math:`r`-dimensional subspace of :math:`\R^n` spanned by the columns of
-    the matrix ``matrix`` of size :math:`n \times r`.
+    Manifold of :math:`n`-dimensional vectors with unit :math:`\ell_2`-norm
+    intersecting an :math:`r`-dimensional subspace of :math:`\R^n`.
+    The subspace is represented by a matrix of size ``n x r`` whose columns
+    span the subspace.
+
+    Args:
+        matrix: Matrix whose columns span the intersecting subspace.
     """
 
     def __init__(self, matrix):
@@ -157,14 +169,21 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         super().__init__(projector, name, dimension)
 
 
+SphereSubspaceIntersection.__doc__ += DOCSTRING_NOTE
+
+
 class SphereSubspaceComplementIntersection(
     _SphereSubspaceIntersectionManifold
 ):
-    r"""Sphere-subspace compliment intersection manifold.
+    r"""Sphere-subspace complement intersection manifold.
 
-    Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
-    the :math:`r`-dimensional subspace of :math:`\R^n` spanned by columns of
-    the matrix ``matrix``.
+    Manifold of :math:`n`-dimensional vectors with unit :math:`\ell_2`-norm
+    that are orthogonal to an :math:`r`-dimensional subspace of :math:`\R^n`.
+    The subspace is represented by a matrix of size ``n x r`` whose columns
+    span the subspace.
+
+    Args:
+        matrix: Matrix whose columns span the subspace.
     """
 
     def __init__(self, matrix):
@@ -179,3 +198,6 @@ class SphereSubspaceComplementIntersection(
         )
         dimension = subspace_dimension - 1
         super().__init__(projector, name, dimension)
+
+
+SphereSubspaceComplementIntersection.__doc__ += DOCSTRING_NOTE

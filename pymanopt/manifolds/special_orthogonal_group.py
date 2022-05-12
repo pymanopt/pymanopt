@@ -1,5 +1,3 @@
-"""Module containing manifolds of n-dimensional rotations."""
-
 import numpy as np
 from scipy.linalg import expm, logm
 from scipy.special import comb
@@ -9,27 +7,26 @@ from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
 
 
 class SpecialOrthogonalGroup(RiemannianSubmanifold):
-    """The special orthogonal group.
+    r"""The (product) manifold of rotation matrices.
 
-    Special orthogonal group (the manifold of rotations): deals with matrices
-    X of size k x n x n (or n x n if k = 1, which is the default) such that
-    each n x n matrix is orthogonal, with determinant 1, i.e.,
-    dot(X.T, X) = eye(n) if k = 1, or dot(X[i].T, X[i]) = eye(n) if k > 1.
+    The special orthgonal group :math:`\SO(n)`.
+    Points on the manifold are matrices :math:`\vmQ \in \R^{n
+    \times n}` such that each matrix is orthogonal with determinant 1, i.e.,
+    :math:`\transp{\vmQ}\vmQ = \vmQ\transp{\vmQ} = \Id_n` and :math:`\det(\vmQ)
+    = 1`.
+    For ``k > 1``, the class can be used to optimize over the product manifold
+    of rotation matrices :math:`\SO(n)^k`.
+    In that case points on the manifold are represented as arrays of shape
+    ``(k, n, n)``.
 
-    This is a description of SO(n)^k with the induced metric from the
-    embedding space (R^nxn)^k, i.e., this manifold is a Riemannian
-    submanifold of (R^nxn)^k endowed with the usual trace inner product.
+    The metric is the usual Euclidean one inherited from the embedding space
+    :math:`(\R^{n \times n})^k`.
+    As such :math:`\SO(n)^k` forms a Riemannian submanifold.
 
-    Tangent vectors are represented in the Lie algebra, i.e., as skew
-    symmetric matrices. Use the function manifold.embedding(X, H) to
-    switch from the Lie algebra representation to the embedding space
-    representation. This is often necessary when defining
-    ``problem.euclidean_hessian``.
-
-    By default, the retraction is only a first-order approximation of the
-    exponential. To force the use of a second-order approximation, instantiate
-    the class with ``SpecialOrthogonalGroup(n, k, retraction="polar")``.
-    This switches from a QR-based computation to an SVD-based computation.
+    Tangent vectors are represented in the Lie algebra of skew-symmetric
+    matrices of the same shape as points on the manifold.
+    The method :meth:`embedding` can be used to transform a tangent vector from
+    its Lie algebra representation to the embedding space representation.
 
     Args:
         n: The dimension of the space that elements of the group act on.
@@ -37,12 +34,17 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         retraction: The type of retraction to use.
             Possible choices are ``qr`` and ``polar``.
 
-    Notes:
+    Note:
+        The default SVD-based retraction is only a first-order approximation of
+        the exponential map.
+        Use of a second-order retraction can be enabled by instantiating the
+        class with ``SpecialOrthogonalGroup(n, k, retraction="polar")``.
+
         The procedure to generate random rotation matrices sampled uniformly
         from the Haar measure is detailed in [Mez2006]_.
     """
 
-    def __init__(self, n, *, k=1, retraction="qr"):
+    def __init__(self, n: int, *, k: int = 1, retraction: str = "qr"):
         self._n = n
         self._k = k
 

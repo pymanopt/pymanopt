@@ -1,11 +1,11 @@
 # TODO/Roadmap
 
-## 1.0:
-  - Clean up all docstrings of manifolds
-
 ## 1.0.x:
   - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices
   - Change "beta_rule" of CG optimizer to internal enum representation
+  - Add re-tangentialization change from manopt's trustregions solver
+  - Add polar retraction for Stiefel manifold
+  - Enable flake8-docstrings project-wide
 
 ## 1.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
@@ -18,7 +18,6 @@
   - Add complex manifolds #125
   - Add jax backend #115
   - Add L-BFGS and other quasi-Newton optimizers
-  - Use forward-over-reverse mode hvps where possible
   - Add patience parameter to terminate optimization if cost does not improve
     anymore #114
   - Add constant step size line search method

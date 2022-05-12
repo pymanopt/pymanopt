@@ -1,21 +1,9 @@
 import abc
 import functools
 import warnings
+from typing import Sequence, Union
 
 import numpy as np
-
-
-class RetrAsExpMixin:
-    """Mixin which defers calls to the exponential map to the retraction."""
-
-    def exp(self, point, tangent_vector):
-        class_name = self.__class__.__name__
-        warnings.warn(
-            f"Exponential map for manifold '{class_name}' not available. "
-            "Using retraction instead.",
-            RuntimeWarning,
-        )
-        return self.retraction(point, tangent_vector)
 
 
 class Manifold(metaclass=abc.ABCMeta):
@@ -23,18 +11,39 @@ class Manifold(metaclass=abc.ABCMeta):
 
     Abstract base class setting out a template for manifold classes.
 
-    Not all methods are required by all optimizers.
-    In particular, first order gradient based optimizers such as
-    :mod:`pymanopt.optimizers.steepest_descent.SteepestDescent` and
-    :mod:`pymanopt.optimizers.conjugate_gradient.ConjugateGradient` require
-    :meth:`euclidean_to_riemannian_gradient` to be implemented but not
-    :meth:`euclidean_to_riemannian_hessian`.
-    Second-order optimizers such as
-    :class:`pymanopt.optimizers.trust_regions.TrustRegions` will require
-    :meth:`euclidean_to_riemannian_hessian`.
+    Args:
+        name: String representation of the manifold.
+        dimension: The dimension of the manifold, i.e., the vector space
+            dimension of the tangent spaces.
+        point_layout: Abstract description of the representation of points on
+            the manifold.
+            For manifolds representing points as simple numpy arrays,
+            ``point_layout`` is ``1``.
+            For more complicated manifolds which might represent points as a
+            tuple or list of ``n`` arrays, `point_layout` would be ``n``.
+            Finally, in the special case of the
+            :class:`pymanopt.manifolds.product.Product` manifold
+            ``point_layout`` will be a compound sequence of point layouts of
+            manifolds involved in the product.
+
+    Note:
+        Not all methods are required by all optimizers.
+        In particular, first order gradient based optimizers such as
+        :mod:`pymanopt.optimizers.steepest_descent.SteepestDescent` and
+        :mod:`pymanopt.optimizers.conjugate_gradient.ConjugateGradient` require
+        :meth:`euclidean_to_riemannian_gradient` to be implemented but not
+        :meth:`euclidean_to_riemannian_hessian`.
+        Second-order optimizers such as
+        :class:`pymanopt.optimizers.trust_regions.TrustRegions` will require
+        :meth:`euclidean_to_riemannian_hessian`.
     """
 
-    def __init__(self, name, dimension, point_layout=1):
+    def __init__(
+        self,
+        name: str,
+        dimension: int,
+        point_layout: Union[int, Sequence[int]] = 1,
+    ):
         if not isinstance(dimension, (int, np.integer)):
             raise TypeError("Manifold dimension must be of type int")
         if dimension < 0:
@@ -108,7 +117,7 @@ class Manifold(metaclass=abc.ABCMeta):
         point: np.ndarray,
         tangent_vector_a: np.ndarray,
         tangent_vector_b: np.ndarray,
-    ) -> np.float64:
+    ) -> float:
         """Inner product between tangent vectors at a point on the manifold.
 
         This method implements a Riemannian inner product between two tangent
@@ -127,23 +136,59 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def projection(self, point, vector):
-        """Projects vector in the ambient space on the tangent space."""
+        """Projects vector in the ambient space on the tangent space.
+
+        Args:
+            point: A point on the manifold.
+            vector: A vector in the ambient space of the tangent space at
+                ``point``.
+
+        Returns:
+            An element of the tangent space at ``point`` closest to ``vector``
+            in the ambient space.
+        """
 
     @abc.abstractmethod
     def norm(self, point, tangent_vector):
-        """Computes the norm of a tangent vector at a point on the manifold."""
+        """Computes the norm of a tangent vector at a point on the manifold.
+
+        Args:
+            point: A point on the manifold.
+            tangent_vector: A tangent vector in the tangent space at ``point``.
+
+        Returns:
+            The norm of ``tangent_vector``.
+        """
 
     @abc.abstractmethod
     def random_point(self):
-        """Returns a random point on the manifold."""
+        """Returns a random point on the manifold.
+
+        Returns:
+            A randomly chosen point on the manifold.
+        """
 
     @abc.abstractmethod
     def random_tangent_vector(self, point):
-        """Returns a random vector in the tangent space at ``point``."""
+        """Returns a random vector in the tangent space at ``point``.
+
+        Args:
+            point: A point on the manifold.
+
+        Returns:
+            A randomly chosen tangent vector in the tangent space at ``point``.
+        """
 
     @abc.abstractmethod
     def zero_vector(self, point):
-        """Returns the zero vector in the tangent space at ``point``."""
+        """Returns the zero vector in the tangent space at ``point``.
+
+        Args:
+            point: A point on the manifold.
+
+        Returns:
+            The origin of the tangent space at ``point``.
+        """
 
     # Methods which are only required by certain optimizers.
 
@@ -159,14 +204,29 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @_raise_not_implemented_error
     def dist(self, point_a, point_b):
-        """The geodesic distance between two points on the manifold."""
+        """The geodesic distance between two points on the manifold.
+
+        Args:
+            point_a: The first point on the manifold.
+            point_b: The second point on the manifold.
+
+        Returns:
+            The distance between ``point_a`` and ``point_b`` on the manifold.
+        """
 
     @_raise_not_implemented_error
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         """Converts the Euclidean to the Riemannian gradient.
 
-        For embedded submanifolds of Euclidean space, this is simply the
-        projection of ``euclidean_gradient`` on the tangent space at ``point``.
+        Args:
+            point: The point on the manifold at which the Euclidean gradient
+                was evaluated.
+            euclidean_gradient: The Euclidean gradient as a vector in the
+                ambient space of the tangent space at ``point``.
+
+        Returns:
+            The Riemannian gradient at ``point``.
+            This must be a tangent vector at ``point``.
         """
 
     @_raise_not_implemented_error
@@ -175,10 +235,22 @@ class Manifold(metaclass=abc.ABCMeta):
     ):
         """Converts the Euclidean to the Riemannian Hessian.
 
-        This converts the Euclidean Hessian-vector product (hvp)
-        ``euclidean_hessian`` of a function at a point ``point`` along a tangent
-        vector ``tangent_vector`` to the Riemannian hvp of ``point`` along
-        ``tangent_vector`` on the manifold.
+        This converts the Euclidean Hessian ``euclidean_hessian`` of a function
+        at a point ``point`` along a tangent vector ``tangent_vector`` to the
+        Riemannian Hessian of ``point`` along ``tangent_vector`` on the
+        manifold.
+
+        Args:
+            point: The point on the manifold at which the Euclidean gradient
+                and Hessian was evaluated.
+            euclidean_gradient: The Euclidean gradient at ``point``.
+            euclidean_hessian: The Euclidean Hessian at ``point`` along the
+                direction ``tangent_vector``.
+            tangent_vector: The tangent vector in the direction of which the
+                Riemannian Hessian is to be calculated.
+
+        Returns:
+            The Riemannian Hessian as a tangent vector at ``point``.
         """
 
     @_raise_not_implemented_error
@@ -189,11 +261,28 @@ class Manifold(metaclass=abc.ABCMeta):
         compute numerically.
         It maps a vector ``tangent_vector`` in the tangent space at ``point``
         back to the manifold.
+
+        Args:
+            point: A point on the manifold.
+            tangent_vector: A tangent vector at ``point``.
+
+        Returns:
+            A point on the manifold reached by moving away from ``point`` in
+            the direction of ``tangent_vector``.
         """
 
     @_raise_not_implemented_error
     def exp(self, point, tangent_vector):
-        """Computes the exponential map on the manifold."""
+        """Computes the exponential map on the manifold.
+
+        Args:
+            point: A point on the manifold.
+            tangent_vector: A tangent vector at ``point``.
+
+        Returns:
+            The point on the manifold reached by moving away from ``point``
+            along a geodesic in the direction of ``tangent_vector``.
+        """
 
     @_raise_not_implemented_error
     def log(self, point_a, point_b):
@@ -204,6 +293,13 @@ class Manifold(metaclass=abc.ABCMeta):
         ``point_b``.
         In other words, ``exp(point_a, log(point_a, point_b)) == point_b``.
         As such it is the inverse of :meth:`exp`.
+
+        Args:
+            point_a: First point on the manifold.
+            point_b: Second point on the manifold.
+
+        Returns:
+            A tangent vector in the tangent space at ``point_a``.
         """
 
     @_raise_not_implemented_error
@@ -215,15 +311,31 @@ class Manifold(metaclass=abc.ABCMeta):
         (see e.g. section 10.5 of [Bou2020]_).
         It transports a vector ``tangent_vector_a`` in the tangent space at
         ``point_a`` to the tangent space at `point_b`.
+
+        Args:
+            point_a: The first point on the manifold.
+            point_b: The second point on the manifold.
+            tangent_vector_a: The tangent vector at ``point_a`` to transport to
+                the tangent space at ``point_b``.
+
+        Returns:
+            A tangent vector at ``point_b``.
         """
 
     @_raise_not_implemented_error
     def pair_mean(self, point_a, point_b):
         """Computes the intrinsic mean of two points on the manifold.
 
-        Returns the intrinsic mean of two points ``X`` and ``Y`` on the
-        manifold, i.e., a point that lies mid-way between ``X`` and ``Y`` on
-        the geodesic arc joining them.
+        Returns the intrinsic mean of two points ``point_a`` and ``point_b`` on
+        the manifold, i.e., a point that lies mid-way between ``point_a`` and
+        ``point_b`` on the geodesic arc joining them.
+
+        Args:
+            point_a: The first point on the manifold.
+            point_b: The second point on the manifold.
+
+        Returns:
+            The mid-way point between ``point_a`` and ``point_b``.
         """
 
     @_raise_not_implemented_error
@@ -234,6 +346,13 @@ class Manifold(metaclass=abc.ABCMeta):
         at ``point`` on the manifold.
         Typically this simply corresponds to ``proj(point, vector)`` but may
         differ for certain manifolds.
+
+        Args:
+            point: A point on the manifold.
+            vector: A vector close to the tangent space at ``point``.
+
+        Returns:
+            The tangent vector at ``point`` closest to ``vector``.
         """
 
 
@@ -249,7 +368,7 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
     method required by second-order optimizers to translate Euclidean
     Hessian-vector products to their Riemannian counterparts.
 
-    Notes:
+    Note:
         This class follows definition 3.47 in [Bou2020]_ of "Riemannian
         submanifolds".
         As such, manifolds derived from this class are assumed to be embedded
@@ -260,6 +379,24 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
         For the exact definition of the Weingarten map refer to [AMT2013]_ and
         the notes in section 5.11 of [Bou2020]_.
     """
+
+    @Manifold._raise_not_implemented_error
+    def weingarten(self, point, tangent_vector, normal_vector):
+        """Compute the Weingarten map of the manifold.
+
+        This map takes a vector ``tangent_vector`` in the tangent space at
+        ``point`` and a vector ``normal_vector`` in the normal space at
+        ``point`` to produce another tangent vector.
+
+        Args:
+            point: A point on the manifold.
+            tangent_vector: A tangent vector at ``point``.
+            normal_vector: A vector orthogonal to the tangent space at
+                ``point``.
+
+        Returns:
+            A tangent vector.
+        """
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(point, euclidean_gradient)
@@ -274,11 +411,17 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
             point, tangent_vector, normal_gradient
         )
 
-    @Manifold._raise_not_implemented_error
-    def weingarten(self, point, tangent_vector, normal_vector):
-        """Compute the Weingarten map of the manifold.
 
-        This map takes a vector ``tangent_vector`` in the tangent space at
-        ``point`` and a vector ``normal_vector`` in the normal space at
-        ``point`` to produce another tangent vector.
-        """
+class RetrAsExpMixin:
+    """Mixin which defers calls to the exponential map to the retraction."""
+
+    def exp(self, point, tangent_vector):
+        class_name = self.__class__.__name__
+        warnings.warn(
+            f"Exponential map for manifold '{class_name}' not available. "
+            "Using retraction instead.",
+            RuntimeWarning,
+        )
+        return self.retraction(point, tangent_vector)
+
+    exp.__doc__ = Manifold.exp.__doc__

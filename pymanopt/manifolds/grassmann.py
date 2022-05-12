@@ -26,17 +26,29 @@ class _GrassmannBase(Manifold):
 
 
 class Grassmann(_GrassmannBase):
-    """The Grassmannian.
+    r"""The Grassmann manifold.
 
-    This is the manifold of p-dimensional subspaces of n dimensional real
-    vector space.
-    The optional argument k allows the user to optimize over the product of k
-    Grassmannians.
-    Elements are represented as n x p matrices (if k == 1), and as k x n x p
-    matrices if k > 1.
+    This is the manifold of subspaces of dimension ``p`` of a real vector space
+    of dimension ``n``.
+    The optional argument ``k`` allows to optimize over the product of ``k``
+    Grassmann manifolds.
+    Elements are represented as ``n x p`` matrices if ``k == 1``, and as ``k x
+    n x p`` arrays if ``k > 1``.
+
+    Args:
+        n: Dimension of the ambient space.
+        p: Dimension of the subspaces.
+        k: The number of elements in the product.
+
+    Note:
+        The geometry assumed here is the one obtained by treating the
+        Grassmannian as a Riemannian quotient manifold of the Stiefel manifold
+        (see also :class:`pymanopt.manifolds.stiefel.Stiefel`)
+        with the orthogonal group :math:`\O(p) = \set{\vmQ \in \R^{p \times p}
+        : \transp{\vmQ}\vmQ = \vmQ\transp{\vmQ} = \Id_p}`.
     """
 
-    def __init__(self, n, p, k=1):
+    def __init__(self, n: int, p: int, k: int = 1):
         self._n = n
         self._p = p
         self._k = k
@@ -86,8 +98,6 @@ class Grassmann(_GrassmannBase):
         u, _, vt = svd(point + tangent_vector, full_matrices=False)
         return multiprod(u, vt)
 
-    # Generate random Grassmann point using qr of random normally distributed
-    # matrix.
     def random_point(self):
         if self._k == 1:
             X = np.random.normal(size=(self._n, self._p))
@@ -113,14 +123,14 @@ class Grassmann(_GrassmannBase):
             multiprod(point, multitransp(vt) * cos_s), vt
         ) + multiprod(u * sin_s, vt)
 
-        # From numerical experiments, it seems necessary to
-        # re-orthonormalize. This is overall quite expensive.
+        # From numerical experiments, it seems necessary to re-orthonormalize.
+        # This is quite expensive.
         if self._k == 1:
-            Y, unused = np.linalg.qr(Y)
+            Y, _ = np.linalg.qr(Y)
             return Y
 
         for i in range(self._k):
-            Y[i], unused = np.linalg.qr(Y[i])
+            Y[i], _ = np.linalg.qr(Y[i])
         return Y
 
     def log(self, point_a, point_b):
@@ -133,17 +143,28 @@ class Grassmann(_GrassmannBase):
 
 
 class ComplexGrassmann(_GrassmannBase):
-    """The complex Grassmannian.
+    r"""The complex Grassmann manifold.
 
-    This is the manifold of p-dimensional subspaces of n dimensional complex
-    vector space.
-    The optional argument k allows the user to optimize over the product of k
-    Grassmannians.
-    Elements are represented as n x p matrices (if k == 1), and as k x n x p
-    matrices if k > 1.
+    This is the manifold of subspaces of dimension ``p`` of complex
+    vector space of dimension ``n``.
+    The optional argument ``k`` allows to optimize over the product of ``k``
+    complex Grassmannians.
+    Elements are represented as ``n x p`` matrices if ``k == 1``, and as ``k x
+    n x p`` arrays if ``k > 1``.
+
+    Args:
+        n: Dimension of the ambient space.
+        p: Dimension of the subspaces.
+        k: The number of elements in the product.
+
+    Note:
+        Similar to :class:`Grassmann`, the complex Grassmannian is treated
+        as a Riemannian quotient manifold of the complex Stiefel manifold
+        with the unitary group :math:`\U(p) = \set{\vmU \in \R^{p \times p}
+        : \transp{\vmU}\vmU = \vmU\transp{\vmU} = \Id_p}`.
     """
 
-    def __init__(self, n, p, k=1):
+    def __init__(self, n: int, p: int, k: int = 1):
         self._n = n
         self._p = p
         self._k = k

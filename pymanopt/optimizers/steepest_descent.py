@@ -31,7 +31,7 @@ class SteepestDescent(Optimizer):
 
     # Function to solve optimisation problem using steepest descent.
     def run(
-        self, problem, initial_point=None, reuse_line_searcher=False
+        self, problem, *, initial_point=None, reuse_line_searcher=False
     ) -> OptimizerResult:
         """Run steepest descent algorithm.
 

@@ -6,6 +6,8 @@ Bibliography
 .. Generate labels using the so-called AMS "authorship trigraph" style.
 .. Citations are ordered alphabetically.
 
+.. [AM2012] Absil, P-A., and Jérôme Malick. "Projection-like retractions on
+   matrix manifolds." SIAM Journal on Optimization 22.1 (2012): 135-158.
 .. [AMS2008] Absil, P-A., Robert Mahony, and Rodolphe
    Sepulchre. "Optimization algorithms on matrix manifolds."
    Princeton University Press, 2009.
@@ -16,6 +18,9 @@ Bibliography
    university press, 2007.
 .. [Bou2020] Boumal, Nicolas. "An introduction to optimization on smooth
    manifolds." Available online, Aug (2020).
+.. [JBA+2010] Journée, Michel, et al. "Low-rank optimization on the cone of
+   positive semidefinite matrices." SIAM Journal on Optimization 20.5 (2010):
+   2327-2351.
 .. [JVV2012] Jeuris, Ben, Raf Vandebril, and Bart Vandereycken. "A survey and
    comparison of contemporary algorithms for computing the matrix geometric
    mean." Electronic Transactions on Numerical Analysis 39.ARTICLE (2012):
@@ -27,3 +32,6 @@ Bibliography
    25.1 (2015): 713-739.
 .. [Van2013] Vandereycken, Bart. "Low-rank matrix completion by Riemannian
    optimization." SIAM Journal on Optimization 23.2 (2013): 1214-1236.
+.. [Yat2013] Yatawatta, Sarod. "Radio interferometric calibration using a
+   Riemannian manifold." 2013 IEEE International Conference on Acoustics,
+   Speech and Signal Processing. IEEE, 2013.

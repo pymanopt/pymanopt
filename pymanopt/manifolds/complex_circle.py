@@ -4,21 +4,28 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
 class ComplexCircle(RiemannianSubmanifold):
-    """Manifold of unit-modulus complex numbers.
+    r"""Manifold of unit-modulus complex numbers.
 
-    Description of vectors z in C^n (complex) such that each component z(i)
-    has unit modulus. The manifold structure is the Riemannian submanifold
-    structure from the embedding space R^2 x ... x R^2, i.e., the complex
-    circle is identified with the unit circle in the real plane.
+    Manifold of complex vectors :math:`\vmz` in :math:`\C^n` such that each
+    component :math:`z_i` has unit modulus :math:`\abs{z_i} = 1`.
+
+    Args:
+        n: The dimension of the underlying complex space.
+
+    Note:
+        The manifold structure is the Riemannian submanifold
+        structure from the embedding space :math:`\R^2 \times \ldots \times
+        \R^2`, i.e., the complex circle identified with the unit circle in the
+        real plane.
     """
 
-    def __init__(self, dimension=1):
-        self._dimension = dimension
-        if dimension == 1:
+    def __init__(self, n=1):
+        self._n = n
+        if n == 1:
             name = "Complex circle S^1"
         else:
-            name = f"Product manifold of complex circles (S^1)^{dimension}"
-        super().__init__(name, dimension)
+            name = f"Product manifold of complex circles (S^1)^{n}"
+        super().__init__(name, n)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return (tangent_vector_a.conj() @ tangent_vector_b).real
@@ -93,5 +100,4 @@ class ComplexCircle(RiemannianSubmanifold):
 
     @staticmethod
     def _normalize(point):
-        """Normalize entries of array by their absolute values."""
         return point / np.abs(point)

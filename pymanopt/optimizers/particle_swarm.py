@@ -39,7 +39,7 @@ class ParticleSwarm(Optimizer):
         self._nostalgia = nostalgia
         self._social = social
 
-    def run(self, problem, initial_point=None) -> OptimizerResult:
+    def run(self, problem, *, initial_point=None) -> OptimizerResult:
         """Run PSO algorithm.
 
         Args:

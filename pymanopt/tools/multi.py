@@ -77,7 +77,10 @@ def multilogm(A, *, positive_definite=False):
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.log(w), axis=-1)
-    return multiprod(v, w * multihconj(v))
+    logmA = multiprod(v, w * multihconj(v))
+    if np.isrealobj(A):
+        return np.real(logmA)
+    return logmA
 
 
 def multiexpm(A, *, symmetric=False):
@@ -87,4 +90,7 @@ def multiexpm(A, *, symmetric=False):
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.exp(w), axis=-1)
-    return multiprod(v, w * multihconj(v))
+    expmA = multiprod(v, w * multihconj(v))
+    if np.isrealobj(A):
+        return np.real(expmA)
+    return expmA

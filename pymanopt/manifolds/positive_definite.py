@@ -13,14 +13,22 @@ from pymanopt.tools.multi import (
 class SymmetricPositiveDefinite(RiemannianSubmanifold):
     """Manifold of symmetric positive definite matrices.
 
-    Notes:
+    Points on the manifold and tangent vectors are represented as arrays of
+    shape ``k x n x n`` if ``k > 1``, and ``n x n`` if ``k == 1``.
+
+    Args:
+        n: The size of matrices in the manifold, i.e., the number of rows and
+            columns of each element.
+        k: The number of elements in the product geometry.
+
+    Note:
         The geometry is based on the discussion in chapter 6 of [Bha2007]_.
         Also see [SH2015]_ for more details.
 
-        The second-order retraction is taken from [JVV20212]_.
+        The second-order retraction is taken from [JVV2012]_.
     """
 
-    def __init__(self, n, k=1):
+    def __init__(self, n: int, k: int = 1):
         self._n = n
         self._k = k
 

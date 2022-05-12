@@ -174,7 +174,6 @@ def check_gradient(problem, x=None, d=None):
 
 def check_retraction(manifold, point=None, tangent_vector=None):
     """Check order of agreement between a retraction and the exponential."""
-
     if point is None:
         point = manifold.random_point()
         tangent_vector = manifold.random_tangent_vector(point)

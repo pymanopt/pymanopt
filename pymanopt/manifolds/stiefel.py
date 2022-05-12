@@ -6,15 +6,32 @@ from pymanopt.tools.multi import multiprod, multisym, multitransp
 
 
 class Stiefel(RiemannianSubmanifold):
-    """The Stiefel manifold.
+    r"""The (product) Stiefel manifold.
 
-    The optional argument k allows the user to optimize over the product of k
-    Stiefels.
-    Elements are represented as n x p matrices (if k == 1), and as k x n x p
-    matrices if k > 1.
+    The Stiefel manifold :math:`\St(n, p)` is the manifold of orthonormal ``n x
+    p`` matrices.
+    A point :math:`\vmX \in \St(n, p)` therefore satisfies the condition
+    :math:`\transp{\vmX}\vmX = \Id_p`.
+    Points on the manifold are represented as arrays of shape ``(n, p)`` if
+    ``k == 1``.
+    For ``k > 1``, the class represents the product manifold of ``k`` Stiefel
+    manifolds, in which case points on the manifold are represented as arrays
+    of shape ``(k, n, p)``.
+
+    The metric is the usual Euclidean metric on :math:`\R^{n \times p}` which
+    turns :math:`\St(n, p)^k` into a Riemannian submanifold.
+
+    Args:
+        n: The number of rows.
+        p: The number of columns.
+        k: The number of elements in the product.
+
+    Note:
+        The retraction currently implemented here is a first-order one based on
+        the QR decomposition.
     """
 
-    def __init__(self, n, p, k=1):
+    def __init__(self, n: int, p: int, k: int = 1):
         self._n = n
         self._p = p
         self._k = k

@@ -22,7 +22,7 @@ class TestProblemBackendInterface(TestCase):
 
         self.cost = cost
         self.gradient = self.cost.compute_gradient()
-        self.hvp = self.cost.compute_hessian_vector_product()
+        self.hessian = self.cost.compute_hessian_vector_product()
 
         self.problem = pymanopt.Problem(self.manifold, self.cost)
 
@@ -41,7 +41,7 @@ class TestProblemBackendInterface(TestCase):
     def test_hessian_vector_product(self):
         (u, s, vt), x = self.manifold.random_point()
         (a, b, c), d = self.manifold.random_point()
-        hu, hs, hvt, hx = self.hvp(u, s, vt, x, a, b, c, d)
+        hu, hs, hvt, hx = self.hessian(u, s, vt, x, a, b, c, d)
         self.assertEqual(hu.shape, (self.m, self.rank))
         self.assertEqual(hs.shape, (self.rank,))
         self.assertEqual(hvt.shape, (self.rank, self.n))
@@ -72,6 +72,6 @@ class TestProblemBackendInterface(TestCase):
 
         (hu, hs, hvt), hx = H
         for ha, hb in zip(
-            (hu, hs, hvt, hx), self.hvp(u, s, vt, x, a, b, c, d)
+            (hu, hs, hvt, hx), self.hessian(u, s, vt, x, a, b, c, d)
         ):
             np_testing.assert_allclose(ha, hb)
