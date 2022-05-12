@@ -38,7 +38,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         The default SVD-based retraction is only a first-order approximation of
         the exponential map.
         Use of a second-order retraction can be enabled by instantiating the
-        class with ``SpecialOrthogonalGroup(n, k, retraction="polar")``.
+        class with ``SpecialOrthogonalGroup(n, k=k, retraction="polar")``.
 
         The procedure to generate random rotation matrices sampled uniformly
         from the Haar measure is detailed in [Mez2006]_.
