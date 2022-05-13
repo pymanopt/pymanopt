@@ -55,11 +55,9 @@ class Stiefel(RiemannianSubmanifold):
         dimension = int(k * (n * p - p * (p + 1) / 2))
         super().__init__(name, dimension)
 
-        if retraction == "qr":
-            self._retraction = self._retraction_qr
-        elif retraction == "polar":
-            self._retraction = self._retraction_polar
-        else:
+        try:
+            self._retraction = getattr(self, f"_retraction_{retraction}")
+        except AttributeError:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
     @property

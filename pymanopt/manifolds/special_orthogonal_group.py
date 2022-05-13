@@ -57,11 +57,9 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         dimension = int(k * comb(n, 2))
         super().__init__(name, dimension)
 
-        if retraction == "qr":
-            self._retraction = self._retraction_qr
-        elif retraction == "polar":
-            self._retraction = self._retraction_polar
-        else:
+        try:
+            self._retraction = getattr(self, f"_retraction_{retraction}")
+        except AttributeError:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
