@@ -113,7 +113,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
     def setUp(self):
         self.n = n = 10
         self.k = k = 3
-        self.manifold = SymmetricPositiveDefinite(n, k)
+        self.manifold = SymmetricPositiveDefinite(n, k=k)
 
     def test_dim(self):
         manifold = self.manifold

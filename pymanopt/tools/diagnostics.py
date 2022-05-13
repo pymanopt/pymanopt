@@ -183,14 +183,14 @@ def check_retraction(manifold, point=None, tangent_vector=None):
     manifold_class = manifold.__class__.__name__
     try:
         manifold.exp(point, tangent_vector)
-    except AttributeError:
+    except NotImplementedError:
         raise RuntimeError(
             f"The manifold '{manifold_class}' provides no exponential map as "
             "reference to compare the retraction."
         )
     try:
         manifold.retraction(point, tangent_vector)
-    except AttributeError:
+    except NotImplementedError:
         raise RuntimeError(
             f"The manifold '{manifold_class}' provides no retraction."
         )

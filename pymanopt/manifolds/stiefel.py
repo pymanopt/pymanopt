@@ -25,13 +25,17 @@ class Stiefel(RiemannianSubmanifold):
         n: The number of rows.
         p: The number of columns.
         k: The number of elements in the product.
+        retraction: The type of retraction to use.
+            Possible choices are ``qr`` and ``polar``.
 
     Note:
-        The retraction currently implemented here is a first-order one based on
+        The default retraction used here is a first-order one based on
         the QR decomposition.
+        To switch to a second-order polar retraction, use ``Stiefel(n, p, k=k,
+        retraction="polar")``.
     """
 
-    def __init__(self, n: int, p: int, k: int = 1):
+    def __init__(self, n: int, p: int, *, k: int = 1, retraction: str = "qr"):
         self._n = n
         self._p = p
         self._k = k
@@ -50,6 +54,11 @@ class Stiefel(RiemannianSubmanifold):
             name = f"Product Stiefel manifold St({n},{p})^{k}"
         dimension = int(k * (n * p - p * (p + 1) / 2))
         super().__init__(name, dimension)
+
+        try:
+            self._retraction = getattr(self, f"_retraction_{retraction}")
+        except AttributeError:
+            raise ValueError(f"Invalid retraction type '{retraction}'")
 
     @property
     def typical_dist(self):
@@ -74,6 +83,9 @@ class Stiefel(RiemannianSubmanifold):
         return self.projection(point, euclidean_hessian - HsymXtG)
 
     def retraction(self, point, tangent_vector):
+        return self._retraction(point, tangent_vector)
+
+    def _retraction_qr(self, point, tangent_vector):
         if self._k == 1:
             q, r = np.linalg.qr(point + tangent_vector)
             return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
@@ -83,6 +95,11 @@ class Stiefel(RiemannianSubmanifold):
             q, r = np.linalg.qr(target_point[i])
             target_point[i] = q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
         return target_point
+
+    def _retraction_polar(self, point, tangent_vector):
+        Y = point + tangent_vector
+        u, _, vt = np.linalg.svd(Y, full_matrices=False)
+        return multiprod(u, vt)
 
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)

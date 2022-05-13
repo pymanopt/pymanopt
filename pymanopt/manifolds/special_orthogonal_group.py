@@ -38,7 +38,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         The default SVD-based retraction is only a first-order approximation of
         the exponential map.
         Use of a second-order retraction can be enabled by instantiating the
-        class with ``SpecialOrthogonalGroup(n, k, retraction="polar")``.
+        class with ``SpecialOrthogonalGroup(n, k=k, retraction="polar")``.
 
         The procedure to generate random rotation matrices sampled uniformly
         from the Haar measure is detailed in [Mez2006]_.
@@ -57,11 +57,9 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         dimension = int(k * comb(n, 2))
         super().__init__(name, dimension)
 
-        if retraction == "qr":
-            self._retraction = self._retraction_qr
-        elif retraction == "polar":
-            self._retractionretr = self._retraction_polar
-        else:
+        try:
+            self._retraction = getattr(self, f"_retraction_{retraction}")
+        except AttributeError:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
@@ -114,17 +112,9 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return Y
 
     def _retraction_polar(self, point, tangent_vector):
-        def retri(array):
-            u, _, vt = np.linalg.svd(array)
-            return u @ vt
-
         Y = point + multiprod(point, tangent_vector)
-        if self._k == 1:
-            return retri(Y)
-
-        for i in range(self._k):
-            Y[i] = retri(Y[i])
-        return Y
+        u, _, vt = np.linalg.svd(Y)
+        return multiprod(u, vt)
 
     def exp(self, point, tangent_vector):
         tv = np.copy(tangent_vector)

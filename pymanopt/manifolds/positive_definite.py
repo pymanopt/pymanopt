@@ -28,7 +28,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
         The second-order retraction is taken from [JVV2012]_.
     """
 
-    def __init__(self, n: int, k: int = 1):
+    def __init__(self, n: int, *, k: int = 1):
         self._n = n
         self._k = k
 

@@ -1,5 +1,3 @@
-"""Module containing manifolds of fixed-rank matrices."""
-
 import collections
 
 import numpy as np
