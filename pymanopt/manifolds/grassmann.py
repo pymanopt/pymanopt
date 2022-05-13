@@ -48,7 +48,7 @@ class Grassmann(_GrassmannBase):
         : \transp{\vmQ}\vmQ = \vmQ\transp{\vmQ} = \Id_p}`.
     """
 
-    def __init__(self, n: int, p: int, k: int = 1):
+    def __init__(self, n: int, p: int, *, k: int = 1):
         self._n = n
         self._p = p
         self._k = k
@@ -164,7 +164,7 @@ class ComplexGrassmann(_GrassmannBase):
         : \transp{\vmU}\vmU = \vmU\transp{\vmU} = \Id_p}`.
     """
 
-    def __init__(self, n: int, p: int, k: int = 1):
+    def __init__(self, n: int, p: int, *, k: int = 1):
         self._n = n
         self._p = p
         self._k = k
