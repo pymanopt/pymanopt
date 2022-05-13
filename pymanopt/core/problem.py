@@ -241,9 +241,9 @@ class Problem:
     def riemannian_gradient(self):
         if self._riemannian_gradient is None:
 
-            def riemannian_gradient(x):
+            def riemannian_gradient(point):
                 return self.manifold.euclidean_to_riemannian_gradient(
-                    x, self.euclidean_gradient(x)
+                    point, self.euclidean_gradient(point)
                 )
 
             self._riemannian_gradient = riemannian_gradient
@@ -262,9 +262,12 @@ class Problem:
         if self._riemannian_hessian is None:
             euclidean_hessian = self.euclidean_hessian
 
-            def riemannian_hessian(x, a):
+            def riemannian_hessian(point, tangent_vector):
                 return self.manifold.euclidean_to_riemannian_hessian(
-                    x, self.euclidean_gradient(x), euclidean_hessian(x, a), a
+                    point,
+                    self.euclidean_gradient(point),
+                    euclidean_hessian(point, tangent_vector),
+                    tangent_vector,
                 )
 
             self._riemannian_hessian = riemannian_hessian
