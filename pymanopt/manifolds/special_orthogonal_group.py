@@ -1,9 +1,10 @@
 import numpy as np
-from scipy.linalg import expm, logm
 from scipy.special import comb
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
+    multiexpm,
+    multilogm,
     multiprod,
     multiqr,
     multiskew,
@@ -118,22 +119,11 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return multiprod(u, vt)
 
     def exp(self, point, tangent_vector):
-        tv = np.copy(tangent_vector)
-        if self._k == 1:
-            return multiprod(point, expm(tv))
-
-        for i in range(self._k):
-            tv[i] = expm(tv[i])
-        return multiprod(point, tv)
+        return multiprod(point, multiexpm(tangent_vector))
 
     def log(self, point_a, point_b):
         U = multiprod(multitransp(point_a), point_b)
-        if self._k == 1:
-            return multiskew(np.real(logm(U)))
-
-        for i in range(self._k):
-            U[i] = np.real(logm(U[i]))
-        return multiskew(U)
+        return multiskew(multilogm(U))
 
     def random_point(self):
         n, k = self._n, self._k

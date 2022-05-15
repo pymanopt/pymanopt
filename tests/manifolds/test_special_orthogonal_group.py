@@ -36,3 +36,17 @@ class TestSpecialOrthogonalGroup(TestCase):
         np_testing.assert_almost_equal(
             tangent_vector, -multitransp(tangent_vector)
         )
+
+    def test_exp_log_inverse(self):
+        s = self.so
+        X = s.random_point()
+        Y = s.random_point()
+        Yexplog = s.exp(X, s.log(X, Y))
+        np_testing.assert_array_almost_equal(Y, Yexplog)
+
+    def test_log_exp_inverse(self):
+        s = self.so
+        X = s.random_point()
+        U = s.random_tangent_vector(X)
+        Ulogexp = s.log(X, s.exp(X, U))
+        np_testing.assert_array_almost_equal(U, Ulogexp)
