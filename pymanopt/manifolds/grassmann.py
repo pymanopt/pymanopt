@@ -2,7 +2,7 @@ import numpy as np
 from numpy.linalg import svd
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools.multi import multihconj, multiprod, multitransp
+from pymanopt.tools.multi import multihconj, multiprod, multiqr, multitransp
 
 
 class _GrassmannBase(Manifold):
@@ -99,15 +99,10 @@ class Grassmann(_GrassmannBase):
         return multiprod(u, vt)
 
     def random_point(self):
+        q, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
         if self._k == 1:
-            X = np.random.normal(size=(self._n, self._p))
-            q, _ = np.linalg.qr(X)
-            return q
-
-        X = np.zeros((self._k, self._n, self._p))
-        for i in range(self._k):
-            X[i], _ = np.linalg.qr(np.random.normal(size=(self._n, self._p)))
-        return X
+            return q.reshape(self._n, self._p)
+        return q
 
     def random_tangent_vector(self, point):
         tangent_vector = np.random.normal(size=point.shape)
@@ -221,24 +216,13 @@ class ComplexGrassmann(_GrassmannBase):
         return multiprod(u, vh)
 
     def random_point(self):
+        q, _ = multiqr(
+            np.random.normal(size=(self._k, self._n, self._p))
+            + 1j * np.random.normal(size=(self._k, self._n, self._p))
+        )
         if self._k == 1:
-            point, _ = np.linalg.qr(
-                (
-                    np.random.normal(size=(self._n, self._p))
-                    + 1j * np.random.normal(size=(self._n, self._p))
-                )
-            )
-            return point
-
-        point = np.zeros((self._k, self._n, self._p), np.complex_)
-        for i in range(self._k):
-            point[i], _ = np.linalg.qr(
-                (
-                    np.random.normal(size=(self._n, self._p))
-                    + 1j * np.random.normal(size=(self._n, self._p))
-                )
-            )
-        return point
+            return q.reshape(self._n, self._p)
+        return q
 
     def random_tangent_vector(self, point):
         tangent_vector = np.random.normal(
