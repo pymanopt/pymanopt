@@ -128,26 +128,19 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
     def random_point(self):
         n, k = self._n, self._k
         if n == 1:
-            R = np.ones((k, 1, 1))
+            point = np.ones((k, 1, 1))
         else:
-            R = np.zeros((k, n, n))
-            for i in range(k):
-                # Generated as such, Q is uniformly distributed over O(n), the
-                # group of orthogonal n-by-n matrices.
-                A = np.random.normal(size=(n, n))
-                Q, RR = np.linalg.qr(A)
-                Q = Q @ np.diag(np.sign(np.diag(RR)))
-
-                # If Q is in O(n) but not in SO(n), we permute the two first
-                # columns of Q such that det(new Q) = -det(Q), hence the new Q
-                # will be in SO(n), uniformly distributed.
-                if np.linalg.det(Q) < 0:
-                    Q[:, [0, 1]] = Q[:, [1, 0]]
-                R[i] = Q
-
+            q, r = multiqr(np.random.normal(size=(k, n, n)))
+            sign = np.sign(np.diagonal(r, axis1=-2, axis2=-1))
+            point = q * np.expand_dims(sign, axis=1)
+            negative_det = np.linalg.det(point) < 0
+            # Swap the first two columns of matrices where det(point) < 0 to
+            # flip the sign of their determinants.
+            if negative_det.any():
+                point[negative_det, :, [0, 1]] = point[negative_det, :, [1, 0]]
         if k == 1:
-            return R.reshape(n, n)
-        return R
+            return point.reshape(n, n)
+        return point
 
     def random_tangent_vector(self, point):
         n, k = self._n, self._k
