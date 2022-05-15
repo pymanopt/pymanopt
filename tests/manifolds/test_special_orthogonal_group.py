@@ -1,3 +1,4 @@
+import numpy as np
 import numpy.testing as np_testing
 
 from pymanopt.manifolds import SpecialOrthogonalGroup
@@ -17,6 +18,7 @@ class TestSpecialOrthogonalGroup(TestCase):
         point = self.so.random_point()
         assert point.shape == (self.n, self.n)
         np_testing.assert_almost_equal(point.T @ point - point @ point.T, 0)
+        assert np.allclose(np.linalg.det(point), 1)
 
         point = self.so_product.random_point()
         assert point.shape == (self.k, self.n, self.n)
@@ -25,6 +27,7 @@ class TestSpecialOrthogonalGroup(TestCase):
             - multiprod(point, multitransp(point)),
             0,
         )
+        assert np.allclose(np.linalg.det(point), 1)
 
     def test_random_tangent_vector(self):
         point = self.so.random_point()
