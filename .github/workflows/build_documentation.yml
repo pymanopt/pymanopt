@@ -17,6 +17,7 @@ jobs:
       max-parallel: 1
       matrix:
         version:
+          - 1.0.0
           - latest
     steps:
       - name: Set up python 3.9
