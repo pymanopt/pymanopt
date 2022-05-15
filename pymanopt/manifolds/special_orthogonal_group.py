@@ -144,11 +144,11 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
 
     def random_tangent_vector(self, point):
         n, k = self._n, self._k
-        idxs = np.triu_indices(n, 1)
+        inds = np.triu_indices(n, 1)
         vector = np.zeros((k, n, n))
         for i in range(k):
-            vector[i][idxs] = np.random.normal(size=int(n * (n - 1) / 2))
-            vector = vector - multitransp(vector)
+            vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
+        vector = vector - multitransp(vector)
         if k == 1:
             vector = vector.reshape(n, n)
         return vector / np.sqrt(np.tensordot(vector, vector, axes=vector.ndim))
