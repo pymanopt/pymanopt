@@ -12,7 +12,7 @@ If an autodiff backend is used via one of the provided decorators, the
 signature of the decorated callable must match the point layout of the manifold
 it is defined on.
 For instance, for memory efficiency points on the
-:class:`pymanopt.manifolds.fixed_rink.FixedRankEmbedded` manifold are not
+:class:`pymanopt.manifolds.fixed_rank.FixedRankEmbedded` manifold are not
 represented as ``m x n`` matrices in the ambient space but as a singular value
 decomposition.
 As such a cost function defined on the manifold must accept three arguments
