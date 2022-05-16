@@ -48,10 +48,6 @@ jobs:
             git checkout ${{ matrix.version }}
           fi
 
-      - name: Generate version list
-        run: |
-          echo "${{ needs.build-matrix.outputs.versions }}" > doc_versions.json
-
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -71,6 +67,7 @@ jobs:
             -b html \
             -D version=${{ matrix.version }} \
             -D release=${{ matrix.version }} \
+            -A doc_versions=${{ join(fromJSON(needs.build-matrix.outputs.versions)) }} \
             docs \
             website/docs/${{ matrix.version }}
 

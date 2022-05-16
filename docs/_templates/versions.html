@@ -7,7 +7,7 @@
   <div class="rst-other-versions">
     <dl>
       <dt>Versions</dt>
-      {%- for doc_version in doc_versions %}
+      {%- for doc_version in doc_versions.split(",") %}
       <dd><a href="/docs/{{ doc_version }}">{{ doc_version }}</a></dd>
       {%- endfor %}
     </dl>

@@ -1,24 +1,9 @@
 import datetime
-import json
-import pathlib
 import string
 
 import sphinxcontrib.katex as katex
 
 import pymanopt
-
-
-def get_doc_versions():
-    """Retrieve version list written by github workflow if available."""
-    root = pathlib.Path(__file__).resolve().parent.parent
-    version_list = root / "doc_versions.json"
-    if version_list.exists():
-        with open(str(version_list)) as fp:
-            doc_versions = json.load(fp)
-    else:
-        doc_versions = []
-    print("Including links to versions:", doc_versions)
-    return doc_versions
 
 
 # Package information
@@ -54,7 +39,7 @@ html_last_updated_fmt = ""
 
 # Doc version sidebar
 templates_path = ["_templates"]
-html_context = {"doc_versions": get_doc_versions()}
+html_context = {}
 
 # autodoc
 autodoc_typehints = "description"
