@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Generate version matrix
         id: build-matrix
-        run: echo '::set-output name=versions::["stable", "latest"]'
+        run: echo "::set-output name=versions::['stable', 'latest']"
     outputs:
       versions: ${{ steps.build-matrix.outputs.versions }}
 
@@ -50,7 +50,7 @@ jobs:
 
       - name: Generate version list
         run: |
-          echo ${{ needs.build-matrix.outputs.versions }} > doc_versions.json
+          echo "${{ needs.build-matrix.outputs.versions }}" > doc_versions.json
 
       - name: Install dependencies
         run: |
