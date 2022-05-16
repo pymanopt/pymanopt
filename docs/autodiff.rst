@@ -3,7 +3,7 @@ Automatic Differentiation
 
 Cost functions, gradients and Hessian-vector products (hvps) in Pymanopt must
 be defined as Python callables annotated with one of the :ref:`backend
-decorators<Backend Decorators>` below.
+decorators<Backends>` below.
 Decorating a callable with a backend decorator will wrap it in an instance of
 the :class:`pymanopt.autodiff.Function` class that provides a backend-agnostic
 API to the :class:`pymanopt.core.problem.Problem` class to compute derivatives.
