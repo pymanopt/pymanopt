@@ -9,16 +9,24 @@ on:
       master
 
 jobs:
+  build-matrix:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Generate version matrix
+        id: build-matrix
+        run: echo '::set-output name=versions::["stable", "latest"]'
+    outputs:
+      versions: ${{ steps.build-matrix.outputs.versions }}
+
   docs:
     runs-on: ubuntu-20.04
+    needs: build-matrix
     strategy:
       # Make sure we never build docs in parallel in case we deploy new
       # versions to avoid potential race conditions while pushing to gh pages.
       max-parallel: 1
       matrix:
-        version:
-          - stable
-          - latest
+        version: ${{ fromJSON(needs.build-matrix.outputs.versions) }}
     steps:
       - name: Set up python 3.9
         uses: actions/setup-python@v2
@@ -39,6 +47,10 @@ jobs:
           else
             git checkout ${{ matrix.version }}
           fi
+
+      - name: Generate version list
+        run: |
+          echo ${{ needs.build-matrix.outputs.versions }} > doc_versions.json
 
       - name: Install dependencies
         run: |

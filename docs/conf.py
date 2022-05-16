@@ -1,20 +1,21 @@
 import datetime
+import json
 import pathlib
 import string
 
 import sphinxcontrib.katex as katex
-import yaml
 
 import pymanopt
 
 
 def get_doc_versions():
-    """Retrieve doc versions from github workflow file."""
+    """Retrieve version list written by github workflow if available."""
     root = pathlib.Path(__file__).resolve().parent.parent
-    yaml_file = root / ".github" / "workflows" / "build_documentation.yml"
-    with open(str(yaml_file)) as fp:
-        doc_config = yaml.safe_load(fp)
-    return doc_config["jobs"]["docs"]["strategy"]["matrix"]["version"]
+    version_list = root / "doc_versions.json"
+    if version_list.exists():
+        with open(str(version_list)) as fp:
+            return json.load(fp)
+    return []
 
 
 # Package information
