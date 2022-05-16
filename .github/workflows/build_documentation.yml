@@ -25,19 +25,20 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Find stable tag
-        run: echo "::set-output name=tag::$(git tag | sort -V | tail -1)"
-        id: stable-tag
-
-      - name: Checkout
+      - name: Clone repository
         uses: actions/checkout@v2
         with:
-          ref: |
-            ${{
-              (matrix.version == 'latest' && github.sha) ||
-              (matrix.version == 'stable' && steps.stable-tag.outputs.tag) ||
-              matrix.version
-            }}
+          fetch-depth: 0
+
+      - name: Checkout target
+        run: |
+          if ${{ matrix.version == 'latest' }}; then
+            git checkout ${{ github.sha }}
+          elif ${{ matrix.version == 'stable' }}; then
+            git checkout tags/$(git tag | sort -V | tail -1)
+          else
+            git checkout ${{ matrix.version }}
+          fi
 
       - name: Install dependencies
         run: |
