@@ -3,7 +3,13 @@ from numpy import testing as np_testing
 from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
-from pymanopt.tools.multi import multiprod, multisym, multitransp
+from pymanopt.tools.multi import (
+    multiprod,
+    multisym,
+    multitransp,
+    multilogm,
+    multiexpm,
+)
 
 from .._test import TestCase
 
@@ -64,6 +70,26 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         aya = multiprod(multiprod(a, y), multitransp(a))
         np_testing.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(axa, aya)
+        )
+
+        def geodesic(point_a, point_b, alpha):
+            if alpha < 0 or 1 < alpha:
+                raise ValueError("Exponent must be in [0,1]")
+            c = np.linalg.cholesky(point_a)
+            c_inv = np.linalg.inv(c)
+            logm = multilogm(
+                multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
+                positive_definite=True
+            )
+            powm = multiexpm(alpha * logm, symmetric=False)
+            return multiprod(multiprod(c, powm), multitransp(c))
+
+        # Test proportionality
+        # from Eq 6.12 of "Positive definite matrices"
+        alpha = np.random.rand(1)[0]
+        np_testing.assert_almost_equal(
+            manifold.dist(x, geodesic(x, y, alpha)),
+            alpha * manifold.dist(x, y)
         )
 
     def test_exp(self):
