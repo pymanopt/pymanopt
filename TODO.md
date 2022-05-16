@@ -1,6 +1,7 @@
 # TODO/Roadmap
 
-## 1.0.x:
+## 1.1.x:
+  - Fix use of np.sign for complex input
   - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices
   - Change "beta_rule" of CG optimizer to internal enum representation
   - Add re-tangentialization change from manopt's trustregions solver
@@ -9,7 +10,7 @@
     also manopt's qr_unique)
   - Add tests for alternative retractions of Stiefel / SO(n)
 
-## 1.1.x:
+## 1.2.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
     transport simply by orthogonal projection of the tangent vector translated
     in the ambient space. For this, 'RiemannianSubmanifold' would require a
