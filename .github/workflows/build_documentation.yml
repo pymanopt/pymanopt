@@ -17,7 +17,7 @@ jobs:
       max-parallel: 1
       matrix:
         version:
-          - 1.0.0
+          - stable
           - latest
     steps:
       - name: Set up python 3.9
@@ -25,10 +25,19 @@ jobs:
         with:
           python-version: 3.9
 
+      - name: Find stable tag
+        run: echo "::set-output name=tag::$(git tag | sort -V | tail -1)"
+        id: stable-tag
+
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ matrix.version == 'latest' && github.sha || matrix.version }}
+          ref: |
+            ${{
+              (matrix.version == 'latest' && github.sha) ||
+              (matrix.version == 'stable' && steps.stable-tag.outputs.tag) ||
+              matrix.version
+            }}
 
       - name: Install dependencies
         run: |
