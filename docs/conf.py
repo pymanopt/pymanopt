@@ -14,8 +14,11 @@ def get_doc_versions():
     version_list = root / "doc_versions.json"
     if version_list.exists():
         with open(str(version_list)) as fp:
-            return json.load(fp)
-    return []
+            doc_versions = json.load(fp)
+    else:
+        doc_versions = []
+    print("Including links to versions:", doc_versions)
+    return doc_versions
 
 
 # Package information
