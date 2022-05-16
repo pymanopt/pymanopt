@@ -17,6 +17,7 @@ jobs:
       max-parallel: 1
       matrix:
         version:
+          - stable
           - latest
     steps:
       - name: Set up python 3.9
@@ -24,10 +25,20 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Checkout
+      - name: Clone repository
         uses: actions/checkout@v2
         with:
-          ref: ${{ matrix.version == 'latest' && github.sha || matrix.version }}
+          fetch-depth: 0
+
+      - name: Checkout target
+        run: |
+          if ${{ matrix.version == 'latest' }}; then
+            git checkout ${{ github.sha }}
+          elif ${{ matrix.version == 'stable' }}; then
+            git checkout tags/$(git tag | sort -V | tail -1)
+          else
+            git checkout ${{ matrix.version }}
+          fi
 
       - name: Install dependencies
         run: |
