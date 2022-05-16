@@ -39,7 +39,7 @@ html_last_updated_fmt = ""
 
 # Doc version sidebar
 templates_path = ["_templates"]
-html_context = {}
+html_context = {"doc_versions": ""}
 
 # autodoc
 autodoc_typehints = "description"
