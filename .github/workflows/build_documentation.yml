@@ -71,14 +71,10 @@ jobs:
         run: |
           PYTHONPATH=. sphinx-build \
             -b html \
-            # E.g. "stable (1.0.0)"
-            -D release=${{ steps.checkout.outputs.version }} \
-            # Same as above.
-            -D version=${{ steps.checkout.outputs.version }} \
-            # E.g. "stable"
-            -D doc_version=${{ matrix.version }} \
-            # E.g. "stable,latest"
-            -D doc_versions=${{ join(fromJSON(needs.build-matrix.outputs.versions)) }} \
+            -D release="${{ steps.checkout.outputs.version }}" \
+            -D version="${{ steps.checkout.outputs.version }}" \
+            -D doc_version="${{ matrix.version }}" \
+            -D doc_versions="${{ join(fromJSON(needs.build-matrix.outputs.versions)) }}" \
             docs \
             website/docs/${{ matrix.version }}
 
