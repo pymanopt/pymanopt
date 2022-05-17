@@ -39,12 +39,18 @@ jobs:
           fetch-depth: 0
 
       - name: Checkout target
+        id: checkout
         run: |
           if ${{ matrix.version == 'latest' }}; then
+            sha=$(git rev-parse --short ${{ github.sha }})
+            echo "::set-output name=version::latest ($sha)"
             git checkout ${{ github.sha }}
           elif ${{ matrix.version == 'stable' }}; then
-            git checkout tags/$(git tag | sort -V | tail -1)
+            tag=$(git tag | sort -V | tail -1)
+            echo "::set-output name=version::stable ($tag)"
+            git checkout tags/$tag
           else
+            echo "::set-output name=version::${{ matrix.version }}"
             git checkout ${{ matrix.version }}
           fi
 
@@ -65,9 +71,14 @@ jobs:
         run: |
           PYTHONPATH=. sphinx-build \
             -b html \
-            -D version=${{ matrix.version }} \
-            -D release=${{ matrix.version }} \
-            -A doc_versions=${{ join(fromJSON(needs.build-matrix.outputs.versions)) }} \
+            # E.g. "stable (1.0.0)"
+            -D release=${{ steps.checkout.outputs.version }} \
+            # Same as above.
+            -D version=${{ steps.checkout.outputs.version }} \
+            # E.g. "stable"
+            -D doc_version=${{ matrix.version }} \
+            # E.g. "stable,latest"
+            -D doc_versions=${{ join(fromJSON(needs.build-matrix.outputs.versions)) }} \
             docs \
             website/docs/${{ matrix.version }}
 

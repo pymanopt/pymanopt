@@ -6,11 +6,26 @@ import sphinxcontrib.katex as katex
 import pymanopt
 
 
+def setup(app):
+    def config_inited(app, config):
+        config.html_context["doc_version"] = config.doc_version
+        config.html_context["doc_versions"] = (
+            config.doc_versions.split(",") or []
+        )
+
+    app.add_config_value(
+        "doc_version", default=pymanopt.__version__, rebuild="html", types=str
+    )
+    app.add_config_value("doc_versions", default="", rebuild="html", types=str)
+    app.connect("config-inited", config_inited)
+
+
 # Package information
 project = "Pymanopt"
 author = "Jamie Townsend, Niklas Koep, Sebastian Weichwald"
 copyright = f"2016-{datetime.date.today().year}, {author}"
 release = version = pymanopt.__version__
+
 
 # Build settings
 extensions = [
@@ -39,7 +54,6 @@ html_last_updated_fmt = ""
 
 # Doc version sidebar
 templates_path = ["_templates"]
-html_context = {"doc_versions": ""}
 
 # autodoc
 autodoc_typehints = "description"
