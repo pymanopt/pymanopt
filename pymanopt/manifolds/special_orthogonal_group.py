@@ -107,11 +107,8 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
 
     def _retraction_qr(self, point, tangent_vector):
         Y = point + multiprod(point, tangent_vector)
-        q, r = multiqr(Y)
-        sign = np.sign(np.sign(np.diagonal(r, axis1=-2, axis2=-1)) + 0.5)
-        if self._k == 1:
-            return q * sign
-        return q * np.expand_dims(sign, axis=1)
+        q, _ = multiqr(Y)
+        return q
 
     def _retraction_polar(self, point, tangent_vector):
         Y = point + multiprod(point, tangent_vector)
@@ -130,9 +127,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         if n == 1:
             point = np.ones((k, 1, 1))
         else:
-            q, r = multiqr(np.random.normal(size=(k, n, n)))
-            sign = np.sign(np.diagonal(r, axis1=-2, axis2=-1))
-            point = q * np.expand_dims(sign, axis=1)
+            point, _ = multiqr(np.random.normal(size=(k, n, n)))
             negative_det = np.linalg.det(point) < 0
             # Swap the first two columns of matrices where det(point) < 0 to
             # flip the sign of their determinants.
