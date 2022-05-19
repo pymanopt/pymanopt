@@ -4,11 +4,11 @@ from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import (
+    multiexpm,
+    multilogm,
     multiprod,
     multisym,
     multitransp,
-    multilogm,
-    multiexpm,
 )
 
 from .._test import TestCase
