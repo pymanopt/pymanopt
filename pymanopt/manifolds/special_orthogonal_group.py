@@ -128,11 +128,13 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
             point = np.ones((k, 1, 1))
         else:
             point, _ = multiqr(np.random.normal(size=(k, n, n)))
-            negative_det = np.linalg.det(point) < 0
             # Swap the first two columns of matrices where det(point) < 0 to
             # flip the sign of their determinants.
-            if negative_det.any():
-                point[negative_det, :, [0, 1]] = point[negative_det, :, [1, 0]]
+            negative_det, *_ = np.where(np.linalg.det(point) < 0)
+            slice_ = np.arange(point.shape[1])
+            point[np.ix_(negative_det, slice_, [0, 1])] = point[
+                np.ix_(negative_det, slice_, [1, 0])
+            ]
         if k == 1:
             return point.reshape(n, n)
         return point
