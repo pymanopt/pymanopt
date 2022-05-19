@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.linalg import svd
 
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools.multi import multihconj, multiprod, multiqr, multitransp
@@ -68,7 +67,9 @@ class Grassmann(_GrassmannBase):
         super().__init__(name, dimension)
 
     def dist(self, point_a, point_b):
-        s = svd(multiprod(multitransp(point_a), point_b), compute_uv=False)
+        s = np.linalg.svd(
+            multiprod(multitransp(point_a), point_b), compute_uv=False
+        )
         s[s > 1] = 1
         s = np.arccos(s)
         return np.linalg.norm(s)
@@ -95,7 +96,7 @@ class Grassmann(_GrassmannBase):
         # columns. Compare this with the Stiefel manifold.
 
         # Compute the polar factorization of Y = X+G
-        u, _, vt = svd(point + tangent_vector, full_matrices=False)
+        u, _, vt = np.linalg.svd(point + tangent_vector, full_matrices=False)
         return multiprod(u, vt)
 
     def random_point(self):
@@ -110,7 +111,7 @@ class Grassmann(_GrassmannBase):
         return tangent_vector / np.linalg.norm(tangent_vector)
 
     def exp(self, point, tangent_vector):
-        u, s, vt = svd(tangent_vector, full_matrices=False)
+        u, s, vt = np.linalg.svd(tangent_vector, full_matrices=False)
         cos_s = np.expand_dims(np.cos(s), -2)
         sin_s = np.expand_dims(np.sin(s), -2)
 
@@ -132,7 +133,7 @@ class Grassmann(_GrassmannBase):
         ytx = multiprod(multitransp(point_b), point_a)
         At = multitransp(point_b) - multiprod(ytx, multitransp(point_a))
         Bt = np.linalg.solve(ytx, At)
-        u, s, vt = svd(multitransp(Bt), full_matrices=False)
+        u, s, vt = np.linalg.svd(multitransp(Bt), full_matrices=False)
         arctan_s = np.expand_dims(np.arctan(s), -2)
         return multiprod(u * arctan_s, vt)
 
