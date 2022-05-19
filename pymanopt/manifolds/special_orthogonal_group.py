@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import comb
+import scipy.special
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
@@ -61,7 +61,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
             name = f"Sphecial orthogonal group SO({n})^{k}"
         else:
             raise ValueError("k must be an integer no less than 1.")
-        dimension = int(k * comb(n, 2))
+        dimension = int(k * scipy.special.comb(n, 2))
         super().__init__(name, dimension)
 
         try:
