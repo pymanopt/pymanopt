@@ -68,7 +68,7 @@ class TestSymmetricManifold(TestCase):
         u = np.random.normal(size=(self.n, self.n, self.k))
         np_testing.assert_almost_equal(np.sqrt(np.sum(u**2)), e.norm(x, u))
 
-    def test_rand(self):
+    def test_random_point(self):
         e = self.manifold
         x = e.random_point()
         y = e.random_point()

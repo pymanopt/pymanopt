@@ -38,7 +38,7 @@ class TestSingleStiefelManifold(TestCase):
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         X = self.manifold.random_point()
@@ -173,7 +173,7 @@ class TestMultiStiefelManifold(TestCase):
         )
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         X = self.manifold.random_point()

@@ -26,7 +26,7 @@ class TestPositiveVectors(TestCase):
         u = self.manifold.random_tangent_vector(x)
         assert self.manifold.norm(x, u) > 0
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold
         # and that if you generate two they are not equal.
         x = self.manifold.random_point()

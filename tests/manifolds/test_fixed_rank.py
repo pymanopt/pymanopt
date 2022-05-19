@@ -92,7 +92,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
             np.sqrt(e.inner_product(x, u, u)), e.norm(x, u)
         )
 
-    def test_rand(self):
+    def test_random_point(self):
         e = self.manifold
         x = e.random_point()
         y = e.random_point()
