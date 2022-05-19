@@ -2,7 +2,7 @@ import numpy as np
 from scipy.linalg import expm
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.tools.multi import multiprod, multisym, multitransp
+from pymanopt.tools.multi import multiprod, multiqr, multisym, multitransp
 
 
 class Stiefel(RiemannianSubmanifold):
@@ -86,15 +86,9 @@ class Stiefel(RiemannianSubmanifold):
         return self._retraction(point, tangent_vector)
 
     def _retraction_qr(self, point, tangent_vector):
-        if self._k == 1:
-            q, r = np.linalg.qr(point + tangent_vector)
-            return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
-
-        target_point = point + tangent_vector
-        for i in range(self._k):
-            q, r = np.linalg.qr(target_point[i])
-            target_point[i] = q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
-        return target_point
+        a = point + tangent_vector
+        point, _ = multiqr(a)
+        return point
 
     def _retraction_polar(self, point, tangent_vector):
         Y = point + tangent_vector
