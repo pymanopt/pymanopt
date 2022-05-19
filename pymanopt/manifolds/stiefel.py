@@ -29,6 +29,8 @@ class Stiefel(RiemannianSubmanifold):
             Possible choices are ``qr`` and ``polar``.
 
     Note:
+        The formula for the exponential map can be found in [ZH2021]_.
+
         The default retraction used here is a first-order one based on
         the QR decomposition.
         To switch to a second-order polar retraction, use ``Stiefel(n, p, k=k,
