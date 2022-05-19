@@ -121,13 +121,7 @@ class Grassmann(_GrassmannBase):
 
         # From numerical experiments, it seems necessary to re-orthonormalize.
         # This is quite expensive.
-        if self._k == 1:
-            Y, _ = np.linalg.qr(Y)
-            return Y
-
-        for i in range(self._k):
-            Y[i], _ = np.linalg.qr(Y[i])
-        return Y
+        return multiqr(Y)[0]
 
     def log(self, point_a, point_b):
         ytx = multiprod(multitransp(point_b), point_a)
@@ -242,13 +236,7 @@ class ComplexGrassmann(_GrassmannBase):
 
         # From numerical experiments, it seems necessary to
         # re-orthonormalize. This is overall quite expensive.
-        if self._k == 1:
-            Y, _ = np.linalg.qr(Y)
-            return Y
-
-        for i in range(self._k):
-            Y[i], _ = np.linalg.qr(Y[i])
-        return Y
+        return multiqr(Y)[0]
 
     def log(self, point_a, point_b):
         YHX = multiprod(multihconj(point_b), point_a)
