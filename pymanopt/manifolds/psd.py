@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.linalg import solve_continuous_lyapunov as lyap
+import scipy.linalg
 
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
 
@@ -20,12 +20,12 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         )
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector, "fro")
+        return np.linalg.norm(tangent_vector)
 
     def projection(self, point, vector):
         YtY = point.T @ point
         AS = point.T @ vector - vector.T @ point
-        Omega = lyap(YtY, AS)
+        Omega = scipy.linalg.solve_continuous_lyapunov(YtY, AS)
         return vector - point @ Omega
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
@@ -237,7 +237,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         eta = self._project_rows(point, vector)
         YtY = point.T @ point
         AS = point.T @ eta - vector.T @ point
-        Omega = lyap(YtY, -AS)
+        Omega = scipy.linalg.solve_continuous_lyapunov(YtY, -AS)
         return eta - point @ (Omega - Omega.T) / 2
 
     def retraction(self, point, tangent_vector):
