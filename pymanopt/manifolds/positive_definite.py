@@ -5,6 +5,7 @@ from pymanopt.tools.multi import (
     multiexpm,
     multilogm,
     multiprod,
+    multiqr,
     multisym,
     multitransp,
 )
@@ -95,13 +96,11 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
         )
 
         # Generate an orthogonal matrix.
-        u = np.zeros((self._k, self._n, self._n))
-        for i in range(self._k):
-            u[i], _ = np.linalg.qr(np.random.normal(size=(self._n, self._n)))
-
+        q, _ = multiqr(np.random.normal(size=(self._n, self._n)))
+        point = multiprod(q, d * multitransp(q))
         if self._k == 1:
-            return multiprod(u, d * multitransp(u))[0]
-        return multiprod(u, d * multitransp(u))
+            return point[0]
+        return point
 
     def random_tangent_vector(self, point):
         k = self._k
