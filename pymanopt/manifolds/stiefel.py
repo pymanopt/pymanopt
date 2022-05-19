@@ -2,7 +2,15 @@ import numpy as np
 from scipy.linalg import expm
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.tools.multi import multiprod, multiqr, multisym, multitransp
+from pymanopt.tools.multi import (
+    multiexpm,
+    multieye,
+    multiprod,
+    multiqr,
+    multiskew,
+    multisym,
+    multitransp,
+)
 
 
 class Stiefel(RiemannianSubmanifold):
@@ -101,16 +109,9 @@ class Stiefel(RiemannianSubmanifold):
         return np.linalg.norm(tangent_vector)
 
     def random_point(self):
+        point, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
         if self._k == 1:
-            matrix = np.random.normal(size=(self._n, self._p))
-            q, _ = np.linalg.qr(matrix)
-            return q
-
-        point = np.zeros((self._k, self._n, self._p))
-        for i in range(self._k):
-            point[i], _ = np.linalg.qr(
-                np.random.normal(size=(self._n, self._p))
-            )
+            return point.reshape(self._n, self._p)
         return point
 
     def random_tangent_vector(self, point):
