@@ -136,7 +136,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
                 np.ix_(negative_det, slice_, [1, 0])
             ]
         if k == 1:
-            return point.reshape(n, n)
+            return point[0]
         return point
 
     def random_tangent_vector(self, point):
@@ -147,13 +147,14 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
             vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
         vector = vector - multitransp(vector)
         if k == 1:
-            vector = vector.reshape(n, n)
+            vector = vector[0]
         return vector / np.sqrt(np.tensordot(vector, vector, axes=vector.ndim))
 
     def zero_vector(self, point):
+        zero = np.zeros((self._k, self._n, self._n))
         if self._k == 1:
-            return np.zeros((self._n, self._n))
-        return np.zeros((self._k, self._n, self._n))
+            return zero[0]
+        return zero
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a

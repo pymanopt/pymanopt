@@ -80,7 +80,7 @@ class Positive(Manifold):
     def random_point(self):
         point = np.exp(np.random.normal(size=(self._k, self._m, self._n)))
         if self._k == 1:
-            return point.reshape(self._m, self._n)
+            return point[0]
         return point
 
     def random_tangent_vector(self, point):

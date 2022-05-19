@@ -109,7 +109,7 @@ class Stiefel(RiemannianSubmanifold):
     def random_point(self):
         point, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
         if self._k == 1:
-            return point.reshape(self._n, self._p)
+            return point[0]
         return point
 
     def random_tangent_vector(self, point):
@@ -145,7 +145,7 @@ class Stiefel(RiemannianSubmanifold):
             a, multiprod(b[..., : self._p], multiexpm(-A))
         )
         if self._k == 1:
-            return target_point.reshape(self._n, self._p)
+            return target_point[0]
         return target_point
 
     def zero_vector(self, point):

@@ -16,9 +16,10 @@ class _GrassmannBase(Manifold):
         return self.projection(point_b, tangent_vector_a)
 
     def zero_vector(self, point):
+        zero = np.zeros((self._k, self._n, self._p))
         if self._k == 1:
-            return np.zeros((self._n, self._p))
-        return np.zeros((self._k, self._n, self._p))
+            return zero[0]
+        return zero
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(point, euclidean_gradient)
@@ -102,7 +103,7 @@ class Grassmann(_GrassmannBase):
     def random_point(self):
         q, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
         if self._k == 1:
-            return q.reshape(self._n, self._p)
+            return q[0]
         return q
 
     def random_tangent_vector(self, point):
@@ -121,7 +122,8 @@ class Grassmann(_GrassmannBase):
 
         # From numerical experiments, it seems necessary to re-orthonormalize.
         # This is quite expensive.
-        return multiqr(Y)[0]
+        q, _ = multiqr(Y)
+        return q
 
     def log(self, point_a, point_b):
         ytx = multiprod(multitransp(point_b), point_a)
@@ -216,7 +218,7 @@ class ComplexGrassmann(_GrassmannBase):
             + 1j * np.random.normal(size=(self._k, self._n, self._p))
         )
         if self._k == 1:
-            return q.reshape(self._n, self._p)
+            return q[0]
         return q
 
     def random_tangent_vector(self, point):
@@ -236,7 +238,8 @@ class ComplexGrassmann(_GrassmannBase):
 
         # From numerical experiments, it seems necessary to
         # re-orthonormalize. This is overall quite expensive.
-        return multiqr(Y)[0]
+        q, _ = multiqr(Y)[0]
+        return q
 
     def log(self, point_a, point_b):
         YHX = multiprod(multihconj(point_b), point_a)
