@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.linalg import expm
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
@@ -7,7 +6,6 @@ from pymanopt.tools.multi import (
     multieye,
     multiprod,
     multiqr,
-    multiskew,
     multisym,
     multitransp,
 )
@@ -123,47 +121,32 @@ class Stiefel(RiemannianSubmanifold):
         return self.projection(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):
+        A = multiprod(multitransp(point), tangent_vector)
         if self._k == 1:
-            W = expm(
-                np.bmat(
-                    [
-                        [
-                            point.T @ tangent_vector,
-                            -tangent_vector.T @ tangent_vector,
-                        ],
-                        [np.eye(self._p), point.T @ tangent_vector],
-                    ]
-                )
-            )
-            Z = np.bmat(
-                [
-                    [expm(-point.T @ tangent_vector)],
-                    [np.zeros((self._p, self._p))],
-                ]
-            )
-            return np.bmat([point, tangent_vector]) @ W @ Z
+            identity = np.eye(self._p)
+        else:
+            identity = multieye(self._p, self._k)
 
-        Y = np.zeros_like(point)
-        for i in range(self._k):
-            W = expm(
-                np.bmat(
-                    [
-                        [
-                            point[i].T @ tangent_vector[i],
-                            -tangent_vector[i].T @ tangent_vector[i],
-                        ],
-                        [np.eye(self._p), point[i].T @ tangent_vector[i]],
-                    ]
-                )
-            )
-            Z = np.bmat(
+        a = np.block([point, tangent_vector])
+        b = multiexpm(
+            np.block(
                 [
-                    [expm(-point[i].T @ tangent_vector[i])],
-                    [np.zeros((self._p, self._p))],
+                    [
+                        A,
+                        -multiprod(
+                            multitransp(tangent_vector), tangent_vector
+                        ),
+                    ],
+                    [identity, A],
                 ]
             )
-            Y[i] = np.bmat([point[i], tangent_vector[i]]) @ W @ Z
-        return Y
+        )
+        target_point = multiprod(
+            a, multiprod(b[..., : self._p], multiexpm(-A))
+        )
+        if self._k == 1:
+            return target_point.reshape(self._n, self._p)
+        return target_point
 
     def zero_vector(self, point):
         if self._k == 1:
