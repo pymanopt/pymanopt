@@ -125,7 +125,7 @@ class Stiefel(RiemannianSubmanifold):
         if self._k == 1:
             identity = np.eye(self._p)
         else:
-            identity = multieye(self._p, self._k)
+            identity = multieye(self._k, self._p)
 
         a = np.block([point, tangent_vector])
         b = multiexpm(
