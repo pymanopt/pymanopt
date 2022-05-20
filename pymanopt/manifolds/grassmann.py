@@ -238,7 +238,7 @@ class ComplexGrassmann(_GrassmannBase):
 
         # From numerical experiments, it seems necessary to
         # re-orthonormalize. This is overall quite expensive.
-        q, _ = multiqr(Y)[0]
+        q, _ = multiqr(Y)
         return q
 
     def log(self, point_a, point_b):
