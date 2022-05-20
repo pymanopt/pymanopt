@@ -1,7 +1,8 @@
 # TODO/Roadmap
 
 ## 1.1.x:
-  - Use weingarten map for oblique manifold, Stiefel and fixed rank matrices
+  - Replace 'multiprod' with bare @-operator
+  - Use weingarten map for fixed rank manifold
   - Change "beta_rule" of CG optimizer to internal enum representation
   - Add re-tangentialization change from manopt's trustregions solver
     (requires adding implementation for `to_tangent_space` for each manifold)
