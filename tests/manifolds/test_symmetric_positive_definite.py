@@ -88,7 +88,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
             return multiprod(multiprod(c, powm), multitransp(c))
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
-        alpha = np.random.rand()
+        alpha = np.random.uniform()
         np_testing.assert_almost_equal(
             manifold.dist(x, geodesic(x, y, alpha)),
             alpha * manifold.dist(x, y),
