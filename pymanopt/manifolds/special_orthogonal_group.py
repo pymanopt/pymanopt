@@ -5,7 +5,6 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
     multiexpm,
     multilogm,
-    multiprod,
     multiqr,
     multiskew,
     multisym,
@@ -85,41 +84,41 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return self.norm(point_a, self.log(point_a, point_b))
 
     def projection(self, point, vector):
-        return multiskew(multiprod(multitransp(point), vector))
+        return multiskew(multitransp(point) @ vector)
 
     def to_tangent_space(self, point, vector):
         return multiskew(vector)
 
     def embedding(self, point, tangent_vector):
-        return multiprod(point, tangent_vector)
+        return point @ tangent_vector
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         Xt = multitransp(point)
-        Xtegrad = multiprod(Xt, euclidean_gradient)
+        Xtegrad = Xt @ euclidean_gradient
         symXtegrad = multisym(Xtegrad)
-        Xtehess = multiprod(Xt, euclidean_hessian)
-        return multiskew(Xtehess - multiprod(tangent_vector, symXtegrad))
+        Xtehess = Xt @ euclidean_hessian
+        return multiskew(Xtehess - tangent_vector @ symXtegrad)
 
     def retraction(self, point, tangent_vector):
         return self._retraction(point, tangent_vector)
 
     def _retraction_qr(self, point, tangent_vector):
-        Y = point + multiprod(point, tangent_vector)
+        Y = point + point @ tangent_vector
         q, _ = multiqr(Y)
         return q
 
     def _retraction_polar(self, point, tangent_vector):
-        Y = point + multiprod(point, tangent_vector)
+        Y = point + point @ tangent_vector
         u, _, vt = np.linalg.svd(Y)
-        return multiprod(u, vt)
+        return u @ vt
 
     def exp(self, point, tangent_vector):
-        return multiprod(point, multiexpm(tangent_vector))
+        return point @ multiexpm(tangent_vector)
 
     def log(self, point_a, point_b):
-        U = multiprod(multitransp(point_a), point_b)
+        U = multitransp(point_a) @ point_b
         return multiskew(multilogm(U))
 
     def random_point(self):
