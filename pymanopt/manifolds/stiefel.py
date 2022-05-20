@@ -144,8 +144,6 @@ class Stiefel(RiemannianSubmanifold):
         target_point = multiprod(
             a, multiprod(b[..., : self._p], multiexpm(-A))
         )
-        if self._k == 1:
-            return target_point[0]
         return target_point
 
     def zero_vector(self, point):
