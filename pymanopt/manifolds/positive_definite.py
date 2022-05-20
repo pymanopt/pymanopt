@@ -4,7 +4,6 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
     multiexpm,
     multilogm,
-    multiprod,
     multiqr,
     multisym,
     multitransp,
@@ -50,7 +49,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
         c = np.linalg.cholesky(point_a)
         c_inv = np.linalg.inv(c)
         logm = multilogm(
-            multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
+            c_inv @ point_b @ multitransp(c_inv),
             positive_definite=True,
         )
         return np.linalg.norm(logm)
@@ -70,18 +69,14 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         # TODO: Check that this is correct
-        return multiprod(multiprod(point, multisym(euclidean_gradient)), point)
+        return point @ multisym(euclidean_gradient) @ point
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         # TODO: Check that this is correct
-        return multiprod(
-            multiprod(point, multisym(euclidean_hessian)), point
-        ) + multisym(
-            multiprod(
-                multiprod(tangent_vector, multisym(euclidean_gradient)), point
-            )
+        return point @ multisym(euclidean_hessian) @ point + multisym(
+            tangent_vector @ multisym(euclidean_gradient) @ point
         )
 
     def norm(self, point, tangent_vector):
@@ -97,7 +92,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
 
         # Generate an orthogonal matrix.
         q, _ = multiqr(np.random.normal(size=(self._n, self._n)))
-        point = multiprod(q, d * multitransp(q))
+        point = q @ (d * multitransp(q))
         if self._k == 1:
             return point[0]
         return point
@@ -116,23 +111,20 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
 
     def exp(self, point, tangent_vector):
         p_inv_tv = np.linalg.solve(point, tangent_vector)
-        e = multiexpm(p_inv_tv, symmetric=False)
-        return multiprod(point, e)
+        return point @ multiexpm(p_inv_tv, symmetric=False)
 
     def retraction(self, point, tangent_vector):
         p_inv_tv = np.linalg.solve(point, tangent_vector)
-        return multisym(
-            point + tangent_vector + multiprod(tangent_vector, p_inv_tv) / 2
-        )
+        return multisym(point + tangent_vector + tangent_vector @ p_inv_tv / 2)
 
     def log(self, point_a, point_b):
         c = np.linalg.cholesky(point_a)
         c_inv = np.linalg.inv(c)
         logm = multilogm(
-            multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
+            c_inv @ point_b @ multitransp(c_inv),
             positive_definite=True,
         )
-        return multiprod(multiprod(c, logm), multitransp(c))
+        return c @ logm @ multitransp(c)
 
     def zero_vector(self, point):
         k = self._k
