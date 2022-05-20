@@ -4,7 +4,6 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
     multiexpm,
     multieye,
-    multiprod,
     multiqr,
     multisym,
     multitransp,
@@ -78,16 +77,14 @@ class Stiefel(RiemannianSubmanifold):
         )
 
     def projection(self, point, vector):
-        return vector - multiprod(
-            point, multisym(multiprod(multitransp(point), vector))
-        )
+        return vector - point @ multisym(multitransp(point) @ vector)
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        XtG = multiprod(multitransp(point), euclidean_gradient)
+        XtG = multitransp(point) @ euclidean_gradient
         symXtG = multisym(XtG)
-        HsymXtG = multiprod(tangent_vector, symXtG)
+        HsymXtG = tangent_vector @ symXtG
         return self.projection(point, euclidean_hessian - HsymXtG)
 
     def retraction(self, point, tangent_vector):
@@ -101,7 +98,7 @@ class Stiefel(RiemannianSubmanifold):
     def _retraction_polar(self, point, tangent_vector):
         Y = point + tangent_vector
         u, _, vt = np.linalg.svd(Y, full_matrices=False)
-        return multiprod(u, vt)
+        return u @ vt
 
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)
@@ -121,7 +118,7 @@ class Stiefel(RiemannianSubmanifold):
         return self.projection(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):
-        A = multiprod(multitransp(point), tangent_vector)
+        A = multitransp(point) @ tangent_vector
         if self._k == 1:
             identity = np.eye(self._p)
         else:
@@ -133,18 +130,13 @@ class Stiefel(RiemannianSubmanifold):
                 [
                     [
                         A,
-                        -multiprod(
-                            multitransp(tangent_vector), tangent_vector
-                        ),
+                        -multitransp(tangent_vector) @ tangent_vector,
                     ],
                     [identity, A],
                 ]
             )
         )
-        target_point = multiprod(
-            a, multiprod(b[..., : self._p], multiexpm(-A))
-        )
-        return target_point
+        return a @ b[..., : self._p] @ multiexpm(-A)
 
     def zero_vector(self, point):
         if self._k == 1:
