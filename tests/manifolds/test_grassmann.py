@@ -3,7 +3,7 @@ from numpy import testing as np_testing
 
 from pymanopt.manifolds import Grassmann
 from pymanopt.tools import testing
-from pymanopt.tools.multi import multieye, multiprod, multisym, multitransp
+from pymanopt.tools.multi import multieye, multisym, multitransp
 
 from .._test import TestCase
 
@@ -48,7 +48,7 @@ class TestSingleGrassmannManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
 
         np_testing.assert_allclose(
-            multiprod(multitransp(xretru), xretru), np.eye(self.n), atol=1e-10
+            multitransp(xretru) @ xretru, np.eye(self.n), atol=1e-10
         )
 
         u = u * 1e-6
@@ -64,7 +64,7 @@ class TestSingleGrassmannManifold(TestCase):
         # if you generate two they are not equal.
         X = self.manifold.random_point()
         np_testing.assert_allclose(
-            multiprod(multitransp(X), X), np.eye(self.n), atol=1e-10
+            multitransp(X) @ X, np.eye(self.n), atol=1e-10
         )
         Y = self.manifold.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
@@ -140,7 +140,7 @@ class TestMultiGrassmannManifold(TestCase):
         H = np.random.normal(size=(self.k, self.m, self.n))
 
         # Compare the projections.
-        Hproj = H - multiprod(X, multiprod(multitransp(X), H))
+        Hproj = H - X @ multitransp(X) @ H
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
     def test_retraction(self):
@@ -152,7 +152,7 @@ class TestMultiGrassmannManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
 
         np_testing.assert_allclose(
-            multiprod(multitransp(xretru), xretru),
+            multitransp(xretru) @ xretru,
             multieye(self.k, self.n),
             atol=1e-10,
         )
@@ -175,7 +175,7 @@ class TestMultiGrassmannManifold(TestCase):
         # if you generate two they are not equal.
         X = self.manifold.random_point()
         np_testing.assert_allclose(
-            multiprod(multitransp(X), X), multieye(self.k, self.n), atol=1e-10
+            multitransp(X) @ X, multieye(self.k, self.n), atol=1e-10
         )
         Y = self.manifold.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
@@ -186,7 +186,7 @@ class TestMultiGrassmannManifold(TestCase):
         X = self.manifold.random_point()
         U = self.manifold.random_tangent_vector(X)
         np_testing.assert_allclose(
-            multisym(multiprod(multitransp(X), U)),
+            multisym(multitransp(X) @ U),
             np.zeros((self.k, self.n, self.n)),
             atol=1e-10,
         )

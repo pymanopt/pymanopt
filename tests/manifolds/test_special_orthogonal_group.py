@@ -3,7 +3,7 @@ import numpy.testing as np_testing
 from nose2.tools import params
 
 from pymanopt.manifolds import SpecialOrthogonalGroup
-from pymanopt.tools.multi import multieye, multiprod, multitransp
+from pymanopt.tools.multi import multieye, multitransp
 
 from .._test import TestCase
 
@@ -26,12 +26,11 @@ class TestSpecialOrthogonalGroup(TestCase):
         point = self.so_product.random_point()
         assert point.shape == (self.k, self.n, self.n)
         np_testing.assert_almost_equal(
-            multiprod(multitransp(point), point)
-            - multiprod(point, multitransp(point)),
+            multitransp(point) @ point - point @ multitransp(point),
             0,
         )
         np_testing.assert_almost_equal(
-            multiprod(multitransp(point), point), multieye(self.k, self.n)
+            multitransp(point) @ point, multieye(self.k, self.n)
         )
         assert np.allclose(np.linalg.det(point), 1)
 
