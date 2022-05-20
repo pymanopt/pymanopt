@@ -52,7 +52,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         )
         assert np.isreal(self.manifold.norm(X, U))
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold
         # and that if you generate two they are not equal.
         # Test also that matrices are complex.
@@ -172,7 +172,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         )
         assert np.isreal(self.manifold.norm(X, U))
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         X = self.manifold.random_point()

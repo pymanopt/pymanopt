@@ -104,7 +104,7 @@ class TestSphereManifold(TestCase):
             self.manifold.norm(x, u), np.linalg.norm(u)
         )
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         s = self.manifold
@@ -168,7 +168,7 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
     def test_dim(self):
         self.assertEqual(self.manifold.dim, 0)
 
-    def test_rand(self):
+    def test_random_point(self):
         x = self.manifold.random_point()
         p = np.ones(2) / np.sqrt(2)
         # The manifold only consists of two isolated points (cf. `setUp()`).
@@ -216,7 +216,7 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
     def test_dim(self):
         self.assertEqual(self.manifold.dim, 0)
 
-    def test_rand(self):
+    def test_random_point(self):
         x = self.manifold.random_point()
         p = np.array([-1, 1]) / np.sqrt(2)
         self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))

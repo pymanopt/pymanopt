@@ -35,3 +35,6 @@ Bibliography
 .. [Yat2013] Yatawatta, Sarod. "Radio interferometric calibration using a
    Riemannian manifold." 2013 IEEE International Conference on Acoustics,
    Speech and Signal Processing. IEEE, 2013.
+.. [ZH2021] Zimmermann, Ralf, and Knut Hüper. "Computing the Riemannian
+   logarithm on the Stiefel manifold: metrics, methods and performance." arXiv
+   preprint arXiv:2103.12046 (2021).

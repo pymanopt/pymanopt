@@ -1,4 +1,5 @@
 import autograd.numpy as np
+from nose2.tools import params
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Stiefel
@@ -14,6 +15,7 @@ class TestSingleStiefelManifold(TestCase):
         self.n = n = 2
         self.k = k = 1
         self.manifold = Stiefel(m, n, k=k)
+        self.manifold_polar = Stiefel(m, n, k=k, retraction="polar")
         self.projection = lambda x, u: u - x @ (x.T @ u + u.T @ x) / 2
 
     def test_dim(self):
@@ -38,7 +40,7 @@ class TestSingleStiefelManifold(TestCase):
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         X = self.manifold.random_point()
@@ -57,19 +59,22 @@ class TestSingleStiefelManifold(TestCase):
         V = self.manifold.random_tangent_vector(X)
         assert np.linalg.norm(U - V) > 1e-6
 
-    def test_retraction(self):
+    @params("manifold", "manifold_polar")
+    def test_retraction(self, manifold_attribute):
+        manifold = getattr(self, manifold_attribute)
+
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.manifold.random_point()
-        u = self.manifold.random_tangent_vector(x)
+        x = manifold.random_point()
+        u = manifold.random_tangent_vector(x)
 
-        xretru = self.manifold.retraction(x, u)
+        xretru = manifold.retraction(x, u)
         np_testing.assert_allclose(
             xretru.T @ xretru, np.eye(self.n, self.n), atol=1e-10
         )
 
         u = u * 1e-6
-        xretru = self.manifold.retraction(x, u)
+        xretru = manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
     def test_euclidean_to_riemannian_hessian(self):
@@ -137,6 +142,7 @@ class TestMultiStiefelManifold(TestCase):
         self.n = n = 3
         self.k = k = 3
         self.manifold = Stiefel(m, n, k=k)
+        self.manifold_polar = Stiefel(m, n, k=k, retraction="polar")
 
     def test_dim(self):
         assert self.manifold.dim == 0.5 * self.k * self.n * (
@@ -173,7 +179,7 @@ class TestMultiStiefelManifold(TestCase):
         )
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         X = self.manifold.random_point()
@@ -196,13 +202,16 @@ class TestMultiStiefelManifold(TestCase):
         V = self.manifold.random_tangent_vector(X)
         assert np.linalg.norm(U - V) > 1e-6
 
-    def test_retraction(self):
+    @params("manifold", "manifold_polar")
+    def test_retraction(self, manifold_attribute):
+        manifold = getattr(self, manifold_attribute)
+
         # Test that the result is on the manifold and that for small
         # tangent vectors it has little effect.
-        x = self.manifold.random_point()
-        u = self.manifold.random_tangent_vector(x)
+        x = manifold.random_point()
+        u = manifold.random_tangent_vector(x)
 
-        xretru = self.manifold.retraction(x, u)
+        xretru = manifold.retraction(x, u)
 
         np_testing.assert_allclose(
             multiprod(multitransp(xretru), xretru),
@@ -211,7 +220,7 @@ class TestMultiStiefelManifold(TestCase):
         )
 
         u = u * 1e-6
-        xretru = self.manifold.retraction(x, u)
+        xretru = manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
     def test_norm(self):
