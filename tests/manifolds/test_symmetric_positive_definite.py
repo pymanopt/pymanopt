@@ -39,6 +39,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         manifold = self.manifold
         x = manifold.random_point()
         y = manifold.random_point()
+        z = manifold.random_point()
 
         # Test separability
         np_testing.assert_almost_equal(manifold.dist(x, x), 0.0)
@@ -47,6 +48,9 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         np_testing.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(y, x)
         )
+
+        # Test triangle inequality
+        assert manifold.dist(x, y) <= manifold.dist(x, z) + manifold.dist(z, y)
 
         # Test alternative implementation (see equation (6.14) in [Bha2007]).
         d = np.sqrt((np.log(eigvalsh(x, y)) ** 2).sum())
