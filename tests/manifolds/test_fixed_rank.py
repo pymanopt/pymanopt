@@ -201,7 +201,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
             + np.diag(s) @ f * (vt @ dvt.T - dvt @ vt.T)
             + np.diag(ds)
         )
-        Vp = (np.eye(self.n) - vt.T @ vt) @ dvt.T @ np.diag(s**-1)
+        Vp = (np.eye(self.n) - vt.T @ vt) @ dvt.T @ np.linalg.inv(np.diag(s))
 
         up, m, vp = m.euclidean_to_riemannian_gradient(x, (du, ds, dvt))
 
