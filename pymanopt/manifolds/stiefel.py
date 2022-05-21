@@ -36,6 +36,8 @@ class Stiefel(RiemannianSubmanifold):
     Note:
         The formula for the exponential map can be found in [ZH2021]_.
 
+        The Weingarten map is taken from [AMT2013]_.
+
         The default retraction used here is a first-order one based on
         the QR decomposition.
         To switch to a second-order polar retraction, use ``Stiefel(n, p, k=k,
@@ -79,13 +81,12 @@ class Stiefel(RiemannianSubmanifold):
     def projection(self, point, vector):
         return vector - point @ multisym(multitransp(point) @ vector)
 
-    def euclidean_to_riemannian_hessian(
-        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
-    ):
-        XtG = multitransp(point) @ euclidean_gradient
-        symXtG = multisym(XtG)
-        HsymXtG = tangent_vector @ symXtG
-        return self.projection(point, euclidean_hessian - HsymXtG)
+    def weingarten(self, point, tangent_vector, normal_vector):
+        return -tangent_vector @ multitransp(
+            point
+        ) @ normal_vector - point @ multisym(
+            multitransp(tangent_vector) @ normal_vector
+        )
 
     def retraction(self, point, tangent_vector):
         return self._retraction(point, tangent_vector)
