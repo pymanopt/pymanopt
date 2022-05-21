@@ -1,7 +1,6 @@
 # TODO/Roadmap
 
 ## 1.1.x:
-  - Change "beta_rule" of CG optimizer to internal enum representation
   - Add re-tangentialization change from manopt's trustregions solver
     (requires adding implementation for `to_tangent_space` for each manifold)
   - Enable flake8-docstrings project-wide
