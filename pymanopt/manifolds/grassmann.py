@@ -79,7 +79,7 @@ class Grassmann(_GrassmannBase):
         )
 
     def projection(self, point, vector):
-        return vector - point @ multitransp(point) @ vector
+        return vector - point @ (multitransp(point) @ vector)
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
