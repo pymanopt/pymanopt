@@ -3,7 +3,13 @@ from numpy import testing as np_testing
 from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
-from pymanopt.tools.multi import multiprod, multisym, multitransp
+from pymanopt.tools.multi import (
+    multiexpm,
+    multilogm,
+    multiprod,
+    multisym,
+    multitransp,
+)
 
 from .._test import TestCase
 
@@ -33,6 +39,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         manifold = self.manifold
         x = manifold.random_point()
         y = manifold.random_point()
+        z = manifold.random_point()
 
         # Test separability
         np_testing.assert_almost_equal(manifold.dist(x, x), 0.0)
@@ -42,8 +49,10 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
             manifold.dist(x, y), manifold.dist(y, x)
         )
 
-        # Test alternative implementation
-        # from Eq 6.14 of "Positive definite matrices"
+        # Test triangle inequality
+        assert manifold.dist(x, y) <= manifold.dist(x, z) + manifold.dist(z, y)
+
+        # Test alternative implementation (see equation (6.14) in [Bha2007]).
         d = np.sqrt((np.log(eigvalsh(x, y)) ** 2).sum())
         np_testing.assert_almost_equal(manifold.dist(x, y), d)
 
@@ -64,6 +73,25 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         aya = multiprod(multiprod(a, y), multitransp(a))
         np_testing.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(axa, aya)
+        )
+
+        def geodesic(point_a, point_b, alpha):
+            if alpha < 0 or 1 < alpha:
+                raise ValueError("Exponent must be in [0,1]")
+            c = np.linalg.cholesky(point_a)
+            c_inv = np.linalg.inv(c)
+            logm = multilogm(
+                multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
+                positive_definite=True,
+            )
+            powm = multiexpm(alpha * logm, symmetric=False)
+            return multiprod(multiprod(c, powm), multitransp(c))
+
+        # Test proportionality (see equation (6.12) in [Bha2007]).
+        alpha = np.random.uniform()
+        np_testing.assert_almost_equal(
+            manifold.dist(x, geodesic(x, y, alpha)),
+            alpha * manifold.dist(x, y),
         )
 
     def test_exp(self):
