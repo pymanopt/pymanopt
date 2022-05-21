@@ -1,7 +1,6 @@
 # TODO/Roadmap
 
 ## 1.1.x:
-  - Replace 'multiprod' with bare @-operator
   - Use weingarten map for fixed rank manifold
   - Change "beta_rule" of CG optimizer to internal enum representation
   - Add re-tangentialization change from manopt's trustregions solver
