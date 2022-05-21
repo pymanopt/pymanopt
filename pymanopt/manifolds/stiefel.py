@@ -118,7 +118,7 @@ class Stiefel(RiemannianSubmanifold):
         return self.projection(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):
-        A = multitransp(point) @ tangent_vector
+        pt_tv = multitransp(point) @ tangent_vector
         if self._k == 1:
             identity = np.eye(self._p)
         else:
@@ -129,14 +129,15 @@ class Stiefel(RiemannianSubmanifold):
             np.block(
                 [
                     [
-                        A,
+                        pt_tv,
                         -multitransp(tangent_vector) @ tangent_vector,
                     ],
-                    [identity, A],
+                    [identity, pt_tv],
                 ]
             )
-        )
-        return a @ b[..., : self._p] @ multiexpm(-A)
+        )[..., : self._p]
+        c = multiexpm(-pt_tv)
+        return a @ (b @ c)
 
     def zero_vector(self, point):
         if self._k == 1:
