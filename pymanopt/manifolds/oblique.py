@@ -47,7 +47,6 @@ class Oblique(RiemannianSubmanifold):
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        # TODO(nkoep): Implement 'weingarten' instead.
         PXehess = self.projection(point, euclidean_hessian)
         return PXehess - tangent_vector * (
             (point * euclidean_gradient).sum(0)[np.newaxis, :]

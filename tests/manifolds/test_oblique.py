@@ -29,7 +29,7 @@ class TestObliqueManifold(TestCase):
 
     # def test_norm(self):
 
-    # def test_rand(self):
+    # def test_random_point(self):
 
     # def test_random_tangent_vector(self):
 

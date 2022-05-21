@@ -1,9 +1,16 @@
 import numpy as np
-from scipy.linalg import expm, logm
-from scipy.special import comb
+import scipy.special
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.tools.multi import multiprod, multiskew, multisym, multitransp
+from pymanopt.tools.multi import (
+    multiexpm,
+    multilogm,
+    multiprod,
+    multiqr,
+    multiskew,
+    multisym,
+    multitransp,
+)
 
 
 class SpecialOrthogonalGroup(RiemannianSubmanifold):
@@ -54,7 +61,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
             name = f"Sphecial orthogonal group SO({n})^{k}"
         else:
             raise ValueError("k must be an integer no less than 1.")
-        dimension = int(k * comb(n, 2))
+        dimension = int(k * scipy.special.comb(n, 2))
         super().__init__(name, dimension)
 
         try:
@@ -99,17 +106,9 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return self._retraction(point, tangent_vector)
 
     def _retraction_qr(self, point, tangent_vector):
-        def retri(array):
-            q, r = np.linalg.qr(array)
-            return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
-
         Y = point + multiprod(point, tangent_vector)
-        if self._k == 1:
-            return retri(Y)
-
-        for i in range(self._k):
-            Y[i] = retri(Y[i])
-        return Y
+        q, _ = multiqr(Y)
+        return q
 
     def _retraction_polar(self, point, tangent_vector):
         Y = point + multiprod(point, tangent_vector)
@@ -117,62 +116,45 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return multiprod(u, vt)
 
     def exp(self, point, tangent_vector):
-        tv = np.copy(tangent_vector)
-        if self._k == 1:
-            return multiprod(point, expm(tv))
-
-        for i in range(self._k):
-            tv[i] = expm(tv[i])
-        return multiprod(point, tv)
+        return multiprod(point, multiexpm(tangent_vector))
 
     def log(self, point_a, point_b):
         U = multiprod(multitransp(point_a), point_b)
-        if self._k == 1:
-            return multiskew(np.real(logm(U)))
-
-        for i in range(self._k):
-            U[i] = np.real(logm(U[i]))
-        return multiskew(U)
+        return multiskew(multilogm(U))
 
     def random_point(self):
         n, k = self._n, self._k
         if n == 1:
-            R = np.ones((k, 1, 1))
+            point = np.ones((k, 1, 1))
         else:
-            R = np.zeros((k, n, n))
-            for i in range(k):
-                # Generated as such, Q is uniformly distributed over O(n), the
-                # group of orthogonal n-by-n matrices.
-                A = np.random.normal(size=(n, n))
-                Q, RR = np.linalg.qr(A)
-                Q = Q @ np.diag(np.sign(np.diag(RR)))
-
-                # If Q is in O(n) but not in SO(n), we permute the two first
-                # columns of Q such that det(new Q) = -det(Q), hence the new Q
-                # will be in SO(n), uniformly distributed.
-                if np.linalg.det(Q) < 0:
-                    Q[:, [0, 1]] = Q[:, [1, 0]]
-                R[i] = Q
-
+            point, _ = multiqr(np.random.normal(size=(k, n, n)))
+            # Swap the first two columns of matrices where det(point) < 0 to
+            # flip the sign of their determinants.
+            negative_det, *_ = np.where(np.linalg.det(point) < 0)
+            slice_ = np.arange(point.shape[1])
+            point[np.ix_(negative_det, slice_, [0, 1])] = point[
+                np.ix_(negative_det, slice_, [1, 0])
+            ]
         if k == 1:
-            return R.reshape(n, n)
-        return R
+            return point[0]
+        return point
 
     def random_tangent_vector(self, point):
         n, k = self._n, self._k
-        idxs = np.triu_indices(n, 1)
+        inds = np.triu_indices(n, 1)
         vector = np.zeros((k, n, n))
         for i in range(k):
-            vector[i][idxs] = np.random.normal(size=int(n * (n - 1) / 2))
-            vector = vector - multitransp(vector)
+            vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
+        vector = vector - multitransp(vector)
         if k == 1:
-            vector = vector.reshape(n, n)
+            vector = vector[0]
         return vector / np.sqrt(np.tensordot(vector, vector, axes=vector.ndim))
 
     def zero_vector(self, point):
+        zero = np.zeros((self._k, self._n, self._n))
         if self._k == 1:
-            return np.zeros((self._n, self._n))
-        return np.zeros((self._k, self._n, self._n))
+            return zero[0]
+        return zero
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a

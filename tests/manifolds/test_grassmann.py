@@ -59,7 +59,7 @@ class TestSingleGrassmannManifold(TestCase):
 
     # def test_norm(self):
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         X = self.manifold.random_point()
@@ -170,7 +170,7 @@ class TestMultiGrassmannManifold(TestCase):
             self.manifold.norm(x, u), np.linalg.norm(u)
         )
 
-    def test_rand(self):
+    def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         X = self.manifold.random_point()

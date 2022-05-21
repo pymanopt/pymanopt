@@ -1,8 +1,7 @@
 import numpy as np
-from numpy.linalg import svd
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools.multi import multihconj, multiprod, multitransp
+from pymanopt.tools.multi import multihconj, multiprod, multiqr, multitransp
 
 
 class _GrassmannBase(Manifold):
@@ -17,9 +16,10 @@ class _GrassmannBase(Manifold):
         return self.projection(point_b, tangent_vector_a)
 
     def zero_vector(self, point):
+        zero = np.zeros((self._k, self._n, self._p))
         if self._k == 1:
-            return np.zeros((self._n, self._p))
-        return np.zeros((self._k, self._n, self._p))
+            return zero[0]
+        return zero
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(point, euclidean_gradient)
@@ -68,7 +68,9 @@ class Grassmann(_GrassmannBase):
         super().__init__(name, dimension)
 
     def dist(self, point_a, point_b):
-        s = svd(multiprod(multitransp(point_a), point_b), compute_uv=False)
+        s = np.linalg.svd(
+            multiprod(multitransp(point_a), point_b), compute_uv=False
+        )
         s[s > 1] = 1
         s = np.arccos(s)
         return np.linalg.norm(s)
@@ -95,19 +97,14 @@ class Grassmann(_GrassmannBase):
         # columns. Compare this with the Stiefel manifold.
 
         # Compute the polar factorization of Y = X+G
-        u, _, vt = svd(point + tangent_vector, full_matrices=False)
+        u, _, vt = np.linalg.svd(point + tangent_vector, full_matrices=False)
         return multiprod(u, vt)
 
     def random_point(self):
+        q, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
         if self._k == 1:
-            X = np.random.normal(size=(self._n, self._p))
-            q, _ = np.linalg.qr(X)
-            return q
-
-        X = np.zeros((self._k, self._n, self._p))
-        for i in range(self._k):
-            X[i], _ = np.linalg.qr(np.random.normal(size=(self._n, self._p)))
-        return X
+            return q[0]
+        return q
 
     def random_tangent_vector(self, point):
         tangent_vector = np.random.normal(size=point.shape)
@@ -115,7 +112,7 @@ class Grassmann(_GrassmannBase):
         return tangent_vector / np.linalg.norm(tangent_vector)
 
     def exp(self, point, tangent_vector):
-        u, s, vt = svd(tangent_vector, full_matrices=False)
+        u, s, vt = np.linalg.svd(tangent_vector, full_matrices=False)
         cos_s = np.expand_dims(np.cos(s), -2)
         sin_s = np.expand_dims(np.sin(s), -2)
 
@@ -125,19 +122,14 @@ class Grassmann(_GrassmannBase):
 
         # From numerical experiments, it seems necessary to re-orthonormalize.
         # This is quite expensive.
-        if self._k == 1:
-            Y, _ = np.linalg.qr(Y)
-            return Y
-
-        for i in range(self._k):
-            Y[i], _ = np.linalg.qr(Y[i])
-        return Y
+        q, _ = multiqr(Y)
+        return q
 
     def log(self, point_a, point_b):
         ytx = multiprod(multitransp(point_b), point_a)
         At = multitransp(point_b) - multiprod(ytx, multitransp(point_a))
         Bt = np.linalg.solve(ytx, At)
-        u, s, vt = svd(multitransp(Bt), full_matrices=False)
+        u, s, vt = np.linalg.svd(multitransp(Bt), full_matrices=False)
         arctan_s = np.expand_dims(np.arctan(s), -2)
         return multiprod(u * arctan_s, vt)
 
@@ -221,24 +213,13 @@ class ComplexGrassmann(_GrassmannBase):
         return multiprod(u, vh)
 
     def random_point(self):
+        q, _ = multiqr(
+            np.random.normal(size=(self._k, self._n, self._p))
+            + 1j * np.random.normal(size=(self._k, self._n, self._p))
+        )
         if self._k == 1:
-            point, _ = np.linalg.qr(
-                (
-                    np.random.normal(size=(self._n, self._p))
-                    + 1j * np.random.normal(size=(self._n, self._p))
-                )
-            )
-            return point
-
-        point = np.zeros((self._k, self._n, self._p), np.complex_)
-        for i in range(self._k):
-            point[i], _ = np.linalg.qr(
-                (
-                    np.random.normal(size=(self._n, self._p))
-                    + 1j * np.random.normal(size=(self._n, self._p))
-                )
-            )
-        return point
+            return q[0]
+        return q
 
     def random_tangent_vector(self, point):
         tangent_vector = np.random.normal(
@@ -257,13 +238,8 @@ class ComplexGrassmann(_GrassmannBase):
 
         # From numerical experiments, it seems necessary to
         # re-orthonormalize. This is overall quite expensive.
-        if self._k == 1:
-            Y, _ = np.linalg.qr(Y)
-            return Y
-
-        for i in range(self._k):
-            Y[i], _ = np.linalg.qr(Y[i])
-        return Y
+        q, _ = multiqr(Y)
+        return q
 
     def log(self, point_a, point_b):
         YHX = multiprod(multihconj(point_b), point_a)
