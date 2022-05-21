@@ -7,7 +7,6 @@ from pymanopt.tools.multi import (
     multieye,
     multihconj,
     multilogm,
-    multiprod,
     multiqr,
     multisym,
     multitransp,
@@ -22,25 +21,6 @@ class TestMulti(TestCase):
         self.n = 50
         self.p = 40
         self.k = 10
-
-    def test_multiprod_singlemat(self):
-        # Two random matrices A (m x n) and B (n x p)
-        A = np.random.normal(size=(self.m, self.n))
-        B = np.random.normal(size=(self.n, self.p))
-
-        # Compare the products.
-        np_testing.assert_allclose(A @ B, multiprod(A, B))
-
-    def test_multiprod(self):
-        # Two random arrays of matrices A (k x m x n) and B (k x n x p)
-        A = np.random.normal(size=(self.k, self.m, self.n))
-        B = np.random.normal(size=(self.k, self.n, self.p))
-
-        C = np.zeros((self.k, self.m, self.p))
-        for i in range(self.k):
-            C[i] = A[i] @ B[i]
-
-        np_testing.assert_allclose(C, multiprod(A, B))
 
     def test_multitransp_singlemat(self):
         A = np.random.normal(size=(self.m, self.n))
@@ -93,7 +73,7 @@ class TestMulti(TestCase):
     def test_multilogm_complex_positive_definite(self):
         shape = (self.k, self.m, self.m)
         A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
-        A = multiprod(A, multihconj(A))
+        A = A @ multihconj(A)
         # Compare fast path for positive definite matrices vs. general slow
         # one.
         np_testing.assert_allclose(
@@ -128,10 +108,10 @@ class TestMulti(TestCase):
         shape = (self.k, self.m, self.m)
         A_real = np.random.normal(size=shape)
         q, r = multiqr(A_real)
-        np_testing.assert_allclose(multiprod(q, r), A_real)
+        np_testing.assert_allclose(q @ r, A_real)
 
         A_complex = np.random.normal(size=shape) + 1j * np.random.normal(
             size=shape
         )
         q, r = multiqr(A_complex)
-        np_testing.assert_allclose(multiprod(q, r), A_complex)
+        np_testing.assert_allclose(q @ r, A_complex)

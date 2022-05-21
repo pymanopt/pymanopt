@@ -4,7 +4,7 @@ from numpy import testing as np_testing
 
 from pymanopt.manifolds import Stiefel
 from pymanopt.tools import testing
-from pymanopt.tools.multi import multieye, multiprod, multisym, multitransp
+from pymanopt.tools.multi import multieye, multisym, multitransp
 
 from .._test import TestCase
 
@@ -170,13 +170,7 @@ class TestMultiStiefelManifold(TestCase):
         H = np.random.normal(size=(self.k, self.m, self.n))
 
         # Compare the projections.
-        Hproj = (
-            H
-            - multiprod(
-                X, multiprod(multitransp(X), H) + multiprod(multitransp(H), X)
-            )
-            / 2
-        )
+        Hproj = H - X @ (multitransp(X) @ H + multitransp(H) @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
     def test_random_point(self):
@@ -184,7 +178,7 @@ class TestMultiStiefelManifold(TestCase):
         # if you generate two they are not equal.
         X = self.manifold.random_point()
         np_testing.assert_allclose(
-            multiprod(multitransp(X), X), multieye(self.k, self.n), atol=1e-10
+            multitransp(X) @ X, multieye(self.k, self.n), atol=1e-10
         )
         Y = self.manifold.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
@@ -195,7 +189,7 @@ class TestMultiStiefelManifold(TestCase):
         X = self.manifold.random_point()
         U = self.manifold.random_tangent_vector(X)
         np_testing.assert_allclose(
-            multisym(multiprod(multitransp(X), U)),
+            multisym(multitransp(X) @ U),
             np.zeros((self.k, self.n, self.n)),
             atol=1e-10,
         )
@@ -214,7 +208,7 @@ class TestMultiStiefelManifold(TestCase):
         xretru = manifold.retraction(x, u)
 
         np_testing.assert_allclose(
-            multiprod(multitransp(xretru), xretru),
+            multitransp(xretru) @ xretru,
             multieye(self.k, self.n),
             atol=1e-10,
         )
@@ -239,7 +233,7 @@ class TestMultiStiefelManifold(TestCase):
 
         xexpu = s.exp(x, u)
         np_testing.assert_allclose(
-            multiprod(multitransp(xexpu), xexpu),
+            multitransp(xexpu) @ xexpu,
             multieye(self.k, self.n),
             atol=1e-10,
         )

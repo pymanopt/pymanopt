@@ -1,7 +1,7 @@
 import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools.multi import multihconj, multiprod, multiqr, multitransp
+from pymanopt.tools.multi import multihconj, multiqr, multitransp
 
 
 class _GrassmannBase(Manifold):
@@ -68,9 +68,7 @@ class Grassmann(_GrassmannBase):
         super().__init__(name, dimension)
 
     def dist(self, point_a, point_b):
-        s = np.linalg.svd(
-            multiprod(multitransp(point_a), point_b), compute_uv=False
-        )
+        s = np.linalg.svd(multitransp(point_a) @ point_b, compute_uv=False)
         s[s > 1] = 1
         s = np.arccos(s)
         return np.linalg.norm(s)
@@ -81,14 +79,14 @@ class Grassmann(_GrassmannBase):
         )
 
     def projection(self, point, vector):
-        return vector - multiprod(point, multiprod(multitransp(point), vector))
+        return vector - point @ (multitransp(point) @ vector)
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         PXehess = self.projection(point, euclidean_hessian)
-        XtG = multiprod(multitransp(point), euclidean_gradient)
-        HXtG = multiprod(tangent_vector, XtG)
+        XtG = multitransp(point) @ euclidean_gradient
+        HXtG = tangent_vector @ XtG
         return PXehess - HXtG
 
     def retraction(self, point, tangent_vector):
@@ -98,7 +96,7 @@ class Grassmann(_GrassmannBase):
 
         # Compute the polar factorization of Y = X+G
         u, _, vt = np.linalg.svd(point + tangent_vector, full_matrices=False)
-        return multiprod(u, vt)
+        return u @ vt
 
     def random_point(self):
         q, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
@@ -116,9 +114,7 @@ class Grassmann(_GrassmannBase):
         cos_s = np.expand_dims(np.cos(s), -2)
         sin_s = np.expand_dims(np.sin(s), -2)
 
-        Y = multiprod(
-            multiprod(point, multitransp(vt) * cos_s), vt
-        ) + multiprod(u * sin_s, vt)
+        Y = point @ (multitransp(vt) * cos_s) @ vt + (u * sin_s) @ vt
 
         # From numerical experiments, it seems necessary to re-orthonormalize.
         # This is quite expensive.
@@ -126,12 +122,12 @@ class Grassmann(_GrassmannBase):
         return q
 
     def log(self, point_a, point_b):
-        ytx = multiprod(multitransp(point_b), point_a)
-        At = multitransp(point_b) - multiprod(ytx, multitransp(point_a))
+        ytx = multitransp(point_b) @ point_a
+        At = multitransp(point_b) - ytx @ multitransp(point_a)
         Bt = np.linalg.solve(ytx, At)
         u, s, vt = np.linalg.svd(multitransp(Bt), full_matrices=False)
         arctan_s = np.expand_dims(np.arctan(s), -2)
-        return multiprod(u * arctan_s, vt)
+        return (u * arctan_s) @ vt
 
 
 class ComplexGrassmann(_GrassmannBase):
@@ -176,9 +172,7 @@ class ComplexGrassmann(_GrassmannBase):
         super().__init__(name, dimension)
 
     def dist(self, point_a, point_b):
-        s = np.linalg.svd(
-            multiprod(multihconj(point_a), point_b), compute_uv=False
-        )
+        s = np.linalg.svd(multihconj(point_a) @ point_b, compute_uv=False)
         s[s > 1] = 1
         s = np.arccos(s)
         return np.linalg.norm(np.real(s))
@@ -193,14 +187,14 @@ class ComplexGrassmann(_GrassmannBase):
         )
 
     def projection(self, point, vector):
-        return vector - multiprod(point, multiprod(multihconj(point), vector))
+        return vector - point @ multihconj(point) @ vector
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         PXehess = self.projection(point, euclidean_hessian)
-        XHG = multiprod(multihconj(point), euclidean_gradient)
-        HXHG = multiprod(tangent_vector, XHG)
+        XHG = multihconj(point) @ euclidean_gradient
+        HXHG = tangent_vector @ XHG
         return PXehess - HXHG
 
     def retraction(self, point, tangent_vector):
@@ -210,7 +204,7 @@ class ComplexGrassmann(_GrassmannBase):
 
         # Compute the polar factorization of Y = X+G
         u, _, vh = np.linalg.svd(point + tangent_vector, full_matrices=False)
-        return multiprod(u, vh)
+        return u @ vh
 
     def random_point(self):
         q, _ = multiqr(
@@ -232,9 +226,7 @@ class ComplexGrassmann(_GrassmannBase):
         U, S, VH = np.linalg.svd(tangent_vector, full_matrices=False)
         cos_S = np.expand_dims(np.cos(S), -2)
         sin_S = np.expand_dims(np.sin(S), -2)
-        Y = multiprod(
-            multiprod(point, multihconj(VH) * cos_S), VH
-        ) + multiprod(U * sin_S, VH)
+        Y = point @ (multihconj(VH) * cos_S) @ VH + (U * sin_S) @ VH
 
         # From numerical experiments, it seems necessary to
         # re-orthonormalize. This is overall quite expensive.
@@ -242,9 +234,9 @@ class ComplexGrassmann(_GrassmannBase):
         return q
 
     def log(self, point_a, point_b):
-        YHX = multiprod(multihconj(point_b), point_a)
-        AH = multihconj(point_b) - multiprod(YHX, multihconj(point_a))
+        YHX = multihconj(point_b) @ point_a
+        AH = multihconj(point_b) - YHX @ multihconj(point_a)
         BH = np.linalg.solve(YHX, AH)
         U, S, VH = np.linalg.svd(multihconj(BH), full_matrices=False)
         arctan_S = np.expand_dims(np.arctan(S), -2)
-        return multiprod(U * arctan_S, VH)
+        return (U * arctan_S) @ VH

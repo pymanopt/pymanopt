@@ -3,13 +3,7 @@ from numpy import testing as np_testing
 from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
-from pymanopt.tools.multi import (
-    multiexpm,
-    multilogm,
-    multiprod,
-    multisym,
-    multitransp,
-)
+from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
 
 from .._test import TestCase
 
@@ -69,8 +63,8 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
 
         # Test congruence-invariance
         a = np.random.normal(size=(self.n, self.n))  # must be invertible
-        axa = multiprod(multiprod(a, x), multitransp(a))
-        aya = multiprod(multiprod(a, y), multitransp(a))
+        axa = a @ x @ multitransp(a)
+        aya = a @ y @ multitransp(a)
         np_testing.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(axa, aya)
         )
@@ -81,11 +75,11 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
             c = np.linalg.cholesky(point_a)
             c_inv = np.linalg.inv(c)
             logm = multilogm(
-                multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
+                c_inv @ point_b @ multitransp(c_inv),
                 positive_definite=True,
             )
             powm = multiexpm(alpha * logm, symmetric=False)
-            return multiprod(multiprod(c, powm), multitransp(c))
+            return c @ powm @ multitransp(c)
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
         alpha = np.random.uniform()
@@ -100,7 +94,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         u = manifold.random_tangent_vector(x)
         e = expm(np.linalg.solve(x, u))
 
-        np_testing.assert_allclose(multiprod(x, e), manifold.exp(x, u))
+        np_testing.assert_allclose(x @ e, manifold.exp(x, u))
         u = u * 1e-6
         np_testing.assert_allclose(manifold.exp(x, u), x + u)
 
@@ -175,7 +169,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         a, b = np.random.normal(size=(2, k, n, n))
         np.testing.assert_almost_equal(
             np.tensordot(a, b.transpose((0, 2, 1)), axes=a.ndim),
-            manifold.inner_product(x, multiprod(x, a), multiprod(x, b)),
+            manifold.inner_product(x, x @ a, x @ b),
         )
 
     def test_projection(self):
@@ -190,7 +184,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         u = np.random.normal(size=(self.k, self.n, self.n))
         np.testing.assert_allclose(
             manifold.euclidean_to_riemannian_gradient(x, u),
-            multiprod(multiprod(x, multisym(u)), x),
+            x @ multisym(u) @ x,
         )
 
     def test_euclidean_to_riemannian_hessian(self):
@@ -202,12 +196,10 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         egrad, ehess = np.random.normal(size=(2, k, n, n))
         u = manifold.random_tangent_vector(x)
 
-        Hess = multiprod(multiprod(x, multisym(ehess)), x) + 2 * multisym(
-            multiprod(multiprod(u, multisym(egrad)), x)
-        )
+        Hess = x @ multisym(ehess) @ x + 2 * multisym(u @ multisym(egrad) @ x)
 
         # Correction factor for the non-constant metric
-        Hess = Hess - multisym(multiprod(multiprod(u, multisym(egrad)), x))
+        Hess = Hess - multisym(u @ multisym(egrad) @ x)
         np_testing.assert_almost_equal(
             Hess, manifold.euclidean_to_riemannian_hessian(x, egrad, ehess, u)
         )
@@ -262,7 +254,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         e = np.zeros((self.k, self.n, self.n))
         for i in range(self.k):
             e[i] = expm(np.linalg.solve(x[i], u[i]))
-        np_testing.assert_allclose(multiprod(x, e), manifold.exp(x, u))
+        np_testing.assert_allclose(x @ e, manifold.exp(x, u))
         u = u * 1e-6
         np_testing.assert_allclose(manifold.exp(x, u), x + u)
 

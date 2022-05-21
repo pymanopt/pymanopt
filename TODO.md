@@ -1,8 +1,6 @@
 # TODO/Roadmap
 
 ## 1.1.x:
-  - Replace 'multiprod' with bare @-operator
-  - Use weingarten map for fixed rank manifold
   - Change "beta_rule" of CG optimizer to internal enum representation
   - Add re-tangentialization change from manopt's trustregions solver
     (requires adding implementation for `to_tangent_space` for each manifold)
@@ -24,6 +22,8 @@
   - Add callback mechanism to allow for custom termination criteria
 
 ## 2.0.x:
+  - Make FixedRankEmbedded manifold compatible with autodiff backends
+    (add weingarten map to support euclidean_to_riemannian_hessian)
   - Refactor TrustRegions implementation and update parameter names
   - Rewrite core/manifolds
     * in JAX with jit support, or

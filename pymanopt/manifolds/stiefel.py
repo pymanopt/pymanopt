@@ -4,7 +4,6 @@ from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
     multiexpm,
     multieye,
-    multiprod,
     multiqr,
     multisym,
     multitransp,
@@ -80,9 +79,7 @@ class Stiefel(RiemannianSubmanifold):
         )
 
     def projection(self, point, vector):
-        return vector - multiprod(
-            point, multisym(multiprod(multitransp(point), vector))
-        )
+        return vector - point @ multisym(multitransp(point) @ vector)
 
     def weingarten(self, point, tangent_vector, normal_vector):
         return -tangent_vector @ multitransp(
@@ -102,7 +99,7 @@ class Stiefel(RiemannianSubmanifold):
     def _retraction_polar(self, point, tangent_vector):
         Y = point + tangent_vector
         u, _, vt = np.linalg.svd(Y, full_matrices=False)
-        return multiprod(u, vt)
+        return u @ vt
 
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)
@@ -122,7 +119,7 @@ class Stiefel(RiemannianSubmanifold):
         return self.projection(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):
-        A = multiprod(multitransp(point), tangent_vector)
+        pt_tv = multitransp(point) @ tangent_vector
         if self._k == 1:
             identity = np.eye(self._p)
         else:
@@ -133,19 +130,15 @@ class Stiefel(RiemannianSubmanifold):
             np.block(
                 [
                     [
-                        A,
-                        -multiprod(
-                            multitransp(tangent_vector), tangent_vector
-                        ),
+                        pt_tv,
+                        -multitransp(tangent_vector) @ tangent_vector,
                     ],
-                    [identity, A],
+                    [identity, pt_tv],
                 ]
             )
-        )
-        target_point = multiprod(
-            a, multiprod(b[..., : self._p], multiexpm(-A))
-        )
-        return target_point
+        )[..., : self._p]
+        c = multiexpm(-pt_tv)
+        return a @ (b @ c)
 
     def zero_vector(self, point):
         if self._k == 1:

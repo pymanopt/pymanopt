@@ -2,7 +2,7 @@ import autograd.numpy as np
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import ComplexGrassmann
-from pymanopt.tools.multi import multieye, multihconj, multiprod, multisym
+from pymanopt.tools.multi import multieye, multihconj, multisym
 
 from .._test import TestCase
 
@@ -39,7 +39,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         np_testing.assert_allclose(proj_U, proj_proj_U)
 
         np_testing.assert_allclose(
-            multiprod(multihconj(X), proj_U),
+            multihconj(X) @ proj_U,
             np.zeros((self.n, self.n)),
             atol=1e-10,
         )
@@ -58,7 +58,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         # Test also that matrices are complex.
         X = self.manifold.random_point()
         np_testing.assert_allclose(
-            multiprod(multihconj(X), X), np.eye(self.n), atol=1e-10
+            multihconj(X) @ X, np.eye(self.n), atol=1e-10
         )
         Y = self.manifold.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
@@ -72,7 +72,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         X = self.manifold.random_point()
         G = self.manifold.random_tangent_vector(X)
         np_testing.assert_allclose(
-            multiprod(multihconj(X), G), np.zeros((self.n, self.n)), atol=1e-10
+            multihconj(X) @ G, np.zeros((self.n, self.n)), atol=1e-10
         )
         H = self.manifold.random_tangent_vector(X)
         assert np.linalg.norm(G - H) > 1e-6
@@ -111,7 +111,7 @@ class TestSingleComplexGrassmannManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
 
         np_testing.assert_allclose(
-            multiprod(multihconj(xretru), xretru), np.eye(self.n), atol=1e-10
+            multihconj(xretru) @ xretru, np.eye(self.n), atol=1e-10
         )
 
         u = u * 1e-6
@@ -159,7 +159,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         np_testing.assert_allclose(proj_U, proj_proj_U)
 
         np_testing.assert_allclose(
-            multiprod(multihconj(X), proj_U),
+            multihconj(X) @ proj_U,
             np.zeros((self.k, self.n, self.n)),
             atol=1e-10,
         )
@@ -177,7 +177,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         # if you generate two they are not equal.
         X = self.manifold.random_point()
         np_testing.assert_allclose(
-            multiprod(multihconj(X), X), multieye(self.k, self.n), atol=1e-10
+            multihconj(X) @ X, multieye(self.k, self.n), atol=1e-10
         )
         Y = self.manifold.random_point()
         assert np.linalg.norm(X - Y) > 1e-6
@@ -189,7 +189,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         X = self.manifold.random_point()
         U = self.manifold.random_tangent_vector(X)
         np_testing.assert_allclose(
-            multisym(multiprod(multihconj(X), U)),
+            multisym(multihconj(X) @ U),
             np.zeros((self.k, self.n, self.n)),
             atol=1e-10,
         )
@@ -230,7 +230,7 @@ class TestMultiComplexGrassmannManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
 
         np_testing.assert_allclose(
-            multiprod(multihconj(xretru), xretru),
+            multihconj(xretru) @ xretru,
             multieye(self.k, self.n),
             atol=1e-10,
         )
