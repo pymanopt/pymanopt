@@ -86,9 +86,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
 
     def random_point(self):
         # Generate eigenvalues between 1 and 2.
-        d = np.ones((self._k, self._n, 1)) + np.random.uniform(
-            size=(self._k, self._n, 1)
-        )
+        d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
 
         # Generate an orthogonal matrix.
         q, _ = multiqr(np.random.normal(size=(self._n, self._n)))
