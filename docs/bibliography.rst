@@ -18,6 +18,9 @@ Bibliography
    university press, 2007.
 .. [Bou2020] Boumal, Nicolas. "An introduction to optimization on smooth
    manifolds." Available online, Aug (2020).
+.. [HZ2006] Hager, William W., and Hongchao Zhang. "A survey of nonlinear
+   conjugate gradient methods." Pacific journal of Optimization 2.1 (2006):
+   35-58.
 .. [JBA+2010] Journée, Michel, et al. "Low-rank optimization on the cone of
    positive semidefinite matrices." SIAM Journal on Optimization 20.5 (2010):
    2327-2351.
