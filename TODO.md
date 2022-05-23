@@ -3,7 +3,6 @@
 ## 1.1.x:
   - Add re-tangentialization change from manopt's trustregions solver
     (requires adding implementation for `to_tangent_space` for each manifold)
-  - Enable flake8-docstrings project-wide
 
 ## 1.2.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
@@ -29,3 +28,5 @@
     * using a backend abstraction as in geomstats (potentially shared with
       geomstats)
   - Revist "reuse_line_searcher"
+  - Rename "orth_value" to "restart_threshold"
+  - Implement optimizers as stateless functions
