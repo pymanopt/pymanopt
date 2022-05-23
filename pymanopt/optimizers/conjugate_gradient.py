@@ -47,7 +47,7 @@ class ConjugateGradient(Optimizer):
         }
         try:
             self._beta_update = beta_rules[beta_rule]
-        except AttributeError:
+        except KeyError:
             raise ValueError(
                 f"Invalid beta rule '{beta_rule}'. Should be one of "
                 f"{list(beta_rules.keys())}."
