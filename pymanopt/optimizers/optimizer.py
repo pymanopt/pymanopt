@@ -74,6 +74,7 @@ class Optimizer(metaclass=abc.ABCMeta):
                 generated.
             *args: Potential optimizer-specific positional arguments.
             **kwargs: Potential optimizer-specific keyword arguments.
+
         Returns:
             The optimization result.
         """
