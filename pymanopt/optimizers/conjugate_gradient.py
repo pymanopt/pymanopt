@@ -44,6 +44,7 @@ class ConjugateGradient(Optimizer):
             "HagerZhang": self._beta_hager_zhang,
             "HestenesStiefel": self._beta_hestenes_stiefel,
             "PolakRibiere": self._beta_polak_ribiere,
+            "LiuStorey": self._beta_liu_storey,
         }
         try:
             self._beta_update = beta_rules[beta_rule]
@@ -209,6 +210,7 @@ class ConjugateGradient(Optimizer):
                     manifold=manifold,
                     x=x,
                     newx=newx,
+                    grad=grad,
                     newgrad=newgrad,
                     Pnewgrad=Pnewgrad,
                     newgradPnewgrad=newgradPnewgrad,
@@ -245,6 +247,7 @@ class ConjugateGradient(Optimizer):
         manifold,
         x,
         newx,
+        grad,
         newgrad,
         Pnewgrad,
         newgradPnewgrad,
@@ -262,6 +265,7 @@ class ConjugateGradient(Optimizer):
         manifold,
         x,
         newx,
+        grad,
         newgrad,
         Pnewgrad,
         newgradPnewgrad,
@@ -280,6 +284,7 @@ class ConjugateGradient(Optimizer):
         manifold,
         x,
         newx,
+        grad,
         newgrad,
         Pnewgrad,
         newgradPnewgrad,
@@ -306,6 +311,7 @@ class ConjugateGradient(Optimizer):
         manifold,
         x,
         newx,
+        grad,
         newgrad,
         Pnewgrad,
         newgradPnewgrad,
@@ -330,3 +336,26 @@ class ConjugateGradient(Optimizer):
         descent_direction_norm = manifold.norm(newx, descent_direction)
         eta_HZ = -1 / (descent_direction_norm * min(0.01, gradient_norm))
         return max(beta, eta_HZ)
+
+    def _beta_liu_storey(
+        self,
+        *,
+        manifold,
+        x,
+        newx,
+        grad,
+        newgrad,
+        Pnewgrad,
+        newgradPnewgrad,
+        Pgrad,
+        gradPgrad,
+        gradient_norm,
+        oldgrad,
+        descent_direction,
+    ):
+        diff = newgrad - oldgrad
+        ip_diff = manifold.inner_product(newx, Pnewgrad, diff)
+        denominator = -manifold.inner_product(x, grad, descent_direction)
+        beta_ls = ip_diff / denominator
+        beta_cd = newgradPnewgrad / denominator
+        return max(0, min(beta_ls, beta_cd))

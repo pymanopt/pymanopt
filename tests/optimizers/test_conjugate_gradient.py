@@ -30,6 +30,7 @@ class TestConjugateGradient(TestCase):
         "HagerZhang",
         "HestenesStiefel",
         "PolakRibiere",
+        "LiuStorey",
     )
     def test_beta_rules(self, beta_rule):
         optimizer = ConjugateGradient(beta_rule=beta_rule, verbosity=0)
