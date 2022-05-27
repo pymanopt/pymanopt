@@ -8,6 +8,134 @@ from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
 
+def _beta_fletcher_reeves(
+    *,
+    manifold,
+    x,
+    newx,
+    grad,
+    newgrad,
+    Pnewgrad,
+    newgradPnewgrad,
+    Pgrad,
+    gradPgrad,
+    gradient_norm,
+    oldgrad,
+    descent_direction,
+):
+    return newgradPnewgrad / gradPgrad
+
+
+def _beta_polak_ribiere(
+    *,
+    manifold,
+    x,
+    newx,
+    grad,
+    newgrad,
+    Pnewgrad,
+    newgradPnewgrad,
+    Pgrad,
+    gradPgrad,
+    gradient_norm,
+    oldgrad,
+    descent_direction,
+):
+    ip_diff = manifold.inner_product(newx, Pnewgrad, newgrad - oldgrad)
+    return max(0, ip_diff / gradPgrad)
+
+
+def _beta_hestenes_stiefel(
+    *,
+    manifold,
+    x,
+    newx,
+    grad,
+    newgrad,
+    Pnewgrad,
+    newgradPnewgrad,
+    Pgrad,
+    gradPgrad,
+    gradient_norm,
+    oldgrad,
+    descent_direction,
+):
+    diff = newgrad - oldgrad
+    try:
+        beta = max(
+            0,
+            manifold.inner_product(newx, Pnewgrad, diff)
+            / manifold.inner_product(newx, diff, descent_direction),
+        )
+    except ZeroDivisionError:
+        beta = 1
+    return beta
+
+
+def _beta_hager_zhang(
+    *,
+    manifold,
+    x,
+    newx,
+    grad,
+    newgrad,
+    Pnewgrad,
+    newgradPnewgrad,
+    Pgrad,
+    gradPgrad,
+    gradient_norm,
+    oldgrad,
+    descent_direction,
+):
+    diff = newgrad - oldgrad
+    Poldgrad = manifold.transport(x, newx, Pgrad)
+    Pdiff = Pnewgrad - Poldgrad
+    denominator = manifold.inner_product(newx, diff, descent_direction)
+    numerator = manifold.inner_product(newx, diff, Pnewgrad)
+    numerator -= (
+        2
+        * manifold.inner_product(newx, diff, Pdiff)
+        * manifold.inner_product(newx, descent_direction, newgrad)
+        / denominator
+    )
+    beta = numerator / denominator
+    descent_direction_norm = manifold.norm(newx, descent_direction)
+    eta_HZ = -1 / (descent_direction_norm * min(0.01, gradient_norm))
+    return max(beta, eta_HZ)
+
+
+def _beta_liu_storey(
+    *,
+    manifold,
+    x,
+    newx,
+    grad,
+    newgrad,
+    Pnewgrad,
+    newgradPnewgrad,
+    Pgrad,
+    gradPgrad,
+    gradient_norm,
+    oldgrad,
+    descent_direction,
+):
+    diff = newgrad - oldgrad
+    ip_diff = manifold.inner_product(newx, Pnewgrad, diff)
+    denominator = -manifold.inner_product(x, grad, descent_direction)
+    beta_ls = ip_diff / denominator
+    beta_cd = newgradPnewgrad / denominator
+    return max(0, min(beta_ls, beta_cd))
+
+
+BETA_RULES = {
+    "FletcherReeves": _beta_fletcher_reeves,
+    "HagerZhang": _beta_hager_zhang,
+    "HestenesStiefel": _beta_hestenes_stiefel,
+    "PolakRibiere": _beta_polak_ribiere,
+    "LiuStorey": _beta_liu_storey,
+}
+
+
 class ConjugateGradient(Optimizer):
     """Riemannian conjugate gradient method.
 
@@ -39,19 +167,12 @@ class ConjugateGradient(Optimizer):
     ):
         super().__init__(*args, **kwargs)
 
-        beta_rules = {
-            "FletcherReeves": self._beta_fletcher_reeves,
-            "HagerZhang": self._beta_hager_zhang,
-            "HestenesStiefel": self._beta_hestenes_stiefel,
-            "PolakRibiere": self._beta_polak_ribiere,
-            "LiuStorey": self._beta_liu_storey,
-        }
         try:
-            self._beta_update = beta_rules[beta_rule]
+            self._beta_update = BETA_RULES[beta_rule]
         except KeyError:
             raise ValueError(
                 f"Invalid beta rule '{beta_rule}'. Should be one of "
-                f"{list(beta_rules.keys())}."
+                f"{list(BETA_RULES.keys())}."
             )
         self._beta_rule = beta_rule
         self._orth_value = orth_value
@@ -240,122 +361,3 @@ class ConjugateGradient(Optimizer):
             step_size=step_size,
             gradient_norm=gradient_norm,
         )
-
-    def _beta_fletcher_reeves(
-        self,
-        *,
-        manifold,
-        x,
-        newx,
-        grad,
-        newgrad,
-        Pnewgrad,
-        newgradPnewgrad,
-        Pgrad,
-        gradPgrad,
-        gradient_norm,
-        oldgrad,
-        descent_direction,
-    ):
-        return newgradPnewgrad / gradPgrad
-
-    def _beta_polak_ribiere(
-        self,
-        *,
-        manifold,
-        x,
-        newx,
-        grad,
-        newgrad,
-        Pnewgrad,
-        newgradPnewgrad,
-        Pgrad,
-        gradPgrad,
-        gradient_norm,
-        oldgrad,
-        descent_direction,
-    ):
-        ip_diff = manifold.inner_product(newx, Pnewgrad, newgrad - oldgrad)
-        return max(0, ip_diff / gradPgrad)
-
-    def _beta_hestenes_stiefel(
-        self,
-        *,
-        manifold,
-        x,
-        newx,
-        grad,
-        newgrad,
-        Pnewgrad,
-        newgradPnewgrad,
-        Pgrad,
-        gradPgrad,
-        gradient_norm,
-        oldgrad,
-        descent_direction,
-    ):
-        diff = newgrad - oldgrad
-        try:
-            beta = max(
-                0,
-                manifold.inner_product(newx, Pnewgrad, diff)
-                / manifold.inner_product(newx, diff, descent_direction),
-            )
-        except ZeroDivisionError:
-            beta = 1
-        return beta
-
-    def _beta_hager_zhang(
-        self,
-        *,
-        manifold,
-        x,
-        newx,
-        grad,
-        newgrad,
-        Pnewgrad,
-        newgradPnewgrad,
-        Pgrad,
-        gradPgrad,
-        gradient_norm,
-        oldgrad,
-        descent_direction,
-    ):
-        diff = newgrad - oldgrad
-        Poldgrad = manifold.transport(x, newx, Pgrad)
-        Pdiff = Pnewgrad - Poldgrad
-        denominator = manifold.inner_product(newx, diff, descent_direction)
-        numerator = manifold.inner_product(newx, diff, Pnewgrad)
-        numerator -= (
-            2
-            * manifold.inner_product(newx, diff, Pdiff)
-            * manifold.inner_product(newx, descent_direction, newgrad)
-            / denominator
-        )
-        beta = numerator / denominator
-        descent_direction_norm = manifold.norm(newx, descent_direction)
-        eta_HZ = -1 / (descent_direction_norm * min(0.01, gradient_norm))
-        return max(beta, eta_HZ)
-
-    def _beta_liu_storey(
-        self,
-        *,
-        manifold,
-        x,
-        newx,
-        grad,
-        newgrad,
-        Pnewgrad,
-        newgradPnewgrad,
-        Pgrad,
-        gradPgrad,
-        gradient_norm,
-        oldgrad,
-        descent_direction,
-    ):
-        diff = newgrad - oldgrad
-        ip_diff = manifold.inner_product(newx, Pnewgrad, diff)
-        denominator = -manifold.inner_product(x, grad, descent_direction)
-        beta_ls = ip_diff / denominator
-        beta_cd = newgradPnewgrad / denominator
-        return max(0, min(beta_ls, beta_cd))

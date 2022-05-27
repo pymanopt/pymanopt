@@ -29,4 +29,3 @@
       geomstats)
   - Revist "reuse_line_searcher"
   - Rename "orth_value" to "restart_threshold"
-  - Implement optimizers as stateless functions
