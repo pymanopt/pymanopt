@@ -1,10 +1,8 @@
 # TODO/Roadmap
 
 ## 1.1.x:
-  - Change "beta_rule" of CG optimizer to internal enum representation
   - Add re-tangentialization change from manopt's trustregions solver
     (requires adding implementation for `to_tangent_space` for each manifold)
-  - Enable flake8-docstrings project-wide
 
 ## 1.2.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
@@ -30,3 +28,4 @@
     * using a backend abstraction as in geomstats (potentially shared with
       geomstats)
   - Revist "reuse_line_searcher"
+  - Rename "orth_value" to "restart_threshold"

@@ -62,7 +62,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         manifold, cost, euclidean_gradient=euclidean_gradient
     )
 
-    optimizer = ConjugateGradient(verbosity=2 * int(not quiet))
+    optimizer = ConjugateGradient(
+        verbosity=2 * int(not quiet), beta_rule="FletcherReeves"
+    )
     Xopt = optimizer.run(problem).point
 
     if quiet:
