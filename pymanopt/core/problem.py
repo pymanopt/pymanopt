@@ -106,9 +106,8 @@ class Problem:
         self.preconditioner = preconditioner
 
     def __setattr__(self, key, value):
-        if hasattr(self, key):
-            if key in ("manifold", "preconditioner"):
-                raise AttributeError(f"Cannot override '{key}' attribute")
+        if hasattr(self, key) and key in ("manifold", "preconditioner"):
+            raise AttributeError(f"Cannot override '{key}' attribute")
         super().__setattr__(key, value)
 
     @staticmethod
