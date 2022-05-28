@@ -83,7 +83,7 @@ class Manifold(metaclass=abc.ABCMeta):
         For most manifolds, which represent points as (potentially
         multi-dimensional) arrays, this will be 1, but other manifolds might
         represent points as tuples or lists of arrays.
-        In this case, :property:`point_layout` describes how many elements such
+        In this case, :attr:`point_layout` describes how many elements such
         tuples/lists contain.
         """
         return self._point_layout
@@ -105,7 +105,7 @@ class Manifold(metaclass=abc.ABCMeta):
         initial and maximal trust-region radii.
 
         Raises:
-            NotImplementedError: If no :property:`typical_dist` is defined.
+            NotImplementedError: If no :attr:`typical_dist` is defined.
         """
         raise NotImplementedError(
             f"Manifold '{self.__class__.__name__}' does not provide a "
