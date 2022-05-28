@@ -3,8 +3,7 @@
 ## 1.1.x:
   - Add re-tangentialization change from manopt's trustregions solver
     (requires adding implementation for `to_tangent_space` for each manifold)
-  - Add pep8-naming and flake8-bugbear flake8 plugin
-  - Replace flake8-docstrings with darglint
+  - Add pep8-naming and flake8-bugbear
 
 ## 1.2.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
@@ -31,3 +30,4 @@
       geomstats)
   - Revist "reuse_line_searcher"
   - Rename "orth_value" to "restart_threshold"
+  - Revisit checking docstrings with darglint if the package is more mature

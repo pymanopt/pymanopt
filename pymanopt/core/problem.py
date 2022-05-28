@@ -71,8 +71,8 @@ class Problem:
             )
         if euclidean_hessian is not None and riemannian_hessian is not None:
             raise ValueError(
-                "Only 'euclidean_hessian' or 'riemannian_hessian' should be provided, "
-                "not both"
+                "Only 'euclidean_hessian' or 'riemannian_hessian' should be "
+                "provided, not both"
             )
 
         self._original_cost = cost

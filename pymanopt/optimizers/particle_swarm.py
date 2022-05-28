@@ -130,6 +130,10 @@ class ParticleSwarm(Optimizer):
 
             column_printer.print_row([iteration, cost_evaluations, fbest])
 
+            # FIXME(nkoep): This only makes sense once we provide a custom
+            #               callback mechanism that actually checks 'xi'.
+            #               Right now this loop is pointless since our default
+            #               stopping criteria do not involve 'xi'.
             # Stop if any particle triggers a stopping criterion.
             for i, xi in enumerate(x):
                 stopping_criterion = self._check_stopping_criterion(

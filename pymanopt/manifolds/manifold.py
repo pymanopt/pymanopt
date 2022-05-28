@@ -87,13 +87,13 @@ class Manifold(metaclass=abc.ABCMeta):
         For most manifolds, which represent points as (potentially
         multi-dimensional) arrays, this will be 1, but other manifolds might
         represent points as tuples or lists of arrays.
-        In this case, `point_layout` describes how many elements such
+        In this case, :property:`point_layout` describes how many elements such
         tuples/lists contain.
         """
         return self._point_layout
 
     @property
-    def num_values(self):
+    def num_values(self) -> int:
         """Total number of values representing a point on the manifold."""
         if isinstance(self.point_layout, (tuple, list)):
             return sum(self.point_layout)
@@ -107,6 +107,9 @@ class Manifold(metaclass=abc.ABCMeta):
 
         This is used by the trust-regions optimizer to determine default
         initial and maximal trust-region radii.
+
+        Raises:
+            NotImplementedError: If no :property:`typical_dist` is defined.
         """
         raise NotImplementedError(
             f"Manifold '{self.__class__.__name__}' does not provide a "
