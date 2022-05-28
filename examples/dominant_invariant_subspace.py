@@ -58,13 +58,6 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
-    """Dominant invariant subspace example.
-
-    This example generates a random 128 x 128 symmetric matrix, and finds the
-    dominant invariant 3-dimensional subspace for this matrix.
-    That is, it finds the subspace spanned by the three eigenvectors with the
-    largest eigenvalues.
-    """
     num_rows = 128
     subspace_dimension = 3
     matrix = np.random.normal(size=(num_rows, num_rows))
