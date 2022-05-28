@@ -3,7 +3,6 @@
 ## 1.1.x:
   - Add re-tangentialization change from manopt's trustregions solver
     (requires adding implementation for `to_tangent_space` for each manifold)
-  - Add flake8-bugbear
 
 ## 1.2.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
