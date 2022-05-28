@@ -73,11 +73,7 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @property
     def dim(self) -> int:
-        """The dimension of the manifold.
-
-        Returns:
-            The dimension of the manifold.
-        """
+        """The dimension of the manifold."""
         return self._dimension
 
     @property
