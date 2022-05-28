@@ -15,6 +15,7 @@ class Backend(metaclass=abc.ABCMeta):
     def __str__(self):
         return self._name
 
+    @staticmethod
     def _assert_backend_available(method):
         """Decorator verifying the availability of a backend.
 

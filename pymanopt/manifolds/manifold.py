@@ -101,7 +101,7 @@ class Manifold(metaclass=abc.ABCMeta):
 
     # Manifold properties that subclasses can define
 
-    @abc.abstractproperty
+    @property
     def typical_dist(self):
         """Returns the `scale` of the manifold.
 
