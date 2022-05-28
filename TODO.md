@@ -20,6 +20,7 @@
   - Add callback mechanism to allow for custom termination criteria
 
 ## 2.0.x:
+  - Add pep8-naming (requires breaking public API to fix all errors)
   - Make FixedRankEmbedded manifold compatible with autodiff backends
     (add weingarten map to support euclidean_to_riemannian_hessian)
   - Refactor TrustRegions implementation and update parameter names
@@ -29,3 +30,4 @@
       geomstats)
   - Revist "reuse_line_searcher"
   - Rename "orth_value" to "restart_threshold"
+  - Revisit checking docstrings with darglint if the package is more mature

@@ -71,8 +71,8 @@ class Problem:
             )
         if euclidean_hessian is not None and riemannian_hessian is not None:
             raise ValueError(
-                "Only 'euclidean_hessian' or 'riemannian_hessian' should be provided, "
-                "not both"
+                "Only 'euclidean_hessian' or 'riemannian_hessian' should be "
+                "provided, not both"
             )
 
         self._original_cost = cost
@@ -106,9 +106,8 @@ class Problem:
         self.preconditioner = preconditioner
 
     def __setattr__(self, key, value):
-        if hasattr(self, key):
-            if key in ("manifold", "preconditioner"):
-                raise AttributeError(f"Cannot override '{key}' attribute")
+        if hasattr(self, key) and key in ("manifold", "preconditioner"):
+            raise AttributeError(f"Cannot override '{key}' attribute")
         super().__setattr__(key, value)
 
     @staticmethod

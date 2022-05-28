@@ -2,7 +2,7 @@
 application_import_names = pymanopt
 docstring-convention = google
 exclude = examples/notebooks/*.py
-ignore = E203, E501, W503, D
+ignore = D1, E203, E501, W503
 import_order_style = pycharm
 max-line-length = 79
-select = C, E, F, W, B, B950
+select = B, B950, C, D, E, F, W

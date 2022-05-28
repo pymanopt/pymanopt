@@ -63,12 +63,13 @@ class TensorFlowBackend(Backend):
             arguments, vectors = bisect_sequence(args)
             tf_args = [self._from_numpy(arg) for arg in arguments]
             tf_vecs = [self._from_numpy(vec) for vec in vectors]
-            with tf.autodiff.ForwardAccumulator(tf_args, tf_vecs) as acc:
-                with tf.GradientTape() as tape:
-                    for arg in tf_args:
-                        tape.watch(arg)
-                    val = function(*tf_args)
-                    grads = tape.gradient(val, tf_args)
+            with tf.autodiff.ForwardAccumulator(
+                tf_args, tf_vecs
+            ) as acc, tf.GradientTape() as tape:
+                for arg in tf_args:
+                    tape.watch(arg)
+                val = function(*tf_args)
+                grads = tape.gradient(val, tf_args)
 
             return self._sanitize_gradients(tf_args, acc.jvp(grads))
 
