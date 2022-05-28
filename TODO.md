@@ -3,7 +3,7 @@
 ## 1.1.x:
   - Add re-tangentialization change from manopt's trustregions solver
     (requires adding implementation for `to_tangent_space` for each manifold)
-  - Add pep8-naming and flake8-bugbear
+  - Add flake8-bugbear
 
 ## 1.2.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
@@ -21,6 +21,7 @@
   - Add callback mechanism to allow for custom termination criteria
 
 ## 2.0.x:
+  - Add pep8-naming (requires breaking public API to fix all errors)
   - Make FixedRankEmbedded manifold compatible with autodiff backends
     (add weingarten map to support euclidean_to_riemannian_hessian)
   - Refactor TrustRegions implementation and update parameter names

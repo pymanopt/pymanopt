@@ -135,7 +135,7 @@ class ParticleSwarm(Optimizer):
             #               Right now this loop is pointless since our default
             #               stopping criteria do not involve 'xi'.
             # Stop if any particle triggers a stopping criterion.
-            for i, xi in enumerate(x):
+            for i, xi in enumerate(x):  # noqa
                 stopping_criterion = self._check_stopping_criterion(
                     start_time=start_time,
                     iteration=iteration,
