@@ -6,19 +6,21 @@ from pymanopt.manifolds.manifold import Manifold
 class PoincareBall(Manifold):
     r"""The Poincare ball.
 
-    An instance represents the Cartesian product of n (defaults to 1)
-    Poincare balls of dimension k.
-    Elements are represented as matrices of size k x n, or arrays of
-    size k if n = 1.
+    The Poincare ball of dimension ``n``.
+    Elements are represented as arrays of shape ``(n,)`` if ``k = 1``.
+    For ``k > 1``, the class represents the product manifold of ``k`` Poincare
+    balls of dimension ``n``, in which case points are represented as arrays of
+    shape ``(k, n)``.
 
-    The Poincare ball is embedded in R^k and is a Riemannian manifold,
-    but it is not an embedded Riemannian submanifold.
-    At every point x, the tangent space at x is R^k since the manifold
-    is open.
+    Since the manifold is open, the tangent space at every point is a copy of
+    :math:`\R^n`.
 
-    The metric is conformal to the Euclidean one (angles are preserved),
-    and it is given at every point :math:`\vmx` by
-    :math:`\inner{\vmu}{\vmv}_\vmx = \lambda_\vmx \inner{\vmu}{\vmv}` where
+    The Poincare ball is embedded in :math:`\R^n` and is a Riemannian manifold,
+    but it is not an embedded Riemannian submanifold since the metric is not
+    inherited from the Euclidean inner product of its ambient space.
+    Instead, the Riemannian metric is conformal to the Euclidean one (angles are
+    preserved), and it is given at every point :math:`\vmx` by
+    :math:`\inner{\vmu}{\vmv}_\vmx = \lambda_\vmx^2 \inner{\vmu}{\vmv}` where
     :math:`\lambda_\vmx = 2 / (1 - \norm{\vmx}^2)` is the conformal factor.
     This induces the following distance between two points :math:`\vmx` and
     :math:`\vmy` on the manifold:
@@ -27,6 +29,10 @@ class PoincareBall(Manifold):
         - \vmy}^2}{(1 - \norm{\vmx}^2) (1 - \norm{\vmy}^2)}}.`
 
     The norm here is understood as the Euclidean norm in the ambient space.
+
+    Args:
+        n: The dimension of the Poincare ball.
+        k: The number of elements in the product of Poincare balls.
     """
 
     def __init__(self, n: int, *, k: int = 1):
