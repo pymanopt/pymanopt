@@ -4,8 +4,8 @@ from pymanopt.manifolds.manifold import Manifold
 
 
 class PoincareBall(Manifold):
-    """
-    Factory class for the Poincare ball model of hyperbolic geometry.
+    r"""The Poincare ball.
+
     An instance represents the Cartesian product of n (defaults to 1)
     Poincare balls of dimension k.
     Elements are represented as matrices of size k x n, or arrays of
@@ -17,13 +17,16 @@ class PoincareBall(Manifold):
     is open.
 
     The metric is conformal to the Euclidean one (angles are preserved),
-    and it is given at every point x by
-        <u, v>_x = lambda_x^2 <u, v>,
-    where lambda_x = 2 / (1 - norm{x}^2) is the conformal factor.
-    This induces the following distance between any two points x and y:
-        dist(x, y) = acosh(
-            1 + 2 norm{x - y}^2 / (1 - norm{x}^2) / (1 - norm{y}^2)
-        ).
+    and it is given at every point :math:`\vmx` by
+    :math:`\inner{\vmu}{\vmv}_\vmx = \lambda_\vmx \inner{\vmu}{\vmv}` where
+    :math:`\lambda_\vmx = 2 / (1 - \norm{\vmx}^2)` is the conformal factor.
+    This induces the following distance between two points :math:`\vmx` and
+    :math:`\vmy` on the manifold:
+
+        :math:`\dist_\manM(\vmx, \vmy) = \arccosh\parens{1 + 2 \frac{\norm{\vmx
+        - \vmy}^2}{(1 - \norm{\vmx}^2) (1 - \norm{\vmy}^2)}}.`
+
+    The norm here is understood as the Euclidean norm in the ambient space.
     """
 
     def __init__(self, k: int, n: int = 1):
@@ -31,119 +34,128 @@ class PoincareBall(Manifold):
         self._n = n
 
         if k < 1:
-            raise ValueError("Need k >= 1. Value supplied was k = %d." % k)
+            raise ValueError(f"Need k >= 1. Value given was k = {k}")
         if n < 1:
-            raise ValueError("Need n >= 1. Value supplied was n = %d." % n)
+            raise ValueError(f"Need n >= 1. Value given was n = {n}")
 
         if n == 1:
-            name = "Poincare ball B({:d})".format(k)
+            name = f"Poincare ball B({k})"
         elif n >= 2:
-            name = "Product Poincare ball B({:d})^{:d}".format(k, n)
+            name = f"Poincare ball B({k})^{n}"
 
         dimension = k * n
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return self.dim / 8
 
-    # The metric in the Poincare ball is conformal to the Euclidean one.
-    def conformal_factor(self, X):
-        return 2 / (1 - np.sum(X * X, axis=0))
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
+        factors = self.conformal_factor(point) ** 2
+        return np.sum(tangent_vector_a * tangent_vector_b * factors)
 
-    def inner(self, X, G, H):
-        factors = np.square(self.conformal_factor(X))
-        return np.sum(G * H * factors)
+    def projection(self, point, vector):
+        return vector
 
-    # Identity map since the tangent space is the ambient space.
-    def proj(self, X, G):
-        return G
+    def norm(self, point, tangent_vector):
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
-    def norm(self, X, G):
-        return np.sqrt(self.inner(X, G, G))
-
-    # Generates points sampled uniformly at random in the unit ball.
-    # In high dimension (large k), sampled points are very likely to
-    # be close to the boundary because of the curse of dimensionality.
-    def rand(self):
+    def random_point(self):
         if self._n == 1:
-            N = np.random.randn(self._k)
+            array = np.random.normal(size=self._k)
         else:
-            N = np.random.randn(self._k, self._n)
-        norms = np.linalg.norm(N, axis=0)
-        radiuses = np.random.rand(self._n) ** (1.0 / self._k)
-        return radiuses * N / norms
+            array = np.random.normal(size=(self._k, self._n))
+        norms = np.linalg.norm(array, axis=0)
+        radiuses = np.random.uniform(size=self._n) ** (1.0 / self._k)
+        return radiuses * array / norms
 
-    def randvec(self, X):
-        return np.random.randn(*np.shape(X))
+    def random_tangent_vector(self, point):
+        return np.random.normal(size=np.shape(point))
 
-    def zerovec(self, X):
-        return np.zeros(np.shape(X))
+    def zero_vector(self, point):
+        return np.zeros_like(point)
 
-    # Geodesic distance.
-    def dist(self, X, Y):
-        norms2_X = np.sum(X * X, axis=0)
-        norms2_Y = np.sum(Y * Y, axis=0)
-        difference = X - Y
+    def dist(self, point_a, point_b):
+        norms2_point_a = np.sum(point_a * point_a, axis=0)
+        norms2_point_b = np.sum(point_b * point_b, axis=0)
+        difference = point_a - point_b
         norms2_difference = np.sum(difference * difference, axis=0)
 
         columns_dist = np.arccosh(
-            1 + 2 * norms2_difference / ((1 - norms2_X) * (1 - norms2_Y))
+            1
+            + 2
+            * norms2_difference
+            / ((1 - norms2_point_a) * (1 - norms2_point_b))
         )
         return np.sqrt(np.sum(np.square(columns_dist)))
 
-    # The hyperbolic metric tensor is conformal to the Euclidean one,
-    # so the Euclidean gradient is simply rescaled.
-    def egrad2rgrad(self, X, G):
-        factors = np.square(1 / self.conformal_factor(X))
-        return G * factors
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        # The hyperbolic metric tensor is conformal to the Euclidean one, so
+        # the Euclidean gradient is simply rescaled.
+        factors = 1 / self.conformal_factor(point) ** 2
+        return euclidean_gradient * factors
 
-    # Derived from the Koszul formula.
-    def ehess2rhess(self, X, G, H, U):
-        lambda_x = self.conformal_factor(X)
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
+    ):
+        # This expression is derived from the Koszul formula.
+        lambda_x = self.conformal_factor(point)
         return (
-            np.sum(G * X, axis=0) * U
-            - np.sum(X * U, axis=0) * G
-            - np.sum(G * U, axis=0) * X
-            + H / lambda_x
+            np.sum(euclidean_gradient * point, axis=0) * tangent_vector
+            - np.sum(point * tangent_vector, axis=0) * euclidean_gradient
+            - np.sum(euclidean_gradient * tangent_vector, axis=0) * point
+            + euclidean_hessian / lambda_x
         ) / lambda_x
 
-    # Exponential map is cheap so use it as a retraction.
-    def retr(self, X, G):
-        return self.exp(X, G)
-
-    # Special non-associative and non-commutative operation
-    # which is closed in the Poincare ball.
-    # Performed column-wise here.
-    def mobius_addition(self, X, Y):
-        scalar_product = np.sum(X * Y, axis=0)
-        norm2X = np.sum(X * X, axis=0)
-        norm2Y = np.sum(Y * Y, axis=0)
-
-        return (X * (1 + 2 * scalar_product + norm2Y) + Y * (1 - norm2X)) / (
-            1 + 2 * scalar_product + norm2X * norm2Y
+    def exp(self, point, tangent_vector):
+        norm_point = np.linalg.norm(tangent_vector, axis=0)
+        # Handle the case where tangent_vector is 0.
+        W = tangent_vector * np.divide(
+            np.tanh(norm_point / (1 - np.sum(point * point, axis=0))),
+            norm_point,
+            out=np.zeros_like(tangent_vector),
+            where=norm_point != 0,
         )
+        return self.mobius_addition(point, W)
 
-    def exp(self, X, U):
-        norm_U = np.linalg.norm(U, axis=0)
-        # Handle the case where U is null.
-        W = U * np.divide(
-            np.tanh(norm_U / (1 - np.sum(X * X, axis=0))),
-            norm_U,
-            out=np.zeros_like(U),
-            where=norm_U != 0,
-        )
-        return self.mobius_addition(X, W)
+    retraction = exp
 
-    def log(self, X, Y):
-        W = self.mobius_addition(-X, Y)
+    def log(self, point_a, point_b):
+        W = self.mobius_addition(-point_a, point_b)
         norm_W = np.linalg.norm(W, axis=0)
-        return (1 - np.sum(X * X, axis=0)) * np.arctanh(norm_W) * W / norm_W
+        return (
+            (1 - np.sum(point_a * point_a, axis=0))
+            * np.arctanh(norm_W)
+            * W
+            / norm_W
+        )
 
-    # I don't have a nice expression for this.
-    # To be completed in the future.
-    def transp(self, X1, X2, G):
-        raise NotImplementedError
+    def pair_mean(self, point_a, point_b):
+        return self.exp(point_a, self.log(point_a, point_b) / 2)
 
-    def pairmean(self, X, Y):
-        return self.exp(X, self.log(X, Y) / 2)
+    def mobius_addition(self, point_a, point_b):
+        """Möbius addition.
+
+        Special non-associative and non-commutative operation which is closed
+        in the Poincare ball.
+
+        Args:
+            point_a: The first point.
+            point_b: The second point.
+
+        Returns:
+            The Möbius sum of ``point_a`` and ``point_b``.
+        """
+        scalar_product = np.sum(point_a * point_b, axis=0)
+        norm_point_a = np.sum(point_a * point_a, axis=0)
+        norm_point_b = np.sum(point_b * point_b, axis=0)
+
+        return (
+            point_a * (1 + 2 * scalar_product + norm_point_b)
+            + point_b * (1 - norm_point_a)
+        ) / (1 + 2 * scalar_product + norm_point_a * norm_point_b)
+
+    def conformal_factor(self, point):
+        return 2 / (1 - np.sum(point * point, axis=0))

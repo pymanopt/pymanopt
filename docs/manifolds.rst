@@ -84,6 +84,11 @@ Positive Matrices
 
 .. automodule:: pymanopt.manifolds.positive
 
+Hyperbolic Space
+----------------
+
+.. automodule:: pymanopt.manifolds.hyperbolic
+
 Product Manifold
 ----------------
 
