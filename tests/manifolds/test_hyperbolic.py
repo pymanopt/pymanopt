@@ -30,7 +30,7 @@ class TestSinglePoincareBallManifold(TestCase):
             self.man.inner_product(x, u, v),
         )
 
-        # test that angles are preserved
+        # Test that angles are preserved.
         x = self.man.random_point() / 2
         u = self.man.random_tangent_vector(x)
         v = self.man.random_tangent_vector(x)
@@ -41,6 +41,11 @@ class TestSinglePoincareBallManifold(TestCase):
             / self.man.norm(x, v)
         )
         np_testing.assert_allclose(cos_rangle, cos_eangle)
+
+        # Test symmetry.
+        np_testing.assert_allclose(
+            self.man.inner_product(x, u, v), self.man.inner_product(x, v, u)
+        )
 
     def test_proj(self):
         x = self.man.random_point()
@@ -89,11 +94,27 @@ class TestSinglePoincareBallManifold(TestCase):
         )
         np_testing.assert_allclose(correct_dist, self.man.dist(x, y))
 
-    # def test_egrad2rgrad(self):
-    #     pass
+    def test_euclidean_to_riemannian_gradient(self):
+        # For now just test whether the method returns an array of the correct
+        # shape.
+        point = self.man.random_point()
+        euclidean_gradient = np.random.normal(size=point.shape)
+        riemannian_gradient = self.man.euclidean_to_riemannian_gradient(
+            point, euclidean_gradient
+        )
+        assert euclidean_gradient.shape == riemannian_gradient.shape
 
-    # def test_ehess2rhess(self):
-    #     pass
+    def test_euclidean_to_riemannian_hessian(self):
+        # For now just test whether the method returns an array of the correct
+        # shape.
+        point = self.man.random_point()
+        euclidean_gradient = np.random.normal(size=point.shape)
+        euclidean_hessian = np.random.normal(size=point.shape)
+        tangent_vector = self.man.random_tangent_vector(point)
+        riemannian_hessian = self.man.euclidean_to_riemannian_hessian(
+            point, euclidean_gradient, euclidean_hessian, tangent_vector
+        )
+        assert euclidean_hessian.shape == riemannian_hessian.shape
 
     def test_retraction(self):
         x = self.man.random_point() / 2
@@ -143,7 +164,8 @@ class TestMultiplePoincareBallManifold(TestCase):
     def test_conformal_factor(self):
         x = self.man.random_point() / 2
         np_testing.assert_allclose(
-            1 - 2 / self.man.conformal_factor(x), la.norm(x, axis=0) ** 2
+            1 - 2 / self.man.conformal_factor(x),
+            la.norm(x, axis=-1, keepdims=True) ** 2,
         )
 
     def test_inner_product(self):
@@ -152,10 +174,15 @@ class TestMultiplePoincareBallManifold(TestCase):
         v = self.man.random_tangent_vector(x)
         np_testing.assert_allclose(
             np.sum(
-                (2 / (1 - la.norm(x, axis=0) ** 2)) ** 2
-                * np.sum(u * v, axis=0)
+                (2 / (1 - la.norm(x, axis=-1) ** 2)) ** 2
+                * np.sum(u * v, axis=-1)
             ),
             self.man.inner_product(x, u, v),
+        )
+
+        # Test symmetry.
+        np_testing.assert_allclose(
+            self.man.inner_product(x, u, v), self.man.inner_product(x, v, u)
         )
 
     def test_proj(self):
@@ -170,8 +197,8 @@ class TestMultiplePoincareBallManifold(TestCase):
 
         np_testing.assert_allclose(
             np.sum(
-                (2 / (1 - la.norm(x, axis=0) ** 2)) ** 2
-                * np.sum(u * u, axis=0)
+                (2 / (1 - la.norm(x, axis=-1) ** 2)) ** 2
+                * np.sum(u * u, axis=-1)
             ),
             self.man.norm(x, u) ** 2,
         )
@@ -180,7 +207,7 @@ class TestMultiplePoincareBallManifold(TestCase):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         x = self.man.random_point()
-        np_testing.assert_array_less(la.norm(x, axis=0), 1)
+        np_testing.assert_array_less(la.norm(x, axis=-1), 1)
         y = self.man.random_point()
         assert not np.array_equal(x, y)
 
@@ -205,25 +232,41 @@ class TestMultiplePoincareBallManifold(TestCase):
             np.arccosh(
                 1
                 + 2
-                * la.norm(x - y, axis=0) ** 2
-                / (1 - la.norm(x, axis=0) ** 2)
-                / (1 - la.norm(y, axis=0) ** 2)
+                * la.norm(x - y, axis=-1) ** 2
+                / (1 - la.norm(x, axis=-1) ** 2)
+                / (1 - la.norm(y, axis=-1) ** 2)
             )
             ** 2
         )
         np_testing.assert_allclose(correct_dist, self.man.dist(x, y) ** 2)
 
-    # def test_egrad2rgrad(self):
-    #     pass
+    def test_euclidean_to_riemannian_gradient(self):
+        # For now just test whether the method returns an array of the correct
+        # shape.
+        point = self.man.random_point()
+        euclidean_gradient = np.random.normal(size=point.shape)
+        riemannian_gradient = self.man.euclidean_to_riemannian_gradient(
+            point, euclidean_gradient
+        )
+        assert euclidean_gradient.shape == riemannian_gradient.shape
 
-    # def test_ehess2rhess(self):
-    #     pass
+    def test_euclidean_to_riemannian_hessian(self):
+        # For now just test whether the method returns an array of the correct
+        # shape.
+        point = self.man.random_point()
+        euclidean_gradient = np.random.normal(size=point.shape)
+        euclidean_hessian = np.random.normal(size=point.shape)
+        tangent_vector = self.man.random_tangent_vector(point)
+        riemannian_hessian = self.man.euclidean_to_riemannian_hessian(
+            point, euclidean_gradient, euclidean_hessian, tangent_vector
+        )
+        assert euclidean_hessian.shape == riemannian_hessian.shape
 
     def test_retraction(self):
         x = self.man.random_point() / 2
         u = self.man.random_tangent_vector(x)
         y = self.man.retraction(x, u)
-        np_testing.assert_array_less(la.norm(y, axis=0), 1 + 1e-10)
+        np_testing.assert_array_less(la.norm(y, axis=-1), 1 + 1e-10)
 
     def test_mobius_addition(self):
         # test if Mobius addition is closed in the Poincare ball
@@ -232,7 +275,7 @@ class TestMultiplePoincareBallManifold(TestCase):
         z = self.man.mobius_addition(x, y)
         # The norm of z may be slightly more than one because of
         # round-off errors.
-        np_testing.assert_array_less(la.norm(z, axis=0), 1 + 1e-10)
+        np_testing.assert_array_less(la.norm(z, axis=-1), 1 + 1e-10)
 
     def test_exp_log_inverse(self):
         x = self.man.random_point() / 2

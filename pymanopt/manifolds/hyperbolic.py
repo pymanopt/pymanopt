@@ -57,8 +57,12 @@ class PoincareBall(Manifold):
         return self.dim / 8
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        factors = self.conformal_factor(point) ** 2
-        return np.sum(tangent_vector_a * tangent_vector_b * factors)
+        factor = self.conformal_factor(point)
+        return np.tensordot(
+            tangent_vector_a,
+            tangent_vector_b * factor**2,
+            axes=tangent_vector_a.ndim,
+        )
 
     def projection(self, point, vector):
         return vector
@@ -69,13 +73,13 @@ class PoincareBall(Manifold):
         )
 
     def random_point(self):
+        array = np.random.normal(size=(self._k, self._n))
+        norms = np.linalg.norm(array, axis=-1, keepdims=True)
+        radiuses = np.random.uniform(size=(self._k, 1)) ** (1.0 / self._n)
+        point = array / norms * radiuses
         if self._k == 1:
-            array = np.random.normal(size=self._n)
-        else:
-            array = np.random.normal(size=(self._n, self._k))
-        norms = np.linalg.norm(array, axis=0)
-        radiuses = np.random.uniform(size=self._k) ** (1.0 / self._n)
-        return radiuses * array / norms
+            return point[0]
+        return point
 
     def random_tangent_vector(self, point):
         return np.random.normal(size=np.shape(point))
@@ -84,10 +88,10 @@ class PoincareBall(Manifold):
         return np.zeros_like(point)
 
     def dist(self, point_a, point_b):
-        norms2_point_a = np.sum(point_a * point_a, axis=0)
-        norms2_point_b = np.sum(point_b * point_b, axis=0)
+        norms2_point_a = np.sum(point_a * point_a, axis=-1)
+        norms2_point_b = np.sum(point_b * point_b, axis=-1)
         difference = point_a - point_b
-        norms2_difference = np.sum(difference * difference, axis=0)
+        norms2_difference = np.sum(difference * difference, axis=-1)
 
         columns_dist = np.arccosh(
             1
@@ -95,31 +99,39 @@ class PoincareBall(Manifold):
             * norms2_difference
             / ((1 - norms2_point_a) * (1 - norms2_point_b))
         )
-        return np.sqrt(np.sum(np.square(columns_dist)))
+        return np.linalg.norm(columns_dist)
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         # The hyperbolic metric tensor is conformal to the Euclidean one, so
         # the Euclidean gradient is simply rescaled.
-        factors = 1 / self.conformal_factor(point) ** 2
-        return euclidean_gradient * factors
+        factor = 1 / self.conformal_factor(point) ** 2
+        return euclidean_gradient * factor
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         # This expression is derived from the Koszul formula.
-        lambda_x = self.conformal_factor(point)
+        factor = self.conformal_factor(point)
         return (
-            np.sum(euclidean_gradient * point, axis=0) * tangent_vector
-            - np.sum(point * tangent_vector, axis=0) * euclidean_gradient
-            - np.sum(euclidean_gradient * tangent_vector, axis=0) * point
-            + euclidean_hessian / lambda_x
-        ) / lambda_x
+            np.sum(euclidean_gradient * point, axis=-1, keepdims=True)
+            * tangent_vector
+            - np.sum(point * tangent_vector, axis=-1, keepdims=True)
+            * euclidean_gradient
+            - np.sum(
+                euclidean_gradient * tangent_vector, axis=-1, keepdims=True
+            )
+            * point
+            + euclidean_hessian / factor
+        ) / factor
 
     def exp(self, point, tangent_vector):
-        norm_point = np.linalg.norm(tangent_vector, axis=0)
+        norm_point = np.linalg.norm(tangent_vector, axis=-1, keepdims=True)
         # Handle the case where tangent_vector is 0.
         W = tangent_vector * np.divide(
-            np.tanh(norm_point / (1 - np.sum(point * point, axis=0))),
+            np.tanh(
+                norm_point
+                / (1 - np.sum(point * point, axis=-1, keepdims=True))
+            ),
             norm_point,
             out=np.zeros_like(tangent_vector),
             where=norm_point != 0,
@@ -130,9 +142,9 @@ class PoincareBall(Manifold):
 
     def log(self, point_a, point_b):
         W = self.mobius_addition(-point_a, point_b)
-        norm_W = np.linalg.norm(W, axis=0)
+        norm_W = np.linalg.norm(W, axis=-1, keepdims=True)
         return (
-            (1 - np.sum(point_a * point_a, axis=0))
+            (1 - np.sum(point_a * point_a, axis=-1, keepdims=True))
             * np.arctanh(norm_W)
             * W
             / norm_W
@@ -154,9 +166,9 @@ class PoincareBall(Manifold):
         Returns:
             The Möbius sum of ``point_a`` and ``point_b``.
         """
-        scalar_product = np.sum(point_a * point_b, axis=0)
-        norm_point_a = np.sum(point_a * point_a, axis=0)
-        norm_point_b = np.sum(point_b * point_b, axis=0)
+        scalar_product = np.sum(point_a * point_b, axis=-1, keepdims=True)
+        norm_point_a = np.sum(point_a * point_a, axis=-1, keepdims=True)
+        norm_point_b = np.sum(point_b * point_b, axis=-1, keepdims=True)
 
         return (
             point_a * (1 + 2 * scalar_product + norm_point_b)
@@ -164,4 +176,17 @@ class PoincareBall(Manifold):
         ) / (1 + 2 * scalar_product + norm_point_a * norm_point_b)
 
     def conformal_factor(self, point):
-        return 2 / (1 - np.sum(point * point, axis=0))
+        """The conformal factor for a point.
+
+        Args:
+            point: The point for which to compute the conformal factor.
+
+        Returns:
+            The conformal factor.
+            If ``point`` is a point on the product manifold of ``k`` Poincare
+            balls, the return value will be an array of shape ``(k,1)``.
+            The singleton dimension is explicitly kept to simplify
+            multiplication of ``point`` by the conformal factor on product
+            manifolds.
+        """
+        return 2 / (1 - np.sum(point * point, axis=-1, keepdims=True))
