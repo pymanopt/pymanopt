@@ -9,11 +9,11 @@ from .._test import TestCase
 
 class TestSinglePoincareBallManifold(TestCase):
     def setUp(self):
-        self.k = 50
-        self.man = PoincareBall(self.k)
+        self.n = 50
+        self.man = PoincareBall(self.n)
 
     def test_dim(self):
-        assert self.man.dim == self.k
+        assert self.man.dim == self.n
 
     def test_conformal_factor(self):
         x = self.man.random_point() / 2
@@ -133,9 +133,9 @@ class TestSinglePoincareBallManifold(TestCase):
 
 class TestMultiplePoincareBallManifold(TestCase):
     def setUp(self):
-        self.k = 50
-        self.n = 20
-        self.man = PoincareBall(self.k, self.n)
+        self.n = 50
+        self.k = 20
+        self.man = PoincareBall(self.n, k=self.k)
 
     def test_dim(self):
         assert self.man.dim == self.k * self.n

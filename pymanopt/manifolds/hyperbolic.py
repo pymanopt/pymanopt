@@ -29,19 +29,19 @@ class PoincareBall(Manifold):
     The norm here is understood as the Euclidean norm in the ambient space.
     """
 
-    def __init__(self, k: int, n: int = 1):
-        self._k = k
+    def __init__(self, n: int, *, k: int = 1):
         self._n = n
+        self._k = k
 
-        if k < 1:
-            raise ValueError(f"Need k >= 1. Value given was k = {k}")
         if n < 1:
             raise ValueError(f"Need n >= 1. Value given was n = {n}")
+        if k < 1:
+            raise ValueError(f"Need k >= 1. Value given was k = {k}")
 
-        if n == 1:
-            name = f"Poincare ball B({k})"
-        elif n >= 2:
-            name = f"Poincare ball B({k})^{n}"
+        if k == 1:
+            name = f"Poincare ball B({n})"
+        elif k >= 2:
+            name = f"Poincare ball B({n})^{k}"
 
         dimension = k * n
         super().__init__(name, dimension)
@@ -63,12 +63,12 @@ class PoincareBall(Manifold):
         )
 
     def random_point(self):
-        if self._n == 1:
-            array = np.random.normal(size=self._k)
+        if self._k == 1:
+            array = np.random.normal(size=self._n)
         else:
-            array = np.random.normal(size=(self._k, self._n))
+            array = np.random.normal(size=(self._n, self._k))
         norms = np.linalg.norm(array, axis=0)
-        radiuses = np.random.uniform(size=self._n) ** (1.0 / self._k)
+        radiuses = np.random.uniform(size=self._k) ** (1.0 / self._n)
         return radiuses * array / norms
 
     def random_tangent_vector(self, point):
