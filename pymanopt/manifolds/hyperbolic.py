@@ -190,3 +190,5 @@ class PoincareBall(Manifold):
             manifolds.
         """
         return 2 / (1 - np.sum(point * point, axis=-1, keepdims=True))
+
+    to_tangent_space = projection
