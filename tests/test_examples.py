@@ -1,4 +1,3 @@
-import matplotlib
 from nose2.tools import params
 
 from examples import (
@@ -61,10 +60,8 @@ class TestExamples(TestCase):
 
     @params(*check_gradient.SUPPORTED_BACKENDS)
     def test_check_gradient(self, backend):
-        matplotlib.use("Agg")
         check_gradient.run(backend)
 
     @params(*check_retraction.SUPPORTED_BACKENDS)
     def test_check_retraction(self, backend):
-        matplotlib.use("Agg")
         check_retraction.run(backend)
