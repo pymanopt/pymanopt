@@ -43,7 +43,7 @@ class ComplexCircle(RiemannianSubmanifold):
     def projection(self, point, vector):
         return vector - (vector.conj() * point).real * point
 
-    tangent = projection
+    to_tangent_space = projection
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
