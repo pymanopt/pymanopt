@@ -115,6 +115,7 @@ latex_macros = r"""
     \def \conj   #1{#1^*}
     \def \norm   #1{\|#1\|}
     \def \abs    #1{|#1|}
+    \def \parens #1{\left(#1\right)}
 """
 # Generate macros for boldface letters.
 latex_macros += "\n".join(
@@ -130,7 +131,13 @@ katex_options = (
     + "\n"
     + r'"\\argmin":'
     + r'"\\mathop{\\operatorname{argmin}}\\limits"'
+    + ",\n"
+    + r'"\\arccosh":'
+    + r'"\\operatorname{arccosh}"'
+    + ",\n"
+    + r'"\\dist":'
+    + r'"\\operatorname{dist}"'
     + "}"
 )
-print(f"Defined KaTeX macros:\n{katex_macros}")
+print(f"Defined KaTeX macros:\n{katex_options}")
 latex_elements = {"preamble": latex_macros}
