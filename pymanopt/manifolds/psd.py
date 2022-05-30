@@ -28,6 +28,8 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
         Omega = scipy.linalg.solve_continuous_lyapunov(YtY, AS)
         return vector - point @ Omega
 
+    to_tangent_space = projection
+
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient
 
@@ -239,6 +241,8 @@ class Elliptope(Manifold, RetrAsExpMixin):
         AS = point.T @ eta - vector.T @ point
         Omega = scipy.linalg.solve_continuous_lyapunov(YtY, -AS)
         return eta - point @ (Omega - Omega.T) / 2
+
+    to_tangent_space = projection
 
     def retraction(self, point, tangent_vector):
         return self._normalize_rows(point + tangent_vector)

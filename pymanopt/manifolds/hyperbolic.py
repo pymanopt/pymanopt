@@ -67,6 +67,8 @@ class PoincareBall(Manifold):
     def projection(self, point, vector):
         return vector
 
+    to_tangent_space = projection
+
     def norm(self, point, tangent_vector):
         return np.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
@@ -187,5 +189,3 @@ class PoincareBall(Manifold):
             manifolds.
         """
         return 2 / (1 - np.sum(point * point, axis=-1, keepdims=True))
-
-    to_tangent_space = projection

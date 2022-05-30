@@ -72,6 +72,8 @@ class Positive(Manifold):
     def projection(self, point, vector):
         return vector
 
+    to_tangent_space = projection
+
     def norm(self, point, tangent_vector):
         return np.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
