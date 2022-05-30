@@ -1,8 +1,6 @@
 # TODO/Roadmap
 
 ## 1.1.x:
-  - Add re-tangentialization change from manopt's trustregions solver
-    (requires adding implementation for `to_tangent_space` for each manifold)
   - Add test cases for 'euclidean_to_riemannian_gradient' based on
     'check_gradient' diagnostic function
   - Add 'check_hessian' diagnostic function to add automatic tests for
