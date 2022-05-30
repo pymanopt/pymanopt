@@ -3,6 +3,7 @@ import warnings
 import autograd.numpy as np
 from numpy import testing as np_testing
 
+import pymanopt
 from pymanopt.manifolds import (
     Sphere,
     SphereSubspaceComplementIntersection,
@@ -11,6 +12,7 @@ from pymanopt.manifolds import (
 from pymanopt.tools import testing
 
 from .._test import TestCase
+from ._manifold_tests import run_gradient_test
 
 
 class TestSphereManifold(TestCase):
@@ -69,6 +71,15 @@ class TestSphereManifold(TestCase):
             H - X * np.trace(X.T @ H),
             self.manifold.euclidean_to_riemannian_gradient(X, H),
         )
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        matrix = np.random.normal(size=(self.m, self.n))
+
+        @pymanopt.function.autograd(self.manifold)
+        def cost(x):
+            return -np.linalg.norm(x - matrix) ** 2
+
+        run_gradient_test(self.manifold, cost)
 
     def test_euclidean_to_riemannian_hessian(self):
         x = self.manifold.random_point()
