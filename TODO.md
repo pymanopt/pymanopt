@@ -20,6 +20,7 @@
     anymore #114
   - Add constant step size line search method
   - Add callback mechanism to allow for custom termination criteria
+  - Add support for complex manifolds to autodiff backends
 
 ## 2.0.x:
   - Add pep8-naming (requires breaking public API to fix all errors)
