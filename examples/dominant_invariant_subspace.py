@@ -28,11 +28,11 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
         @pymanopt.function.numpy(manifold)
         def euclidean_gradient(X):
-            return -(matrix + matrix.T) @ X
+            return -2 * matrix @ X
 
         @pymanopt.function.numpy(manifold)
         def euclidean_hessian(X, H):
-            return -(matrix + matrix.T) @ H
+            return -2 * matrix @ H
 
     elif backend == "pytorch":
         matrix_ = torch.from_numpy(matrix)
@@ -46,10 +46,6 @@ def create_cost_and_derivates(manifold, matrix, backend):
         @pymanopt.function.tensorflow(manifold)
         def cost(X):
             return -tf.tensordot(X, tf.matmul(matrix, X), axes=2)
-
-        @pymanopt.function.tensorflow(manifold)
-        def euclidean_gradient(X):
-            return -tf.matmul(matrix + matrix.T, X)
 
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
