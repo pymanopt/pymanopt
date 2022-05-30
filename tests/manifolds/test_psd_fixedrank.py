@@ -1,13 +1,17 @@
+import autograd.numpy as np
+
+import pymanopt
 from pymanopt.manifolds import PSDFixedRank
 
 from .._test import TestCase
+from ._manifold_tests import run_gradient_test
 
 
 class TestPSDFixedRankManifold(TestCase):
-    def test_constructor(self):
+    def setUp(self):
         n = 50
         k = 10
-        PSDFixedRank(n, k)
+        self.manifold = PSDFixedRank(n, k)
 
     # def test_dim(self):
 
@@ -23,7 +27,14 @@ class TestPSDFixedRankManifold(TestCase):
 
     # def test_retraction(self):
 
-    # def test_euclidean_to_riemannian_gradient(self):
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        matrix = self.manifold.random_point()
+
+        @pymanopt.function.autograd(self.manifold)
+        def cost(x):
+            return np.linalg.norm(x - matrix) ** 2
+
+        run_gradient_test(self.manifold, cost)
 
     # def test_norm(self):
 

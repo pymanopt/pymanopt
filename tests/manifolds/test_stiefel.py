@@ -2,11 +2,13 @@ import autograd.numpy as np
 from nose2.tools import params
 from numpy import testing as np_testing
 
+import pymanopt
 from pymanopt.manifolds import Stiefel
 from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multisym, multitransp
 
 from .._test import TestCase
+from ._manifold_tests import run_gradient_test
 
 
 class TestSingleStiefelManifold(TestCase):
@@ -172,6 +174,15 @@ class TestMultiStiefelManifold(TestCase):
         # Compare the projections.
         Hproj = H - X @ (multitransp(X) @ H + multitransp(H) @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        matrix = self.manifold.random_point()
+
+        @pymanopt.function.autograd(self.manifold)
+        def cost(x):
+            return np.linalg.norm(x - matrix) ** 2
+
+        run_gradient_test(self.manifold, cost)
 
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that

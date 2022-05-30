@@ -73,11 +73,11 @@ class TestSphereManifold(TestCase):
         )
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        matrix = np.random.normal(size=(self.m, self.n))
+        matrix = self.manifold.random_point()
 
         @pymanopt.function.autograd(self.manifold)
         def cost(x):
-            return -np.linalg.norm(x - matrix) ** 2
+            return np.linalg.norm(x - matrix) ** 2
 
         run_gradient_test(self.manifold, cost)
 

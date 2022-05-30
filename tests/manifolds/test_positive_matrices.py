@@ -1,9 +1,11 @@
 import autograd.numpy as np
 from numpy import testing as np_testing
 
+import pymanopt
 from pymanopt.manifolds import Positive
 
 from .._test import TestCase
+from ._manifold_tests import run_gradient_test
 
 
 class TestPositiveVectors(TestCase):
@@ -78,3 +80,12 @@ class TestPositiveVectors(TestCase):
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        vector = self.manifold.random_point()
+
+        @pymanopt.function.autograd(self.manifold)
+        def cost(x):
+            return np.linalg.norm(x - vector) ** 2
+
+        run_gradient_test(self.manifold, cost)

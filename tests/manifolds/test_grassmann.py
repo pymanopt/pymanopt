@@ -58,7 +58,7 @@ class TestSingleGrassmannManifold(TestCase):
         np_testing.assert_allclose(xretru, x + u)
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        matrix = np.random.normal(size=(self.m, self.n))
+        matrix = self.manifold.random_point()
 
         @pymanopt.function.autograd(self.manifold)
         def cost(x):

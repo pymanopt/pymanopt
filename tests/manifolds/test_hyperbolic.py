@@ -108,7 +108,7 @@ class TestSinglePoincareBallManifold(TestCase):
         assert euclidean_gradient.shape == riemannian_gradient.shape
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        vector = np.random.normal(size=self.n)
+        vector = self.manifold.random_point()
 
         @pymanopt.function.autograd(self.manifold)
         def cost(x):

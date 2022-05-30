@@ -1,11 +1,13 @@
-import numpy as np
+import autograd.numpy as np
 import numpy.testing as np_testing
 from nose2.tools import params
 
+import pymanopt
 from pymanopt.manifolds import SpecialOrthogonalGroup
 from pymanopt.tools.multi import multieye, multitransp
 
 from .._test import TestCase
+from ._manifold_tests import run_gradient_test
 
 
 class TestSpecialOrthogonalGroup(TestCase):
@@ -75,3 +77,12 @@ class TestSpecialOrthogonalGroup(TestCase):
         U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
         np_testing.assert_array_almost_equal(U, Ulogexp)
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        matrix = self.so.random_point()
+
+        @pymanopt.function.autograd(self.so)
+        def cost(x):
+            return np.linalg.norm(x - matrix) ** 2
+
+        run_gradient_test(self.so, cost)

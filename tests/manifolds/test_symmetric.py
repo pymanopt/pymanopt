@@ -1,10 +1,12 @@
-import numpy as np
+import autograd.numpy as np
 from numpy import testing as np_testing
 
+import pymanopt
 from pymanopt.manifolds import Symmetric
 from pymanopt.tools.multi import multisym
 
 from .._test import TestCase
+from ._manifold_tests import run_gradient_test
 
 
 class TestSymmetricManifold(TestCase):
@@ -61,6 +63,15 @@ class TestSymmetricManifold(TestCase):
         x = e.random_point()
         u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.euclidean_to_riemannian_gradient(x, u), u)
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        matrix = self.manifold.random_point()
+
+        @pymanopt.function.autograd(self.manifold)
+        def cost(x):
+            return np.linalg.norm(x - matrix) ** 2
+
+        run_gradient_test(self.manifold, cost)
 
     def test_norm(self):
         e = self.manifold
