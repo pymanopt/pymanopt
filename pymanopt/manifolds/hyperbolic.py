@@ -74,30 +74,27 @@ class PoincareBall(Manifold):
 
     def random_point(self):
         array = np.random.normal(size=(self._k, self._n))
-        norms = np.linalg.norm(array, axis=-1, keepdims=True)
-        radiuses = np.random.uniform(size=(self._k, 1)) ** (1.0 / self._n)
-        point = array / norms * radiuses
+        norm = np.linalg.norm(array, axis=-1, keepdims=True)
+        radius = np.random.uniform(size=(self._k, 1)) ** (1.0 / self._n)
+        point = array / norm * radius
         if self._k == 1:
             return point[0]
         return point
 
     def random_tangent_vector(self, point):
-        return np.random.normal(size=np.shape(point))
+        return np.random.normal(size=point.shape)
 
     def zero_vector(self, point):
         return np.zeros_like(point)
 
     def dist(self, point_a, point_b):
-        norms2_point_a = np.sum(point_a * point_a, axis=-1)
-        norms2_point_b = np.sum(point_b * point_b, axis=-1)
+        norm_point_a = np.sum(point_a * point_a, axis=-1)
+        norm_point_b = np.sum(point_b * point_b, axis=-1)
         difference = point_a - point_b
-        norms2_difference = np.sum(difference * difference, axis=-1)
+        norm_difference = np.sum(difference * difference, axis=-1)
 
         columns_dist = np.arccosh(
-            1
-            + 2
-            * norms2_difference
-            / ((1 - norms2_point_a) * (1 - norms2_point_b))
+            1 + 2 * norm_difference / ((1 - norm_point_a) * (1 - norm_point_b))
         )
         return np.linalg.norm(columns_dist)
 
