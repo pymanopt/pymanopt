@@ -608,6 +608,10 @@ class TrustRegions(Optimizer):
             beta = z_r / zold_rold
             delta = -z + beta * delta
 
+            # Re-tangentialize delta to make sure it remains within the tangent
+            # space.
+            delta = manifold.to_tangent_space(x, delta)
+
             # Update new P-norms and P-dots [CGT2000, eq. 7.5.6 & 7.5.7].
             e_Pd = beta * (e_Pd + alpha * d_Pd)
             d_Pd = z_r + beta * beta * d_Pd

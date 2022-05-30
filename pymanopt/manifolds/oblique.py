@@ -44,6 +44,8 @@ class Oblique(RiemannianSubmanifold):
     def projection(self, point, vector):
         return vector - point * ((point * vector).sum(0)[np.newaxis, :])
 
+    to_tangent_space = projection
+
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):

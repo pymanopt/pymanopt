@@ -31,6 +31,8 @@ class _SphereBase(RiemannianSubmanifold):
     def projection(self, point, vector):
         return vector - self.inner_product(point, point, vector) * point
 
+    to_tangent_space = projection
+
     def weingarten(self, point, tangent_vector, normal_vector):
         return (
             -self.inner_product(point, point, normal_vector) * tangent_vector

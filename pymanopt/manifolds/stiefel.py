@@ -81,6 +81,8 @@ class Stiefel(RiemannianSubmanifold):
     def projection(self, point, vector):
         return vector - point @ multisym(multitransp(point) @ vector)
 
+    to_tangent_space = projection
+
     def weingarten(self, point, tangent_vector, normal_vector):
         return -tangent_vector @ multitransp(
             point

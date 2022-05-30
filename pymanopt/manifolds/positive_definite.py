@@ -67,14 +67,14 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
     def projection(self, point, vector):
         return multisym(vector)
 
+    to_tangent_space = projection
+
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
-        # TODO: Check that this is correct
         return point @ multisym(euclidean_gradient) @ point
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        # TODO: Check that this is correct
         return point @ multisym(euclidean_hessian) @ point + multisym(
             tangent_vector @ multisym(euclidean_gradient) @ point
         )

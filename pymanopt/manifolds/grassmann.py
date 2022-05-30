@@ -24,6 +24,9 @@ class _GrassmannBase(Manifold):
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(point, euclidean_gradient)
 
+    def to_tangent_space(self, point, vector):
+        return self.projection(point, vector)
+
 
 class Grassmann(_GrassmannBase):
     r"""The Grassmann manifold.

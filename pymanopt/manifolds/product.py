@@ -78,6 +78,11 @@ class Product(Manifold):
             point, vector
         )
 
+    def to_tangent_space(self, point, vector):
+        return self._dispatch(
+            "to_tangent_space", reduction=_ProductTangentVector
+        )(point, vector)
+
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self._dispatch(
             "euclidean_to_riemannian_gradient", reduction=_ProductTangentVector
