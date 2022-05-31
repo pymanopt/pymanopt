@@ -3,15 +3,17 @@ from numpy import testing as np_testing
 
 from pymanopt.manifolds import Positive
 
-from .._test import TestCase
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestPositiveVectors(TestCase):
+class TestPositiveVectors(ManifoldTestCase):
     def setUp(self):
         self.m = m = 3
         self.n = n = 1
         self.k = k = 2
         self.manifold = Positive(m, n, k=k)
+
+        super().setUp()
 
     def test_inner_product(self):
         x = self.manifold.random_point()
@@ -78,3 +80,6 @@ class TestPositiveVectors(TestCase):
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()

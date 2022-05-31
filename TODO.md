@@ -1,8 +1,6 @@
 # TODO/Roadmap
 
 ## 1.1.x:
-  - Add test cases for 'euclidean_to_riemannian_gradient' based on
-    'check_gradient' diagnostic function
   - Add 'check_hessian' diagnostic function to add automatic tests for
     `euclidean_to_riemannian_hessian'
 
@@ -23,6 +21,8 @@
   - Add support for complex manifolds to autodiff backends
 
 ## 2.0.x:
+  - Raise an exception if dimension of 'SphereSubspaceIntersection' manifold is
+    0
   - Add pep8-naming (requires breaking public API to fix all errors)
   - Make FixedRankEmbedded manifold compatible with autodiff backends
     (add weingarten map to support euclidean_to_riemannian_hessian)

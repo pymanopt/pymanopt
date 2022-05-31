@@ -1,13 +1,15 @@
 from pymanopt.manifolds import PSDFixedRank
 
-from .._test import TestCase
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestPSDFixedRankManifold(TestCase):
-    def test_constructor(self):
+class TestPSDFixedRankManifold(ManifoldTestCase):
+    def setUp(self):
         n = 50
         k = 10
-        PSDFixedRank(n, k)
+        self.manifold = PSDFixedRank(n, k)
+
+        super().setUp()
 
     # def test_dim(self):
 
@@ -23,7 +25,8 @@ class TestPSDFixedRankManifold(TestCase):
 
     # def test_retraction(self):
 
-    # def test_euclidean_to_riemannian_gradient(self):
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
 
     # def test_norm(self):
 

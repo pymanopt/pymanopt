@@ -39,8 +39,7 @@ def check_directional_derivative(problem, x=None, d=None):
     check_directional_derivative performs a numerical test to check that the
     directional derivatives defined in the problem structure agree up to first
     order with the cost function at some point x, along some direction d. The
-    test is based on a truncated Taylor series (see online pymanopt
-    documentation).
+    test is based on a truncated Taylor series.
     Both x and d are optional and will be sampled at random if omitted.
     """
     #  If x and / or d are not specified, pick them at random.
@@ -116,9 +115,9 @@ def check_gradient(problem, x=None, d=None):
     """Checks the consistency of the cost function and the gradient.
 
     check_gradient performs a numerical test to check that the gradient
-    defined in the problem structure agrees up to first order with the cost
-    function at some point x, along some direction d. The test is based on a
-    truncated Taylor series.
+    defined in the problem agrees up to first order with the cost function at
+    some point x, along some direction d. The test is based on a truncated
+    Taylor series.
 
     It is also tested that the gradient is indeed a tangent vector.
 

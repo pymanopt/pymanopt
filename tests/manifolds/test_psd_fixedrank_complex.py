@@ -1,13 +1,15 @@
 from pymanopt.manifolds import PSDFixedRankComplex
 
-from .._test import TestCase
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestPSDFixedRankComplexManifold(TestCase):
-    def test_constructor(self):
+class TestPSDFixedRankComplexManifold(ManifoldTestCase):
+    def setUp(self):
         n = 50
         k = 10
-        PSDFixedRankComplex(n, k)
+        self.manifold = PSDFixedRankComplex(n, k)
+
+        super().setUp()
 
     # def test_dim(self):
 

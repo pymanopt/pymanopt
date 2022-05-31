@@ -1,13 +1,15 @@
 from pymanopt.manifolds import Elliptope
 
-from .._test import TestCase
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestElliptopeManifold(TestCase):
-    def test_constructor(self):
+class TestElliptopeManifold(ManifoldTestCase):
+    def setUp(self):
         n = 50
         k = 10
-        Elliptope(n, k)
+        self.manifold = Elliptope(n, k)
+
+        super().setUp()
 
     # def test_dim(self):
 
@@ -23,7 +25,8 @@ class TestElliptopeManifold(TestCase):
 
     # def test_retraction(self):
 
-    # def test_euclidean_to_riemannian_gradient(self):
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
 
     # def test_norm(self):
 

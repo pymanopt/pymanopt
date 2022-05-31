@@ -1,16 +1,18 @@
-import numpy as np
+import autograd.numpy as np
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Euclidean
 
-from .._test import TestCase
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestEuclideanManifold(TestCase):
+class TestEuclideanManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 10
         self.n = n = 5
         self.manifold = Euclidean(m, n)
+
+        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.m * self.n
@@ -58,6 +60,9 @@ class TestEuclideanManifold(TestCase):
         x = e.random_point()
         u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.euclidean_to_riemannian_gradient(x, u), u)
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
 
     def test_norm(self):
         e = self.manifold

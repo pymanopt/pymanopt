@@ -1,17 +1,19 @@
-import numpy as np
-from numpy import testing as np_testing
+import autograd.numpy as np
+import numpy.testing as np_testing
 from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
 
-from .._test import TestCase
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
+class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
     def setUp(self):
         self.n = n = 15
         self.manifold = SymmetricPositiveDefinite(n)
+
+        super().setUp()
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -112,7 +114,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
     def test_norm(self):
         manifold = self.manifold
         x = manifold.random_point()
-        np.testing.assert_almost_equal(
+        np_testing.assert_almost_equal(
             manifold.norm(np.eye(self.n), x), np.linalg.norm(x)
         )
 
@@ -131,11 +133,13 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         np_testing.assert_allclose(manifold.log(x, y), u)
 
 
-class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
+class TestMultiSymmetricPositiveDefiniteManifold(ManifoldTestCase):
     def setUp(self):
         self.n = n = 10
         self.k = k = 3
         self.manifold = SymmetricPositiveDefinite(n, k=k)
+
+        super().setUp()
 
     def test_dim(self):
         manifold = self.manifold
@@ -167,7 +171,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         n = self.n
         x = manifold.random_point()
         a, b = np.random.normal(size=(2, k, n, n))
-        np.testing.assert_almost_equal(
+        np_testing.assert_almost_equal(
             np.tensordot(a, b.transpose((0, 2, 1)), axes=a.ndim),
             manifold.inner_product(x, x @ a, x @ b),
         )
@@ -176,16 +180,19 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         manifold = self.manifold
         x = manifold.random_point()
         a = np.random.normal(size=(self.k, self.n, self.n))
-        np.testing.assert_allclose(manifold.projection(x, a), multisym(a))
+        np_testing.assert_allclose(manifold.projection(x, a), multisym(a))
 
     def test_euclidean_to_riemannian_gradient(self):
         manifold = self.manifold
         x = manifold.random_point()
         u = np.random.normal(size=(self.k, self.n, self.n))
-        np.testing.assert_allclose(
+        np_testing.assert_allclose(
             manifold.euclidean_to_riemannian_gradient(x, u),
             x @ multisym(u) @ x,
         )
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         # Use manopt's slow method
@@ -208,7 +215,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         manifold = self.manifold
         x = manifold.random_point()
         Id = np.array(self.k * [np.eye(self.n)])
-        np.testing.assert_almost_equal(manifold.norm(Id, x), np.linalg.norm(x))
+        np_testing.assert_almost_equal(manifold.norm(Id, x), np.linalg.norm(x))
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
