@@ -4,17 +4,26 @@ import numpy.testing as np_testing
 import pymanopt
 from pymanopt.manifolds import Euclidean, Grassmann, Product, Sphere
 
-from .._test import TestCase
-from ._manifold_tests import run_gradient_test
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestProductManifold(TestCase):
+class TestProductManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
         self.euclidean = Euclidean(m, n)
         self.sphere = Sphere(n)
         self.manifold = Product([self.euclidean, self.sphere])
+
+        point = self.manifold.random_point()
+
+        @pymanopt.function.autograd(self.manifold)
+        def cost(*x):
+            return np.sum(
+                [np.linalg.norm(a - b) ** 2 for a, b in zip(x, point)]
+            )
+
+        self.cost = cost
 
     def test_dim(self):
         np_testing.assert_equal(
@@ -53,15 +62,7 @@ class TestProductManifold(TestCase):
     # def test_retraction(self):
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        point = self.manifold.random_point()
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(*x):
-            return np.sum(
-                [np.linalg.norm(a - b) ** 2 for a, b in zip(x, point)]
-            )
-
-        run_gradient_test(self.manifold, cost)
+        self.run_gradient_test()
 
     # def test_norm(self):
 

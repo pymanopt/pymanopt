@@ -1,16 +1,14 @@
 import autograd.numpy as np
 from numpy import testing as np_testing
 
-import pymanopt
 from pymanopt.manifolds import Grassmann
 from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multisym, multitransp
 
-from .._test import TestCase
-from ._manifold_tests import run_gradient_test
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestSingleGrassmannManifold(TestCase):
+class TestSingleGrassmannManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
@@ -18,6 +16,8 @@ class TestSingleGrassmannManifold(TestCase):
         self.manifold = Grassmann(m, n, k=k)
 
         self.projection = lambda x, u: u - x @ x.T @ u
+
+        super().setUp()
 
     def test_dist(self):
         x = self.manifold.random_point()
@@ -58,13 +58,7 @@ class TestSingleGrassmannManifold(TestCase):
         np_testing.assert_allclose(xretru, x + u)
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        matrix = self.manifold.random_point()
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(x):
-            return np.linalg.norm(x - matrix) ** 2
-
-        run_gradient_test(self.manifold, cost)
+        self.run_gradient_test()
 
     # def test_norm(self):
 
@@ -108,7 +102,7 @@ class TestSingleGrassmannManifold(TestCase):
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiGrassmannManifold(TestCase):
+class TestMultiGrassmannManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
@@ -116,6 +110,8 @@ class TestMultiGrassmannManifold(TestCase):
         self.manifold = Grassmann(m, n, k=k)
 
         self.projection = lambda x, u: u - x @ x.T @ u
+
+        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.k * (self.m * self.n - self.n**2)
@@ -170,7 +166,8 @@ class TestMultiGrassmannManifold(TestCase):
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
-    # def test_euclidean_to_riemannian_gradient(self):
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
 
     def test_norm(self):
         x = self.manifold.random_point()

@@ -4,16 +4,24 @@ from numpy import testing as np_testing
 import pymanopt
 from pymanopt.manifolds import FixedRankEmbedded
 
-from .._test import TestCase
-from ._manifold_tests import run_gradient_test
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestFixedRankEmbeddedManifold(TestCase):
+class TestFixedRankEmbeddedManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 10
         self.n = n = 5
         self.k = k = 3
         self.manifold = FixedRankEmbedded(m, n, k)
+
+        u, s, vt = self.manifold.random_point()
+        matrix = (u * s) @ vt
+
+        @pymanopt.function.autograd(self.manifold)
+        def cost(u, s, vt):
+            return np.linalg.norm((u * s) @ vt - matrix) ** 2
+
+        self.cost = cost
 
     def test_dim(self):
         assert self.manifold.dim == (self.m + self.n - self.k) * self.k
@@ -212,14 +220,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         np_testing.assert_allclose(Vp, vp)
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        u, s, vt = self.manifold.random_point()
-        matrix = (u * s) @ vt
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(u, s, vt):
-            return np.linalg.norm((u * s) @ vt - matrix) ** 2
-
-        run_gradient_test(self.manifold, cost)
+        self.run_gradient_test()
 
     def test_random_tangent_vector(self):
         e = self.manifold

@@ -1,17 +1,17 @@
 import autograd.numpy as np
 from numpy import testing as np_testing
 
-import pymanopt
 from pymanopt.manifolds import PoincareBall
 
-from .._test import TestCase
-from ._manifold_tests import run_gradient_test
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestSinglePoincareBallManifold(TestCase):
+class TestSinglePoincareBallManifold(ManifoldTestCase):
     def setUp(self):
         self.n = 50
         self.manifold = PoincareBall(self.n)
+
+        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.n
@@ -108,13 +108,7 @@ class TestSinglePoincareBallManifold(TestCase):
         assert euclidean_gradient.shape == riemannian_gradient.shape
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        vector = self.manifold.random_point()
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(x):
-            return np.linalg.norm(x - vector) ** 2
-
-        run_gradient_test(self.manifold, cost)
+        self.run_gradient_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         # For now just test whether the method returns an array of the correct
@@ -166,11 +160,12 @@ class TestSinglePoincareBallManifold(TestCase):
         )
 
 
-class TestMultiplePoincareBallManifold(TestCase):
+class TestMultiplePoincareBallManifold(ManifoldTestCase):
     def setUp(self):
         self.n = 50
         self.k = 20
         self.manifold = PoincareBall(self.n, k=self.k)
+        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.k * self.n
@@ -264,6 +259,9 @@ class TestMultiplePoincareBallManifold(TestCase):
             point, euclidean_gradient
         )
         assert euclidean_gradient.shape == riemannian_gradient.shape
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         # For now just test whether the method returns an array of the correct

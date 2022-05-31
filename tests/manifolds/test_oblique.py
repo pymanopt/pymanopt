@@ -1,18 +1,17 @@
-import autograd.numpy as np
 import numpy.testing as np_testing
 
-import pymanopt
 from pymanopt.manifolds import Oblique
 
-from .._test import TestCase
-from ._manifold_tests import run_gradient_test
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestObliqueManifold(TestCase):
+class TestObliqueManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
         self.manifold = Oblique(m, n)
+
+        super().setUp()
 
     # def test_dim(self):
 
@@ -29,13 +28,7 @@ class TestObliqueManifold(TestCase):
     # def test_retraction(self):
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        matrix = self.manifold.random_point()
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(x):
-            return np.linalg.norm(x - matrix) ** 2
-
-        run_gradient_test(self.manifold, cost)
+        self.run_gradient_test()
 
     # def test_norm(self):
 

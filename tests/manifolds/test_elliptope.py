@@ -1,17 +1,15 @@
-import autograd.numpy as np
-
-import pymanopt
 from pymanopt.manifolds import Elliptope
 
-from .._test import TestCase
-from ._manifold_tests import run_gradient_test
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestElliptopeManifold(TestCase):
+class TestElliptopeManifold(ManifoldTestCase):
     def setUp(self):
         n = 50
         k = 10
         self.manifold = Elliptope(n, k)
+
+        super().setUp()
 
     # def test_dim(self):
 
@@ -28,13 +26,7 @@ class TestElliptopeManifold(TestCase):
     # def test_retraction(self):
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        matrix = self.manifold.random_point()
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(x):
-            return np.linalg.norm(x - matrix) ** 2
-
-        run_gradient_test(self.manifold, cost)
+        self.run_gradient_test()
 
     # def test_norm(self):
 

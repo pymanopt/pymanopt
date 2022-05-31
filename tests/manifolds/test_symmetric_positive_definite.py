@@ -2,18 +2,18 @@ import autograd.numpy as np
 import numpy.testing as np_testing
 from scipy.linalg import eigvalsh, expm
 
-import pymanopt
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
 
-from .._test import TestCase
-from ._manifold_tests import run_gradient_test
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
+class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
     def setUp(self):
         self.n = n = 15
         self.manifold = SymmetricPositiveDefinite(n)
+
+        super().setUp()
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -133,11 +133,13 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         np_testing.assert_allclose(manifold.log(x, y), u)
 
 
-class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
+class TestMultiSymmetricPositiveDefiniteManifold(ManifoldTestCase):
     def setUp(self):
         self.n = n = 10
         self.k = k = 3
         self.manifold = SymmetricPositiveDefinite(n, k=k)
+
+        super().setUp()
 
     def test_dim(self):
         manifold = self.manifold
@@ -190,13 +192,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
         )
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        matrix = self.manifold.random_point()
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(x):
-            return np.linalg.norm(x - matrix) ** 2
-
-        run_gradient_test(self.manifold, cost)
+        self.run_gradient_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         # Use manopt's slow method

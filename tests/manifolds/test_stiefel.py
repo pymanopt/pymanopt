@@ -2,16 +2,14 @@ import autograd.numpy as np
 from nose2.tools import params
 from numpy import testing as np_testing
 
-import pymanopt
 from pymanopt.manifolds import Stiefel
 from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multisym, multitransp
 
-from .._test import TestCase
-from ._manifold_tests import run_gradient_test
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestSingleStiefelManifold(TestCase):
+class TestSingleStiefelManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 20
         self.n = n = 2
@@ -19,6 +17,8 @@ class TestSingleStiefelManifold(TestCase):
         self.manifold = Stiefel(m, n, k=k)
         self.manifold_polar = Stiefel(m, n, k=k, retraction="polar")
         self.projection = lambda x, u: u - x @ (x.T @ u + u.T @ x) / 2
+
+        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
@@ -41,6 +41,9 @@ class TestSingleStiefelManifold(TestCase):
         # Compare the projections.
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
 
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
@@ -138,13 +141,15 @@ class TestSingleStiefelManifold(TestCase):
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiStiefelManifold(TestCase):
+class TestMultiStiefelManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 10
         self.n = n = 3
         self.k = k = 3
         self.manifold = Stiefel(m, n, k=k)
         self.manifold_polar = Stiefel(m, n, k=k, retraction="polar")
+
+        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == 0.5 * self.k * self.n * (
@@ -176,13 +181,7 @@ class TestMultiStiefelManifold(TestCase):
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
     def test_euclidean_to_riemannian_gradient_from_cost(self):
-        matrix = self.manifold.random_point()
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(x):
-            return np.linalg.norm(x - matrix) ** 2
-
-        run_gradient_test(self.manifold, cost)
+        self.run_gradient_test()
 
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that

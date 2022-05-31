@@ -4,10 +4,10 @@ from numpy import testing as np_testing
 from pymanopt.manifolds import ComplexGrassmann
 from pymanopt.tools.multi import multieye, multihconj, multisym
 
-from .._test import TestCase
+from ._manifold_tests import ManifoldTestCase
 
 
-class TestSingleComplexGrassmannManifold(TestCase):
+class TestSingleComplexGrassmannManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
@@ -15,6 +15,8 @@ class TestSingleComplexGrassmannManifold(TestCase):
         self.manifold = ComplexGrassmann(m, n, k=k)
 
         self.projection = lambda x, u: u - x @ x.T @ u
+
+        super().setUp()
 
     def test_inner_product(self):
         X = self.manifold.random_point()
@@ -119,12 +121,14 @@ class TestSingleComplexGrassmannManifold(TestCase):
         np_testing.assert_allclose(xretru, x + u)
 
 
-class TestMultiComplexGrassmannManifold(TestCase):
+class TestMultiComplexGrassmannManifold(ManifoldTestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
         self.k = k = 3
         self.manifold = ComplexGrassmann(m, n, k=k)
+
+        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.k * 2 * (
