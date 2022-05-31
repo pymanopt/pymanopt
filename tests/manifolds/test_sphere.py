@@ -250,9 +250,6 @@ class TestSphereSubspaceComplementIntersectionManifold(ManifoldTestCase):
         # simply the 0-dimensional space {0}.
         np_testing.assert_array_almost_equal(p, np.zeros(self.n))
 
-    def test_euclidean_to_riemannian_gradient_from_cost(self):
-        self.run_gradient_test()
-
     def test_dim_1(self):
         U = np.zeros((3, 1))
         U[-1, -1] = 1
