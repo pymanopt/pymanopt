@@ -3,6 +3,7 @@ import warnings
 import autograd.numpy as np
 from numpy import testing as np_testing
 
+import pymanopt
 from pymanopt.manifolds import (
     Sphere,
     SphereSubspaceComplementIntersection,
@@ -189,9 +190,6 @@ class TestSphereSubspaceIntersectionManifold(ManifoldTestCase):
         # simply the 0-dimensional space {0}.
         np_testing.assert_array_almost_equal(p, np.zeros(self.n))
 
-    def test_euclidean_to_riemannian_gradient_from_cost(self):
-        self.run_gradient_test()
-
     def test_dim_1(self):
         U = np.zeros((3, 2))
         U[0, 0] = U[1, 1] = 1
@@ -210,6 +208,17 @@ class TestSphereSubspaceIntersectionManifold(ManifoldTestCase):
         dim = np.linalg.matrix_rank(U) - 1
         manifold = SphereSubspaceIntersection(U)
         self.assertEqual(manifold.dim, dim)
+
+
+class TestSphereSubspaceIntersectionManifoldGradient(ManifoldTestCase):
+    def setUp(self):
+        span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
+        self.manifold = SphereSubspaceIntersection(span_matrix)
+
+        super().setUp()
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
 
 
 class TestSphereSubspaceComplementIntersectionManifold(ManifoldTestCase):
@@ -270,3 +279,16 @@ class TestSphereSubspaceComplementIntersectionManifold(ManifoldTestCase):
         x = manifold.random_point()
         np_testing.assert_almost_equal(np.linalg.norm(x), 1)
         np_testing.assert_array_almost_equal(U.T @ x, np.zeros(U.shape[1]))
+
+
+class TestSphereSubspaceComplementIntersectionManifoldGradient(
+    ManifoldTestCase
+):
+    def setUp(self):
+        span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
+        self.manifold = SphereSubspaceComplementIntersection(span_matrix)
+
+        super().setUp()
+
+    def test_euclidean_to_riemannian_gradient_from_cost(self):
+        self.run_gradient_test()
