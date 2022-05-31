@@ -1,8 +1,6 @@
 # TODO/Roadmap
 
 ## 1.1.x:
-  - Add test cases for 'euclidean_to_riemannian_gradient' based on
-    'check_gradient' diagnostic function
   - Add 'check_hessian' diagnostic function to add automatic tests for
     `euclidean_to_riemannian_hessian'
 

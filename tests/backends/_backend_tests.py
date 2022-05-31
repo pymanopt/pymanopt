@@ -192,8 +192,8 @@ class TestVector(unittest.TestCase):
         # ... and hess
         # First form hessian matrix H
         # Convert Y and A into matrices (row vectors)
-        Ymat = np.matrix(Y)
-        Amat = np.matrix(A)
+        Ymat = Y[np.newaxis, :]
+        Amat = A[np.newaxis, :]
 
         diag = np.eye(n)
 
@@ -347,8 +347,8 @@ class TestMixed(unittest.TestCase):
 
         # Calculate correct hess
         # 1. Vector
-        Ymat = np.matrix(y[0])
-        Amat = np.matrix(a[0])
+        Ymat = y[0][np.newaxis, :]
+        Amat = a[0][np.newaxis, :]
 
         diag = np.eye(n1)
 
