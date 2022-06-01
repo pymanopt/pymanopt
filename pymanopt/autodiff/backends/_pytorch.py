@@ -12,7 +12,7 @@ else:
     from torch import autograd
 
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
-from ._backend import Backend
+from ._backend import Backend, fail_on_complex_input
 
 
 class PyTorchBackend(Backend):
@@ -57,6 +57,7 @@ class PyTorchBackend(Backend):
 
     @Backend._assert_backend_available
     def generate_gradient_operator(self, function, num_arguments):
+        @fail_on_complex_input
         def gradient(*args):
             torch_arguments = []
             for argument in args:
@@ -72,6 +73,7 @@ class PyTorchBackend(Backend):
 
     @Backend._assert_backend_available
     def generate_hessian_operator(self, function, num_arguments):
+        @fail_on_complex_input
         def hessian_vector_product(*args):
             points, vectors = bisect_sequence(args)
             torch_arguments = []
