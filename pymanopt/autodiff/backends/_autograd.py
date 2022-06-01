@@ -8,7 +8,7 @@ except ImportError:
     autograd = None
 
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
-from ._backend import Backend
+from ._backend import Backend, fail_on_complex_input
 
 
 class AutogradBackend(Backend):
@@ -25,7 +25,9 @@ class AutogradBackend(Backend):
 
     @Backend._assert_backend_available
     def generate_gradient_operator(self, function, num_arguments):
-        gradient = autograd.grad(function, argnum=list(range(num_arguments)))
+        gradient = autograd.grad(
+            fail_on_complex_input(function), argnum=list(range(num_arguments))
+        )
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
         return gradient
@@ -49,7 +51,7 @@ class AutogradBackend(Backend):
     @Backend._assert_backend_available
     def generate_hessian_operator(self, function, num_arguments):
         hessian_vector_product = self._hessian_vector_product(
-            function, argnum=list(range(num_arguments))
+            fail_on_complex_input(function), argnum=list(range(num_arguments))
         )
 
         @functools.wraps(hessian_vector_product)
