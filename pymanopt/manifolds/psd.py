@@ -4,7 +4,7 @@ import scipy.linalg
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
 
 
-class _PSDFixedRank(Manifold, RetrAsExpMixin):
+class _PSDFixedRank(Manifold):
     def __init__(self, n, k, name, dimension):
         self._n = n
         self._k = k
@@ -38,8 +38,10 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     ):
         return self.projection(point, euclidean_hessian)
 
-    def retraction(self, point, tangent_vector):
+    def exp(self, point, tangent_vector):
         return point + tangent_vector
+
+    retraction = exp
 
     def random_point(self):
         return np.random.normal(size=(self._n, self._k))
