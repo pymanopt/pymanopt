@@ -81,5 +81,8 @@ class TestPositiveVectors(ManifoldTestCase):
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
-    def test_euclidean_to_riemannian_gradient_from_cost(self):
-        self.run_gradient_test()
+    def test_first_order_function_approximation(self):
+        self.run_gradient_approximation_test()
+
+    def test_second_order_function_approximation(self):
+        self.run_hessian_approximation_test()
