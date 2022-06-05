@@ -1,10 +1,7 @@
 # TODO/Roadmap
 
-## 1.1.x:
-  - Add 'check_hessian' diagnostic function to add automatic tests for
-    `euclidean_to_riemannian_hessian'
-
 ## 1.2.x:
+  - Add 'check_hessian' function
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
     transport simply by orthogonal projection of the tangent vector translated
     in the ambient space. For this, 'RiemannianSubmanifold' would require a
