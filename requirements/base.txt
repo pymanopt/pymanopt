@@ -1,3 +1,4 @@
+attrs>=21.4.0,<22
 autograd>=1.2
 numpy>=1.16
 scipy>=1.0
