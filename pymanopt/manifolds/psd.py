@@ -4,7 +4,7 @@ import scipy.linalg
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
 
 
-class _PSDFixedRank(Manifold, RetrAsExpMixin):
+class _PSDFixedRank(Manifold):
     def __init__(self, n, k, name, dimension):
         self._n = n
         self._k = k
@@ -16,15 +16,20 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
-            tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
-        )
+            tangent_vector_a.conj(),
+            tangent_vector_b,
+            axes=tangent_vector_a.ndim,
+        ).real
+
+    def dist(self, point_a, point_b):
+        return self.norm(point_a, self.log(point_a, point_b))
 
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)
 
     def projection(self, point, vector):
-        YtY = point.T @ point
-        AS = point.T @ vector - vector.T @ point
+        YtY = point.T.conj() @ point
+        AS = point.T.conj() @ vector - vector.T.conj() @ point
         Omega = scipy.linalg.solve_continuous_lyapunov(YtY, AS)
         return vector - point @ Omega
 
@@ -38,8 +43,14 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     ):
         return self.projection(point, euclidean_hessian)
 
-    def retraction(self, point, tangent_vector):
+    def exp(self, point, tangent_vector):
         return point + tangent_vector
+
+    retraction = exp
+
+    def log(self, point_a, point_b):
+        u, _, vh = np.linalg.svd(point_b.T.conj() @ point_a)
+        return point_b @ u @ vh - point_a
 
     def random_point(self):
         return np.random.normal(size=(self._n, self._k))
@@ -47,13 +58,13 @@ class _PSDFixedRank(Manifold, RetrAsExpMixin):
     def random_tangent_vector(self, point):
         random_vector = self.random_point()
         tangent_vector = self.projection(point, random_vector)
-        return self._normalize(tangent_vector)
+        return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(point_b, tangent_vector_a)
 
     def _normalize(self, array):
-        return array / self.norm(None, array)
+        return array / np.linalg.norm(array)
 
     def zero_vector(self, point):
         return np.zeros((self._n, self._k))
@@ -144,27 +155,10 @@ class PSDFixedRankComplex(_PSDFixedRank):
         dimension = 2 * k * n - k * k
         super().__init__(n, k, name, dimension)
 
-    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return (
-            2
-            * np.tensordot(
-                tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
-            ).real
-        )
-
-    def norm(self, point, tangent_vector):
-        return np.sqrt(
-            self.inner_product(point, tangent_vector, tangent_vector)
-        )
-
-    def dist(self, point_a, point_b):
-        s, _, d = np.linalg.svd(point_b.T.conj() @ point_a)
-        e = point_a - point_b @ s @ d
-        return self.inner_product(None, e, e) / 2
-
     def random_point(self):
-        rand_ = super().rand
-        return rand_() + 1j * rand_()
+        return np.random.normal(
+            size=(self._n, self._k)
+        ) + 1j * np.random.normal(size=(self._n, self._k))
 
 
 class Elliptope(Manifold, RetrAsExpMixin):
