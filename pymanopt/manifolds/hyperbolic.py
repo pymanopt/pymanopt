@@ -125,13 +125,11 @@ class PoincareBall(Manifold):
 
     def exp(self, point, tangent_vector):
         norm_point = np.linalg.norm(tangent_vector, axis=-1, keepdims=True)
-        # Handle the case where tangent_vector is 0.
+        factor = self.conformal_factor(point)
         W = tangent_vector * np.divide(
-            np.tanh(
-                norm_point
-                / (1 - np.sum(point * point, axis=-1, keepdims=True))
-            ),
+            np.tanh(norm_point * factor / 2),
             norm_point,
+            # Handle the case where tangent_vector is 0.
             out=np.zeros_like(tangent_vector),
             where=norm_point != 0,
         )
@@ -142,12 +140,8 @@ class PoincareBall(Manifold):
     def log(self, point_a, point_b):
         W = self.mobius_addition(-point_a, point_b)
         norm_W = np.linalg.norm(W, axis=-1, keepdims=True)
-        return (
-            (1 - np.sum(point_a * point_a, axis=-1, keepdims=True))
-            * np.arctanh(norm_W)
-            * W
-            / norm_W
-        )
+        factor = self.conformal_factor(point_a)
+        return np.arctanh(norm_W) * W / norm_W / (factor / 2)
 
     def pair_mean(self, point_a, point_b):
         return self.exp(point_a, self.log(point_a, point_b) / 2)
