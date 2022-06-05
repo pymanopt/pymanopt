@@ -1,13 +1,13 @@
 import abc
 import collections
 import time
-from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
+import attrs
 import numpy as np
 
 
-@dataclass
+@attrs.define(kw_only=True, frozen=True)
 class OptimizerResult:
     point: Any
     cost: float
