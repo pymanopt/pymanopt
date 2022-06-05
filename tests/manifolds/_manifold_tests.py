@@ -17,11 +17,22 @@ class ManifoldTestCase(TestCase):
 
         self.cost = cost
 
-    def run_gradient_test(self):
+    def run_gradient_approximation_test(self):
         problem = pymanopt.Problem(self.manifold, self.cost)
+        # Approximate the cost function with a 1st order model.
         h, _, segment, poly = diagnostics.check_directional_derivative(problem)
-        # Compute slope of linear regression line through points in linear domain.
         x = np.log(h[segment])
         y = np.log(10) * np.polyval(poly, np.log10(np.e) * x)
         slope = scipy.stats.linregress(x, y).slope
-        assert 1.995 <= slope <= 2.005
+        assert 1.95 <= slope <= 2.05
+
+    def run_hessian_approximation_test(self):
+        problem = pymanopt.Problem(self.manifold, self.cost)
+        # Approximate the cost function with a 2nd order model.
+        h, error, segment, poly = diagnostics.check_directional_derivative(
+            problem, use_quadratic_model=True
+        )
+        x = np.log(h[segment])
+        y = np.log(10) * np.polyval(poly, np.log10(np.e) * x)
+        slope = scipy.stats.linregress(x, y).slope
+        assert np.allclose(np.linalg.norm(error), 0) or (2.95 <= slope <= 3.05)
