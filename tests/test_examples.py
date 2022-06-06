@@ -33,7 +33,7 @@ class TestExamples(TestCase):
 
     @params(*dominant_invariant_subspace.SUPPORTED_BACKENDS)
     def test_dominant_invariant_complex_subspace(self, backend):
-        if backend == "numpy":
+        if backend in ("numpy", "autograd"):
             dominant_invariant_complex_subspace.run(backend)
         else:
             with self.assertRaises(TypeError):
