@@ -1,13 +1,19 @@
+import copy
 import time
-from copy import deepcopy
+import typing
 
+import attrs
 import numpy as np
 
-from pymanopt.optimizers.line_search import BackTrackingLineSearcher
+from pymanopt.optimizers.line_search import (
+    BackTrackingLineSearcher,
+    LineSearcher,
+)
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
 
+@attrs.define
 class SteepestDescent(Optimizer):
     """Riemannian steepest descent algorithm.
 
@@ -20,16 +26,13 @@ class SteepestDescent(Optimizer):
         line_searcher: The line search method.
     """
 
-    def __init__(self, line_searcher=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    _line_searcher: LineSearcher = attrs.field(
+        factory=BackTrackingLineSearcher
+    )
+    line_searcher: typing.Optional[LineSearcher] = attrs.field(
+        init=False, default=None
+    )
 
-        if line_searcher is None:
-            self._line_searcher = BackTrackingLineSearcher()
-        else:
-            self._line_searcher = line_searcher
-        self.line_searcher = None
-
-    # Function to solve optimisation problem using steepest descent.
     def run(
         self, problem, *, initial_point=None, reuse_line_searcher=False
     ) -> OptimizerResult:
@@ -55,7 +58,7 @@ class SteepestDescent(Optimizer):
         gradient = problem.riemannian_gradient
 
         if not reuse_line_searcher or self.line_searcher is None:
-            self.line_searcher = deepcopy(self._line_searcher)
+            self.line_searcher = copy.deepcopy(self._line_searcher)
         line_searcher = self.line_searcher
 
         # If no starting point is specified, generate one at random.

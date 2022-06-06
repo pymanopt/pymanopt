@@ -1,7 +1,7 @@
 import abc
 import collections
 import time
-from typing import Any, Dict, Optional
+import typing
 
 import attrs
 import numpy as np
@@ -9,17 +9,18 @@ import numpy as np
 
 @attrs.define(kw_only=True, frozen=True)
 class OptimizerResult:
-    point: Any
+    point: typing.Any
     cost: float
     iterations: int
     stopping_criterion: str
     time: float
-    cost_evaluations: Optional[int] = None
-    step_size: Optional[float] = None
-    gradient_norm: Optional[float] = None
-    log: Optional[Dict] = None
+    cost_evaluations: typing.Optional[int] = None
+    step_size: typing.Optional[float] = None
+    gradient_norm: typing.Optional[float] = None
+    log: typing.Optional[typing.Dict] = None
 
 
+@attrs.define
 class Optimizer(metaclass=abc.ABCMeta):
     """Abstract base class for Pymanopt optimizers.
 
@@ -38,25 +39,15 @@ class Optimizer(metaclass=abc.ABCMeta):
             operates: 0 logs nothing, 1 logs information for each iteration.
     """
 
-    def __init__(
-        self,
-        max_time: float = 1000,
-        max_iterations: int = 1000,
-        min_gradient_norm: float = 1e-6,
-        min_step_size: float = 1e-10,
-        max_cost_evaluations: int = 5000,
-        verbosity: int = 2,
-        log_verbosity: int = 0,
-    ):
-        self._max_time = max_time
-        self._max_iterations = max_iterations
-        self._min_gradient_norm = min_gradient_norm
-        self._min_step_size = min_step_size
-        self._max_cost_evaluations = max_cost_evaluations
-        self._verbosity = verbosity
-        self._log_verbosity = log_verbosity
+    _max_time: float = 1000.0
+    _max_iterations: int = 1000
+    _min_gradient_norm: float = 1e-6
+    _min_step_size: float = 1e-10
+    _max_cost_evaluations: int = 5000
+    _verbosity: int = 2
+    _log_verbosity: int = 0
 
-        self._log = None
+    _log: typing.Optional[typing.Dict] = attrs.field(init=False, default=None)
 
     def __str__(self):
         return type(self).__name__

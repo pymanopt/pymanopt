@@ -1,5 +1,7 @@
 import time
+import typing
 
+import attrs
 import numpy as np
 
 from pymanopt import tools
@@ -7,6 +9,7 @@ from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
 
+@attrs.define
 class ParticleSwarm(Optimizer):
     """Particle swarm optimization (PSO) method.
 
@@ -21,23 +24,11 @@ class ParticleSwarm(Optimizer):
         social: Quantifies performance relative to neighbors.
     """
 
-    def __init__(
-        self,
-        max_cost_evaluations=None,
-        max_iterations=None,
-        population_size=None,
-        nostalgia=1.4,
-        social=1.4,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
-
-        self._max_cost_evaluations = max_cost_evaluations
-        self._max_iterations = max_iterations
-        self._population_size = population_size
-        self._nostalgia = nostalgia
-        self._social = social
+    _max_cost_evaluations: typing.Optional[int] = None
+    _max_iterations: typing.Optional[int] = None
+    _population_size: typing.Optional[int] = None
+    _nostalgia: float = 1.4
+    _social: float = 1.4
 
     def run(self, problem, *, initial_point=None) -> OptimizerResult:
         """Run PSO algorithm.

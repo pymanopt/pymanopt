@@ -2,18 +2,12 @@
 
 ## 1.2.x:
   - Add 'check_hessian' function
-  - For Riemannian submanifolds of Euclidean space, it is acceptable to
-    transport simply by orthogonal projection of the tangent vector translated
-    in the ambient space. For this, 'RiemannianSubmanifold' would require a
-    generic 'embedding' method. See 'FixedRankEmbedded'.
-  - attrs
   - Refactor optimizer implementations
-  - Add complex manifolds #125
+  - Add complex manifolds #125, #170
   - Add JAX backend #115
   - Add L-BFGS and other quasi-Newton optimizers
   - Add patience parameter to terminate optimization if cost does not improve
     anymore #114
-  - Add constant step size line search method
   - Add callback mechanism to allow for custom termination criteria
   - Add support for complex manifolds to autodiff backends
 
@@ -28,6 +22,7 @@
     * in JAX with jit support, or
     * using a backend abstraction as in geomstats (potentially shared with
       geomstats)
-  - Revist "reuse_line_searcher"
+  - Revist "reuse_line_searcher" and 'self._line_searcher' vs.
+    'self.line_searcher'
   - Rename "orth_value" to "restart_threshold"
   - Revisit checking docstrings with darglint if the package is more mature
