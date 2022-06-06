@@ -1,64 +1,67 @@
-# References, taken from trustregions.m in manopt:
-
-# Please cite the Manopt paper as well as the research paper:
-#     @Article{genrtr,
-#       Title    = {Trust-region methods on {Riemannian} manifolds},
-#       Author   = {Absil, P.-A. and Baker, C. G. and Gallivan, K. A.},
-#       Journal  = {Foundations of Computational Mathematics},
-#       Year     = {2007},
-#       Number   = {3},
-#       Pages    = {303--330},
-#       Volume   = {7},
-#       Doi      = {10.1007/s10208-005-0179-9}
-#     }
-#
-# See also: steepestdescent conjugategradient manopt/examples
-
-# An explicit, general listing of this algorithm, with preconditioning,
-# can be found in the following paper:
-#     @Article{boumal2015lowrank,
-#       Title   = {Low-rank matrix completion via preconditioned optimization
-#                   on the {G}rassmann manifold},
-#       Author  = {Boumal, N. and Absil, P.-A.},
-#       Journal = {Linear Algebra and its Applications},
-#       Year    = {2015},
-#       Pages   = {200--239},
-#       Volume  = {475},
-#       Doi     = {10.1016/j.laa.2015.02.027},
-#     }
-
-# When the Hessian is not specified, it is approximated with
-# finite-differences of the gradient. The resulting method is called
-# RTR-FD. Some convergence theory for it is available in this paper:
-# @incollection{boumal2015rtrfd
-# 	author={Boumal, N.},
-# 	title={Riemannian trust regions with finite-difference Hessian
-#                      approximations are globally convergent},
-# 	year={2015},
-# 	booktitle={Geometric Science of Information}
-# }
-
-
-# This file is part of Manopt: www.manopt.org.
-# This code is an adaptation to Manopt of the original GenRTR code:
-# RTR - Riemannian Trust-Region
-# (c) 2004-2007, P.-A. Absil, C. G. Baker, K. A. Gallivan
-# Florida State University
-# School of Computational Science
-# (http://www.math.fsu.edu/~cbaker/GenRTR/?page=download)
-# See accompanying license file.
-# The adaptation was executed by Nicolas Boumal.
-
-# Ported to pymanopt by Jamie Townsend. January 2016.
-
 import time
 
+import attrs
 import numpy as np
 
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 
 
+@attrs.define
 class TrustRegions(Optimizer):
+    """Riemannian Trust-Region algorithm.
+
+    Second-order method that approximates the objective function by a
+    quadratic surface and then updates the current estimate based on that.
+    Also included is the truncated (Steihaug-Toint) conjugate gradient
+    algorithm (tCG).
+
+    Args:
+        miniter: Minimum number of outer iterations if ``use_rand`` is true.
+            (Currently unused)
+        kappa: tCG linear convergence target rate.
+            The inner tCG algorithm terminates early if the residual is reduced
+            by a factor of ``kappa``.
+        theta: tCG super-linear convergence target rate.
+            The inner tCG algorithm terminates early if the residual is reduced
+            by a power of ``theta + 1``.
+        rho_prime: Accept/reject threshold.
+            If accept/reject threshold ``rho`` is at least ``rho_prime``, the
+            outer iteration is accepted, and rejected otherwise in which case
+            the trust-region radius will be decreased.
+            To ensure this, ``rho_prime >= 0`` must be strictly smaller than
+            1/4.
+            If ``rho_prime`` is negative, the algorithm is not guaranteed to
+            produce monotonically decreasing cost values.
+            It is therefore recommended to set ``rho_prime > 0`` to aid
+            convergence.
+        use_rand: Whether or not to randomly initialize the starting point of
+            the inner tCG algorithm with a tangent vector in the trust-region.
+            By default, this is false in which case the zero tangent vector is
+            used as initial point.
+        rho_regularization: Regularization factor applied to accept/reject
+            threshold.
+            Close to convergence, evaluating the performance ratio ``rho`` of
+            the quadratic model is numerically challenging even though the
+            model is likely accurate and should be accepted.
+            Regularization lets ``rho`` go to 1 as the model decrease and
+            the actual decrease go to zero.
+    """
+
+    miniter: int = 3
+    kappa: float = 0.1
+    theta: float = 1.0
+    rho_prime: float = attrs.field(default=0.1)
+    use_rand: bool = False
+    rho_regularization: float = 1e3
+
+    @rho_prime.validator
+    def _validate_rho_prime(self, attribute, value):
+        rho_prime = value
+        if rho_prime < 0:
+            raise ValueError("'rho_prime' must be greater than or equal to 0")
+        if rho_prime >= 0.25:
+            raise ValueError("'rho_prime' must be strictly smaller than 1/4")
+
     (
         NEGATIVE_CURVATURE,
         EXCEEDED_TR,
@@ -77,33 +80,6 @@ class TrustRegions(Optimizer):
         MODEL_INCREASED: "model increased",
     }
 
-    def __init__(
-        self,
-        miniter=3,
-        kappa=0.1,
-        theta=1.0,
-        rho_prime=0.1,
-        use_rand=False,
-        rho_regularization=1e3,
-        *args,
-        **kwargs,
-    ):
-        """Riemannian Trust-Regions algorithm.
-
-        Second-order method that approximates the objective function by a
-        quadratic surface and then updates the current estimate based on that.
-        Also included is the truncated (Steihaug-Toint) conjugate gradient
-        algorithm.
-        """
-        super().__init__(*args, **kwargs)
-
-        self.miniter = miniter
-        self.kappa = kappa
-        self.theta = theta
-        self.rho_prime = rho_prime
-        self.use_rand = use_rand
-        self.rho_regularization = rho_regularization
-
     def run(
         self,
         problem,
@@ -114,6 +90,22 @@ class TrustRegions(Optimizer):
         Delta_bar=None,
         Delta0=None,
     ) -> OptimizerResult:
+        """Run Riemannian Trust-Region algorithm.
+
+        Args:
+            problem: The problem to solve.
+            initial_point: Starting point of the optimization.
+                If not given, a starting point on the manifold is chosen at
+                random.
+            mininner: The minimum number of inner tCG iterations to run.
+            maxinner: The maximum number of inner tCG iterations to run.
+            Delta_bar: Maximum trust-region radius.
+                By default, this is set to ``problem.manifold.typical_dist``.
+            Delta0: Initial trust-region radius.
+                If omitted, this is set to ``Delta_bar / 8``.
+
+        Returns: The optimization result.
+        """
         manifold = problem.manifold
 
         if maxinner is None:
@@ -255,7 +247,7 @@ class TrustRegions(Optimizer):
             rhonum = fx - fx_prop
             rhoden = -manifold.inner_product(
                 x, fgradx, eta
-            ) - 0.5 * manifold.inner_product(x, eta, Heta)
+            ) - 0.5 * manifold.inner_product(x, Heta, eta)
 
             # rhonum could be anything.
             # rhoden should be nonnegative, as guaranteed by tCG, baring
@@ -348,7 +340,7 @@ class TrustRegions(Optimizer):
                         "decreases)."
                     )
                     print(
-                        " +++ Consider decreasing options.Delta_bar "
+                        " +++ Consider decreasing 'Delta_bar' "
                         "by an order of magnitude."
                     )
                     print(
@@ -374,7 +366,7 @@ class TrustRegions(Optimizer):
                         "increases)."
                     )
                     print(
-                        " +++ Consider increasing options.Delta_bar "
+                        " +++ Consider increasing 'Delta_bar' "
                         "by an order of magnitude."
                     )
                     print(
