@@ -1,11 +1,13 @@
 import abc
 import functools
+import typing
 import warnings
-from typing import Sequence, Union
 
+import attrs
 import numpy as np
 
 
+@attrs.define
 class Manifold(metaclass=abc.ABCMeta):
     """Riemannian manifold base class.
 
@@ -38,21 +40,23 @@ class Manifold(metaclass=abc.ABCMeta):
         :meth:`euclidean_to_riemannian_hessian`.
     """
 
-    def __init__(
-        self,
-        name: str,
-        dimension: int,
-        point_layout: Union[int, Sequence[int]] = 1,
-    ):
+    _name: str
+    _dimension: int = attrs.field()
+    _point_layout: typing.Union[int, typing.Sequence[int]] = attrs.field(
+        default=1
+    )
+
+    @_dimension.validator
+    def _validate_dimension(self, attribute, value):
+        dimension = value
         if not isinstance(dimension, (int, np.integer)):
             raise TypeError("Manifold dimension must be of type int")
         if dimension < 0:
             raise ValueError("Manifold dimension must be positive")
-        if not isinstance(point_layout, (int, tuple, list)):
-            raise TypeError(
-                "Point layout must be of type int, tuple or list, not "
-                f"{type(point_layout)}"
-            )
+
+    @_point_layout.validator
+    def _validate_point_layout(self, attribute, value):
+        point_layout = value
         if isinstance(point_layout, (tuple, list)):
             if not all([num_arguments > 0 for num_arguments in point_layout]):
                 raise ValueError(
@@ -63,10 +67,6 @@ class Manifold(metaclass=abc.ABCMeta):
             raise ValueError(
                 f"Invalid point layout {point_layout}: must be positive"
             )
-
-        self._name = name
-        self._dimension = dimension
-        self._point_layout = point_layout
 
     def __str__(self):
         return self._name
