@@ -8,7 +8,7 @@ import functools
 import numpy as np
 
 from ...tools import bisect_sequence, unpack_singleton_sequence_return_value
-from ._backend import Backend, fail_on_complex_input
+from ._backend import Backend
 
 
 class TensorFlowBackend(Backend):
@@ -42,7 +42,6 @@ class TensorFlowBackend(Backend):
 
     @Backend._assert_backend_available
     def generate_gradient_operator(self, function, num_arguments):
-        @fail_on_complex_input
         def gradient(*args):
             tf_arguments = []
             with tf.GradientTape() as tape:
@@ -60,7 +59,6 @@ class TensorFlowBackend(Backend):
 
     @Backend._assert_backend_available
     def generate_hessian_operator(self, function, num_arguments):
-        @fail_on_complex_input
         def hessian_vector_product(*args):
             arguments, vectors = bisect_sequence(args)
             tf_args = [self._from_numpy(arg) for arg in arguments]
