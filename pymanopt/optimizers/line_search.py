@@ -8,7 +8,7 @@ import attrs
 class LineSearcher(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def search(self, objective, manifold, x, d, f0, df0):
-        """Function to perform line search.
+        """Run line search procedure.
 
         Args:
             objective: Objective function to optimize.
