@@ -18,7 +18,6 @@
     anymore #114
   - Add constant step size line search method
   - Add callback mechanism to allow for custom termination criteria
-  - Add support for complex manifolds to autodiff backends
 
 ## 2.0.x:
   - Raise an exception if dimension of 'SphereSubspaceIntersection' manifold is
