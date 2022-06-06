@@ -18,7 +18,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
         @pymanopt.function.autograd(manifold)
         def cost(Y):
-            return np.linalg.norm(Y @ Y.T - matrix, "fro") ** 2
+            return np.sum((Y @ Y.T - matrix) ** 2)
 
     elif backend == "numpy":
 

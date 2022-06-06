@@ -18,7 +18,7 @@ class TestProblemBackendInterface(TestCase):
 
         @pymanopt.function.autograd(self.manifold)
         def cost(u, s, vt, x):
-            return np.linalg.norm(((u * s) @ vt - A) @ x) ** 2
+            return np.sum((((u * s) @ vt - A) @ x) ** 2)
 
         self.cost = cost
         self.gradient = self.cost.get_gradient_operator()

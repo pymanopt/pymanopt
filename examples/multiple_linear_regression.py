@@ -18,8 +18,7 @@ def create_cost_and_derivates(manifold, samples, targets, backend):
 
         @pymanopt.function.autograd(manifold)
         def cost(weights):
-            # Use autograd's linalg.norm wrapper.
-            return np.linalg.norm(targets - samples @ weights) ** 2
+            return np.sum((targets - samples @ weights) ** 2)
 
     elif backend == "numpy":
 
