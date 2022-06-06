@@ -1,6 +1,7 @@
 import abc
 import functools
 
+import attrs
 import numpy as np
 
 
@@ -16,6 +17,7 @@ def fail_on_complex_input(function):
     return wrapper
 
 
+@attrs.define
 class Backend(metaclass=abc.ABCMeta):
     """Abstract base class defining the interface for autodiff backends.
 
@@ -23,8 +25,7 @@ class Backend(metaclass=abc.ABCMeta):
         name: The name of the backend.
     """
 
-    def __init__(self, name):
-        self._name = name
+    _name: str
 
     def __str__(self):
         return self._name
