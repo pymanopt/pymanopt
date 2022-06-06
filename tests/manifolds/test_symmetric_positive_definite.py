@@ -1,6 +1,6 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
-from scipy.linalg import eigvalsh, expm, norm
+from scipy.linalg import eigvalsh, expm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
@@ -50,7 +50,8 @@ class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
 
         # Test exponential metric increasing property
         # (see equation (6.8) in [Bha2007]).
-        assert manifold.dist(x, y) >= norm(multilogm(x) - multilogm(y))
+        logx, logy = multilogm(x), multilogm(y)
+        assert manifold.dist(x, y) >= np.linalg.norm(logx - logy)
 
         # Test alternative implementation (see equation (6.14) in [Bha2007]).
         d = np.sqrt((np.log(eigvalsh(x, y)) ** 2).sum())
@@ -113,13 +114,13 @@ class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
         v = manifold.random_tangent_vector(x)
         np_testing.assert_allclose(multisym(u), u)
         np_testing.assert_almost_equal(1, manifold.norm(x, u))
-        assert norm(u - v) > 1e-3
+        assert np.linalg.norm(u - v) > 1e-3
 
     def test_norm(self):
         manifold = self.manifold
         x = manifold.random_point()
         np_testing.assert_almost_equal(
-            manifold.norm(np.eye(self.n), x), norm(x)
+            manifold.norm(np.eye(self.n), x), np.linalg.norm(x)
         )
 
     def test_exp_log_inverse(self):
@@ -219,7 +220,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(ManifoldTestCase):
         manifold = self.manifold
         x = manifold.random_point()
         Id = np.array(self.k * [np.eye(self.n)])
-        np_testing.assert_almost_equal(manifold.norm(Id, x), norm(x))
+        np_testing.assert_almost_equal(manifold.norm(Id, x), np.linalg.norm(x))
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -247,7 +248,7 @@ class TestMultiSymmetricPositiveDefiniteManifold(ManifoldTestCase):
         v = manifold.random_tangent_vector(x)
         np_testing.assert_allclose(multisym(u), u)
         np_testing.assert_almost_equal(1, manifold.norm(x, u))
-        assert norm(u - v) > 1e-3
+        assert np.linalg.norm(u - v) > 1e-3
 
     def test_transport(self):
         manifold = self.manifold
