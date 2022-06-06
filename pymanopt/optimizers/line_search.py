@@ -1,22 +1,14 @@
+import abc
 import typing
 
 import attrs
 
 
 @attrs.define
-class BackTrackingLineSearcher:
-    """Back-tracking line-search algorithm."""
-
-    contraction_factor: float = 0.5
-    optimism: float = 2.0
-    sufficient_decrease: float = 1e-4
-    max_iterations: int = 25
-    initial_step_size: float = 1.0
-
-    _oldf0: typing.Optional[float] = attrs.field(init=False, default=None)
-
+class LineSearcher(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
     def search(self, objective, manifold, x, d, f0, df0):
-        """Function to perform backtracking line search.
+        """Function to perform line search.
 
         Args:
             objective: Objective function to optimize.
@@ -30,6 +22,21 @@ class BackTrackingLineSearcher:
             the vector retracted to reach the suggested iterate ``newx`` from
             ``x``.
         """
+
+
+@attrs.define
+class BackTrackingLineSearcher(LineSearcher):
+    """Back-tracking line-search algorithm."""
+
+    contraction_factor: float = 0.5
+    optimism: float = 2.0
+    sufficient_decrease: float = 1e-4
+    max_iterations: int = 25
+    initial_step_size: float = 1.0
+
+    _oldf0: typing.Optional[float] = attrs.field(init=False, default=None)
+
+    def search(self, objective, manifold, x, d, f0, df0):
         # Compute the norm of the search direction
         norm_d = manifold.norm(x, d)
 
@@ -75,7 +82,7 @@ class BackTrackingLineSearcher:
 
 
 @attrs.define
-class AdaptiveLineSearcher:
+class AdaptiveLineSearcher(LineSearcher):
     """Adaptive line-search algorithm."""
 
     contraction_factor: float = 0.5
