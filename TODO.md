@@ -12,8 +12,7 @@
   - Add support for complex manifolds to autodiff backends
 
 ## 2.0.x:
-  - Raise an exception if dimension of 'SphereSubspaceIntersection' manifold is
-    0
+  - Raise exception if dimension of manifold is 0
   - Add pep8-naming (requires breaking public API to fix all errors)
   - Make FixedRankEmbedded manifold compatible with autodiff backends
     (add weingarten map to support euclidean_to_riemannian_hessian)
@@ -22,7 +21,7 @@
     * in JAX with jit support, or
     * using a backend abstraction as in geomstats (potentially shared with
       geomstats)
-  - Revist "reuse_line_searcher" and 'self._line_searcher' vs.
-    'self.line_searcher'
-  - Rename "orth_value" to "restart_threshold"
+  - Revist 'reuse_line_searcher' and 'self._line_searcher' vs.
+    'self.line_searcher' instance attributes
+  - Rename 'orth_value' to 'restart_threshold'
   - Revisit checking docstrings with darglint if the package is more mature
