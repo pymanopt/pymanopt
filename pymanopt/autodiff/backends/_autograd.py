@@ -3,7 +3,6 @@ import functools
 
 try:
     import autograd
-    import autograd.numpy as np
 except ImportError:
     autograd = None
 else:
