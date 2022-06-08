@@ -1,11 +1,24 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
-from scipy.linalg import eigvalsh, expm
+from scipy.linalg import eigvalsh, expm, logm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
 
 from ._manifold_tests import ManifoldTestCase
+
+
+def geodesic(point_a, point_b, alpha):
+    if alpha < 0 or 1 < alpha:
+        raise ValueError("Exponent must be in [0,1]")
+    c = np.linalg.cholesky(point_a)
+    c_inv = np.linalg.inv(c)
+    log_cbc = multilogm(
+        c_inv @ point_b @ multitransp(c_inv),
+        positive_definite=True,
+    )
+    powm = multiexpm(alpha * log_cbc, symmetric=False)
+    return c @ powm @ multitransp(c)
 
 
 class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
@@ -48,14 +61,13 @@ class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
         # Test triangle inequality
         assert manifold.dist(x, y) <= manifold.dist(x, z) + manifold.dist(z, y)
 
-        # Test exponential metric increasing property
-        # (see equation (6.8) in [Bha2007]).
-        logx, logy = multilogm(x), multilogm(y)
-        assert manifold.dist(x, y) >= np.linalg.norm(logx - logy)
-
         # Test alternative implementation (see equation (6.14) in [Bha2007]).
         d = np.sqrt((np.log(eigvalsh(x, y)) ** 2).sum())
         np_testing.assert_almost_equal(manifold.dist(x, y), d)
+
+        # Test exponential metric increasing property
+        # (see equation (6.8) in [Bha2007]).
+        assert manifold.dist(x, y) >= np.linalg.norm(logm(x) - logm(y))
 
         # check that dist is consistent with log
         np_testing.assert_almost_equal(
@@ -75,18 +87,6 @@ class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
         np_testing.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(axa, aya)
         )
-
-        def geodesic(point_a, point_b, alpha):
-            if alpha < 0 or 1 < alpha:
-                raise ValueError("Exponent must be in [0,1]")
-            c = np.linalg.cholesky(point_a)
-            c_inv = np.linalg.inv(c)
-            logm = multilogm(
-                c_inv @ point_b @ multitransp(c_inv),
-                positive_definite=True,
-            )
-            powm = multiexpm(alpha * logm, symmetric=False)
-            return c @ powm @ multitransp(c)
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
         alpha = np.random.uniform()
