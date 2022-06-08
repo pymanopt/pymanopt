@@ -39,13 +39,13 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
-            return -torch.tensordot(X, torch.matmul(matrix_, X))
+            return -torch.tensordot(X, matrix_ @ X)
 
     elif backend == "tensorflow":
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):
-            return -tf.tensordot(X, tf.matmul(matrix, X), axes=2)
+            return -tf.tensordot(X, matrix @ X, axes=2)
 
     else:
         raise ValueError(f"Unsupported backend '{backend}'")

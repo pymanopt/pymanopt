@@ -53,17 +53,15 @@ def create_cost_and_derivates(manifold, samples, backend):
 
         @pymanopt.function.pytorch(manifold)
         def cost(w):
-            projector = torch.matmul(w, torch.transpose(w, 1, 0))
-            return (
-                torch.norm(samples_ - torch.matmul(samples_, projector)) ** 2
-            )
+            projector = w @ torch.transpose(w, 1, 0)
+            return torch.norm(samples_ - samples_ @ projector) ** 2
 
     elif backend == "tensorflow":
 
         @pymanopt.function.tensorflow(manifold)
         def cost(w):
-            projector = tf.matmul(w, tf.transpose(w))
-            return tf.norm(samples - tf.matmul(samples, projector)) ** 2
+            projector = w @ tf.transpose(w)
+            return tf.norm(samples - samples @ projector) ** 2
 
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
