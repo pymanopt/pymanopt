@@ -1,4 +1,4 @@
-import numpy as np
+import autograd.numpy as np
 import numpy.testing as np_testing
 from nose2.tools import params
 
@@ -49,3 +49,32 @@ class TestConjugateGradient(TestCase):
     def test_beta_invalid_rule(self):
         with self.assertRaises(ValueError):
             ConjugateGradient(beta_rule="SomeUnknownBetaRule")
+
+    def test_complex_cost_problem(self):
+        # Solve the dominant invariant complex subspace problem.
+        num_rows = 32
+        subspace_dimension = 3
+        matrix = np.random.normal(
+            size=(num_rows, num_rows)
+        ) + 1j * np.random.normal(size=(num_rows, num_rows))
+        matrix = 0.5 * (matrix + matrix.T.conj())
+
+        manifold = pymanopt.manifolds.ComplexGrassmann(
+            num_rows, subspace_dimension
+        )
+
+        @pymanopt.function.autograd(manifold)
+        def cost(X):
+            return -np.real(np.trace(np.conj(X.T) @ matrix @ X))
+
+        problem = pymanopt.Problem(manifold, cost)
+        optimizer = ConjugateGradient(verbosity=0)
+        estimated_spanning_set = optimizer.run(problem).point
+
+        # True solution.
+        eigenvalues, eigenvectors = np.linalg.eig(matrix)
+        column_indices = np.argsort(eigenvalues)[-subspace_dimension:]
+        spanning_set = eigenvectors[:, column_indices]
+        np_testing.assert_allclose(
+            manifold.dist(spanning_set, estimated_spanning_set), 0, atol=1e-6
+        )
