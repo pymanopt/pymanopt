@@ -43,15 +43,12 @@ class TensorFlowBackend(Backend):
     @Backend._assert_backend_available
     def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
-            tf_arguments = []
+            arguments = list(map(self._from_numpy, args))
             with tf.GradientTape() as tape:
-                for argument in args:
-                    tf_argument = self._from_numpy(argument)
-                    tape.watch(tf_argument)
-                    tf_arguments.append(tf_argument)
-                val = function(*tf_arguments)
-                grads = tape.gradient(val, tf_arguments)
-            return self._sanitize_gradients(tf_arguments, grads)
+                for argument in arguments:
+                    tape.watch(argument)
+                gradients = tape.gradient(function(*arguments), arguments)
+            return self._sanitize_gradients(arguments, gradients)
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
@@ -60,18 +57,18 @@ class TensorFlowBackend(Backend):
     @Backend._assert_backend_available
     def generate_hessian_operator(self, function, num_arguments):
         def hessian_vector_product(*args):
-            arguments, vectors = bisect_sequence(args)
-            tf_args = [self._from_numpy(arg) for arg in arguments]
-            tf_vecs = [self._from_numpy(vec) for vec in vectors]
-            with tf.autodiff.ForwardAccumulator(
-                tf_args, tf_vecs
-            ) as acc, tf.GradientTape() as tape:
-                for arg in tf_args:
-                    tape.watch(arg)
-                val = function(*tf_args)
-                grads = tape.gradient(val, tf_args)
-
-            return self._sanitize_gradients(tf_args, acc.jvp(grads))
+            arguments, vectors = bisect_sequence(
+                list(map(self._from_numpy, args))
+            )
+            with tf.GradientTape() as tape, tf.autodiff.ForwardAccumulator(
+                arguments, vectors
+            ) as accumulator:
+                for argument in arguments:
+                    tape.watch(argument)
+                gradients = tape.gradient(function(*arguments), arguments)
+            return self._sanitize_gradients(
+                arguments, accumulator.jvp(gradients)
+            )
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(
