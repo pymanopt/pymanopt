@@ -313,7 +313,7 @@ class Manifold(metaclass=abc.ABCMeta):
         transport) as defined in section 8.1 of [AMS2008]_, or a transporter
         (see e.g. section 10.5 of [Bou2020]_).
         It transports a vector ``tangent_vector_a`` in the tangent space at
-        ``point_a`` to the tangent space at `point_b`.
+        ``point_a`` to the tangent space at ``point_b``.
 
         Args:
             point_a: The first point on the manifold.

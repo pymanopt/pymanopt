@@ -5,11 +5,11 @@ import scipy.linalg
 def multitransp(A):
     """Vectorized matrix transpose.
 
-    A is assumed to be an array containing M matrices, each of which has
-    dimension N x P.
-    That is, A is an M x N x P array. Multitransp then returns an array
-    containing the M matrix transposes of the matrices in A, each of which will
-    be P x N.
+    ``A`` is assumed to be an array containing ``M`` matrices, each of which
+    has dimension ``N x P``.
+    That is, ``A`` is an ``M x N x P`` array. Multitransp then returns an array
+    containing the ``M`` matrix transposes of the matrices in ``A``, each of
+    which will be ``P x N``.
     """
     if A.ndim == 2:
         return A.T
