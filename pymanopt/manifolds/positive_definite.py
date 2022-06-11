@@ -109,7 +109,7 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
         # Generate eigenvalues from a uniform distribution.
         d = np.random.uniform(low=low, high=high, size=(self._k, self._n, 1))
 
-        # Generate an orthogonal matrix from a normal distribution..
+        # Generate an orthogonal matrix from a normal distribution.
         q, _ = multiqr(
             np.random.normal(loc=loc, scale=scale, size=(self._n, self._n))
         )
