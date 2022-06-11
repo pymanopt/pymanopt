@@ -84,12 +84,37 @@ class SymmetricPositiveDefinite(RiemannianSubmanifold):
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
-    def random_point(self):
-        # Generate eigenvalues between 1 and 2.
-        d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
+    def random_point(self, *, low=1.0, high=2.0, loc=0.0, scale=1.0):
+        """Returns a random point on the manifold.
 
-        # Generate an orthogonal matrix.
-        q, _ = multiqr(np.random.normal(size=(self._n, self._n)))
+        Generate eigenvalues from a uniform distribution between lower and
+        upper bounds, generate an orthogonal matrix applying a QR decomposition
+        on a random matrix drawn from a normal distribution, and apply
+        conjugation.
+
+        Args:
+            low: Lower boundary of uniform distribution for eigenvalues.
+            high: Upper boundary of uniform distribution for eigenvalues.
+            loc: Mean of normal distribution for random matrix.
+            scale: Standard deviation of normal distribution for random matrix.
+
+        Returns:
+            A randomly chosen point on the manifold.
+        """
+        if low <= 0.0:
+            raise ValueError("Lower bound must be strictly positive")
+        if high <= low:
+            raise ValueError("Upper bound must be superior to lower bound")
+
+        # Generate eigenvalues from a uniform distribution.
+        d = np.random.uniform(low=low, high=high, size=(self._k, self._n, 1))
+
+        # Generate an orthogonal matrix from a normal distribution..
+        q, _ = multiqr(
+            np.random.normal(loc=loc, scale=scale, size=(self._n, self._n))
+        )
+
+        # Apply conjugation.
         point = q @ (d * multitransp(q))
         if self._k == 1:
             return point[0]
