@@ -44,6 +44,15 @@ class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
         w = np.linalg.eigvalsh(x)
         assert (w > [0]).all()
 
+        # Check use of all parameters
+        manifold.random_point(low=5.0, high=10.0, loc=2.0, scale=5.0)
+
+        with self.assertRaises(ValueError):
+            manifold.random_point(low=-1)
+
+        with self.assertRaises(ValueError):
+            manifold.random_point(low=2, high=1)
+
     def test_dist(self):
         manifold = self.manifold
         x = manifold.random_point()
