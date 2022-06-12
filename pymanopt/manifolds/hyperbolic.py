@@ -90,11 +90,9 @@ class PoincareBall(Manifold):
         return np.zeros_like(point)
 
     def dist(self, point_a, point_b):
-        norm_point_a = np.sum(point_a * point_a, axis=-1)
-        norm_point_b = np.sum(point_b * point_b, axis=-1)
-        difference = point_a - point_b
-        norm_difference = np.sum(difference * difference, axis=-1)
-
+        norm_point_a = np.linalg.norm(point_a, axis=-1) ** 2
+        norm_point_b = np.linalg.norm(point_b, axis=-1) ** 2
+        norm_difference = np.linalg.norm(point_a - point_b, axis=-1) ** 2
         columns_dist = np.arccosh(
             1 + 2 * norm_difference / ((1 - norm_point_a) * (1 - norm_point_b))
         )
@@ -129,7 +127,7 @@ class PoincareBall(Manifold):
         W = tangent_vector * np.divide(
             np.tanh(
                 norm_point
-                / (1 - np.sum(point * point, axis=-1, keepdims=True))
+                / (1 - np.linalg.norm(point, axis=-1, keepdims=True) ** 2)
             ),
             norm_point,
             out=np.zeros_like(tangent_vector),
@@ -143,7 +141,7 @@ class PoincareBall(Manifold):
         W = self.mobius_addition(-point_a, point_b)
         norm_W = np.linalg.norm(W, axis=-1, keepdims=True)
         return (
-            (1 - np.sum(point_a * point_a, axis=-1, keepdims=True))
+            (1 - np.linalg.norm(point_a, axis=-1, keepdims=True) ** 2)
             * np.arctanh(norm_W)
             * W
             / norm_W

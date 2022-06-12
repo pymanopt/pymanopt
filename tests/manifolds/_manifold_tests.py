@@ -20,7 +20,8 @@ class ManifoldTestCase(TestCase):
     def run_gradient_test(self):
         problem = pymanopt.Problem(self.manifold, self.cost)
         h, _, segment, poly = diagnostics.check_directional_derivative(problem)
-        # Compute slope of linear regression line through points in linear domain.
+        # Compute slope of linear regression line through points in linear
+        # domain.
         x = np.log(h[segment])
         y = np.log(10) * np.polyval(poly, np.log10(np.e) * x)
         slope = scipy.stats.linregress(x, y).slope
