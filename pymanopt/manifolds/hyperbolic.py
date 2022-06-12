@@ -84,7 +84,8 @@ class PoincareBall(Manifold):
         return point
 
     def random_tangent_vector(self, point):
-        return np.random.normal(size=point.shape)
+        vector = np.random.normal(size=point.shape)
+        return vector / self.norm(point, vector)
 
     def zero_vector(self, point):
         return np.zeros_like(point)
