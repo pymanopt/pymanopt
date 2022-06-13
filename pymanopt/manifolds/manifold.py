@@ -95,7 +95,7 @@ class Manifold(metaclass=abc.ABCMeta):
             return sum(self.point_layout)
         return self.point_layout
 
-    # Manifold properties that subclasses can define
+    # Manifold properties that subclasses can define.
 
     @property
     def typical_dist(self):
@@ -347,8 +347,8 @@ class Manifold(metaclass=abc.ABCMeta):
 
         This method guarantees that ``vector`` is indeed a tangent vector
         at ``point`` on the manifold.
-        Typically this simply corresponds to ``proj(point, vector)`` but may
-        differ for certain manifolds.
+        Typically this simply corresponds to a call to meth:`projection` but
+        may differ for certain manifolds.
 
         Args:
             point: A point on the manifold.
@@ -357,6 +357,33 @@ class Manifold(metaclass=abc.ABCMeta):
         Returns:
             The tangent vector at ``point`` closest to ``vector``.
         """
+
+    def embedding(self, point, tangent_vector):
+        """Convert tangent vector to ambient space representation.
+
+        Certain manifolds represent tangent vectors in a format that is more
+        conducive for internal calculations than their representation in the
+        ambient space.
+        Euclidean Hessian operators generally expect tangent vectors in their
+        ambient space representation though.
+        This method allows switching between these two representations and is
+        mainly useful when implementing custom `euclidean_hessian` functions
+        that are passed to :class:`pymanopt.core.problem.Problem`.
+        Note that for most manifolds, ``embedding`` is simply the identity map.
+
+        Args:
+            point: A point on the manifold.
+            tangent_vector: A tangent vector in the internal representation of
+                the manifold.
+
+        Returns:
+            The same tangent vector in the ambient space representation.
+
+        Note:
+            This method is called internally when Hessian operators are
+            generated automatically by one of the autodiff backends.
+        """
+        return tangent_vector
 
 
 class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
