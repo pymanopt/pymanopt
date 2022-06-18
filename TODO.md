@@ -1,10 +1,10 @@
 # TODO/Roadmap
 
-## 1.1.x:
+## 2.0.x:
   - Add 'check_hessian' diagnostic function to add automatic tests for
     `euclidean_to_riemannian_hessian'
 
-## 1.2.x:
+## 2.1.x:
   - For Riemannian submanifolds of Euclidean space, it is acceptable to
     transport simply by orthogonal projection of the tangent vector translated
     in the ambient space. For this, 'RiemannianSubmanifold' would require a
@@ -20,7 +20,7 @@
   - Add callback mechanism to allow for custom termination criteria
   - Add support for complex manifolds to autodiff backends
 
-## 2.0.x:
+## 3.0.x:
   - Raise an exception if dimension of 'SphereSubspaceIntersection' manifold is
     0
   - Add pep8-naming (requires breaking public API to fix all errors)
