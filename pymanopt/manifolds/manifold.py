@@ -380,8 +380,10 @@ class Manifold(metaclass=abc.ABCMeta):
             The same tangent vector in the ambient space representation.
 
         Note:
-            This method is called internally when Hessian operators are
-            generated automatically by one of the autodiff backends.
+            This method is mainly needed internally by the
+            :class:`pymanopt.core.problem.Problem` class in order to convert
+            tangent vectors to the representation expected by user-given or
+            autodiff-generated Euclidean Hessian operators.
         """
         return tangent_vector
 
