@@ -123,8 +123,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return point @ multiexpm(tangent_vector)
 
     def log(self, point_a, point_b):
-        U = multitransp(point_a) @ point_b
-        return multiskew(multilogm(U))
+        return multiskew(multilogm(multitransp(point_a) @ point_b))
 
     def random_point(self):
         n, k = self._n, self._k

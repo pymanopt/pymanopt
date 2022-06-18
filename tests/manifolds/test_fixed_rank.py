@@ -219,8 +219,8 @@ class TestFixedRankEmbeddedManifold(ManifoldTestCase):
         np_testing.assert_allclose(M, m)
         np_testing.assert_allclose(Vp, vp)
 
-    def test_euclidean_to_riemannian_gradient_from_cost(self):
-        self.run_gradient_test()
+    def test_first_order_function_approximation(self):
+        self.run_gradient_approximation_test()
 
     def test_random_tangent_vector(self):
         e = self.manifold
