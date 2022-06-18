@@ -29,8 +29,13 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
     :math:`(\R^{n \times n})^k`.
     As such :math:`\SO(n)^k` forms a Riemannian submanifold.
 
-    Tangent vectors are represented in the Lie algebra of skew-symmetric
-    matrices of the same shape as points on the manifold.
+    The tangent space :math:`\tangent{\vmQ}\SO(n)` at a point :math:`\vmQ` is
+    given by :math:`\tangent{\vmQ}\SO(n) = \set{\vmQ \vmOmega \in \R^{n \times
+    n} \mid \vmOmega = -\transp{\vmOmega}} = \vmQ \Skew(n)`, where
+    :math:`\Skew(n)` denotes the set of skew-symmetric matrices.
+    This corresponds to the Lie algebra of :math:`\SO(n)`, a fact which is used
+    here to conveniently represent tangent vectors numerically by their
+    skew-symmetric factor.
     The method :meth:`embedding` can be used to transform a tangent vector from
     its Lie algebra representation to the embedding space representation.
 
@@ -118,8 +123,7 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return point @ multiexpm(tangent_vector)
 
     def log(self, point_a, point_b):
-        U = multitransp(point_a) @ point_b
-        return multiskew(multilogm(U))
+        return multiskew(multilogm(multitransp(point_a) @ point_b))
 
     def random_point(self):
         n, k = self._n, self._k

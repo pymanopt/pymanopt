@@ -84,7 +84,8 @@ class PoincareBall(Manifold):
         return point
 
     def random_tangent_vector(self, point):
-        return np.random.normal(size=point.shape)
+        vector = np.random.normal(size=point.shape)
+        return vector / self.norm(point, vector)
 
     def zero_vector(self, point):
         return np.zeros_like(point)
@@ -93,16 +94,20 @@ class PoincareBall(Manifold):
         norm_point_a = np.linalg.norm(point_a, axis=-1) ** 2
         norm_point_b = np.linalg.norm(point_b, axis=-1) ** 2
         norm_difference = np.linalg.norm(point_a - point_b, axis=-1) ** 2
-        columns_dist = np.arccosh(
-            1 + 2 * norm_difference / ((1 - norm_point_a) * (1 - norm_point_b))
+        return np.linalg.norm(
+            np.arccosh(
+                1
+                + 2
+                * norm_difference
+                / ((1 - norm_point_a) * (1 - norm_point_b))
+            )
         )
-        return np.linalg.norm(columns_dist)
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         # The hyperbolic metric tensor is conformal to the Euclidean one, so
         # the Euclidean gradient is simply rescaled.
-        factor = 1 / self.conformal_factor(point) ** 2
-        return euclidean_gradient * factor
+        factor = self.conformal_factor(point)
+        return euclidean_gradient * (1 / factor**2)
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
@@ -123,29 +128,23 @@ class PoincareBall(Manifold):
 
     def exp(self, point, tangent_vector):
         norm_point = np.linalg.norm(tangent_vector, axis=-1, keepdims=True)
-        # Handle the case where tangent_vector is 0.
-        W = tangent_vector * np.divide(
-            np.tanh(
-                norm_point
-                / (1 - np.linalg.norm(point, axis=-1, keepdims=True) ** 2)
+        factor = self.conformal_factor(point)
+        return self.mobius_addition(
+            point,
+            tangent_vector
+            * (
+                np.tanh(norm_point * factor / 2)
+                / (norm_point + (norm_point == 0))
             ),
-            norm_point,
-            out=np.zeros_like(tangent_vector),
-            where=norm_point != 0,
         )
-        return self.mobius_addition(point, W)
 
     retraction = exp
 
     def log(self, point_a, point_b):
-        W = self.mobius_addition(-point_a, point_b)
-        norm_W = np.linalg.norm(W, axis=-1, keepdims=True)
-        return (
-            (1 - np.linalg.norm(point_a, axis=-1, keepdims=True) ** 2)
-            * np.arctanh(norm_W)
-            * W
-            / norm_W
-        )
+        w = self.mobius_addition(-point_a, point_b)
+        norm_w = np.linalg.norm(w, axis=-1, keepdims=True)
+        factor = self.conformal_factor(point_a)
+        return np.arctanh(norm_w) * w / norm_w / (factor / 2)
 
     def pair_mean(self, point_a, point_b):
         return self.exp(point_a, self.log(point_a, point_b) / 2)

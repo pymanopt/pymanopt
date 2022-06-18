@@ -98,24 +98,26 @@ katex_autorender_path = (
 )
 # TODO(nkoep): Move this macro generation to its own module.
 latex_macros = r"""
-    \def \manM   {\mathcal{M}}
-    \def \R      {\mathbb{R}}
-    \def \C      {\mathbb{C}}
-    \def \O      {\mathrm{O}}
-    \def \SO     {\mathrm{SO}}
-    \def \U      {\mathrm{U}}
-    \def \E      {\mathcal{E}}
-    \def \St     {\mathrm{St}}
-    \def \Id     {\mathrm{Id}}
-    \def \set    #1{\{#1\}}
-    \def \inner  #2{\langle #1, #2 \rangle}
-    \def \opt    #1{#1^\star}
-    \def \sphere {\mathcal{S}}
-    \def \transp #1{#1^\top}
-    \def \conj   #1{#1^*}
-    \def \norm   #1{\|#1\|}
-    \def \abs    #1{|#1|}
-    \def \parens #1{\left(#1\right)}
+    \def \manM    {\mathcal{M}}
+    \def \R       {\mathbb{R}}
+    \def \C       {\mathbb{C}}
+    \def \O       {\mathrm{O}}
+    \def \SO      {\mathrm{SO}}
+    \def \U       {\mathrm{U}}
+    \def \E       {\mathcal{E}}
+    \def \Skew    {\mathrm{Skew}}
+    \def \St      {\mathrm{St}}
+    \def \Id      {\mathrm{Id}}
+    \def \set     #1{\{#1\}}
+    \def \inner   #2{\langle #1, #2 \rangle}
+    \def \opt     #1{#1^\star}
+    \def \sphere  {\mathcal{S}}
+    \def \transp  #1{#1^\top}
+    \def \conj    #1{#1^*}
+    \def \norm    #1{\|#1\|}
+    \def \abs     #1{|#1|}
+    \def \parens  #1{\left(#1\right)}
+    \def \tangent #1{\mathrm{T}_{#1}}
 """
 # Generate macros for boldface letters.
 latex_macros += "\n".join(
@@ -123,6 +125,7 @@ latex_macros += "\n".join(
         r"\def \vm{letter} {{\mathbf{{{letter}}}}}".format(letter=letter)
         for letter in string.ascii_lowercase + string.ascii_uppercase
     ]
+    + [r"\def \vmOmega {\mathbf{\Omega}}"]
 )
 katex_macros = katex.latex_defs_to_katex_macros(latex_macros)
 katex_options = (

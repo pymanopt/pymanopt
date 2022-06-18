@@ -42,8 +42,11 @@ class TestSingleStiefelManifold(ManifoldTestCase):
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
-    def test_euclidean_to_riemannian_gradient_from_cost(self):
-        self.run_gradient_test()
+    def test_first_order_function_approximation(self):
+        self.run_gradient_approximation_test()
+
+    def test_second_order_function_approximation(self):
+        self.run_hessian_approximation_test()
 
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
@@ -180,8 +183,11 @@ class TestMultiStiefelManifold(ManifoldTestCase):
         Hproj = H - X @ (multitransp(X) @ H + multitransp(H) @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
-    def test_euclidean_to_riemannian_gradient_from_cost(self):
-        self.run_gradient_test()
+    def test_first_order_function_approximation(self):
+        self.run_gradient_approximation_test()
+
+    def test_second_order_function_approximation(self):
+        self.run_hessian_approximation_test()
 
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that

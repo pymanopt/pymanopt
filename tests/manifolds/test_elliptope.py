@@ -25,8 +25,8 @@ class TestElliptopeManifold(ManifoldTestCase):
 
     # def test_retraction(self):
 
-    def test_euclidean_to_riemannian_gradient_from_cost(self):
-        self.run_gradient_test()
+    def test_first_order_function_approximation(self):
+        self.run_gradient_approximation_test()
 
     # def test_norm(self):
 
