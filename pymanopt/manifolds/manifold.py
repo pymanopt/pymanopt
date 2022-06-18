@@ -362,14 +362,12 @@ class Manifold(metaclass=abc.ABCMeta):
         """Convert tangent vector to ambient space representation.
 
         Certain manifolds represent tangent vectors in a format that is more
-        conducive for internal calculations than their representation in the
+        convenient for numerical calculations than their representation in the
         ambient space.
         Euclidean Hessian operators generally expect tangent vectors in their
         ambient space representation though.
-        This method allows switching between these two representations and is
-        mainly useful when implementing custom `euclidean_hessian` functions
-        that are passed to :class:`pymanopt.core.problem.Problem`.
-        Note that for most manifolds, ``embedding`` is simply the identity map.
+        This method allows switching between the two possible representations,
+        For most manifolds, ``embedding`` is simply the identity map.
 
         Args:
             point: A point on the manifold.
