@@ -42,14 +42,14 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
         @pymanopt.function.pytorch(manifold)
         def cost(u, s, vt):
-            X = torch.matmul(u, torch.matmul(torch.diag(s), vt))
+            X = u @ torch.diag(s) @ vt
             return torch.norm(X - matrix_) ** 2
 
     elif backend == "tensorflow":
 
         @pymanopt.function.tensorflow(manifold)
         def cost(u, s, vt):
-            X = tf.matmul(u, tf.matmul(tf.linalg.diag(s), vt))
+            X = u @ tf.linalg.diag(s) @ vt
             return tf.norm(X - matrix) ** 2
 
     else:

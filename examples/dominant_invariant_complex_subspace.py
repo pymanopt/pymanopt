@@ -39,14 +39,14 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
-            return -torch.tensordot(X.conj(), torch.matmul(matrix_, X)).real
+            return -torch.tensordot(X.conj(), matrix_ @ X).real
 
     elif backend == "tensorflow":
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):
             return -tf.math.real(
-                tf.tensordot(tf.math.conj(X), tf.matmul(matrix, X), axes=2)
+                tf.tensordot(tf.math.conj(X), matrix @ X, axes=2)
             )
 
     else:

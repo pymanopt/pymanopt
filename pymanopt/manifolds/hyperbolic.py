@@ -91,10 +91,9 @@ class PoincareBall(Manifold):
         return np.zeros_like(point)
 
     def dist(self, point_a, point_b):
-        norm_point_a = np.sum(point_a * point_a, axis=-1)
-        norm_point_b = np.sum(point_b * point_b, axis=-1)
-        difference = point_a - point_b
-        norm_difference = np.sum(difference * difference, axis=-1)
+        norm_point_a = np.linalg.norm(point_a, axis=-1) ** 2
+        norm_point_b = np.linalg.norm(point_b, axis=-1) ** 2
+        norm_difference = np.linalg.norm(point_a - point_b, axis=-1) ** 2
         return np.linalg.norm(
             np.arccosh(
                 1

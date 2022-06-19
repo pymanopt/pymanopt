@@ -41,7 +41,7 @@ def create_cost_and_derivates(manifold, samples, targets, backend):
 
         @pymanopt.function.pytorch(manifold)
         def cost(weights):
-            return torch.norm(targets_ - torch.matmul(samples_, weights)) ** 2
+            return torch.norm(targets_ - samples_ @ weights) ** 2
 
     elif backend == "tensorflow":
 

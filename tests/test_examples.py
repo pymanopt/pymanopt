@@ -33,11 +33,7 @@ class TestExamples(TestCase):
 
     @params(*dominant_invariant_subspace.SUPPORTED_BACKENDS)
     def test_dominant_invariant_complex_subspace(self, backend):
-        if backend == "numpy":
-            dominant_invariant_complex_subspace.run(backend)
-        else:
-            with self.assertRaises(TypeError):
-                dominant_invariant_complex_subspace.run(backend)
+        dominant_invariant_complex_subspace.run(backend)
 
     @params(*low_rank_matrix_approximation.SUPPORTED_BACKENDS)
     def test_low_rank_matrix_approximation(self, backend):
