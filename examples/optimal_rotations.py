@@ -5,14 +5,14 @@ import torch
 import pymanopt
 from examples._tools import ExampleRunner
 from pymanopt.manifolds import SpecialOrthogonalGroup
-from pymanopt.solvers import SteepestDescent
+from pymanopt.optimizers import SteepestDescent
 
 
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_egrad(manifold, ABt, backend):
-    egrad = None
+def create_cost_and_derivates(manifold, ABt, backend):
+    euclidean_gradient = None
 
     if backend == "autograd":
 
@@ -27,7 +27,7 @@ def create_cost_egrad(manifold, ABt, backend):
             return -np.tensordot(X, ABt, axes=X.ndim)
 
         @pymanopt.function.numpy(manifold)
-        def egrad(X):
+        def euclidean_gradient(X):
             return -ABt
 
     elif backend == "pytorch":
@@ -46,7 +46,7 @@ def create_cost_egrad(manifold, ABt, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad
+    return cost, euclidean_gradient
 
 
 def compute_optimal_solution(ABt):
@@ -65,18 +65,20 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m = 10
     k = 10
 
-    A = np.random.randn(k, n, m)
-    B = np.random.randn(k, n, m)
+    A = np.random.normal(size=(k, n, m))
+    B = np.random.normal(size=(k, n, m))
     ABt = np.array([Ak @ Bk.T for Ak, Bk in zip(A, B)])
 
-    manifold = SpecialOrthogonalGroup(n, k)
-    cost, egrad = create_cost_egrad(manifold, ABt, backend)
-    problem = pymanopt.Problem(manifold, cost, egrad=egrad)
-    if quiet:
-        problem.verbosity = 0
+    manifold = SpecialOrthogonalGroup(n, k=k)
+    cost, euclidean_gradient = create_cost_and_derivates(
+        manifold, ABt, backend
+    )
+    problem = pymanopt.Problem(
+        manifold, cost, euclidean_gradient=euclidean_gradient
+    )
 
-    solver = SteepestDescent()
-    X = solver.solve(problem)
+    optimizer = SteepestDescent(verbosity=2 * int(not quiet))
+    X = optimizer.run(problem).point
 
     if not quiet:
         Xopt = np.array([compute_optimal_solution(ABtk) for ABtk in ABt])

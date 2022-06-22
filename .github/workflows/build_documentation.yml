@@ -9,25 +9,50 @@ on:
       master
 
 jobs:
+  build-matrix:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Generate version matrix
+        id: build-matrix
+        run: echo "::set-output name=versions::['stable', 'latest']"
+    outputs:
+      versions: ${{ steps.build-matrix.outputs.versions }}
+
   docs:
     runs-on: ubuntu-20.04
+    needs: build-matrix
     strategy:
       # Make sure we never build docs in parallel in case we deploy new
       # versions to avoid potential race conditions while pushing to gh pages.
       max-parallel: 1
       matrix:
-        version:
-          - latest
+        version: ${{ fromJSON(needs.build-matrix.outputs.versions) }}
     steps:
       - name: Set up python 3.9
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
 
-      - name: Checkout
+      - name: Clone repository
         uses: actions/checkout@v2
         with:
-          ref: ${{ matrix.version == 'latest' && github.sha || matrix.version }}
+          fetch-depth: 0
+
+      - name: Checkout target
+        id: checkout
+        run: |
+          if ${{ matrix.version == 'latest' }}; then
+            sha=$(git rev-parse --short ${{ github.sha }})
+            echo "::set-output name=version::latest ($sha)"
+            git checkout ${{ github.sha }}
+          elif ${{ matrix.version == 'stable' }}; then
+            tag=$(git tag | sort -V | tail -1)
+            echo "::set-output name=version::stable ($tag)"
+            git checkout tags/$tag
+          else
+            echo "::set-output name=version::${{ matrix.version }}"
+            git checkout ${{ matrix.version }}
+          fi
 
       - name: Install dependencies
         run: |
@@ -46,8 +71,10 @@ jobs:
         run: |
           PYTHONPATH=. sphinx-build \
             -b html \
-            -D version=${{ matrix.version }} \
-            -D release=${{ matrix.version }} \
+            -D release="${{ steps.checkout.outputs.version }}" \
+            -D version="${{ steps.checkout.outputs.version }}" \
+            -D doc_version="${{ matrix.version }}" \
+            -D doc_versions="${{ join(fromJSON(needs.build-matrix.outputs.versions)) }}" \
             docs \
             website/docs/${{ matrix.version }}
 

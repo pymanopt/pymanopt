@@ -2,7 +2,7 @@ Manifolds
 =========
 
 The rigorous mathematical definition of a manifold is beyond the scope of this
-document.
+documentation.
 However, if you are unfamiliar with the idea, it is fine just to visualize it
 as a smooth subset of `Euclidean space
 <https://en.wikipedia.org/wiki/Euclidean_space>`_.
@@ -21,7 +21,7 @@ We plan to implement more depending on the needs of users, so if there is a
 particular manifold you would like to optimize over, please let us know.
 If you wish to implement your own manifold for Pymanopt, you will
 need to inherit from the abstract :class:`pymanopt.manifolds.manifold.Manifold`
-or :class:`pymanopt.manifolds.manifold.EuclideanEmbeddedSubmanifold` base
+or :class:`pymanopt.manifolds.manifold.RiemannianSubmanifold` base
 class.
 
 Manifold
@@ -69,8 +69,8 @@ Symmetric Positive Definite Matrices
 
 .. automodule:: pymanopt.manifolds.positive_definite
 
-Manifold of Positive Semidefinite Matrices
-------------------------------------------
+Positive Semidefinite Matrices
+------------------------------
 
 .. automodule:: pymanopt.manifolds.psd
 
@@ -79,10 +79,15 @@ Fixed-Rank Matrices
 
 .. automodule:: pymanopt.manifolds.fixed_rank
 
-Strictly-Positive Vectors
--------------------------
+Positive Matrices
+-----------------
 
-.. automodule:: pymanopt.manifolds.strictly_positive_vectors
+.. automodule:: pymanopt.manifolds.positive
+
+Hyperbolic Space
+----------------
+
+.. automodule:: pymanopt.manifolds.hyperbolic
 
 Product Manifold
 ----------------

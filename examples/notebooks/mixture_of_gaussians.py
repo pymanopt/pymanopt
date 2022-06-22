@@ -121,7 +121,7 @@ from autograd.scipy.special import logsumexp
 import pymanopt
 from pymanopt import Problem
 from pymanopt.manifolds import Euclidean, Product, SymmetricPositiveDefinite
-from pymanopt.solvers import SteepestDescent
+from pymanopt.optimizers import SteepestDescent
 
 
 # (1) Instantiate the manifold
@@ -151,13 +151,13 @@ def cost(S, v):
     return -np.sum(loglikvec)
 
 
-problem = Problem(manifold=manifold, cost=cost, verbosity=1)
+problem = Problem(manifold, cost)
 
-# (3) Instantiate a Pymanopt solver
-solver = SteepestDescent()
+# (3) Instantiate a Pymanopt optimizer
+optimizer = SteepestDescent(verbosity=1)
 
 # let Pymanopt do the rest
-Xopt = solver.solve(problem)
+Xopt = optimizer.run(problem).point
 # -
 
 # Once Pymanopt has finished the optimisation we can obtain the inferred parameters as follows:
@@ -202,7 +202,7 @@ print(pihat[2])
 
 # ## When Things Go Astray
 #
-# A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [LineSearchBackTracking](https://github.com/pymanopt/pymanopt/blob/master/pymanopt/solvers/linesearch.py)) -- here we demonstrate this approach:
+# A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [BackTrackingLineSearcher](https://github.com/pymanopt/pymanopt/blob/master/pymanopt/optimizers/line_search.py)) -- here we demonstrate this approach:
 
 
 class LineSearchMoG:
@@ -214,15 +214,15 @@ class LineSearchMoG:
         self,
         contraction_factor=0.5,
         optimism=2,
-        suff_decr=1e-4,
-        maxiter=25,
-        initial_stepsize=1,
+        sufficient_decrease=1e-4,
+        max_iterations=25,
+        initial_step_size=1,
     ):
         self.contraction_factor = contraction_factor
         self.optimism = optimism
-        self.suff_decr = suff_decr
-        self.maxiter = maxiter
-        self.initial_stepsize = initial_stepsize
+        self.sufficient_decrease = sufficient_decrease
+        self.max_iterations = max_iterations
+        self.initial_step_size = initial_step_size
 
         self._oldf0 = None
 
@@ -241,7 +241,7 @@ class LineSearchMoG:
             - df0
                 directional derivative at x along d
         Returns:
-            - stepsize
+            - step_size
                 norm of the vector retracted to reach newx from x
             - newx
                 next iterate suggested by the line-search
@@ -255,7 +255,7 @@ class LineSearchMoG:
             # Look a little further
             alpha *= self.optimism
         else:
-            alpha = self.initial_stepsize / norm_d
+            alpha = self.initial_step_size / norm_d
         alpha = float(alpha)
 
         # Make the chosen step and compute the cost there.
@@ -264,8 +264,8 @@ class LineSearchMoG:
 
         # Backtrack while the Armijo criterion is not satisfied
         while (
-            newf > f0 + self.suff_decr * alpha * df0
-            and step_count <= self.maxiter
+            newf > f0 + self.sufficient_decrease * alpha * df0
+            and step_count <= self.max_iterations
             and not reset
         ):
 
@@ -284,14 +284,14 @@ class LineSearchMoG:
             alpha = 0
             newx = x
 
-        stepsize = alpha * norm_d
+        step_size = alpha * norm_d
 
         self._oldf0 = f0
 
-        return stepsize, newx
+        return step_size, newx
 
     def _newxnewf(self, x, d, objective, manifold):
-        newx = manifold.retr(x, d)
+        newx = manifold.retraction(x, d)
         try:
             newf = objective(newx)
         except np.linalg.LinAlgError:
@@ -302,6 +302,6 @@ class LineSearchMoG:
                     for k in range(newx[0].shape[0])
                 ]
             )
-            x[0][replace, :, :] = manifold.rand()[0][replace, :, :]
+            x[0][replace, :, :] = manifold.random_point()[0][replace, :, :]
             return x, objective(x), True
         return newx, newf, False

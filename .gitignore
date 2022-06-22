@@ -66,5 +66,5 @@ manopt-*
 # pyenv
 .python-version
 
-# DS_Store
+# Mac OS temp files
 .DS_Store

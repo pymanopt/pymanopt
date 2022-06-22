@@ -1,21 +1,34 @@
 import numpy as np
-from numpy import linalg as la
-from numpy import random as rnd
-from scipy.linalg import expm
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multilog, multiprod, multisym, multitransp
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.tools.multi import (
+    multiexpm,
+    multilogm,
+    multiqr,
+    multisym,
+    multitransp,
+)
 
 
-class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
+class SymmetricPositiveDefinite(RiemannianSubmanifold):
     """Manifold of symmetric positive definite matrices.
 
-    Notes:
+    Points on the manifold and tangent vectors are represented as arrays of
+    shape ``k x n x n`` if ``k > 1``, and ``n x n`` if ``k == 1``.
+
+    Args:
+        n: The size of matrices in the manifold, i.e., the number of rows and
+            columns of each element.
+        k: The number of elements in the product geometry.
+
+    Note:
         The geometry is based on the discussion in chapter 6 of [Bha2007]_.
         Also see [SH2015]_ for more details.
+
+        The second-order retraction is taken from [JVV2012]_.
     """
 
-    def __init__(self, n, k=1):
+    def __init__(self, n: int, *, k: int = 1):
         self._n = n
         self._k = k
 
@@ -29,98 +42,89 @@ class SymmetricPositiveDefinite(EuclideanEmbeddedSubmanifold):
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(self.dim)
 
     def dist(self, point_a, point_b):
-        # Adapted from equation (6.13) of [Bha2007].
-        c = la.cholesky(point_a)
-        c_inv = la.inv(c)
-        logm = multilog(
-            multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
-            pos_def=True,
+        c = np.linalg.cholesky(point_a)
+        c_inv = np.linalg.inv(c)
+        logm = multilogm(
+            c_inv @ point_b @ multitransp(c_inv),
+            positive_definite=True,
         )
-        return la.norm(logm)
+        return np.linalg.norm(logm)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
-        p_inv_tv_a = la.solve(point, tangent_vector_a)
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
+        p_inv_tv_a = np.linalg.solve(point, tangent_vector_a)
         if tangent_vector_a is tangent_vector_b:
             p_inv_tv_b = p_inv_tv_a
         else:
-            p_inv_tv_b = la.solve(point, tangent_vector_b)
+            p_inv_tv_b = np.linalg.solve(point, tangent_vector_b)
         return np.tensordot(
             p_inv_tv_a, multitransp(p_inv_tv_b), axes=tangent_vector_a.ndim
         )
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return multisym(vector)
 
-    def egrad2rgrad(self, point, euclidean_gradient):
-        # TODO: Check that this is correct
-        return multiprod(multiprod(point, multisym(euclidean_gradient)), point)
+    to_tangent_space = projection
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        return point @ multisym(euclidean_gradient) @ point
+
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        # TODO: Check that this is correct
-        return multiprod(
-            multiprod(point, multisym(euclidean_hvp)), point
-        ) + multisym(
-            multiprod(
-                multiprod(tangent_vector, multisym(euclidean_gradient)), point
-            )
+        return point @ multisym(euclidean_hessian) @ point + multisym(
+            tangent_vector @ multisym(euclidean_gradient) @ point
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(self.inner(point, tangent_vector, tangent_vector))
+        return np.sqrt(
+            self.inner_product(point, tangent_vector, tangent_vector)
+        )
 
-    def rand(self):
+    def random_point(self):
         # Generate eigenvalues between 1 and 2.
-        d = np.ones((self._k, self._n, 1)) + rnd.rand(self._k, self._n, 1)
+        d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
 
         # Generate an orthogonal matrix.
-        u = np.zeros((self._k, self._n, self._n))
-        for i in range(self._k):
-            u[i], _ = la.qr(rnd.randn(self._n, self._n))
-
+        q, _ = multiqr(np.random.normal(size=(self._n, self._n)))
+        point = q @ (d * multitransp(q))
         if self._k == 1:
-            return multiprod(u, d * multitransp(u))[0]
-        return multiprod(u, d * multitransp(u))
+            return point[0]
+        return point
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         k = self._k
         n = self._n
         if k == 1:
-            tangent_vector = multisym(rnd.randn(n, n))
+            tangent_vector = multisym(np.random.normal(size=(n, n)))
         else:
-            tangent_vector = multisym(rnd.randn(k, n, n))
+            tangent_vector = multisym(np.random.normal(size=(k, n, n)))
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_b):
-        return tangent_vector_b
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return tangent_vector_a
 
     def exp(self, point, tangent_vector):
-        p_inv_tv = la.solve(point, tangent_vector)
-        if self._k > 1:
-            e = np.zeros(np.shape(point))
-            for i in range(self._k):
-                e[i] = expm(p_inv_tv[i])
-        else:
-            e = expm(p_inv_tv)
-        return multiprod(point, e)
+        p_inv_tv = np.linalg.solve(point, tangent_vector)
+        return point @ multiexpm(p_inv_tv, symmetric=False)
 
-    retr = exp
+    def retraction(self, point, tangent_vector):
+        p_inv_tv = np.linalg.solve(point, tangent_vector)
+        return multisym(point + tangent_vector + tangent_vector @ p_inv_tv / 2)
 
     def log(self, point_a, point_b):
-        c = la.cholesky(point_a)
-        c_inv = la.inv(c)
-        logm = multilog(
-            multiprod(multiprod(c_inv, point_b), multitransp(c_inv)),
-            pos_def=True,
+        c = np.linalg.cholesky(point_a)
+        c_inv = np.linalg.inv(c)
+        logm = multilogm(
+            c_inv @ point_b @ multitransp(c_inv),
+            positive_definite=True,
         )
-        return multiprod(multiprod(c, logm), multitransp(c))
+        return c @ logm @ multitransp(c)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         k = self._k
         n = self._n
         if k == 1:

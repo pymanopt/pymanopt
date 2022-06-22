@@ -1,51 +1,56 @@
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
-class ComplexCircle(EuclideanEmbeddedSubmanifold):
-    """Manifold of unit-modulus complex numbers.
+class ComplexCircle(RiemannianSubmanifold):
+    r"""Manifold of unit-modulus complex numbers.
 
-    Description of vectors z in C^n (complex) such that each component z(i)
-    has unit modulus. The manifold structure is the Riemannian submanifold
-    structure from the embedding space R^2 x ... x R^2, i.e., the complex
-    circle is identified with the unit circle in the real plane.
+    Manifold of complex vectors :math:`\vmz` in :math:`\C^n` such that each
+    component :math:`z_i` has unit modulus :math:`\abs{z_i} = 1`.
+
+    Args:
+        n: The dimension of the underlying complex space.
+
+    Note:
+        The manifold structure is the Riemannian submanifold
+        structure from the embedding space :math:`\R^2 \times \ldots \times
+        \R^2`, i.e., the complex circle identified with the unit circle in the
+        real plane.
     """
 
-    def __init__(self, dimension=1):
-        self._dimension = dimension
-        if dimension == 1:
+    def __init__(self, n=1):
+        self._n = n
+        if n == 1:
             name = "Complex circle S^1"
         else:
-            name = f"Product manifold of complex circles (S^1)^{dimension}"
-        super().__init__(name, dimension)
+            name = f"Product manifold of complex circles (S^1)^{n}"
+        super().__init__(name, n)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return (tangent_vector_a.conj() @ tangent_vector_b).real
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        return la.norm(np.arccos((point_a.conj() * point_b).real))
+        return np.linalg.norm(np.arccos((point_a.conj() * point_b).real))
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.pi * np.sqrt(self._dimension)
 
-    def proj(self, point, vector):
+    def projection(self, point, vector):
         return vector - (vector.conj() * point).real * point
 
-    tangent = proj
+    to_tangent_space = projection
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return self.proj(
+        return self.projection(
             point,
-            euclidean_hvp
+            euclidean_hessian
             - (point * euclidean_gradient.conj()).real * tangent_vector,
         )
 
@@ -62,37 +67,37 @@ class ComplexCircle(EuclideanEmbeddedSubmanifold):
         tangent_vector_new[not_mask] = point[not_mask]
         return tangent_vector_new
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._normalize(point + tangent_vector)
 
-    def log(self, x1, x2):
-        v = self.proj(x1, x2 - x1)
+    def log(self, point_a, point_b):
+        v = self.projection(point_a, point_b - point_a)
         abs_v = np.abs(v)
-        di = np.arccos((x1.conj() * x2).real)
+        di = np.arccos((point_a.conj() * point_b).real)
         factors = di / abs_v
         factors[di <= 1e-6] = 1
         return v * factors
 
-    def rand(self):
+    def random_point(self):
         dimension = self._dimension
         return self._normalize(
-            rnd.randn(dimension) + 1j * rnd.randn(dimension)
+            np.random.normal(size=dimension)
+            + 1j * np.random.normal(size=dimension)
         )
 
-    def randvec(self, point):
-        tangent_vector = rnd.randn(self._dimension) * 1j * point
+    def random_tangent_vector(self, point):
+        tangent_vector = np.random.normal(size=self._dimension) * 1j * point
         return tangent_vector / self.norm(point, tangent_vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(point_b, tangent_vector_a)
 
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         return self._normalize(point_a + point_b)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros(self._dimension)
 
     @staticmethod
     def _normalize(point):
-        """Normalize entries of array by their absolute values."""
         return point / np.abs(point)

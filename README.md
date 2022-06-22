@@ -7,7 +7,7 @@
 
 | Overview |   |
 | -------- | - |
-| Latest version | [![Latest version](https://badge.fury.io/py/pymanopt.svg)](https://badge.fury.io/py/pymanopt) |
+| Latest version | [![Latest version](https://badge.fury.io/py/pymanopt.svg)](https://badge.fury.io/py/pymanopt) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6549953.svg)](https://doi.org/10.5281/zenodo.6549953) |
 | Downloads | [![Downloads](https://static.pepy.tech/personalized-badge/pymanopt?period=total&units=international_system&left_color=grey&right_color=green&left_text=Downloads)](https://pepy.tech/project/pymanopt) |
 | Build status | [![Build status](https://github.com/pymanopt/pymanopt/actions/workflows/run_tests.yml/badge.svg)](https://github.com/pymanopt/pymanopt/actions/workflows/run_tests.yml) |
 | Coverage | [![Coverage](https://coveralls.io/repos/github/pymanopt/pymanopt/badge.svg?branch=master)](https://coveralls.io/github/pymanopt/pymanopt?branch=master) |

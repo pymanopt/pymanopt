@@ -1,34 +1,15 @@
 import numpy as np
-
-
-def multiprod(A: np.ndarray, B: np.ndarray) -> np.ndarray:
-    """Vectorized matrix-matrix multiplication.
-    The matrices ``A`` and ``B`` are assumed to be arrays containing ``k``
-    matrices, i.e., ``A`` and ``B`` have shape ``(k, m, n)`` and ``(k, n, p)``,
-    respectively.
-    The function multiplies each matrix in ``A`` with the corresponding matrix
-    in ``B`` along the first dimension.
-    The resulting array has shape ``(k, m, p)``.
-    Args:
-        A: The first matrix.
-        B: The second matrix.
-    Returns:
-        The matrix (or more precisely array of matrices) corresponding to
-        the matrix product vectorized over the first dimension of ``A`` and
-        ``B`` (if ``A.ndim == 2``).
-    """
-    if A.ndim == 2:
-        return A @ B
-    return np.einsum("ijk,ikl->ijl", A, B)
+import scipy.linalg
 
 
 def multitransp(A):
     """Vectorized matrix transpose.
-    A is assumed to be an array containing M matrices, each of which has
-    dimension N x P.
-    That is, A is an M x N x P array. Multitransp then returns an array
-    containing the M matrix transposes of the matrices in A, each of which will
-    be P x N.
+
+    ``A`` is assumed to be an array containing ``M`` matrices, each of which
+    has dimension ``N x P``.
+    That is, ``A`` is an ``M x N x P`` array. Multitransp then returns an array
+    containing the ``M`` matrix transposes of the matrices in ``A``, each of
+    which will be ``P x N``.
     """
     # First check if we have been given just one matrix
     if A.ndim == 2:
@@ -37,7 +18,7 @@ def multitransp(A):
 
 
 def multihconj(A):
-    """Vectorized matrix Hermitian conjugate."""
+    """Vectorized matrix conjugate transpose."""
     return np.conjugate(multitransp(A))
 
 
@@ -57,8 +38,9 @@ def multiherm(A):
 
 def multiskew(A):
     """Vectorized matrix skew-symmetrization.
-    Same as :func:`multisym`, but returns an array where each matrix ``A[i]``
-    is skew-symmetric, i.e., the components of ``A`` satisfy ``A[i] ==
+
+    Similar to :func:`multisym`, but returns an array where each matrix
+    ``A[i]`` is skew-symmetric, i.e., the components of ``A`` satisfy ``A[i] ==
     -A[i].T``.
     """
     return 0.5 * (A - multitransp(A))
@@ -74,21 +56,43 @@ def multieye(k, n):
     return np.tile(np.eye(n), (k, 1, 1))
 
 
-def multilog(A, pos_def=False):
+def multilogm(A, *, positive_definite=False):
     """Vectorized matrix logarithm."""
-    if not pos_def:
-        raise NotImplementedError
+    if not positive_definite:
+        return np.vectorize(scipy.linalg.logm, signature="(m,m)->(m,m)")(A)
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.log(w), axis=-1)
-    return multiprod(v, w * multitransp(v))
+    logmA = v @ (w * multihconj(v))
+    if np.isrealobj(A):
+        return np.real(logmA)
+    return logmA
 
 
-def multiexp(A, sym=False):
+def multiexpm(A, *, symmetric=False):
     """Vectorized matrix exponential."""
-    if not sym:
-        raise NotImplementedError
+    if not symmetric:
+        return np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")(A)
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.exp(w), axis=-1)
-    return multiprod(v, w * multitransp(v))
+    expmA = v @ (w * multihconj(v))
+    if np.isrealobj(A):
+        return np.real(expmA)
+    return expmA
+
+
+def multiqr(A):
+    """Vectorized QR decomposition."""
+    q, r = np.vectorize(np.linalg.qr, signature="(m,n)->(m,k),(k,n)")(A)
+
+    # Compute signs or unit-modulus phase of entries of diagonal of r.
+    diagonal = np.diagonal(r, axis1=-2, axis2=-1).copy()
+    diagonal[diagonal == 0] = 1
+    s = diagonal / np.abs(diagonal)
+
+    if A.ndim == 3:
+        s = np.expand_dims(s, axis=1)
+    q = q * s
+    r = multitransp(multitransp(r) * np.conjugate(s))
+    return q, r

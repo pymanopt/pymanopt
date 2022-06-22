@@ -5,7 +5,7 @@ import torch
 import pymanopt
 from examples._tools import ExampleRunner
 from pymanopt.manifolds import Elliptope
-from pymanopt.solvers import ConjugateGradient
+from pymanopt.optimizers import ConjugateGradient
 
 
 SUPPORTED_BACKENDS = ("autograd", "pytorch", "tensorflow")
@@ -30,7 +30,7 @@ def create_cost(manifold, epsilon, backend):
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
-            Y = torch.matmul(X, torch.transpose(X, 1, 0))
+            Y = X @ torch.transpose(X, 1, 0)
             s = torch.triu(Y, 1).max()
             expY = torch.exp((Y - s) / epsilon)
             expY = expY - torch.diag(torch.diag(expY))
@@ -41,7 +41,7 @@ def create_cost(manifold, epsilon, backend):
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):
-            Y = tf.matmul(X, tf.transpose(X))
+            Y = X @ tf.transpose(X)
             s = tf.reduce_max(tf.linalg.band_part(Y, 0, -1))
             expY = tf.exp((Y - s) / epsilon)
             expY = expY - tf.linalg.diag(tf.linalg.diag_part(expY))
@@ -71,11 +71,13 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = Elliptope(num_points, dimension)
     cost = create_cost(manifold, epsilon, backend)
     problem = pymanopt.Problem(manifold, cost)
-    if quiet:
-        problem.verbosity = 0
 
-    solver = ConjugateGradient(mingradnorm=1e-8, maxiter=1e5)
-    Yopt = solver.solve(problem)
+    optimizer = ConjugateGradient(
+        min_gradient_norm=1e-8,
+        max_iterations=1e5,
+        verbosity=2 * int(not quiet),
+    )
+    Yopt = optimizer.run(problem).point
 
     if quiet:
         return

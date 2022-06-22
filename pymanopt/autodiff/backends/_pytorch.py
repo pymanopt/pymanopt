@@ -59,42 +59,38 @@ class PyTorchBackend(Backend):
         return list(map(self._sanitize_gradient, tensors))
 
     @Backend._assert_backend_available
-    def compute_gradient(self, function, num_arguments):
+    def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
-            torch_arguments = []
-            for argument in args:
-                torch_argument = self._from_numpy(argument)
-                torch_argument.requires_grad_()
-                torch_arguments.append(torch_argument)
-            function(*torch_arguments).backward()
-            return self._sanitize_gradients(torch_arguments)
+            arguments = [
+                self._from_numpy(arg).requires_grad_() for arg in args
+            ]
+            function(*arguments).backward()
+            return self._sanitize_gradients(arguments)
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
         return gradient
 
     @Backend._assert_backend_available
-    def compute_hessian_vector_product(self, function, num_arguments):
+    def generate_hessian_operator(self, function, num_arguments):
         def hessian_vector_product(*args):
-            points, vectors = bisect_sequence(args)
-            torch_arguments = []
-            for point in points:
-                torch_argument = self._from_numpy(point)
-                torch_argument.requires_grad_()
-                torch_arguments.append(torch_argument)
-            torch_vectors = [self._from_numpy(vector) for vector in vectors]
-            fx = function(*torch_arguments)
-            fx.requires_grad_()
+            arguments, vectors = bisect_sequence(
+                list(map(self._from_numpy, args))
+            )
+            arguments = [argument.requires_grad_() for argument in arguments]
             gradients = autograd.grad(
-                fx, torch_arguments, create_graph=True, allow_unused=True
+                function(*arguments),
+                arguments,
+                create_graph=True,
+                allow_unused=True,
             )
             dot_product = 0
-            for gradient, vector in zip(gradients, torch_vectors):
+            for gradient, vector in zip(gradients, vectors):
                 dot_product += torch.tensordot(
-                    gradient, vector, dims=gradient.dim()
+                    gradient.conj(), vector, dims=gradient.ndim
                 )
             dot_product.backward()
-            return self._sanitize_gradients(torch_arguments)
+            return self._sanitize_gradients(arguments)
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(

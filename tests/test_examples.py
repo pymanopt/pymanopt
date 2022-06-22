@@ -1,9 +1,9 @@
-import matplotlib
 from nose2.tools import params
 
 from examples import (
     closest_unit_norm_column_approximation,
     dominant_eigenvector,
+    dominant_invariant_complex_subspace,
     dominant_invariant_subspace,
     low_rank_matrix_approximation,
     low_rank_psd_matrix_approximation,
@@ -13,7 +13,7 @@ from examples import (
     pca,
     rank_k_correlation_matrix_approximation,
 )
-from examples.advanced import check_gradient
+from examples.advanced import check_gradient, check_retraction
 
 from ._test import TestCase
 
@@ -30,6 +30,10 @@ class TestExamples(TestCase):
     @params(*dominant_invariant_subspace.SUPPORTED_BACKENDS)
     def test_dominant_invariant_subspace(self, backend):
         dominant_invariant_subspace.run(backend)
+
+    @params(*dominant_invariant_subspace.SUPPORTED_BACKENDS)
+    def test_dominant_invariant_complex_subspace(self, backend):
+        dominant_invariant_complex_subspace.run(backend)
 
     @params(*low_rank_matrix_approximation.SUPPORTED_BACKENDS)
     def test_low_rank_matrix_approximation(self, backend):
@@ -61,5 +65,8 @@ class TestExamples(TestCase):
 
     @params(*check_gradient.SUPPORTED_BACKENDS)
     def test_check_gradient(self, backend):
-        matplotlib.use("Agg")
         check_gradient.run(backend)
+
+    @params(*check_retraction.SUPPORTED_BACKENDS)
+    def test_check_retraction(self, backend):
+        check_retraction.run(backend)

@@ -1,54 +1,27 @@
-## TODO/Roadmap
+# TODO/Roadmap
 
-### Issues
-
-### 1.0:
-  - Return namedtupleS from solver's 'solve' method
-  - Clean up solver argument names
-  - Renaming:
-    # Short names
-    * dim
-    * dist
-    * exp
-    * log
-    # Long forms
-    * transp -> transporter
-    * rand -> random_point
-    * randvec -> random_vector
-    * retr -> retraction
-    * proj -> projection
-    * tangent -> to_tangent_space
-    * zerovec -> zero_vector
-    * typicaldist -> typical_dist
-    * pairmean -> point_mean
-    # Undecided
-    * grad, hess -> riemannian_gradient, riemannian_hvp
-    * egrad, ehess -> euclidean_gradient, euclidean_hvp
-    * egrad2rgrad -> euclidean_to_riemannian_gradient
-    * ehess2rhess -> euclidean_to_riemannian_hvp
-
-### 1.0.x:
-  - Use weingarten map for oblique manifold and Stiefel
-
-### 1.1.x:
-  - For Riemannian submanifolds of Euclidean space, it is acceptable to
-    transport simply by orthogonal projection of the tangent vector translated
-    in the ambient space. For this, 'EuclideanEmbeddedSubmanifold' would
-    require a generic 'tangent2ambient' method. See 'FixedRankEmbedded'.
-  - Add default implementation for tangent?
+## 2.1.x:
   - attrs
-  - Refactor solver implementations
-  - Add complex manifolds #125
-  - Add jax backend #115
-  - Add L-BFGS (and other quasi-Newton) solver
-  - Use forward-over-reverse mode hvps where possible
-  - Add patience parameter to terminate optimization if
-    cost does not improve anymore #114
-  - Add constant step size line search method
+  - Add 'check_hessian' function
+  - Refactor optimizer implementations
+  - Add complex manifolds #125, #170
+  - Add JAX backend #115
+  - Add L-BFGS and other quasi-Newton optimizers
+  - Add patience parameter to terminate optimization if cost does not improve
+    anymore #114
   - Add callback mechanism to allow for custom termination criteria
 
-### 2.0.x:
+## 3.0.x:
+  - Raise exception if dimension of manifold is 0
+  - Add pep8-naming (requires breaking public API to fix all errors)
+  - Make FixedRankEmbedded manifold compatible with autodiff backends
+    (add weingarten map to support euclidean_to_riemannian_hessian)
+  - Refactor TrustRegions implementation and update parameter names
   - Rewrite core/manifolds
-    * in jax with jit support, or
+    * in JAX with jit support, or
     * using a backend abstraction as in geomstats (potentially shared with
       geomstats)
+  - Revist 'reuse_line_searcher' and 'self._line_searcher' vs.
+    'self.line_searcher' instance attributes
+  - Rename 'orth_value' to 'restart_threshold'
+  - Revisit checking docstrings with darglint if the package is more mature

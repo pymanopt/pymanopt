@@ -1,11 +1,10 @@
 import numpy as np
 import tensorflow as tf
-from numpy import random as rnd
 from numpy import testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import Product, Sphere, Stiefel
-from pymanopt.solvers import TrustRegions
+from pymanopt.optimizers import TrustRegions
 
 from ._test import TestCase
 
@@ -13,28 +12,23 @@ from ._test import TestCase
 class TestProblem(TestCase):
     def setUp(self):
         self.n = 15
-        self.man = Sphere(self.n)
+        self.manifold = Sphere(self.n)
 
-        @pymanopt.function.tensorflow(self.man)
+        @pymanopt.function.tensorflow(self.manifold)
         def cost(X):
             return tf.exp(tf.reduce_sum(X**2))
 
         self.cost = cost
 
     def test_prepare(self):
-        problem = pymanopt.Problem(self.man, self.cost)
-        x = rnd.randn(self.n)
+        problem = pymanopt.Problem(self.manifold, self.cost)
+        x = np.random.normal(size=self.n)
         np_testing.assert_allclose(
-            2 * x * np.exp(np.sum(x**2)), problem.egrad(x)
+            2 * x * np.exp(np.sum(x**2)), problem.euclidean_gradient(x)
         )
 
     def test_attribute_override(self):
-        problem = pymanopt.Problem(self.man, self.cost)
-        with self.assertRaises(ValueError):
-            problem.verbosity = "0"
-        with self.assertRaises(ValueError):
-            problem.verbosity = -1
-        problem.verbosity = 2
+        problem = pymanopt.Problem(self.manifold, self.cost)
         with self.assertRaises(AttributeError):
             problem.manifold = None
 
@@ -47,8 +41,8 @@ class TestProblem(TestCase):
             X, Y = args
             return tf.reduce_sum(X) + tf.reduce_sum(Y)
 
-        problem = pymanopt.Problem(manifold=manifold, cost=cost)
-        solver = TrustRegions(maxiter=1)
-        Xopt, Yopt = solver.solve(problem)
+        problem = pymanopt.Problem(manifold, cost)
+        optimizer = TrustRegions(max_iterations=1)
+        Xopt, Yopt = optimizer.run(problem).point
         self.assertEqual(Xopt.shape, (3, 3))
         self.assertEqual(Yopt.shape, (3, 3))

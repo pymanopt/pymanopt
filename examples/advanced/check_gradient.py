@@ -12,8 +12,8 @@ from pymanopt.tools.diagnostics import check_gradient
 SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
 
 
-def create_cost_egrad(manifold, matrix, backend):
-    egrad = None
+def create_cost_and_derivates(manifold, matrix, backend):
+    euclidean_gradient = None
 
     if backend == "autograd":
 
@@ -28,7 +28,7 @@ def create_cost_egrad(manifold, matrix, backend):
             return -np.inner(x, matrix @ x)
 
         @pymanopt.function.numpy(manifold)
-        def egrad(x):
+        def euclidean_gradient(x):
             return -2 * matrix @ x
 
     elif backend == "pytorch":
@@ -47,7 +47,7 @@ def create_cost_egrad(manifold, matrix, backend):
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad
+    return cost, euclidean_gradient
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
@@ -55,14 +55,14 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     manifold = Sphere(n)
 
     # Generate random problem data.
-    matrix = np.random.randn(n, n)
+    matrix = np.random.normal(size=(n, n))
     matrix = 0.5 * (matrix + matrix.T)
-    cost, egrad = create_cost_egrad(manifold, matrix, backend)
+    cost, euclidean_gradient = create_cost_and_derivates(
+        manifold, matrix, backend
+    )
 
     # Create the problem structure.
-    problem = Problem(manifold=manifold, cost=cost, egrad=egrad)
-    if quiet:
-        problem.verbosity = 0
+    problem = Problem(manifold, cost, euclidean_gradient=euclidean_gradient)
 
     # Numerically check gradient consistency (optional).
     check_gradient(problem)

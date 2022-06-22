@@ -12,8 +12,8 @@ Usually only the following steps are required:
    backend decorators defined in :mod:`pymanopt.function`.
 #. Create a :class:`pymanopt.Problem` instance tying the
    optimization problem together.
-#. Instantiate a Pymanopt solver from :mod:`pymanopt.solvers` and run it on the
-   problem instance.
+#. Instantiate a Pymanopt optimizer from :mod:`pymanopt.optimizers` and run it
+   on the problem instance.
 
 Installation
 ------------
@@ -71,14 +71,15 @@ using Pymanopt for a random symmetric matrix.
 As indicated in the introduction above, we follow four simple steps: we
 instantiate the manifold, create the cost function (using Autograd in this
 case), define a problem instance which we pass the manifold and the cost
-function, and run the minimization problem using one of the available solvers.
+function, and run the minimization problem using one of the available
+optimizers.
 
 .. code-block:: python
 
     import autograd.numpy as anp
     import pymanopt
     import pymanopt.manifolds
-    import pymanopt.solvers
+    import pymanopt.optimizers
 
     anp.random.seed(42)
 
@@ -92,18 +93,18 @@ function, and run the minimization problem using one of the available solvers.
     def cost(point):
         return -point @ matrix @ point
 
-    problem = pymanopt.Problem(manifold=manifold, cost=cost)
+    problem = pymanopt.Problem(manifold, cost)
 
-    solver = pymanopt.solvers.SteepestDescent()
-    solution = solver.solve(problem)
+    optimizer = pymanopt.optimizers.SteepestDescent()
+    result = optimizer.run(problem)
 
     eigenvalues, eigenvectors = anp.linalg.eig(matrix)
     dominant_eigenvector = eigenvectors[:, eigenvalues.argmax()]
 
     print("Dominant eigenvector:", dominant_eigenvector)
-    print("Pymanopt solution:", solution)
+    print("Pymanopt solution:", result.point)
 
-Running this example will produce (something like) the following output:
+Running this example will produce (something like) the following:
 
 .. code-block:: none
 

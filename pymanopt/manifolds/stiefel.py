@@ -1,20 +1,50 @@
 import numpy as np
-from scipy.linalg import expm
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multiprod, multisym, multitransp
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.tools.multi import (
+    multiexpm,
+    multieye,
+    multiqr,
+    multisym,
+    multitransp,
+)
 
 
-class Stiefel(EuclideanEmbeddedSubmanifold):
-    """The Stiefel manifold.
+class Stiefel(RiemannianSubmanifold):
+    r"""The (product) Stiefel manifold.
 
-    The optional argument k allows the user to optimize over the product of k
-    Stiefels.
-    Elements are represented as n x p matrices (if k == 1), and as k x n x p
-    matrices if k > 1 (Note that this is different to manopt!).
+    The Stiefel manifold :math:`\St(n, p)` is the manifold of orthonormal ``n x
+    p`` matrices.
+    A point :math:`\vmX \in \St(n, p)` therefore satisfies the condition
+    :math:`\transp{\vmX}\vmX = \Id_p`.
+    Points on the manifold are represented as arrays of shape ``(n, p)`` if
+    ``k == 1``.
+    For ``k > 1``, the class represents the product manifold of ``k`` Stiefel
+    manifolds, in which case points on the manifold are represented as arrays
+    of shape ``(k, n, p)``.
+
+    The metric is the usual Euclidean metric on :math:`\R^{n \times p}` which
+    turns :math:`\St(n, p)^k` into a Riemannian submanifold.
+
+    Args:
+        n: The number of rows.
+        p: The number of columns.
+        k: The number of elements in the product.
+        retraction: The type of retraction to use.
+            Possible choices are ``qr`` and ``polar``.
+
+    Note:
+        The formula for the exponential map can be found in [ZH2021]_.
+
+        The Weingarten map is taken from [AMT2013]_.
+
+        The default retraction used here is a first-order one based on
+        the QR decomposition.
+        To switch to a second-order polar retraction, use ``Stiefel(n, p, k=k,
+        retraction="polar")``.
     """
 
-    def __init__(self, n, p, k=1):
+    def __init__(self, n: int, p: int, *, k: int = 1, retraction: str = "qr"):
         self._n = n
         self._p = p
         self._k = k
@@ -34,105 +64,85 @@ class Stiefel(EuclideanEmbeddedSubmanifold):
         dimension = int(k * (n * p - p * (p + 1) / 2))
         super().__init__(name, dimension)
 
+        try:
+            self._retraction = getattr(self, f"_retraction_{retraction}")
+        except AttributeError:
+            raise ValueError(f"Invalid retraction type '{retraction}'")
+
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.sqrt(self._p * self._k)
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
-    def proj(self, point, vector):
-        return vector - multiprod(
-            point, multisym(multiprod(multitransp(point), vector))
+    def projection(self, point, vector):
+        return vector - point @ multisym(multitransp(point) @ vector)
+
+    to_tangent_space = projection
+
+    def weingarten(self, point, tangent_vector, normal_vector):
+        return -tangent_vector @ multitransp(
+            point
+        ) @ normal_vector - point @ multisym(
+            multitransp(tangent_vector) @ normal_vector
         )
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
-    ):
-        XtG = multiprod(multitransp(point), euclidean_gradient)
-        symXtG = multisym(XtG)
-        HsymXtG = multiprod(tangent_vector, symXtG)
-        return self.proj(point, euclidean_hvp - HsymXtG)
+    def retraction(self, point, tangent_vector):
+        return self._retraction(point, tangent_vector)
 
-    def retr(self, point, tangent_vector):
-        if self._k == 1:
-            q, r = np.linalg.qr(point + tangent_vector)
-            return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
+    def _retraction_qr(self, point, tangent_vector):
+        a = point + tangent_vector
+        point, _ = multiqr(a)
+        return point
 
-        target_point = point + tangent_vector
-        for i in range(self._k):
-            q, r = np.linalg.qr(target_point[i])
-            target_point[i] = q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
-        return target_point
+    def _retraction_polar(self, point, tangent_vector):
+        Y = point + tangent_vector
+        u, _, vt = np.linalg.svd(Y, full_matrices=False)
+        return u @ vt
 
     def norm(self, point, tangent_vector):
         return np.linalg.norm(tangent_vector)
 
-    def rand(self):
+    def random_point(self):
+        point, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
         if self._k == 1:
-            matrix = np.random.randn(self._n, self._p)
-            q, _ = np.linalg.qr(matrix)
-            return q
-
-        point = np.zeros((self._k, self._n, self._p))
-        for i in range(self._k):
-            point[i], _ = np.linalg.qr(np.random.randn(self._n, self._p))
+            return point[0]
         return point
 
-    def randvec(self, point):
-        vector = np.random.randn(*np.shape(point))
-        vector = self.proj(point, vector)
+    def random_tangent_vector(self, point):
+        vector = np.random.normal(size=point.shape)
+        vector = self.projection(point, vector)
         return vector / np.linalg.norm(vector)
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):
+        pt_tv = multitransp(point) @ tangent_vector
         if self._k == 1:
-            W = expm(
-                np.bmat(
-                    [
-                        [
-                            point.T @ tangent_vector,
-                            -tangent_vector.T @ tangent_vector,
-                        ],
-                        [np.eye(self._p), point.T @ tangent_vector],
-                    ]
-                )
-            )
-            Z = np.bmat(
+            identity = np.eye(self._p)
+        else:
+            identity = multieye(self._k, self._p)
+
+        a = np.block([point, tangent_vector])
+        b = multiexpm(
+            np.block(
                 [
-                    [expm(-point.T @ tangent_vector)],
-                    [np.zeros((self._p, self._p))],
+                    [
+                        pt_tv,
+                        -multitransp(tangent_vector) @ tangent_vector,
+                    ],
+                    [identity, pt_tv],
                 ]
             )
-            return np.bmat([point, tangent_vector]) @ W @ Z
+        )[..., : self._p]
+        c = multiexpm(-pt_tv)
+        return a @ (b @ c)
 
-        Y = np.zeros_like(point)
-        for i in range(self._k):
-            W = expm(
-                np.bmat(
-                    [
-                        [
-                            point[i].T @ tangent_vector[i],
-                            -tangent_vector[i].T @ tangent_vector[i],
-                        ],
-                        [np.eye(self._p), point[i].T @ tangent_vector[i]],
-                    ]
-                )
-            )
-            Z = np.bmat(
-                [
-                    [expm(-point[i].T @ tangent_vector[i])],
-                    [np.zeros((self._p, self._p))],
-                ]
-            )
-            Y[i] = np.bmat([point[i], tangent_vector[i]]) @ W @ Z
-        return Y
-
-    def zerovec(self, point):
+    def zero_vector(self, point):
         if self._k == 1:
             return np.zeros((self._n, self._p))
         return np.zeros((self._k, self._n, self._p))

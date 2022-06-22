@@ -16,25 +16,25 @@ class Function:
         self._function = backend.prepare_function(function)
         self._num_arguments = manifold.num_values
 
-        self._egrad = None
-        self._ehess = None
+        self._gradient = None
+        self._hessian = None
 
     def __str__(self):
         return f"Function <{self._backend}>"
 
-    def compute_gradient(self):
-        if self._egrad is None:
-            self._egrad = self._backend.compute_gradient(
+    def get_gradient_operator(self):
+        if self._gradient is None:
+            self._gradient = self._backend.generate_gradient_operator(
                 self._original_function, self._num_arguments
             )
-        return self._egrad
+        return self._gradient
 
-    def compute_hessian_vector_product(self):
-        if self._ehess is None:
-            self._ehess = self._backend.compute_hessian_vector_product(
+    def get_hessian_operator(self):
+        if self._hessian is None:
+            self._hessian = self._backend.generate_hessian_operator(
                 self._original_function, self._num_arguments
             )
-        return self._ehess
+        return self._hessian
 
     def __call__(self, *args, **kwargs):
         return self._function(*args, **kwargs)

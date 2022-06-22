@@ -1,104 +1,114 @@
 import warnings
 
 import numpy as np
-import numpy.linalg as la
-import numpy.random as rnd
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
-class _SphereBase(EuclideanEmbeddedSubmanifold):
-    """Base class for tensors with unit Frobenius norm.
-
-    Notes:
-        The implementation of the Weingarten map is taken from [AMT2013]_.
-    """
-
+class _SphereBase(RiemannianSubmanifold):
     def __init__(self, *shape, name, dimension):
         if len(shape) == 0:
-            raise TypeError("Need shape parameters.")
+            raise TypeError("Need at least one dimension.")
         self._shape = shape
         super().__init__(name, dimension)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.pi
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        inner = max(min(self.inner(point_a, point_a, point_b), 1), -1)
+        inner = max(min(self.inner_product(point_a, point_a, point_b), 1), -1)
         return np.arccos(inner)
 
-    def proj(self, point, vector):
-        return vector - self.inner(point, point, vector) * point
+    def projection(self, point, vector):
+        return vector - self.inner_product(point, point, vector) * point
+
+    to_tangent_space = projection
 
     def weingarten(self, point, tangent_vector, normal_vector):
-        return -self.inner(point, point, normal_vector) * tangent_vector
+        return (
+            -self.inner_product(point, point, normal_vector) * tangent_vector
+        )
 
     def exp(self, point, tangent_vector):
         norm = self.norm(point, tangent_vector)
         return point * np.cos(norm) + tangent_vector * np.sinc(norm / np.pi)
 
-    def retr(self, point, tangent_vector):
+    def retraction(self, point, tangent_vector):
         return self._normalize(point + tangent_vector)
 
     def log(self, point_a, point_b):
-        vector = self.proj(point_a, point_b - point_a)
+        vector = self.projection(point_a, point_b - point_a)
         distance = self.dist(point_a, point_b)
         epsilon = np.finfo(np.float64).eps
         factor = (distance + epsilon) / (self.norm(point_a, vector) + epsilon)
         return factor * vector
 
-    def rand(self):
-        point = rnd.randn(*self._shape)
+    def random_point(self):
+        point = np.random.normal(size=self._shape)
         return self._normalize(point)
 
-    def randvec(self, point):
-        vector = rnd.randn(*self._shape)
-        return self._normalize(self.proj(point, vector))
+    def random_tangent_vector(self, point):
+        vector = np.random.normal(size=self._shape)
+        return self._normalize(self.projection(point, vector))
 
-    def transp(self, point_a, point_b, tangent_vector_a):
-        return self.proj(point_b, tangent_vector_a)
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(point_b, tangent_vector_a)
 
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         return self._normalize(point_a + point_b)
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
         return np.zeros(self._shape)
 
     def _normalize(self, array):
-        return array / la.norm(array)
+        return array / np.linalg.norm(array)
 
 
 class Sphere(_SphereBase):
     r"""The sphere manifold.
 
-    Manifold of shape :math:`n_1 \times n_2 \times \ldots \times n_k` tensors
-    with unit 2-norm.
-    The metric is such that the sphere is a Riemannian submanifold of Euclidean
-    space.
+    Manifold of shape :math:`n_1 \times \ldots \times n_k` tensors with unit
+    Euclidean norm.
+    The norm is understood as the :math:`\ell_2`-norm of :math:`\E =
+    \R^{\sum_{i=1}^k n_i}` after identifying :math:`\R^{n_1 \times \ldots
+    \times n_k}` with :math:`\E`.
+    The metric is the one inherited from the usual Euclidean inner product that
+    induces :math:`\norm{\cdot}_2` on :math:`\E` such that the manifold forms a
+    Riemannian submanifold of Euclidean space.
+
+    Args:
+        shape: The shape of tensors.
     """
 
-    def __init__(self, *shape):
+    def __init__(self, *shape: int):
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
         if len(shape) == 1:
-            (n1,) = shape
-            name = f"Sphere manifold of {n1}-vectors"
+            (n,) = shape
+            name = f"Sphere manifold of {n}-vectors"
         elif len(shape) == 2:
-            n1, n2 = shape
-            name = f"Sphere manifold of {n1}x{n2} matrices"
+            m, n = shape
+            name = f"Sphere manifold of {m}x{n} matrices"
         else:
             name = f"Sphere manifold of shape {shape} tensors"
         dimension = np.prod(shape) - 1
         super().__init__(*shape, name=name, dimension=dimension)
+
+
+DOCSTRING_NOTE = """
+    Note:
+        The Weingarten map is taken from [AMT2013]_.
+"""
+Sphere.__doc__ += DOCSTRING_NOTE
 
 
 class _SphereSubspaceIntersectionManifold(_SphereBase):
@@ -123,32 +133,36 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
                 "The span matrix cannot have fewer rows than columns"
             )
 
-    def proj(self, point, vector):
-        return self._subspace_projector @ super().proj(point, vector)
+    def projection(self, point, vector):
+        return self._subspace_projector @ super().projection(point, vector)
 
-    def rand(self):
-        point = super().rand()
+    def random_point(self):
+        point = super().random_point()
         return self._normalize(self._subspace_projector @ point)
 
-    def randvec(self, point):
-        vector = super().randvec(point)
+    def random_tangent_vector(self, point):
+        vector = super().random_tangent_vector(point)
         return self._normalize(self._subspace_projector @ vector)
 
 
 class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     r"""Sphere-subspace intersection manifold.
 
-    Manifold of n-dimensional unit 2-norm vectors intersecting the
-    :math:`r`-dimensional subspace of :math:`\R^n` spanned by the columns of
-    the matrix ``matrix`` of size :math:`n \times r`.
+    Manifold of :math:`n`-dimensional vectors with unit :math:`\ell_2`-norm
+    intersecting an :math:`r`-dimensional subspace of :math:`\R^n`.
+    The subspace is represented by a matrix of size ``n x r`` whose columns
+    span the subspace.
+
+    Args:
+        matrix: Matrix whose columns span the intersecting subspace.
     """
 
     def __init__(self, matrix):
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
-        q, _ = la.qr(matrix)
+        q, _ = np.linalg.qr(matrix)
         projector = q @ q.T
-        subspace_dimension = la.matrix_rank(projector)
+        subspace_dimension = np.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors intersecting a "
             f"{subspace_dimension}-dimensional subspace"
@@ -157,25 +171,35 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         super().__init__(projector, name, dimension)
 
 
+SphereSubspaceIntersection.__doc__ += DOCSTRING_NOTE
+
+
 class SphereSubspaceComplementIntersection(
     _SphereSubspaceIntersectionManifold
 ):
-    r"""Sphere-subspace compliment intersection manifold.
+    r"""Sphere-subspace complement intersection manifold.
 
-    Manifold of n-dimensional unit 2-norm vectors which are orthogonal to
-    the :math:`r`-dimensional subspace of :math:`\R^n` spanned by columns of
-    the matrix ``matrix``.
+    Manifold of :math:`n`-dimensional vectors with unit :math:`\ell_2`-norm
+    that are orthogonal to an :math:`r`-dimensional subspace of :math:`\R^n`.
+    The subspace is represented by a matrix of size ``n x r`` whose columns
+    span the subspace.
+
+    Args:
+        matrix: Matrix whose columns span the subspace.
     """
 
     def __init__(self, matrix):
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
-        q, _ = la.qr(matrix)
+        q, _ = np.linalg.qr(matrix)
         projector = np.eye(m) - q @ q.T
-        subspace_dimension = la.matrix_rank(projector)
+        subspace_dimension = np.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors orthogonal "
             f"to a {subspace_dimension}-dimensional subspace"
         )
         dimension = subspace_dimension - 1
         super().__init__(projector, name, dimension)
+
+
+SphereSubspaceComplementIntersection.__doc__ += DOCSTRING_NOTE
