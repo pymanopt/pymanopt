@@ -30,7 +30,7 @@ def create_cost(manifold, epsilon, backend):
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
-            Y = torch.matmul(X, torch.transpose(X, 1, 0))
+            Y = X @ torch.transpose(X, 1, 0)
             s = torch.triu(Y, 1).max()
             expY = torch.exp((Y - s) / epsilon)
             expY = expY - torch.diag(torch.diag(expY))
@@ -41,7 +41,7 @@ def create_cost(manifold, epsilon, backend):
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):
-            Y = tf.matmul(X, tf.transpose(X))
+            Y = X @ tf.transpose(X)
             s = tf.reduce_max(tf.linalg.band_part(Y, 0, -1))
             expY = tf.exp((Y - s) / epsilon)
             expY = expY - tf.linalg.diag(tf.linalg.diag_part(expY))

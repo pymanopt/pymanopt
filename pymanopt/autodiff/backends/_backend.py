@@ -2,19 +2,6 @@ import abc
 import functools
 
 import attrs
-import numpy as np
-
-
-def fail_on_complex_input(function):
-    @functools.wraps(function)
-    def wrapper(*args, **kwargs):
-        if any(map(np.iscomplexobj, args)) or any(
-            map(np.iscomplexobj, kwargs.values())
-        ):
-            raise TypeError("Autodiff backend does not support complex input")
-        return function(*args, **kwargs)
-
-    return wrapper
 
 
 @attrs.define

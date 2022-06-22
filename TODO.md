@@ -1,6 +1,7 @@
 # TODO/Roadmap
 
-## 1.2.x:
+## 2.1.x:
+  - attrs
   - Add 'check_hessian' function
   - Refactor optimizer implementations
   - Add complex manifolds #125, #170
@@ -9,9 +10,8 @@
   - Add patience parameter to terminate optimization if cost does not improve
     anymore #114
   - Add callback mechanism to allow for custom termination criteria
-  - Add support for complex manifolds to autodiff backends
 
-## 2.0.x:
+## 3.0.x:
   - Raise exception if dimension of manifold is 0
   - Add pep8-naming (requires breaking public API to fix all errors)
   - Make FixedRankEmbedded manifold compatible with autodiff backends

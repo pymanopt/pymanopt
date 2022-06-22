@@ -84,7 +84,9 @@ class Problem:
             )
         self._euclidean_gradient = euclidean_gradient
         if euclidean_hessian is not None:
-            euclidean_hessian = self._wrap_hessian_operator(euclidean_hessian)
+            euclidean_hessian = self._wrap_hessian_operator(
+                euclidean_hessian, embed_tangent_vectors=True
+            )
         self._euclidean_hessian = euclidean_hessian
 
         if riemannian_gradient is not None:
@@ -197,7 +199,9 @@ class Problem:
             return self._group_return_values(wrapped_gradient, point_layout)
         return wrapped_gradient
 
-    def _wrap_hessian_operator(self, hessian_operator):
+    def _wrap_hessian_operator(
+        self, hessian_operator, *, embed_tangent_vectors=False
+    ):
         point_layout = self.manifold.point_layout
         if isinstance(point_layout, (list, tuple)):
 
@@ -208,9 +212,9 @@ class Problem:
                     *self._flatten_arguments(vector, point_layout),
                 )
 
-            return self._group_return_values(wrapper, point_layout)
+            wrapper = self._group_return_values(wrapper, point_layout)
 
-        if point_layout == 1:
+        elif point_layout == 1:
 
             @functools.wraps(hessian_operator)
             def wrapper(point, vector):
@@ -222,7 +226,15 @@ class Problem:
             def wrapper(point, vector):
                 return hessian_operator(*point, *vector)
 
-        return wrapper
+        if embed_tangent_vectors:
+
+            @functools.wraps(wrapper)
+            def hvp(point, vector):
+                return wrapper(point, self.manifold.embedding(point, vector))
+
+        else:
+            hvp = wrapper
+        return hvp
 
     @property
     def cost(self):
@@ -252,20 +264,20 @@ class Problem:
     def euclidean_hessian(self):
         if self._euclidean_hessian is None:
             self._euclidean_hessian = self._wrap_hessian_operator(
-                self._original_cost.get_hessian_operator()
+                self._original_cost.get_hessian_operator(),
+                embed_tangent_vectors=True,
             )
         return self._euclidean_hessian
 
     @property
     def riemannian_hessian(self):
         if self._riemannian_hessian is None:
-            euclidean_hessian = self.euclidean_hessian
 
             def riemannian_hessian(point, tangent_vector):
                 return self.manifold.euclidean_to_riemannian_hessian(
                     point,
                     self.euclidean_gradient(point),
-                    euclidean_hessian(point, tangent_vector),
+                    self.euclidean_hessian(point, tangent_vector),
                     tangent_vector,
                 )
 

@@ -6,7 +6,7 @@ from numpy import testing as np_testing
 from pymanopt.manifolds.manifold import Manifold
 
 
-def manifold_factory(point_layout):
+def manifold_factory(*, point_layout):
     class CustomManifold(Manifold):
         def __init__(self):
             super().__init__(
@@ -54,12 +54,48 @@ class TestUnaryFunction(unittest.TestCase):
         np_testing.assert_allclose(2 * x, euclidean_gradient(x))
 
         # Test the Hessian.
-        u = np.random.normal(size=self.n)
+        u = np.random.normal(size=n)
 
         # Test whether Hessian accepts two regular arguments.
         ehess = cost.get_hessian_operator()
         # Test whether Hessian-vector product is correct.
         np_testing.assert_allclose(2 * u, ehess(x, u))
+
+
+class TestUnaryComplexFunction(unittest.TestCase):
+    """Test cost function, gradient and Hessian of complex unary cost function.
+
+    This test uses a cost function of the form::
+
+        f = lambda x: np.sum(x ** 2).real
+    """
+
+    def setUp(self):
+        self.manifold = manifold_factory(point_layout=1)
+        self.n = 10
+        self.cost = None
+
+    def test_unary_function(self):
+        cost = self.cost
+        assert cost is not None
+        n = self.n
+
+        x = np.random.normal(size=n) + 1j * np.random.normal(size=n)
+
+        # Test whether cost function accepts single argument.
+        self.assertAlmostEqual(np.sum(x**2).real, cost(x))
+
+        # Test whether gradient accepts single argument.
+        euclidean_gradient = cost.get_gradient_operator()
+        np_testing.assert_allclose(2 * x.conj(), euclidean_gradient(x))
+
+        # Test the Hessian.
+        u = np.random.normal(size=n) + 1j * np.random.normal(size=n)
+
+        # Test whether Hessian accepts two regular arguments.
+        ehess = cost.get_hessian_operator()
+        # Test whether Hessian-vector product is correct.
+        np_testing.assert_allclose(2 * u.conj(), ehess(x, u))
 
 
 class TestNaryFunction(unittest.TestCase):
