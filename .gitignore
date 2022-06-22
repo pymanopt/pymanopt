@@ -65,3 +65,4 @@ manopt-*
 
 # pyenv
 .python-version
+.DS_Store
