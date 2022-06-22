@@ -1,21 +1,22 @@
-"""
-Module containing manifolds of n-dimensional unitaries
-"""
-
 import numpy as np
-from numpy import linalg as la
-from numpy import random as rnd
-from scipy.linalg import expm, logm
-from scipy.special import comb
+import scipy.special
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multiprod, multihconj, multiherm, multiskewh
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.tools.multi import (
+    multiexpm,
+    multilogm,
+    multiqr,
+    multihconj,
+    multiskewh,
+    multiherm,
+    multitransp,
+)
 
 
-class Unitaries(EuclideanEmbeddedSubmanifold):
+class Unitaries(RiemannianSubmanifold):
     """
     Returns a manifold structure to optimize over unitary matrices.
-    
+
     manifold = Unitaries(n)
     manifold = Unitaries(n, k)
 
@@ -49,7 +50,7 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
             Possible choices are ``qr`` and ``polar``.
     """
 
-    def __init__(self, n, k=1, retraction="qr"):
+    def __init__(self, n: int, *, k: int = 1, retraction: str = "qr"):
         self._n = n
         self._k = k
 
@@ -62,93 +63,62 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
         dimension = int(k * n**2)
         super().__init__(name, dimension)
 
-        if retraction == "qr":
-            self.retr = self._retr_qr
-        elif retraction == "polar":
-            self.retr = self._retr_polar
-        else:
+        try:
+            self._retraction = getattr(self, f"_retraction_{retraction}")
+        except AttributeError:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
-    def inner(self, point, tangent_vector_a, tangent_vector_b):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.tensordot(
             tangent_vector_a.conj(), tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return la.norm(tangent_vector)
+        return np.linalg.norm(tangent_vector)
 
     @property
-    def typicaldist(self):
+    def typical_dist(self):
         return np.pi * np.sqrt(self._n * self._k)
 
     def dist(self, point_a, point_b):
         return self.norm(point_a, self.log(point_a, point_b))
 
     def proj(self, point, vector):
-        return multiskewh(multiprod(multihconj(point), vector))
+        return multiskewh(multitransp(multihconj(point) @ vector))
 
-    def tangent(self, point, vector):
+    def to_tangent_space(self, point, vector):
         return multiskewh(vector)
 
-    def tangent2ambient(self, point, tangent_vector):
-        return multiprod(point, tangent_vector)
+    def embedding(self, point, tangent_vector):
+        return point @ tangent_vector
 
-    def ehess2rhess(
-        self, point, euclidean_gradient, euclidean_hvp, tangent_vector
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         Xt = multihconj(point)
-        Xtegrad = multiprod(Xt, euclidean_gradient)
+        Xtegrad = Xt @ euclidean_gradient
         symXtegrad = multiherm(Xtegrad)
-        Xtehess = multiprod(Xt, euclidean_hvp)
-        return multiskewh(Xtehess - multiprod(tangent_vector, symXtegrad))
+        Xtehess = Xt @ euclidean_hessian
+        return multiskewh(Xtehess - tangent_vector @ symXtegrad)
 
-    # QR-based retraction or Polar-based retraction
-    # QR-based retraction
-    def _retr_qr(self, point, tangent_vector):
-        def retri(array):
-            q, r = la.qr(array)
-            return q @ np.diag(np.sign(np.sign(np.diag(r)) + 0.5))
+    def retraction(self, point, tangent_vector):
+        return self._retraction(point, tangent_vector)
 
-        Y = point + multiprod(point, tangent_vector)
-        if self._k == 1:
-            return retri(Y)
+    def _retraction_qr(self, point, tangent_vector):
+        Y = point + point @ tangent_vector
+        q, _ = multiqr(Y)
+        return q
 
-        for i in range(self._k):
-            Y[i] = retri(Y[i])
-        return Y
-
-    # Polar-based retraction
-    def _retr_polar(self, point, tangent_vector):
-        def retri(array):
-            u, _, vt = la.svd(array)
-            return u @ vt
-
-        Y = point + multiprod(point, tangent_vector)
-        if self._k == 1:
-            return retri(Y)
-
-        for i in range(self._k):
-            Y[i] = retri(Y[i])
-        return Y
+    def _retraction_polar(self, point, tangent_vector):
+        Y = point + point @ tangent_vector
+        u, _, vt = np.linalg.svd(Y)
+        return u @ vt
 
     def exp(self, point, tangent_vector):
-        tv = np.copy(tangent_vector)
-        if self._k == 1:
-            return multiprod(point, expm(tv))
+        return point @ multiexpm(tangent_vector)
 
-        for i in range(self._k):
-            tv[i] = expm(tv[i])
-        return multiprod(point, tv)
-
-    
     def log(self, point_a, point_b):
-        U = multiprod(multitransp(point_a), point_b)
-        if self._k == 1:
-            return multiskewh(logm(U))
-
-        for i in range(self._k):
-            U[i] = logm(U[i])
-        return multiskewh(U)
+        return multiskewh(multilogm(multihconj(point_a) @ point_b))
 
     @staticmethod
     def _randunitary(n, N=1):
@@ -173,7 +143,6 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
             return U.reshape(n, n)
         return U
 
-
     def rand(self):
         return self._randunitary(self._n, self._k)
 
@@ -189,19 +158,21 @@ class Unitaries(EuclideanEmbeddedSubmanifold):
             return S.reshape(n, n)
         return S
 
-    def randvec(self, point):
+    def random_tangent_vector(self, point):
         tangent_vector = self._randskewh(self._n, self._k)
-        nrmU = np.sqrt(np.tensordot(tangent_vector.conj(), tangent_vector, axes=tangent_vector.ndim))
+        nrmU = np.sqrt(np.tensordot(tangent_vector.conj(),
+                       tangent_vector, axes=tangent_vector.ndim))
         return tangent_vector / nrmU
 
-    def zerovec(self, point):
+    def zero_vector(self, point):
+        zero = np.zeros((self._k, self._n, self._n))
         if self._k == 1:
-            return np.zeros((self._n, self._n))
-        return np.zeros((self._k, self._n, self._n))
+            return zero[0]
+        return zero
 
-    def transp(self, point_a, point_b, tangent_vector_a):
+    def transport(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a
 
-    def pairmean(self, point_a, point_b):
+    def pair_mean(self, point_a, point_b):
         V = self.log(point_a, point_b)
         return self.exp(point_a, 0.5 * V)
