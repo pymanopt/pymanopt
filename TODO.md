@@ -5,11 +5,10 @@
   - Add 'check_hessian' function
   - Refactor optimizer implementations
   - Add complex manifolds #125, #170
-  - Add JAX backend #115
   - Add L-BFGS and other quasi-Newton optimizers
   - Add patience parameter to terminate optimization if cost does not improve
     anymore #114
-  - Add callback mechanism to allow for custom termination criteria
+  - Add callback mechanism to allow for custom termination criteria #133
 
 ## 3.0.x:
   - Raise exception if dimension of manifold is 0
