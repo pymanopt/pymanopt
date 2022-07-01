@@ -1,4 +1,6 @@
 autograd>=1.2
+jax>=0.2.0
+jaxlib
 numpy>=1.16
 scipy>=1.0
 tensorflow>=2.0
