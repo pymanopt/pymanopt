@@ -8,7 +8,7 @@ from pymanopt.manifolds import Sphere
 from pymanopt.optimizers import SteepestDescent
 
 
-SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, matrix, backend):
@@ -17,6 +17,12 @@ def create_cost_and_derivates(manifold, matrix, backend):
     if backend == "autograd":
 
         @pymanopt.function.autograd(manifold)
+        def cost(x):
+            return -x.T @ matrix @ x
+
+    elif backend == "jax":
+
+        @pymanopt.function.jax(manifold)
         def cost(x):
             return -x.T @ matrix @ x
 
