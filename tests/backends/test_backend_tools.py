@@ -1,12 +1,12 @@
-import unittest
-
 from pymanopt.tools import (
     bisect_sequence,
     unpack_singleton_sequence_return_value,
 )
 
+from .._test import TestCase
 
-class TestArgumentFlattening(unittest.TestCase):
+
+class TestArgumentFlattening(TestCase):
     def test_bisect_sequence(self):
         sequence = range(10)
         half1, half2 = bisect_sequence(sequence)

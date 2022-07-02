@@ -1,9 +1,9 @@
-import unittest
-
 import numpy as np
 from numpy import testing as np_testing
 
 from pymanopt.manifolds.manifold import Manifold
+
+from .._test import TestCase
 
 
 def manifold_factory(*, point_layout):
@@ -26,7 +26,7 @@ def manifold_factory(*, point_layout):
     return CustomManifold()
 
 
-class TestUnaryFunction(unittest.TestCase):
+class TestUnaryFunction(TestCase):
     """Test cost function, gradient and Hessian for a unary cost function.
 
     This test uses a cost function of the form::
@@ -62,7 +62,7 @@ class TestUnaryFunction(unittest.TestCase):
         np_testing.assert_allclose(2 * u, ehess(x, u))
 
 
-class TestUnaryComplexFunction(unittest.TestCase):
+class TestUnaryComplexFunction(TestCase):
     """Test cost function, gradient and Hessian of complex unary cost function.
 
     This test uses a cost function of the form::
@@ -98,7 +98,7 @@ class TestUnaryComplexFunction(unittest.TestCase):
         np_testing.assert_allclose(2 * u.conj(), ehess(x, u))
 
 
-class TestNaryFunction(unittest.TestCase):
+class TestNaryFunction(TestCase):
     """Test cost function, gradient and Hessian for an nary cost function.
 
     This test uses a cost function of the form::
@@ -152,7 +152,7 @@ class TestNaryFunction(unittest.TestCase):
         np_testing.assert_allclose(h_y, u)
 
 
-class TestNaryParameterGrouping(unittest.TestCase):
+class TestNaryParameterGrouping(TestCase):
     """Test parameter grouping for cost function, gradient and Hessian.
 
     This test assumes a cost function of the form::
@@ -210,7 +210,7 @@ class TestNaryParameterGrouping(unittest.TestCase):
         np_testing.assert_allclose(h_z, 6 * z * w)
 
 
-class TestVector(unittest.TestCase):
+class TestVector(TestCase):
     def setUp(self):
         np.seterr(all="raise")
 
@@ -252,7 +252,7 @@ class TestVector(unittest.TestCase):
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
 
-class TestMatrix(unittest.TestCase):
+class TestMatrix(TestCase):
     def setUp(self):
         np.seterr(all="raise")
 
@@ -298,7 +298,7 @@ class TestMatrix(unittest.TestCase):
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
 
-class TestTensor3(unittest.TestCase):
+class TestTensor3(TestCase):
     def setUp(self):
         np.seterr(all="raise")
 
@@ -344,7 +344,7 @@ class TestTensor3(unittest.TestCase):
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
 
-class TestMixed(unittest.TestCase):
+class TestMixed(TestCase):
     def setUp(self):
         np.seterr(all="raise")
 
