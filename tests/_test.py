@@ -8,8 +8,7 @@ import tensorflow as tf
 import torch
 
 
-def test_setup():
-    seed = 42
+def test_setup(*, seed: int):
     random.seed(seed)
     anp.random.seed(seed)
     np.random.seed(seed)
@@ -23,4 +22,4 @@ class TestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        test_setup()
+        test_setup(seed=1338)
