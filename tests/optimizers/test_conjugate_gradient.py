@@ -30,9 +30,7 @@ class TestConjugateGradient(TestCase):
         "HagerZhang",
         "HestenesStiefel",
         "PolakRibiere",
-        # FIXME(nkoep): This update rule often fails during tests so skip it
-        #               for now.
-        # "LiuStorey",
+        "LiuStorey",
     )
     def test_beta_rules(self, beta_rule):
         optimizer = ConjugateGradient(beta_rule=beta_rule, verbosity=0)
@@ -78,5 +76,5 @@ class TestConjugateGradient(TestCase):
         column_indices = np.argsort(eigenvalues)[-subspace_dimension:]
         spanning_set = eigenvectors[:, column_indices]
         np_testing.assert_allclose(
-            manifold.dist(spanning_set, estimated_spanning_set), 0, atol=1e-6
+            manifold.dist(spanning_set, estimated_spanning_set), 0, atol=1e-5
         )
