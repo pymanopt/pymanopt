@@ -25,9 +25,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install requirements
-        run: |
-          pip install -r requirements/ci.txt
-          pip install -r requirements/base.txt -r requirements/dev.txt
+        run: pip install -e ".[all,ci]"
 
       - name: Run linting
         run: |

@@ -21,9 +21,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install requirements
-        run: |
-          pip install -r requirements/ci.txt
-          pip install -r requirements/base.txt -r requirements/dev.txt
+        run: pip install -e ".[ci]"
 
       - name: Versioning
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -35,7 +33,7 @@ jobs:
           echo "__version__ = \"${GITHUB_TAG}\"" > pymanopt/_version.py
 
       - name: Build sdist and wheel
-        run: python setup.py sdist bdist_wheel
+        run: python -m build
 
       - name: Publish to pypi on tags
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
