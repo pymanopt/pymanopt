@@ -32,7 +32,6 @@ def multisym(A):
 
 
 def multiherm(A):
-    # Inspired by MATLAB multiherm function by Nicholas Boumal.
     return 0.5 * (A + multihconj(A))
 
 
@@ -47,7 +46,6 @@ def multiskew(A):
 
 
 def multiskewh(A):
-    # Inspired by MATLAB multiskewh function by Nicholas Boumal.
     return 0.5 * (A - multihconj(A))
 
 

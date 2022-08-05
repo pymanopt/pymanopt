@@ -1,0 +1,248 @@
+import numpy as np
+import scipy.special
+
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.tools.multi import (
+    multiexpm,
+    multilogm,
+    multiqr,
+    multiskew,
+    multisym,
+    multitransp,
+)
+
+
+class _UnitaryBase(RiemannianSubmanifold):
+    def __init__(self, name, dimension, retraction):
+        super().__init__(name, dimension)
+
+        try:
+            self._retraction = getattr(self, f"_retraction_{retraction}")
+        except AttributeError:
+            raise ValueError(f"Invalid retraction type '{retraction}'")
+
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
+        return np.tensordot(
+            tangent_vector_a.conj(),
+            tangent_vector_b,
+            axes=tangent_vector_a.ndim,
+        )
+
+    def norm(self, point, tangent_vector):
+        return np.linalg.norm(tangent_vector)
+
+    @property
+    def typical_dist(self):
+        return np.pi * np.sqrt(self._n * self._k)
+
+    def dist(self, point_a, point_b):
+        return self.norm(point_a, self.log(point_a, point_b))
+
+    def projection(self, point, vector):
+        return multiskew(multihconj(point) @ vector)
+
+    def to_tangent_space(self, point, vector):
+        return multiskewh(vector)
+
+    def embedding(self, point, tangent_vector):
+        return point @ tangent_vector
+
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
+    ):
+        Xt = multihconj(point)
+        Xtegrad = Xt @ euclidean_gradient
+        symXtegrad = multiherm(Xtegrad)
+        Xtehess = Xt @ euclidean_hessian
+        return multiskewh(Xtehess - tangent_vector @ symXtegrad)
+
+    def retraction(self, point, tangent_vector):
+        return self._retraction(point, tangent_vector)
+
+    def _retraction_qr(self, point, tangent_vector):
+        Y = point + point @ tangent_vector
+        q, _ = multiqr(Y)
+        return q
+
+    def _retraction_polar(self, point, tangent_vector):
+        Y = point + point @ tangent_vector
+        u, _, vt = np.linalg.svd(Y)
+        return u @ vt
+
+    def exp(self, point, tangent_vector):
+        return point @ multiexpm(tangent_vector)
+
+    def log(self, point_a, point_b):
+        return multiskewh(multilogm(multihconj(point_a) @ point_b))
+
+    def zero_vector(self, point):
+        zero = np.zeros((self._k, self._n, self._n))
+        if self._k == 1:
+            return zero[0]
+        return zero
+
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return tangent_vector_a
+
+    def pair_mean(self, point_a, point_b):
+        V = self.log(point_a, point_b)
+        return self.exp(point_a, 0.5 * V)
+
+
+class SpecialOrthogonalGroup(_UnitaryBase):
+    r"""The (product) manifold of rotation matrices.
+
+    The special orthgonal group :math:`\SO(n)`.
+    Points on the manifold are matrices :math:`\vmQ \in \R^{n
+    \times n}` such that each matrix is orthogonal with determinant 1, i.e.,
+    :math:`\transp{\vmQ}\vmQ = \vmQ\transp{\vmQ} = \Id_n` and :math:`\det(\vmQ)
+    = 1`.
+    For ``k > 1``, the class can be used to optimize over the product manifold
+    of rotation matrices :math:`\SO(n)^k`.
+    In that case points on the manifold are represented as arrays of shape
+    ``(k, n, n)``.
+
+    The metric is the usual Euclidean one inherited from the embedding space
+    :math:`(\R^{n \times n})^k`.
+    As such :math:`\SO(n)^k` forms a Riemannian submanifold.
+
+    The tangent space :math:`\tangent{\vmQ}\SO(n)` at a point :math:`\vmQ` is
+    given by :math:`\tangent{\vmQ}\SO(n) = \set{\vmQ \vmOmega \in \R^{n \times
+    n} \mid \vmOmega = -\transp{\vmOmega}} = \vmQ \Skew(n)`, where
+    :math:`\Skew(n)` denotes the set of skew-symmetric matrices.
+    This corresponds to the Lie algebra of :math:`\SO(n)`, a fact which is used
+    here to conveniently represent tangent vectors numerically by their
+    skew-symmetric factor.
+    The method :meth:`embedding` can be used to transform a tangent vector from
+    its Lie algebra representation to the embedding space representation.
+
+    Args:
+        n: The dimension of the space that elements of the group act on.
+        k: The number of elements in the product of groups.
+        retraction: The type of retraction to use.
+            Possible choices are ``qr`` and ``polar``.
+
+    Note:
+        The default SVD-based retraction is only a first-order approximation of
+        the exponential map.
+        Use of a second-order retraction can be enabled by instantiating the
+        class with ``SpecialOrthogonalGroup(n, k=k, retraction="polar")``.
+
+        The procedure to generate random rotation matrices sampled uniformly
+        from the Haar measure is detailed in [Mez2006]_.
+    """
+
+    def __init__(self, n: int, *, k: int = 1, retraction: str = "qr"):
+        self._n = n
+        self._k = k
+
+        if k == 1:
+            name = f"Special orthogonal group SO({n})"
+        elif k > 1:
+            name = f"Sphecial orthogonal group SO({n})^{k}"
+        else:
+            raise ValueError("k must be an integer no less than 1.")
+        dimension = int(k * scipy.special.comb(n, 2))
+        super().__init__(name, dimension, retraction)
+
+    def random_point(self):
+        n, k = self._n, self._k
+        if n == 1:
+            point = np.ones((k, 1, 1))
+        else:
+            point, _ = multiqr(np.random.normal(size=(k, n, n)))
+            # Swap the first two columns of matrices where det(point) < 0 to
+            # flip the sign of their determinants.
+            negative_det, *_ = np.where(np.linalg.det(point) < 0)
+            slice_ = np.arange(point.shape[1])
+            point[np.ix_(negative_det, slice_, [0, 1])] = point[
+                np.ix_(negative_det, slice_, [1, 0])
+            ]
+        if k == 1:
+            return point[0]
+        return point
+
+    def random_tangent_vector(self, point):
+        n, k = self._n, self._k
+        inds = np.triu_indices(n, 1)
+        vector = np.zeros((k, n, n))
+        for i in range(k):
+            vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
+        vector = vector - multitransp(vector)
+        if k == 1:
+            vector = vector[0]
+        return vector / self.norm(point, vector)
+
+
+class UnitaryGroup(_UnitaryBase):
+    """The (product) manifold of unitary matrices (i.e., the unitary group).
+
+    Unitary group: deals with arrays U of size n x n x k (or n x n if k = 1,
+    which is the default) such that each n x n matrix is unitary, that is,
+        X.conj().T @ X = eye(n) if k = 1, or
+        X[i].conj().T @ X[i] = eye(n) for i = 1 : k if k > 1.
+
+    This is a description of U(n)^k with the induced metric from the
+    embedding space (C^nxn)^k, i.e., this manifold is a Riemannian
+    submanifold of (C^nxn)^k endowed with the usual real inner product on
+    C^nxn, namely, <A, B> = real(trace(A.conj().T @ B)).
+
+    This is important:
+    Tangent vectors are represented in the Lie algebra, i.e., as
+    skew-Hermitian matrices. Use the function M.tangent2ambient(X, H) to
+    switch from the Lie algebra representation to the embedding space
+    representation. This is often necessary when defining
+    problem.ehess(X, H).
+    as the input H will then be a skew-Hermitian matrix (but the output must
+    not be, as the output is the Hessian in the embedding Euclidean space.)
+
+    By default, the retraction is only a first-order approximation of the
+    exponential. To force the use of a second-order approximation, call
+    manifold.retr = manifold.retr2 after creating manifold object.
+    This switches from a QR-based computation to an SVD-based computation.
+
+    Args:
+        n: The dimension of the space that elements of the group act on.
+        k: The number of elements in the product of groups.
+        retraction: The type of retraction to use.
+            Possible choices are ``qr`` and ``polar``.
+    """
+
+    def __init__(self, n: int, *, k: int = 1, retraction: str = "qr"):
+        self._n = n
+        self._k = k
+
+        if k == 1:
+            name = f"Unitary group U({n})"
+        elif k > 1:
+            name = f"Unitary group U({n})^{k}"
+        else:
+            raise ValueError("k must be an integer no less than 1.")
+        dimension = int(k * n**2)
+        super().__init__(name, dimension, retraction)
+
+    def random_point(self):
+        n, k = self._n, self._k
+        if n == 1:
+            point = np.ones((k, 1, 1)) + 1j * np.ones((k, 1, 1))
+            point /= np.abs(point)
+        else:
+            point, _ = multiqr(
+                np.random.normal(size=(k, n, n))
+                + 1j * np.random.normal(size=(k, n, n))
+            )
+        if k == 1:
+            return point[0]
+        return point
+
+    def random_tangent_vector(self, point):
+        # TODO
+        n, k = self._n, self._k
+        inds = np.triu_indices(n, 1)
+        vector = np.zeros((k, n, n))
+        for i in range(k):
+            vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
+        vector = vector - multihconj(vector)
+        if k == 1:
+            vector = vector[0]
+        return vector / np.sqrt(2)

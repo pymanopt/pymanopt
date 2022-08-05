@@ -30,9 +30,6 @@ class PyTorchBackend(Backend):
         Since torch does not support negative strides, we create a copy of the
         array to reset the strides in that case.
         """
-        if isinstance(array, torch.Tensor):
-            return array
-        
         strides = np.array(array.strides)
         if np.any(strides < 0):
             warnings.warn(
