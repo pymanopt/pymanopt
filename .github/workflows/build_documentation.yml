@@ -14,7 +14,8 @@ jobs:
     steps:
       - name: Generate version matrix
         id: build-matrix
-        run: echo "::set-output name=versions::['stable', 'latest']"
+        # run: echo "::set-output name=versions::['stable', 'latest']"
+        run: echo "::set-output name=versions::['latest']"
     outputs:
       versions: ${{ steps.build-matrix.outputs.versions }}
 
