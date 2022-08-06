@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OPTIONAL_DEPENDENCIES = ("autograd", "tensorflow")
+OPTIONAL_DEPENDENCIES = ("autograd", "tensorflow", "torch")
 
 
 def parse_requirements_file(filename):
@@ -26,7 +26,10 @@ if __name__ == "__main__":
             requirement.startswith(optional_dependency)
             for optional_dependency in OPTIONAL_DEPENDENCIES
         ):
-            package = re.match(r"([A-Za-z0-9\-_]+).*", requirement).group(1)
+            match = re.match(r"([A-Za-z0-9\-_]+).*", requirement)
+            if match is None:
+                continue
+            package = match.group(1)
             optional_dependencies[package] = [requirement]
         else:
             install_requires.append(requirement)

@@ -1,5 +1,13 @@
 import numpy as np
 import scipy.linalg
+import scipy.version
+
+
+# Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked matrices.
+if scipy.version.version >= "1.9.0":
+    scipy_expm = scipy.linalg.expm
+else:
+    scipy_expm = np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")
 
 
 def multitransp(A):
@@ -62,7 +70,7 @@ def multilogm(A, *, positive_definite=False):
 def multiexpm(A, *, symmetric=False):
     """Vectorized matrix exponential."""
     if not symmetric:
-        return np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")(A)
+        return scipy_expm(A)
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.exp(w), axis=-1)
