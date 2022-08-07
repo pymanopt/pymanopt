@@ -44,14 +44,11 @@ jobs:
         run: |
           if ${{ matrix.version == 'latest' }}; then
             sha=$(git rev-parse --short ${{ github.sha }})
-            echo "::set-output name=version::latest ($sha)"
             git checkout ${{ github.sha }}
           elif ${{ matrix.version == 'stable' }}; then
             tag=$(git tag | sort -V | tail -1)
-            echo "::set-output name=version::stable ($tag)"
             git checkout tags/$tag
           else
-            echo "::set-output name=version::${{ matrix.version }}"
             git checkout ${{ matrix.version }}
           fi
 
@@ -68,8 +65,6 @@ jobs:
         run: |
           PYTHONPATH=. sphinx-build \
             -b html \
-            -D release="${{ steps.checkout.outputs.version }}" \
-            -D version="${{ steps.checkout.outputs.version }}" \
             -D doc_version="${{ matrix.version }}" \
             -D doc_versions="${{ join(fromJSON(needs.build-matrix.outputs.versions)) }}" \
             docs \
