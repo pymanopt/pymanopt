@@ -59,11 +59,11 @@ jobs:
           pip install -e ".[all,ci,docs]"
 
       - name: Run doctests
-        run: PYTHONPATH=. sphinx-build -b doctest docs $(mktemp -d)
+        run: sphinx-build -b doctest docs $(mktemp -d)
 
       - name: Build docs
         run: |
-          PYTHONPATH=. sphinx-build \
+          sphinx-build \
             -b html \
             -D doc_version="${{ matrix.version }}" \
             -D doc_versions="${{ join(fromJSON(needs.build-matrix.outputs.versions)) }}" \
