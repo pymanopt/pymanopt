@@ -266,8 +266,8 @@ class TestMultiplePoincareBallManifold(ManifoldTestCase):
     def test_first_order_function_approximation(self):
         self.run_gradient_approximation_test()
 
-    # def test_second_order_function_approximation(self):
-    #     self.run_hessian_approximation_test()
+    def test_second_order_function_approximation(self):
+        self.run_hessian_approximation_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         # For now just test whether the method returns an array of the correct
