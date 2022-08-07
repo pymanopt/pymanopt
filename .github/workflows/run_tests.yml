@@ -6,7 +6,7 @@ on:
       master
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -26,12 +26,6 @@ jobs:
 
       - name: Install requirements
         run: pip install -e ".[all,ci]"
-
-      - name: Run linting
-        run: |
-          isort --check .
-          black --check .
-          flake8
 
       - name: Run tests
         run: nose2 tests --verbose --with-coverage
