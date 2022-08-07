@@ -1,4 +1,4 @@
-name: Lint and run tests
+name: Run test suite
 
 on:
   pull_request:
