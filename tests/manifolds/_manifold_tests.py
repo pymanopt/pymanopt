@@ -1,12 +1,17 @@
 import autograd.numpy as np
 
 import pymanopt
+import pymanopt.autodiff
+import pymanopt.manifolds
 from pymanopt.tools import diagnostics
 
 from .._test import TestCase
 
 
 class ManifoldTestCase(TestCase):
+    cost: pymanopt.autodiff.Function
+    manifold: pymanopt.manifolds.manifold.Manifold
+
     def setUp(self):
         random_point = self.manifold.random_point()
 
