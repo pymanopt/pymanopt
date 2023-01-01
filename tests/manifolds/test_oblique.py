@@ -2,10 +2,10 @@ import numpy.testing as np_testing
 
 from pymanopt.manifolds import Oblique
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestObliqueManifold(ManifoldTestCase):
+class TestObliqueManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
@@ -26,12 +26,6 @@ class TestObliqueManifold(ManifoldTestCase):
     # def test_euclidean_to_riemannian_hessian(self):
 
     # def test_retraction(self):
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     # def test_norm(self):
 

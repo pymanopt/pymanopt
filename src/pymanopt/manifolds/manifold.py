@@ -7,6 +7,17 @@ import attrs
 import numpy as np
 
 
+def _raise_not_implemented_error(method):
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        raise NotImplementedError(
+            f"Manifold '{self.__class__.__name__}' provides no "
+            f"implementation for '{method.__name__}'"
+        )
+
+    return wrapper
+
+
 @attrs.define
 class Manifold(metaclass=abc.ABCMeta):
     """Riemannian manifold base class.
@@ -194,16 +205,6 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     # Methods which are only required by certain optimizers.
-
-    def _raise_not_implemented_error(method):
-        @functools.wraps(method)
-        def wrapper(self, *args, **kwargs):
-            raise NotImplementedError(
-                f"Manifold '{self.__class__.__name__}' provides no "
-                f"implementation for '{method.__name__}'"
-            )
-
-        return wrapper
 
     @_raise_not_implemented_error
     def dist(self, point_a, point_b):
@@ -410,7 +411,7 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
         the notes in section 5.11 of [Bou2020]_.
     """
 
-    @Manifold._raise_not_implemented_error
+    @_raise_not_implemented_error
     def weingarten(self, point, tangent_vector, normal_vector):
         """Compute the Weingarten map of the manifold.
 

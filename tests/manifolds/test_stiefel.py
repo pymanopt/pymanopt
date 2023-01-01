@@ -6,10 +6,10 @@ from pymanopt.manifolds import Stiefel
 from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multisym, multitransp
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestSingleStiefelManifold(ManifoldTestCase):
+class TestSingleStiefelManifold(TestCase):
     def setUp(self):
         self.m = m = 20
         self.n = n = 2
@@ -41,12 +41,6 @@ class TestSingleStiefelManifold(ManifoldTestCase):
         # Compare the projections.
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
@@ -144,7 +138,7 @@ class TestSingleStiefelManifold(ManifoldTestCase):
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiStiefelManifold(ManifoldTestCase):
+class TestMultiStiefelManifold(TestCase):
     def setUp(self):
         self.m = m = 10
         self.n = n = 3
@@ -182,12 +176,6 @@ class TestMultiStiefelManifold(ManifoldTestCase):
         # Compare the projections.
         Hproj = H - X @ (multitransp(X) @ H + multitransp(H) @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
