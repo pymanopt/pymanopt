@@ -411,7 +411,7 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
         the notes in section 5.11 of [Bou2020]_.
     """
 
-    @Manifold._raise_not_implemented_error
+    @_raise_not_implemented_error
     def weingarten(self, point, tangent_vector, normal_vector):
         """Compute the Weingarten map of the manifold.
 
