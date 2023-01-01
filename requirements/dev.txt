@@ -1,5 +1,5 @@
 black[jupyter]==22.3.0
-flake8==3.9.1
+flake8==6.0.0
 flake8-bugbear==22.12.6
 flake8-docstrings==1.6.0
 flake8-import-order==0.18.2
