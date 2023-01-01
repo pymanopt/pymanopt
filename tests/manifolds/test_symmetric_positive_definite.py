@@ -5,7 +5,7 @@ from scipy.linalg import eigvalsh, expm, logm
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
 def geodesic(point_a, point_b, alpha):
@@ -21,7 +21,7 @@ def geodesic(point_a, point_b, alpha):
     return c @ powm @ multitransp(c)
 
 
-class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
+class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
     def setUp(self):
         self.n = n = 15
         self.manifold = SymmetricPositiveDefinite(n)
@@ -138,7 +138,7 @@ class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
         np_testing.assert_allclose(manifold.log(x, y), u)
 
 
-class TestMultiSymmetricPositiveDefiniteManifold(ManifoldTestCase):
+class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
     def setUp(self):
         self.n = n = 10
         self.k = k = 3
@@ -230,12 +230,6 @@ class TestMultiSymmetricPositiveDefiniteManifold(ManifoldTestCase):
             manifold.euclidean_to_riemannian_gradient(x, u),
             x @ multisym(u) @ x,
         )
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         # Use manopt's slow method

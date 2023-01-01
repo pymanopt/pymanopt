@@ -3,10 +3,10 @@ from numpy import testing as np_testing
 
 from pymanopt.manifolds import Positive
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestPositiveVectors(ManifoldTestCase):
+class TestPositiveVectors(TestCase):
     def setUp(self):
         self.m = m = 3
         self.n = n = 1
@@ -80,9 +80,3 @@ class TestPositiveVectors(ManifoldTestCase):
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()

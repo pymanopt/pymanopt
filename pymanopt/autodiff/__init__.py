@@ -40,34 +40,36 @@ class Function:
         return self._function(*args, **kwargs)
 
 
-def backend_decorator_factory(Backend) -> typing.Callable:
+def backend_decorator_factory(
+    backend_cls,
+) -> typing.Callable[[Manifold], typing.Callable[[typing.Callable], Function]]:
     """Create function decorator for a backend.
 
     Function to create a backend decorator that is used to annotate a
     callable::
 
-        decorator = backend_decorator_factory(Backend)
+        decorator = backend_decorator_factory(backend_cls)
 
         @decorator(manifold)
         def function(x):
             ...
 
     Args:
-        Backend: a class implementing the backend interface defined by
+        backend_cls: a class implementing the backend interface defined by
             :class:`pymanopt.autodiff.backend._backend._Backend`.
 
     Returns:
         A new backend decorator.
     """
 
-    def decorator(manifold):
+    def decorator(manifold: Manifold) -> typing.Callable:
         if not isinstance(manifold, Manifold):
             raise TypeError(
                 "Backend decorator requires a manifold instance, got "
                 f"{manifold}"
             )
 
-        def inner(function):
+        def inner(function: typing.Callable) -> Function:
             argspec = inspect.getfullargspec(function)
             if (
                 (argspec.args and argspec.varargs)
@@ -79,7 +81,7 @@ def backend_decorator_factory(Backend) -> typing.Callable:
                     "or a variable-length argument like *x"
                 )
             return Function(
-                function=function, manifold=manifold, backend=Backend()
+                function=function, manifold=manifold, backend=backend_cls()
             )
 
         return inner

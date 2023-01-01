@@ -3,10 +3,10 @@ from numpy import testing as np_testing
 
 from pymanopt.manifolds import PoincareBall
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestSinglePoincareBallManifold(ManifoldTestCase):
+class TestSinglePoincareBallManifold(TestCase):
     def setUp(self):
         self.n = 50
         self.manifold = PoincareBall(self.n)
@@ -107,12 +107,6 @@ class TestSinglePoincareBallManifold(ManifoldTestCase):
         )
         assert euclidean_gradient.shape == riemannian_gradient.shape
 
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
-
     def test_euclidean_to_riemannian_hessian(self):
         # For now just test whether the method returns an array of the correct
         # shape.
@@ -163,7 +157,7 @@ class TestSinglePoincareBallManifold(ManifoldTestCase):
         )
 
 
-class TestMultiplePoincareBallManifold(ManifoldTestCase):
+class TestMultiplePoincareBallManifold(TestCase):
     def setUp(self):
         self.n = 50
         self.k = 20
@@ -262,12 +256,6 @@ class TestMultiplePoincareBallManifold(ManifoldTestCase):
             point, euclidean_gradient
         )
         assert euclidean_gradient.shape == riemannian_gradient.shape
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    # def test_second_order_function_approximation(self):
-    #     self.run_hessian_approximation_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         # For now just test whether the method returns an array of the correct

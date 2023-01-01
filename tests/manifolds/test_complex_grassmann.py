@@ -4,10 +4,10 @@ from numpy import testing as np_testing
 from pymanopt.manifolds import ComplexGrassmann
 from pymanopt.tools.multi import multieye, multihconj, multisym
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestSingleComplexGrassmannManifold(ManifoldTestCase):
+class TestSingleComplexGrassmannManifold(TestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
@@ -121,7 +121,7 @@ class TestSingleComplexGrassmannManifold(ManifoldTestCase):
         np_testing.assert_allclose(xretru, x + u)
 
 
-class TestMultiComplexGrassmannManifold(ManifoldTestCase):
+class TestMultiComplexGrassmannManifold(TestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2

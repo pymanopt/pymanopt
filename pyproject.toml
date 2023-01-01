@@ -10,3 +10,4 @@ line_length = 79
 multi_line_output = 3
 profile = "pycharm"
 use_parentheses = true
+known_first_party = "pymanopt"
