@@ -1,9 +1,9 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
 from nose2.tools import params
-from pymanopt.tools.multi import multieye, multitransp
 
 from pymanopt.manifolds import SpecialOrthogonalGroup
+from pymanopt.tools.multi import multieye, multitransp
 
 from .._test import TestCase
 

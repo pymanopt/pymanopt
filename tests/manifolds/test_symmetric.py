@@ -1,8 +1,8 @@
 import autograd.numpy as np
 from numpy import testing as np_testing
-from pymanopt.tools.multi import multisym
 
 from pymanopt.manifolds import Symmetric
+from pymanopt.tools.multi import multisym
 
 from .._test import TestCase
 

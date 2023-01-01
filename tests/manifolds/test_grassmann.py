@@ -1,9 +1,9 @@
 import autograd.numpy as np
 from numpy import testing as np_testing
-from pymanopt.tools.multi import multieye, multisym, multitransp
 
 from pymanopt.manifolds import Grassmann
 from pymanopt.tools import testing
+from pymanopt.tools.multi import multieye, multisym, multitransp
 
 from .._test import TestCase
 

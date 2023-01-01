@@ -1,9 +1,9 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
-from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
 from scipy.linalg import eigvalsh, expm, logm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
+from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
 
 from .._test import TestCase
 
