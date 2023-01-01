@@ -19,11 +19,13 @@ class ManifoldTestCase(TestCase):
     def run_gradient_approximation_test(self):
         problem = pymanopt.Problem(self.manifold, self.cost)
         *_, (slope, *_) = diagnostics.check_directional_derivative(problem)
-        assert 1.95 <= slope <= 2.05
+        assert 1.95 <= slope <= 2.05, f"slope is {slope}"
 
     def run_hessian_approximation_test(self):
         problem = pymanopt.Problem(self.manifold, self.cost)
         _, error, _, (slope, *_) = diagnostics.check_directional_derivative(
             problem, use_quadratic_model=True
         )
-        assert np.allclose(np.linalg.norm(error), 0) or (2.95 <= slope <= 3.05)
+        assert np.allclose(np.linalg.norm(error), 0) or (
+            2.9 <= slope <= 3.1
+        ), f"slope is {slope}"

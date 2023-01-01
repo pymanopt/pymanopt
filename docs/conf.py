@@ -8,10 +8,16 @@ import pymanopt
 
 def setup(app):
     def config_inited(app, config):
-        config.html_context["doc_version"] = config.doc_version
+        doc_version = config.doc_version
+        if doc_version in ["latest", "stable"]:
+            config.version = (
+                config.release
+            ) = f"{doc_version} ({config.version})"
+        config.html_context["doc_version"] = doc_version
         config.html_context["doc_versions"] = (
             config.doc_versions.split(",") or []
         )
+        print(f"Generating documentation for {config.version}")
 
     app.add_config_value(
         "doc_version", default=pymanopt.__version__, rebuild="html", types=str
@@ -24,7 +30,7 @@ def setup(app):
 project = "Pymanopt"
 author = "Jamie Townsend, Niklas Koep, Sebastian Weichwald"
 copyright = f"2016-{datetime.date.today().year}, {author}"
-release = version = pymanopt.__version__
+version = release = pymanopt.__version__
 
 
 # Build settings

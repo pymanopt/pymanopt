@@ -21,8 +21,4 @@ ENV_NAME="$NAME-$PYTHON_VERSION"
 CONFIGURE_OPTS=--enable-shared pyenv install -s "$PYTHON_VERSION"
 pyenv virtualenv -f "$PYTHON_VERSION" "$ENV_NAME"
 pyenv local "$ENV_NAME"
-pip install -r requirements/ci.txt
-pip install \
-  -r requirements/base.txt \
-  -r requirements/dev.txt \
-  -r requirements/docs.txt
+pip install -e ".[all]"

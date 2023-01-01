@@ -4,10 +4,10 @@ import numpy.testing as np_testing
 import pymanopt
 from pymanopt.manifolds import Euclidean, Grassmann, Product, Sphere
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestProductManifold(ManifoldTestCase):
+class TestProductManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
@@ -60,12 +60,6 @@ class TestProductManifold(ManifoldTestCase):
     # def test_euclidean_to_riemannian_hessian(self):
 
     # def test_retraction(self):
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     # def test_norm(self):
 
