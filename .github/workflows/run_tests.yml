@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install requirements
+      - name: Install dependencies
         run: pip install -e ".[all,ci]"
 
       - name: Run tests
