@@ -14,7 +14,8 @@ jobs:
     steps:
       - name: Generate version matrix
         id: build-matrix
-        run: echo "versions=['stable', 'latest']" >> $GITHUB_OUTPUT
+        # run: echo "versions=['stable', 'latest']" >> $GITHUB_OUTPUT
+        run: echo "versions=['latest']" >> $GITHUB_OUTPUT
     outputs:
       versions: ${{ steps.build-matrix.outputs.versions }}
 
