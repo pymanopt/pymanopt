@@ -134,16 +134,16 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
             # Swap the first two columns of matrices where det(point) < 0 to
             # flip the sign of their determinants.
             negative_det, *_ = np.where(np.linalg.det(point) < 0)
-            slice_ = np.arange(point.shape[1])
-            point[np.ix_(negative_det, slice_, [0, 1])] = point[
-                np.ix_(negative_det, slice_, [1, 0])
-            ]
+            negative_det = np.expand_dims(negative_det, (-2, -1))
+            point[negative_det, :, [0, 1]] = point[negative_det, :, [1, 0]]
         if k == 1:
             return point[0]
         return point
 
     def random_tangent_vector(self, point):
         n, k = self._n, self._k
+        if n == 1:
+            return np.ones((k, 1, 1))
         inds = np.triu_indices(n, 1)
         vector = np.zeros((k, n, n))
         for i in range(k):
@@ -163,5 +163,4 @@ class SpecialOrthogonalGroup(RiemannianSubmanifold):
         return tangent_vector_a
 
     def pair_mean(self, point_a, point_b):
-        V = self.log(point_a, point_b)
-        return self.exp(point_a, 0.5 * V)
+        return self.exp(point_a, self.log(point_a, point_b) / 2)
