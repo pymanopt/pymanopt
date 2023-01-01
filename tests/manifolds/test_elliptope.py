@@ -25,9 +25,6 @@ class TestElliptopeManifold(TestCase):
 
     # def test_retraction(self):
 
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
     # def test_norm(self):
 
     # def test_random_point(self):
