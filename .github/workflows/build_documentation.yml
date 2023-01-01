@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Generate version matrix
         id: build-matrix
-        run: echo "::set-output name=versions::['stable', 'latest']"
+        run: echo "versions=['stable', 'latest']" >> $GITHUB_OUTPUT
     outputs:
       versions: ${{ steps.build-matrix.outputs.versions }}
 
@@ -43,14 +43,14 @@ jobs:
         run: |
           if ${{ matrix.version == 'latest' }}; then
             sha=$(git rev-parse --short ${{ github.sha }})
-            echo "::set-output name=version::latest ($sha)"
+            echo "version=latest ($sha)" >> $GITHUB_OUTPUT
             git checkout ${{ github.sha }}
           elif ${{ matrix.version == 'stable' }}; then
             tag=$(git tag | sort -V | tail -1)
-            echo "::set-output name=version::stable ($tag)"
+            echo "version=stable ($tag)" >> $GITHUB_OUTPUT
             git checkout tags/$tag
           else
-            echo "::set-output name=version::${{ matrix.version }}"
+            echo "version=${{ matrix.version }}" >> $GITHUB_OUTPUT
             git checkout ${{ matrix.version }}
           fi
 
