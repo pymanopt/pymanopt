@@ -3,10 +3,10 @@ import scipy.stats
 
 from pymanopt.manifolds import PSDFixedRankComplex
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestPSDFixedRankComplexManifold(ManifoldTestCase):
+class TestPSDFixedRankComplexManifold(TestCase):
     def setUp(self):
         self.n = 50
         self.k = 10

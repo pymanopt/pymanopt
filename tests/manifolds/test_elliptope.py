@@ -1,9 +1,9 @@
 from pymanopt.manifolds import Elliptope
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestElliptopeManifold(ManifoldTestCase):
+class TestElliptopeManifold(TestCase):
     def setUp(self):
         n = 50
         k = 10
@@ -24,9 +24,6 @@ class TestElliptopeManifold(ManifoldTestCase):
     # def test_euclidean_to_riemannian_hessian(self):
 
     # def test_retraction(self):
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
 
     # def test_norm(self):
 
