@@ -15,7 +15,6 @@ jobs:
           - "3.8"
           - "3.9"
           - "3.10"
-          - "3.11"
     steps:
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -40,7 +39,7 @@ jobs:
         run: nose2 tests --verbose --with-coverage
 
       - name: Upload coverage
-        if: ${{ matrix.python-version == 3.11 }}
+        if: ${{ matrix.python-version == 3.7 }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_SERVICE_NAME: github
