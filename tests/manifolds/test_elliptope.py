@@ -1,9 +1,9 @@
 from pymanopt.manifolds import Elliptope
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestElliptopeManifold(ManifoldTestCase):
+class TestElliptopeManifold(TestCase):
     def setUp(self):
         n = 50
         k = 10

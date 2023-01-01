@@ -4,10 +4,10 @@ from numpy import testing as np_testing
 import pymanopt
 from pymanopt.manifolds import FixedRankEmbedded
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestFixedRankEmbeddedManifold(ManifoldTestCase):
+class TestFixedRankEmbeddedManifold(TestCase):
     def setUp(self):
         self.m = m = 10
         self.n = n = 5
