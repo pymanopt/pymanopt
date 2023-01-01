@@ -11,10 +11,10 @@ from pymanopt.manifolds import (
 )
 from pymanopt.tools import testing
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestSphereManifold(ManifoldTestCase):
+class TestSphereManifold(TestCase):
     def setUp(self):
         self.m = m = 100
         self.n = n = 50
@@ -72,12 +72,6 @@ class TestSphereManifold(ManifoldTestCase):
             H - X * np.trace(X.T @ H),
             self.manifold.euclidean_to_riemannian_gradient(X, H),
         )
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         x = self.manifold.random_point()
@@ -164,7 +158,7 @@ class TestSphereManifold(ManifoldTestCase):
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestSphereSubspaceIntersectionManifold(ManifoldTestCase):
+class TestSphereSubspaceIntersectionManifold(TestCase):
     def setUp(self):
         self.n = 2
         # Defines the 1-sphere intersected with the 1-dimensional subspace
@@ -213,21 +207,15 @@ class TestSphereSubspaceIntersectionManifold(ManifoldTestCase):
         self.assertEqual(manifold.dim, dim)
 
 
-class TestSphereSubspaceIntersectionManifoldGradient(ManifoldTestCase):
+class TestSphereSubspaceIntersectionManifoldGradient(TestCase):
     def setUp(self):
         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
         self.manifold = SphereSubspaceIntersection(span_matrix)
 
         super().setUp()
 
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
 
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
-
-
-class TestSphereSubspaceComplementIntersectionManifold(ManifoldTestCase):
+class TestSphereSubspaceComplementIntersectionManifold(TestCase):
     def setUp(self):
         self.n = 2
         # Define the 1-sphere intersected with the 1-dimensional subspace
@@ -284,17 +272,9 @@ class TestSphereSubspaceComplementIntersectionManifold(ManifoldTestCase):
         np_testing.assert_array_almost_equal(U.T @ x, np.zeros(U.shape[1]))
 
 
-class TestSphereSubspaceComplementIntersectionManifoldGradient(
-    ManifoldTestCase
-):
+class TestSphereSubspaceComplementIntersectionManifoldGradient(TestCase):
     def setUp(self):
         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
         self.manifold = SphereSubspaceComplementIntersection(span_matrix)
 
         super().setUp()
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()

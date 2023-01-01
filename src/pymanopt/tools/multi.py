@@ -82,15 +82,17 @@ def multiexpm(A, *, symmetric=False):
 
 def multiqr(A):
     """Vectorized QR decomposition."""
+    if A.ndim not in (2, 3):
+        raise ValueError("Input must be a matrix or a stacked matrix")
+
     q, r = np.vectorize(np.linalg.qr, signature="(m,n)->(m,k),(k,n)")(A)
 
     # Compute signs or unit-modulus phase of entries of diagonal of r.
-    diagonal = np.diagonal(r, axis1=-2, axis2=-1).copy()
-    diagonal[diagonal == 0] = 1
-    s = diagonal / np.abs(diagonal)
+    s = np.diagonal(r, axis1=-2, axis2=-1).copy()
+    s[s == 0] = 1
+    s = s / np.abs(s)
 
-    if A.ndim == 3:
-        s = np.expand_dims(s, axis=1)
-    q = q * s
-    r = multitransp(multitransp(r) * np.conjugate(s))
+    s = np.expand_dims(s, axis=-1)
+    q = q * multitransp(s)
+    r = r * np.conjugate(s)
     return q, r

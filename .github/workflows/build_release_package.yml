@@ -14,10 +14,10 @@ jobs:
   deploy:
     runs-on: ubuntu-20.04
     steps:
-      - name: Set up python 3.9
+      - name: Set up python 3.7
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.7
 
       - name: Checkout
         uses: actions/checkout@v2

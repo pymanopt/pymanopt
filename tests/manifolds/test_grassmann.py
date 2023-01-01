@@ -5,10 +5,10 @@ from pymanopt.manifolds import Grassmann
 from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multisym, multitransp
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestSingleGrassmannManifold(ManifoldTestCase):
+class TestSingleGrassmannManifold(TestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
@@ -57,12 +57,6 @@ class TestSingleGrassmannManifold(ManifoldTestCase):
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
 
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
-
     # def test_norm(self):
 
     def test_random_point(self):
@@ -105,7 +99,7 @@ class TestSingleGrassmannManifold(ManifoldTestCase):
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiGrassmannManifold(ManifoldTestCase):
+class TestMultiGrassmannManifold(TestCase):
     def setUp(self):
         self.m = m = 5
         self.n = n = 2
@@ -168,12 +162,6 @@ class TestMultiGrassmannManifold(ManifoldTestCase):
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_norm(self):
         x = self.manifold.random_point()

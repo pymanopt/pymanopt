@@ -14,8 +14,8 @@ jobs:
     steps:
       - name: Generate version matrix
         id: build-matrix
-        # run: echo "::set-output name=versions::['stable', 'latest']"
-        run: echo "::set-output name=versions::['latest']"
+        # run: echo "versions=['stable', 'latest']" >> $GITHUB_OUTPUT
+        run: echo "versions=['latest']" >> $GITHUB_OUTPUT
     outputs:
       versions: ${{ steps.build-matrix.outputs.versions }}
 
@@ -29,10 +29,10 @@ jobs:
       matrix:
         version: ${{ fromJSON(needs.build-matrix.outputs.versions) }}
     steps:
-      - name: Set up python 3.9
+      - name: Set up python 3.7
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.7
 
       - name: Clone repository
         uses: actions/checkout@v2
