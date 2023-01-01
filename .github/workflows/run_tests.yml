@@ -1,4 +1,4 @@
-name: Lint and run tests
+name: Run test suite
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       master
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -24,16 +24,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install requirements
-        run: |
-          pip install -r requirements/ci.txt
-          pip install -r requirements/base.txt -r requirements/dev.txt
-
-      - name: Run linting
-        run: |
-          isort --check .
-          black --check .
-          flake8
+      - name: Install dependencies
+        run: pip install -e ".[all,ci]"
 
       - name: Run tests
         run: nose2 tests --verbose --with-coverage
