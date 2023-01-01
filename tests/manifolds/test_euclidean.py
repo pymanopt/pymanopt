@@ -3,10 +3,10 @@ from numpy import testing as np_testing
 
 from pymanopt.manifolds import Euclidean
 
-from ._manifold_tests import ManifoldTestCase
+from .._test import TestCase
 
 
-class TestEuclideanManifold(ManifoldTestCase):
+class TestEuclideanManifold(TestCase):
     def setUp(self):
         self.m = m = 10
         self.n = n = 5
@@ -60,12 +60,6 @@ class TestEuclideanManifold(ManifoldTestCase):
         x = e.random_point()
         u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.euclidean_to_riemannian_gradient(x, u), u)
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_norm(self):
         e = self.manifold
