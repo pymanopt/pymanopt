@@ -28,7 +28,7 @@ jobs:
         run: pip install -e ".[all,ci]"
 
       - name: Run tests
-        run: nose2 tests --verbose --with-coverage
+        run: pytest -v --cov-report= --cov=src/pymanopt tests/
 
       - name: Upload coverage
         if: ${{ matrix.python-version == 3.7 }}
