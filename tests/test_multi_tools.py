@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from numpy import testing as np_testing
 from scipy.linalg import expm, logm
 
@@ -12,11 +13,10 @@ from pymanopt.tools.multi import (
     multitransp,
 )
 
-from ._test import TestCase
 
-
-class TestMulti(TestCase):
-    def setUp(self):
+class TestMulti:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = 40
         self.n = 50
         self.p = 40

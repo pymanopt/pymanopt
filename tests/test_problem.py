@@ -7,11 +7,10 @@ import pymanopt
 from pymanopt.manifolds import Product, Sphere, Stiefel
 from pymanopt.optimizers import TrustRegions
 
-from ._test import TestCase
 
-
-class TestProblem(TestCase):
-    def setUp(self):
+class TestProblem:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 15
         self.manifold = Sphere(self.n)
 

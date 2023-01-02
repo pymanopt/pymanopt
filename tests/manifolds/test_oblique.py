@@ -1,17 +1,15 @@
 import numpy.testing as np_testing
+import pytest
 
 from pymanopt.manifolds import Oblique
 
-from .._test import TestCase
 
-
-class TestObliqueManifold(TestCase):
-    def setUp(self):
+class TestObliqueManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 100
         self.n = n = 50
         self.manifold = Oblique(m, n)
-
-        super().setUp()
 
     # def test_dim(self):
 

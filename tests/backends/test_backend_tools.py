@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from pymanopt.tools import (
     bisect_sequence,
@@ -6,13 +6,13 @@ from pymanopt.tools import (
 )
 
 
-class TestArgumentFlattening(unittest.TestCase):
+class TestArgumentFlattening:
     def test_bisect_sequence(self):
         sequence = range(10)
         half1, half2 = bisect_sequence(sequence)
-        self.assertEqual(half1, range(5))
-        self.assertEqual(half2, range(5, 10))
-        with self.assertRaises(ValueError):
+        assert half1 == range(5)
+        assert half2 == range(5, 10)
+        with pytest.raises(ValueError):
             bisect_sequence(range(11))
 
     def test_unpack_singleton_sequence_return_value(self):
@@ -20,18 +20,18 @@ class TestArgumentFlattening(unittest.TestCase):
         def f():
             return (1,)
 
-        self.assertEqual(f(), 1)
+        assert f() == 1
 
         @unpack_singleton_sequence_return_value
         def g():
             return (1, 2)
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             g()
 
         @unpack_singleton_sequence_return_value
         def h():
             return None
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             h()
