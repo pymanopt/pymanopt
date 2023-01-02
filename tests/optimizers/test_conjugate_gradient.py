@@ -1,15 +1,14 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
-from nose2.tools import params
+import pytest
 
 import pymanopt
 from pymanopt.optimizers import ConjugateGradient
 
-from .._test import TestCase
 
-
-class TestConjugateGradient(TestCase):
-    def setUp(self):
+class TestConjugateGradient:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         n = 32
         matrix = np.random.normal(size=(n, n))
         matrix = 0.5 * (matrix + matrix.T)
@@ -25,12 +24,15 @@ class TestConjugateGradient(TestCase):
 
         self.problem = pymanopt.Problem(manifold, cost)
 
-    @params(
-        "FletcherReeves",
-        "HagerZhang",
-        "HestenesStiefel",
-        "PolakRibiere",
-        "LiuStorey",
+    @pytest.mark.parametrize(
+        "beta_rule",
+        [
+            "FletcherReeves",
+            "HagerZhang",
+            "HestenesStiefel",
+            "PolakRibiere",
+            "LiuStorey",
+        ],
     )
     def test_beta_rules(self, beta_rule):
         optimizer = ConjugateGradient(beta_rule=beta_rule, verbosity=0)
@@ -47,7 +49,7 @@ class TestConjugateGradient(TestCase):
         )
 
     def test_beta_invalid_rule(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             ConjugateGradient(beta_rule="SomeUnknownBetaRule")
 
     def test_complex_cost_problem(self):

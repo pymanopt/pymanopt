@@ -1,14 +1,15 @@
 import numpy as np
+import pytest
 from numpy import testing as np_testing
 
 import pymanopt
 
-from .._test import TestCase
 from . import _backend_tests
 
 
-class TestNumPyBackend(TestCase):
-    def setUp(self):
+class TestNumPyBackend:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 10
 
         @pymanopt.function.numpy(
@@ -40,7 +41,7 @@ class TestNumPyBackend(TestCase):
         )
 
     def test_gradient_hessian_exceptions(self):
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             self.cost.get_gradient_operator()
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             self.cost.get_hessian_operator()
