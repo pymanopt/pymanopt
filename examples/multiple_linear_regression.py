@@ -1,4 +1,5 @@
 import autograd.numpy as np
+import jax.numpy as jnp
 import tensorflow as tf
 import torch
 
@@ -8,7 +9,7 @@ from pymanopt.manifolds import Euclidean
 from pymanopt.optimizers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, samples, targets, backend):
@@ -18,8 +19,13 @@ def create_cost_and_derivates(manifold, samples, targets, backend):
 
         @pymanopt.function.autograd(manifold)
         def cost(weights):
-            # Use autograd's linalg.norm wrapper.
             return np.linalg.norm(targets - samples @ weights) ** 2
+
+    elif backend == "jax":
+
+        @pymanopt.function.jax(manifold)
+        def cost(weights):
+            return jnp.linalg.norm(targets - samples @ weights) ** 2
 
     elif backend == "numpy":
 
