@@ -47,7 +47,7 @@ class TestUnaryFunction(unittest.TestCase):
         x = np.random.normal(size=n)
 
         # Test whether cost function accepts single argument.
-        self.assertAlmostEqual(np.sum(x**2), cost(x))
+        assert np.allclose(np.sum(x**2), cost(x))
 
         # Test whether gradient accepts single argument.
         euclidean_gradient = cost.get_gradient_operator()
@@ -83,7 +83,7 @@ class TestUnaryComplexFunction(unittest.TestCase):
         x = np.random.normal(size=n) + 1j * np.random.normal(size=n)
 
         # Test whether cost function accepts single argument.
-        self.assertAlmostEqual(np.sum(x**2).real, cost(x))
+        assert np.allclose(np.sum(x**2).real, cost(x))
 
         # Test whether gradient accepts single argument.
         euclidean_gradient = cost.get_gradient_operator()
@@ -123,14 +123,14 @@ class TestNaryFunction(unittest.TestCase):
         x = np.random.normal(size=n)
         y = np.random.normal(size=n)
 
-        self.assertAlmostEqual(x @ y, cost(x, y))
+        assert np.allclose(x @ y, cost(x, y))
 
         euclidean_gradient = cost.get_gradient_operator()
         g = euclidean_gradient(x, y)
-        self.assertIsInstance(g, (list, tuple))
-        self.assertEqual(len(g), 2)
+        assert isinstance(g, (list, tuple))
+        assert len(g) == 2
         for gi in g:
-            self.assertIsInstance(gi, np.ndarray)
+            assert isinstance(gi, np.ndarray)
         g_x, g_y = g
         np_testing.assert_allclose(g_x, y)
         np_testing.assert_allclose(g_y, x)
@@ -141,10 +141,10 @@ class TestNaryFunction(unittest.TestCase):
 
         ehess = cost.get_hessian_operator()
         h = ehess(x, y, u, v)
-        self.assertIsInstance(h, (list, tuple))
-        self.assertEqual(len(h), 2)
+        assert isinstance(h, (list, tuple))
+        assert len(h) == 2
         for hi in h:
-            self.assertIsInstance(hi, np.ndarray)
+            assert isinstance(hi, np.ndarray)
 
         # Test whether the Hessian-vector product is correct.
         h_x, h_y = h
@@ -175,15 +175,15 @@ class TestNaryParameterGrouping(unittest.TestCase):
 
         x, y, z = [np.random.normal(size=n) for _ in range(3)]
 
-        self.assertAlmostEqual(np.sum(x**2 + y + z**3), cost(x, y, z))
+        assert np.allclose(np.sum(x**2 + y + z**3), cost(x, y, z))
 
         euclidean_gradient = cost.get_gradient_operator()
         g = euclidean_gradient(x, y, z)
 
-        self.assertIsInstance(g, (list, tuple))
-        self.assertEqual(len(g), 3)
+        assert isinstance(g, (list, tuple))
+        assert len(g) == 3
         for grad in g:
-            self.assertIsInstance(grad, np.ndarray)
+            assert isinstance(grad, np.ndarray)
         g_x, g_y, g_z = g
 
         # Verify correctness of the gradient.
@@ -198,10 +198,10 @@ class TestNaryParameterGrouping(unittest.TestCase):
         h = ehess(x, y, z, u, v, w)
 
         # Test the type composition of the return value.
-        self.assertIsInstance(h, (list, tuple))
-        self.assertEqual(len(h), 3)
+        assert isinstance(h, (list, tuple))
+        assert len(h) == 3
         for hess in h:
-            self.assertIsInstance(hess, np.ndarray)
+            assert isinstance(hess, np.ndarray)
         h_x, h_y, h_z = h
 
         # Test whether the Hessian-vector product is correct.
