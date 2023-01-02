@@ -33,11 +33,9 @@ jobs:
         id: tag
 
       - name: Publish tag to pypi
-        if: |
-          ${{
-            startsWith(github.ref, 'refs/tags/') &&
-            (steps.tag.outputs.is_valid == 'true')
-          }}
+        if: >
+          startsWith(github.ref, 'refs/tags/') &&
+          steps.tag.outputs.is_valid == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
