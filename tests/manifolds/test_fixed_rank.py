@@ -1,14 +1,14 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import FixedRankEmbedded
 
-from .._test import TestCase
 
-
-class TestFixedRankEmbeddedManifold(TestCase):
-    def setUp(self):
+class TestFixedRankEmbeddedManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 10
         self.n = n = 5
         self.k = k = 3
@@ -34,7 +34,7 @@ class TestFixedRankEmbeddedManifold(TestCase):
         a = e.random_point()
         x = e.random_tangent_vector(a)
         y = e.random_tangent_vector(a)
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             e.dist(x, y)
 
     def test_inner_product(self):

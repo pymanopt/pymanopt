@@ -1,19 +1,17 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Symmetric
 from pymanopt.tools.multi import multisym
 
-from .._test import TestCase
 
-
-class TestSymmetricManifold(TestCase):
-    def setUp(self):
+class TestSymmetricManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = n = 10
         self.k = k = 5
         self.manifold = Symmetric(n, k)
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == 0.5 * self.k * self.n * (self.n + 1)

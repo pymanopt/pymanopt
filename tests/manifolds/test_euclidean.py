@@ -1,18 +1,16 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Euclidean
 
-from .._test import TestCase
 
-
-class TestEuclideanManifold(TestCase):
-    def setUp(self):
+class TestEuclideanManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 10
         self.n = n = 5
         self.manifold = Euclidean(m, n)
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.m * self.n

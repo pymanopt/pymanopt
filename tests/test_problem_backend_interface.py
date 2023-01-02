@@ -1,14 +1,14 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
+import pytest
 
 import pymanopt
 from pymanopt.manifolds import Euclidean, FixedRankEmbedded, Product
 
-from ._test import TestCase
 
-
-class TestProblemBackendInterface(TestCase):
-    def setUp(self):
+class TestProblemBackendInterface:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 20
         self.n = n = 10
         self.rank = rank = 3
@@ -33,19 +33,19 @@ class TestProblemBackendInterface(TestCase):
     def test_gradient_operator_shapes(self):
         (u, s, vt), x = self.manifold.random_point()
         gu, gs, gvt, gx = self.gradient(u, s, vt, x)
-        self.assertEqual(gu.shape, (self.m, self.rank))
-        self.assertEqual(gs.shape, (self.rank,))
-        self.assertEqual(gvt.shape, (self.rank, self.n))
-        self.assertEqual(gx.shape, (self.n,))
+        assert gu.shape == (self.m, self.rank)
+        assert gs.shape == (self.rank,)
+        assert gvt.shape == (self.rank, self.n)
+        assert gx.shape == (self.n,)
 
     def test_hessian_operator_shapes(self):
         (u, s, vt), x = self.manifold.random_point()
         (a, b, c), d = self.manifold.random_point()
         hu, hs, hvt, hx = self.hessian(u, s, vt, x, a, b, c, d)
-        self.assertEqual(hu.shape, (self.m, self.rank))
-        self.assertEqual(hs.shape, (self.rank,))
-        self.assertEqual(hvt.shape, (self.rank, self.n))
-        self.assertEqual(hx.shape, (self.n,))
+        assert hu.shape == (self.m, self.rank)
+        assert hs.shape == (self.rank,)
+        assert hvt.shape == (self.rank, self.n)
+        assert hx.shape == (self.n,)
 
     def test_problem_cost(self):
         cost = self.problem.cost

@@ -1,6 +1,7 @@
 import warnings
 
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 import pymanopt
@@ -11,19 +12,16 @@ from pymanopt.manifolds import (
 )
 from pymanopt.tools import testing
 
-from .._test import TestCase
 
-
-class TestSphereManifold(TestCase):
-    def setUp(self):
+class TestSphereManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 100
         self.n = n = 50
         self.manifold = Sphere(m, n)
 
         # For automatic testing of euclidean_to_riemannian_hessian
         self.projection = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.m * self.n - 1
@@ -158,8 +156,9 @@ class TestSphereManifold(TestCase):
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestSphereSubspaceIntersectionManifold(TestCase):
-    def setUp(self):
+class TestSphereSubspaceIntersectionManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 2
         # Defines the 1-sphere intersected with the 1-dimensional subspace
         # passing through (1, 1) / sqrt(2). This creates a 0-dimensional
@@ -168,16 +167,13 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
         with warnings.catch_warnings(record=True):
             self.manifold = SphereSubspaceIntersection(self.U)
 
-        super().setUp()
-
     def test_dim(self):
-        self.assertEqual(self.manifold.dim, 0)
+        assert self.manifold.dim == 0
 
     def test_random_point(self):
         x = self.manifold.random_point()
         p = np.ones(2) / np.sqrt(2)
-        # The manifold only consists of two isolated points (cf. `setUp()`).
-        self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
+        assert np.allclose(x, p) or np.allclose(x, -p)
 
     def test_projection(self):
         h = np.random.normal(size=self.n)
@@ -193,7 +189,7 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
         manifold = SphereSubspaceIntersection(U)
         # U spans the x-y plane, therefore the manifold consists of the
         # 1-sphere in the x-y plane, and has dimension 1.
-        self.assertEqual(manifold.dim, 1)
+        assert manifold.dim == 1
         # Check if a random element from the manifold has vanishing
         # z-component.
         x = manifold.random_point()
@@ -204,19 +200,19 @@ class TestSphereSubspaceIntersectionManifold(TestCase):
         U = np.random.normal(size=(n, n // 3))
         dim = np.linalg.matrix_rank(U) - 1
         manifold = SphereSubspaceIntersection(U)
-        self.assertEqual(manifold.dim, dim)
+        assert manifold.dim == dim
 
 
-class TestSphereSubspaceIntersectionManifoldGradient(TestCase):
-    def setUp(self):
+class TestSphereSubspaceIntersectionManifoldGradient:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
         self.manifold = SphereSubspaceIntersection(span_matrix)
 
-        super().setUp()
 
-
-class TestSphereSubspaceComplementIntersectionManifold(TestCase):
-    def setUp(self):
+class TestSphereSubspaceComplementIntersectionManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 2
         # Define the 1-sphere intersected with the 1-dimensional subspace
         # orthogonal to the line passing through (1, 1) / sqrt(2). This creates
@@ -226,15 +222,13 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         with warnings.catch_warnings(record=True):
             self.manifold = SphereSubspaceComplementIntersection(self.U)
 
-        super().setUp()
-
     def test_dim(self):
-        self.assertEqual(self.manifold.dim, 0)
+        assert self.manifold.dim == 0
 
     def test_random_point(self):
         x = self.manifold.random_point()
         p = np.array([-1, 1]) / np.sqrt(2)
-        self.assertTrue(np.allclose(x, p) or np.allclose(x, -p))
+        assert np.allclose(x, p) or np.allclose(x, -p)
 
     def test_projection(self):
         h = np.random.normal(size=self.n)
@@ -251,7 +245,7 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         # U spans the z-axis with its orthogonal complement being the x-y
         # plane, therefore the manifold consists of the 1-sphere in the x-y
         # plane, and has dimension 1.
-        self.assertEqual(manifold.dim, 1)
+        assert manifold.dim == 1
         # Check if a random element from the manifold has vanishing
         # z-component.
         x = manifold.random_point()
@@ -264,7 +258,7 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         # dimension n - rank(U).
         dim = n - np.linalg.matrix_rank(U) - 1
         manifold = SphereSubspaceComplementIntersection(U)
-        self.assertEqual(manifold.dim, dim)
+        assert manifold.dim == dim
 
         # Test if a random element really lies in the left null space of U.
         x = manifold.random_point()
@@ -272,9 +266,8 @@ class TestSphereSubspaceComplementIntersectionManifold(TestCase):
         np_testing.assert_array_almost_equal(U.T @ x, np.zeros(U.shape[1]))
 
 
-class TestSphereSubspaceComplementIntersectionManifoldGradient(TestCase):
-    def setUp(self):
+class TestSphereSubspaceComplementIntersectionManifoldGradient:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
         self.manifold = SphereSubspaceComplementIntersection(span_matrix)
-
-        super().setUp()
