@@ -1,9 +1,8 @@
 import numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds.manifold import Manifold
-
-from .._test import TestCase
 
 
 def manifold_factory(*, point_layout):
@@ -26,7 +25,7 @@ def manifold_factory(*, point_layout):
     return CustomManifold()
 
 
-class TestUnaryFunction(TestCase):
+class TestUnaryFunction:
     """Test cost function, gradient and Hessian for a unary cost function.
 
     This test uses a cost function of the form::
@@ -34,7 +33,8 @@ class TestUnaryFunction(TestCase):
         f = lambda x: np.sum(x ** 2)
     """
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def initialize_test_case(self):
         self.manifold = manifold_factory(point_layout=1)
         self.n = 10
         self.cost = None
@@ -47,7 +47,7 @@ class TestUnaryFunction(TestCase):
         x = np.random.normal(size=n)
 
         # Test whether cost function accepts single argument.
-        self.assertAlmostEqual(np.sum(x**2), cost(x))
+        assert np.allclose(np.sum(x**2), cost(x))
 
         # Test whether gradient accepts single argument.
         euclidean_gradient = cost.get_gradient_operator()
@@ -62,7 +62,7 @@ class TestUnaryFunction(TestCase):
         np_testing.assert_allclose(2 * u, ehess(x, u))
 
 
-class TestUnaryComplexFunction(TestCase):
+class TestUnaryComplexFunction:
     """Test cost function, gradient and Hessian of complex unary cost function.
 
     This test uses a cost function of the form::
@@ -70,7 +70,8 @@ class TestUnaryComplexFunction(TestCase):
         f = lambda x: np.sum(x ** 2).real
     """
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def initialize_test_case(self):
         self.manifold = manifold_factory(point_layout=1)
         self.n = 10
         self.cost = None
@@ -83,7 +84,7 @@ class TestUnaryComplexFunction(TestCase):
         x = np.random.normal(size=n) + 1j * np.random.normal(size=n)
 
         # Test whether cost function accepts single argument.
-        self.assertAlmostEqual(np.sum(x**2).real, cost(x))
+        assert np.allclose(np.sum(x**2).real, cost(x))
 
         # Test whether gradient accepts single argument.
         euclidean_gradient = cost.get_gradient_operator()
@@ -98,7 +99,7 @@ class TestUnaryComplexFunction(TestCase):
         np_testing.assert_allclose(2 * u.conj(), ehess(x, u))
 
 
-class TestNaryFunction(TestCase):
+class TestNaryFunction:
     """Test cost function, gradient and Hessian for an nary cost function.
 
     This test uses a cost function of the form::
@@ -110,7 +111,8 @@ class TestNaryFunction(TestCase):
     manifold are represented as a 3-tuple of a truncated SVD.
     """
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def initialize_test_case(self):
         self.manifold = manifold_factory(point_layout=2)
         self.n = 10
         self.cost = None
@@ -123,14 +125,14 @@ class TestNaryFunction(TestCase):
         x = np.random.normal(size=n)
         y = np.random.normal(size=n)
 
-        self.assertAlmostEqual(x @ y, cost(x, y))
+        assert np.allclose(x @ y, cost(x, y))
 
         euclidean_gradient = cost.get_gradient_operator()
         g = euclidean_gradient(x, y)
-        self.assertIsInstance(g, (list, tuple))
-        self.assertEqual(len(g), 2)
+        assert isinstance(g, (list, tuple))
+        assert len(g) == 2
         for gi in g:
-            self.assertIsInstance(gi, np.ndarray)
+            assert isinstance(gi, np.ndarray)
         g_x, g_y = g
         np_testing.assert_allclose(g_x, y)
         np_testing.assert_allclose(g_y, x)
@@ -141,10 +143,10 @@ class TestNaryFunction(TestCase):
 
         ehess = cost.get_hessian_operator()
         h = ehess(x, y, u, v)
-        self.assertIsInstance(h, (list, tuple))
-        self.assertEqual(len(h), 2)
+        assert isinstance(h, (list, tuple))
+        assert len(h) == 2
         for hi in h:
-            self.assertIsInstance(hi, np.ndarray)
+            assert isinstance(hi, np.ndarray)
 
         # Test whether the Hessian-vector product is correct.
         h_x, h_y = h
@@ -152,7 +154,7 @@ class TestNaryFunction(TestCase):
         np_testing.assert_allclose(h_y, u)
 
 
-class TestNaryParameterGrouping(TestCase):
+class TestNaryParameterGrouping:
     """Test parameter grouping for cost function, gradient and Hessian.
 
     This test assumes a cost function of the form::
@@ -163,7 +165,8 @@ class TestNaryParameterGrouping(TestCase):
     underlying manifolds represents points as a tuple of arrays.
     """
 
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def initialize_test_case(self):
         self.manifold = manifold_factory(point_layout=3)
         self.n = 10
         self.cost = None
@@ -175,15 +178,15 @@ class TestNaryParameterGrouping(TestCase):
 
         x, y, z = [np.random.normal(size=n) for _ in range(3)]
 
-        self.assertAlmostEqual(np.sum(x**2 + y + z**3), cost(x, y, z))
+        assert np.allclose(np.sum(x**2 + y + z**3), cost(x, y, z))
 
         euclidean_gradient = cost.get_gradient_operator()
         g = euclidean_gradient(x, y, z)
 
-        self.assertIsInstance(g, (list, tuple))
-        self.assertEqual(len(g), 3)
+        assert isinstance(g, (list, tuple))
+        assert len(g) == 3
         for grad in g:
-            self.assertIsInstance(grad, np.ndarray)
+            assert isinstance(grad, np.ndarray)
         g_x, g_y, g_z = g
 
         # Verify correctness of the gradient.
@@ -198,10 +201,10 @@ class TestNaryParameterGrouping(TestCase):
         h = ehess(x, y, z, u, v, w)
 
         # Test the type composition of the return value.
-        self.assertIsInstance(h, (list, tuple))
-        self.assertEqual(len(h), 3)
+        assert isinstance(h, (list, tuple))
+        assert len(h) == 3
         for hess in h:
-            self.assertIsInstance(hess, np.ndarray)
+            assert isinstance(hess, np.ndarray)
         h_x, h_y, h_z = h
 
         # Test whether the Hessian-vector product is correct.
@@ -210,8 +213,9 @@ class TestNaryParameterGrouping(TestCase):
         np_testing.assert_allclose(h_z, 6 * z * w)
 
 
-class TestVector(TestCase):
-    def setUp(self):
+class TestVector:
+    @pytest.fixture(autouse=True)
+    def initialize_test_case(self):
         np.seterr(all="raise")
 
         self.manifold = manifold_factory(point_layout=1)
@@ -252,8 +256,9 @@ class TestVector(TestCase):
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
 
-class TestMatrix(TestCase):
-    def setUp(self):
+class TestMatrix:
+    @pytest.fixture(autouse=True)
+    def initialize_test_case(self):
         np.seterr(all="raise")
 
         self.manifold = manifold_factory(point_layout=1)
@@ -298,8 +303,9 @@ class TestMatrix(TestCase):
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
 
-class TestTensor3(TestCase):
-    def setUp(self):
+class TestTensor3:
+    @pytest.fixture(autouse=True)
+    def initialize_test_case(self):
         np.seterr(all="raise")
 
         self.manifold = manifold_factory(point_layout=1)
@@ -344,8 +350,9 @@ class TestTensor3(TestCase):
         np_testing.assert_allclose(self.correct_hess, hess(self.Y, self.A))
 
 
-class TestMixed(TestCase):
-    def setUp(self):
+class TestMixed:
+    @pytest.fixture(autouse=True)
+    def initialize_test_case(self):
         np.seterr(all="raise")
 
         self.manifold = manifold_factory(point_layout=3)

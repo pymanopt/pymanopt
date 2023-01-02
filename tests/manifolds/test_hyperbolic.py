@@ -1,17 +1,15 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import PoincareBall
 
-from .._test import TestCase
 
-
-class TestSinglePoincareBallManifold(TestCase):
-    def setUp(self):
+class TestSinglePoincareBallManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 50
         self.manifold = PoincareBall(self.n)
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.n
@@ -157,12 +155,12 @@ class TestSinglePoincareBallManifold(TestCase):
         )
 
 
-class TestMultiplePoincareBallManifold(TestCase):
-    def setUp(self):
+class TestMultiplePoincareBallManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 50
         self.k = 20
         self.manifold = PoincareBall(self.n, k=self.k)
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.k * self.n

@@ -1,18 +1,16 @@
 import numpy.testing as np_testing
+import pytest
 import scipy.stats
 
 from pymanopt.manifolds import PSDFixedRankComplex
 
-from .._test import TestCase
 
-
-class TestPSDFixedRankComplexManifold(TestCase):
-    def setUp(self):
+class TestPSDFixedRankComplexManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 50
         self.k = 10
         self.manifold = PSDFixedRankComplex(self.n, self.k)
-
-        super().setUp()
 
     # def test_dim(self):
 

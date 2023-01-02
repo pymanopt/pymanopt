@@ -28,15 +28,14 @@ jobs:
       - name: Build release artifacts
         run: python -m build
 
-      - name: Publish to pypi test mirror
-        if: ${{ github.ref == 'refs/heads/master' }}
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+      - name: Verify tag name
+        uses: nowsprinting/check-version-format-action@v3
+        id: tag
 
       - name: Publish tag to pypi
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: >
+          startsWith(github.ref, 'refs/tags/') &&
+          steps.tag.outputs.is_valid == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}

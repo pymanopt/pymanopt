@@ -1,4 +1,4 @@
-from nose2.tools import params
+import pytest
 
 from examples import (
     closest_unit_norm_column_approximation,
@@ -15,58 +15,74 @@ from examples import (
 )
 from examples.advanced import check_gradient, check_retraction
 
-from ._test import TestCase
 
-
-class TestExamples(TestCase):
-    @params(*closest_unit_norm_column_approximation.SUPPORTED_BACKENDS)
+class TestExamples:
+    @pytest.mark.parametrize(
+        "backend", closest_unit_norm_column_approximation.SUPPORTED_BACKENDS
+    )
     def test_closest_unit_norm_column_approximation(self, backend):
         closest_unit_norm_column_approximation.run(backend)
 
-    @params(*dominant_eigenvector.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize(
+        "backend", dominant_eigenvector.SUPPORTED_BACKENDS
+    )
     def test_dominant_eigenvector(self, backend):
         dominant_eigenvector.run(backend)
 
-    @params(*dominant_invariant_subspace.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize(
+        "backend", dominant_invariant_subspace.SUPPORTED_BACKENDS
+    )
     def test_dominant_invariant_subspace(self, backend):
         dominant_invariant_subspace.run(backend)
 
-    @params(*dominant_invariant_subspace.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize(
+        "backend", dominant_invariant_subspace.SUPPORTED_BACKENDS
+    )
     def test_dominant_invariant_complex_subspace(self, backend):
         dominant_invariant_complex_subspace.run(backend)
 
-    @params(*low_rank_matrix_approximation.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize(
+        "backend", low_rank_matrix_approximation.SUPPORTED_BACKENDS
+    )
     def test_low_rank_matrix_approximation(self, backend):
         low_rank_matrix_approximation.run(backend)
 
-    @params(*low_rank_psd_matrix_approximation.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize(
+        "backend", low_rank_psd_matrix_approximation.SUPPORTED_BACKENDS
+    )
     def test_low_rank_psd_matrix_approximation(self, backend):
         low_rank_psd_matrix_approximation.run(backend)
 
-    @params(*multiple_linear_regression.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize(
+        "backend", multiple_linear_regression.SUPPORTED_BACKENDS
+    )
     def test_multiple_linear_regression(self, backend):
         multiple_linear_regression.run(backend)
 
-    @params(*optimal_rotations.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize("backend", optimal_rotations.SUPPORTED_BACKENDS)
     def test_optimal_rotations(self, backend):
         optimal_rotations.run(backend)
 
-    @params(*packing_on_the_sphere.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize(
+        "backend", packing_on_the_sphere.SUPPORTED_BACKENDS
+    )
     def test_packing_on_the_sphere(self, backend):
         packing_on_the_sphere.run(backend)
 
-    @params(*pca.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize("backend", pca.SUPPORTED_BACKENDS)
     def test_pca(self, backend):
         pca.run(backend)
 
-    @params(*rank_k_correlation_matrix_approximation.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize(
+        "backend", rank_k_correlation_matrix_approximation.SUPPORTED_BACKENDS
+    )
     def test_rank_k_correlation_matrix_approximation(self, backend):
         rank_k_correlation_matrix_approximation.run(backend)
 
-    @params(*check_gradient.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize("backend", check_gradient.SUPPORTED_BACKENDS)
     def test_check_gradient(self, backend):
         check_gradient.run(backend)
 
-    @params(*check_retraction.SUPPORTED_BACKENDS)
+    @pytest.mark.parametrize("backend", check_retraction.SUPPORTED_BACKENDS)
     def test_check_retraction(self, backend):
         check_retraction.run(backend)
