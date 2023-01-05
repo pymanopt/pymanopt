@@ -195,7 +195,7 @@ def check_hessian(problem, point=None, tangent_vector=None):
 
     It is also tested that the result of applying the Hessian along that
     direction is indeed a tangent vector, and that the Hessian operator is
-    symmetric w.r.t. the Riemannian metric.
+    linear and symmetric w.r.t. the Riemannian metric.
 
     Both x and d are optional and will be sampled at random if omitted.
     """
