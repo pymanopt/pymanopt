@@ -30,6 +30,13 @@ jobs:
       - name: Run tests
         run: pytest -v --cov-report= --cov=src/pymanopt tests/
 
+      - name: Collect coverage
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: ${{ matrix.python-version }}
+          parallel: true
+
   finish:
     needs: tests
     runs-on: ubuntu-20.04
