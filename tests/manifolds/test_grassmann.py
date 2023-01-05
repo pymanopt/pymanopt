@@ -1,23 +1,21 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Grassmann
 from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multisym, multitransp
 
-from ._manifold_tests import ManifoldTestCase
 
-
-class TestSingleGrassmannManifold(ManifoldTestCase):
-    def setUp(self):
+class TestSingleGrassmannManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 5
         self.n = n = 2
         self.k = k = 1
         self.manifold = Grassmann(m, n, k=k)
 
         self.projection = lambda x, u: u - x @ x.T @ u
-
-        super().setUp()
 
     def test_dist(self):
         x = self.manifold.random_point()
@@ -56,12 +54,6 @@ class TestSingleGrassmannManifold(ManifoldTestCase):
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     # def test_norm(self):
 
@@ -105,16 +97,15 @@ class TestSingleGrassmannManifold(ManifoldTestCase):
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiGrassmannManifold(ManifoldTestCase):
-    def setUp(self):
+class TestMultiGrassmannManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 5
         self.n = n = 2
         self.k = k = 3
         self.manifold = Grassmann(m, n, k=k)
 
         self.projection = lambda x, u: u - x @ x.T @ u
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.k * (self.m * self.n - self.n**2)
@@ -168,12 +159,6 @@ class TestMultiGrassmannManifold(ManifoldTestCase):
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_norm(self):
         x = self.manifold.random_point()

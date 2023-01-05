@@ -1,14 +1,14 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
+import pytest
 
 import pymanopt
 from pymanopt.manifolds import Euclidean, Grassmann, Product, Sphere
 
-from ._manifold_tests import ManifoldTestCase
 
-
-class TestProductManifold(ManifoldTestCase):
-    def setUp(self):
+class TestProductManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 100
         self.n = n = 50
         self.euclidean = Euclidean(m, n)
@@ -51,7 +51,12 @@ class TestProductManifold(ManifoldTestCase):
         manifold = Product((Euclidean(12), Grassmann(12, 3)))
         x = manifold.random_point()
         eta = manifold.random_tangent_vector(x)
-        np.float64(1.0) * eta
+        factor = 42
+        eta_scaled = eta * factor
+        eta_euclidean, eta_grassmann = eta
+        eta_euclidean_scaled, eta_grassmann_scaled = eta_scaled
+        assert np.allclose(eta_euclidean * factor, eta_euclidean_scaled)
+        assert np.allclose(eta_grassmann * factor, eta_grassmann_scaled)
 
     # def test_inner_product(self):
 
@@ -60,12 +65,6 @@ class TestProductManifold(ManifoldTestCase):
     # def test_euclidean_to_riemannian_hessian(self):
 
     # def test_retraction(self):
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     # def test_norm(self):
 

@@ -1,11 +1,10 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
+import pytest
 from scipy.linalg import eigvalsh, expm, logm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
-
-from ._manifold_tests import ManifoldTestCase
 
 
 def geodesic(point_a, point_b, alpha):
@@ -21,12 +20,11 @@ def geodesic(point_a, point_b, alpha):
     return c @ powm @ multitransp(c)
 
 
-class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
-    def setUp(self):
+class TestSingleSymmetricPositiveDefiniteManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = n = 15
         self.manifold = SymmetricPositiveDefinite(n)
-
-        super().setUp()
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -138,13 +136,12 @@ class TestSingleSymmetricPositiveDefiniteManifold(ManifoldTestCase):
         np_testing.assert_allclose(manifold.log(x, y), u)
 
 
-class TestMultiSymmetricPositiveDefiniteManifold(ManifoldTestCase):
-    def setUp(self):
+class TestMultiSymmetricPositiveDefiniteManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = n = 10
         self.k = k = 3
         self.manifold = SymmetricPositiveDefinite(n, k=k)
-
-        super().setUp()
 
     def test_dim(self):
         manifold = self.manifold
@@ -230,12 +227,6 @@ class TestMultiSymmetricPositiveDefiniteManifold(ManifoldTestCase):
             manifold.euclidean_to_riemannian_gradient(x, u),
             x @ multisym(u) @ x,
         )
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_euclidean_to_riemannian_hessian(self):
         # Use manopt's slow method

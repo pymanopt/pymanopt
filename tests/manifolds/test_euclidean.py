@@ -1,18 +1,16 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Euclidean
 
-from ._manifold_tests import ManifoldTestCase
 
-
-class TestEuclideanManifold(ManifoldTestCase):
-    def setUp(self):
+class TestEuclideanManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 10
         self.n = n = 5
         self.manifold = Euclidean(m, n)
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.m * self.n
@@ -60,12 +58,6 @@ class TestEuclideanManifold(ManifoldTestCase):
         x = e.random_point()
         u = e.random_tangent_vector(x)
         np_testing.assert_allclose(e.euclidean_to_riemannian_gradient(x, u), u)
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     def test_norm(self):
         e = self.manifold

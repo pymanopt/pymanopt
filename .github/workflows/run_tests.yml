@@ -1,20 +1,21 @@
-name: Lint and run tests
+name: Run test suite
 
 on:
   pull_request:
     branches:
       master
+  push:
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version:
-          - 3.6
-          - 3.7
-          - 3.8
-          - 3.9
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
     steps:
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -24,23 +25,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install requirements
-        run: |
-          pip install -r requirements/ci.txt
-          pip install -r requirements/base.txt -r requirements/dev.txt
-
-      - name: Run linting
-        run: |
-          isort --check .
-          black --check .
-          flake8
+      - name: Install dependencies
+        run: pip install -e ".[all,ci]"
 
       - name: Run tests
-        run: nose2 tests --verbose --with-coverage
+        run: |
+          pytest -v --cov-report= --cov=src/pymanopt tests/
+          coverage lcov -o coverage/lcov.info
 
+      - name: Collect coverage
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: ${{ matrix.python-version }}
+          parallel: true
+
+  finish:
+    needs: tests
+    runs-on: ubuntu-20.04
+    steps:
       - name: Upload coverage
-        if: ${{ matrix.python-version == 3.9 }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_SERVICE_NAME: github
-        run: coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true

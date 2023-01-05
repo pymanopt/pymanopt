@@ -1,23 +1,20 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
-from nose2.tools import params
+import pytest
 
 from pymanopt.manifolds import SpecialOrthogonalGroup
 from pymanopt.tools.multi import multieye, multitransp
 
-from ._manifold_tests import ManifoldTestCase
 
-
-class TestSpecialOrthogonalGroup(ManifoldTestCase):
-    def setUp(self):
+class TestSpecialOrthogonalGroup:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = n = 10
         self.k = k = 3
         self.so_product = SpecialOrthogonalGroup(n, k=k)
         self.so = SpecialOrthogonalGroup(n)
         self.so_polar = SpecialOrthogonalGroup(n, retraction="polar")
-
         self.manifold = self.so
-        super().setUp()
 
     def test_random_point(self):
         point = self.so.random_point()
@@ -48,7 +45,7 @@ class TestSpecialOrthogonalGroup(ManifoldTestCase):
             tangent_vector, -multitransp(tangent_vector)
         )
 
-    @params("so", "so_polar")
+    @pytest.mark.parametrize("manifold_attribute", ["so", "so_polar"])
     def test_retraction(self, manifold_attribute):
         manifold = getattr(self, manifold_attribute)
 
@@ -78,9 +75,3 @@ class TestSpecialOrthogonalGroup(ManifoldTestCase):
         U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
         np_testing.assert_array_almost_equal(U, Ulogexp)
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()

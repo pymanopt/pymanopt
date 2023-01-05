@@ -1,4 +1,5 @@
 import autograd.numpy as np
+import jax.numpy as jnp
 import tensorflow as tf
 import torch
 
@@ -8,7 +9,7 @@ from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.optimizers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, matrix, backend):
@@ -20,6 +21,13 @@ def create_cost_and_derivates(manifold, matrix, backend):
         def cost(u, s, vt):
             X = u @ np.diag(s) @ vt
             return np.linalg.norm(X - matrix) ** 2
+
+    elif backend == "jax":
+
+        @pymanopt.function.jax(manifold)
+        def cost(u, s, vt):
+            X = u @ jnp.diag(s) @ vt
+            return jnp.linalg.norm(X - matrix) ** 2
 
     elif backend == "numpy":
 

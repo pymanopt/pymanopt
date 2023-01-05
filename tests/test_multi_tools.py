@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from numpy import testing as np_testing
 from scipy.linalg import expm, logm
 
@@ -12,11 +13,10 @@ from pymanopt.tools.multi import (
     multitransp,
 )
 
-from ._test import TestCase
 
-
-class TestMulti(TestCase):
-    def setUp(self):
+class TestMulti:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = 40
         self.n = 50
         self.p = 40
@@ -104,8 +104,20 @@ class TestMulti(TestCase):
             multiexpm(A, symmetric=True), multiexpm(A, symmetric=False)
         )
 
+    def test_multiqr_singlemat(self):
+        shape = (self.m, self.n)
+        A_real = np.random.normal(size=shape)
+        q, r = multiqr(A_real)
+        np_testing.assert_allclose(q @ r, A_real)
+
+        A_complex = np.random.normal(size=shape) + 1j * np.random.normal(
+            size=shape
+        )
+        q, r = multiqr(A_complex)
+        np_testing.assert_allclose(q @ r, A_complex)
+
     def test_multiqr(self):
-        shape = (self.k, self.m, self.m)
+        shape = (self.k, self.m, self.n)
         A_real = np.random.normal(size=shape)
         q, r = multiqr(A_real)
         np_testing.assert_allclose(q @ r, A_real)

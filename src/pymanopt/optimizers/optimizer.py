@@ -68,7 +68,6 @@ class Optimizer(metaclass=abc.ABCMeta):
         Args:
             problem: Pymanopt problem class instance exposing the cost function
                 and the manifold to optimize over.
-                The class must either
             initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.

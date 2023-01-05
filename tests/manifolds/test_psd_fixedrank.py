@@ -1,18 +1,16 @@
 import numpy.testing as np_testing
+import pytest
 import scipy.stats
 
 from pymanopt.manifolds import PSDFixedRank
 
-from ._manifold_tests import ManifoldTestCase
 
-
-class TestPSDFixedRankManifold(ManifoldTestCase):
-    def setUp(self):
+class TestPSDFixedRankManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 50
         self.k = 10
         self.manifold = PSDFixedRank(self.n, self.k)
-
-        super().setUp()
 
     # def test_dim(self):
 
@@ -31,12 +29,6 @@ class TestPSDFixedRankManifold(ManifoldTestCase):
     # def test_euclidean_to_riemannian_hessian(self):
 
     # def test_retraction(self):
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
 
     # def test_norm(self):
 

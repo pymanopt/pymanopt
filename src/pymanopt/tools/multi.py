@@ -1,5 +1,13 @@
 import numpy as np
 import scipy.linalg
+import scipy.version
+
+
+# Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked matrices.
+if scipy.version.version >= "1.9.0":
+    scipy_expm = scipy.linalg.expm
+else:
+    scipy_expm = np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")
 
 
 def multitransp(A):
@@ -24,6 +32,7 @@ def multihconj(A):
 
 def multisym(A):
     """Vectorized matrix symmetrization.
+
     Given an array ``A`` of matrices (represented as an array of shape ``(k, n,
     n)``), returns a version of ``A`` with each matrix symmetrized, i.e.,
     every matrix ``A[i]`` satisfies ``A[i] == A[i].T``.
@@ -70,7 +79,7 @@ def multilogm(A, *, positive_definite=False):
 def multiexpm(A, *, symmetric=False):
     """Vectorized matrix exponential."""
     if not symmetric:
-        return np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")(A)
+        return scipy_expm(A)
 
     w, v = np.linalg.eigh(A)
     w = np.expand_dims(np.exp(w), axis=-1)
@@ -82,15 +91,17 @@ def multiexpm(A, *, symmetric=False):
 
 def multiqr(A):
     """Vectorized QR decomposition."""
+    if A.ndim not in (2, 3):
+        raise ValueError("Input must be a matrix or a stacked matrix")
+
     q, r = np.vectorize(np.linalg.qr, signature="(m,n)->(m,k),(k,n)")(A)
 
     # Compute signs or unit-modulus phase of entries of diagonal of r.
-    diagonal = np.diagonal(r, axis1=-2, axis2=-1).copy()
-    diagonal[diagonal == 0] = 1
-    s = diagonal / np.abs(diagonal)
+    s = np.diagonal(r, axis1=-2, axis2=-1).copy()
+    s[s == 0] = 1
+    s = s / np.abs(s)
 
-    if A.ndim == 3:
-        s = np.expand_dims(s, axis=1)
-    q = q * s
-    r = multitransp(multitransp(r) * np.conjugate(s))
+    s = np.expand_dims(s, axis=-1)
+    q = q * multitransp(s)
+    r = r * np.conjugate(s)
     return q, r

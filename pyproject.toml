@@ -1,3 +1,7 @@
+[build-system]
+requires = ["pip==21.3.1", "setuptools==59.6.0", "versioneer-518"]
+build-backend = "setuptools.build_meta"
+
 [tool.black]
 include = '\.py$'
 line-length = 79

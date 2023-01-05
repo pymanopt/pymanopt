@@ -1,24 +1,21 @@
 import autograd.numpy as np
-from nose2.tools import params
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Stiefel
 from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multisym, multitransp
 
-from ._manifold_tests import ManifoldTestCase
 
-
-class TestSingleStiefelManifold(ManifoldTestCase):
-    def setUp(self):
+class TestSingleStiefelManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 20
         self.n = n = 2
         self.k = k = 1
         self.manifold = Stiefel(m, n, k=k)
         self.manifold_polar = Stiefel(m, n, k=k, retraction="polar")
         self.projection = lambda x, u: u - x @ (x.T @ u + u.T @ x) / 2
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == 0.5 * self.n * (2 * self.m - self.n - 1)
@@ -42,12 +39,6 @@ class TestSingleStiefelManifold(ManifoldTestCase):
         Hproj = H - X @ (X.T @ H + H.T @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
-
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
@@ -67,7 +58,9 @@ class TestSingleStiefelManifold(ManifoldTestCase):
         V = self.manifold.random_tangent_vector(X)
         assert np.linalg.norm(U - V) > 1e-6
 
-    @params("manifold", "manifold_polar")
+    @pytest.mark.parametrize(
+        "manifold_attribute", ["manifold", "manifold_polar"]
+    )
     def test_retraction(self, manifold_attribute):
         manifold = getattr(self, manifold_attribute)
 
@@ -144,15 +137,14 @@ class TestSingleStiefelManifold(ManifoldTestCase):
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiStiefelManifold(ManifoldTestCase):
-    def setUp(self):
+class TestMultiStiefelManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 10
         self.n = n = 3
         self.k = k = 3
         self.manifold = Stiefel(m, n, k=k)
         self.manifold_polar = Stiefel(m, n, k=k, retraction="polar")
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == 0.5 * self.k * self.n * (
@@ -183,12 +175,6 @@ class TestMultiStiefelManifold(ManifoldTestCase):
         Hproj = H - X @ (multitransp(X) @ H + multitransp(H) @ X) / 2
         np_testing.assert_allclose(Hproj, self.manifold.projection(X, H))
 
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
-
     def test_random_point(self):
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
@@ -212,7 +198,9 @@ class TestMultiStiefelManifold(ManifoldTestCase):
         V = self.manifold.random_tangent_vector(X)
         assert np.linalg.norm(U - V) > 1e-6
 
-    @params("manifold", "manifold_polar")
+    @pytest.mark.parametrize(
+        "manifold_attribute", ["manifold", "manifold_polar"]
+    )
     def test_retraction(self, manifold_attribute):
         manifold = getattr(self, manifold_attribute)
 

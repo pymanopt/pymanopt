@@ -1,15 +1,14 @@
 import autograd.numpy as np
-from nose2.tools import params
+import pytest
 
 import pymanopt
 import pymanopt.optimizers
 from pymanopt.manifolds import Sphere
 
-from .._test import TestCase
 
-
-class TestOptimizers(TestCase):
-    def setUp(self):
+class TestOptimizers:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         n = 32
         matrix = np.random.normal(size=(n, n))
         self.manifold = manifold = Sphere(n)
@@ -21,7 +20,7 @@ class TestOptimizers(TestCase):
 
         self.problem = pymanopt.Problem(manifold, cost)
 
-    @params(*pymanopt.optimizers.OPTIMIZERS)
+    @pytest.mark.parametrize("optimizer_name", pymanopt.optimizers.OPTIMIZERS)
     def test_optimizers(self, optimizer_name):
         optimizer = getattr(pymanopt.optimizers, optimizer_name)(
             max_iterations=self.max_iterations, verbosity=0

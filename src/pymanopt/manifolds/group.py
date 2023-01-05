@@ -4,15 +4,20 @@ import scipy.special
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
     multiexpm,
+    multihconj,
+    multiherm,
     multilogm,
     multiqr,
     multiskew,
-    multisym,
+    multiskewh,
     multitransp,
 )
 
 
 class _UnitaryBase(RiemannianSubmanifold):
+    _n: int
+    _k: int
+
     def __init__(self, name, dimension, retraction):
         super().__init__(name, dimension)
 
@@ -85,8 +90,7 @@ class _UnitaryBase(RiemannianSubmanifold):
         return tangent_vector_a
 
     def pair_mean(self, point_a, point_b):
-        V = self.log(point_a, point_b)
-        return self.exp(point_a, 0.5 * V)
+        return self.exp(point_a, self.log(point_a, point_b) / 2)
 
 
 class SpecialOrthogonalGroup(_UnitaryBase):
@@ -154,16 +158,16 @@ class SpecialOrthogonalGroup(_UnitaryBase):
             # Swap the first two columns of matrices where det(point) < 0 to
             # flip the sign of their determinants.
             negative_det, *_ = np.where(np.linalg.det(point) < 0)
-            slice_ = np.arange(point.shape[1])
-            point[np.ix_(negative_det, slice_, [0, 1])] = point[
-                np.ix_(negative_det, slice_, [1, 0])
-            ]
+            negative_det = np.expand_dims(negative_det, (-2, -1))
+            point[negative_det, :, [0, 1]] = point[negative_det, :, [1, 0]]
         if k == 1:
             return point[0]
         return point
 
     def random_tangent_vector(self, point):
         n, k = self._n, self._k
+        if n == 1:
+            return np.ones((k, 1, 1))
         inds = np.triu_indices(n, 1)
         vector = np.zeros((k, n, n))
         for i in range(k):
@@ -175,9 +179,9 @@ class SpecialOrthogonalGroup(_UnitaryBase):
 
 
 class UnitaryGroup(_UnitaryBase):
-    """The (product) manifold of unitary matrices (i.e., the unitary group).
+    r"""The (product) manifold of unitary matrices (i.e., the unitary group).
 
-    Unitary group: deals with arrays U of size n x n x k (or n x n if k = 1,
+    Unitary group: deals with arrays U of size k x n x n (or n x n if k = 1,
     which is the default) such that each n x n matrix is unitary, that is,
         X.conj().T @ X = eye(n) if k = 1, or
         X[i].conj().T @ X[i] = eye(n) for i = 1 : k if k > 1.
@@ -187,7 +191,6 @@ class UnitaryGroup(_UnitaryBase):
     submanifold of (C^nxn)^k endowed with the usual real inner product on
     C^nxn, namely, <A, B> = real(trace(A.conj().T @ B)).
 
-    This is important:
     Tangent vectors are represented in the Lie algebra, i.e., as
     skew-Hermitian matrices. Use the function M.tangent2ambient(X, H) to
     switch from the Lie algebra representation to the embedding space
@@ -235,7 +238,7 @@ class UnitaryGroup(_UnitaryBase):
             return point[0]
         return point
 
-    def random_tangent_vector(self, point):
+    def _random_tangent_vector(self, point):
         # TODO
         n, k = self._n, self._k
         inds = np.triu_indices(n, 1)
@@ -246,3 +249,24 @@ class UnitaryGroup(_UnitaryBase):
         if k == 1:
             vector = vector[0]
         return vector / np.sqrt(2)
+
+    def random_tangent_vector(self, point):
+        tangent_vector = _randskewh(self._n, self._k)
+        norm = np.sqrt(
+            np.tensordot(
+                tangent_vector.conj(), tangent_vector, axes=tangent_vector.ndim
+            )
+        )
+        return tangent_vector / norm
+
+
+def _randskewh(n, k=1):
+    # Generate random skew-hermitian matrices with normal entries.
+    idxs = np.triu_indices(n, 1)
+    S = np.zeros((k, n, n))
+    for i in range(k):
+        S[i][idxs] = np.random.normal(size=int(n * (n - 1) / 2))
+        S = S - multihconj(S)
+    if k == 1:
+        return S.reshape(n, n)
+    return S

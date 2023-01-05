@@ -1,4 +1,5 @@
 import autograd.numpy as np
+import jax.numpy as jnp
 import tensorflow as tf
 import torch
 
@@ -8,7 +9,7 @@ from pymanopt.manifolds import SpecialOrthogonalGroup
 from pymanopt.optimizers import SteepestDescent
 
 
-SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, ABt, backend):
@@ -19,6 +20,12 @@ def create_cost_and_derivates(manifold, ABt, backend):
         @pymanopt.function.autograd(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
+
+    elif backend == "jax":
+
+        @pymanopt.function.jax(manifold)
+        def cost(X):
+            return -jnp.tensordot(X, ABt, axes=X.ndim)
 
     elif backend == "numpy":
 

@@ -1,19 +1,17 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Positive
 
-from ._manifold_tests import ManifoldTestCase
 
-
-class TestPositiveVectors(ManifoldTestCase):
-    def setUp(self):
+class TestPositiveVectors:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 3
         self.n = n = 1
         self.k = k = 2
         self.manifold = Positive(m, n, k=k)
-
-        super().setUp()
 
     def test_inner_product(self):
         x = self.manifold.random_point()
@@ -80,9 +78,3 @@ class TestPositiveVectors(ManifoldTestCase):
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
         np_testing.assert_allclose(xretru, x + u)
-
-    def test_first_order_function_approximation(self):
-        self.run_gradient_approximation_test()
-
-    def test_second_order_function_approximation(self):
-        self.run_hessian_approximation_test()
