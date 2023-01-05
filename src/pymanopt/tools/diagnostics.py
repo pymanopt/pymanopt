@@ -47,7 +47,7 @@ def check_directional_derivative(
     #  If x and / or d are not specified, pick them at random.
     if d is not None and x is None:
         raise ValueError(
-            "If d is provided, x must be too, " "since d is tangent at x."
+            "If d is provided, x must be too, " "since d is tangent at x"
         )
     if x is None:
         x = problem.manifold.random_point()
@@ -138,22 +138,21 @@ def check_gradient(problem, x=None, d=None):
 
     Both x and d are optional and will be sampled at random if omitted.
     """
-    #  If x and / or d are not specified, pick them at random.
     if plt is None:
         raise RuntimeError("The 'check_gradient' function requires matplotlib")
     if d is not None and x is None:
         raise ValueError(
-            "If d is provided, x must be too, since d is tangent at x."
+            "If d is provided, x must be too, since d must be tangent at x"
         )
     if x is None:
         x = problem.manifold.random_point()
     if d is None:
         d = problem.manifold.random_tangent_vector(x)
 
-    h, err, segment, poly = check_directional_derivative(problem, x, d)
+    h, error, segment, poly = check_directional_derivative(problem, x, d)
 
     plt.figure()
-    plt.loglog(h, err)
+    plt.loglog(h, error)
     plt.xlabel("h")
     plt.ylabel("Approximation error")
     plt.loglog(
@@ -161,9 +160,9 @@ def check_gradient(problem, x=None, d=None):
     )
     plt.plot([1e-8, 1e0], [1e-8, 1e8], linestyle="--", color="k")
     plt.title(
-        "Gradient check\nThe slope of the continuous line "
-        "should match that of the dashed\n(reference) line "
-        "over at least a few orders of magnitude for h."
+        "Gradient check\nThe slope of the continuous line should match that "
+        "of the dashed\n(reference) line over at least a few orders of "
+        "magnitude for h."
     )
     plt.show()
 
@@ -178,16 +177,121 @@ def check_gradient(problem, x=None, d=None):
         )
     else:
         residual = grad - projected_grad
-        err = problem.manifold.norm(x, residual)
-        print(f"The residual should be 0, or very close. Residual: {err:g}.")
+        error = problem.manifold.norm(x, residual)
+        print(f"The residual should be close to 0: {error:g}.")
         print(
-            "If it is far from 0, then the gradient "
-            "is not in the tangent space."
+            "If it is far from 0, then the gradient is not in the tangent "
+            "space."
         )
+
+
+def check_hessian(problem, point=None, tangent_vector=None):
+    """Checks the consistency of the cost function and the Hessian.
+
+    The function performs a numerical test to check that the Hessian
+    defined in the problem agrees up to second order with the cost function at
+    some point x, along some direction d. The test is based on a truncated
+    Taylor series.
+
+    It is also tested that the result of applying the Hessian along that
+    direction is indeed a tangent vector, and that the Hessian operator is
+    linear and symmetric w.r.t. the Riemannian metric.
+
+    Both x and d are optional and will be sampled at random if omitted.
+    """
+    if plt is None:
+        raise RuntimeError("The 'check_hessian' function requires matplotlib")
+    if tangent_vector is not None and point is None:
+        raise ValueError(
+            "If d is provided, x must be too, since d must be tangent at x"
+        )
+    if point is None:
+        point = problem.manifold.random_point()
+    if tangent_vector is None:
+        tangent_vector = problem.manifold.random_tangent_vector(point)
+
+    h, error, segment, poly = check_directional_derivative(
+        problem, point, tangent_vector, use_quadratic_model=True
+    )
+
+    plt.figure()
+    plt.loglog(h, error)
+    plt.xlabel("h")
+    plt.ylabel("Approximation error")
+    plt.loglog(
+        h[segment], 10 ** np.polyval(poly, np.log10(h[segment])), linewidth=3
+    )
+    plt.plot([1e-8, 1e0], [1e-16, 1e8], linestyle="--", color="k")
+    plt.title(
+        "Hessian check\nThe slope of the continuous line should match that of "
+        "the dashed\n(reference) line over at least a few orders of magnitude "
+        "for h."
+    )
+    plt.show()
+
+    hessian = problem.riemannian_hessian(point, tangent_vector)
+    try:
+        projected_hessian = problem.manifold.to_tangent_space(point, hessian)
+    except NotImplementedError:
+        print(
+            "Pymanopt was unable to verify that the Hessian operator indeed "
+            "yields a tangent vector since "
+            f"{problem.manifold.__class__.__name__} does not provide a "
+            "'to_tangent_space' implementation."
+        )
+    else:
+        residual = hessian - projected_hessian
+        error = problem.manifold.norm(point, residual)
+        print(f"The residual should be 0, or very close. Residual: {error:g}.")
+        print(
+            "If it is far from 0, then the Hessian is not in the tangent "
+            "space."
+        )
+    print()
+
+    # Check linearity of Hessian operator.
+    tangent_vector_a = problem.manifold.random_tangent_vector(point)
+    tangent_vector_b = problem.manifold.random_tangent_vector(point)
+    hessian_a = problem.riemannian_hessian(point, tangent_vector_a)
+    hessian_b = problem.riemannian_hessian(point, tangent_vector_b)
+    weight_a, weight_b = np.random.normal(size=2)
+    hessian_of_linear_combination = problem.riemannian_hessian(
+        point, weight_a * tangent_vector_a + weight_b * tangent_vector_b
+    )
+    linear_combination_of_hessians = (
+        weight_a * hessian_a + weight_b * hessian_b
+    )
+    error_norm = problem.manifold.norm(
+        point, hessian_of_linear_combination - linear_combination_of_hessians
+    )
+    print(
+        "The norm of the residual between H[a*d1 + b*d2] and a*H[d1] + "
+        f"b*H[d2] should be very close to 0: {error_norm:g}."
+    )
+    print("If it is far from 0, then the Hessian is not a linear operator.")
+    print()
+
+    # Check symmetry of Hessian operator.
+    inner_product_a = problem.manifold.inner_product(
+        point, tangent_vector_a, hessian_b
+    )
+    inner_product_b = problem.manifold.inner_product(
+        point, hessian_a, tangent_vector_b
+    )
+    error = inner_product_a - inner_product_b
+    print(
+        "The difference <d1, H[d2]> - <H[d1], d2> should be close to zero: "
+        f"{inner_product_a:g} - {inner_product_b:g} = {error:g}."
+    )
+    print("If it is far from 0 then the Hessian is not a symmetric operator.")
 
 
 def check_retraction(manifold, point=None, tangent_vector=None):
     """Check order of agreement between a retraction and the exponential."""
+    if plt is None:
+        raise RuntimeError(
+            "The 'check_retraction' function requires matplotlib"
+        )
     if point is None:
         point = manifold.random_point()
         tangent_vector = manifold.random_tangent_vector(point)
@@ -206,15 +310,15 @@ def check_retraction(manifold, point=None, tangent_vector=None):
         manifold.retraction(point, tangent_vector)
     except NotImplementedError:
         raise RuntimeError(
-            f"The manifold '{manifold_class}' provides no retraction."
-        )
+            f"The manifold '{manifold_class}' provides no retraction"
+        ) from None
     try:
         manifold.retraction(point, tangent_vector)
     except NotImplementedError:
         raise RuntimeError(
             f"This manifold '{manifold_class}'provides no distance map which "
-            "is required to run this check."
-        )
+            "is required to run this check"
+        ) from None
 
     # Compare the retraction and the exponential over steps of varying
     # length, on a wide log-scale.
