@@ -3,10 +3,7 @@ name: Run test suite
 on:
   pull_request:
     branches:
-      "master"
-  push:
-    branches:
-      "!master"
+      master
 
 jobs:
   tests:
