@@ -28,7 +28,9 @@ jobs:
         run: pip install -e ".[all,ci]"
 
       - name: Run tests
-        run: pytest -v --cov-report= --cov=src/pymanopt tests/
+        run: |
+          pytest -v --cov-report= --cov=src/pymanopt tests/
+          coverage lcov -o coverage/lcov.info
 
       - name: Collect coverage
         uses: coverallsapp/github-action@master
