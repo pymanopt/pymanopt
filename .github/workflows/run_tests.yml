@@ -30,9 +30,12 @@ jobs:
       - name: Run tests
         run: pytest -v --cov-report= --cov=src/pymanopt tests/
 
+  finish:
+    needs: tests
+    runs-on: ubuntu-20.04
+    steps:
       - name: Upload coverage
-        if: ${{ matrix.python-version == 3.7 }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_SERVICE_NAME: github
-        run: coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
