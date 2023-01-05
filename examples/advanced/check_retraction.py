@@ -15,6 +15,6 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
 if __name__ == "__main__":
     runner = ExampleRunner(
-        run, "Check retraction of positive manifold", SUPPORTED_BACKENDS
+        run, "Check retraction on positive manifold", SUPPORTED_BACKENDS
     )
     runner.run()

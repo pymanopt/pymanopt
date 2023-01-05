@@ -1,4 +1,5 @@
 import autograd.numpy as np
+import jax.numpy as jnp
 import tensorflow as tf
 import torch
 
@@ -9,7 +10,7 @@ from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_gradient
 
 
-SUPPORTED_BACKENDS = ("autograd", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, matrix, backend):
@@ -20,6 +21,12 @@ def create_cost_and_derivates(manifold, matrix, backend):
         @pymanopt.function.autograd(manifold)
         def cost(x):
             return -np.inner(x, matrix @ x)
+
+    elif backend == "jax":
+
+        @pymanopt.function.jax(manifold)
+        def cost(x):
+            return -jnp.inner(x, matrix @ x)
 
     elif backend == "numpy":
 
@@ -70,6 +77,6 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
 if __name__ == "__main__":
     runner = ExampleRunner(
-        run, "Check gradient for sphere manifold", SUPPORTED_BACKENDS
+        run, "Check gradient on sphere manifold", SUPPORTED_BACKENDS
     )
     runner.run()
