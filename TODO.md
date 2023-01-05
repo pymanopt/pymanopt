@@ -1,7 +1,6 @@
 # TODO/Roadmap
 
 ## 2.x:
-  - Add 'check_hessian' function
   - Add callback mechanism to allow for custom termination criteria #133
   - Add patience parameter to terminate optimization if cost does not improve
     anymore #114
