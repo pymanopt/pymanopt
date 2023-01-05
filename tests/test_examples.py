@@ -13,7 +13,7 @@ from examples import (
     pca,
     rank_k_correlation_matrix_approximation,
 )
-from examples.advanced import check_gradient, check_retraction
+from examples.advanced import check_gradient, check_hessian, check_retraction
 
 
 class TestExamples:
@@ -82,6 +82,10 @@ class TestExamples:
     @pytest.mark.parametrize("backend", check_gradient.SUPPORTED_BACKENDS)
     def test_check_gradient(self, backend):
         check_gradient.run(backend)
+
+    @pytest.mark.parametrize("backend", check_gradient.SUPPORTED_BACKENDS)
+    def test_check_hessian(self, backend):
+        check_hessian.run(backend)
 
     @pytest.mark.parametrize("backend", check_retraction.SUPPORTED_BACKENDS)
     def test_check_retraction(self, backend):
