@@ -265,9 +265,8 @@ def check_hessian(problem, point=None, tangent_vector=None):
         point, hessian_of_linear_combination - linear_combination_of_hessians
     )
     print(
-        "The residual between Hessian of linear combination and linear "
-        "combination of Hessians should be very close to 0. Residual: "
-        f"{error_norm:g}."
+        "The norm of the residual between H[a*d1 + b*d2] and a*H[d1] + "
+        f"b*H[d2] should be very close to 0: {error_norm:g}."
     )
     print("If it is far from 0, then the Hessian is not a linear operator.")
     print()
