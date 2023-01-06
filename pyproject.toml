@@ -1,6 +1,9 @@
 [build-system]
-requires = ["pip==21.3.1", "setuptools==59.6.0", "versioneer-518"]
+requires = ["pip==21.3.1", "setuptools==59.6.0", "setuptools-scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "src/pymanopt/_version.py"
 
 [tool.black]
 include = '\.py$'
@@ -14,3 +17,15 @@ line_length = 79
 multi_line_output = 3
 profile = "pycharm"
 use_parentheses = true
+
+[tool.flake8]
+application_import_names = "pymanopt"
+docstring-convention = "google"
+exclude = [
+  "examples/notebooks/*.py",
+  "build"
+]
+ignore = ["B024", "B027", "D1", "E203", "E501", "W503"]
+import_order_style = "pycharm"
+max-line-length = 79
+select = ["B", "B950", "C", "D", "E", "F", "W"]
