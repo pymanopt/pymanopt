@@ -31,6 +31,7 @@ repos:
           - flake8-bugbear==22.12.6
           - flake8-docstrings==1.6.0
           - flake8-import-order==0.18.2
+          - flake8-pyproject==1.2.2
   - repo: https://github.com/mwouts/jupytext
     rev: v1.13.4
     hooks:
