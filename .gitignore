@@ -68,3 +68,6 @@ manopt-*
 
 # Mac OS temp files
 .DS_Store
+
+# setuptools-scm
+src/pymanopt/_version.py
