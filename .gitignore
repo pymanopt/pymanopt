@@ -65,3 +65,6 @@ manopt-*
 
 # pyenv
 .python-version
+
+# setuptools-scm
+src/pymanopt/_version.py
