@@ -61,3 +61,11 @@ def is_sequence(instance):
     return not isinstance(instance, str) and isinstance(
         instance, typing.Sequence
     )
+
+
+def extend_docstring(text: str):
+    def inner(cls):
+        cls.__doc__ += text
+        return cls
+
+    return inner

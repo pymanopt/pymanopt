@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.tools import extend_docstring
 
 
 class _SphereBase(RiemannianSubmanifold):
@@ -73,6 +74,13 @@ class _SphereBase(RiemannianSubmanifold):
         return array / np.linalg.norm(array)
 
 
+DOCSTRING_NOTE = """
+    Note:
+        The Weingarten map is taken from [AMT2013]_.
+"""
+
+
+@extend_docstring(DOCSTRING_NOTE)
 class Sphere(_SphereBase):
     r"""The sphere manifold.
 
@@ -102,13 +110,6 @@ class Sphere(_SphereBase):
             name = f"Sphere manifold of shape {shape} tensors"
         dimension = np.prod(shape) - 1
         super().__init__(*shape, name=name, dimension=dimension)
-
-
-DOCSTRING_NOTE = """
-    Note:
-        The Weingarten map is taken from [AMT2013]_.
-"""
-Sphere.__doc__ += DOCSTRING_NOTE
 
 
 class _SphereSubspaceIntersectionManifold(_SphereBase):
@@ -145,6 +146,7 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
         return self._normalize(self._subspace_projector @ vector)
 
 
+@extend_docstring(DOCSTRING_NOTE)
 class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     r"""Sphere-subspace intersection manifold.
 
@@ -171,9 +173,7 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         super().__init__(projector, name, dimension)
 
 
-SphereSubspaceIntersection.__doc__ += DOCSTRING_NOTE
-
-
+@extend_docstring(DOCSTRING_NOTE)
 class SphereSubspaceComplementIntersection(
     _SphereSubspaceIntersectionManifold
 ):
@@ -200,6 +200,3 @@ class SphereSubspaceComplementIntersection(
         )
         dimension = subspace_dimension - 1
         super().__init__(projector, name, dimension)
-
-
-SphereSubspaceComplementIntersection.__doc__ += DOCSTRING_NOTE
