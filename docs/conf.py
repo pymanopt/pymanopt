@@ -119,11 +119,13 @@ latex_macros = r"""
     \def \opt     #1{#1^\star}
     \def \sphere  {\mathcal{S}}
     \def \transp  #1{#1^\top}
-    \def \conj    #1{#1^*}
+    \def \adj     #1{#1^*}
+    \def \conj    #1{\overline{#1}}
     \def \norm    #1{\|#1\|}
     \def \abs     #1{|#1|}
     \def \parens  #1{\left(#1\right)}
     \def \tangent #1{\mathrm{T}_{#1}}
+    \def \Re      {\mathfrak{Re}}
 """
 # Generate macros for boldface letters.
 latex_macros += "\n".join(
@@ -146,6 +148,9 @@ katex_options = (
     + ",\n"
     + r'"\\dist":'
     + r'"\\operatorname{dist}"'
+    + ",\n"
+    + r'"\\tr":'
+    + r'"\\operatorname{tr}"'
     + "}"
 )
 print(f"Defined KaTeX macros:\n{katex_options}")
