@@ -2,6 +2,7 @@ import numpy as np
 import scipy.special
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.tools import extend_docstring
 from pymanopt.tools.multi import (
     multiexpm,
     multihconj,
@@ -93,6 +94,25 @@ class _UnitaryBase(RiemannianSubmanifold):
         return self.exp(point_a, self.log(point_a, point_b) / 2)
 
 
+DOCSTRING_NOTE = """
+    Args:
+        n: The dimension of the space that elements of the group act on.
+        k: The number of elements in the product of groups.
+        retraction: The type of retraction to use.
+            Possible choices are ``qr`` and ``polar``.
+
+    Note:
+        The default QR-based retraction is only a first-order approximation of
+        the exponential map.
+        Use of an SVD-based second-order retraction can be enabled by setting
+        the ``retraction`` argument to "polar".
+
+        The procedure to generate random points on the manifold sampled
+        uniformly from the Haar measure is detailed in [Mez2006]_.
+"""
+
+
+@extend_docstring(DOCSTRING_NOTE)
 class SpecialOrthogonalGroup(_UnitaryBase):
     r"""The (product) manifold of rotation matrices.
 
@@ -119,21 +139,6 @@ class SpecialOrthogonalGroup(_UnitaryBase):
     skew-symmetric factor.
     The method :meth:`embedding` can be used to transform a tangent vector from
     its Lie algebra representation to the embedding space representation.
-
-    Args:
-        n: The dimension of the space that elements of the group act on.
-        k: The number of elements in the product of groups.
-        retraction: The type of retraction to use.
-            Possible choices are ``qr`` and ``polar``.
-
-    Note:
-        The default SVD-based retraction is only a first-order approximation of
-        the exponential map.
-        Use of a second-order retraction can be enabled by instantiating the
-        class with ``SpecialOrthogonalGroup(n, k=k, retraction="polar")``.
-
-        The procedure to generate random rotation matrices sampled uniformly
-        from the Haar measure is detailed in [Mez2006]_.
     """
 
     def __init__(self, n: int, *, k: int = 1, retraction: str = "qr"):
@@ -165,50 +170,39 @@ class SpecialOrthogonalGroup(_UnitaryBase):
         return point
 
     def random_tangent_vector(self, point):
-        n, k = self._n, self._k
-        if n == 1:
-            return np.ones((k, 1, 1))
-        inds = np.triu_indices(n, 1)
-        vector = np.zeros((k, n, n))
-        for i in range(k):
-            vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
-        vector = vector - multitransp(vector)
-        if k == 1:
+        vector = _random_skew_symmetric_matrix(self._n, self._k)
+        if self._k == 1:
             vector = vector[0]
         return vector / self.norm(point, vector)
 
 
+@extend_docstring(DOCSTRING_NOTE)
 class UnitaryGroup(_UnitaryBase):
     r"""The (product) manifold of unitary matrices (i.e., the unitary group).
 
-    Unitary group: deals with arrays U of size k x n x n (or n x n if k = 1,
-    which is the default) such that each n x n matrix is unitary, that is,
-        X.conj().T @ X = eye(n) if k = 1, or
-        X[i].conj().T @ X[i] = eye(n) for i = 1 : k if k > 1.
+    The unitary group :math:`\U(n)`.
+    Points on the manifold are matrices :math:`\vmU \in \C^{n
+    \times n}` such that each matrix is unitary, i.e.,
+    :math:`\transp{\conj{\vmU}}\vmU = \adj{\vmU}\vmU = \Id_n`.
+    For ``k > 1``, the class represents the product manifold
+    of unitary matrices :math:`\U(n)^k`.
+    In that case points on the manifold are represented as arrays of shape
+    ``(k, n, n)``.
 
-    This is a description of U(n)^k with the induced metric from the
-    embedding space (C^nxn)^k, i.e., this manifold is a Riemannian
-    submanifold of (C^nxn)^k endowed with the usual real inner product on
-    C^nxn, namely, <A, B> = real(trace(A.conj().T @ B)).
+    The metric is the usual Euclidean one inherited from the embedding space
+    :math:`(\C^{n \times n})^k`, i.e., :math:`\inner{\vmA}{\vmB} =
+    \Re\tr(\adj{A}B)`.
+    As such :math:`\U(n)^k` forms a Riemannian submanifold.
 
-    Tangent vectors are represented in the Lie algebra, i.e., as
-    skew-Hermitian matrices. Use the function M.tangent2ambient(X, H) to
-    switch from the Lie algebra representation to the embedding space
-    representation. This is often necessary when defining
-    problem.ehess(X, H).
-    as the input H will then be a skew-Hermitian matrix (but the output must
-    not be, as the output is the Hessian in the embedding Euclidean space.)
-
-    By default, the retraction is only a first-order approximation of the
-    exponential. To force the use of a second-order approximation, call
-    manifold.retr = manifold.retr2 after creating manifold object.
-    This switches from a QR-based computation to an SVD-based computation.
-
-    Args:
-        n: The dimension of the space that elements of the group act on.
-        k: The number of elements in the product of groups.
-        retraction: The type of retraction to use.
-            Possible choices are ``qr`` and ``polar``.
+    The tangent space :math:`\tangent{\vmU}\U(n)` at a point :math:`\vmU` is
+    given by :math:`\tangent{\vmU}\U(n) = \set{\vmU \vmOmega \in \C^{n \times
+    n} \mid \vmOmega = -\adj{\vmOmega} = \vmU \adj{\Skew}(n)`, where
+    :math:`\adj{\Skew}(n)` denotes the set of skew-Hermitian matrices.
+    This corresponds to the Lie algebra of :math:`\U(n)`, a fact which is used
+    here to conveniently represent tangent vectors numerically by their
+    skew-Hermitian factor.
+    The method :meth:`embedding` can be used to convert a tangent vector from
+    its Lie algebra representation to the embedding space representation.
     """
 
     def __init__(self, n: int, *, k: int = 1, retraction: str = "qr"):
@@ -238,35 +232,32 @@ class UnitaryGroup(_UnitaryBase):
             return point[0]
         return point
 
-    def _random_tangent_vector(self, point):
-        # TODO
+    def random_tangent_vector(self, point):
         n, k = self._n, self._k
-        inds = np.triu_indices(n, 1)
-        vector = np.zeros((k, n, n))
-        for i in range(k):
-            vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
-        vector = vector - multihconj(vector)
+        vector = (
+            _random_skew_symmetric_matrix(n, k)
+            + 1j * _random_symmetric_matrix(n, k)
+        ) / np.sqrt(2)
         if k == 1:
             vector = vector[0]
-        return vector / np.sqrt(2)
-
-    def random_tangent_vector(self, point):
-        tangent_vector = _randskewh(self._n, self._k)
-        norm = np.sqrt(
-            np.tensordot(
-                tangent_vector.conj(), tangent_vector, axes=tangent_vector.ndim
-            )
-        )
-        return tangent_vector / norm
+        return vector / self.norm(point, vector)
 
 
-def _randskewh(n, k=1):
-    # Generate random skew-hermitian matrices with normal entries.
-    idxs = np.triu_indices(n, 1)
-    S = np.zeros((k, n, n))
+def _random_skew_symmetric_matrix(n, k):
+    if n == 1:
+        return np.ones((k, 1, 1))
+    inds = np.triu_indices(n, 1)
+    vector = np.zeros((k, n, n))
     for i in range(k):
-        S[i][idxs] = np.random.normal(size=int(n * (n - 1) / 2))
-        S = S - multihconj(S)
-    if k == 1:
-        return S.reshape(n, n)
-    return S
+        vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
+    return vector - multitransp(vector)
+
+
+def _random_symmetric_matrix(n, k):
+    if n == 1:
+        return np.ones((k, 1, 1))
+    inds = np.triu_indices(n, 1)
+    vector = np.zeros((k, n, n))
+    for i in range(k):
+        vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
+    return vector + multitransp(vector)
