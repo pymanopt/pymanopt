@@ -19,7 +19,6 @@ def multitransp(A):
     containing the ``M`` matrix transposes of the matrices in ``A``, each of
     which will be ``P x N``.
     """
-    # First check if we have been given just one matrix
     if A.ndim == 2:
         return A.T
     return np.transpose(A, (0, 2, 1))
