@@ -245,19 +245,23 @@ class UnitaryGroup(_UnitaryBase):
 
 def _random_skew_symmetric_matrix(n, k):
     if n == 1:
-        return np.ones((k, 1, 1))
-    inds = np.triu_indices(n, 1)
-    vector = np.zeros((k, n, n))
-    for i in range(k):
-        vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
+        return np.zeros((k, 1, 1))
+    vector = _random_upper_triangular_matrix(n, k)
     return vector - multitransp(vector)
 
 
 def _random_symmetric_matrix(n, k):
     if n == 1:
-        return np.ones((k, 1, 1))
+        return np.random.normal(size=(k, 1, 1))
+    vector = _random_upper_triangular_matrix(n, k)
+    return vector + multitransp(vector)
+
+
+def _random_upper_triangular_matrix(n, k):
+    if n < 2:
+        raise ValueError("Matrix dimension cannot be less than 2")
     inds = np.triu_indices(n, 1)
     vector = np.zeros((k, n, n))
     for i in range(k):
-        vector[i][inds] = np.random.normal(size=int(n * (n - 1) / 2))
-    return vector + multitransp(vector)
+        vector[i][inds] = np.random.normal(size=n * (n - 1) // 2)
+    return vector
