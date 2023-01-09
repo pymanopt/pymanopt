@@ -254,13 +254,21 @@ def _random_symmetric_matrix(n, k):
     if n == 1:
         return np.random.normal(size=(k, 1, 1))
     vector = _random_upper_triangular_matrix(n, k)
-    return vector + multitransp(vector)
+    vector = vector + multitransp(vector)
+    # The diagonal elements get scaled by a factor of 2 by the previous
+    # operation so re-draw them so every entry of the returned matrix follows a
+    # standard normal distribution.
+    indices = np.arange(n)
+    vector[:, indices, indices] = np.random.normal(size=(k, n))
+    return vector
 
 
 def _random_upper_triangular_matrix(n, k):
     if n < 2:
         raise ValueError("Matrix dimension cannot be less than 2")
-    inds = np.triu_indices(n, 1)
+    indices = np.triu_indices(n, 1)
     vector = np.zeros((k, n, n))
-    vector[(slice(None), *inds)] = np.random.normal(size=(k, n * (n - 1) // 2))
+    vector[(slice(None), *indices)] = np.random.normal(
+        size=(k, n * (n - 1) // 2)
+    )
     return vector
