@@ -262,6 +262,5 @@ def _random_upper_triangular_matrix(n, k):
         raise ValueError("Matrix dimension cannot be less than 2")
     inds = np.triu_indices(n, 1)
     vector = np.zeros((k, n, n))
-    for i in range(k):
-        vector[i][inds] = np.random.normal(size=n * (n - 1) // 2)
+    vector[(slice(None), *inds)] = np.random.normal(size=(k, n * (n - 1) // 2))
     return vector
