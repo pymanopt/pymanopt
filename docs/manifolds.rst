@@ -54,10 +54,10 @@ Complex Circle
 
 .. automodule:: pymanopt.manifolds.complex_circle
 
-Special Orthogonal Group
-------------------------
+Group Manifolds
+---------------
 
-.. automodule:: pymanopt.manifolds.special_orthogonal_group
+.. automodule:: pymanopt.manifolds.group
 
 Oblique Manifold
 ----------------

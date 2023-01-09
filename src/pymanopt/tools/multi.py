@@ -39,6 +39,10 @@ def multisym(A):
     return 0.5 * (A + multitransp(A))
 
 
+def multiherm(A):
+    return 0.5 * (A + multihconj(A))
+
+
 def multiskew(A):
     """Vectorized matrix skew-symmetrization.
 
@@ -47,6 +51,10 @@ def multiskew(A):
     -A[i].T``.
     """
     return 0.5 * (A - multitransp(A))
+
+
+def multiskewh(A):
+    return 0.5 * (A - multihconj(A))
 
 
 def multieye(k, n):

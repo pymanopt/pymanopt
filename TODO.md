@@ -4,7 +4,7 @@
   - Add callback mechanism to allow for custom termination criteria #133
   - Add patience parameter to terminate optimization if cost does not improve
     anymore #114
-  - Add complex manifolds #125, #170
+  - Add complex manifolds #125
   - Add L-BFGS and other quasi-Newton optimizers
 
 ## 3.x:
