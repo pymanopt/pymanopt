@@ -181,9 +181,9 @@ class UnitaryGroup(_UnitaryBase):
     r"""The (product) manifold of unitary matrices (i.e., the unitary group).
 
     The unitary group :math:`\U(n)`.
-    Points on the manifold are matrices :math:`\vmU \in \C^{n
+    Points on the manifold are matrices :math:`\vmX \in \C^{n
     \times n}` such that each matrix is unitary, i.e.,
-    :math:`\transp{\conj{\vmU}}\vmU = \adj{\vmU}\vmU = \Id_n`.
+    :math:`\transp{\conj{\vmX}}\vmX = \adj{\vmX}\vmX = \Id_n`.
     For ``k > 1``, the class represents the product manifold
     of unitary matrices :math:`\U(n)^k`.
     In that case points on the manifold are represented as arrays of shape
@@ -191,12 +191,12 @@ class UnitaryGroup(_UnitaryBase):
 
     The metric is the usual Euclidean one inherited from the embedding space
     :math:`(\C^{n \times n})^k`, i.e., :math:`\inner{\vmA}{\vmB} =
-    \Re\tr(\adj{A}B)`.
+    \Re\tr(\adj{\vmA}\vmB)`.
     As such :math:`\U(n)^k` forms a Riemannian submanifold.
 
-    The tangent space :math:`\tangent{\vmU}\U(n)` at a point :math:`\vmU` is
-    given by :math:`\tangent{\vmU}\U(n) = \set{\vmU \vmOmega \in \C^{n \times
-    n} \mid \vmOmega = -\adj{\vmOmega} = \vmU \adj{\Skew}(n)`, where
+    The tangent space :math:`\tangent{\vmX}\U(n)` at a point :math:`\vmX` is
+    given by :math:`\tangent{\vmX}\U(n) = \set{\vmX \vmOmega \in \C^{n \times
+    n} \mid \vmOmega = -\adj{\vmOmega}} = \vmX \adj{\Skew}(n)`, where
     :math:`\adj{\Skew}(n)` denotes the set of skew-Hermitian matrices.
     This corresponds to the Lie algebra of :math:`\U(n)`, a fact which is used
     here to conveniently represent tangent vectors numerically by their
