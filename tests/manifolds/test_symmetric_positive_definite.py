@@ -1,11 +1,10 @@
 import autograd.numpy as np
 import numpy.testing as np_testing
+import pytest
 from scipy.linalg import eigvalsh, expm, logm
 
 from pymanopt.manifolds import SymmetricPositiveDefinite
 from pymanopt.tools.multi import multiexpm, multilogm, multisym, multitransp
-
-from .._test import TestCase
 
 
 def geodesic(point_a, point_b, alpha):
@@ -21,12 +20,11 @@ def geodesic(point_a, point_b, alpha):
     return c @ powm @ multitransp(c)
 
 
-class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
-    def setUp(self):
+class TestSingleSymmetricPositiveDefiniteManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = n = 15
         self.manifold = SymmetricPositiveDefinite(n)
-
-        super().setUp()
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -138,13 +136,12 @@ class TestSingleSymmetricPositiveDefiniteManifold(TestCase):
         np_testing.assert_allclose(manifold.log(x, y), u)
 
 
-class TestMultiSymmetricPositiveDefiniteManifold(TestCase):
-    def setUp(self):
+class TestMultiSymmetricPositiveDefiniteManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = n = 10
         self.k = k = 3
         self.manifold = SymmetricPositiveDefinite(n, k=k)
-
-        super().setUp()
 
     def test_dim(self):
         manifold = self.manifold

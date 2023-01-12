@@ -97,7 +97,7 @@ class Grassmann(_GrassmannBase):
         # since only the column space is important, not the actual
         # columns. Compare this with the Stiefel manifold.
 
-        # Compute the polar factorization of Y = X+G
+        # Compute the polar factorization of Y = X + G.
         u, _, vt = np.linalg.svd(point + tangent_vector, full_matrices=False)
         return u @ vt
 

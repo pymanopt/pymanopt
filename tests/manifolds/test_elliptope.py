@@ -1,15 +1,14 @@
+import pytest
+
 from pymanopt.manifolds import Elliptope
 
-from .._test import TestCase
 
-
-class TestElliptopeManifold(TestCase):
-    def setUp(self):
+class TestElliptopeManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         n = 50
         k = 10
         self.manifold = Elliptope(n, k)
-
-        super().setUp()
 
     # def test_dim(self):
 

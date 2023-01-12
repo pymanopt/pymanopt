@@ -1,23 +1,21 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Grassmann
 from pymanopt.tools import testing
 from pymanopt.tools.multi import multieye, multisym, multitransp
 
-from .._test import TestCase
 
-
-class TestSingleGrassmannManifold(TestCase):
-    def setUp(self):
+class TestSingleGrassmannManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 5
         self.n = n = 2
         self.k = k = 1
         self.manifold = Grassmann(m, n, k=k)
 
         self.projection = lambda x, u: u - x @ x.T @ u
-
-        super().setUp()
 
     def test_dist(self):
         x = self.manifold.random_point()
@@ -99,16 +97,15 @@ class TestSingleGrassmannManifold(TestCase):
     # np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestMultiGrassmannManifold(TestCase):
-    def setUp(self):
+class TestMultiGrassmannManifold:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 5
         self.n = n = 2
         self.k = k = 3
         self.manifold = Grassmann(m, n, k=k)
 
         self.projection = lambda x, u: u - x @ x.T @ u
-
-        super().setUp()
 
     def test_dim(self):
         assert self.manifold.dim == self.k * (self.m * self.n - self.n**2)

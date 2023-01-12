@@ -1,12 +1,14 @@
-import autograd.numpy as np
+import autograd.numpy as anp
 import jax.numpy as jnp
+import numpy as np
 import tensorflow as tf
 import torch
 
 import pymanopt
 from examples._tools import ExampleRunner
-from pymanopt.manifolds import Oblique
-from pymanopt.optimizers import TrustRegions
+from pymanopt import Problem
+from pymanopt.manifolds import Sphere
+from pymanopt.tools.diagnostics import check_hessian
 
 
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
@@ -18,43 +20,41 @@ def create_cost_and_derivates(manifold, matrix, backend):
     if backend == "autograd":
 
         @pymanopt.function.autograd(manifold)
-        def cost(X):
-            return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
+        def cost(x):
+            return -anp.inner(x, matrix @ x)
 
     elif backend == "jax":
 
         @pymanopt.function.jax(manifold)
-        def cost(X):
-            return 0.25 * jnp.linalg.norm(X.T @ X - matrix) ** 2
+        def cost(x):
+            return -jnp.inner(x, matrix @ x)
 
     elif backend == "numpy":
 
         @pymanopt.function.numpy(manifold)
-        def cost(X):
-            return 0.25 * np.linalg.norm(X.T @ X - matrix) ** 2
+        def cost(x):
+            return -np.inner(x, matrix @ x)
 
         @pymanopt.function.numpy(manifold)
-        def euclidean_gradient(X):
-            return 0.5 * X @ (X.T @ X - matrix)
+        def euclidean_gradient(x):
+            return -2 * matrix @ x
 
         @pymanopt.function.numpy(manifold)
-        def euclidean_hessian(X, H):
-            return X @ (H.T @ X + X.T @ H) + H @ (X.T @ X - matrix)
+        def euclidean_hessian(x, d):
+            return -2 * matrix @ d
 
     elif backend == "pytorch":
         matrix_ = torch.from_numpy(matrix)
 
         @pymanopt.function.pytorch(manifold)
-        def cost(X):
-            return (
-                0.25 * torch.norm(torch.transpose(X, 1, 0) @ X - matrix_) ** 2
-            )
+        def cost(x):
+            return -x @ matrix_ @ x
 
     elif backend == "tensorflow":
 
         @pymanopt.function.tensorflow(manifold)
-        def cost(X):
-            return 0.25 * tf.norm(tf.transpose(X) @ X - matrix) ** 2
+        def cost(x):
+            return -tf.tensordot(x, tf.tensordot(matrix, x, axes=1), axes=1)
 
     else:
         raise ValueError(f"Unsupported backend '{backend}'")
@@ -63,36 +63,30 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
-    num_rows = 10
-    rank = 3
-    matrix = np.random.normal(size=(num_rows, num_rows))
-    matrix = 0.5 * (matrix + matrix.T)
+    n = 128
+    manifold = Sphere(n)
 
-    # Solve the problem with pymanopt.
-    manifold = Oblique(rank, num_rows)
+    # Generate random problem data.
+    matrix = np.random.normal(size=(n, n))
+    matrix = 0.5 * (matrix + matrix.T)
     cost, euclidean_gradient, euclidean_hessian = create_cost_and_derivates(
         manifold, matrix, backend
     )
-    problem = pymanopt.Problem(
+
+    # Create the problem structure.
+    problem = Problem(
         manifold,
         cost,
         euclidean_gradient=euclidean_gradient,
         euclidean_hessian=euclidean_hessian,
     )
 
-    optimizer = TrustRegions(verbosity=2 * int(not quiet))
-    X = optimizer.run(problem).point
-
-    if quiet:
-        return
-
-    C = X.T @ X
-    print("Diagonal elements:", np.diag(C))
-    print("Eigenvalues:", np.sort(np.linalg.eig(C)[0].real)[::-1])
+    # Numerically check gradient consistency (optional).
+    check_hessian(problem)
 
 
 if __name__ == "__main__":
     runner = ExampleRunner(
-        run, "Nearest low-rank correlation matrix", SUPPORTED_BACKENDS
+        run, "Check Hessian on sphere manifold", SUPPORTED_BACKENDS
     )
     runner.run()

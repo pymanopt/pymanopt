@@ -72,8 +72,10 @@ class FixedRankEmbedded(RiemannianSubmanifold):
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.sum(
-            np.tensordot(a, b)
-            for (a, b) in zip(tangent_vector_a, tangent_vector_b)
+            [
+                np.tensordot(a, b)
+                for (a, b) in zip(tangent_vector_a, tangent_vector_b)
+            ]
         )
 
     def _apply_ambient(self, vector, matrix):

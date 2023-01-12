@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 import tensorflow as tf
 from numpy import testing as np_testing
 
@@ -6,11 +7,10 @@ import pymanopt
 from pymanopt.manifolds import Product, Sphere, Stiefel
 from pymanopt.optimizers import TrustRegions
 
-from ._test import TestCase
 
-
-class TestProblem(TestCase):
-    def setUp(self):
+class TestProblem:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.n = 15
         self.manifold = Sphere(self.n)
 
@@ -29,7 +29,7 @@ class TestProblem(TestCase):
 
     def test_attribute_override(self):
         problem = pymanopt.Problem(self.manifold, self.cost)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             problem.manifold = None
 
     def test_vararg_cost_on_product(self):
@@ -44,5 +44,5 @@ class TestProblem(TestCase):
         problem = pymanopt.Problem(manifold, cost)
         optimizer = TrustRegions(max_iterations=1)
         Xopt, Yopt = optimizer.run(problem).point
-        self.assertEqual(Xopt.shape, (3, 3))
-        self.assertEqual(Yopt.shape, (3, 3))
+        assert Xopt.shape == (3, 3)
+        assert Yopt.shape == (3, 3)

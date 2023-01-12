@@ -10,12 +10,6 @@ development dependencies by running
 
     $ pip install -e ".[all]"
 
-We provide a simple bootstrapping script in
-`tools/bootstrap-pyenv-virtualenv.sh` to set up a local development
-environment.
-The script requires `pyenv` and `pyenv-virtualenv` to be installed and
-configured.
-
 Verify that all existing tests pass by executing the test suite via
 [nose2][nose2]:
 

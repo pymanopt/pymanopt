@@ -1,19 +1,17 @@
 import autograd.numpy as np
+import pytest
 from numpy import testing as np_testing
 
 from pymanopt.manifolds import Positive
 
-from .._test import TestCase
 
-
-class TestPositiveVectors(TestCase):
-    def setUp(self):
+class TestPositiveVectors:
+    @pytest.fixture(autouse=True)
+    def setup(self):
         self.m = m = 3
         self.n = n = 1
         self.k = k = 2
         self.manifold = Positive(m, n, k=k)
-
-        super().setUp()
 
     def test_inner_product(self):
         x = self.manifold.random_point()
