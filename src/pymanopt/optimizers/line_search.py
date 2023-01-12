@@ -1,24 +1,14 @@
-class BackTrackingLineSearcher:
-    """Back-tracking line-search algorithm."""
+import abc
+import typing
 
-    def __init__(
-        self,
-        contraction_factor=0.5,
-        optimism=2,
-        sufficient_decrease=1e-4,
-        max_iterations=25,
-        initial_step_size=1,
-    ):
-        self.contraction_factor = contraction_factor
-        self.optimism = optimism
-        self.sufficient_decrease = sufficient_decrease
-        self.max_iterations = max_iterations
-        self.initial_step_size = initial_step_size
+import attrs
 
-        self._oldf0 = None
 
+@attrs.define
+class LineSearcher(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
     def search(self, objective, manifold, x, d, f0, df0):
-        """Function to perform backtracking line search.
+        """Run line search procedure.
 
         Args:
             objective: Objective function to optimize.
@@ -32,6 +22,21 @@ class BackTrackingLineSearcher:
             the vector retracted to reach the suggested iterate ``newx`` from
             ``x``.
         """
+
+
+@attrs.define
+class BackTrackingLineSearcher(LineSearcher):
+    """Back-tracking line-search algorithm."""
+
+    contraction_factor: float = 0.5
+    optimism: float = 2.0
+    sufficient_decrease: float = 1e-4
+    max_iterations: int = 25
+    initial_step_size: float = 1.0
+
+    _oldf0: typing.Optional[float] = attrs.field(init=False, default=None)
+
+    def search(self, objective, manifold, x, d, f0, df0):
         # Compute the norm of the search direction
         norm_d = manifold.norm(x, d)
 
@@ -49,7 +54,7 @@ class BackTrackingLineSearcher:
         newf = objective(newx)
         step_count = 1
 
-        # Backtrack while the Armijo criterion is not satisfied
+        # Backtrack while the Armijo criterion is not satisfied.
         while (
             newf > f0 + self.sufficient_decrease * alpha * df0
             and step_count <= self.max_iterations
@@ -76,21 +81,16 @@ class BackTrackingLineSearcher:
         return step_size, newx
 
 
-class AdaptiveLineSearcher:
+@attrs.define
+class AdaptiveLineSearcher(LineSearcher):
     """Adaptive line-search algorithm."""
 
-    def __init__(
-        self,
-        contraction_factor=0.5,
-        sufficient_decrease=0.5,
-        max_iterations=10,
-        initial_step_size=1,
-    ):
-        self._contraction_factor = contraction_factor
-        self._sufficient_decrease = sufficient_decrease
-        self._max_iterations = max_iterations
-        self._initial_step_size = initial_step_size
-        self._oldalpha = None
+    contraction_factor: float = 0.5
+    sufficient_decrease: float = 0.5
+    max_iterations: int = 10
+    initial_step_size: float = 1.0
+
+    _oldalpha: typing.Optional[float] = attrs.field(init=False, default=None)
 
     def search(self, objective, manifold, x, d, f0, df0):
         norm_d = manifold.norm(x, d)
@@ -98,7 +98,7 @@ class AdaptiveLineSearcher:
         if self._oldalpha is not None:
             alpha = self._oldalpha
         else:
-            alpha = self._initial_step_size / norm_d
+            alpha = self.initial_step_size / norm_d
         alpha = float(alpha)
 
         newx = manifold.retraction(x, alpha * d)
@@ -106,11 +106,11 @@ class AdaptiveLineSearcher:
         cost_evaluations = 1
 
         while (
-            newf > f0 + self._sufficient_decrease * alpha * df0
-            and cost_evaluations <= self._max_iterations
+            newf > f0 + self.sufficient_decrease * alpha * df0
+            and cost_evaluations <= self.max_iterations
         ):
             # Reduce the step size.
-            alpha *= self._contraction_factor
+            alpha *= self.contraction_factor
 
             # Look closer down the line.
             newx = manifold.retraction(x, alpha * d)

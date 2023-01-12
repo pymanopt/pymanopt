@@ -1,9 +1,11 @@
+import copy
 import time
-from copy import deepcopy
+import typing
 
+import attrs
 import numpy as np
 
-from pymanopt.optimizers.line_search import AdaptiveLineSearcher
+from pymanopt.optimizers.line_search import AdaptiveLineSearcher, LineSearcher
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
@@ -136,6 +138,7 @@ BETA_RULES = {
 }
 
 
+@attrs.define
 class ConjugateGradient(Optimizer):
     """Riemannian conjugate gradient method.
 
@@ -157,31 +160,26 @@ class ConjugateGradient(Optimizer):
         See [HZ2006]_ for details about Powell's restart strategy.
     """
 
-    def __init__(
-        self,
-        beta_rule: str = "HestenesStiefel",
-        orth_value=np.inf,
-        line_searcher=None,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
+    _beta_rule: str = attrs.field(default="HestenesStiefel")
+    _orth_value: float = np.inf
+    _line_searcher: LineSearcher = attrs.field(factory=AdaptiveLineSearcher)
 
-        try:
-            self._beta_update = BETA_RULES[beta_rule]
-        except KeyError:
+    @_beta_rule.validator
+    def _validate_beta_rule(self, attribute, value):
+        beta_rule = value
+        if beta_rule not in BETA_RULES:
             raise ValueError(
                 f"Invalid beta rule '{beta_rule}'. Should be one of "
                 f"{list(BETA_RULES.keys())}."
             )
-        self._beta_rule = beta_rule
-        self._orth_value = orth_value
 
-        if line_searcher is None:
-            self._line_searcher = AdaptiveLineSearcher()
-        else:
-            self._line_searcher = line_searcher
-        self.line_searcher = None
+    _beta_update: typing.Callable = attrs.field(init=False)
+    line_searcher: typing.Optional[LineSearcher] = attrs.field(
+        init=False, default=None
+    )
+
+    def __attrs_post_init__(self):
+        self._beta_update = BETA_RULES[self._beta_rule]
 
     def run(
         self, problem, *, initial_point=None, reuse_line_searcher=False
@@ -208,7 +206,7 @@ class ConjugateGradient(Optimizer):
         gradient = problem.riemannian_gradient
 
         if not reuse_line_searcher or self.line_searcher is None:
-            self.line_searcher = deepcopy(self._line_searcher)
+            self.line_searcher = copy.deepcopy(self._line_searcher)
         line_searcher = self.line_searcher
 
         # If no starting point is specified, generate one at random.

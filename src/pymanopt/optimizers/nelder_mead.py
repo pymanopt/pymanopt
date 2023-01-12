@@ -1,5 +1,7 @@
 import time
+import typing
 
+import attrs
 import numpy as np
 
 import pymanopt
@@ -33,6 +35,7 @@ def compute_centroid(manifold, points):
     return optimizer.run(problem).point
 
 
+@attrs.define
 class NelderMead(Optimizer):
     """Nelder-Mead alglorithm.
 
@@ -50,23 +53,11 @@ class NelderMead(Optimizer):
         contraction: Factor by which to contract the reflected simplex.
     """
 
-    def __init__(
-        self,
-        max_cost_evaluations=None,
-        max_iterations=None,
-        reflection=1,
-        expansion=2,
-        contraction=0.5,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
-
-        self._max_cost_evaluations = max_cost_evaluations
-        self._max_iterations = max_iterations
-        self._reflection = reflection
-        self._expansion = expansion
-        self._contraction = contraction
+    _max_cost_evaluations: typing.Optional[int] = None
+    _max_iterations: typing.Optional[int] = None
+    _reflection: float = 1.0
+    _expansion: float = 2.0
+    _contraction = 0.5
 
     def run(self, problem, *, initial_point=None) -> OptimizerResult:
         """Run Nelder-Mead algorithm.
