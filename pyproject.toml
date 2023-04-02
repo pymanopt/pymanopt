@@ -1,5 +1,5 @@
 [build-system]
-requires = ["pip==21.3.1", "setuptools==59.6.0", "setuptools-scm[toml]>=6.2"]
+requires = ["pip==22.3.1", "setuptools==65.6.3", "setuptools-scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
