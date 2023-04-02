@@ -28,6 +28,11 @@ jobs:
       matrix:
         version: ${{ fromJSON(needs.build-matrix.outputs.versions) }}
     steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
       - name: Set up python 3.7
         uses: actions/setup-python@v4
         with:

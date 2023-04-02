@@ -9,6 +9,9 @@ jobs:
   linting:
     runs-on: ubuntu-20.04
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Set up python 3.9
         uses: actions/setup-python@v4
         with:
