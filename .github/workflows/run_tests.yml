@@ -18,9 +18,12 @@ jobs:
           - "3.10"
     steps:
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
 
       - name: Checkout
         uses: actions/checkout@v2
