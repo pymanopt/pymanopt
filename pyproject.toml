@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pymanopt"
+dynamic = ["version"]
 description = """\
   Toolbox for optimization on Riemannian manifolds with support for automatic \
   differentiation\
