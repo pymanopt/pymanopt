@@ -20,7 +20,7 @@ As such a cost function defined on the manifold must accept three arguments
 on how points are represented.
 
 New backends can be created by inheriting from the
-:class:`pymanopt.autodiff.backends._backend._Backend` class, and creating a
+:class:`pymanopt.autodiff.backends._backend.Backend` class, and creating a
 backend decorator using :func:`pymanopt.autodiff.backend_decorator_factory`.
 
 .. automodule:: pymanopt.autodiff
