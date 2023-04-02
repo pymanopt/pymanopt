@@ -4,87 +4,90 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pymanopt"
-description = "Toolbox for optimization on Riemannian manifolds with support for automatic differentiation"
+description = """\
+  Toolbox for optimization on Riemannian manifolds with support for automatic \
+  differentiation\
+"""
 authors = [
   {name = "Jamie Townsend"},
   {name = "Niklas Koep"},
   {name = "Sebastian Weichwald"},
 ]
-readme="README.md"
-license = { text = "BSD 3-Clause License"}
-requires-python=">=3.7"
-keywords=[
-    "manifolds",
-    "optimization",
-    "automatic differentiation",
+readme = "README.md"
+license = {text = "BSD 3-Clause License"}
+requires-python = ">=3.7"
+keywords = [
+  "manifolds",
+  "optimization",
+  "automatic differentiation",
 ]
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "License :: OSI Approved :: BSD License",
-    "Intended Audience :: Science/Research",
-    "Development Status :: 5 - Production/Stable",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "License :: OSI Approved :: BSD License",
+  "Intended Audience :: Science/Research",
+  "Development Status :: 5 - Production/Stable",
 ]
 dependencies = [
-    "numpy>=1.16.0",
-    "scipy>=1.0,<1.10",
+  "numpy>=1.16.0",
+  "scipy>=1.0,<1.10",
 ]
 [project.urls]
-homepage="https://pymanopt.org"
+homepage = "https://pymanopt.org"
 
 [project.optional-dependencies]
 autograd = [
-    "autograd>=1.2",
+  "autograd>=1.2",
 ]
 jax = [
-    "jax>=0.2.0",
-    "jaxlib",
+  "jax>=0.2.0",
+  "jaxlib",
 ]
 tensorflow = [
-    "tensorflow>=2.0.0",
+  "tensorflow>=2.0.0",
 ]
 torch = [
-    "torch>=1.0.0",
+  "torch>=1.0.0",
 ]
 backends = [
-    "pymanopt[autograd,jax,tensorflow,torch]",
+  "pymanopt[autograd,jax,tensorflow,torch]",
 ]
 dev = [
-    "black[jupyter]==22.3.0",
-    "flake8==5.0.4",
-    "flake8-bugbear==22.12.6",
-    "flake8-docstrings==1.6.0",
-    "flake8-import-order==0.18.2",
-    "flake8-pyproject==1.2.2",
-    "isort==5.8.0",
-    "matplotlib",
-    "pre-commit",
-    "pytest==7.2.0",
-    "pytest-cov==4.0.0",
+  "black[jupyter]==22.3.0",
+  "flake8==5.0.4",
+  "flake8-bugbear==22.12.6",
+  "flake8-docstrings==1.6.0",
+  "flake8-import-order==0.18.2",
+  "flake8-pyproject==1.2.2",
+  "isort==5.8.0",
+  "matplotlib",
+  "pre-commit",
+  "pytest==7.2.0",
+  "pytest-cov==4.0.0",
 ]
 docs = [
-    "docutils==0.16",
-    "ipykernel==6.4.2",
-    "myst-parser==0.16.1",
-    "nbsphinx==0.8.7",
-    "sphinx==4.2.0",
-    "sphinx_rtd_theme==1.0.0",
-    "sphinxcontrib-katex==0.8.6",
+  "docutils==0.16",
+  "ipykernel==6.4.2",
+  "myst-parser==0.16.1",
+  "nbsphinx==0.8.7",
+  "sphinx==4.2.0",
+  "sphinx_rtd_theme==1.0.0",
+  "sphinxcontrib-katex==0.8.6",
 ]
 ci = [
-    "build==0.8.0",
-    "pip==22.3.1",
-    "setuptools==65.6.3",
-    "wheel==0.38.4",
+  "build==0.8.0",
+  "pip==22.3.1",
+  "setuptools==65.6.3",
+  "wheel==0.38.4",
 ]
 all = [
-    "pymanopt[backends,dev]",
+  "pymanopt[backends,dev]",
 ]
 [tool.setuptools_scm]
 write_to = "src/pymanopt/_version.py"
