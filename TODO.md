@@ -22,5 +22,5 @@
   (add `weingarten` map to support `euclidean_to_riemannian_hessian`)
 - Rewrite core/manifolds
   - in JAX with jit support, or
-  - using a backend abstraction as in geomstats (potentially shared with
+  - using a backend abstraction as in `geomstats` (potentially shared with
     `geomstats`)

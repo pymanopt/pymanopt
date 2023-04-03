@@ -3,7 +3,7 @@ name: Run linting
 on:
   pull_request:
     branches:
-      master
+      - master
 
 jobs:
   linting:
