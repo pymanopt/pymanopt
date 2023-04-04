@@ -3,12 +3,12 @@ name: Build release version
 on:
   push:
     branches:
-      master
+      - master
     tags:
       - '*.*.*'
   pull_request:
     branches:
-      master
+      - master
 
 jobs:
   deploy:
