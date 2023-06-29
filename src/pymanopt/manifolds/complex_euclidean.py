@@ -27,7 +27,7 @@ class _ComplexEuclidean(RiemannianSubmanifold):
     def projection(self, X, U):
         return U
 
-    def ehess2rhess(self, X, egrad, ehess, H):
+    def euclidean_to_riemannian_hessian(self, X, egrad, ehess, H):
         return ehess
 
     def exp(self, X, U):
@@ -42,7 +42,7 @@ class _ComplexEuclidean(RiemannianSubmanifold):
         return rnd.randn(*self._shape) + 1j*rnd.randn(*self._shape)
 
     def random_tangent_vector(self, X):
-        Y = self.rand()
+        Y = self.random_point()
         return Y / self.norm(X, Y)
 
     def transp(self, X1, X2, G):
