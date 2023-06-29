@@ -2,10 +2,9 @@ import numpy as np
 from numpy import linalg as la, random as rnd, testing as np_testing
 
 from pymanopt.manifolds import ComplexEuclidean
-from .._test import TestCase
 
 
-class TestComplexEuclideanManifold(TestCase):
+class TestComplexEuclideanManifold:
     def setUp(self):
         self.m = m = 10
         self.n = n = 5

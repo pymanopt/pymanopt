@@ -4,11 +4,10 @@ from scipy.linalg import eigvalsh
 
 from pymanopt.manifolds import HermitianPositiveDefinite,\
         SpecialHermitianPositiveDefinite
-from pymanopt.tools.multi import multiherm, multiprod, multitransp
-from .._test import TestCase
+from pymanopt.tools.multi import multiherm, multitransp
 
 
-class TestSingleHermitianPositiveDefiniteManifold(TestCase):
+class TestSingleHermitianPositiveDefiniteManifold:
     def setUp(self):
         self.n = n = 15
         self.man = HermitianPositiveDefinite(n)
@@ -81,8 +80,7 @@ class TestSingleHermitianPositiveDefiniteManifold(TestCase):
         man = self.man
         x = man.rand()
         u = rnd.randn(self.n, self.n) + 1j*rnd.randn(self.n, self.n)
-        np.testing.assert_allclose(man.egrad2rgrad(x, u),
-                                   multiprod(multiprod(x, multiherm(u)), x))
+        np.testing.assert_allclose(man.egrad2rgrad(x, u), x @ multiherm(u) @ x)
 
     def test_exp(self):
         # exp(x, u) = x + u.
@@ -144,7 +142,7 @@ class TestSingleHermitianPositiveDefiniteManifold(TestCase):
                                        man.norm(x, man.log(x, y)))
 
 
-class TestMultiHermitianPositiveDefiniteManifold(TestCase):
+class TestMultiHermitianPositiveDefiniteManifold:
     def setUp(self):
         self.n = n = 10
         self.k = k = 3
@@ -193,8 +191,7 @@ class TestMultiHermitianPositiveDefiniteManifold(TestCase):
         # b is not symmetric, it is Hermitian
         np.testing.assert_almost_equal(
             np.tensordot(a, multitransp(b), axes=a.ndim),
-            man.inner(x, multiprod(x, a),
-                      multiprod(x, b)))
+            man.inner(x, x @ a @ x @ b))
         assert man.inner(x, a, b).dtype == np.float
 
     def test_norm(self):
@@ -222,7 +219,7 @@ class TestMultiHermitianPositiveDefiniteManifold(TestCase):
         u = rnd.randn(self.k, self.n, self.n)
         + 1j*rnd.randn(self.k, self.n, self.n)
         np.testing.assert_allclose(man.egrad2rgrad(x, u),
-                                   multiprod(multiprod(x, multiherm(u)), x))
+                                   x @ multiherm(u) @ x)
 
     def test_exp(self):
         # Test against manopt implementation, test that for small vectors
@@ -299,7 +296,7 @@ class TestMultiHermitianPositiveDefiniteManifold(TestCase):
                                        man.norm(x, man.log(x, y)))
 
 
-class TestSingleSpecialHermitianPositiveDefiniteManifold(TestCase):
+class TestSingleSpecialHermitianPositiveDefiniteManifold:
     def setUp(self):
         self.n = n = 10
         self.k = k = 1
@@ -365,8 +362,7 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold(TestCase):
         # b is not symmetric, it is Hermitian
         np.testing.assert_almost_equal(
             np.tensordot(a, multitransp(b), axes=a.ndim),
-            man.inner(x, multiprod(x, a),
-                      multiprod(x, b)))
+            man.inner(x, x @ a @ x @ b))
         assert man.inner(x, a, b).dtype == np.float
 
     def test_norm(self):
@@ -480,7 +476,7 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold(TestCase):
                                        man.norm(x, man.log(x, y)))
 
 
-class TestMultiSpecialHermitianPositiveDefiniteManifold(TestCase):
+class TestMultiSpecialHermitianPositiveDefiniteManifold:
     def setUp(self):
         self.n = n = 10
         self.k = k = 3
@@ -546,8 +542,7 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold(TestCase):
         # b is not symmetric, it is Hermitian
         np.testing.assert_almost_equal(
             np.tensordot(a, multitransp(b), axes=a.ndim),
-            man.inner(x, multiprod(x, a),
-                      multiprod(x, b)))
+            man.inner(x, x @ a @ x @ b))
         assert man.inner(x, a, b).dtype == np.float
 
     def test_norm(self):
