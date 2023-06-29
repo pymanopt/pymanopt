@@ -2,12 +2,11 @@ import numpy as np
 from numpy import linalg as la, random as rnd
 from scipy.linalg import sqrtm
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
-from pymanopt.tools.multi import multihconj, multiherm, multilog
-from pymanopt.tools.multi import multiprod, multitransp
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.tools.multi import multihconj, multiherm, multilogm, multitransp
 
 
-class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
+class HermitianPositiveDefinite(RiemannianSubmanifold):
     """Manifold of (n x n)^k complex Hermitian positive definite matrices.
     """
     def __init__(self, n, k=1):
@@ -36,8 +35,8 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
                 rnd.randn(self._n, self._n)+1j*rnd.randn(self._n, self._n))
 
         if self._k == 1:
-            return multiprod(u, d * multihconj(u))[0]
-        return multiprod(u, d * multihconj(u))
+            return (u @ (d * multihconj(u)))[0]
+        return u @ (d * multihconj(u))
 
     def randvec(self, x):
         k = self._k
@@ -66,14 +65,13 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         # definite results.
         c = la.cholesky(x)
         c_inv = la.inv(c)
-        return np.real(
-            la.norm(multiprod(multiprod(c_inv, u), multihconj(c_inv))))
+        return np.real(la.norm(c_inv @ u @ multihconj(c_inv)))
 
     def proj(self, X, G):
         return multiherm(G)
 
     def egrad2rgrad(self, x, u):
-        return multiprod(multiprod(x, multiherm(u)), x)
+        return x @ multiherm(u) @ x
 
     def exp(self, x, u):
         k = self._k
@@ -86,14 +84,14 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
             temp = np.zeros(q.shape, dtype=np.complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(np.sqrt(d[i, :]))[np.newaxis, :, :]
-            x_sqrt = multiprod(multiprod(q, temp), multihconj(q))
+            x_sqrt = q @ temp @ multihconj(q)
 
             temp = np.zeros(q.shape, dtype=np.complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(1/np.sqrt(d[i, :]))[np.newaxis, :, :]
-            x_isqrt = multiprod(multiprod(q, temp), multihconj(q))
+            x_isqrt = q @ temp @ multihconj(q)
 
-        d, q = la.eigh(multiprod(multiprod(x_isqrt, u), x_isqrt))
+        d, q = la.eigh(x_isqrt @ u @ x_isqrt)
         if k == 1:
             e = q@np.diag(np.exp(d))@q.conj().T
         else:
@@ -101,9 +99,9 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(np.exp(d[i, :]))[np.newaxis, :, :]
             d = temp
-            e = multiprod(multiprod(q, d), multihconj(q))
+            e = q @ d @ multihconj(q)
 
-        e = multiprod(multiprod(x_sqrt, e), x_sqrt)
+        e = x_sqrt @ e @ x_sqrt
         e = multiherm(e)
         return e
 
@@ -122,14 +120,14 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
             temp = np.zeros(q.shape, dtype=np.complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(np.sqrt(d[i, :]))[np.newaxis, :, :]
-            x_sqrt = multiprod(multiprod(q, temp), multihconj(q))
+            x_sqrt = q @ temp @ multihconj(q)
 
             temp = np.zeros(q.shape, dtype=np.complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(1/np.sqrt(d[i, :]))[np.newaxis, :, :]
-            x_isqrt = multiprod(multiprod(q, temp), multihconj(q))
+            x_isqrt = q @ temp @ multihconj(q)
 
-        d, q = la.eigh(multiprod(multiprod(x_isqrt, y), x_isqrt))
+        d, q = la.eigh(x_isqrt @ y @ x_isqrt)
         if k == 1:
             log = q@np.diag(np.log(d))@q.conj().T
         else:
@@ -137,9 +135,9 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(np.log(d[i, :]))[np.newaxis, :, :]
             d = temp
-            log = multiprod(multiprod(q, d), multihconj(q))
+            log = q @ d @ multihconj(q)
 
-        xi = multiprod(multiprod(x_sqrt, log), x_sqrt)
+        xi = x_sqrt @ log @ x_sqrt
         xi = multiherm(xi)
         return xi
 
@@ -150,18 +148,17 @@ class HermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         else:
             for i in range(len(E)):
                 E[i, :, :] = sqrtm(E[i, :, :])
-        transp_d = multiprod(multiprod(E, d), multihconj(E))
+        transp_d = E @ d @ multihconj(E)
         return transp_d
 
     def dist(self, x, y):
         c = la.cholesky(x)
         c_inv = la.inv(c)
-        logm = multilog(multiprod(multiprod(c_inv, y), multihconj(c_inv)),
-                        pos_def=True)
+        logm = multilogm(c_inv @ y @ multihconj(c_inv), pos_def=True)
         return np.real(la.norm(logm))
 
 
-class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
+class SpecialHermitianPositiveDefinite(RiemannianSubmanifold):
     """Manifold of (n x n)^k Hermitian positive
     definite matrices with unit determinant
     called 'Special Hermitian positive definite manifold'.
@@ -238,7 +235,7 @@ class SpecialHermitianPositiveDefinite(EuclideanEmbeddedSubmanifold):
         return u
 
     def egrad2rgrad(self, x, u):
-        rgrad = multiprod(multiprod(x, u), x)
+        rgrad = x @ u @ x
         rgrad = self.proj(x, rgrad)
         return rgrad
 

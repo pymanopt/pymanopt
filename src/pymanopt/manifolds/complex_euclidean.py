@@ -1,10 +1,10 @@
 import numpy as np
 from numpy import linalg as la, random as rnd
 
-from pymanopt.manifolds.manifold import EuclideanEmbeddedSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
-class _ComplexEuclidean(EuclideanEmbeddedSubmanifold):
+class _ComplexEuclidean(RiemannianSubmanifold):
     """Shared base class for subspace manifolds of Euclidean space."""
 
     def __init__(self, name, dimension, *shape):

@@ -3,8 +3,11 @@ __all__ = [
     "ComplexGrassmann",
     "Elliptope",
     "Euclidean",
+    "ComplexEuclidean",
     "FixedRankEmbedded",
     "Grassmann",
+    "HermitianPositiveDefinite",
+    "SpecialHermitianPositiveDefinite",
     "Oblique",
     "PSDFixedRank",
     "PSDFixedRankComplex",
@@ -24,9 +27,11 @@ __all__ = [
 
 from .complex_circle import ComplexCircle
 from .euclidean import Euclidean, SkewSymmetric, Symmetric
+from .complex_euclidean import ComplexEuclidean
 from .fixed_rank import FixedRankEmbedded
 from .grassmann import ComplexGrassmann, Grassmann
 from .group import SpecialOrthogonalGroup, UnitaryGroup
+from .hpd import HermitianPositiveDefinite, SpecialHermitianPositiveDefinite
 from .hyperbolic import PoincareBall
 from .oblique import Oblique
 from .positive import Positive
