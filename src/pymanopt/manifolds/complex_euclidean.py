@@ -15,7 +15,7 @@ class _ComplexEuclidean(RiemannianSubmanifold):
     def typicaldist(self):
         return np.sqrt(self.dim/2)
 
-    def inner(self, X, G, H):
+    def inner_product(self, X, G, H):
         return np.real(np.tensordot(G.conj(), H, axes=G.ndim))
 
     def norm(self, X, G):
@@ -24,7 +24,7 @@ class _ComplexEuclidean(RiemannianSubmanifold):
     def dist(self, X, Y):
         return la.norm(X - Y)
 
-    def proj(self, X, U):
+    def projection(self, X, U):
         return U
 
     def ehess2rhess(self, X, egrad, ehess, H):
@@ -38,10 +38,10 @@ class _ComplexEuclidean(RiemannianSubmanifold):
     def log(self, X, Y):
         return Y - X
 
-    def rand(self):
+    def random_point(self):
         return rnd.randn(*self._shape) + 1j*rnd.randn(*self._shape)
 
-    def randvec(self, X):
+    def random_tangent_vector(self, X):
         Y = self.rand()
         return Y / self.norm(X, Y)
 
@@ -51,7 +51,7 @@ class _ComplexEuclidean(RiemannianSubmanifold):
     def pairmean(self, X, Y):
         return (X + Y) / 2
 
-    def zerovec(self, X):
+    def zero_vector(self, X):
         return np.zeros(self._shape, dtype=np.complex)
 
 

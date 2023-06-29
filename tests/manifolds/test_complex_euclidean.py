@@ -1,10 +1,12 @@
 import numpy as np
+import pytest
 from numpy import linalg as la, random as rnd, testing as np_testing
 
 from pymanopt.manifolds import ComplexEuclidean
 
 
 class TestComplexEuclideanManifold:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.m = m = 10
         self.n = n = 5
