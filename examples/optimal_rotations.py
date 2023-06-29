@@ -1,61 +1,59 @@
-import os
-
 import autograd.numpy as np
+import jax.numpy as jnp
 import tensorflow as tf
-import theano.tensor as T
 import torch
-from examples._tools import ExampleRunner
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import SpecialOrthogonalGroup
-from pymanopt.solvers import SteepestDescent
+from pymanopt.optimizers import SteepestDescent
 
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
-)
+def create_cost_and_derivates(manifold, ABt, backend):
+    euclidean_gradient = None
 
+    if backend == "autograd":
 
-def create_cost_egrad(backend, ABt):
-    egrad = None
-
-    if backend == "Autograd":
-        @pymanopt.function.Autograd
-        def cost(X):
-            return -np.tensordot(X, ABt, axes=X.ndim)
-    elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.autograd(manifold)
         def cost(X):
             return -np.tensordot(X, ABt, axes=X.ndim)
 
-        @pymanopt.function.Callable
-        def egrad(X):
+    elif backend == "jax":
+
+        @pymanopt.function.jax(manifold)
+        def cost(X):
+            return -jnp.tensordot(X, ABt, axes=X.ndim)
+
+    elif backend == "numpy":
+
+        @pymanopt.function.numpy(manifold)
+        def cost(X):
+            return -np.tensordot(X, ABt, axes=X.ndim)
+
+        @pymanopt.function.numpy(manifold)
+        def euclidean_gradient(X):
             return -ABt
-    elif backend == "PyTorch":
+
+    elif backend == "pytorch":
         ABt_ = torch.from_numpy(ABt)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.pytorch(manifold)
         def cost(X):
             return -torch.tensordot(X, ABt_, dims=X.dim())
-    elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros(ABt.shape, dtype=np.float64), name="X")
 
-        @pymanopt.function.TensorFlow
+    elif backend == "tensorflow":
+
+        @pymanopt.function.tensorflow(manifold)
         def cost(X):
             return -tf.tensordot(X, ABt, axes=ABt.ndim)
-    elif backend == "Theano":
-        X = T.tensor3()
 
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            return -T.tensordot(X, ABt, axes=ABt.ndim)
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad
+    return cost, euclidean_gradient
 
 
 def compute_optimal_solution(ABt):
@@ -74,18 +72,20 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     m = 10
     k = 10
 
-    A = np.random.randn(k, n, m)
-    B = np.random.randn(k, n, m)
+    A = np.random.normal(size=(k, n, m))
+    B = np.random.normal(size=(k, n, m))
     ABt = np.array([Ak @ Bk.T for Ak, Bk in zip(A, B)])
 
-    cost, egrad = create_cost_egrad(backend, ABt)
-    manifold = SpecialOrthogonalGroup(n, k)
-    problem = pymanopt.Problem(manifold, cost, egrad=egrad)
-    if quiet:
-        problem.verbosity = 0
+    manifold = SpecialOrthogonalGroup(n, k=k)
+    cost, euclidean_gradient = create_cost_and_derivates(
+        manifold, ABt, backend
+    )
+    problem = pymanopt.Problem(
+        manifold, cost, euclidean_gradient=euclidean_gradient
+    )
 
-    solver = SteepestDescent()
-    X = solver.solve(problem)
+    optimizer = SteepestDescent(verbosity=2 * int(not quiet))
+    X = optimizer.run(problem).point
 
     if not quiet:
         Xopt = np.array([compute_optimal_solution(ABtk) for ABtk in ABt])
@@ -93,6 +93,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
 
 if __name__ == "__main__":
-    runner = ExampleRunner(run, "Optimal rotations example",
-                           SUPPORTED_BACKENDS)
+    runner = ExampleRunner(
+        run, "Optimal rotations example", SUPPORTED_BACKENDS
+    )
     runner.run()

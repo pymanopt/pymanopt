@@ -1,0 +1,90 @@
+name: Build documentation
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build-matrix:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Generate version matrix
+        id: build-matrix
+        run: echo "versions=['stable', 'latest']" >> "$GITHUB_OUTPUT"
+    outputs:
+      versions: ${{ steps.build-matrix.outputs.versions }}
+
+  docs:
+    runs-on: ubuntu-20.04
+    needs: build-matrix
+    strategy:
+      # Make sure we never build docs in parallel in case we deploy new
+      # versions to avoid potential race conditions while pushing to gh pages.
+      max-parallel: 1
+      matrix:
+        version: ${{ fromJSON(needs.build-matrix.outputs.versions) }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up python 3.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.7
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Clone repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Checkout target
+        id: checkout
+        run: |
+          if ${{ matrix.version == 'latest' }}; then
+            sha=$(git rev-parse --short ${{ github.sha }})
+            git checkout ${{ github.sha }}
+          elif ${{ matrix.version == 'stable' }}; then
+            tag=$(git tag | sort -V | tail -1)
+            git checkout tags/$tag
+          else
+            git checkout ${{ matrix.version }}
+          fi
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+          pip install -e ".[all,ci,docs]"
+
+      - name: Run doctests
+        run: sphinx-build -b doctest docs $(mktemp -d)
+
+      - name: Build docs
+        run: |
+          sphinx-build \
+            -b html \
+            -D doc_version="${{ matrix.version }}" \
+            -D doc_versions="${{ join(fromJSON(needs.build-matrix.outputs.versions)) }}" \
+            docs \
+            website/docs/${{ matrix.version }}
+
+      - name: Publish documentation
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          external_repository: pymanopt/pymanopt.github.io
+          publish_branch: main
+          publish_dir: website/docs/${{ matrix.version }}
+          destination_dir: docs/${{ matrix.version }}
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: ${{ github.event.head_commit.message }}

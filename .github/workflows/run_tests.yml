@@ -1,0 +1,56 @@
+name: Run test suite
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+
+jobs:
+  tests:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: pip install -e ".[all,ci]"
+
+      - name: Run tests
+        run: |
+          pytest -v --cov-report= --cov=src/pymanopt tests/
+          coverage lcov -o coverage/lcov.info
+
+      - name: Collect coverage
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: ${{ matrix.python-version }}
+          parallel: true
+
+  finish:
+    needs: tests
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Upload coverage
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true

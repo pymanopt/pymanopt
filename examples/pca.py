@@ -1,101 +1,103 @@
-import os
-
 import autograd.numpy as np
+import jax.numpy as jnp
 import tensorflow as tf
-import theano.tensor as T
 import torch
-from examples._tools import ExampleRunner
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import Stiefel
-from pymanopt.solvers import TrustRegions
+from pymanopt.optimizers import TrustRegions
 
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
-)
+def create_cost_and_derivates(manifold, samples, backend):
+    euclidean_gradient = euclidean_hessian = None
 
+    if backend == "autograd":
 
-def create_cost_egrad_ehess(backend, samples, num_components):
-    dimension = samples.shape[-1]
-    egrad = ehess = None
-
-    if backend == "Autograd":
-        @pymanopt.function.Autograd
-        def cost(w):
-            return np.linalg.norm(samples - samples @ w @ w.T) ** 2
-    elif backend == "Callable":
-        @pymanopt.function.Callable
+        @pymanopt.function.autograd(manifold)
         def cost(w):
             return np.linalg.norm(samples - samples @ w @ w.T) ** 2
 
-        @pymanopt.function.Callable
-        def egrad(w):
-            return -2 * (
-                samples.T @ (samples - samples @ w @ w.T) +
-                (samples - samples @ w @ w.T).T @ samples
-            ) @ w
+    elif backend == "jax":
 
-        @pymanopt.function.Callable
-        def ehess(w, h):
-            return -2 * (
-                samples.T @ (samples - samples @ w @ h.T) @ w +
-                samples.T @ (samples - samples @ h @ w.T) @ w +
-                samples.T @ (samples - samples @ w @ w.T) @ h +
-                (samples - samples @ w @ h.T).T @ samples @ w +
-                (samples - samples @ h @ w.T).T @ samples @ w +
-                (samples - samples @ w @ w.T).T @ samples @ h
+        @pymanopt.function.jax(manifold)
+        def cost(w):
+            return jnp.linalg.norm(samples - samples @ w @ w.T) ** 2
+
+    elif backend == "numpy":
+
+        @pymanopt.function.numpy(manifold)
+        def cost(w):
+            return np.linalg.norm(samples - samples @ w @ w.T) ** 2
+
+        @pymanopt.function.numpy(manifold)
+        def euclidean_gradient(w):
+            return (
+                -2
+                * (
+                    samples.T @ (samples - samples @ w @ w.T)
+                    + (samples - samples @ w @ w.T).T @ samples
+                )
+                @ w
             )
-    elif backend == "PyTorch":
+
+        @pymanopt.function.numpy(manifold)
+        def euclidean_hessian(w, h):
+            return -2 * (
+                samples.T @ (samples - samples @ w @ h.T) @ w
+                + samples.T @ (samples - samples @ h @ w.T) @ w
+                + samples.T @ (samples - samples @ w @ w.T) @ h
+                + (samples - samples @ w @ h.T).T @ samples @ w
+                + (samples - samples @ h @ w.T).T @ samples @ w
+                + (samples - samples @ w @ w.T).T @ samples @ h
+            )
+
+    elif backend == "pytorch":
         samples_ = torch.from_numpy(samples)
 
-        @pymanopt.function.PyTorch
+        @pymanopt.function.pytorch(manifold)
         def cost(w):
-            projector = torch.matmul(w, torch.transpose(w, 1, 0))
-            return torch.norm(
-                samples_ - torch.matmul(samples_, projector)) ** 2
-    elif backend == "TensorFlow":
-        w = tf.Variable(
-            tf.zeros((dimension, num_components), dtype=np.float64), name="w")
+            projector = w @ torch.transpose(w, 1, 0)
+            return torch.norm(samples_ - samples_ @ projector) ** 2
 
-        @pymanopt.function.TensorFlow
-        def cost(w):
-            projector = tf.matmul(w, tf.transpose(w))
-            return tf.norm(samples - tf.matmul(samples, projector)) ** 2
-    elif backend == "Theano":
-        w = T.matrix()
+    elif backend == "tensorflow":
 
-        @pymanopt.function.Theano(w)
+        @pymanopt.function.tensorflow(manifold)
         def cost(w):
-            projector = T.dot(w, w.T)
-            return (samples - T.dot(samples, projector)).norm(2) ** 2
+            projector = w @ tf.transpose(w)
+            return tf.norm(samples - samples @ projector) ** 2
+
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad, ehess
+    return cost, euclidean_gradient, euclidean_hessian
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     dimension = 3
     num_samples = 200
     num_components = 2
-    samples = np.random.randn(num_samples, dimension) @ np.diag([3, 2, 1])
+    samples = np.random.normal(size=(num_samples, dimension)) @ np.diag(
+        [3, 2, 1]
+    )
     samples -= samples.mean(axis=0)
 
-    cost, egrad, ehess = create_cost_egrad_ehess(
-        backend, samples, num_components)
     manifold = Stiefel(dimension, num_components)
-    problem = pymanopt.Problem(manifold, cost, egrad=egrad, ehess=ehess)
-    if quiet:
-        problem.verbosity = 0
+    cost, euclidean_gradient, euclidean_hessian = create_cost_and_derivates(
+        manifold, samples, backend
+    )
+    problem = pymanopt.Problem(
+        manifold,
+        cost,
+        euclidean_gradient=euclidean_gradient,
+        euclidean_hessian=euclidean_hessian,
+    )
 
-    solver = TrustRegions()
-    # from pymanopt.solvers import ConjugateGradient
-    # solver = ConjugateGradient()
-    estimated_span_matrix = solver.solve(problem)
+    optimizer = TrustRegions(verbosity=2 * int(not quiet))
+    estimated_span_matrix = optimizer.run(problem).point
 
     if quiet:
         return
@@ -107,8 +109,11 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     span_matrix = eigenvectors[:, indices]
     projector = span_matrix @ span_matrix.T
 
-    print("Frobenius norm error between estimated and closed-form projection "
-          "matrix:", np.linalg.norm(projector - estimated_projector))
+    print(
+        "Frobenius norm error between estimated and closed-form projection "
+        "matrix:",
+        np.linalg.norm(projector - estimated_projector),
+    )
 
 
 if __name__ == "__main__":

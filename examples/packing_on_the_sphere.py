@@ -1,27 +1,21 @@
-import os
-
 import autograd.numpy as np
+import jax.numpy as jnp
 import tensorflow as tf
-import theano.tensor as T
 import torch
-from examples._tools import ExampleRunner
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import Elliptope
-from pymanopt.solvers import ConjugateGradient
+from pymanopt.optimizers import ConjugateGradient
 
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+SUPPORTED_BACKENDS = ("autograd", "jax", "pytorch", "tensorflow")
 
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "PyTorch", "TensorFlow", "Theano"
-)
+def create_cost(manifold, epsilon, backend):
+    if backend == "autograd":
 
-
-def create_cost(backend, dimension, num_points, epsilon):
-    if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.autograd(manifold)
         def cost(X):
             Y = X @ X.T
             # Shift the exponentials by the maximum value to reduce numerical
@@ -32,40 +26,42 @@ def create_cost(backend, dimension, num_points, epsilon):
             expY -= np.diag(np.diag(expY))
             u = np.triu(expY, 1).sum()
             return s + epsilon * np.log(u)
-    elif backend == "PyTorch":
-        @pymanopt.function.PyTorch
+
+    elif backend == "jax":
+
+        @pymanopt.function.jax(manifold)
         def cost(X):
-            Y = torch.matmul(X, torch.transpose(X, 1, 0))
+            Y = X @ X.T
+            s = jnp.triu(Y, 1).max()
+            expY = jnp.exp((Y - s) / epsilon)
+            expY -= jnp.diag(jnp.diag(expY))
+            u = jnp.triu(expY, 1).sum()
+            return s + epsilon * jnp.log(u)
+
+    elif backend == "pytorch":
+
+        @pymanopt.function.pytorch(manifold)
+        def cost(X):
+            Y = X @ torch.transpose(X, 1, 0)
             s = torch.triu(Y, 1).max()
             expY = torch.exp((Y - s) / epsilon)
             expY = expY - torch.diag(torch.diag(expY))
             u = torch.triu(expY, 1).sum()
             return s + epsilon * torch.log(u)
-    elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros((num_points, dimension), dtype=np.float64),
-                        name="X")
 
-        @pymanopt.function.TensorFlow
+    elif backend == "tensorflow":
+
+        @pymanopt.function.tensorflow(manifold)
         def cost(X):
-            Y = tf.matmul(X, tf.transpose(X))
+            Y = X @ tf.transpose(X)
             s = tf.reduce_max(tf.linalg.band_part(Y, 0, -1))
             expY = tf.exp((Y - s) / epsilon)
             expY = expY - tf.linalg.diag(tf.linalg.diag_part(expY))
             u = tf.reduce_sum(tf.linalg.band_part(Y, 0, -1))
             return s + epsilon * tf.math.log(u)
-    elif backend == "Theano":
-        X = T.matrix()
 
-        @pymanopt.function.Theano(X)
-        def cost(X):
-            Y = T.dot(X, X.T)
-            s = T.triu(Y, 1).max()
-            expY = T.exp((Y - s) / epsilon)
-            expY = expY - T.diag(T.diag(expY))
-            u = T.sum(T.triu(expY, 1))
-            return s + epsilon * T.log(u)
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
     return cost
 
@@ -82,16 +78,18 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     # using a small epsilon straightaway is to reduce epsilon bit by bit and to
     # warm-start subsequent optimization in that way. Trustregions will be more
     # appropriate for these fine tunings.
-    epsilon = 0.0015
+    epsilon = 0.005
 
-    cost = create_cost(backend, dimension, num_points, epsilon)
     manifold = Elliptope(num_points, dimension)
+    cost = create_cost(manifold, epsilon, backend)
     problem = pymanopt.Problem(manifold, cost)
-    if quiet:
-        problem.verbosity = 0
 
-    solver = ConjugateGradient(mingradnorm=1e-8, maxiter=1e5)
-    Yopt = solver.solve(problem)
+    optimizer = ConjugateGradient(
+        min_gradient_norm=1e-8,
+        max_iterations=1e5,
+        verbosity=2 * int(not quiet),
+    )
+    Yopt = optimizer.run(problem).point
 
     if quiet:
         return

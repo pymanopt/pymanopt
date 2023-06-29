@@ -1,26 +1,26 @@
-# Pymanopt TODO List
+# TODO/Roadmap
 
-- Development
-  - Integrate `flake8-import-order` into ci
-  - Integrate flake8-docstrings (add 'docstring-convention = numpy' in [flake8]
-    section of .flake8 file)
+## 2.x
 
-- **Improve test coverage**
+- Enable "I" flake8 warnings
+- Add callback mechanism to allow for custom termination criteria #133
+- Add complex manifolds #125
+- Add L-BFGS and other quasi-Newton optimizers
 
-- Manifolds:
-  - Stiefel [@118](./pymanopt/manifolds/stiefel.py#L118): simplify expressions if possible
+## 3.x
 
-- Solvers
-  - nelder_mead [@31](./pymanopt/solvers/nelder_mead.py#L31): need to decide what to do about the TR iterations
-  - Solvers cast to np.array before returning
+- Refactor TrustRegions implementation and update parameter names
+- Disallow 0-dimensional manifolds (see sphere-subspace intersection)
+- Rename `orth_value` to `restart_threshold`
+- Revist `reuse_line_searcher` and `self._line_searcher` vs.
+  `self.line_searcher` instance attributes
+- Add pep8-naming (requires breaking public API to fix all errors)
 
-- Tools:
-  - autodiff theano and tensorflow: FixedRankEmbedded compatibility
-  - autodiff autograd: move type checking outside of compiled function
-  - autodiff/_theano [@82](./pymanopt/tools/autodiff/_theano.py#L82): fix theano's no Rop fallback for the product manifold/investigate whether this no Rop fallback is really necessary
-  - autodiff/_autograd: fix product manifold when one or more of the manifolds is FixedRankEmbedded
+## 4.x
 
-- Misc:
-  - always use "".format rather than "%s" % "bla"
-  - set up pre-commit hook to run flake8 tests (also add this to contrib.md)
-  - drop python 3.5 support so we can switch to f-strings
+- Make `FixedRankEmbedded` manifold compatible with autodiff backends
+  (add `weingarten` map to support `euclidean_to_riemannian_hessian`)
+- Rewrite core/manifolds
+  - in JAX with jit support, or
+  - using a backend abstraction as in `geomstats` (potentially shared with
+    `geomstats`)

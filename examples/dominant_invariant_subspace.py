@@ -1,117 +1,101 @@
-import os
-
 import autograd.numpy as np
+import jax.numpy as jnp
 import tensorflow as tf
-import theano.tensor as T
 import torch
-from examples._tools import ExampleRunner
-from numpy import linalg as la, random as rnd
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import Grassmann
-from pymanopt.solvers import TrustRegions
+from pymanopt.optimizers import TrustRegions
 
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
-SUPPORTED_BACKENDS = (
-    "Autograd", "Callable", "PyTorch", "TensorFlow", "Theano"
-)
+def create_cost_and_derivates(manifold, matrix, backend):
+    euclidean_gradient = euclidean_hessian = None
 
+    if backend == "autograd":
 
-def create_cost_egrad_ehess(backend, A, p):
-    n = A.shape[-1]
-    egrad = ehess = None
-
-    if backend == "Autograd":
-        @pymanopt.function.Autograd
+        @pymanopt.function.autograd(manifold)
         def cost(X):
-            return -np.trace(X.T @ A @ X)
-    elif backend == "Callable":
-        @pymanopt.function.Callable
+            return -np.trace(X.T @ matrix @ X)
+
+    elif backend == "jax":
+
+        @pymanopt.function.jax(manifold)
         def cost(X):
-            return -np.trace(X.T @ A @ X)
+            return -jnp.trace(X.T @ matrix @ X)
 
-        @pymanopt.function.Callable
-        def egrad(X):
-            return -(A + A.T) @ X
+    elif backend == "numpy":
 
-        @pymanopt.function.Callable
-        def ehess(X, H):
-            return -(A + A.T) @ H
-    elif backend == "PyTorch":
-        A_ = torch.from_numpy(A)
-
-        @pymanopt.function.PyTorch
+        @pymanopt.function.numpy(manifold)
         def cost(X):
-            return -torch.tensordot(X, torch.matmul(A_, X))
-    elif backend == "TensorFlow":
-        X = tf.Variable(tf.zeros((n, p), dtype=np.float64), name="X")
+            return -np.trace(X.T @ matrix @ X)
 
-        @pymanopt.function.TensorFlow
+        @pymanopt.function.numpy(manifold)
+        def euclidean_gradient(X):
+            return -2 * matrix @ X
+
+        @pymanopt.function.numpy(manifold)
+        def euclidean_hessian(X, H):
+            return -2 * matrix @ H
+
+    elif backend == "pytorch":
+        matrix_ = torch.from_numpy(matrix)
+
+        @pymanopt.function.pytorch(manifold)
         def cost(X):
-            return -tf.tensordot(X, tf.matmul(A, X), axes=2)
+            return -torch.tensordot(X, matrix_ @ X)
 
-        # Define the Euclidean gradient explicitly for the purpose of
-        # demonstration. The Euclidean Hessian-vector product is automatically
-        # calculated via TensorFlow's autodiff capabilities.
-        @pymanopt.function.TensorFlow
-        def egrad(X):
-            return -tf.matmul(A + A.T, X)
-    elif backend == "Theano":
-        X = T.matrix()
-        U = T.matrix()
+    elif backend == "tensorflow":
 
-        @pymanopt.function.Theano(X)
+        @pymanopt.function.tensorflow(manifold)
         def cost(X):
-            return -T.dot(X.T, T.dot(A, X)).trace()
+            return -tf.tensordot(X, matrix @ X, axes=2)
 
-        # Define the Euclidean Hessian-vector product explicitly for the
-        # purpose of demonstration. The Euclidean gradient is automatically
-        # calculated via Theano's autodiff capabilities.
-        @pymanopt.function.Theano(X, U)
-        def ehess(X, U):
-            return -T.dot(A + A.T, U)
     else:
-        raise ValueError("Unsupported backend '{:s}'".format(backend))
+        raise ValueError(f"Unsupported backend '{backend}'")
 
-    return cost, egrad, ehess
+    return cost, euclidean_gradient, euclidean_hessian
 
 
 def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
-    """This example generates a random 128 x 128 symmetric matrix and finds the
-    dominant invariant 3 dimensional subspace for this matrix, i.e., it finds
-    the subspace spanned by the three eigenvectors with the largest
-    eigenvalues.
-    """
     num_rows = 128
     subspace_dimension = 3
-    matrix = rnd.randn(num_rows, num_rows)
+    matrix = np.random.normal(size=(num_rows, num_rows))
     matrix = 0.5 * (matrix + matrix.T)
 
-    cost, egrad, ehess = create_cost_egrad_ehess(
-        backend, matrix, subspace_dimension)
     manifold = Grassmann(num_rows, subspace_dimension)
-    problem = pymanopt.Problem(manifold, cost=cost, egrad=egrad, ehess=ehess)
-    if quiet:
-        problem.verbosity = 0
+    cost, euclidean_gradient, euclidean_hessian = create_cost_and_derivates(
+        manifold, matrix, backend
+    )
+    problem = pymanopt.Problem(
+        manifold,
+        cost,
+        euclidean_gradient=euclidean_gradient,
+        euclidean_hessian=euclidean_hessian,
+    )
 
-    solver = TrustRegions()
-    estimated_spanning_set = solver.solve(
-        problem, Delta_bar=8*np.sqrt(subspace_dimension))
+    optimizer = TrustRegions(verbosity=2 * int(not quiet))
+    estimated_spanning_set = optimizer.run(
+        problem, Delta_bar=8 * np.sqrt(subspace_dimension)
+    ).point
 
     if quiet:
         return
 
-    eigenvalues, eigenvectors = la.eig(matrix)
+    eigenvalues, eigenvectors = np.linalg.eig(matrix)
     column_indices = np.argsort(eigenvalues)[-subspace_dimension:]
     spanning_set = eigenvectors[:, column_indices]
-    print("Geodesic distance between true and estimated dominant subspace:",
-          manifold.dist(spanning_set, estimated_spanning_set))
+    print(
+        "Geodesic distance between true and estimated dominant subspace:",
+        manifold.dist(spanning_set, estimated_spanning_set),
+    )
 
 
 if __name__ == "__main__":
-    runner = ExampleRunner(run, "Dominant invariant subspace",
-                           SUPPORTED_BACKENDS)
+    runner = ExampleRunner(
+        run, "Dominant invariant subspace", SUPPORTED_BACKENDS
+    )
     runner.run()
