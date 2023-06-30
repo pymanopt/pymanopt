@@ -223,8 +223,9 @@ class TestMultiHermitianPositiveDefiniteManifold:
     def test_projection(self):
         man = self.man
         x = man.random_point()
-        a = rnd.randn(self.k, self.n, self.n)
-        +1j * rnd.randn(self.k, self.n, self.n)
+        a = rnd.randn(self.k, self.n, self.n) + 1j * rnd.randn(
+            self.k, self.n, self.n
+        )
         np.testing.assert_allclose(man.projection(x, a), multiherm(a))
         np.testing.assert_allclose(
             man.projection(x, a), man.projection(x, man.projection(x, a))
@@ -400,8 +401,7 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold:
     def test_projection(self):
         man = self.man
         x = man.random_point()
-        a = rnd.randn(self.n, self.n)
-        +1j * rnd.randn(self.n, self.n)
+        a = rnd.randn(self.n, self.n) + 1j * rnd.randn(self.n, self.n)
         p = man.projection(x, a)
 
         assert np.shape(p) == (self.n, self.n)
