@@ -100,9 +100,9 @@ class TestComplexEuclideanManifold:
         Ulogexp = s.log(X, s.exp(X, U))
         np_testing.assert_array_almost_equal(U, Ulogexp)
 
-    def test_pairmean(self):
+    def test_pair_mean(self):
         s = self.man
         X = s.random_point()
         Y = s.random_point()
-        Z = s.pairmean(X, Y)
+        Z = s.pair_mean(X, Y)
         np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

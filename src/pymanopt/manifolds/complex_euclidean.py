@@ -16,43 +16,51 @@ class _ComplexEuclidean(RiemannianSubmanifold):
     def typicaldist(self):
         return np.sqrt(self.dim / 2)
 
-    def inner_product(self, X, G, H):
-        return np.real(np.tensordot(G.conj(), H, axes=G.ndim))
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
+        return np.real(
+            np.tensordot(
+                tangent_vector_a.conj(),
+                tangent_vector_b,
+                axes=tangent_vector_a.ndim,
+            )
+        )
 
-    def norm(self, X, G):
-        return la.norm(G)
+    def norm(self, point, tangent_vector):
+        return la.norm(tangent_vector)
 
-    def dist(self, X, Y):
-        return la.norm(X - Y)
+    def dist(self, point_a, point_b):
+        return la.norm(point_a - point_b)
 
-    def projection(self, X, U):
-        return U
+    def projection(self, point, vector):
+        return vector
 
-    def euclidean_to_riemannian_hessian(self, X, egrad, ehess, H):
-        return ehess
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
+    ):
+        return euclidean_hessian
 
-    def exp(self, X, U):
-        return X + U
+    def exp(self, point, tangent_vector):
+        return point + tangent_vector
 
     retr = exp
 
-    def log(self, X, Y):
-        return Y - X
+    def log(self, point_a, point_b):
+        return point_b - point_a
 
     def random_point(self):
         return rnd.randn(*self._shape) + 1j * rnd.randn(*self._shape)
 
-    def random_tangent_vector(self, X):
+    def random_tangent_vector(self, point):
         Y = self.random_point()
-        return Y / self.norm(X, Y)
+        return Y / self.norm(point, Y)
 
-    def transp(self, X1, X2, G):
-        return G
+    def transp(self, point_a, point_b, tangent_vector):
+        return tangent_vector
 
-    def pairmean(self, X, Y):
-        return (X + Y) / 2
+    def pair_mean(self, point_a, point_b):
+        return (point_a + point_b) / 2
 
-    def zero_vector(self, X):
+    def zero_vector(self, point):
         return np.zeros(self._shape, dtype=np.complex)
 
 
