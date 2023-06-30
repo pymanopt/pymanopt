@@ -80,7 +80,7 @@ class HermitianPositiveDefinite(Manifold):
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return point @ multiherm(euclidean_gradient) @ point
 
-    def exp(self, point, euclidean_gradient):
+    def exp(self, point, tangent_vector):
         k = self._k
 
         d, q = la.eigh(point)
@@ -98,7 +98,7 @@ class HermitianPositiveDefinite(Manifold):
                 temp[i, :, :] = np.diag(1 / np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_isqrt = q @ temp @ multihconj(q)
 
-        d, q = la.eigh(x_isqrt @ euclidean_gradient @ x_isqrt)
+        d, q = la.eigh(x_isqrt @ tangent_vector @ x_isqrt)
         if k == 1:
             e = q @ np.diag(np.exp(d)) @ q.conj().T
         else:
@@ -162,10 +162,12 @@ class HermitianPositiveDefinite(Manifold):
         transp_d = E @ tangent_vector_a @ multihconj(E)
         return transp_d
 
-    def dist(self, x, y):
-        c = la.cholesky(x)
+    def dist(self, point_a, point_b):
+        c = la.cholesky(point_a)
         c_inv = la.inv(c)
-        logm = multilogm(c_inv @ y @ multihconj(c_inv), positive_definite=True)
+        logm = multilogm(
+            c_inv @ point_b @ multihconj(c_inv), positive_definite=True
+        )
         return np.real(la.norm(logm))
 
 
@@ -182,11 +184,6 @@ class SpecialHermitianPositiveDefinite(Manifold):
         self.HPD = HermitianPositiveDefinite(n, k)
 
         if k == 1:
-            name = (
-                "Manifold of special Hermitian "
-                f"positive definite ({n} x {n}) matrices"
-            )
-            # write same but on two lines
             name = (
                 "Manifold of special Hermitian "
                 f"positive definite ({n} x {n}) matrices"

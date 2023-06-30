@@ -234,8 +234,9 @@ class TestMultiHermitianPositiveDefiniteManifold:
     def test_euclidean_to_riemannian_gradient(self):
         man = self.man
         x = man.random_point()
-        u = rnd.randn(self.k, self.n, self.n)
-        +1j * rnd.randn(self.k, self.n, self.n)
+        u = rnd.randn(self.k, self.n, self.n) + 1j * rnd.randn(
+            self.k, self.n, self.n
+        )
         np.testing.assert_allclose(
             man.euclidean_to_riemannian_gradient(x, u), x @ multiherm(u) @ x
         )

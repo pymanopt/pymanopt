@@ -79,12 +79,12 @@ class TestComplexEuclideanManifold:
         np_testing.assert_almost_equal(la.norm(u), 1)
         assert la.norm(u - v) > 1e-6
 
-    def test_transp(self):
+    def test_transport(self):
         e = self.man
         x = e.random_point()
         y = e.random_point()
         u = e.random_tangent_vector(x)
-        np_testing.assert_allclose(e.transp(x, y, u), u)
+        np_testing.assert_allclose(e.transport(x, y, u), u)
 
     def test_exp_log_inverse(self):
         s = self.man

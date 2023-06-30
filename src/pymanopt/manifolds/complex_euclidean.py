@@ -54,7 +54,7 @@ class _ComplexEuclidean(RiemannianSubmanifold):
         Y = self.random_point()
         return Y / self.norm(point, Y)
 
-    def transp(self, point_a, point_b, tangent_vector):
+    def transport(self, point_a, point_b, tangent_vector):
         return tangent_vector
 
     def pair_mean(self, point_a, point_b):
