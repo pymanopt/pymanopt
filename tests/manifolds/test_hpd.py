@@ -1,10 +1,14 @@
 import numpy as np
 import pytest
-from numpy import linalg as la, random as rnd, testing as np_testing
+from numpy import linalg as la
+from numpy import random as rnd
+from numpy import testing as np_testing
 from scipy.linalg import eigvalsh
 
-from pymanopt.manifolds import HermitianPositiveDefinite,\
-        SpecialHermitianPositiveDefinite
+from pymanopt.manifolds import (
+    HermitianPositiveDefinite,
+    SpecialHermitianPositiveDefinite,
+)
 from pymanopt.tools.multi import multiherm, multitransp
 
 
@@ -17,7 +21,7 @@ class TestSingleHermitianPositiveDefiniteManifold:
     def test_dim(self):
         man = self.man
         n = self.n
-        np_testing.assert_equal(man.dim, n * (n+1))
+        np_testing.assert_equal(man.dim, n * (n + 1))
 
     def test_random_point(self):
         # Just test that random_point returns a point on the manifold and two
@@ -52,13 +56,13 @@ class TestSingleHermitianPositiveDefiniteManifold:
         x = man.random_point()
         a = man.random_tangent_vector(x)
         b = man.random_tangent_vector(x)
-        np.testing.assert_almost_equal(np.real(np.trace(a@b)),
-                                       man.inner_product(x, x@a,
-                                                 x@b))
+        np.testing.assert_almost_equal(
+            np.real(np.trace(a @ b)), man.inner_product(x, x @ a, x @ b)
+        )
         assert man.inner_product(x, a, b).dtype == float
 
         x_inv = np.linalg.inv(x)
-        inner = np.real(np.trace(x_inv@a@x_inv@b))
+        inner = np.real(np.trace(x_inv @ a @ x_inv @ b))
         np.testing.assert_almost_equal(inner, man.inner_product(x, a, b))
 
     def test_norm(self):
@@ -69,20 +73,25 @@ class TestSingleHermitianPositiveDefiniteManifold:
         x = man.random_point()
         u = man.random_tangent_vector(x)
         np.testing.assert_almost_equal(
-            np.sqrt(man.inner_product(x, u, u)), man.norm(x, u))
+            np.sqrt(man.inner_product(x, u, u)), man.norm(x, u)
+        )
 
     def test_projection(self):
         man = self.man
         x = man.random_point()
-        a = rnd.randn(self.n, self.n) + 1j*rnd.randn(self.n, self.n)
+        a = rnd.randn(self.n, self.n) + 1j * rnd.randn(self.n, self.n)
         np.testing.assert_allclose(man.projection(x, a), multiherm(a))
-        np.testing.assert_allclose(man.projection(x, a), man.projection(x, man.projection(x, a)))
+        np.testing.assert_allclose(
+            man.projection(x, a), man.projection(x, man.projection(x, a))
+        )
 
     def test_euclidean_to_riemannian_gradient(self):
         man = self.man
         x = man.random_point()
-        u = rnd.randn(self.n, self.n) + 1j*rnd.randn(self.n, self.n)
-        np.testing.assert_allclose(man.euclidean_to_riemannian_gradient(x, u), x @ multiherm(u) @ x)
+        u = rnd.randn(self.n, self.n) + 1j * rnd.randn(self.n, self.n)
+        np.testing.assert_allclose(
+            man.euclidean_to_riemannian_gradient(x, u), x @ multiherm(u) @ x
+        )
 
     def test_exp(self):
         # exp(x, u) = x + u.
@@ -129,19 +138,20 @@ class TestSingleHermitianPositiveDefiniteManifold:
         y = man.random_point()
 
         # Test separability
-        np_testing.assert_almost_equal(man.dist(x, x), 0.)
+        np_testing.assert_almost_equal(man.dist(x, x), 0.0)
 
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
 
         # Test alternative implementation
         # from Eq 6.14 of "Positive definite matrices"
-        d = np.sqrt((np.log(np.real(eigvalsh(x, y)))**2).sum())
+        d = np.sqrt((np.log(np.real(eigvalsh(x, y))) ** 2).sum())
         np_testing.assert_almost_equal(man.dist(x, y), d)
 
         # check that dist is consistent with log
-        np_testing.assert_almost_equal(man.dist(x, y),
-                                       man.norm(x, man.log(x, y)))
+        np_testing.assert_almost_equal(
+            man.dist(x, y), man.norm(x, man.log(x, y))
+        )
 
 
 class TestMultiHermitianPositiveDefiniteManifold:
@@ -155,7 +165,7 @@ class TestMultiHermitianPositiveDefiniteManifold:
         man = self.man
         n = self.n
         k = self.k
-        np_testing.assert_equal(man.dim, k * n * (n+1))
+        np_testing.assert_equal(man.dim, k * n * (n + 1))
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -194,7 +204,8 @@ class TestMultiHermitianPositiveDefiniteManifold:
         # b is not symmetric, it is Hermitian
         np.testing.assert_almost_equal(
             np.tensordot(a, multitransp(b), axes=a.ndim),
-            man.inner_product(x, x @ a, x @ b))
+            man.inner_product(x, x @ a, x @ b),
+        )
         assert man.inner_product(x, a, b).dtype == float
 
     def test_norm(self):
@@ -206,23 +217,27 @@ class TestMultiHermitianPositiveDefiniteManifold:
         x = man.random_point()
         u = man.random_tangent_vector(x)
         np.testing.assert_almost_equal(
-            np.sqrt(man.inner_product(x, u, u)), man.norm(x, u))
+            np.sqrt(man.inner_product(x, u, u)), man.norm(x, u)
+        )
 
     def test_projection(self):
         man = self.man
         x = man.random_point()
         a = rnd.randn(self.k, self.n, self.n)
-        + 1j*rnd.randn(self.k, self.n, self.n)
+        +1j * rnd.randn(self.k, self.n, self.n)
         np.testing.assert_allclose(man.projection(x, a), multiherm(a))
-        np.testing.assert_allclose(man.projection(x, a), man.projection(x, man.projection(x, a)))
+        np.testing.assert_allclose(
+            man.projection(x, a), man.projection(x, man.projection(x, a))
+        )
 
     def test_euclidean_to_riemannian_gradient(self):
         man = self.man
         x = man.random_point()
         u = rnd.randn(self.k, self.n, self.n)
-        + 1j*rnd.randn(self.k, self.n, self.n)
-        np.testing.assert_allclose(man.euclidean_to_riemannian_gradient(x, u),
-                                   x @ multiherm(u) @ x)
+        +1j * rnd.randn(self.k, self.n, self.n)
+        np.testing.assert_allclose(
+            man.euclidean_to_riemannian_gradient(x, u), x @ multiherm(u) @ x
+        )
 
     def test_exp(self):
         # Test against manopt implementation, test that for small vectors
@@ -289,14 +304,15 @@ class TestMultiHermitianPositiveDefiniteManifold:
         y = man.random_point()
 
         # Test separability
-        np_testing.assert_almost_equal(man.dist(x, x), 0.)
+        np_testing.assert_almost_equal(man.dist(x, x), 0.0)
 
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
 
         # check that dist is consistent with log
-        np_testing.assert_almost_equal(man.dist(x, y),
-                                       man.norm(x, man.log(x, y)))
+        np_testing.assert_almost_equal(
+            man.dist(x, y), man.norm(x, man.log(x, y))
+        )
 
 
 class TestSingleSpecialHermitianPositiveDefiniteManifold:
@@ -309,7 +325,7 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold:
     def test_dim(self):
         man = self.man
         n = self.n
-        np_testing.assert_equal(man.dim, n*(n+1)-1)
+        np_testing.assert_equal(man.dim, n * (n + 1) - 1)
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -366,7 +382,8 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold:
         # b is not symmetric, it is Hermitian
         np.testing.assert_almost_equal(
             np.tensordot(a, multitransp(b), axes=a.ndim),
-            man.inner_product(x, x @ a, x @ b))
+            man.inner_product(x, x @ a, x @ b),
+        )
         assert man.inner_product(x, a, b).dtype == float
 
     def test_norm(self):
@@ -378,13 +395,14 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold:
         x = man.random_point()
         u = man.random_tangent_vector(x)
         np.testing.assert_almost_equal(
-            np.sqrt(man.inner_product(x, u, u)), man.norm(x, u))
+            np.sqrt(man.inner_product(x, u, u)), man.norm(x, u)
+        )
 
     def test_projection(self):
         man = self.man
         x = man.random_point()
         a = rnd.randn(self.n, self.n)
-        + 1j*rnd.randn(self.n, self.n)
+        +1j * rnd.randn(self.n, self.n)
         p = man.projection(x, a)
 
         assert np.shape(p) == (self.n, self.n)
@@ -470,14 +488,15 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold:
         y = man.random_point()
 
         # Test separability
-        np_testing.assert_almost_equal(man.dist(x, x), 0.)
+        np_testing.assert_almost_equal(man.dist(x, x), 0.0)
 
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
 
         # check that dist is consistent with log
-        np_testing.assert_almost_equal(man.dist(x, y),
-                                       man.norm(x, man.log(x, y)))
+        np_testing.assert_almost_equal(
+            man.dist(x, y), man.norm(x, man.log(x, y))
+        )
 
 
 class TestMultiSpecialHermitianPositiveDefiniteManifold:
@@ -491,7 +510,7 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold:
         man = self.man
         n = self.n
         k = self.k
-        np_testing.assert_equal(man.dim, k * (n*(n+1)-1))
+        np_testing.assert_equal(man.dim, k * (n * (n + 1) - 1))
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -547,7 +566,8 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold:
         # b is not symmetric, it is Hermitian
         np.testing.assert_almost_equal(
             np.tensordot(a, multitransp(b), axes=a.ndim),
-            man.inner_product(x, x @ a, x @ b))
+            man.inner_product(x, x @ a, x @ b),
+        )
         assert man.inner_product(x, a, b).dtype == float
 
     def test_norm(self):
@@ -559,12 +579,15 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold:
         x = man.random_point()
         u = man.random_tangent_vector(x)
         np.testing.assert_almost_equal(
-            np.sqrt(man.inner_product(x, u, u)), man.norm(x, u))
+            np.sqrt(man.inner_product(x, u, u)), man.norm(x, u)
+        )
 
     def test_projection(self):
         man = self.man
         x = man.random_point()
-        a = rnd.randn(self.k, self.n, self.n) + 1j*rnd.randn(self.k, self.n, self.n)
+        a = rnd.randn(self.k, self.n, self.n) + 1j * rnd.randn(
+            self.k, self.n, self.n
+        )
         p = man.projection(x, a)
 
         np.testing.assert_allclose(p, multiherm(p))
@@ -650,11 +673,12 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold:
         y = man.random_point()
 
         # Test separability
-        np_testing.assert_almost_equal(man.dist(x, x), 0.)
+        np_testing.assert_almost_equal(man.dist(x, x), 0.0)
 
         # Test symmetry
         np_testing.assert_almost_equal(man.dist(x, y), man.dist(y, x))
 
         # check that dist is consistent with log
-        np_testing.assert_almost_equal(man.dist(x, y),
-                                       man.norm(x, man.log(x, y)))
+        np_testing.assert_almost_equal(
+            man.dist(x, y), man.norm(x, man.log(x, y))
+        )

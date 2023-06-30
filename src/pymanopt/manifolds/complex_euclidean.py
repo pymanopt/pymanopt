@@ -1,5 +1,6 @@
 import numpy as np
-from numpy import linalg as la, random as rnd
+from numpy import linalg as la
+from numpy import random as rnd
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
@@ -13,7 +14,7 @@ class _ComplexEuclidean(RiemannianSubmanifold):
 
     @property
     def typicaldist(self):
-        return np.sqrt(self.dim/2)
+        return np.sqrt(self.dim / 2)
 
     def inner_product(self, X, G, H):
         return np.real(np.tensordot(G.conj(), H, axes=G.ndim))
@@ -39,7 +40,7 @@ class _ComplexEuclidean(RiemannianSubmanifold):
         return Y - X
 
     def random_point(self):
-        return rnd.randn(*self._shape) + 1j*rnd.randn(*self._shape)
+        return rnd.randn(*self._shape) + 1j * rnd.randn(*self._shape)
 
     def random_tangent_vector(self, X):
         Y = self.random_point()
@@ -56,10 +57,11 @@ class _ComplexEuclidean(RiemannianSubmanifold):
 
 
 class ComplexEuclidean(_ComplexEuclidean):
-    """
-    Complex Euclidean manifold of shape n1 x n2 x ... x nk tensors. Useful for
-    unconstrained optimization problems or for unconstrained hyperparameters,
-    as part of a product manifold.
+    """Complex Euclidean manifold of shape n1 x n2 x ... x nk tensors.
+
+    Useful for unconstrained optimization problems or
+    for unconstrained hyperparameters, as part of
+    a product manifold.
 
     Examples:
     Create a manifold of vectors of length n:
@@ -77,6 +79,6 @@ class ComplexEuclidean(_ComplexEuclidean):
         elif len(shape) == 2:
             name = ("Euclidean manifold of {}x{} matrices").format(*shape)
         else:
-            name = ("Euclidean manifold of shape " + str(shape) + " tensors")
-        dimension = 2*np.prod(shape)
+            name = "Euclidean manifold of shape " + str(shape) + " tensors"
+        dimension = 2 * np.prod(shape)
         super().__init__(name, dimension, *shape)

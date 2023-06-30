@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
-from numpy import linalg as la, random as rnd, testing as np_testing
+from numpy import linalg as la
+from numpy import random as rnd
+from numpy import testing as np_testing
 
 from pymanopt.manifolds import ComplexEuclidean
 
@@ -16,8 +18,9 @@ class TestComplexEuclideanManifold:
         assert self.man.dim == 2 * self.m * self.n
 
     def test_typicaldist(self):
-        np_testing.assert_almost_equal(self.man.typicaldist, np.sqrt(self.m *
-                                                                     self.n))
+        np_testing.assert_almost_equal(
+            self.man.typicaldist, np.sqrt(self.m * self.n)
+        )
 
     def test_dist(self):
         e = self.man
@@ -30,8 +33,8 @@ class TestComplexEuclideanManifold:
         y = e.random_tangent_vector(x)
         z = e.random_tangent_vector(x)
         np_testing.assert_almost_equal(
-            np.real(np.sum(y.conj() * z)),
-            e.inner_product(x, y, z))
+            np.real(np.sum(y.conj() * z)), e.inner_product(x, y, z)
+        )
 
     def test_projection(self):
         e = self.man
@@ -44,8 +47,9 @@ class TestComplexEuclideanManifold:
         x = e.random_point()
         u = e.random_tangent_vector(x)
         egrad, ehess = rnd.randn(2, self.m, self.n)
-        np_testing.assert_allclose(e.euclidean_to_riemannian_hessian(x, egrad, ehess, u),
-                                   ehess)
+        np_testing.assert_allclose(
+            e.euclidean_to_riemannian_hessian(x, egrad, ehess, u), ehess
+        )
 
     def test_retr(self):
         e = self.man

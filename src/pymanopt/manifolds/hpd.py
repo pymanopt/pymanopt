@@ -1,5 +1,6 @@
 import numpy as np
-from numpy import linalg as la, random as rnd
+from numpy import linalg as la
+from numpy import random as rnd
 from scipy.linalg import sqrtm
 
 from pymanopt.manifolds.manifold import Manifold
@@ -7,15 +8,17 @@ from pymanopt.tools.multi import multihconj, multiherm, multilogm, multitransp
 
 
 class HermitianPositiveDefinite(Manifold):
-    """Manifold of (n x n)^k complex Hermitian positive definite matrices.
-    """
+    """Manifold of (n x n)^k complex Hermitian positive definite matrices."""
+
     def __init__(self, n, k=1):
         self._n = n
         self._k = k
 
         if k == 1:
-            name = ("Manifold of Hermitian positive definite\
-                    ({} x {}) matrices").format(n, n)
+            name = (
+                "Manifold of Hermitian positive definite\
+                    ({} x {}) matrices"
+            ).format(n, n)
         else:
             name = "Product manifold of {} ({} x {}) matrices".format(k, n, n)
         dimension = 2 * int(k * n * (n + 1) / 2)
@@ -32,7 +35,8 @@ class HermitianPositiveDefinite(Manifold):
         u = np.zeros((self._k, self._n, self._n), dtype=complex)
         for i in range(self._k):
             u[i], r = la.qr(
-                rnd.randn(self._n, self._n)+1j*rnd.randn(self._n, self._n))
+                rnd.randn(self._n, self._n) + 1j * rnd.randn(self._n, self._n)
+            )
 
         if self._k == 1:
             return (u @ (d * multihconj(u)))[0]
@@ -42,9 +46,9 @@ class HermitianPositiveDefinite(Manifold):
         k = self._k
         n = self._n
         if k == 1:
-            u = multiherm(rnd.randn(n, n)+1j*rnd.randn(n, n))
+            u = multiherm(rnd.randn(n, n) + 1j * rnd.randn(n, n))
         else:
-            u = multiherm(rnd.randn(k, n, n)+1j*rnd.randn(k, n, n))
+            u = multiherm(rnd.randn(k, n, n) + 1j * rnd.randn(k, n, n))
         return u / self.norm(x, u)
 
     def zero_vector(self, x):
@@ -56,8 +60,10 @@ class HermitianPositiveDefinite(Manifold):
 
     def inner_product(self, x, u, v):
         return np.real(
-            np.tensordot(la.solve(x, u), multitransp(la.solve(x, v)),
-                         axes=x.ndim))
+            np.tensordot(
+                la.solve(x, u), multitransp(la.solve(x, v)), axes=x.ndim
+            )
+        )
 
     def norm(self, x, u):
         # This implementation is as fast as np.linalg.solve_triangular and is
@@ -78,8 +84,8 @@ class HermitianPositiveDefinite(Manifold):
 
         d, q = la.eigh(x)
         if k == 1:
-            x_sqrt = q@np.diag(np.sqrt(d))@q.conj().T
-            x_isqrt = q@np.diag(1/np.sqrt(d))@q.conj().T
+            x_sqrt = q @ np.diag(np.sqrt(d)) @ q.conj().T
+            x_isqrt = q @ np.diag(1 / np.sqrt(d)) @ q.conj().T
         else:
             temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
@@ -88,12 +94,12 @@ class HermitianPositiveDefinite(Manifold):
 
             temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
-                temp[i, :, :] = np.diag(1/np.sqrt(d[i, :]))[np.newaxis, :, :]
+                temp[i, :, :] = np.diag(1 / np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_isqrt = q @ temp @ multihconj(q)
 
         d, q = la.eigh(x_isqrt @ u @ x_isqrt)
         if k == 1:
-            e = q@np.diag(np.exp(d))@q.conj().T
+            e = q @ np.diag(np.exp(d)) @ q.conj().T
         else:
             temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
@@ -106,7 +112,7 @@ class HermitianPositiveDefinite(Manifold):
         return e
 
     def retraction(self, x, u):
-        r = x + u + (1/2)*u@la.solve(x, u)
+        r = x + u + (1 / 2) * u @ la.solve(x, u)
         return r
 
     def log(self, x, y):
@@ -114,8 +120,8 @@ class HermitianPositiveDefinite(Manifold):
 
         d, q = la.eigh(x)
         if k == 1:
-            x_sqrt = q@np.diag(np.sqrt(d))@q.conj().T
-            x_isqrt = q@np.diag(1/np.sqrt(d))@q.conj().T
+            x_sqrt = q @ np.diag(np.sqrt(d)) @ q.conj().T
+            x_isqrt = q @ np.diag(1 / np.sqrt(d)) @ q.conj().T
         else:
             temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
@@ -124,12 +130,12 @@ class HermitianPositiveDefinite(Manifold):
 
             temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
-                temp[i, :, :] = np.diag(1/np.sqrt(d[i, :]))[np.newaxis, :, :]
+                temp[i, :, :] = np.diag(1 / np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_isqrt = q @ temp @ multihconj(q)
 
         d, q = la.eigh(x_isqrt @ y @ x_isqrt)
         if k == 1:
-            log = q@np.diag(np.log(d))@q.conj().T
+            log = q @ np.diag(np.log(d)) @ q.conj().T
         else:
             temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
@@ -159,12 +165,11 @@ class HermitianPositiveDefinite(Manifold):
 
 
 class SpecialHermitianPositiveDefinite(Manifold):
-    """Manifold of (n x n)^k Hermitian positive
-    definite matrices with unit determinant
-    called 'Special Hermitian positive definite manifold'.
-    It is a totally geodesic submanifold of
-    the Hermitian positive definite matrices.
+    """Manifold of (n x n)^k HPD matrices with unit determinant.
+
+    It is a totally geodesic submanifold of the Hermitian positive definite matrices.
     """
+
     def __init__(self, n, k=1):
         self._n = n
         self._k = k
@@ -172,12 +177,16 @@ class SpecialHermitianPositiveDefinite(Manifold):
         self.HPD = HermitianPositiveDefinite(n, k)
 
         if k == 1:
-            name = ("Manifold of special Hermitian positive definite\
-                    ({} x {}) matrices").format(n, n)
+            name = (
+                "Manifold of special Hermitian positive definite\
+                    ({} x {}) matrices"
+            ).format(n, n)
         else:
             name = "Product manifold of {} special Hermitian positive\
-                    definite ({} x {}) matrices".format(k, n, n)
-        dimension = int(k * (n*(n+1) - 1))
+                    definite ({} x {}) matrices".format(
+                k, n, n
+            )
+        dimension = int(k * (n * (n + 1) - 1))
         super().__init__(name, dimension)
 
     def random_point(self):
@@ -186,9 +195,9 @@ class SpecialHermitianPositiveDefinite(Manifold):
 
         # Normalize them.
         if self._k == 1:
-            x = x / (np.real(la.det(x))**(1/self._n))
+            x = x / (np.real(la.det(x)) ** (1 / self._n))
         else:
-            x = x / (np.real(la.det(x))**(1/self._n)).reshape(-1, 1, 1)
+            x = x / (np.real(la.det(x)) ** (1 / self._n)).reshape(-1, 1, 1)
 
         return x
 
@@ -197,9 +206,9 @@ class SpecialHermitianPositiveDefinite(Manifold):
         k = self._k
         n = self._n
         if k == 1:
-            u = rnd.randn(n, n)+1j*rnd.randn(n, n)
+            u = rnd.randn(n, n) + 1j * rnd.randn(n, n)
         else:
-            u = rnd.randn(k, n, n)+1j*rnd.randn(k, n, n)
+            u = rnd.randn(k, n, n) + 1j * rnd.randn(k, n, n)
 
         # Project them on tangent space.
         u = self.projection(x, u)
@@ -228,9 +237,9 @@ class SpecialHermitianPositiveDefinite(Manifold):
         # Project on tangent space of SHPD at x.
         t = np.trace(la.solve(x, u), axis1=-2, axis2=-1)
         if k == 1:
-            u = u - (1/n) * np.real(t) * x
+            u = u - (1 / n) * np.real(t) * x
         else:
-            u = u - (1/n) * np.real(t.reshape(-1, 1, 1)) * x
+            u = u - (1 / n) * np.real(t.reshape(-1, 1, 1)) * x
 
         return u
 
@@ -244,9 +253,9 @@ class SpecialHermitianPositiveDefinite(Manifold):
 
         # Normalize them.
         if self._k == 1:
-            e = e / np.real(la.det(e))**(1/self._n)
+            e = e / np.real(la.det(e)) ** (1 / self._n)
         else:
-            e = e / (np.real(la.det(e))**(1/self._n)).reshape(-1, 1, 1)
+            e = e / (np.real(la.det(e)) ** (1 / self._n)).reshape(-1, 1, 1)
         return e
 
     def retraction(self, x, u):
@@ -254,9 +263,9 @@ class SpecialHermitianPositiveDefinite(Manifold):
 
         # Normalize them.
         if self._k == 1:
-            r = r / np.real(la.det(r))**(1/self._n)
+            r = r / np.real(la.det(r)) ** (1 / self._n)
         else:
-            r = r / (np.real(la.det(r))**(1/self._n)).reshape(-1, 1, 1)
+            r = r / (np.real(la.det(r)) ** (1 / self._n)).reshape(-1, 1, 1)
         return r
 
     def log(self, x, y):

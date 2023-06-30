@@ -26,8 +26,8 @@ __all__ = [
 ]
 
 from .complex_circle import ComplexCircle
-from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .complex_euclidean import ComplexEuclidean
+from .euclidean import Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
 from .grassmann import ComplexGrassmann, Grassmann
 from .group import SpecialOrthogonalGroup, UnitaryGroup
