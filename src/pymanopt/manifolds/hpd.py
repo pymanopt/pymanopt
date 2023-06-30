@@ -34,7 +34,7 @@ class HermitianPositiveDefinite(Manifold):
         # svd but this is slower for bigger matrices.
         u = np.zeros((self._k, self._n, self._n), dtype=complex)
         for i in range(self._k):
-            u[i], r = la.qr(
+            u[i], _ = la.qr(
                 rnd.randn(self._n, self._n) + 1j * rnd.randn(self._n, self._n)
             )
 
@@ -42,47 +42,49 @@ class HermitianPositiveDefinite(Manifold):
             return (u @ (d * multihconj(u)))[0]
         return u @ (d * multihconj(u))
 
-    def random_tangent_vector(self, x):
+    def random_tangent_vector(self, point):
         k = self._k
         n = self._n
         if k == 1:
             u = multiherm(rnd.randn(n, n) + 1j * rnd.randn(n, n))
         else:
             u = multiherm(rnd.randn(k, n, n) + 1j * rnd.randn(k, n, n))
-        return u / self.norm(x, u)
+        return u / self.norm(point, u)
 
-    def zero_vector(self, x):
+    def zero_vector(self, point):
         k = self._k
         n = self._n
         if k != 1:
             return np.zeros((k, n, n), dtype=complex)
         return np.zeros((n, n), dtype=complex)
 
-    def inner_product(self, x, u, v):
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.real(
             np.tensordot(
-                la.solve(x, u), multitransp(la.solve(x, v)), axes=x.ndim
+                la.solve(point, tangent_vector_a),
+                multitransp(la.solve(point, tangent_vector_b)),
+                axes=point.ndim,
             )
         )
 
-    def norm(self, x, u):
+    def norm(self, point, tangent_vector):
         # This implementation is as fast as np.linalg.solve_triangular and is
         # more stable, as the above solver tends to output non positive
         # definite results.
-        c = la.cholesky(x)
+        c = la.cholesky(point)
         c_inv = la.inv(c)
-        return np.real(la.norm(c_inv @ u @ multihconj(c_inv)))
+        return np.real(la.norm(c_inv @ tangent_vector @ multihconj(c_inv)))
 
-    def projection(self, X, G):
-        return multiherm(G)
+    def projection(self, point, vector):
+        return multiherm(vector)
 
-    def euclidean_to_riemannian_gradient(self, x, u):
-        return x @ multiherm(u) @ x
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        return point @ multiherm(euclidean_gradient) @ point
 
-    def exp(self, x, u):
+    def exp(self, point, euclidean_gradient):
         k = self._k
 
-        d, q = la.eigh(x)
+        d, q = la.eigh(point)
         if k == 1:
             x_sqrt = q @ np.diag(np.sqrt(d)) @ q.conj().T
             x_isqrt = q @ np.diag(1 / np.sqrt(d)) @ q.conj().T
@@ -97,7 +99,7 @@ class HermitianPositiveDefinite(Manifold):
                 temp[i, :, :] = np.diag(1 / np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_isqrt = q @ temp @ multihconj(q)
 
-        d, q = la.eigh(x_isqrt @ u @ x_isqrt)
+        d, q = la.eigh(x_isqrt @ euclidean_gradient @ x_isqrt)
         if k == 1:
             e = q @ np.diag(np.exp(d)) @ q.conj().T
         else:
@@ -111,14 +113,18 @@ class HermitianPositiveDefinite(Manifold):
         e = multiherm(e)
         return e
 
-    def retraction(self, x, u):
-        r = x + u + (1 / 2) * u @ la.solve(x, u)
+    def retraction(self, point, tangent_vector):
+        r = (
+            point
+            + tangent_vector
+            + (1 / 2) * tangent_vector @ la.solve(point, tangent_vector)
+        )
         return r
 
-    def log(self, x, y):
+    def log(self, point_a, point_b):
         k = self._k
 
-        d, q = la.eigh(x)
+        d, q = la.eigh(point_a)
         if k == 1:
             x_sqrt = q @ np.diag(np.sqrt(d)) @ q.conj().T
             x_isqrt = q @ np.diag(1 / np.sqrt(d)) @ q.conj().T
@@ -133,7 +139,7 @@ class HermitianPositiveDefinite(Manifold):
                 temp[i, :, :] = np.diag(1 / np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_isqrt = q @ temp @ multihconj(q)
 
-        d, q = la.eigh(x_isqrt @ y @ x_isqrt)
+        d, q = la.eigh(x_isqrt @ point_b @ x_isqrt)
         if k == 1:
             log = q @ np.diag(np.log(d)) @ q.conj().T
         else:
@@ -147,14 +153,14 @@ class HermitianPositiveDefinite(Manifold):
         xi = multiherm(xi)
         return xi
 
-    def transp(self, x1, x2, d):
-        E = multihconj(la.solve(multihconj(x1), multihconj(x2)))
+    def transport(self, point_a, point_b, tangent_vector_a):
+        E = multihconj(la.solve(multihconj(point_a), multihconj(point_b)))
         if self._k == 1:
             E = sqrtm(E)
         else:
             for i in range(len(E)):
                 E[i, :, :] = sqrtm(E[i, :, :])
-        transp_d = E @ d @ multihconj(E)
+        transp_d = E @ tangent_vector_a @ multihconj(E)
         return transp_d
 
     def dist(self, x, y):
@@ -201,7 +207,7 @@ class SpecialHermitianPositiveDefinite(Manifold):
 
         return x
 
-    def random_tangent_vector(self, x):
+    def random_tangent_vector(self, point):
         # Generate k matrices.
         k = self._k
         n = self._n
@@ -211,45 +217,47 @@ class SpecialHermitianPositiveDefinite(Manifold):
             u = rnd.randn(k, n, n) + 1j * rnd.randn(k, n, n)
 
         # Project them on tangent space.
-        u = self.projection(x, u)
+        u = self.projection(point, u)
 
         # Unit norm.
-        u = u / self.norm(x, u)
+        u = u / self.norm(point, u)
 
         return u
 
-    def zero_vector(self, x):
-        return self.HPD.zero_vector(x)
+    def zero_vector(self, point):
+        return self.HPD.zero_vector(point)
 
-    def inner_product(self, x, u, v):
-        return self.HPD.inner_product(x, u, v)
+    def inner_product(self, point, tangent_vector_a, tangent_vector_b):
+        return self.HPD.inner_product(
+            point, tangent_vector_a, tangent_vector_b
+        )
 
-    def norm(self, x, u):
-        return self.HPD.norm(x, u)
+    def norm(self, point, tangent_vector):
+        return self.HPD.norm(point, tangent_vector)
 
-    def projection(self, x, u):
+    def projection(self, point, vector):
         n = self._n
         k = self._k
 
         # Project matrix on tangent space of HPD.
-        u = multiherm(u)
+        u = multiherm(vector)
 
         # Project on tangent space of SHPD at x.
-        t = np.trace(la.solve(x, u), axis1=-2, axis2=-1)
+        t = np.trace(la.solve(point, vector), axis1=-2, axis2=-1)
         if k == 1:
-            u = u - (1 / n) * np.real(t) * x
+            u = u - (1 / n) * np.real(t) * point
         else:
-            u = u - (1 / n) * np.real(t.reshape(-1, 1, 1)) * x
+            u = u - (1 / n) * np.real(t.reshape(-1, 1, 1)) * point
 
         return u
 
-    def euclidean_to_riemannian_gradient(self, x, u):
-        rgrad = x @ u @ x
-        rgrad = self.projection(x, rgrad)
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        rgrad = point @ euclidean_gradient @ point
+        rgrad = self.projection(point, rgrad)
         return rgrad
 
-    def exp(self, x, u):
-        e = self.HPD.exp(x, u)
+    def exp(self, point, tangent_vector):
+        e = self.HPD.exp(point, tangent_vector)
 
         # Normalize them.
         if self._k == 1:
@@ -258,8 +266,8 @@ class SpecialHermitianPositiveDefinite(Manifold):
             e = e / (np.real(la.det(e)) ** (1 / self._n)).reshape(-1, 1, 1)
         return e
 
-    def retraction(self, x, u):
-        r = self.HPD.retraction(x, u)
+    def retraction(self, point, tangent_vector):
+        r = self.HPD.retraction(point, tangent_vector)
 
         # Normalize them.
         if self._k == 1:
@@ -268,11 +276,13 @@ class SpecialHermitianPositiveDefinite(Manifold):
             r = r / (np.real(la.det(r)) ** (1 / self._n)).reshape(-1, 1, 1)
         return r
 
-    def log(self, x, y):
-        return self.HPD.log(x, y)
+    def log(self, point_a, point_b):
+        return self.HPD.log(point_a, point_b)
 
-    def transp(self, x1, x2, d):
-        return self.projection(x2, self.HPD.transp(x1, x2, d))
+    def transport(self, point_a, point_b, tangent_vector_a):
+        return self.projection(
+            point_b, self.HPD.transport(point_a, point_b, tangent_vector_a)
+        )
 
-    def dist(self, x, y):
-        return self.HPD.dist(x, y)
+    def dist(self, point_a, point_b):
+        return self.HPD.dist(point_a, point_b)

@@ -124,12 +124,12 @@ class TestSingleHermitianPositiveDefiniteManifold:
         y = man.exp(x, u)
         np_testing.assert_allclose(man.log(x, y), u)
 
-    def test_transp(self):
+    def test_transport(self):
         man = self.man
         x = man.random_point()
         y = man.random_point()
         u = man.random_tangent_vector(x)
-        t_u = man.transp(x, y, u)
+        t_u = man.transport(x, y, u)
         np_testing.assert_allclose(t_u, man.projection(y, t_u))
 
     def test_dist(self):
@@ -290,12 +290,12 @@ class TestMultiHermitianPositiveDefiniteManifold:
         y = man.exp(x, u)
         np_testing.assert_allclose(man.log(x, y), u)
 
-    def test_transp(self):
+    def test_transport(self):
         man = self.man
         x = man.random_point()
         y = man.random_point()
         u = man.random_tangent_vector(x)
-        t_u = man.transp(x, y, u)
+        t_u = man.transport(x, y, u)
         np_testing.assert_allclose(t_u, man.projection(y, t_u))
 
     def test_dist(self):
@@ -357,7 +357,6 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold:
         # with norm 1 and that two randvecs are different.
         man = self.man
         n = self.n
-        man = self.man
         x = man.random_point()
         u = man.random_tangent_vector(x)
         v = man.random_tangent_vector(x)
@@ -474,12 +473,12 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold:
         y = man.exp(x, u)
         np_testing.assert_allclose(man.log(x, y), u)
 
-    def test_transp(self):
+    def test_transport(self):
         man = self.man
         x = man.random_point()
         y = man.random_point()
         u = man.random_tangent_vector(x)
-        transp_u = man.transp(x, y, u)
+        transp_u = man.transport(x, y, u)
         np_testing.assert_allclose(transp_u, self.man.projection(y, transp_u))
 
     def test_dist(self):
@@ -659,12 +658,12 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold:
         y = man.exp(x, u)
         np_testing.assert_allclose(man.log(x, y), u)
 
-    def test_transp(self):
+    def test_transport(self):
         man = self.man
         x = man.random_point()
         y = man.random_point()
         u = man.random_tangent_vector(x)
-        transp_u = man.transp(x, y, u)
+        transp_u = man.transport(x, y, u)
         np_testing.assert_allclose(transp_u, self.man.projection(y, transp_u))
 
     def test_dist(self):
