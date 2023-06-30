@@ -11,9 +11,8 @@ class Function:
         if not backend.is_available():
             raise RuntimeError(f"Backend '{backend}' is not available")
 
-        self._original_function = function
         self._backend = backend
-        self._function = backend.prepare_function(function)
+        self._function = function
         self._num_arguments = manifold.num_values
 
         self._gradient = None
@@ -25,14 +24,14 @@ class Function:
     def get_gradient_operator(self):
         if self._gradient is None:
             self._gradient = self._backend.generate_gradient_operator(
-                self._original_function, self._num_arguments
+                self._function, self._num_arguments
             )
         return self._gradient
 
     def get_hessian_operator(self):
         if self._hessian is None:
             self._hessian = self._backend.generate_hessian_operator(
-                self._original_function, self._num_arguments
+                self._function, self._num_arguments
             )
         return self._hessian
 
