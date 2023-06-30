@@ -2,11 +2,11 @@ import numpy as np
 from numpy import linalg as la, random as rnd
 from scipy.linalg import sqrtm
 
-from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools.multi import multihconj, multiherm, multilogm, multitransp
 
 
-class HermitianPositiveDefinite(RiemannianSubmanifold):
+class HermitianPositiveDefinite(Manifold):
     """Manifold of (n x n)^k complex Hermitian positive definite matrices.
     """
     def __init__(self, n, k=1):
@@ -21,7 +21,7 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
         dimension = 2 * int(k * n * (n + 1) / 2)
         super().__init__(name, dimension)
 
-    def rand(self):
+    def random_point(self):
         # Generate eigenvalues between 1 and 2
         # (eigenvalues of a symmetric matrix are always real).
         d = np.ones((self._k, self._n, 1)) + rnd.rand(self._k, self._n, 1)
@@ -29,7 +29,7 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
         # Generate an orthogonal matrix. Annoyingly qr decomp isn't
         # vectorized so need to use a for loop. Could be done using
         # svd but this is slower for bigger matrices.
-        u = np.zeros((self._k, self._n, self._n), dtype=np.complex)
+        u = np.zeros((self._k, self._n, self._n), dtype=complex)
         for i in range(self._k):
             u[i], r = la.qr(
                 rnd.randn(self._n, self._n)+1j*rnd.randn(self._n, self._n))
@@ -38,7 +38,7 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
             return (u @ (d * multihconj(u)))[0]
         return u @ (d * multihconj(u))
 
-    def randvec(self, x):
+    def random_tangent_vector(self, x):
         k = self._k
         n = self._n
         if k == 1:
@@ -47,14 +47,14 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
             u = multiherm(rnd.randn(k, n, n)+1j*rnd.randn(k, n, n))
         return u / self.norm(x, u)
 
-    def zerovec(self, x):
+    def zero_vector(self, x):
         k = self._k
         n = self._n
         if k != 1:
-            return np.zeros((k, n, n), dtype=np.complex)
-        return np.zeros((n, n), dtype=np.complex)
+            return np.zeros((k, n, n), dtype=complex)
+        return np.zeros((n, n), dtype=complex)
 
-    def inner(self, x, u, v):
+    def inner_product(self, x, u, v):
         return np.real(
             np.tensordot(la.solve(x, u), multitransp(la.solve(x, v)),
                          axes=x.ndim))
@@ -67,10 +67,10 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
         c_inv = la.inv(c)
         return np.real(la.norm(c_inv @ u @ multihconj(c_inv)))
 
-    def proj(self, X, G):
+    def projection(self, X, G):
         return multiherm(G)
 
-    def egrad2rgrad(self, x, u):
+    def euclidean_to_riemannian_gradient(self, x, u):
         return x @ multiherm(u) @ x
 
     def exp(self, x, u):
@@ -81,12 +81,12 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
             x_sqrt = q@np.diag(np.sqrt(d))@q.conj().T
             x_isqrt = q@np.diag(1/np.sqrt(d))@q.conj().T
         else:
-            temp = np.zeros(q.shape, dtype=np.complex)
+            temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_sqrt = q @ temp @ multihconj(q)
 
-            temp = np.zeros(q.shape, dtype=np.complex)
+            temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(1/np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_isqrt = q @ temp @ multihconj(q)
@@ -95,7 +95,7 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
         if k == 1:
             e = q@np.diag(np.exp(d))@q.conj().T
         else:
-            temp = np.zeros(q.shape, dtype=np.complex)
+            temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(np.exp(d[i, :]))[np.newaxis, :, :]
             d = temp
@@ -105,7 +105,7 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
         e = multiherm(e)
         return e
 
-    def retr(self, x, u):
+    def retraction(self, x, u):
         r = x + u + (1/2)*u@la.solve(x, u)
         return r
 
@@ -117,12 +117,12 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
             x_sqrt = q@np.diag(np.sqrt(d))@q.conj().T
             x_isqrt = q@np.diag(1/np.sqrt(d))@q.conj().T
         else:
-            temp = np.zeros(q.shape, dtype=np.complex)
+            temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_sqrt = q @ temp @ multihconj(q)
 
-            temp = np.zeros(q.shape, dtype=np.complex)
+            temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(1/np.sqrt(d[i, :]))[np.newaxis, :, :]
             x_isqrt = q @ temp @ multihconj(q)
@@ -131,7 +131,7 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
         if k == 1:
             log = q@np.diag(np.log(d))@q.conj().T
         else:
-            temp = np.zeros(q.shape, dtype=np.complex)
+            temp = np.zeros(q.shape, dtype=complex)
             for i in range(q.shape[0]):
                 temp[i, :, :] = np.diag(np.log(d[i, :]))[np.newaxis, :, :]
             d = temp
@@ -154,11 +154,11 @@ class HermitianPositiveDefinite(RiemannianSubmanifold):
     def dist(self, x, y):
         c = la.cholesky(x)
         c_inv = la.inv(c)
-        logm = multilogm(c_inv @ y @ multihconj(c_inv), pos_def=True)
+        logm = multilogm(c_inv @ y @ multihconj(c_inv), positive_definite=True)
         return np.real(la.norm(logm))
 
 
-class SpecialHermitianPositiveDefinite(RiemannianSubmanifold):
+class SpecialHermitianPositiveDefinite(Manifold):
     """Manifold of (n x n)^k Hermitian positive
     definite matrices with unit determinant
     called 'Special Hermitian positive definite manifold'.
@@ -180,9 +180,9 @@ class SpecialHermitianPositiveDefinite(RiemannianSubmanifold):
         dimension = int(k * (n*(n+1) - 1))
         super().__init__(name, dimension)
 
-    def rand(self):
+    def random_point(self):
         # Generate k HPD matrices.
-        x = self.HPD.rand()
+        x = self.HPD.random_point()
 
         # Normalize them.
         if self._k == 1:
@@ -192,7 +192,7 @@ class SpecialHermitianPositiveDefinite(RiemannianSubmanifold):
 
         return x
 
-    def randvec(self, x):
+    def random_tangent_vector(self, x):
         # Generate k matrices.
         k = self._k
         n = self._n
@@ -202,23 +202,23 @@ class SpecialHermitianPositiveDefinite(RiemannianSubmanifold):
             u = rnd.randn(k, n, n)+1j*rnd.randn(k, n, n)
 
         # Project them on tangent space.
-        u = self.proj(x, u)
+        u = self.projection(x, u)
 
         # Unit norm.
         u = u / self.norm(x, u)
 
         return u
 
-    def zerovec(self, x):
-        return self.HPD.zerovec(x)
+    def zero_vector(self, x):
+        return self.HPD.zero_vector(x)
 
-    def inner(self, x, u, v):
-        return self.HPD.inner(x, u, v)
+    def inner_product(self, x, u, v):
+        return self.HPD.inner_product(x, u, v)
 
     def norm(self, x, u):
         return self.HPD.norm(x, u)
 
-    def proj(self, x, u):
+    def projection(self, x, u):
         n = self._n
         k = self._k
 
@@ -234,9 +234,9 @@ class SpecialHermitianPositiveDefinite(RiemannianSubmanifold):
 
         return u
 
-    def egrad2rgrad(self, x, u):
+    def euclidean_to_riemannian_gradient(self, x, u):
         rgrad = x @ u @ x
-        rgrad = self.proj(x, rgrad)
+        rgrad = self.projection(x, rgrad)
         return rgrad
 
     def exp(self, x, u):
@@ -249,8 +249,8 @@ class SpecialHermitianPositiveDefinite(RiemannianSubmanifold):
             e = e / (np.real(la.det(e))**(1/self._n)).reshape(-1, 1, 1)
         return e
 
-    def retr(self, x, u):
-        r = self.HPD.retr(x, u)
+    def retraction(self, x, u):
+        r = self.HPD.retraction(x, u)
 
         # Normalize them.
         if self._k == 1:
@@ -263,7 +263,7 @@ class SpecialHermitianPositiveDefinite(RiemannianSubmanifold):
         return self.HPD.log(x, y)
 
     def transp(self, x1, x2, d):
-        return self.proj(x2, self.HPD.transp(x1, x2, d))
+        return self.projection(x2, self.HPD.transp(x1, x2, d))
 
     def dist(self, x, y):
         return self.HPD.dist(x, y)
