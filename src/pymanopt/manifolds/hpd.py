@@ -26,7 +26,7 @@ class HermitianPositiveDefinite(Manifold):
     def random_point(self):
         # Generate eigenvalues between 1 and 2
         # (eigenvalues of a symmetric matrix are always real).
-        d = np.ones((self._k, self._n, 1)) + rnd.rand(self._k, self._n, 1)
+        d = 1 + rnd.rand(self._k, self._n, 1)
 
         # Generate an orthogonal matrix. Annoyingly qr decomp isn't
         # vectorized so need to use a for loop. Could be done using
