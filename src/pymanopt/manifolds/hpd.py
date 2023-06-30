@@ -16,11 +16,10 @@ class HermitianPositiveDefinite(Manifold):
 
         if k == 1:
             name = (
-                "Manifold of Hermitian positive definite\
-                    ({} x {}) matrices"
-            ).format(n, n)
+                f"Manifold of Hermitian positive definite ({n} x {n}) matrices"
+            )
         else:
-            name = "Product manifold of {} ({} x {}) matrices".format(k, n, n)
+            name = f"Product manifold of {k} ({n} x {n}) matrices"
         dimension = 2 * int(k * n * (n + 1) / 2)
         super().__init__(name, dimension)
 
@@ -184,13 +183,19 @@ class SpecialHermitianPositiveDefinite(Manifold):
 
         if k == 1:
             name = (
-                "Manifold of special Hermitian positive definite\
-                    ({} x {}) matrices"
-            ).format(n, n)
+                "Manifold of special Hermitian "
+                f"positive definite ({n} x {n}) matrices"
+            )
+            # write same but on two lines
+            name = (
+                "Manifold of special Hermitian "
+                f"positive definite ({n} x {n}) matrices"
+            )
         else:
-            name = "Product manifold of {} special Hermitian positive\
-                    definite ({} x {}) matrices".format(
-                k, n, n
+            name = (
+                f"Product manifold of {k} special "
+                "Hermitian positive definite "
+                f"({n} x {n}) matrices"
             )
         dimension = int(k * (n * (n + 1) - 1))
         super().__init__(name, dimension)

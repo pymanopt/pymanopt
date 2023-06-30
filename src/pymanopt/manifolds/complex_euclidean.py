@@ -83,10 +83,10 @@ class ComplexEuclidean(_ComplexEuclidean):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
-            name = "Euclidean manifold of {}-vectors".format(*shape)
+            name = f"Euclidean manifold of {shape[0]}-vectors"
         elif len(shape) == 2:
-            name = ("Euclidean manifold of {}x{} matrices").format(*shape)
+            name = f"Euclidean manifold of {shape[0]}x{shape[1]} matrices"
         else:
-            name = "Euclidean manifold of shape " + str(shape) + " tensors"
+            name = f"Euclidean manifold of shape {shape} tensors"
         dimension = 2 * np.prod(shape)
         super().__init__(name, dimension, *shape)
