@@ -15,8 +15,12 @@ class _Euclidean(RiemannianSubmanifold):
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return float(
-            np.tensordot(
-                tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
+            np.real(
+                np.tensordot(
+                    tangent_vector_a.conj(),
+                    tangent_vector_b,
+                    axes=tangent_vector_a.ndim,
+                )
             )
         )
 
@@ -90,6 +94,45 @@ class Euclidean(_Euclidean):
             name = f"Euclidean manifold of shape {shape} tensors"
         dimension = np.prod(shape)
         super().__init__(name, dimension, *shape)
+
+
+class ComplexEuclidean(_Euclidean):
+    r"""Complex Euclidean manifold.
+
+    Args:
+        shape: Shape of points on the manifold.
+
+    Note:
+        If ``shape == (n,)``, this is the manifold of vectors with the
+        standard Euclidean inner product, i.e., :math:`\C^n`.
+        For ``shape == (m, n)``, it corresponds to the manifold of ``m x n``
+        matrices equipped with the standard trace inner product.
+        For ``shape == (n1, n2, ..., nk)``, the class represents the manifold
+        of tensors of shape ``n1 x n2 x ... x nk`` with the inner product
+        corresponding to the usual tensor dot product.
+    """
+
+    def __init__(self, *shape):
+        if len(shape) == 0:
+            raise TypeError("Need shape parameters")
+        if len(shape) == 1:
+            (n1,) = shape
+            name = f"Complex Euclidean manifold of {n1}-vectors"
+        elif len(shape) == 2:
+            n1, n2 = shape
+            name = f"Complex Euclidean manifold of {n1}x{n2} matrices"
+        else:
+            name = f"Complex Euclidean manifold of shape {shape} tensors"
+        dimension = 2 * np.prod(shape)
+        super().__init__(name, dimension, *shape)
+
+    def random_point(self):
+        return np.random.randn(*self._shape) + 1j * np.random.randn(
+            *self._shape
+        )
+
+    def zero_vector(self, point):
+        return np.zeros(self._shape, dtype=np.complex)
 
 
 class Symmetric(_Euclidean):
