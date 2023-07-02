@@ -15,7 +15,7 @@ def _(array_a, array_b):
 
 @nx.exp.register(np.ndarray)
 def _(array):
-    return np.abs(array)
+    return np.exp(array)
 
 
 @nx.tensordot.register(np.ndarray)
