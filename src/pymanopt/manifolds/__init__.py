@@ -30,11 +30,14 @@ from .euclidean import ComplexEuclidean, Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
 from .grassmann import ComplexGrassmann, Grassmann
 from .group import SpecialOrthogonalGroup, UnitaryGroup
-from .hpd import HermitianPositiveDefinite, SpecialHermitianPositiveDefinite
 from .hyperbolic import PoincareBall
 from .oblique import Oblique
 from .positive import Positive
-from .positive_definite import SymmetricPositiveDefinite
+from .positive_definite import (
+    HermitianPositiveDefinite,
+    SpecialHermitianPositiveDefinite,
+    SymmetricPositiveDefinite,
+)
 from .product import Product
 from .psd import Elliptope, PSDFixedRank, PSDFixedRankComplex
 from .sphere import (
