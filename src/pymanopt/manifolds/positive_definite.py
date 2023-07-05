@@ -45,7 +45,7 @@ class _positive_definite(RiemannianSubmanifold):
     to_tangent_space = projection
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
-        return self.projection(point @ euclidean_gradient @ point)
+        return self.projection(point, point @ euclidean_gradient @ point)
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
