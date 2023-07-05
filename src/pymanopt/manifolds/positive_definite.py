@@ -287,5 +287,5 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(
-            point_b, super().projection(point_a, point_b, tangent_vector_a)
+            point_b, super().projection(point_b, tangent_vector_a)
         )
