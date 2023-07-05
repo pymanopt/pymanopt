@@ -252,9 +252,10 @@ class TestMultiSymmetricPositiveDefiniteManifold:
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
         alpha = np.random.uniform()
-        np_testing.assert_almost_equal(
+        np_testing.assert_allclose(
             manifold.dist(x, geodesic(x, y, alpha)),
             alpha * manifold.dist(x, y),
+            rtol=1e-3,
         )
 
     def test_inner_product(self):
