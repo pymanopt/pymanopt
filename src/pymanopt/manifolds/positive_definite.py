@@ -151,7 +151,7 @@ class HermitianPositiveDefinite(_positive_definite):
         k: The number of elements in the product geometry.
     """
 
-    def __init__(self, n, k=1):
+    def __init__(self, n: int, *, k: int = 1):
         self._n = n
         self._k = k
 
@@ -215,7 +215,7 @@ class SpecialHermitianPositiveDefinite(_positive_definite):
         self._n = n
         self._k = k
 
-        self.HPD = HermitianPositiveDefinite(n, k)
+        self.HPD = HermitianPositiveDefinite(n, k=k)
 
         if k == 1:
             name = (
