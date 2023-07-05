@@ -10,6 +10,7 @@ from pymanopt.manifolds import (
 )
 from pymanopt.tools.multi import (
     multiexpm,
+    multihconj,
     multiherm,
     multilogm,
     multisym,
@@ -23,11 +24,11 @@ def geodesic(point_a, point_b, alpha):
     c = np.linalg.cholesky(point_a)
     c_inv = np.linalg.inv(c)
     log_cbc = multilogm(
-        c_inv @ point_b @ multitransp(c_inv),
+        c_inv @ point_b @ multihconj(c_inv),
         positive_definite=True,
     )
     powm = multiexpm(alpha * log_cbc, symmetric=False)
-    return c @ powm @ multitransp(c)
+    return c @ powm @ multihconj(c)
 
 
 class TestSingleSymmetricPositiveDefiniteManifold:
@@ -98,10 +99,9 @@ class TestSingleSymmetricPositiveDefiniteManifold:
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
         alpha = np.random.uniform()
-        np_testing.assert_allclose(
+        np_testing.assert_almost_equal(
             manifold.dist(x, geodesic(x, y, alpha)),
             alpha * manifold.dist(x, y),
-            rtol=1e-3,
         )
 
     def test_exp(self):
@@ -252,10 +252,9 @@ class TestMultiSymmetricPositiveDefiniteManifold:
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
         alpha = np.random.uniform()
-        np_testing.assert_allclose(
+        np_testing.assert_almost_equal(
             manifold.dist(x, geodesic(x, y, alpha)),
             alpha * manifold.dist(x, y),
-            rtol=1e-3,
         )
 
     def test_inner_product(self):
