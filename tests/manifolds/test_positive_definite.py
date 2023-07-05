@@ -349,7 +349,7 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         manifold = self.manifold
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
-        e = np.zeros((self.k, self.n, self.n))
+        e = np.zeros_like(x)
         for i in range(self.k):
             e[i] = expm(np.linalg.solve(x[i], u[i]))
         np_testing.assert_allclose(x @ e, manifold.exp(x, u))
