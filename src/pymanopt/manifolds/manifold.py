@@ -87,6 +87,10 @@ class Manifold(metaclass=abc.ABCMeta):
         """The dimension of the manifold."""
         return self._dimension
 
+    @dim.setter
+    def dim(self, value):
+        self._dimension = value
+
     @property
     def point_layout(self):
         """The number of elements a point on a manifold consists of.
