@@ -190,20 +190,6 @@ class TestSingleHermitianPositiveDefiniteManifold(
         assert u.dtype == complex
         assert np.linalg.norm(u - v) > 1e-3
 
-    def test_inner_product(self):
-        manifold = self.manifold
-        x = manifold.random_point()
-        a = manifold.random_tangent_vector(x)
-        b = manifold.random_tangent_vector(x)
-        np_testing.assert_almost_equal(
-            np.real(np.trace(a @ b)), manifold.inner_product(x, x @ a, x @ b)
-        )
-        assert manifold.inner_product(x, a, b).dtype == float
-
-        x_inv = np.linalg.inv(x)
-        inner = np.real(np.trace(x_inv @ a @ x_inv @ b))
-        np_testing.assert_almost_equal(inner, manifold.inner_product(x, a, b))
-
 
 class TestMultiSymmetricPositiveDefiniteManifold:
     @pytest.fixture(autouse=True)
@@ -449,18 +435,6 @@ class TestMultiHermitianPositiveDefiniteManifold(
         assert u.shape == (k, n, n)
         assert np.linalg.norm(u - v) > 1e-3
 
-    def test_inner_product(self):
-        manifold = self.manifold
-        x = manifold.random_point()
-        a = manifold.random_tangent_vector(x)
-        b = manifold.random_tangent_vector(x)
-        # b is not symmetric, it is Hermitian
-        np_testing.assert_almost_equal(
-            np.tensordot(a, multitransp(b), axes=a.ndim),
-            manifold.inner_product(x, x @ a, x @ b),
-        )
-        assert manifold.inner_product(x, a, b).dtype == float
-
 
 class TestSingleSpecialHermitianPositiveDefiniteManifold(
     TestSingleHermitianPositiveDefiniteManifold
@@ -521,30 +495,6 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold(
         np_testing.assert_almost_equal(1, manifold.norm(x, u))
 
         assert np.linalg.norm(u - v) > 1e-3
-
-    def test_inner_product(self):
-        manifold = self.manifold
-        x = manifold.random_point()
-        a = manifold.random_tangent_vector(x)
-        b = manifold.random_tangent_vector(x)
-        # b is not symmetric, it is Hermitian
-        np_testing.assert_almost_equal(
-            np.tensordot(a, multitransp(b), axes=a.ndim),
-            manifold.inner_product(x, x @ a, x @ b),
-        )
-        assert manifold.inner_product(x, a, b).dtype == float
-
-    def test_norm(self):
-        manifold = self.manifold
-        Id = np.eye(self.n)
-        u = manifold.random_tangent_vector(Id)
-        np_testing.assert_almost_equal(manifold.norm(Id, u), np.linalg.norm(u))
-
-        x = manifold.random_point()
-        u = manifold.random_tangent_vector(x)
-        np_testing.assert_almost_equal(
-            np.sqrt(manifold.inner_product(x, u, u)), manifold.norm(x, u)
-        )
 
     def test_projection(self):
         manifold = self.manifold
