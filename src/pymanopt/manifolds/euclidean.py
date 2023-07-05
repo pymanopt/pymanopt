@@ -132,7 +132,7 @@ class ComplexEuclidean(_Euclidean):
         )
 
     def zero_vector(self, point):
-        return np.zeros(self._shape, dtype=np.complex)
+        return np.zeros(self._shape, dtype=complex)
 
 
 class Symmetric(_Euclidean):
