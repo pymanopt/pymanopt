@@ -121,7 +121,7 @@ class TestSingleSymmetricPositiveDefiniteManifold:
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
         v = manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(multisym(u), u)
+        np_testing.assert_allclose(multiherm(u), u)
         np_testing.assert_almost_equal(1, manifold.norm(x, u))
         assert np.linalg.norm(u - v) > 1e-3
 
@@ -272,7 +272,7 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         manifold = self.manifold
         x = manifold.random_point()
         a = np.random.normal(size=(self.k, self.n, self.n))
-        np_testing.assert_allclose(manifold.projection(x, a), multisym(a))
+        np_testing.assert_allclose(manifold.projection(x, a), multiherm(a))
 
     def test_euclidean_to_riemannian_gradient(self):
         manifold = self.manifold
@@ -280,7 +280,7 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         u = np.random.normal(size=(self.k, self.n, self.n))
         np_testing.assert_allclose(
             manifold.euclidean_to_riemannian_gradient(x, u),
-            x @ multisym(u) @ x,
+            x @ multiherm(u) @ x,
         )
 
     def test_euclidean_to_riemannian_hessian(self):
@@ -292,10 +292,12 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         egrad, ehess = np.random.normal(size=(2, k, n, n))
         u = manifold.random_tangent_vector(x)
 
-        Hess = x @ multisym(ehess) @ x + 2 * multisym(u @ multisym(egrad) @ x)
+        Hess = x @ multiherm(ehess) @ x + 2 * multiherm(
+            u @ multiherm(egrad) @ x
+        )
 
         # Correction factor for the non-constant metric
-        Hess = Hess - multisym(u @ multisym(egrad) @ x)
+        Hess = Hess - multiherm(u @ multiherm(egrad) @ x)
         np_testing.assert_almost_equal(
             Hess, manifold.euclidean_to_riemannian_hessian(x, egrad, ehess, u)
         )
@@ -364,7 +366,7 @@ class TestMultiSymmetricPositiveDefiniteManifold:
 
         assert np.shape(y) == (self.k, self.n, self.n)
         # Check symmetry
-        np_testing.assert_allclose(y, multisym(y))
+        np_testing.assert_allclose(y, multiherm(y))
 
         # Check positivity of eigenvalues
         w = np.linalg.eigvalsh(y)
