@@ -1,6 +1,9 @@
 import numpy as np
 
-from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.manifolds.manifold import (
+    RiemannianSubmanifold,
+    _raise_not_implemented_error,
+)
 from pymanopt.tools.multi import (
     multiexpm,
     multihconj,
@@ -163,7 +166,7 @@ class HermitianPositiveDefinite(_positive_definite):
             )
         else:
             name = f"Product manifold of {k} ({n} x {n}) Hermitian positive definite"
-        dimension = 2 * int(k * n * (n + 1) / 2)
+        dimension = int(k * n * (n + 1))
         super().__init__(name, dimension)
 
     def random_point(self):
@@ -201,7 +204,7 @@ class HermitianPositiveDefinite(_positive_definite):
         return np.zeros((k, n, n), dtype=complex)
 
 
-class SpecialHermitianPositiveDefinite(_positive_definite):
+class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
     """Manifold of hermitian positive definite matrices with unit determinant.
 
     Points on the manifold and tangent vectors are represented as arrays of
@@ -213,110 +216,76 @@ class SpecialHermitianPositiveDefinite(_positive_definite):
         k: The number of elements in the product geometry.
     """
 
-    def __init__(self, n, k=1):
-        self._n = n
-        self._k = k
-
-        self.HPD = HermitianPositiveDefinite(n, k=k)
-
-        if k == 1:
-            name = (
-                "Manifold of special Hermitian "
-                f"positive definite ({n} x {n}) matrices"
-            )
-        else:
-            name = (
-                f"Product manifold of {k} special "
-                "Hermitian positive definite "
-                f"({n} x {n}) matrices"
-            )
-        dimension = int(k * (n * (n + 1) - 1))
-        super().__init__(name, dimension)
+    def __init__(self, n: int, *, k: int = 1):
+        super().__init__(n, k=k)
+        self.dim = int(k * n * (n + 1) - k)
 
     def random_point(self):
         n = self._n
-        k = self._k
 
-        # Generate eigenvalues between 1 and 2.
-        d = 1.0 + np.random.uniform(size=(k, n, 1))
+        # Generate point on the HPD manifold.
+        point = super().random_point()
 
-        # Generate an orthogonal matrix.
-        q, _ = multiqr(
-            np.random.normal(size=(k, n, n))
-            + 1j * np.random.normal(size=(k, n, n))
-        )
-        point = q @ (d * multihconj(q))
-
+        # Unit determinant.
         point = point / (np.real(np.linalg.det(point)) ** (1 / n))
-        point = point.squeeze()
 
         return point
 
     def random_tangent_vector(self, point):
-        # Generate k matrices.
-        k = self._k
-        n = self._n
-        if k == 1:
-            u = np.random.randn(n, n) + 1j * np.random.randn(n, n)
-        else:
-            u = np.random.randn(k, n, n) + 1j * np.random.randn(k, n, n)
+        tangent_vector = super().random_tangent_vector(point)
 
         # Project them on tangent space.
-        u = self.projection(point, u)
+        tangent_vector = self.projection(point, tangent_vector)
 
         # Unit norm.
-        u = u / self.norm(point, u)
+        tangent_vector = tangent_vector / self.norm(point, tangent_vector)
 
-        return u
-
-    def zero_vector(self, point):
-        k = self._k
-        n = self._n
-        if k == 1:
-            return np.zeros((n, n), dtype=complex)
-        return np.zeros((k, n, n), dtype=complex)
+        return tangent_vector
 
     def projection(self, point, vector):
         n = self._n
-        k = self._k
 
         # Project matrix on tangent space of HPD.
-        u = multiherm(vector)
+        vector = super().projection(point, vector)
 
         # Project on tangent space of SHPD at x.
         t = np.trace(np.linalg.solve(point, vector), axis1=-2, axis2=-1)
-        if k == 1:
-            u = u - (1 / n) * np.real(t) * point
-        else:
-            u = u - (1 / n) * np.real(t.reshape(-1, 1, 1)) * point
+        tangent_vector = vector - (1 / n) * np.real(t) * point
 
-        return u
+        return tangent_vector
+
+    def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        return self.projection(
+            point,
+            super().euclidean_to_riemannian_gradient(
+                point, euclidean_gradient
+            ),
+        )
+
+    @_raise_not_implemented_error
+    def euclidean_to_riemannian_hessian(
+        self, point, euclidean_gradient, euclidean_hessian, tangent_vector
+    ):
+        pass
 
     def exp(self, point, tangent_vector):
         e = super().exp(point, tangent_vector)
 
-        # Normalize them.
-        if self._k == 1:
-            e = e / np.real(np.linalg.det(e)) ** (1 / self._n)
-        else:
-            e = e / (np.real(np.linalg.det(e)) ** (1 / self._n)).reshape(
-                -1, 1, 1
-            )
+        # Normalize them. (This is not necessary, but it is good for numerical
+        # stability.)
+        e = e / np.real(np.linalg.det(e)) ** (1 / self._n)
+
         return e
 
     def retraction(self, point, tangent_vector):
         r = super().retraction(point, tangent_vector)
 
-        # Normalize them.
-        if self._k == 1:
-            r = r / np.real(np.linalg.det(r)) ** (1 / self._n)
-        else:
-            r = r / (np.real(np.linalg.det(r)) ** (1 / self._n)).reshape(
-                -1, 1, 1
-            )
+        # Unit determinant.
+        r = r / np.real(np.linalg.det(r)) ** (1 / self._n)
+
         return r
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(
-            point_b, self.HPD.transport(point_a, point_b, tangent_vector_a)
+            point_b, super().projection(point_a, point_b, tangent_vector_a)
         )
