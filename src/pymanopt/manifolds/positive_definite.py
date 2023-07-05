@@ -222,12 +222,15 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
 
     def random_point(self):
         n = self._n
+        k = self._k
 
         # Generate point on the HPD manifold.
         point = super().random_point()
 
         # Unit determinant.
-        point = point / (np.real(np.linalg.det(point)) ** (1 / n))
+        shape = (k, 1, 1) if k > 1 else (1, 1)
+        det = (np.linalg.det(point) ** (1 / n)).reshape(shape)
+        point = point / det
 
         return point
 
@@ -244,13 +247,18 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
 
     def projection(self, point, vector):
         n = self._n
+        k = self._k
 
         # Project matrix on tangent space of HPD.
         vector = super().projection(point, vector)
 
         # Project on tangent space of SHPD at x.
-        t = np.trace(np.linalg.solve(point, vector), axis1=-2, axis2=-1)
-        tangent_vector = vector - (1 / n) * np.real(t) * point
+        shape = (k, 1, 1) if k > 1 else (1, 1)
+        t = np.real(
+            np.trace(np.linalg.solve(point, vector), axis1=-2, axis2=-1)
+        )
+        t = t.reshape(shape)
+        tangent_vector = vector - (1 / n) * t * point
 
         return tangent_vector
 
@@ -269,19 +277,31 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
         pass
 
     def exp(self, point, tangent_vector):
+        n = self._n
+        k = self._k
+
+        # Compute exponential mapping on HPD.
         e = super().exp(point, tangent_vector)
 
         # Normalize them. (This is not necessary, but it is good for numerical
         # stability.)
-        e = e / np.real(np.linalg.det(e)) ** (1 / self._n)
+        shape = (k, 1, 1) if k > 1 else (1, 1)
+        det = (np.linalg.det(e) ** (1 / n)).reshape(shape)
+        e = e / det
 
         return e
 
     def retraction(self, point, tangent_vector):
+        n = self._n
+        k = self._k
+
+        # Compute retraction on HPD.
         r = super().retraction(point, tangent_vector)
 
         # Unit determinant.
-        r = r / np.real(np.linalg.det(r)) ** (1 / self._n)
+        shape = (k, 1, 1) if k > 1 else (1, 1)
+        det = (np.linalg.det(r) ** (1 / n)).reshape(shape)
+        r = r / det
 
         return r
 
