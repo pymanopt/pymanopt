@@ -88,7 +88,9 @@ class _positive_definite(RiemannianSubmanifold):
 
     def retraction(self, point, tangent_vector):
         p_inv_tv = np.linalg.solve(point, tangent_vector)
-        return multisym(point + tangent_vector + tangent_vector @ p_inv_tv / 2)
+        return multiherm(
+            point + tangent_vector + tangent_vector @ p_inv_tv / 2
+        )
 
     def log(self, point_a, point_b):
         c = np.linalg.cholesky(point_a)
