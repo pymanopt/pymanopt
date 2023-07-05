@@ -234,19 +234,21 @@ class SpecialHermitianPositiveDefinite(_positive_definite):
         super().__init__(name, dimension)
 
     def random_point(self):
+        n = self._n
+        k = self._k
+
         # Generate eigenvalues between 1 and 2.
-        d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
+        d = 1.0 + np.random.uniform(size=(k, n, 1))
 
         # Generate an orthogonal matrix.
         q, _ = multiqr(
-            np.random.normal(size=(self._n, self._n))
-            + 1j * np.random.normal(size=(self._n, self._n))
+            np.random.normal(size=(k, n, n))
+            + 1j * np.random.normal(size=(k, n, n))
         )
         point = q @ (d * multihconj(q))
 
-        point = point / (
-            np.real(np.linalg.det(point)) ** (1 / self._n)
-        ).reshape(-1, 1, 1)
+        point = point / (np.real(np.linalg.det(point)) ** (1 / n))
+        point = point.squeeze()
 
         return point
 
