@@ -2,7 +2,7 @@ import numpy as np
 
 from pymanopt.manifolds.manifold import (
     RiemannianSubmanifold,
-    _raise_not_implemented_error,
+    raise_not_implemented_error,
 )
 from pymanopt.tools.multi import (
     multiexpm,
@@ -265,7 +265,7 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
             ),
         )
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):

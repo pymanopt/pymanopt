@@ -6,7 +6,7 @@ from typing import Sequence, Union
 import numpy as np
 
 
-def _raise_not_implemented_error(method):
+def raise_not_implemented_error(method):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         raise NotImplementedError(
@@ -210,7 +210,7 @@ class Manifold(metaclass=abc.ABCMeta):
 
     # Methods which are only required by certain optimizers.
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def dist(self, point_a, point_b):
         """The geodesic distance between two points on the manifold.
 
@@ -222,7 +222,7 @@ class Manifold(metaclass=abc.ABCMeta):
             The distance between ``point_a`` and ``point_b`` on the manifold.
         """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         """Converts the Euclidean to the Riemannian gradient.
 
@@ -237,7 +237,7 @@ class Manifold(metaclass=abc.ABCMeta):
             This must be a tangent vector at ``point``.
         """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
@@ -261,7 +261,7 @@ class Manifold(metaclass=abc.ABCMeta):
             The Riemannian Hessian as a tangent vector at ``point``.
         """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def retraction(self, point, tangent_vector):
         """Retracts a tangent vector back to the manifold.
 
@@ -279,7 +279,7 @@ class Manifold(metaclass=abc.ABCMeta):
             the direction of ``tangent_vector``.
         """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def exp(self, point, tangent_vector):
         """Computes the exponential map on the manifold.
 
@@ -292,7 +292,7 @@ class Manifold(metaclass=abc.ABCMeta):
             along a geodesic in the direction of ``tangent_vector``.
         """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def log(self, point_a, point_b):
         """Computes the logarithmic map on the manifold.
 
@@ -310,7 +310,7 @@ class Manifold(metaclass=abc.ABCMeta):
             A tangent vector in the tangent space at ``point_a``.
         """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def transport(self, point_a, point_b, tangent_vector_a):
         """Compute transport of tangent vectors between tangent spaces.
 
@@ -330,7 +330,7 @@ class Manifold(metaclass=abc.ABCMeta):
             A tangent vector at ``point_b``.
         """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def pair_mean(self, point_a, point_b):
         """Computes the intrinsic mean of two points on the manifold.
 
@@ -346,7 +346,7 @@ class Manifold(metaclass=abc.ABCMeta):
             The mid-way point between ``point_a`` and ``point_b``.
         """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def to_tangent_space(self, point, vector):
         """Re-tangentialize a vector.
 
@@ -415,7 +415,7 @@ class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
         the notes in section 5.11 of [Bou2020]_.
     """
 
-    @_raise_not_implemented_error
+    @raise_not_implemented_error
     def weingarten(self, point, tangent_vector, normal_vector):
         """Compute the Weingarten map of the manifold.
 
