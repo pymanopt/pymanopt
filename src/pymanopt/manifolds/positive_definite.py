@@ -135,10 +135,11 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
         self._k = k
 
         if k == 1:
-            name = f"Manifold of positive definite {n}x{n} matrices"
+            name = f"Manifold of symmetric positive definite {n}x{n} matrices"
         else:
             name = (
-                f"Product manifold of {k} positive definite {n}x{n} matrices"
+                f"Product manifold of {k} "
+                f"symmetric positive definite {n}x{n} matrices"
             )
         dimension = int(k * n * (n + 1) / 2)
         super().__init__(name, dimension)
@@ -161,11 +162,12 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
         self._k = k
 
         if k == 1:
-            name = (
-                f"Manifold of Hermitian positive definite ({n} x {n}) matrices"
-            )
+            name = f"Manifold of Hermitian positive definite {n}x{n} matrices"
         else:
-            name = f"Product manifold of {k} ({n} x {n}) Hermitian positive definite"
+            name = (
+                f"Product manifold of {k} "
+                f"Hermitian positive definite {n}x{n} matrices"
+            )
         dimension = int(k * n * (n + 1))
         super().__init__(name, dimension)
 
