@@ -243,11 +243,8 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
         shape = (k, 1, 1) if k > 1 else (1, 1)
         t = np.real(
             np.trace(np.linalg.solve(point, vector), axis1=-2, axis2=-1)
-        )
-        t = t.reshape(shape)
-        tangent_vector = vector - (1 / n) * t * point
-
-        return tangent_vector
+        ).reshape(shape)
+        return vector - (1 / n) * t * point
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(
