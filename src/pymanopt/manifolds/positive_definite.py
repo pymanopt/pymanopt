@@ -10,7 +10,6 @@ from pymanopt.tools.multi import (
     multiherm,
     multilogm,
     multiqr,
-    multisym,
     multitransp,
 )
 
@@ -78,9 +77,14 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         k = self._k
         n = self._n
         if k == 1:
-            tangent_vector = multisym(np.random.normal(size=(n, n)))
+            tangent_vector = np.random.randn(n, n)
+            if np.iscomplexobj(point):
+                tangent_vector = tangent_vector + 1j * np.random.randn(n, n)
         else:
-            tangent_vector = multisym(np.random.normal(size=(k, n, n)))
+            tangent_vector = np.random.randn(k, n, n)
+            if np.iscomplexobj(point):
+                tangent_vector = tangent_vector + 1j * np.random.randn(k, n, n)
+        tangent_vector = multiherm(tangent_vector)
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -175,21 +179,8 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
         dimension = int(k * n * (n + 1))
         super().__init__(name, dimension)
 
-    def random_tangent_vector(self, point):
-        k = self._k
-        n = self._n
-        if k == 1:
-            tangent_vector = multiherm(
-                np.random.randn(n, n) + 1j * np.random.randn(n, n)
-            )
-        else:
-            tangent_vector = multiherm(
-                np.random.randn(k, n, n) + 1j * np.random.randn(k, n, n)
-            )
-        return tangent_vector / self.norm(point, tangent_vector)
 
-
-class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
+class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
     """Manifold of hermitian positive definite matrices with unit determinant.
 
     Points on the manifold and tangent vectors are represented as arrays of
@@ -202,8 +193,18 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
     """
 
     def __init__(self, n: int, *, k: int = 1):
-        super().__init__(n, k=k)
-        self.dim = int(k * n * (n + 1) - k)
+        self._n = n
+        self._k = k
+
+        if k == 1:
+            name = f"Manifold of Special Hermitian positive definite {n}x{n} matrices"
+        else:
+            name = (
+                f"Product manifold of {k} Special "
+                f"Hermitian positive definite {n}x{n} matrices"
+            )
+        dimension = int(k * n * (n + 1) - k)
+        super().__init__(name, dimension)
 
     def random_point(self):
         n = self._n
