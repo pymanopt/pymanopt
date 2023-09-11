@@ -145,7 +145,7 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
 
 
 class HermitianPositiveDefinite(_PositiveDefiniteBase):
-    """Manifold of hermitian positive definite matrices.
+    """Manifold of Hermitian positive definite matrices.
 
     Points on the manifold and tangent vectors are represented as arrays of
     shape ``k x n x n`` if ``k > 1``, and ``n x n`` if ``k == 1``.
