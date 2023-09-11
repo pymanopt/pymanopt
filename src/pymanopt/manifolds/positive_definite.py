@@ -66,9 +66,12 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         # Generate eigenvalues between 1 and 2.
         d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
 
-        # Generate an orthogonal matrix.
-        q, _ = multiqr(np.random.normal(size=(self._n, self._n)))
-        point = q @ (d * multitransp(q))
+        # Generate a unitary matrix.
+        q, _ = multiqr(
+            np.random.normal(size=(self._n, self._n))
+            + 1j * np.random.normal(size=(self._n, self._n))
+        )
+        point = q @ (d * multihconj(q))
         if self._k == 1:
             return point[0]
         return point
@@ -144,6 +147,9 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
         dimension = int(k * n * (n + 1) / 2)
         super().__init__(name, dimension)
 
+    def random_point(self):
+        return super().random_point().real
+
 
 class HermitianPositiveDefinite(_PositiveDefiniteBase):
     """Manifold of Hermitian positive definite matrices.
@@ -170,20 +176,6 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
             )
         dimension = int(k * n * (n + 1))
         super().__init__(name, dimension)
-
-    def random_point(self):
-        # Generate eigenvalues between 1 and 2.
-        d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
-
-        # Generate a unitary matrix.
-        q, _ = multiqr(
-            np.random.normal(size=(self._n, self._n))
-            + 1j * np.random.normal(size=(self._n, self._n))
-        )
-        point = q @ (d * multihconj(q))
-        if self._k == 1:
-            return point[0]
-        return point
 
     def random_tangent_vector(self, point):
         k = self._k
