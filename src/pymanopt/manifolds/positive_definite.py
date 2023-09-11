@@ -15,7 +15,7 @@ from pymanopt.tools.multi import (
 )
 
 
-class _positive_definite(RiemannianSubmanifold):
+class _PositiveDefiniteBase(RiemannianSubmanifold):
     def __init__(self, name, dimension, *shape):
         self._shape = shape
         super().__init__(name, dimension)
@@ -112,7 +112,7 @@ class _positive_definite(RiemannianSubmanifold):
         return np.zeros((k, n, n))
 
 
-class SymmetricPositiveDefinite(_positive_definite):
+class SymmetricPositiveDefinite(_PositiveDefiniteBase):
     """Manifold of symmetric positive definite matrices.
 
     Points on the manifold and tangent vectors are represented as arrays of
@@ -144,7 +144,7 @@ class SymmetricPositiveDefinite(_positive_definite):
         super().__init__(name, dimension)
 
 
-class HermitianPositiveDefinite(_positive_definite):
+class HermitianPositiveDefinite(_PositiveDefiniteBase):
     """Manifold of hermitian positive definite matrices.
 
     Points on the manifold and tangent vectors are represented as arrays of
