@@ -72,9 +72,7 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
             + 1j * np.random.normal(size=(self._n, self._n))
         )
         point = q @ (d * multihconj(q))
-        if self._k == 1:
-            return point[0]
-        return point
+        return point if self._k > 1 else point[0]
 
     def random_tangent_vector(self, point):
         k = self._k
@@ -217,9 +215,7 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
         # Unit determinant.
         shape = (k, 1, 1) if k > 1 else (1, 1)
         det = (np.linalg.det(point) ** (1 / n)).reshape(shape)
-        point = point / det
-
-        return point
+        return point / det
 
     def random_tangent_vector(self, point):
         tangent_vector = super().random_tangent_vector(point)
@@ -228,9 +224,7 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
         tangent_vector = self.projection(point, tangent_vector)
 
         # Unit norm.
-        tangent_vector = tangent_vector / self.norm(point, tangent_vector)
-
-        return tangent_vector
+        return tangent_vector / self.norm(point, tangent_vector)
 
     def projection(self, point, vector):
         n = self._n
@@ -271,9 +265,7 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
         # stability.)
         shape = (k, 1, 1) if k > 1 else (1, 1)
         det = (np.linalg.det(e) ** (1 / n)).reshape(shape)
-        e = e / det
-
-        return e
+        return e / det
 
     def retraction(self, point, tangent_vector):
         n = self._n
@@ -285,9 +277,7 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
         # Unit determinant.
         shape = (k, 1, 1) if k > 1 else (1, 1)
         det = (np.linalg.det(r) ** (1 / n)).reshape(shape)
-        r = r / det
-
-        return r
+        return r / det
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(
