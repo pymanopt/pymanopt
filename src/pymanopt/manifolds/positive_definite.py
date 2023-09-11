@@ -108,8 +108,8 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         k = self._k
         n = self._n
         if k == 1:
-            return np.zeros((n, n))
-        return np.zeros((k, n, n))
+            return np.zeros((n, n), dtype=point.dtype)
+        return np.zeros((k, n, n), dtype=point.dtype)
 
 
 class SymmetricPositiveDefinite(_PositiveDefiniteBase):
@@ -195,13 +195,6 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
                 np.random.randn(k, n, n) + 1j * np.random.randn(k, n, n)
             )
         return tangent_vector / self.norm(point, tangent_vector)
-
-    def zero_vector(self, point):
-        k = self._k
-        n = self._n
-        if k == 1:
-            return np.zeros((n, n), dtype=complex)
-        return np.zeros((k, n, n), dtype=complex)
 
 
 class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
