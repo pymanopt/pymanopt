@@ -173,7 +173,7 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
         # Generate eigenvalues between 1 and 2.
         d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
 
-        # Generate an orthogonal matrix.
+        # Generate a unitary matrix.
         q, _ = multiqr(
             np.random.normal(size=(self._n, self._n))
             + 1j * np.random.normal(size=(self._n, self._n))
