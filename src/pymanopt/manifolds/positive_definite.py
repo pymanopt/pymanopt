@@ -120,7 +120,7 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
 
     Args:
         n: The size of matrices in the manifold, i.e., the number of rows and
-            columns of each element.
+           columns of each element.
         k: The number of elements in the product geometry.
 
     Note:
@@ -152,7 +152,7 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
 
     Args:
         n: The size of matrices in the manifold, i.e., the number of rows and
-            columns of each element.
+           columns of each element.
         k: The number of elements in the product geometry.
     """
 
@@ -212,7 +212,7 @@ class SpecialHermitianPositiveDefinite(HermitianPositiveDefinite):
 
     Args:
         n: The size of matrices in the manifold, i.e., the number of rows and
-            columns of each element.
+           columns of each element.
         k: The number of elements in the product geometry.
     """
 
