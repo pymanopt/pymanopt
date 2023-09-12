@@ -197,10 +197,10 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         self._k = k
 
         if k == 1:
-            name = f"Manifold of Special Hermitian positive definite {n}x{n} matrices"
+            name = f"Manifold of special Hermitian positive definite {n}x{n} matrices"
         else:
             name = (
-                f"Product manifold of {k} Special "
+                f"Product manifold of {k} special "
                 f"Hermitian positive definite {n}x{n} matrices"
             )
         dimension = int(k * n * (n + 1) - k)
