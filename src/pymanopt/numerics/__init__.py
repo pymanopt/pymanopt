@@ -6,7 +6,10 @@ import importlib
 from pymanopt.numerics.core import abs, allclose, exp, tensordot
 
 
-def _register_backends():
+FUNCTIONS = [abs, allclose, exp, tensordot]
+
+
+def register_backends():
     for backend in ["numpy", "jax", "pytorch", "tensorflow"]:
         try:
             importlib.import_module(f"pymanopt.numerics._backends.{backend}")
@@ -14,4 +17,4 @@ def _register_backends():
             pass
 
 
-_register_backends()
+register_backends()
