@@ -33,10 +33,15 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         return np.real(np.linalg.norm(logm))
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
+        p_inv_tv_a = np.linalg.solve(point, tangent_vector_a)
+        if tangent_vector_a is tangent_vector_b:
+            p_inv_tv_b = p_inv_tv_a
+        else:
+            p_inv_tv_b = np.linalg.solve(point, tangent_vector_b)
         return np.real(
             np.tensordot(
-                np.linalg.solve(point, tangent_vector_a),
-                multitransp(np.linalg.solve(point, tangent_vector_b)),
+                p_inv_tv_a,
+                multitransp(p_inv_tv_b),
                 axes=point.ndim,
             )
         )
