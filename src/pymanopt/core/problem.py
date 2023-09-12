@@ -55,14 +55,21 @@ class Problem:
     ):
         self.manifold = manifold
 
+        self._validate_function(cost, "cost")
         for function, name in (
-            (cost, "cost"),
             (euclidean_gradient, "euclidean_gradient"),
             (euclidean_hessian, "euclidean_hessian"),
             (riemannian_gradient, "riemannian_gradient"),
             (riemannian_hessian, "riemannian_hessian"),
         ):
             self._validate_function(function, name)
+            if function is not None and str(function._backend) != str(cost._backend):
+                raise ValueError(
+                    f"Function '{name}' ({function}) must be decorated "
+                    f"with the same backend decorator as 'cost' ({cost})."
+                )
+
+
 
         if euclidean_gradient is not None and riemannian_gradient is not None:
             raise ValueError(
