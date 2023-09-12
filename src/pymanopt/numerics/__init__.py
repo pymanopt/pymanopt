@@ -6,9 +6,6 @@ import importlib
 from pymanopt.numerics.core import abs, allclose, exp, tensordot
 
 
-FUNCTIONS = [abs, allclose, exp, tensordot]
-
-
 def register_backends():
     for backend in ["numpy", "jax", "pytorch", "tensorflow"]:
         try:
