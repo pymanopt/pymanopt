@@ -1,9 +1,9 @@
-__all__ = ["abs", "allclose", "exp", "tensordot"]
+__all__ = ["abs", "allclose", "exp", "tensordot", "tanh"]
 
 
 import importlib
 
-from pymanopt.numerics.core import abs, allclose, exp, tensordot
+from pymanopt.numerics.core import abs, allclose, exp, tanh, tensordot
 
 
 def register_backends():

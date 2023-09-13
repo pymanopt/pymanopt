@@ -30,3 +30,8 @@ def _(
     array_a: torch.Tensor, array_b: torch.Tensor, *, axes: int = 2
 ) -> torch.Tensor:
     return torch.tensordot(array_a, array_b, dims=axes)
+
+
+@nx.tanh.register
+def _(array: torch.Tensor) -> torch.Tensor:
+    return torch.tanh(array)

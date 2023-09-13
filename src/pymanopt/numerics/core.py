@@ -60,7 +60,6 @@ def _not_implemented(function):
 #   - np.spacing
 #   - np.sqrt
 #   - np.sum
-#   - np.tanh
 #   - np.tile
 #   - np.trace
 #   - np.transpose
@@ -95,4 +94,10 @@ def exp(_):
 @functools.singledispatch
 @_not_implemented
 def tensordot(*_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def tanh(_):
     pass

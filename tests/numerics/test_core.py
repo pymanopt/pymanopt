@@ -64,3 +64,17 @@ def test_exp(argument, expected_output):
 def test_tensordot(argument_a, argument_b, expected_output):
     output = nx.tensordot(argument_a, argument_b, axes=argument_a.ndim)
     assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (np.arctanh(np.array([0.4, 0.2])), np.array([0.4, 0.2])),
+        (jnp.arctanh(jnp.array([0.4, 0.2])), jnp.array([0.4, 0.2])),
+        (torch.arctanh(torch.Tensor([0.4, 0.2])), torch.Tensor([0.4, 0.2])),
+        (tf.math.atanh(tf.constant([0.4, 0.2])), tf.constant([0.4, 0.2])),
+    ],
+)
+def test_tanh(argument, expected_output):
+    output = nx.tanh(argument)
+    assert nx.allclose(output, expected_output)

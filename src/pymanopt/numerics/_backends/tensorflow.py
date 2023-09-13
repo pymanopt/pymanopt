@@ -22,3 +22,8 @@ def _(array: tf.Tensor) -> tf.Tensor:
 @nx.tensordot.register
 def _(array_a: tf.Tensor, array_b: tf.Tensor, *, axes: int = 2) -> tf.Tensor:
     return tnp.tensordot(array_a, array_b, axes=axes)
+
+
+@nx.tanh.register
+def _(array: tf.Tensor) -> tf.Tensor:
+    return tf.math.tanh(array)

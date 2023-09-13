@@ -23,3 +23,8 @@ def _(
     array_a: jnp.ndarray, array_b: jnp.ndarray, *, axes: int = 2
 ) -> jnp.ndarray:
     return jnp.tensordot(array_a, array_b, axes=axes)
+
+
+@nx.tanh.register
+def _(array: jnp.ndarray) -> jnp.ndarray:
+    return jnp.tanh(array)
