@@ -12,6 +12,68 @@ def _not_implemented(function):
     return inner
 
 
+# TODO:
+#   - np.all
+#   - np.any
+#   - np.arange
+#   - np.arccos
+#   - np.arccosh
+#   - np.arctan
+#   - np.arctanh
+#   - np.argmin
+#   - np.argsort
+#   - np.array
+#   - np.block
+#   - np.conjugate
+#   - np.cos
+#   - np.diag
+#   - np.diagonal
+#   - np.eye
+#   - np.finfo
+#   - np.hstack
+#   - np.iscomplexobj
+#   - np.isnan
+#   - np.isrealobj
+#   - np.linalg.cholesky
+#   - np.linalg.det
+#   - np.linalg.eigh
+#   - np.linalg.inv
+#   - np.linalg.norm
+#   - np.linalg.qr
+#   - np.linalg.solve
+#   - np.linalg.svd
+#   - np.log
+#   - np.logspace
+#   - np.newaxis
+#   - np.ones
+#   - np.pi
+#   - np.polyfit
+#   - np.polyval
+#   - np.prod
+#   - np.random.normal
+#   - np.random.randn
+#   - np.random.uniform
+#   - np.real
+#   - np.sin
+#   - np.sinc
+#   - np.sort
+#   - np.spacing
+#   - np.sqrt
+#   - np.sum
+#   - np.tanh
+#   - np.tile
+#   - np.trace
+#   - np.transpose
+#   - np.vectorize
+#   - np.vstack
+#   - np.where
+#   - np.zeros
+#   - scipy.special.comb
+#   - scipy.linalg.solve_continuous_lyapunov
+#   - scipy.linalg.expm
+#   - scipy.linalg.logm
+
+
 @functools.singledispatch
 @_not_implemented
 def abs(_):
