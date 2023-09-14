@@ -1,10 +1,15 @@
 import numpy as np
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools.multi import multihconj, multiqr, multitransp
 
 
 class _GrassmannBase(Manifold):
+    _n: int
+    _p: int
+    _k: int
+
     @property
     def typical_dist(self):
         return np.sqrt(self._p * self._k)
@@ -77,7 +82,7 @@ class Grassmann(_GrassmannBase):
         return np.linalg.norm(s)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return nx.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
@@ -182,7 +187,7 @@ class ComplexGrassmann(_GrassmannBase):
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.real(
-            np.tensordot(
+            nx.tensordot(
                 np.conjugate(tangent_vector_a),
                 tangent_vector_b,
                 axes=tangent_vector_a.ndim,

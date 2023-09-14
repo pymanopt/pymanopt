@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.linalg
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
 
 
@@ -15,7 +16,7 @@ class _PSDFixedRank(Manifold):
         return 10 + self._k
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return nx.tensordot(
             tangent_vector_a.conj(),
             tangent_vector_b,
             axes=tangent_vector_a.ndim,
@@ -220,7 +221,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         return 10 * self._k
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return nx.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 

@@ -1,5 +1,6 @@
 import numpy as np
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
@@ -55,7 +56,7 @@ class ComplexCircle(RiemannianSubmanifold):
         )
 
     def exp(self, point, tangent_vector):
-        tangent_vector_abs = np.abs(tangent_vector)
+        tangent_vector_abs = nx.abs(tangent_vector)
         mask = tangent_vector_abs > 0
         not_mask = np.logical_not(mask)
         tangent_vector_new = np.zeros(self._dimension)
@@ -72,7 +73,7 @@ class ComplexCircle(RiemannianSubmanifold):
 
     def log(self, point_a, point_b):
         v = self.projection(point_a, point_b - point_a)
-        abs_v = np.abs(v)
+        abs_v = nx.abs(v)
         di = np.arccos((point_a.conj() * point_b).real)
         factors = di / abs_v
         factors[di <= 1e-6] = 1
@@ -100,4 +101,4 @@ class ComplexCircle(RiemannianSubmanifold):
 
     @staticmethod
     def _normalize(point):
-        return point / np.abs(point)
+        return point / nx.abs(point)
