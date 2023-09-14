@@ -20,13 +20,12 @@ Installation
 
 Pymanopt is compatible with Python 3.6+, and depends on NumPy and SciPy.
 Additionally, to use Pymanopt's built-in automatic differentiation, which we
-strongly recommend, you need to setup your cost functions using either
-`Autograd <https://github.com/HIPS/autograd>`_, `JAX
+strongly recommend, you need to setup your cost functions using either `JAX
 <https://jax.readthedocs.io/en/latest/>_`, `TensorFlow
-<https://www.tensorflow.org>`_ or `PyTorch <http://www.pytorch.org/>`_.
-If you are unfamiliar with these packages and you are unsure which to go for,
-we suggest to start with Autograd.
-Autograd wraps thinly around NumPy, and is very simple to use, particularly if
+<https://www.tensorflow.org>`_ or `PyTorch <http://www.pytorch.org/>`_. If you
+are unfamiliar with these packages and you are unsure which to go for, we
+suggest to start with JAX.
+JAX wraps thinly around NumPy, and is very simple to use, particularly if
 you're already familiar with NumPy.
 To get the latest version of Pymanopt, install it via pip:
 
@@ -70,27 +69,27 @@ with :math:`\sphere^{n-1}` denoting the set of all unit-norm vectors in
 The following is a minimal working example of how to solve the above problem
 using Pymanopt for a random symmetric matrix.
 As indicated in the introduction above, we follow four simple steps: we
-instantiate the manifold, create the cost function (using Autograd in this
+instantiate the manifold, create the cost function (using JAX in this
 case), define a problem instance which we pass the manifold and the cost
 function, and run the minimization problem using one of the available
 optimizers.
 
 .. code-block:: python
 
-    import autograd.numpy as anp
+    import jax.numpy as jnp
     import pymanopt
     import pymanopt.manifolds
     import pymanopt.optimizers
 
-    anp.random.seed(42)
+    key = jax.random.PRNGKey(42)
 
     dim = 3
     manifold = pymanopt.manifolds.Sphere(dim)
 
-    matrix = anp.random.normal(size=(dim, dim))
+    matrix = jnp.random.normal(key, shape=(dim, dim))
     matrix = 0.5 * (matrix + matrix.T)
 
-    @pymanopt.function.autograd(manifold)
+    @pymanopt.function.jax(manifold)
     def cost(point):
         return -point @ matrix @ point
 
@@ -99,7 +98,7 @@ optimizers.
     optimizer = pymanopt.optimizers.SteepestDescent()
     result = optimizer.run(problem)
 
-    eigenvalues, eigenvectors = anp.linalg.eig(matrix)
+    eigenvalues, eigenvectors = jnp.linalg.eig(matrix)
     dominant_eigenvector = eigenvectors[:, eigenvalues.argmax()]
 
     print("Dominant eigenvector:", dominant_eigenvector)
@@ -112,38 +111,30 @@ Running this example will produce (something like) the following:
     Optimizing...
     Iteration    Cost                       Gradient norm
     ---------    -----------------------    --------------
-       1         +1.1041943339110254e+00    5.65626470e-01
-       2         +5.2849633289004561e-01    8.90742722e-01
-       3         -8.0741058657312559e-01    2.23937710e+00
-       4         -1.2667369971251594e+00    1.59671326e+00
-       5         -1.4100298597091836e+00    1.11228845e+00
-       6         -1.5219408277812505e+00    2.45507203e-01
-       7         -1.5269956262562046e+00    6.81712914e-02
-       8         -1.5273114803528709e+00    3.40941735e-02
-       9         -1.5273905588875487e+00    1.70222768e-02
-      10         -1.5274100956128560e+00    8.61140952e-03
-      11         -1.5274154319869837e+00    3.90706914e-03
-      12         -1.5274156215853507e+00    3.62943721e-03
-      13         -1.5274162595152783e+00    2.47643452e-03
-      14         -1.5274168030609154e+00    3.66398414e-04
-      15         -1.5274168133149475e+00    1.45210081e-04
-      16         -1.5274168150025758e+00    4.96142583e-05
-      17         -1.5274168150483476e+00    4.42317042e-05
-      18         -1.5274168151841643e+00    2.13915041e-05
-      19         -1.5274168152087644e+00    1.36422863e-05
-      20         -1.5274168152220804e+00    6.25780214e-06
-      21         -1.5274168152229037e+00    5.48381052e-06
-      22         -1.5274168152252021e+00    2.16996083e-06
-      23         -1.5274168152255774e+00    7.52279600e-07
-    Terminated - min grad norm reached after 23 iterations, 0.01 seconds.
+       1         +7.3636104836175786e-01    1.78120267e+00
+       2         +1.9196509409063550e-01    1.29654224e+00
+       3         +3.0638109168006390e-02    6.13254596e-01
+       4         -7.7901008505905957e-03    7.25241389e-02
+       5         -8.3457028386552494e-03    5.56249650e-02
+       6         -8.4593397499944326e-03    4.49748292e-02
+       7         -8.6552155330729182e-03    6.23199857e-03
+       8         -8.6576998894642276e-03    3.71419432e-03
+       9         -8.6581363887458067e-03    3.06238405e-03
+      10         -8.6590589920961022e-03    1.74038637e-04
+      11         -8.6590618561912091e-03    3.57952773e-05
+      12         -8.6590619610269620e-03    1.48676753e-05
+      13         -8.6590619819723654e-03    2.99713741e-06
+      14         -8.6590619826608199e-03    1.42672552e-06
+      15         -8.6590619827597113e-03    1.01736059e-06
+      16         -8.6590619827723175e-03    9.52384449e-07
+    Terminated - min grad norm reached after 16 iterations, 0.24 seconds.
 
-    Dominant eigenvector: [-0.78442334 -0.38225031 -0.48843088]
-    Pymanopt solution: [0.78442327 0.38225034 0.48843097]
+    Dominant eigenvector: [ 0.73188691 -0.59568032 -0.33091767]
+    Pymanopt solution: [-0.73188694  0.59568023  0.33091777]
 
 Note that the direction of the "true" dominant eigenvector and the solution
 found by Pymanopt differ.
-This is not exactly surprising though.
-Eigenvectors are not unique since every eigenpair :math:`(\lambda, \vmv)` still
+This is not surprising though since every eigenpair :math:`(\lambda, \vmv)`
 satisfies the eigenvalue equation :math:`\vmA \vmv = \lambda \vmv` if
 :math:`\vmv` is replaced by :math:`\alpha \vmv` for some :math:`\alpha \in \R
 \setminus \set{0}`.
