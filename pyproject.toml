@@ -43,9 +43,6 @@ dependencies = [
 homepage = "https://pymanopt.org"
 
 [project.optional-dependencies]
-autograd = [
-  "autograd>=1.2",
-]
 jax = [
   "jax>=0.2.0",
   "jaxlib",
@@ -57,7 +54,7 @@ torch = [
   "torch>=1.0.0",
 ]
 backends = [
-  "pymanopt[autograd,jax,tensorflow,torch]",
+  "pymanopt[jax,tensorflow,torch]",
 ]
 dev = [
   "black[jupyter]==22.3.0",

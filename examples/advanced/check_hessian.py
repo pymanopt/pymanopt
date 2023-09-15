@@ -1,4 +1,3 @@
-import autograd.numpy as anp
 import jax.numpy as jnp
 import numpy as np
 import tensorflow as tf
@@ -11,19 +10,13 @@ from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_hessian
 
 
-SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, matrix, backend):
     euclidean_gradient = euclidean_hessian = None
 
-    if backend == "autograd":
-
-        @pymanopt.function.autograd(manifold)
-        def cost(x):
-            return -anp.inner(x, matrix @ x)
-
-    elif backend == "jax":
+    if backend == "jax":
 
         @pymanopt.function.jax(manifold)
         def cost(x):

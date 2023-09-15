@@ -9,9 +9,9 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.13.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: pymanopt-3.7.10
 #     language: python
-#     name: python
+#     name: pymanopt-3.7.10
 # ---
 
 # # Riemannian Optimization for Inference in MoG models
@@ -31,7 +31,7 @@
 # Let's generate $N=1000$ samples of that MoG model and scatter plot the samples:
 
 # +
-import autograd.numpy as np
+import numpy as np
 
 
 np.set_printoptions(precision=2)
@@ -116,7 +116,8 @@ import sys
 
 sys.path.insert(0, "../..")
 
-from autograd.scipy.special import logsumexp
+import jax.numpy as jnp
+from jax.scipy.special import logsumexp
 
 import pymanopt
 from pymanopt import Problem
@@ -129,26 +130,26 @@ manifold = Product([SymmetricPositiveDefinite(D + 1, k=K), Euclidean(K - 1)])
 
 # (2) Define cost function
 # The parameters must be contained in a list theta.
-@pymanopt.function.autograd(manifold)
+@pymanopt.function.jax(manifold)
 def cost(S, v):
     # Unpack parameters
-    nu = np.append(v, 0)
+    nu = jnp.append(v, 0)
 
-    logdetS = np.expand_dims(np.linalg.slogdet(S)[1], 1)
-    y = np.concatenate([samples.T, np.ones((1, N))], axis=0)
+    logdetS = jnp.expand_dims(jnp.linalg.slogdet(S)[1], 1)
+    y = jnp.concatenate([samples.T, jnp.ones((1, N))], axis=0)
 
     # Calculate log_q
-    y = np.expand_dims(y, 0)
+    y = jnp.expand_dims(y, 0)
 
     # 'Probability' of y belonging to each cluster
-    log_q = -0.5 * (np.sum(y * np.linalg.solve(S, y), axis=1) + logdetS)
+    log_q = -0.5 * (jnp.sum(y * jnp.linalg.solve(S, y), axis=1) + logdetS)
 
-    alpha = np.exp(nu)
-    alpha = alpha / np.sum(alpha)
-    alpha = np.expand_dims(alpha, 1)
+    alpha = jnp.exp(nu)
+    alpha = alpha / jnp.sum(alpha)
+    alpha = jnp.expand_dims(alpha, 1)
 
-    loglikvec = logsumexp(np.log(alpha) + log_q, axis=0)
-    return -np.sum(loglikvec)
+    loglikvec = logsumexp(jnp.log(alpha) + log_q, axis=0)
+    return -jnp.sum(loglikvec)
 
 
 problem = Problem(manifold, cost)
