@@ -31,11 +31,25 @@
 # Let's generate $N=1000$ samples of that MoG model and scatter plot the samples:
 
 # +
+import sys
+
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+
+# +
 import numpy as np
+from jax.scipy.special import logsumexp
+
+import pymanopt
+from pymanopt import Problem
+from pymanopt.manifolds import Euclidean, Product, SymmetricPositiveDefinite
+from pymanopt.optimizers import SteepestDescent
+
+
+np.random.seed(42)
 
 
 np.set_printoptions(precision=2)
-import matplotlib.pyplot as plt
 
 
 # %matplotlib inline
@@ -110,19 +124,8 @@ plt.show()
 #
 # So let's infer the parameters of our toy example by Riemannian optimisation using Pymanopt:
 
-# +
-import sys
-
 
 sys.path.insert(0, "../..")
-
-import jax.numpy as jnp
-from jax.scipy.special import logsumexp
-
-import pymanopt
-from pymanopt import Problem
-from pymanopt.manifolds import Euclidean, Product, SymmetricPositiveDefinite
-from pymanopt.optimizers import SteepestDescent
 
 
 # (1) Instantiate the manifold
@@ -203,7 +206,7 @@ print(pihat[2])
 
 # ## When Things Go Astray
 #
-# A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [BackTrackingLineSearcher](https://github.com/pymanopt/pymanopt/blob/master/pymanopt/optimizers/line_search.py)) -- here we demonstrate this approach:
+# A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [BackTrackingLineSearcher](https://github.com/pymanopt/pymanopt/blob/master/src/pymanopt/optimizers/line_search.py)) -- here we demonstrate this approach:
 
 
 class LineSearchMoG:
