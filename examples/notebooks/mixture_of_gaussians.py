@@ -207,9 +207,7 @@ print(pihat[2])
 
 
 class LineSearchMoG:
-    """
-    Back-tracking line-search that checks for close to singular matrices.
-    """
+    """Back-tracking line-search that checks for close to singular matrices."""
 
     def __init__(
         self,
@@ -228,24 +226,19 @@ class LineSearchMoG:
         self._oldf0 = None
 
     def search(self, objective, manifold, x, d, f0, df0):
-        """
-        Function to perform backtracking line-search.
-        Arguments:
-            - objective
-                objective function to optimise
-            - manifold
-                manifold to optimise over
-            - x
-                starting point on the manifold
-            - d
-                tangent vector at x (descent direction)
-            - df0
-                directional derivative at x along d
+        """Function to perform backtracking line search.
+
+        Args:
+            objective: Objective function to optimize.
+            manifold: The manifold to optimize over.
+            x: Starting point on the manifold.
+            d: Tangent vector at ``x``, i.e., a descent direction.
+            df0: Directional derivative at ``x`` along ``d``.
+
         Returns:
-            - step_size
-                norm of the vector retracted to reach newx from x
-            - newx
-                next iterate suggested by the line-search
+            A tuple ``(step_size, newx)`` where ``step_size`` is the norm of
+            the vector retracted to reach the suggested iterate ``newx`` from
+            ``x``.
         """
         # Compute the norm of the search direction
         norm_d = manifold.norm(x, d)
