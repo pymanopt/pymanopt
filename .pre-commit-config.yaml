@@ -18,6 +18,7 @@ repos:
     rev: 5.11.5
     hooks:
       - id: isort
+        args: [--treat-comment-as-code, "# %%", --float-to-top]
   - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
