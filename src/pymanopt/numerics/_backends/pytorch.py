@@ -10,6 +10,11 @@ def _(array: torch.Tensor) -> torch.Tensor:
     return torch.abs(array)
 
 
+@nx.all.register
+def _(array: torch.Tensor) -> torch.Tensor:
+    return torch.all(array)
+
+
 @nx.allclose.register
 def _(
     array_a: torch.Tensor, array_b: typing.Union[torch.Tensor, float, int]

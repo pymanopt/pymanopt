@@ -22,6 +22,24 @@ def test_abs(argument, expected_output):
 
 
 @pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (np.array([True, True]), True),
+        (np.array([False, True]), False),
+        (jnp.array([True, True]), True),
+        (jnp.array([False, True]), False),
+        (torch.Tensor([True, True]), True),
+        (torch.Tensor([False, True]), False),
+        (tf.constant([True, True]), True),
+        (tf.constant([False, True]), False),
+    ],
+)
+def test_all(argument, expected_output):
+    output = nx.all(argument)
+    assert output == expected_output
+
+
+@pytest.mark.parametrize(
     "argument_a, argument_b, expected_output",
     [
         (np.array([4, 2]), np.array([4, 2]), True),

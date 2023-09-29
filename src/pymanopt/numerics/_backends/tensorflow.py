@@ -9,6 +9,11 @@ def _(array: tf.Tensor) -> tf.Tensor:
     return tnp.abs(array)
 
 
+@nx.all.register
+def _(array: tf.Tensor) -> tf.Tensor:
+    return tf.reduce_all(array)
+
+
 @nx.allclose.register
 def _(array_a: tf.Tensor, array_b: tf.Tensor) -> bool:
     return tnp.allclose(array_a, array_b)

@@ -8,6 +8,11 @@ def _(array: np.ndarray) -> np.ndarray:
     return np.abs(array)
 
 
+@nx.all.register
+def _(array: np.ndarray) -> bool:
+    return np.all(array)
+
+
 @nx.allclose.register
 def _(array_a: np.ndarray, array_b: np.ndarray) -> bool:
     return np.allclose(array_a, array_b)

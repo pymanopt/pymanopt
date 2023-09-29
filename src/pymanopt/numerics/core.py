@@ -13,7 +13,6 @@ def _not_implemented(function):
 
 
 # TODO:
-#   - np.all
 #   - np.any
 #   - np.arange
 #   - np.arccos
@@ -76,6 +75,12 @@ def _not_implemented(function):
 @functools.singledispatch
 @_not_implemented
 def abs(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def all(_):
     pass
 
 
