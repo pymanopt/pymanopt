@@ -1,4 +1,5 @@
-import autograd.numpy as np
+import jax.numpy as jnp
+import numpy as np
 import numpy.testing as np_testing
 import pytest
 
@@ -17,10 +18,10 @@ class TestProductManifold:
 
         point = self.manifold.random_point()
 
-        @pymanopt.function.autograd(self.manifold)
+        @pymanopt.function.jax(self.manifold)
         def cost(*x):
-            return np.sum(
-                [np.linalg.norm(a - b) ** 2 for a, b in zip(x, point)]
+            return jnp.sum(
+                [jnp.linalg.norm(a - b) ** 2 for a, b in zip(x, point)]
             )
 
         self.cost = cost

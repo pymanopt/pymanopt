@@ -2,9 +2,10 @@
 
 ## 2.x
 
+- Move examples/notebooks to notebooks, and only store `*.py` files from which
+  notebooks are rendered via nbsphinx
 - Enable "I" flake8 warnings
 - Add callback mechanism to allow for custom termination criteria #133
-- Add complex manifolds #125
 - Add L-BFGS and other quasi-Newton optimizers
 
 ## 3.x

@@ -1,5 +1,5 @@
-import autograd.numpy as np
 import jax.numpy as jnp
+import numpy as np
 import tensorflow as tf
 import torch
 
@@ -9,25 +9,11 @@ from pymanopt.manifolds import Elliptope
 from pymanopt.optimizers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("autograd", "jax", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("jax", "pytorch", "tensorflow")
 
 
 def create_cost(manifold, epsilon, backend):
-    if backend == "autograd":
-
-        @pymanopt.function.autograd(manifold)
-        def cost(X):
-            Y = X @ X.T
-            # Shift the exponentials by the maximum value to reduce numerical
-            # trouble due to possible overflows.
-            s = np.triu(Y, 1).max()
-            expY = np.exp((Y - s) / epsilon)
-            # Zero out the diagonal
-            expY -= np.diag(np.diag(expY))
-            u = np.triu(expY, 1).sum()
-            return s + epsilon * np.log(u)
-
-    elif backend == "jax":
+    if backend == "jax":
 
         @pymanopt.function.jax(manifold)
         def cost(X):

@@ -1,4 +1,5 @@
-import autograd.numpy as np
+import jax.numpy as jnp
+import numpy as np
 import numpy.testing as np_testing
 import pytest
 
@@ -18,7 +19,7 @@ class TestConjugateGradient:
 
         self.manifold = manifold = pymanopt.manifolds.Sphere(n)
 
-        @pymanopt.function.autograd(manifold)
+        @pymanopt.function.jax(manifold)
         def cost(point):
             return -point.T @ matrix @ point
 
@@ -65,9 +66,9 @@ class TestConjugateGradient:
             num_rows, subspace_dimension
         )
 
-        @pymanopt.function.autograd(manifold)
+        @pymanopt.function.jax(manifold)
         def cost(X):
-            return -np.real(np.trace(np.conj(X.T) @ matrix @ X))
+            return -jnp.real(jnp.trace(jnp.conj(X.T) @ matrix @ X))
 
         problem = pymanopt.Problem(manifold, cost)
         optimizer = ConjugateGradient(verbosity=0)

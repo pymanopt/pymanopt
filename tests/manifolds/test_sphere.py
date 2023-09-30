@@ -1,6 +1,7 @@
 import warnings
 
-import autograd.numpy as np
+import jax.numpy as jnp
+import numpy as np
 import pytest
 from numpy import testing as np_testing
 
@@ -21,7 +22,7 @@ class TestSphereManifold:
         self.manifold = Sphere(m, n)
 
         # For automatic testing of euclidean_to_riemannian_hessian
-        self.projection = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
+        self.projection = lambda x, u: u - jnp.tensordot(x, u, jnp.ndim(u)) * x
 
     def test_dim(self):
         assert self.manifold.dim == self.m * self.n - 1

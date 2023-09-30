@@ -1,4 +1,5 @@
-import autograd.numpy as np
+import jax.numpy as jnp
+import numpy as np
 import numpy.testing as np_testing
 import pytest
 
@@ -16,9 +17,9 @@ class TestProblemBackendInterface:
         A = np.random.normal(size=(m, n))
         self.manifold = Product([FixedRankEmbedded(m, n, rank), Euclidean(n)])
 
-        @pymanopt.function.autograd(self.manifold)
+        @pymanopt.function.jax(self.manifold)
         def cost(u, s, vt, x):
-            return np.linalg.norm(((u * s) @ vt - A) @ x) ** 2
+            return jnp.linalg.norm(((u * s) @ vt - A) @ x) ** 2
 
         self.cost = cost
         self.gradient = self.cost.get_gradient_operator()

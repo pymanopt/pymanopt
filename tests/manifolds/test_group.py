@@ -1,4 +1,4 @@
-import autograd.numpy as np
+import numpy as np
 import numpy.testing as np_testing
 import pytest
 

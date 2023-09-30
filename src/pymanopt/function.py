@@ -1,9 +1,3 @@
-__all__ = ["autograd", "jax", "numpy", "pytorch", "tensorflow"]
+__all__ = ["jax", "numpy", "pytorch", "tensorflow"]
 
-from pymanopt.autodiff.backends import (
-    autograd,
-    jax,
-    numpy,
-    pytorch,
-    tensorflow,
-)
+from pymanopt.autodiff.backends import jax, numpy, pytorch, tensorflow

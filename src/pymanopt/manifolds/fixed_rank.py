@@ -2,6 +2,7 @@ import collections
 
 import numpy as np
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
@@ -73,7 +74,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return np.sum(
             [
-                np.tensordot(a, b)
+                nx.tensordot(a, b)
                 for (a, b) in zip(tangent_vector_a, tangent_vector_b)
             ]
         )

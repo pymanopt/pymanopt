@@ -8,7 +8,7 @@ Note:
 """
 
 import numpy as np
-from autograd import grad, jacobian
+from jax import grad, jacobian
 
 
 def riemannian_gradient(cost, projector):

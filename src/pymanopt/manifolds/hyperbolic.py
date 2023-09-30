@@ -1,5 +1,6 @@
 import numpy as np
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold
 
 
@@ -18,8 +19,8 @@ class PoincareBall(Manifold):
     The Poincare ball is embedded in :math:`\R^n` and is a Riemannian manifold,
     but it is not an embedded Riemannian submanifold since the metric is not
     inherited from the Euclidean inner product of its ambient space.
-    Instead, the Riemannian metric is conformal to the Euclidean one (angles are
-    preserved), and it is given at every point :math:`\vmx` by
+    Instead, the Riemannian metric is conformal to the Euclidean one (angles
+    are preserved), and it is given at every point :math:`\vmx` by
     :math:`\inner{\vmu}{\vmv}_\vmx = \lambda_\vmx^2 \inner{\vmu}{\vmv}` where
     :math:`\lambda_\vmx = 2 / (1 - \norm{\vmx}^2)` is the conformal factor.
     This induces the following distance between two points :math:`\vmx` and
@@ -58,7 +59,7 @@ class PoincareBall(Manifold):
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         factor = self.conformal_factor(point)
-        return np.tensordot(
+        return nx.tensordot(
             tangent_vector_a,
             tangent_vector_b * factor**2,
             axes=tangent_vector_a.ndim,

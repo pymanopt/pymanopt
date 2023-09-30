@@ -1,5 +1,6 @@
 import numpy as np
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import (
     multiexpm,
@@ -74,7 +75,7 @@ class Stiefel(RiemannianSubmanifold):
         return np.sqrt(self._p * self._k)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return nx.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 

@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.special
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools import extend_docstring
 from pymanopt.tools.multi import (
@@ -28,7 +29,7 @@ class _UnitaryBase(RiemannianSubmanifold):
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return nx.tensordot(
             tangent_vector_a.conj(),
             tangent_vector_b,
             axes=tangent_vector_a.ndim,
@@ -222,7 +223,7 @@ class UnitaryGroup(_UnitaryBase):
         n, k = self._n, self._k
         if n == 1:
             point = np.ones((k, 1, 1)) + 1j * np.ones((k, 1, 1))
-            point /= np.abs(point)
+            point /= nx.abs(point)
         else:
             point, _ = multiqr(
                 np.random.normal(size=(k, n, n))

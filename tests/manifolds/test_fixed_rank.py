@@ -1,4 +1,5 @@
-import autograd.numpy as np
+import jax.numpy as jnp
+import numpy as np
 import pytest
 from numpy import testing as np_testing
 
@@ -17,9 +18,9 @@ class TestFixedRankEmbeddedManifold:
         u, s, vt = self.manifold.random_point()
         matrix = (u * s) @ vt
 
-        @pymanopt.function.autograd(self.manifold)
+        @pymanopt.function.jax(self.manifold)
         def cost(u, s, vt):
-            return np.linalg.norm((u * s) @ vt - matrix) ** 2
+            return jnp.linalg.norm((u * s) @ vt - matrix) ** 2
 
         self.cost = cost
 
