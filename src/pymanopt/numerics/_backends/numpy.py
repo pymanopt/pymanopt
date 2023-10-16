@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 
 import pymanopt.numerics.core as nx
 import pymanopt.numerics.linalg as linalg
@@ -97,6 +98,11 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.exp(array)
 
 
+@linalg.expm.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return scipy.linalg.expm(array)
+
+
 @linalg.cholesky.register
 def _(array: generic_list_type) -> np.ndarray:
     return np.linalg.cholesky(array)
@@ -117,6 +123,11 @@ def _(array: generic_list_type) -> np.ndarray:
     return np.linalg.inv(array)
 
 
+@linalg.logm.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return scipy.linalg.logm(array)
+
+
 @linalg.norm.register
 def _(array: generic_np_type) -> np.float64:
     return np.linalg.norm(array)
@@ -130,6 +141,11 @@ def _(array: generic_list_type) -> tuple[np.ndarray, np.ndarray]:
 @linalg.solve.register
 def _(array_a: generic_list_type, array_b: generic_list_type) -> np.ndarray:
     return np.linalg.solve(array_a, array_b)
+
+
+@linalg.solve_continuous_lyapunov.register
+def _(array_a: generic_list_type, array_q: generic_list_type) -> np.ndarray:
+    return scipy.linalg.solve_continuous_lyapunov(array_a, array_q)
 
 
 @linalg.svd.register

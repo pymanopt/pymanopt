@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 import torch
+import scipy
 
 import pymanopt.numerics as nx
 
@@ -307,7 +308,7 @@ def test_inv(argument):
     [
         1,
         [2],
-        np.array([2]),
+        np.array([1, 4.2])
     ]
 )
 def test_norm(argument):
@@ -339,6 +340,45 @@ def test_qr(argument):
 def test_solve(argument_a, argument_b):
     output = nx.linalg.solve(argument_a, argument_b)
     expected_output = np.linalg.solve(argument_a, argument_b)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument_a, argument_b",
+    [
+        (np.array([[1]]), np.array([[3]])),
+        (np.array([[2, 1], [1, 2]]), np.array([[1.2, 4], [2, 1]])),
+    ],
+)
+def test_solve_continuous_lyapunov(argument_a, argument_b):
+    output = nx.linalg.solve_continuous_lyapunov(argument_a, argument_b)
+    expected_output = scipy.linalg.solve_continuous_lyapunov(argument_a, argument_b)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        np.array([[1]]),
+        np.array([[1, 1.3], [1.3, 1]]),
+    ],
+)
+def test_expm(argument):
+    output = nx.linalg.expm(argument)
+    expected_output = scipy.linalg.expm(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        np.array([[1]]),
+        np.array([[2, 1], [1, 2]]),
+    ],
+)
+def test_logm(argument):
+    output = nx.linalg.logm(argument)
+    expected_output = scipy.linalg.logm(argument)
     assert nx.allclose(output, expected_output)
 
 
