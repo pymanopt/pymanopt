@@ -251,6 +251,18 @@ def test_exp(argument, expected_output):
 
 
 @pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (np.array([[1]]), np.array([[1]])),
+        (np.array([[2, 1], [1, 2]]), np.linalg.cholesky(np.array([[2, 1], [1, 2]]))),
+    ],
+)
+def test_cholesky(argument, expected_output):
+    output = nx.linalg.cholesky(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
     "argument_a, argument_b, expected_output",
     [
         (np.array([-4, 2]), np.array([1, 3]), 2),

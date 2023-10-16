@@ -1,6 +1,7 @@
 import numpy as np
 
 import pymanopt.numerics.core as nx
+import pymanopt.numerics.linalg as linalg
 
 generic_list_type = tuple | list | np.ndarray
 generic_np_type = int | float | complex | np.generic | generic_list_type
@@ -94,6 +95,11 @@ def _(n: int) -> np.ndarray:
 @nx.exp.register
 def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.exp(array)
+
+
+@linalg.cholesky.register
+def _(array: generic_list_type) -> np.ndarray:
+    return np.linalg.cholesky(array)
 
 
 @nx.tensordot.register
