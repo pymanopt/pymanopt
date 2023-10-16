@@ -103,6 +103,46 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return scipy.linalg.expm(array)
 
 
+@nx.finfo.register
+def _(dtype: type) -> np.finfo:
+    return np.finfo(dtype)
+
+
+@nx.hstack.register
+def _(arrays: generic_list_type) -> np.ndarray:
+    return np.hstack(arrays)
+
+
+@nx.iscomplexobj.register
+def _(array: generic_np_type) -> bool:
+    return np.iscomplexobj(array)
+
+
+@nx.isnan.register
+def _(array: generic_np_type) -> bool:
+    return np.isnan(array)
+
+
+@nx.isrealobj.register
+def _(array: generic_np_type) -> bool:
+    return np.isrealobj(array)
+
+
+@nx.log.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return np.log(array)
+
+
+@nx.logspace.register
+def _(start: int, stop: int, num: int = 50, endpoint: bool = True) -> np.ndarray:
+    return np.logspace(start, stop, num, endpoint)
+
+
+@nx.ones.register
+def _(shape: int | list | tuple) -> np.ndarray:
+    return np.ones(shape)
+
+
 @linalg.cholesky.register
 def _(array: generic_list_type) -> np.ndarray:
     return np.linalg.cholesky(array)

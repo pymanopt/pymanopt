@@ -1,4 +1,5 @@
 import functools
+import numpy as np
 
 
 def _not_implemented(function):
@@ -13,16 +14,6 @@ def _not_implemented(function):
 
 
 # TODO:
-#   - np.finfo
-#   - np.hstack
-#   - np.iscomplexobj
-#   - np.isnan
-#   - np.isrealobj
-#   - np.log
-#   - np.logspace
-#   - np.newaxis
-#   - np.ones
-#   - np.pi
 #   - np.polyfit
 #   - np.polyval
 #   - np.prod
@@ -156,11 +147,65 @@ def exp(_):
 
 @functools.singledispatch
 @_not_implemented
-def tensordot(*_):
+def finfo(_):
     pass
 
 
 @functools.singledispatch
 @_not_implemented
+def hstack(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def iscomplexobj(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def isnan(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def isrealobj(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def log(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def logspace(_):
+    pass
+
+
+newaxis = None
+
+
+@functools.singledispatch
+@_not_implemented
+def ones(_):
+    pass
+
+
+pi = np.pi
+
+
+@functools.singledispatch
+@_not_implemented
 def tanh(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def tensordot(*_):
     pass

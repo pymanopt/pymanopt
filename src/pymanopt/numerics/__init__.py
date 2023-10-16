@@ -17,6 +17,16 @@ __all__ = [
     "diagonal",
     "eye",
     "exp",
+    "finfo",
+    "hstack",
+    "iscomplexobj",
+    "isnan",
+    "isrealobj",
+    "log",
+    "logspace",
+    "newaxis",
+    "ones",
+    "pi",
     "tanh",
     "tensordot"
 ]
@@ -43,6 +53,16 @@ from pymanopt.numerics.core import (
     diagonal,
     eye,
     exp,
+    finfo,
+    hstack,
+    iscomplexobj,
+    isnan,
+    isrealobj,
+    log,
+    logspace,
+    newaxis,
+    ones,
+    pi,
     tanh,
     tensordot
 )

@@ -251,6 +251,98 @@ def test_exp(argument, expected_output):
 
 
 @pytest.mark.parametrize(
+    "argument",
+    [
+        np.float64,
+        np.complex128,
+    ]
+)
+def test_finfo(argument):
+    assert nx.finfo(argument) == np.finfo(argument)
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        [1, 2],
+        [np.array([1, 2]), np.array([3, 4])],
+    ]
+)
+def test_hstack(argument):
+    output = nx.hstack(argument)
+    assert nx.allclose(output, np.hstack(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        1,
+        1 + 2j,
+        np.array([1 + 1j, 2]),
+    ]
+)
+def test_iscomplexobj(argument):
+    output = nx.iscomplexobj(argument)
+    assert nx.allclose(output, np.iscomplexobj(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        np.nan,
+        np.array([np.nan, 1]),
+        np.array([1, 2]),
+    ]
+)
+def test_isnan(argument):
+    output = nx.isnan(argument)
+    assert nx.allclose(output, np.isnan(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        3,
+        np.array([1, 2]),
+    ]
+)
+def test_log(argument):
+    output = nx.log(argument)
+    assert nx.allclose(output, np.log(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        (3, 6, 8)
+    ]
+)
+def test_logspace(argument):
+    output = nx.logspace(*argument)
+    assert nx.allclose(output, np.logspace(*argument))
+
+
+def test_newaxis():
+    assert nx.newaxis == np.newaxis
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        1,
+        (3, 2)
+    ]
+)
+def test_ones(argument):
+    output = nx.ones(argument)
+    assert nx.allclose(output, np.ones(argument))
+
+
+def test_pi():
+    assert nx.pi == np.pi
+
+
+@pytest.mark.parametrize(
     "argument_a, argument_b, expected_output",
     [
         (np.array([-4, 2]), np.array([1, 3]), 2),
