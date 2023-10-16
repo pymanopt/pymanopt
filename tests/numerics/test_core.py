@@ -72,7 +72,7 @@ def test_any(argument, expected_output):
 @pytest.mark.parametrize(
     "argument, expected_output",
     [
-        (3,  np.arange(3)),
+        (3, np.arange(3)),
         ((1, 3), np.arange(1, 3)),
     ],
 )
