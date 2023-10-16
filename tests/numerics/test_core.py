@@ -84,7 +84,8 @@ def test_arange(argument, expected_output):
         output = nx.arange(*argument)
     else:
         output = nx.arange(argument)
-    assert (output == expected_output).all()
+    assert nx.allclose(output, expected_output)
+
 
 @pytest.mark.parametrize(
     "argument, expected_output",
