@@ -142,6 +142,103 @@ def test_arctanh(argument, expected_output):
 @pytest.mark.parametrize(
     "argument, expected_output",
     [
+        ([2, 1, 3], 1),
+        (np.array([2, 1, 3]), 1),
+    ]
+)
+def test_argmin(argument, expected_output):
+    assert nx.argmin(argument) == expected_output
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (1, np.array([1])),
+        (1.2, np.array([1.2])),
+        (np.array([1, 2]), np.array([1, 2])),
+    ]
+)
+def test_array(argument, expected_output):
+    output = nx.array(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        ([1, 2], np.array([1, 2])),
+        (np.array([1, 2]), np.array([1, 2])),
+        ([np.array([1, 2]), np.array([3, 4])],
+         np.block([np.array([1, 2]), np.array([3, 4])])),
+    ]
+)
+def test_block(argument, expected_output):
+    output = nx.block(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (1 + 2j, 1 - 2j),
+        (np.array([1 + 2j, 3 + 4j]), np.array([1 - 2j, 3 - 4j])),
+    ]
+)
+def test_conjugate(argument, expected_output):
+    output = nx.conjugate(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (1, np.cos(1)),
+        (1.2, np.cos(1.2)),
+        (np.array([1.2, 2]), np.cos([1.2, 2]))
+    ]
+)
+def test_cos(argument, expected_output):
+    output = nx.cos(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (np.array([[1, 2], [3, 4]]), np.array([1, 4])),
+    ]
+)
+def test_diag(argument, expected_output):
+    output = nx.diag(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (np.array([[1, 2], [3, 4]]), np.diagonal(np.array([[1, 2], [3, 4]]))),
+    ]
+)
+def test_diagonal(argument, expected_output):
+    output = nx.diagonal(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (1, np.eye(1)),
+        (2, np.eye(2)),
+    ]
+)
+def test_eye(argument, expected_output):
+    output = nx.eye(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
         (np.log(np.array([4, 2])), np.array([4, 2])),
         (jnp.log(jnp.array([4, 2])), jnp.array([4, 2])),
         (torch.log(torch.Tensor([4, 2])), torch.Tensor([4, 2])),

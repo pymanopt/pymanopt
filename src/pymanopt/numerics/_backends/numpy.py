@@ -2,7 +2,8 @@ import numpy as np
 
 import pymanopt.numerics.core as nx
 
-generic_np_type = int | float | tuple | list | np.generic | np.ndarray
+generic_list_type = tuple | list | np.ndarray
+generic_np_type = int | float | complex | np.generic | generic_list_type
 
 
 @nx.abs.register
@@ -48,6 +49,46 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
 @nx.arctanh.register
 def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.arctanh(array)
+
+
+@nx.argmin.register
+def _(array: generic_np_type) -> int:
+    return np.argmin(array)
+
+
+@nx.array.register
+def _(array: generic_np_type) -> np.ndarray:
+    return np.array(array)
+
+
+@nx.block.register
+def _(arrays: generic_np_type) -> np.ndarray:
+    return np.block(arrays)
+
+
+@nx.conjugate.register
+def _(array: generic_np_type) -> generic_np_type:
+    return np.conjugate(array)
+
+
+@nx.cos.register
+def _(array: generic_np_type) -> generic_np_type:
+    return np.cos(array)
+
+
+@nx.diag.register
+def _(array: generic_list_type) -> np.ndarray:
+    return np.diag(array)
+
+
+@nx.diagonal.register
+def _(array: generic_list_type) -> np.ndarray:
+    return np.diagonal(array)
+
+
+@nx.eye.register
+def _(n: int) -> np.ndarray:
+    return np.eye(n)
 
 
 @nx.exp.register

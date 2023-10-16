@@ -13,15 +13,6 @@ def _not_implemented(function):
 
 
 # TODO:
-#   - np.argmin
-#   - np.argsort
-#   - np.array
-#   - np.block
-#   - np.conjugate
-#   - np.cos
-#   - np.diag
-#   - np.diagonal
-#   - np.eye
 #   - np.finfo
 #   - np.hstack
 #   - np.iscomplexobj
@@ -117,6 +108,54 @@ def arctan(_):
 @functools.singledispatch
 @_not_implemented
 def arctanh(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def argmin(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def array(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def block(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def conjugate(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def cos(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def diag(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def diagonal(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def eye(_):
     pass
 
 
