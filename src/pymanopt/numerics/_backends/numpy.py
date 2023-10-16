@@ -102,6 +102,41 @@ def _(array: generic_list_type) -> np.ndarray:
     return np.linalg.cholesky(array)
 
 
+@linalg.det.register
+def _(array: generic_list_type) -> np.float64 | np.complex128:
+    return np.linalg.det(array)
+
+
+@linalg.eigh.register
+def _(array: generic_list_type) -> tuple[np.ndarray, np.ndarray]:
+    return np.linalg.eigh(array)
+
+
+@linalg.inv.register
+def _(array: generic_list_type) -> np.ndarray:
+    return np.linalg.inv(array)
+
+
+@linalg.norm.register
+def _(array: generic_np_type) -> np.float64:
+    return np.linalg.norm(array)
+
+
+@linalg.qr.register
+def _(array: generic_list_type) -> tuple[np.ndarray, np.ndarray]:
+    return np.linalg.qr(array)
+
+
+@linalg.solve.register
+def _(array_a: generic_list_type, array_b: generic_list_type) -> np.ndarray:
+    return np.linalg.solve(array_a, array_b)
+
+
+@linalg.svd.register
+def _(array: generic_list_type) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    return np.linalg.svd(array)
+
+
 @nx.tensordot.register
 def _(
     array_a: generic_np_type, array_b: generic_np_type, *, axes: int = 2
