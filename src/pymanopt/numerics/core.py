@@ -13,10 +13,6 @@ def _not_implemented(function):
 
 
 # TODO:
-#   - np.arccos
-#   - np.arccosh
-#   - np.arctan
-#   - np.arctanh
 #   - np.argmin
 #   - np.argsort
 #   - np.array
@@ -97,6 +93,30 @@ def any(*_):
 @functools.singledispatch
 @_not_implemented
 def arange(*_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def arccos(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def arccosh(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def arctan(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def arctanh(_):
     pass
 
 

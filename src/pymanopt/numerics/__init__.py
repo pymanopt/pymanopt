@@ -4,6 +4,10 @@ __all__ = [
     "allclose",
     "any",
     "arange",
+    "arccos",
+    "arccosh",
+    "arctan",
+    "arctanh",
     "exp",
     "tanh",
     "tensordot"
@@ -18,6 +22,10 @@ from pymanopt.numerics.core import (
     allclose,
     any,
     arange,
+    arccos,
+    arccosh,
+    arctan,
+    arctanh,
     exp,
     tanh,
     tensordot

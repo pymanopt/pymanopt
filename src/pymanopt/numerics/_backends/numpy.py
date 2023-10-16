@@ -30,6 +30,26 @@ def _(start: int, stop: int = None, step: int = 1) -> np.ndarray:
     return np.arange(start, stop, step)
 
 
+@nx.arccos.register
+def _(array: generic_np_type) -> generic_np_type:
+    return np.arccos(array)
+
+
+@nx.arccosh.register
+def _(array: generic_np_type) -> generic_np_type:
+    return np.arccosh(array)
+
+
+@nx.arctan.register
+def _(array: generic_np_type) -> generic_np_type:
+    return np.arctan(array)
+
+
+@nx.arctanh.register
+def _(array: generic_np_type) -> generic_np_type:
+    return np.arctanh(array)
+
+
 @nx.exp.register
 def _(array: np.ndarray) -> np.ndarray:
     return np.exp(array)

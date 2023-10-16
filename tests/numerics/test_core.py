@@ -86,6 +86,57 @@ def test_arange(argument, expected_output):
         output = nx.arange(argument)
     assert (output == expected_output).all()
 
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (0, np.arccos(0)),
+        (0.2, np.arccos(0.2)),
+        (np.array([-0.2, 0.3]), np.arccos([-0.2, 0.3])),
+    ]
+)
+def test_arccos(argument, expected_output):
+    output = nx.arccos(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (1, np.arccosh(1)),
+        (1.2, np.arccosh(1.2)),
+        (np.array([1.2, 2]), np.arccosh([1.2, 2])),
+    ]
+)
+def test_arccosh(argument, expected_output):
+    output = nx.arccosh(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (1, np.arctan(1)),
+        (1.2, np.arctan(1.2)),
+        (np.array([1.2, 2]), np.arctan([1.2, 2])),
+    ]
+)
+def test_arctan(argument, expected_output):
+    output = nx.arctan(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (0, np.arctanh(0)),
+        (0.1, np.arctanh(0.1)),
+        (np.array([0.2, -0.3]), np.arctanh([0.2, -0.3])),
+    ]
+)
+def test_arctanh(argument, expected_output):
+    output = nx.arctanh(argument)
+    assert nx.allclose(output, expected_output)
+
 
 @pytest.mark.parametrize(
     "argument, expected_output",
