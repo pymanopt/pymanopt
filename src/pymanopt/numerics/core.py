@@ -14,15 +14,9 @@ def _not_implemented(function):
 
 
 # TODO:
-#   - np.polyfit
-#   - np.polyval
-#   - np.prod
 #   - np.random.normal
 #   - np.random.randn
 #   - np.random.uniform
-#   - np.real
-#   - np.sin
-#   - np.sinc
 #   - np.sort
 #   - np.spacing
 #   - np.sqrt
@@ -197,6 +191,42 @@ def ones(_):
 
 
 pi = np.pi
+
+
+@functools.singledispatch
+@_not_implemented
+def polyfit(*_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def polyval(*_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def prod(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def real(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def sin(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def sinc(_):
+    pass
 
 
 @functools.singledispatch

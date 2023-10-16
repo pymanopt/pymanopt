@@ -343,6 +343,76 @@ def test_pi():
 
 
 @pytest.mark.parametrize(
+    "argument_a, argument_b",
+    [
+        (np.array([1.2, 2]), np.array([3, 4])),
+    ]
+)
+def test_polyfit(argument_a, argument_b):
+    output = nx.polyfit(argument_a, argument_b, 1)
+    assert nx.allclose(output, np.polyfit(argument_a, argument_b, 1))
+
+
+@pytest.mark.parametrize(
+    "argument_a, argument_b",
+    [
+        (np.array([1.2, 2]), np.array([3, 4])),
+    ]
+)
+def test_polyval(argument_a, argument_b):
+    output = nx.polyval(argument_a, argument_b)
+    assert nx.allclose(output, np.polyval(argument_a, argument_b))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        np.array([1.2, 2]),
+    ]
+)
+def test_prod(argument):
+    output = nx.prod(argument)
+    assert nx.allclose(output, np.prod(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        1,
+        1 + 2j,
+        np.array([1 + 1j, 2]),
+    ]
+)
+def test_real(argument):
+    output = nx.real(argument)
+    assert nx.allclose(output, np.real(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        2,
+        np.array([1, 2]),
+    ]
+)
+def test_sin(argument):
+    output = nx.sin(argument)
+    assert nx.allclose(output, np.sin(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        2,
+        np.array([1, 2]),
+    ]
+)
+def test_sinc(argument):
+    output = nx.sinc(argument)
+    assert nx.allclose(output, np.sinc(argument))
+
+
+@pytest.mark.parametrize(
     "argument_a, argument_b, expected_output",
     [
         (np.array([-4, 2]), np.array([1, 3]), 2),

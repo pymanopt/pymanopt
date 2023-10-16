@@ -193,6 +193,36 @@ def _(array: generic_list_type) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return np.linalg.svd(array)
 
 
+@nx.polyfit.register
+def _(x: generic_np_type, y: generic_np_type, deg: int) -> np.ndarray:
+    return np.polyfit(x, y, deg)
+
+
+@nx.polyval.register
+def _(p: generic_np_type, x: generic_np_type) -> np.ndarray:
+    return np.polyval(p, x)
+
+
+@nx.prod.register
+def _(array: generic_np_type) -> np.float64:
+    return np.prod(array)
+
+
+@nx.real.register
+def _(array: generic_np_type) -> int | float | np.ndarray:
+    return np.real(array)
+
+
+@nx.sin.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return np.sin(array)
+
+
+@nx.sinc.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return np.sinc(array)
+
+
 @nx.tensordot.register
 def _(
     array_a: generic_np_type, array_b: generic_np_type, *, axes: int = 2

@@ -27,6 +27,12 @@ __all__ = [
     "newaxis",
     "ones",
     "pi",
+    "polyfit",
+    "polyval",
+    "prod",
+    "real",
+    "sin",
+    "sinc",
     "tanh",
     "tensordot"
 ]
@@ -63,6 +69,12 @@ from pymanopt.numerics.core import (
     newaxis,
     ones,
     pi,
+    polyfit,
+    polyval,
+    prod,
+    real,
+    sin,
+    sinc,
     tanh,
     tensordot
 )
