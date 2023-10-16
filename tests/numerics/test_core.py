@@ -59,6 +59,34 @@ def test_allclose(argument_a, argument_b, expected_output):
 @pytest.mark.parametrize(
     "argument, expected_output",
     [
+        ([True, False], True),
+        ([False, False], False),
+        (np.array([True, False]), True),
+        (np.array([False, False]), False),
+    ],
+)
+def test_any(argument, expected_output):
+    assert nx.any(argument) == expected_output
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (3,  np.arange(3)),
+        ((1, 3), np.arange(1, 3)),
+    ],
+)
+def test_arange(argument, expected_output):
+    if isinstance(argument, tuple):
+        output = nx.arange(*argument)
+    else:
+        output = nx.arange(argument)
+    assert (output == expected_output).all()
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
         (np.log(np.array([4, 2])), np.array([4, 2])),
         (jnp.log(jnp.array([4, 2])), jnp.array([4, 2])),
         (torch.log(torch.Tensor([4, 2])), torch.Tensor([4, 2])),

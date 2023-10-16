@@ -13,8 +13,6 @@ def _not_implemented(function):
 
 
 # TODO:
-#   - np.any
-#   - np.arange
 #   - np.arccos
 #   - np.arccosh
 #   - np.arctan
@@ -87,6 +85,18 @@ def all(_):
 @functools.singledispatch
 @_not_implemented
 def allclose(*_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def any(*_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def arange(*_):
     pass
 
 

@@ -2,6 +2,8 @@ __all__ = [
     "abs",
     "all",
     "allclose",
+    "any",
+    "arange",
     "exp",
     "tanh",
     "tensordot"
@@ -14,6 +16,8 @@ from pymanopt.numerics.core import (
     abs,
     all,
     allclose,
+    any,
+    arange,
     exp,
     tanh,
     tensordot
