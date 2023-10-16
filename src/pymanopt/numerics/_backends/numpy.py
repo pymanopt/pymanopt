@@ -2,6 +2,8 @@ import numpy as np
 
 import pymanopt.numerics.core as nx
 
+generic_np_type = int | float | np.generic | np.ndarray
+
 
 @nx.abs.register
 def _(array: np.ndarray) -> np.ndarray:
