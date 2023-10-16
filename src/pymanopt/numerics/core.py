@@ -18,14 +18,6 @@ def _not_implemented(function):
 #   - np.iscomplexobj
 #   - np.isnan
 #   - np.isrealobj
-#   - np.linalg.cholesky
-#   - np.linalg.det
-#   - np.linalg.eigh
-#   - np.linalg.inv
-#   - np.linalg.norm
-#   - np.linalg.qr
-#   - np.linalg.solve
-#   - np.linalg.svd
 #   - np.log
 #   - np.logspace
 #   - np.newaxis
@@ -52,9 +44,6 @@ def _not_implemented(function):
 #   - np.where
 #   - np.zeros
 #   - scipy.special.comb
-#   - scipy.linalg.solve_continuous_lyapunov
-#   - scipy.linalg.expm
-#   - scipy.linalg.logm
 
 
 @functools.singledispatch
