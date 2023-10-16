@@ -16,7 +16,7 @@ def _(array: np.ndarray) -> bool:
 
 
 @nx.allclose.register
-def _(array_a: np.ndarray, array_b: np.ndarray) -> bool:
+def _(array_a: generic_np_type, array_b: generic_np_type) -> bool:
     return np.allclose(array_a, array_b)
 
 
