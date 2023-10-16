@@ -42,6 +42,9 @@ def test_all(argument, expected_output):
 @pytest.mark.parametrize(
     "argument_a, argument_b, expected_output",
     [
+        (4, 4, True),
+        (4.2, 4.2, True),
+        (np.array(4.2), 4.2, True),
         (np.array([4, 2]), np.array([4, 2]), True),
         (np.array([4, 2]), np.array([2, 4]), False),
         (jnp.array([4, 2]), jnp.array([4, 2]), True),
