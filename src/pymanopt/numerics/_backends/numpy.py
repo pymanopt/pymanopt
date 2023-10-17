@@ -4,8 +4,7 @@ import scipy
 import pymanopt.numerics.core as nx
 import pymanopt.numerics.linalg as linalg
 
-generic_list_type = tuple | list | np.ndarray
-generic_np_type = int | float | complex | np.generic | generic_list_type
+generic_np_type = int | float | complex | np.generic | tuple | list | np.ndarray
 
 
 @nx.abs.register
@@ -79,12 +78,12 @@ def _(array: generic_np_type) -> generic_np_type:
 
 
 @nx.diag.register
-def _(array: generic_list_type) -> np.ndarray:
+def _(array: generic_np_type) -> np.ndarray:
     return np.diag(array)
 
 
 @nx.diagonal.register
-def _(array: generic_list_type) -> np.ndarray:
+def _(array: generic_np_type) -> np.ndarray:
     return np.diagonal(array)
 
 
@@ -109,7 +108,7 @@ def _(dtype: type) -> np.finfo:
 
 
 @nx.hstack.register
-def _(arrays: generic_list_type) -> np.ndarray:
+def _(arrays: generic_np_type) -> np.ndarray:
     return np.hstack(arrays)
 
 
@@ -144,22 +143,22 @@ def _(shape: int | list | tuple) -> np.ndarray:
 
 
 @linalg.cholesky.register
-def _(array: generic_list_type) -> np.ndarray:
+def _(array: generic_np_type) -> np.ndarray:
     return np.linalg.cholesky(array)
 
 
 @linalg.det.register
-def _(array: generic_list_type) -> np.float64 | np.complex128:
+def _(array: generic_np_type) -> np.float64 | np.complex128:
     return np.linalg.det(array)
 
 
 @linalg.eigh.register
-def _(array: generic_list_type) -> tuple[np.ndarray, np.ndarray]:
+def _(array: generic_np_type) -> tuple[np.ndarray, np.ndarray]:
     return np.linalg.eigh(array)
 
 
 @linalg.inv.register
-def _(array: generic_list_type) -> np.ndarray:
+def _(array: generic_np_type) -> np.ndarray:
     return np.linalg.inv(array)
 
 
@@ -174,22 +173,22 @@ def _(array: generic_np_type) -> np.float64:
 
 
 @linalg.qr.register
-def _(array: generic_list_type) -> tuple[np.ndarray, np.ndarray]:
+def _(array: generic_np_type) -> tuple[np.ndarray, np.ndarray]:
     return np.linalg.qr(array)
 
 
 @linalg.solve.register
-def _(array_a: generic_list_type, array_b: generic_list_type) -> np.ndarray:
+def _(array_a: generic_np_type, array_b: generic_np_type) -> np.ndarray:
     return np.linalg.solve(array_a, array_b)
 
 
 @linalg.solve_continuous_lyapunov.register
-def _(array_a: generic_list_type, array_q: generic_list_type) -> np.ndarray:
+def _(array_a: generic_np_type, array_q: generic_np_type) -> np.ndarray:
     return scipy.linalg.solve_continuous_lyapunov(array_a, array_q)
 
 
 @linalg.svd.register
-def _(array: generic_list_type) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def _(array: generic_np_type) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return np.linalg.svd(array)
 
 
@@ -224,7 +223,7 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
 
 
 @nx.sort.register
-def _(array: generic_list_type) -> np.ndarray:
+def _(array: generic_np_type) -> np.ndarray:
     return np.sort(array)
 
 
@@ -249,7 +248,7 @@ def _(array: generic_np_type, reps: int | tuple[int, ...]) -> np.ndarray:
 
 
 @nx.trace.register
-def _(array: generic_list_type) -> np.float64:
+def _(array: generic_np_type) -> np.float64:
     return np.trace(array)
 
 
