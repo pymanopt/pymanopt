@@ -223,6 +223,41 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.sinc(array)
 
 
+@nx.sort.register
+def _(array: generic_list_type) -> np.ndarray:
+    return np.sort(array)
+
+
+@nx.spacing.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return np.spacing(array)
+
+
+@nx.sqrt.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return np.sqrt(array)
+
+
+@nx.sum.register
+def _(array: generic_np_type, axis: int | None = None) -> np.float64 | np.ndarray:
+    return np.sum(array, axis)
+
+
+@nx.tile.register
+def _(array: generic_np_type, reps: int | tuple[int, ...]) -> np.ndarray:
+    return np.tile(array, reps)
+
+
+@nx.trace.register
+def _(array: generic_list_type) -> np.float64:
+    return np.trace(array)
+
+
+@nx.transpose.register
+def _(array: generic_np_type, axes: tuple[int, ...] | None = None) -> np.ndarray:
+    return np.transpose(array, axes)
+
+
 @nx.tensordot.register
 def _(
     array_a: generic_np_type, array_b: generic_np_type, *, axes: int = 2

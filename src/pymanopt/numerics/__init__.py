@@ -33,6 +33,13 @@ __all__ = [
     "real",
     "sin",
     "sinc",
+    "sort",
+    "spacing",
+    "sqrt",
+    "sum",
+    "tile",
+    "trace",
+    "transpose",
     "tanh",
     "tensordot"
 ]
@@ -75,6 +82,13 @@ from pymanopt.numerics.core import (
     real,
     sin,
     sinc,
+    sort,
+    spacing,
+    sqrt,
+    sum,
+    tile,
+    trace,
+    transpose,
     tanh,
     tensordot
 )

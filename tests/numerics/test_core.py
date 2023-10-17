@@ -413,6 +413,105 @@ def test_sinc(argument):
 
 
 @pytest.mark.parametrize(
+    "argument",
+    [
+        [2, 1],
+        np.array([2, 1]),
+    ]
+)
+def test_sort(argument):
+    output = nx.sort(argument)
+    assert nx.allclose(output, np.sort(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        2.2,
+        [2.2, 1],
+        np.array([2.2, 1]),
+    ]
+)
+def test_spacing(argument):
+    output = nx.spacing(argument)
+    assert nx.allclose(output, np.spacing(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        2,
+        [2, 1],
+        np.array([2, 1]),
+    ]
+)
+def test_sqrt(argument):
+    output = nx.sqrt(argument)
+    assert nx.allclose(output, np.sqrt(argument))
+
+
+@pytest.mark.parametrize(
+    "argument_a, argument_b",
+    [
+        (1, None),
+        ([1, 2], None),
+        (np.array([1, 2]), None),
+        (np.array([[1, 2], [3, 4]]), 1),
+    ]
+)
+def test_sum(argument_a, argument_b):
+    if argument_b is None:
+        output = nx.sum(argument_a)
+        assert nx.allclose(output, np.sum(argument_a))
+    else:
+        output = nx.sum(argument_a, argument_b)
+        assert nx.allclose(output, np.sum(argument_a, argument_b))
+
+
+@pytest.mark.parametrize(
+    "argument_a, argument_b",
+    [
+        (1, [1, 2]),
+        ([1, 2], [3, 4, 1]),
+        (np.array([1, 2]), np.array([3, 4, 1])),
+    ]
+)
+def test_tile(argument_a, argument_b):
+    output = nx.tile(argument_a, argument_b)
+    assert nx.allclose(output, np.tile(argument_a, argument_b))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        [[1, 2], [3, 4]],
+        np.array([[1, 2], [3, 4]]),
+    ]
+)
+def test_trace(argument):
+    output = nx.trace(argument)
+    assert nx.allclose(output, np.trace(argument))
+
+
+@pytest.mark.parametrize(
+    "argument_a, argument_b",
+    [
+        (2, None),
+        ([1, 2], None),
+        (np.array([1, 2]), None),
+        (np.array([[1, 2], [3, 4]]), (1, 0)),
+    ]
+)
+def test_transpose(argument_a, argument_b):
+    if argument_b is None:
+        output = nx.transpose(argument_a)
+        assert nx.allclose(output, np.transpose(argument_a))
+    else:
+        output = nx.transpose(argument_a, argument_b)
+        assert nx.allclose(output, np.transpose(argument_a, argument_b))
+
+
+@pytest.mark.parametrize(
     "argument_a, argument_b, expected_output",
     [
         (np.array([-4, 2]), np.array([1, 3]), 2),

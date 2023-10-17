@@ -17,13 +17,6 @@ def _not_implemented(function):
 #   - np.random.normal
 #   - np.random.randn
 #   - np.random.uniform
-#   - np.sort
-#   - np.spacing
-#   - np.sqrt
-#   - np.sum
-#   - np.tile
-#   - np.trace
-#   - np.transpose
 #   - np.vectorize
 #   - np.vstack
 #   - np.where
@@ -226,6 +219,48 @@ def sin(_):
 @functools.singledispatch
 @_not_implemented
 def sinc(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def sort(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def spacing(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def sqrt(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def sum(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def tile(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def trace(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def transpose(_):
     pass
 
 
