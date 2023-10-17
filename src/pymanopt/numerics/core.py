@@ -38,19 +38,19 @@ def all(_):
 
 @functools.singledispatch
 @_not_implemented
-def allclose(*_):
+def allclose(_):
     pass
 
 
 @functools.singledispatch
 @_not_implemented
-def any(*_):
+def any(_):
     pass
 
 
 @functools.singledispatch
 @_not_implemented
-def arange(*_):
+def arange(_):
     pass
 
 
@@ -188,13 +188,13 @@ pi = np.pi
 
 @functools.singledispatch
 @_not_implemented
-def polyfit(*_):
+def polyfit(_):
     pass
 
 
 @functools.singledispatch
 @_not_implemented
-def polyval(*_):
+def polyval(_):
     pass
 
 
@@ -272,5 +272,29 @@ def tanh(_):
 
 @functools.singledispatch
 @_not_implemented
-def tensordot(*_):
+def tensordot(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def vectorize(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def vstack(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def where(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
+def zeros(_):
     pass

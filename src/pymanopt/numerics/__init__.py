@@ -41,7 +41,11 @@ __all__ = [
     "trace",
     "transpose",
     "tanh",
-    "tensordot"
+    "tensordot",
+    "vectorize",
+    "vstack",
+    "where",
+    "zeros"
 ]
 
 
@@ -90,7 +94,11 @@ from pymanopt.numerics.core import (
     trace,
     transpose,
     tanh,
-    tensordot
+    tensordot,
+    vectorize,
+    vstack,
+    where,
+    zeros
 )
 
 
