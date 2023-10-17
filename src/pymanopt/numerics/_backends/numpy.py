@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import numpy as np
 import scipy
 
@@ -267,3 +268,23 @@ def _(
 @nx.tanh.register
 def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.tanh(array)
+
+
+@nx.vectorize.register
+def _(func: Callable, signature: None | str = None) -> Callable:
+    return np.vectorize(func, signature=signature)
+
+
+@nx.vstack.register
+def _(arrays: generic_np_type) -> np.ndarray:
+    return np.vstack(arrays)
+
+
+@nx.where.register
+def _(condition: generic_np_type) -> np.ndarray:
+    return np.where(condition)
+
+
+@nx.zeros.register
+def _(shape: int | list | tuple) -> np.ndarray:
+    return np.zeros(shape)

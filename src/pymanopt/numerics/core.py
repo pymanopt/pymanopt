@@ -17,10 +17,6 @@ def _not_implemented(function):
 #   - np.random.normal
 #   - np.random.randn
 #   - np.random.uniform
-#   - np.vectorize
-#   - np.vstack
-#   - np.where
-#   - np.zeros
 #   - scipy.special.comb
 
 

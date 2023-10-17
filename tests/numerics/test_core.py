@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 import tensorflow as tf
 import torch
+import scipy
 
 import pymanopt.numerics as nx
 
@@ -537,3 +538,56 @@ def test_tensordot(argument_a, argument_b, expected_output):
 def test_tanh(argument, expected_output):
     output = nx.tanh(argument)
     assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument_a, argument_b, argument_c",
+    [
+        (scipy.linalg.expm, "(m,m)->(m,m)", [
+            np.array([[1, 2], [3, 4]]), np.array([[1, 2], [3, 4]])]),
+    ]
+)
+def test_vectorize(argument_a, argument_b, argument_c):
+    output = nx.vectorize(argument_a, signature=argument_b)
+    assert nx.allclose(
+        output(argument_c),
+        np.vectorize(argument_a, signature=argument_b)(argument_c)
+    )
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        [2, 1],
+        np.array([2, 1]),
+        [np.array([2, 1]), np.array([2, 1])],
+    ]
+)
+def test_vstack(argument):
+    output = nx.vstack(argument)
+    assert nx.allclose(output, np.vstack(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        False,
+        [False, True],
+        np.array([False, True]),
+    ]
+)
+def test_where(argument):
+    output = nx.where(argument)
+    assert nx.allclose(output, np.where(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        2,
+        [2, 1],
+    ]
+)
+def test_zeros(argument):
+    output = nx.zeros(argument)
+    assert nx.allclose(output, np.zeros(argument))
