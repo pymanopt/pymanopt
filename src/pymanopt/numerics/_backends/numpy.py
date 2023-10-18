@@ -207,6 +207,21 @@ def _(array: generic_np_type) -> np.float64:
     return np.prod(array)
 
 
+@nx.random.normal.register
+def _(shape: generic_np_type) -> np.ndarray:
+    return np.random.normal(size=shape)
+
+
+@nx.random.randn.register
+def _(*shape: generic_np_type) -> np.ndarray:
+    return np.random.randn(*shape)
+
+
+@nx.random.uniform.register
+def _(low: int | float, high: int | float, size: generic_np_type) -> np.ndarray:
+    return np.random.uniform(low, high, size)
+
+
 @nx.real.register
 def _(array: generic_np_type) -> int | float | np.ndarray:
     return np.real(array)

@@ -14,9 +14,6 @@ def _not_implemented(function):
 
 
 # TODO:
-#   - np.random.normal
-#   - np.random.randn
-#   - np.random.uniform
 #   - scipy.special.comb
 
 

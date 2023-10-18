@@ -31,6 +31,7 @@ __all__ = [
     "polyfit",
     "polyval",
     "prod",
+    "random",
     "real",
     "sin",
     "sinc",
@@ -102,6 +103,7 @@ from pymanopt.numerics.core import (
     zeros
 )
 from pymanopt.numerics import linalg
+from pymanopt.numerics import random
 
 
 def register_backends():
