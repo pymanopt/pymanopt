@@ -2,8 +2,7 @@ from collections.abc import Callable
 import numpy as np
 import scipy
 
-import pymanopt.numerics.core as nx
-import pymanopt.numerics.linalg as linalg
+import pymanopt.numerics as nx
 
 generic_np_type = int | float | complex | np.generic | tuple | list | np.ndarray
 
@@ -138,57 +137,57 @@ def _(shape: int | list | tuple) -> np.ndarray:
     return np.ones(shape)
 
 
-@linalg.cholesky.register
+@nx.linalg.cholesky.register
 def _(array: generic_np_type) -> np.ndarray:
     return np.linalg.cholesky(array)
 
 
-@linalg.det.register
+@nx.linalg.det.register
 def _(array: generic_np_type) -> np.float64 | np.complex128:
     return np.linalg.det(array)
 
 
-@linalg.eigh.register
+@nx.linalg.eigh.register
 def _(array: generic_np_type) -> tuple[np.ndarray, np.ndarray]:
     return np.linalg.eigh(array)
 
 
-@linalg.expm.register
+@nx.linalg.expm.register
 def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return scipy.linalg.expm(array)
 
 
-@linalg.inv.register
+@nx.linalg.inv.register
 def _(array: generic_np_type) -> np.ndarray:
     return np.linalg.inv(array)
 
 
-@linalg.logm.register
+@nx.linalg.logm.register
 def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return scipy.linalg.logm(array)
 
 
-@linalg.norm.register
+@nx.linalg.norm.register
 def _(array: generic_np_type) -> np.float64:
     return np.linalg.norm(array)
 
 
-@linalg.qr.register
+@nx.linalg.qr.register
 def _(array: generic_np_type) -> tuple[np.ndarray, np.ndarray]:
     return np.linalg.qr(array)
 
 
-@linalg.solve.register
+@nx.linalg.solve.register
 def _(array_a: generic_np_type, array_b: generic_np_type) -> np.ndarray:
     return np.linalg.solve(array_a, array_b)
 
 
-@linalg.solve_continuous_lyapunov.register
+@nx.linalg.solve_continuous_lyapunov.register
 def _(array_a: generic_np_type, array_q: generic_np_type) -> np.ndarray:
     return scipy.linalg.solve_continuous_lyapunov(array_a, array_q)
 
 
-@linalg.svd.register
+@nx.linalg.svd.register
 def _(array: generic_np_type) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return np.linalg.svd(array)
 

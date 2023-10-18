@@ -22,6 +22,7 @@ __all__ = [
     "iscomplexobj",
     "isnan",
     "isrealobj",
+    "linalg",
     "log",
     "logspace",
     "newaxis",
@@ -100,6 +101,7 @@ from pymanopt.numerics.core import (
     where,
     zeros
 )
+from pymanopt.numerics import linalg
 
 
 def register_backends():
