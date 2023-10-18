@@ -98,11 +98,6 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.exp(array)
 
 
-@linalg.expm.register
-def _(array: generic_np_type) -> np.float64 | np.ndarray:
-    return scipy.linalg.expm(array)
-
-
 @nx.finfo.register
 def _(dtype: type) -> np.finfo:
     return np.finfo(dtype)
@@ -156,6 +151,11 @@ def _(array: generic_np_type) -> np.float64 | np.complex128:
 @linalg.eigh.register
 def _(array: generic_np_type) -> tuple[np.ndarray, np.ndarray]:
     return np.linalg.eigh(array)
+
+
+@linalg.expm.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return scipy.linalg.expm(array)
 
 
 @linalg.inv.register
