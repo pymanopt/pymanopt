@@ -242,6 +242,18 @@ def _(array: generic_np_type, axis: int | None = None) -> np.float64 | np.ndarra
     return np.sum(array, axis)
 
 
+@nx.tanh.register
+def _(array: generic_np_type) -> np.float64 | np.ndarray:
+    return np.tanh(array)
+
+
+@nx.tensordot.register
+def _(
+    array_a: generic_np_type, array_b: generic_np_type, *, axes: int = 2
+) -> np.float64 | np.ndarray:
+    return np.tensordot(array_a, array_b, axes=axes)
+
+
 @nx.tile.register
 def _(array: generic_np_type, reps: int | tuple[int, ...]) -> np.ndarray:
     return np.tile(array, reps)
@@ -255,18 +267,6 @@ def _(array: generic_np_type) -> np.float64:
 @nx.transpose.register
 def _(array: generic_np_type, axes: tuple[int, ...] | None = None) -> np.ndarray:
     return np.transpose(array, axes)
-
-
-@nx.tensordot.register
-def _(
-    array_a: generic_np_type, array_b: generic_np_type, *, axes: int = 2
-) -> np.float64 | np.ndarray:
-    return np.tensordot(array_a, array_b, axes=axes)
-
-
-@nx.tanh.register
-def _(array: generic_np_type) -> np.float64 | np.ndarray:
-    return np.tanh(array)
 
 
 @nx.vectorize.register
