@@ -13,10 +13,6 @@ def _not_implemented(function):
     return inner
 
 
-# TODO:
-#   - scipy.special.comb
-
-
 @functools.singledispatch
 @_not_implemented
 def abs(_):
