@@ -1,5 +1,3 @@
-import numpy as np
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import multiskew, multisym
@@ -12,11 +10,11 @@ class _Euclidean(RiemannianSubmanifold):
 
     @property
     def typical_dist(self):
-        return np.sqrt(self.dim)
+        return nx.sqrt(self.dim)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return float(
-            np.real(
+            nx.real(
                 nx.tensordot(
                     tangent_vector_a.conj(),
                     tangent_vector_b,
@@ -26,10 +24,10 @@ class _Euclidean(RiemannianSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return nx.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        return np.linalg.norm(point_a - point_b)
+        return nx.linalg.norm(point_a - point_b)
 
     def projection(self, point, vector):
         return vector
@@ -50,7 +48,7 @@ class _Euclidean(RiemannianSubmanifold):
         return point_b - point_a
 
     def random_point(self):
-        return np.random.normal(size=self._shape)
+        return nx.random.normal(size=self._shape)
 
     def random_tangent_vector(self, point):
         tangent_vector = self.random_point()
@@ -63,7 +61,7 @@ class _Euclidean(RiemannianSubmanifold):
         return (point_a + point_b) / 2
 
     def zero_vector(self, point):
-        return np.zeros(self._shape)
+        return nx.zeros(self._shape)
 
 
 class Euclidean(_Euclidean):
@@ -93,7 +91,7 @@ class Euclidean(_Euclidean):
             name = f"Euclidean manifold of {n1}x{n2} matrices"
         else:
             name = f"Euclidean manifold of shape {shape} tensors"
-        dimension = np.prod(shape)
+        dimension = nx.prod(shape)
         super().__init__(name, dimension, *shape)
 
 
@@ -124,16 +122,16 @@ class ComplexEuclidean(_Euclidean):
             name = f"Complex Euclidean manifold of {n1}x{n2} matrices"
         else:
             name = f"Complex Euclidean manifold of shape {shape} tensors"
-        dimension = 2 * np.prod(shape)
+        dimension = 2 * nx.prod(shape)
         super().__init__(name, dimension, *shape)
 
     def random_point(self):
-        return np.random.randn(*self._shape) + 1j * np.random.randn(
+        return nx.random.randn(*self._shape) + 1j * nx.random.randn(
             *self._shape
         )
 
     def zero_vector(self, point):
-        return np.zeros(self._shape, dtype=complex)
+        return nx.zeros(self._shape, dtype=complex)
 
 
 class Symmetric(_Euclidean):
@@ -171,7 +169,7 @@ class Symmetric(_Euclidean):
         return multisym(euclidean_hessian)
 
     def random_point(self):
-        return multisym(np.random.normal(size=self._shape))
+        return multisym(nx.random.normal(size=self._shape))
 
     def random_tangent_vector(self, point):
         tangent_vector = self.random_point()
@@ -213,7 +211,7 @@ class SkewSymmetric(_Euclidean):
         return multiskew(euclidean_hessian)
 
     def random_point(self):
-        return multiskew(np.random.normal(size=self._shape))
+        return multiskew(nx.random.normal(size=self._shape))
 
     def random_tangent_vector(self, point):
         tangent_vector = self.random_point()

@@ -1,5 +1,3 @@
-import numpy as np
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold
 
@@ -71,32 +69,32 @@ class PoincareBall(Manifold):
     to_tangent_space = projection
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return nx.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
     def random_point(self):
-        array = np.random.normal(size=(self._k, self._n))
-        norm = np.linalg.norm(array, axis=-1, keepdims=True)
-        radius = np.random.uniform(size=(self._k, 1)) ** (1.0 / self._n)
+        array = nx.random.normal(size=(self._k, self._n))
+        norm = nx.linalg.norm(array, axis=-1, keepdims=True)
+        radius = nx.random.uniform(size=(self._k, 1)) ** (1.0 / self._n)
         point = array / norm * radius
         if self._k == 1:
             return point[0]
         return point
 
     def random_tangent_vector(self, point):
-        vector = np.random.normal(size=point.shape)
+        vector = nx.random.normal(size=point.shape)
         return vector / self.norm(point, vector)
 
     def zero_vector(self, point):
-        return np.zeros_like(point)
+        return nx.zeros_like(point)
 
     def dist(self, point_a, point_b):
-        norm_point_a = np.linalg.norm(point_a, axis=-1) ** 2
-        norm_point_b = np.linalg.norm(point_b, axis=-1) ** 2
-        norm_difference = np.linalg.norm(point_a - point_b, axis=-1) ** 2
-        return np.linalg.norm(
-            np.arccosh(
+        norm_point_a = nx.linalg.norm(point_a, axis=-1) ** 2
+        norm_point_b = nx.linalg.norm(point_b, axis=-1) ** 2
+        norm_difference = nx.linalg.norm(point_a - point_b, axis=-1) ** 2
+        return nx.linalg.norm(
+            nx.arccosh(
                 1
                 + 2
                 * norm_difference
@@ -116,11 +114,11 @@ class PoincareBall(Manifold):
         # This expression is derived from the Koszul formula.
         factor = self.conformal_factor(point)
         return (
-            np.sum(euclidean_gradient * point, axis=-1, keepdims=True)
+            nx.sum(euclidean_gradient * point, axis=-1, keepdims=True)
             * tangent_vector
-            - np.sum(point * tangent_vector, axis=-1, keepdims=True)
+            - nx.sum(point * tangent_vector, axis=-1, keepdims=True)
             * euclidean_gradient
-            - np.sum(
+            - nx.sum(
                 euclidean_gradient * tangent_vector, axis=-1, keepdims=True
             )
             * point
@@ -128,13 +126,13 @@ class PoincareBall(Manifold):
         ) / factor
 
     def exp(self, point, tangent_vector):
-        norm_point = np.linalg.norm(tangent_vector, axis=-1, keepdims=True)
+        norm_point = nx.linalg.norm(tangent_vector, axis=-1, keepdims=True)
         factor = self.conformal_factor(point)
         return self.mobius_addition(
             point,
             tangent_vector
             * (
-                np.tanh(norm_point * factor / 2)
+                nx.tanh(norm_point * factor / 2)
                 / (norm_point + (norm_point == 0))
             ),
         )
@@ -143,9 +141,9 @@ class PoincareBall(Manifold):
 
     def log(self, point_a, point_b):
         w = self.mobius_addition(-point_a, point_b)
-        norm_w = np.linalg.norm(w, axis=-1, keepdims=True)
+        norm_w = nx.linalg.norm(w, axis=-1, keepdims=True)
         factor = self.conformal_factor(point_a)
-        return np.arctanh(norm_w) * w / norm_w / (factor / 2)
+        return nx.arctanh(norm_w) * w / norm_w / (factor / 2)
 
     def pair_mean(self, point_a, point_b):
         return self.exp(point_a, self.log(point_a, point_b) / 2)
@@ -163,9 +161,9 @@ class PoincareBall(Manifold):
         Returns:
             The Möbius sum of ``point_a`` and ``point_b``.
         """
-        scalar_product = np.sum(point_a * point_b, axis=-1, keepdims=True)
-        norm_point_a = np.sum(point_a * point_a, axis=-1, keepdims=True)
-        norm_point_b = np.sum(point_b * point_b, axis=-1, keepdims=True)
+        scalar_product = nx.sum(point_a * point_b, axis=-1, keepdims=True)
+        norm_point_a = nx.sum(point_a * point_a, axis=-1, keepdims=True)
+        norm_point_b = nx.sum(point_b * point_b, axis=-1, keepdims=True)
 
         return (
             point_a * (1 + 2 * scalar_product + norm_point_b)
@@ -186,4 +184,4 @@ class PoincareBall(Manifold):
             multiplication of ``point`` by the conformal factor on product
             manifolds.
         """
-        return 2 / (1 - np.sum(point * point, axis=-1, keepdims=True))
+        return 2 / (1 - nx.sum(point * point, axis=-1, keepdims=True))

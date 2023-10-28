@@ -1,6 +1,3 @@
-import numpy as np
-import scipy.special
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools import extend_docstring
@@ -36,11 +33,11 @@ class _UnitaryBase(RiemannianSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return nx.linalg.norm(tangent_vector)
 
     @property
     def typical_dist(self):
-        return np.pi * np.sqrt(self._n * self._k)
+        return nx.pi * nx.sqrt(self._n * self._k)
 
     def dist(self, point_a, point_b):
         return self.norm(point_a, self.log(point_a, point_b))
@@ -73,7 +70,7 @@ class _UnitaryBase(RiemannianSubmanifold):
 
     def _retraction_polar(self, point, tangent_vector):
         Y = point + point @ tangent_vector
-        u, _, vt = np.linalg.svd(Y)
+        u, _, vt = nx.linalg.svd(Y)
         return u @ vt
 
     def exp(self, point, tangent_vector):
@@ -83,7 +80,7 @@ class _UnitaryBase(RiemannianSubmanifold):
         return multiskewh(multilogm(multihconj(point_a) @ point_b))
 
     def zero_vector(self, point):
-        zero = np.zeros((self._k, self._n, self._n))
+        zero = nx.zeros((self._k, self._n, self._n))
         if self._k == 1:
             return zero[0]
         return zero
@@ -158,13 +155,13 @@ class SpecialOrthogonalGroup(_UnitaryBase):
     def random_point(self):
         n, k = self._n, self._k
         if n == 1:
-            point = np.ones((k, 1, 1))
+            point = nx.ones((k, 1, 1))
         else:
-            point, _ = multiqr(np.random.normal(size=(k, n, n)))
+            point, _ = multiqr(nx.random.normal(size=(k, n, n)))
             # Swap the first two columns of matrices where det(point) < 0 to
             # flip the sign of their determinants.
-            negative_det, *_ = np.where(np.linalg.det(point) < 0)
-            negative_det = np.expand_dims(negative_det, (-2, -1))
+            negative_det, *_ = nx.where(nx.linalg.det(point) < 0)
+            negative_det = nx.expand_dims(negative_det, (-2, -1))
             point[negative_det, :, [0, 1]] = point[negative_det, :, [1, 0]]
         if k == 1:
             return point[0]
@@ -222,12 +219,12 @@ class UnitaryGroup(_UnitaryBase):
     def random_point(self):
         n, k = self._n, self._k
         if n == 1:
-            point = np.ones((k, 1, 1)) + 1j * np.ones((k, 1, 1))
+            point = nx.ones((k, 1, 1)) + 1j * nx.ones((k, 1, 1))
             point /= nx.abs(point)
         else:
             point, _ = multiqr(
-                np.random.normal(size=(k, n, n))
-                + 1j * np.random.normal(size=(k, n, n))
+                nx.random.normal(size=(k, n, n))
+                + 1j * nx.random.normal(size=(k, n, n))
             )
         if k == 1:
             return point[0]
@@ -238,7 +235,7 @@ class UnitaryGroup(_UnitaryBase):
         vector = (
             _random_skew_symmetric_matrix(n, k)
             + 1j * _random_symmetric_matrix(n, k)
-        ) / np.sqrt(2)
+        ) / nx.sqrt(2)
         if k == 1:
             vector = vector[0]
         return vector / self.norm(point, vector)
@@ -246,30 +243,30 @@ class UnitaryGroup(_UnitaryBase):
 
 def _random_skew_symmetric_matrix(n, k):
     if n == 1:
-        return np.zeros((k, 1, 1))
+        return nx.zeros((k, 1, 1))
     vector = _random_upper_triangular_matrix(n, k)
     return vector - multitransp(vector)
 
 
 def _random_symmetric_matrix(n, k):
     if n == 1:
-        return np.random.normal(size=(k, 1, 1))
+        return nx.random.normal(size=(k, 1, 1))
     vector = _random_upper_triangular_matrix(n, k)
     vector = vector + multitransp(vector)
     # The diagonal elements get scaled by a factor of 2 by the previous
     # operation so re-draw them so every entry of the returned matrix follows a
     # standard normal distribution.
-    indices = np.arange(n)
-    vector[:, indices, indices] = np.random.normal(size=(k, n))
+    indices = nx.arange(n)
+    vector[:, indices, indices] = nx.random.normal(size=(k, n))
     return vector
 
 
 def _random_upper_triangular_matrix(n, k):
     if n < 2:
         raise ValueError("Matrix dimension cannot be less than 2")
-    indices = np.triu_indices(n, 1)
-    vector = np.zeros((k, n, n))
-    vector[(slice(None), *indices)] = np.random.normal(
+    indices = nx.triu_indices(n, 1)
+    vector = nx.zeros((k, n, n))
+    vector[(slice(None), *indices)] = nx.random.normal(
         size=(k, n * (n - 1) // 2)
     )
     return vector

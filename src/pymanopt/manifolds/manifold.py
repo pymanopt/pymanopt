@@ -3,7 +3,7 @@ import functools
 import warnings
 from typing import Sequence, Union
 
-import numpy as np
+import pymanopt.numerics as nx
 
 
 def raise_not_implemented_error(method):
@@ -55,7 +55,7 @@ class Manifold(metaclass=abc.ABCMeta):
         dimension: int,
         point_layout: Union[int, Sequence[int]] = 1,
     ):
-        if not isinstance(dimension, (int, np.integer)):
+        if not isinstance(dimension, (int, nx.integer)):
             raise TypeError("Manifold dimension must be of type int")
         if dimension < 0:
             raise ValueError("Manifold dimension must be positive")
@@ -128,9 +128,9 @@ class Manifold(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def inner_product(
         self,
-        point: np.ndarray,
-        tangent_vector_a: np.ndarray,
-        tangent_vector_b: np.ndarray,
+        point: nx.ndarray,
+        tangent_vector_a: nx.ndarray,
+        tangent_vector_b: nx.ndarray,
     ) -> float:
         """Inner product between tangent vectors at a point on the manifold.
 

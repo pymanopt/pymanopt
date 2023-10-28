@@ -1,5 +1,3 @@
-import numpy as np
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
@@ -27,7 +25,7 @@ class Oblique(RiemannianSubmanifold):
 
     @property
     def typical_dist(self):
-        return np.pi * np.sqrt(self._n)
+        return nx.pi * nx.sqrt(self._n)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return nx.tensordot(
@@ -35,15 +33,15 @@ class Oblique(RiemannianSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return nx.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
         XY = (point_a * point_b).sum(0)
         XY[XY > 1] = 1
-        return np.linalg.norm(np.arccos(XY))
+        return nx.linalg.norm(nx.arccos(XY))
 
     def projection(self, point, vector):
-        return vector - point * ((point * vector).sum(0)[np.newaxis, :])
+        return vector - point * ((point * vector).sum(0)[nx.newaxis, :])
 
     to_tangent_space = projection
 
@@ -52,13 +50,13 @@ class Oblique(RiemannianSubmanifold):
     ):
         PXehess = self.projection(point, euclidean_hessian)
         return PXehess - tangent_vector * (
-            (point * euclidean_gradient).sum(0)[np.newaxis, :]
+            (point * euclidean_gradient).sum(0)[nx.newaxis, :]
         )
 
     def exp(self, point, tangent_vector):
-        norm = np.sqrt((tangent_vector**2).sum(0))[np.newaxis, :]
-        target_point = point * np.cos(norm) + tangent_vector * np.sinc(
-            norm / np.pi
+        norm = nx.sqrt((tangent_vector**2).sum(0))[nx.newaxis, :]
+        target_point = point * nx.cos(norm) + tangent_vector * nx.sinc(
+            norm / nx.pi
         )
         return target_point
 
@@ -67,21 +65,21 @@ class Oblique(RiemannianSubmanifold):
 
     def log(self, point_a, point_b):
         vector = self.projection(point_a, point_b - point_a)
-        distances = np.arccos((point_a * point_b).sum(0))
-        norms = np.sqrt((vector**2).sum(0)).real
+        distances = nx.arccos((point_a * point_b).sum(0))
+        norms = nx.sqrt((vector**2).sum(0)).real
         # Try to avoid zero-division when both distances and norms are almost
         # zero.
-        epsilon = np.finfo(np.float64).eps
+        epsilon = nx.finfo(nx.float64).eps
         factors = (distances + epsilon) / (norms + epsilon)
         return vector * factors
 
     def random_point(self):
         return self._normalize_columns(
-            np.random.normal(size=(self._m, self._n))
+            nx.random.normal(size=(self._m, self._n))
         )
 
     def random_tangent_vector(self, point):
-        vector = np.random.normal(size=point.shape)
+        vector = nx.random.normal(size=point.shape)
         tangent_vector = self.projection(point, vector)
         return tangent_vector / self.norm(point, tangent_vector)
 
@@ -92,7 +90,7 @@ class Oblique(RiemannianSubmanifold):
         return self._normalize_columns(point_a + point_b)
 
     def zero_vector(self, point):
-        return np.zeros((self._m, self._n))
+        return nx.zeros((self._m, self._n))
 
     def _normalize_columns(self, array):
-        return array / np.linalg.norm(array, axis=0)[np.newaxis, :]
+        return array / nx.linalg.norm(array, axis=0)[nx.newaxis, :]

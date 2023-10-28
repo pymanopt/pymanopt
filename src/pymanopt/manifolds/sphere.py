@@ -1,7 +1,5 @@
 import warnings
 
-import numpy as np
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools import extend_docstring
@@ -16,7 +14,7 @@ class _SphereBase(RiemannianSubmanifold):
 
     @property
     def typical_dist(self):
-        return np.pi
+        return nx.pi
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return nx.tensordot(
@@ -24,11 +22,11 @@ class _SphereBase(RiemannianSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return nx.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
         inner = max(min(self.inner_product(point_a, point_a, point_b), 1), -1)
-        return np.arccos(inner)
+        return nx.arccos(inner)
 
     def projection(self, point, vector):
         return vector - self.inner_product(point, point, vector) * point
@@ -42,7 +40,7 @@ class _SphereBase(RiemannianSubmanifold):
 
     def exp(self, point, tangent_vector):
         norm = self.norm(point, tangent_vector)
-        return point * np.cos(norm) + tangent_vector * np.sinc(norm / np.pi)
+        return point * nx.cos(norm) + tangent_vector * nx.sinc(norm / nx.pi)
 
     def retraction(self, point, tangent_vector):
         return self._normalize(point + tangent_vector)
@@ -50,16 +48,16 @@ class _SphereBase(RiemannianSubmanifold):
     def log(self, point_a, point_b):
         vector = self.projection(point_a, point_b - point_a)
         distance = self.dist(point_a, point_b)
-        epsilon = np.finfo(np.float64).eps
+        epsilon = nx.finfo(nx.float64).eps
         factor = (distance + epsilon) / (self.norm(point_a, vector) + epsilon)
         return factor * vector
 
     def random_point(self):
-        point = np.random.normal(size=self._shape)
+        point = nx.random.normal(size=self._shape)
         return self._normalize(point)
 
     def random_tangent_vector(self, point):
-        vector = np.random.normal(size=self._shape)
+        vector = nx.random.normal(size=self._shape)
         return self._normalize(self.projection(point, vector))
 
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -69,10 +67,10 @@ class _SphereBase(RiemannianSubmanifold):
         return self._normalize(point_a + point_b)
 
     def zero_vector(self, point):
-        return np.zeros(self._shape)
+        return nx.zeros(self._shape)
 
     def _normalize(self, array):
-        return array / np.linalg.norm(array)
+        return array / nx.linalg.norm(array)
 
 
 DOCSTRING_NOTE = """
@@ -109,7 +107,7 @@ class Sphere(_SphereBase):
             name = f"Sphere manifold of {m}x{n} matrices"
         else:
             name = f"Sphere manifold of shape {shape} tensors"
-        dimension = np.prod(shape) - 1
+        dimension = nx.prod(shape) - 1
         super().__init__(*shape, name=name, dimension=dimension)
 
 
@@ -128,7 +126,7 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
 
     def _validate_span_matrix(self, matrix):
         if len(matrix.shape) != 2:
-            raise ValueError("Input array must be 2-dimensional")
+            raise ValueError("Inxut array must be 2-dimensional")
         num_rows, num_columns = matrix.shape
         if num_rows < num_columns:
             raise ValueError(
@@ -163,9 +161,9 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     def __init__(self, matrix):
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
-        q, _ = np.linalg.qr(matrix)
+        q, _ = nx.linalg.qr(matrix)
         projector = q @ q.T
-        subspace_dimension = np.linalg.matrix_rank(projector)
+        subspace_dimension = nx.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors intersecting a "
             f"{subspace_dimension}-dimensional subspace"
@@ -192,9 +190,9 @@ class SphereSubspaceComplementIntersection(
     def __init__(self, matrix):
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
-        q, _ = np.linalg.qr(matrix)
-        projector = np.eye(m) - q @ q.T
-        subspace_dimension = np.linalg.matrix_rank(projector)
+        q, _ = nx.linalg.qr(matrix)
+        projector = nx.eye(m) - q @ q.T
+        subspace_dimension = nx.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors orthogonal "
             f"to a {subspace_dimension}-dimensional subspace"

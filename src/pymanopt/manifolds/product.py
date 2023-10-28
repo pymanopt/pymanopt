@@ -1,8 +1,6 @@
 import functools
 from typing import Sequence
 
-import numpy as np
-
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
@@ -27,14 +25,14 @@ class Product(Manifold):
         manifold_names = " x ".join([str(manifold) for manifold in manifolds])
         name = f"Product manifold: {manifold_names}"
 
-        dimension = np.sum([manifold.dim for manifold in manifolds])
+        dimension = nx.sum([manifold.dim for manifold in manifolds])
         point_layout = tuple(manifold.point_layout for manifold in manifolds)
         super().__init__(name, dimension, point_layout=point_layout)
 
     @property
     def typical_dist(self):
-        return np.sqrt(
-            np.sum([manifold.typical_dist**2 for manifold in self.manifolds])
+        return nx.sqrt(
+            nx.sum([manifold.typical_dist**2 for manifold in self.manifolds])
         )
 
     def _dispatch(
@@ -57,12 +55,12 @@ class Product(Manifold):
         return wrapper
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return nx.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return self._dispatch("inner_product", reduction=np.sum)(
+        return self._dispatch("inner_product", reduction=nx.sum)(
             point, tangent_vector_a, tangent_vector_b
         )
 
@@ -70,7 +68,7 @@ class Product(Manifold):
         return self._dispatch(
             "dist",
             transform=lambda value: value**2,
-            reduction=lambda values: np.sqrt(np.sum(values)),
+            reduction=lambda values: nx.sqrt(nx.sum(values)),
         )(point_a, point_b)
 
     def projection(self, point, vector):
