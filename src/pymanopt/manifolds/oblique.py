@@ -75,11 +75,11 @@ class Oblique(RiemannianSubmanifold):
 
     def random_point(self):
         return self._normalize_columns(
-            nx.random.normal((self._m, self._n))
+            nx.random.normal(size=(self._m, self._n))
         )
 
     def random_tangent_vector(self, point):
-        vector = nx.random.normal(point.shape)
+        vector = nx.random.normal(size=point.shape)
         tangent_vector = self.projection(point, vector)
         return tangent_vector / self.norm(point, tangent_vector)
 
