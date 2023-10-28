@@ -107,7 +107,7 @@ from pymanopt.numerics.core import (
     zeros
 )
 from pymanopt.numerics import linalg
-from pymanopt.numerics import random
+from numpy import random
 
 _BACKENDS = ["numpy", "jax", "pytorch", "tensorflow"]
 
