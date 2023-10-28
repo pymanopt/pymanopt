@@ -274,6 +274,10 @@ def test_finfo(argument):
     assert nx.finfo(argument) == np.finfo(argument)
 
 
+def test_float64():
+    assert nx.float64 == np.float64
+
+
 @pytest.mark.parametrize(
     "argument",
     [

@@ -136,6 +136,9 @@ def finfo(_):
     pass
 
 
+float64 = np.float64
+
+
 @functools.singledispatch
 @_not_implemented
 def hstack(_):
