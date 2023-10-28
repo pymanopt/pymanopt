@@ -53,6 +53,7 @@ class Problem:
         riemannian_hessian: Optional[Function] = None,
         preconditioner: Optional[Callable] = None,
     ):
+        manifold.backend = cost._backend
         self.manifold = manifold
 
         for function, name in (

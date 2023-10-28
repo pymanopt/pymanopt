@@ -109,9 +109,11 @@ from pymanopt.numerics.core import (
 from pymanopt.numerics import linalg
 from pymanopt.numerics import random
 
+_BACKENDS = ["numpy", "jax", "pytorch", "tensorflow"]
+
 
 def register_backends():
-    for backend in ["numpy", "jax", "pytorch", "tensorflow"]:
+    for backend in _BACKENDS:
         try:
             importlib.import_module(f"pymanopt.numerics._backends.{backend}")
         except ImportError:

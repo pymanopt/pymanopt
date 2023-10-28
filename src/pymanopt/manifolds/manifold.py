@@ -4,6 +4,7 @@ import warnings
 from typing import Sequence, Union
 
 import pymanopt.numerics as nx
+from pymanopt.numerics import _BACKENDS
 
 
 def raise_not_implemented_error(method):
@@ -14,6 +15,30 @@ def raise_not_implemented_error(method):
             f"implementation for '{method.__name__}'"
         )
 
+    return wrapper
+
+
+def _point_to_numerics(method):
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        point = method(self, *args, **kwargs)
+        backend = self._backend
+        if backend == 'pytorch':
+            import torch
+            point = torch.tensor(point, dtype=torch.float64)
+        elif backend == 'jax':
+            import jax.numpy as jnp
+            point = jnp.array(point, dtype=jnp.float64)
+        elif backend == 'tensorflow':
+            import tensorflow as tf
+            point = tf.convert_to_tensor(point, dtype=tf.float64)
+        elif backend is None:
+            warnings.warn(
+                f"Manifold '{self.__class__.__name__}' has not been "
+                "provided a numerical backend. "
+                "The value of backend should be set. Falling back to NumPy."
+            )
+        return point
     return wrapper
 
 
@@ -78,6 +103,7 @@ class Manifold(metaclass=abc.ABCMeta):
         self._name = name
         self._dimension = dimension
         self._point_layout = point_layout
+        self._backend = None
 
     def __str__(self):
         return self._name
@@ -175,12 +201,31 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
+    @_point_to_numerics
     def random_point(self):
         """Returns a random point on the manifold.
 
         Returns:
             A randomly chosen point on the manifold.
         """
+
+    @property
+    def backend(self):
+        return self._backend
+
+    @backend.setter
+    def backend(self, backend):
+        """Set the backend used by the random_point method.
+
+        Args:
+            backend: The backend to use.
+        """
+        backend = str(backend).lower()
+        if backend not in _BACKENDS:
+            raise ValueError(
+                f"Invalid backend '{backend}': must be one of {_BACKENDS}"
+            )
+        self._backend = backend
 
     @abc.abstractmethod
     def random_tangent_vector(self, point):
