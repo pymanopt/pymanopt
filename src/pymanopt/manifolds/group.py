@@ -149,7 +149,7 @@ class SpecialOrthogonalGroup(_UnitaryBase):
             name = f"Sphecial orthogonal group SO({n})^{k}"
         else:
             raise ValueError("k must be an integer no less than 1.")
-        dimension = int(k * scipy.special.comb(n, 2))
+        dimension = int(k * nx.special.comb(n, 2))
         super().__init__(name, dimension, retraction)
 
     def random_point(self):

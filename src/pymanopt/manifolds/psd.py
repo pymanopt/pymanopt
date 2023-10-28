@@ -28,7 +28,7 @@ class _PSDFixedRank(Manifold):
     def projection(self, point, vector):
         YtY = point.T.conj() @ point
         AS = point.T.conj() @ vector - vector.T.conj() @ point
-        Omega = scipy.linalg.solve_continuous_lyapunov(YtY, AS)
+        Omega = nx.linalg.solve_continuous_lyapunov(YtY, AS)
         return vector - point @ Omega
 
     to_tangent_space = projection
@@ -231,7 +231,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         eta = self._project_rows(point, vector)
         YtY = point.T @ point
         AS = point.T @ eta - vector.T @ point
-        Omega = scipy.linalg.solve_continuous_lyapunov(YtY, -AS)
+        Omega = nx.linalg.solve_continuous_lyapunov(YtY, -AS)
         return eta - point @ (Omega - Omega.T) / 2
 
     to_tangent_space = projection
