@@ -1,6 +1,7 @@
 import functools
 from typing import Sequence
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
