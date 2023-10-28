@@ -1,5 +1,8 @@
 import functools
 import numpy as np
+import torch
+import jax
+import tensorflow as tf
 
 
 def _not_implemented(function):
@@ -161,6 +164,9 @@ def log(_):
 @_not_implemented
 def logspace(_):
     pass
+
+
+ndarray = np.ndarray | torch.Tensor | jax.numpy.ndarray | tf.Tensor
 
 
 newaxis = None
