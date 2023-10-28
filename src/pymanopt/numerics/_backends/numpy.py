@@ -208,8 +208,8 @@ def _(array: generic_np_type) -> np.float64:
 
 
 @nx.random.normal.register
-def _(shape: generic_np_type) -> np.ndarray:
-    return np.random.normal(size=shape)
+def _(size: generic_np_type) -> np.ndarray:
+    return np.random.normal(size=size)
 
 
 @nx.random.randn.register
