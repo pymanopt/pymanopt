@@ -252,6 +252,18 @@ def test_exp(argument, expected_output):
 
 
 @pytest.mark.parametrize(
+    "argument_a, argument_b",
+    [
+        (np.array([4, 2]), 0),
+        (np.array([4, 2]), (0, 1)),
+    ]
+)
+def test_expand_dims(argument_a, argument_b):
+    output = nx.expand_dims(argument_a, argument_b)
+    assert nx.allclose(output, np.expand_dims(argument_a, argument_b))
+
+
+@pytest.mark.parametrize(
     "argument",
     [
         np.float64,

@@ -126,6 +126,12 @@ def exp(_):
 
 @functools.singledispatch
 @_not_implemented
+def expand_dims(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
 def finfo(_):
     pass
 

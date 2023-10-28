@@ -97,6 +97,14 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.exp(array)
 
 
+@nx.expand_dims.register
+def _(
+    array: generic_np_type,
+    axis: int | tuple[int, ...] = None
+) -> np.ndarray:
+    return np.expand_dims(array, axis)
+
+
 @nx.finfo.register
 def _(dtype: type) -> np.finfo:
     return np.finfo(dtype)
