@@ -136,6 +136,9 @@ def hstack(_):
     pass
 
 
+integer = np.integer
+
+
 @functools.singledispatch
 @_not_implemented
 def iscomplexobj(_):
