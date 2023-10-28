@@ -84,16 +84,20 @@ def test_logm(argument):
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument_a, argument_b",
     [
-        1,
-        [2],
-        np.array([1, 4.2])
+        (1, None),
+        ([2], None),
+        (np.array([1, 4.2]), None),
+        (np.array([[1, 2], [3, 4.2]]), 0)
     ]
 )
-def test_norm(argument):
-    output = nx.linalg.norm(argument)
-    expected_output = np.linalg.norm(argument)
+def test_norm(argument_a, argument_b):
+    output = nx.linalg.norm(argument_a, axis=argument_b)
+    if argument_b is None:
+        expected_output = np.linalg.norm(argument_a)
+    else:
+        expected_output = np.linalg.norm(argument_a, axis=argument_b)
     assert nx.allclose(output, expected_output)
 
 

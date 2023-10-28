@@ -168,8 +168,8 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
 
 
 @nx.linalg.norm.register
-def _(array: generic_np_type) -> np.float64:
-    return np.linalg.norm(array)
+def _(array: generic_np_type, axis: None | generic_np_type = None) -> np.float64:
+    return np.linalg.norm(array, axis=axis)
 
 
 @nx.linalg.qr.register
