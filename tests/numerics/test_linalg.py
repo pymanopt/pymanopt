@@ -84,6 +84,20 @@ def test_logm(argument):
 
 
 @pytest.mark.parametrize(
+    "argument",
+    [
+        np.array([[1]]),
+        np.array([[2, 1], [4, 2]]),
+        np.array([[2, 1], [4, 1]]),
+    ]
+)
+def test_matrix_rank(argument):
+    output = nx.linalg.matrix_rank(argument)
+    expected_output = np.linalg.matrix_rank(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
     "argument_a, argument_b",
     [
         (1, None),

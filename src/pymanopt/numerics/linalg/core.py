@@ -29,6 +29,12 @@ def inv(_):
 
 @functools.singledispatch
 @_not_implemented
+def matrix_rank(_):
+    pass
+
+
+@functools.singledispatch
+@_not_implemented
 def norm(_):
     pass
 

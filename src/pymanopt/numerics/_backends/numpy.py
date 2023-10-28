@@ -167,6 +167,11 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return scipy.linalg.logm(array)
 
 
+@nx.linalg.matrix_rank.register
+def _(array: generic_np_type) -> int:
+    return np.linalg.matrix_rank(array)
+
+
 @nx.linalg.norm.register
 def _(
     array: generic_np_type,
