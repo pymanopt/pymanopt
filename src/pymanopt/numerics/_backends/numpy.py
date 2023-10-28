@@ -168,8 +168,12 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
 
 
 @nx.linalg.norm.register
-def _(array: generic_np_type, axis: None | generic_np_type = None) -> np.float64:
-    return np.linalg.norm(array, axis=axis)
+def _(
+    array: generic_np_type,
+    *args: tuple,
+    **kwargs: dict,
+) -> np.float64:
+    return np.linalg.norm(array, *args, **kwargs)
 
 
 @nx.linalg.qr.register
@@ -188,8 +192,12 @@ def _(array_a: generic_np_type, array_q: generic_np_type) -> np.ndarray:
 
 
 @nx.linalg.svd.register
-def _(array: generic_np_type) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    return np.linalg.svd(array)
+def _(
+    array: generic_np_type,
+    *args: tuple,
+    **kwargs: dict
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    return np.linalg.svd(array, *args, **kwargs)
 
 
 @nx.polyfit.register
@@ -238,8 +246,12 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
 
 
 @nx.sum.register
-def _(array: generic_np_type, axis: int | None = None) -> np.float64 | np.ndarray:
-    return np.sum(array, axis)
+def _(
+    array: generic_np_type,
+    *args: tuple,
+    **kwargs: dict
+) -> np.float64 | np.ndarray:
+    return np.sum(array, *args, **kwargs)
 
 
 @nx.tanh.register
@@ -249,9 +261,12 @@ def _(array: generic_np_type) -> np.float64 | np.ndarray:
 
 @nx.tensordot.register
 def _(
-    array_a: generic_np_type, array_b: generic_np_type, *, axes: int = 2
+    array_a: generic_np_type,
+    array_b: generic_np_type,
+    *args: tuple,
+    **kwargs: dict
 ) -> np.float64 | np.ndarray:
-    return np.tensordot(array_a, array_b, axes=axes)
+    return np.tensordot(array_a, array_b, *args, **kwargs)
 
 
 @nx.tile.register
@@ -260,8 +275,12 @@ def _(array: generic_np_type, reps: int | tuple[int, ...]) -> np.ndarray:
 
 
 @nx.trace.register
-def _(array: generic_np_type) -> np.float64:
-    return np.trace(array)
+def _(
+    array: generic_np_type,
+    *args: tuple,
+    **kwargs: dict
+) -> np.float64:
+    return np.trace(array, *args, **kwargs)
 
 
 @nx.transpose.register
