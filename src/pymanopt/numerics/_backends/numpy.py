@@ -1,4 +1,3 @@
-from collections.abc import Callable
 import numpy as np
 import scipy
 
@@ -25,11 +24,6 @@ def _(array_a: generic_np_type, array_b: generic_np_type) -> bool:
 @nx.any.register
 def _(array: generic_np_type) -> bool:
     return np.any(array)
-
-
-@nx.arange.register
-def _(start: int, stop: int = None, step: int = 1) -> np.ndarray:
-    return np.arange(start, stop, step)
 
 
 @nx.arccos.register
@@ -67,11 +61,6 @@ def _(arrays: generic_np_type) -> np.ndarray:
     return np.block(arrays)
 
 
-@nx.special.comb.register
-def _(n: int, k: int) -> int:
-    return scipy.special.comb(n, k, exact=True)
-
-
 @nx.conjugate.register
 def _(array: generic_np_type) -> generic_np_type:
     return np.conjugate(array)
@@ -92,11 +81,6 @@ def _(array: generic_np_type) -> np.ndarray:
     return np.diagonal(array)
 
 
-@nx.eye.register
-def _(n: int) -> np.ndarray:
-    return np.eye(n)
-
-
 @nx.exp.register
 def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.exp(array)
@@ -108,11 +92,6 @@ def _(
     axis: int | tuple[int, ...] = None
 ) -> np.ndarray:
     return np.expand_dims(array, axis)
-
-
-@nx.finfo.register
-def _(dtype: type) -> np.finfo:
-    return np.finfo(dtype)
 
 
 @nx.hstack.register
@@ -138,16 +117,6 @@ def _(array: generic_np_type) -> bool:
 @nx.log.register
 def _(array: generic_np_type) -> np.float64 | np.ndarray:
     return np.log(array)
-
-
-@nx.logspace.register
-def _(start: int, stop: int, num: int = 50, endpoint: bool = True) -> np.ndarray:
-    return np.logspace(start, stop, num, endpoint)
-
-
-@nx.ones.register
-def _(shape: int | list | tuple) -> np.ndarray:
-    return np.ones(shape)
 
 
 @nx.linalg.cholesky.register
@@ -306,11 +275,6 @@ def _(array: generic_np_type, axes: tuple[int, ...] | None = None) -> np.ndarray
     return np.transpose(array, axes)
 
 
-@nx.vectorize.register
-def _(func: Callable, signature: None | str = None) -> Callable:
-    return np.vectorize(func, signature=signature)
-
-
 @nx.vstack.register
 def _(arrays: generic_np_type) -> np.ndarray:
     return np.vstack(arrays)
@@ -319,8 +283,3 @@ def _(arrays: generic_np_type) -> np.ndarray:
 @nx.where.register
 def _(condition: generic_np_type) -> np.ndarray:
     return np.where(condition)
-
-
-@nx.zeros.register
-def _(shape: int | list | tuple) -> np.ndarray:
-    return np.zeros(shape)

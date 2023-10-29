@@ -40,10 +40,7 @@ def any(_):
     pass
 
 
-@functools.singledispatch
-@_not_implemented
-def arange(_):
-    pass
+arange = np.arange
 
 
 @functools.singledispatch
@@ -112,10 +109,7 @@ def diagonal(_):
     pass
 
 
-@functools.singledispatch
-@_not_implemented
-def eye(_):
-    pass
+eye = np.eye
 
 
 @functools.singledispatch
@@ -130,10 +124,7 @@ def expand_dims(_):
     pass
 
 
-@functools.singledispatch
-@_not_implemented
-def finfo(_):
-    pass
+finfo = np.finfo
 
 
 float64 = np.float64
@@ -172,10 +163,7 @@ def log(_):
     pass
 
 
-@functools.singledispatch
-@_not_implemented
-def logspace(_):
-    pass
+logspace = np.logspace
 
 
 ndarray = np.ndarray | torch.Tensor | jax.numpy.ndarray | tf.Tensor
@@ -184,10 +172,7 @@ ndarray = np.ndarray | torch.Tensor | jax.numpy.ndarray | tf.Tensor
 newaxis = None
 
 
-@functools.singledispatch
-@_not_implemented
-def ones(_):
-    pass
+ones = np.ones
 
 
 pi = np.pi
@@ -283,10 +268,7 @@ def tensordot(_):
     pass
 
 
-@functools.singledispatch
-@_not_implemented
-def vectorize(_):
-    pass
+vectorize = np.vectorize
 
 
 @functools.singledispatch
@@ -301,7 +283,4 @@ def where(_):
     pass
 
 
-@functools.singledispatch
-@_not_implemented
-def zeros(_):
-    pass
+zeros = np.zeros

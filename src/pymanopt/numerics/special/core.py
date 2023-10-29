@@ -1,9 +1,4 @@
-import functools
-
-from pymanopt.numerics.core import _not_implemented
+import scipy.special
 
 
-@functools.singledispatch
-@_not_implemented
-def comb(_):
-    pass
+comb = scipy.special.comb
