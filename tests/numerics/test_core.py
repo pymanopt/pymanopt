@@ -499,6 +499,34 @@ def test_tile(argument_a, argument_b):
 
 
 @pytest.mark.parametrize(
+    "argument, expected_output",
+    [
+        (np.arctanh(np.array([0.4, 0.2])), np.array([0.4, 0.2])),
+        (jnp.arctanh(jnp.array([0.4, 0.2])), jnp.array([0.4, 0.2])),
+        (torch.arctanh(torch.Tensor([0.4, 0.2])), torch.Tensor([0.4, 0.2])),
+        (tf.math.atanh(tf.constant([0.4, 0.2])), tf.constant([0.4, 0.2])),
+    ],
+)
+def test_tanh(argument, expected_output):
+    output = nx.tanh(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument_a, argument_b, expected_output",
+    [
+        (np.array([-4, 2]), np.array([1, 3]), 2),
+        (jnp.array([-4, 2]), jnp.array([1, 3]), 2),
+        (torch.Tensor([-4, 2]), torch.Tensor([1, 3]), 2),
+        (tf.constant([-4, 2]), tf.constant([1, 3]), 2),
+    ],
+)
+def test_tensordot(argument_a, argument_b, expected_output):
+    output = nx.tensordot(argument_a, argument_b, axes=argument_a.ndim)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
     "argument",
     [
         [[1, 2], [3, 4]],
@@ -529,31 +557,19 @@ def test_transpose(argument_a, argument_b):
 
 
 @pytest.mark.parametrize(
-    "argument_a, argument_b, expected_output",
+    "argument_a, argument_b, argument_c",
     [
-        (np.array([-4, 2]), np.array([1, 3]), 2),
-        (jnp.array([-4, 2]), jnp.array([1, 3]), 2),
-        (torch.Tensor([-4, 2]), torch.Tensor([1, 3]), 2),
-        (tf.constant([-4, 2]), tf.constant([1, 3]), 2),
-    ],
+        (1, 2, None),
+        (2, 1, 1),
+    ]
 )
-def test_tensordot(argument_a, argument_b, expected_output):
-    output = nx.tensordot(argument_a, argument_b, axes=argument_a.ndim)
-    assert nx.allclose(output, expected_output)
-
-
-@pytest.mark.parametrize(
-    "argument, expected_output",
-    [
-        (np.arctanh(np.array([0.4, 0.2])), np.array([0.4, 0.2])),
-        (jnp.arctanh(jnp.array([0.4, 0.2])), jnp.array([0.4, 0.2])),
-        (torch.arctanh(torch.Tensor([0.4, 0.2])), torch.Tensor([0.4, 0.2])),
-        (tf.math.atanh(tf.constant([0.4, 0.2])), tf.constant([0.4, 0.2])),
-    ],
-)
-def test_tanh(argument, expected_output):
-    output = nx.tanh(argument)
-    assert nx.allclose(output, expected_output)
+def test_triu_indices(argument_a, argument_b, argument_c):
+    if argument_c is None:
+        output = nx.triu_indices(argument_a, argument_b)
+        assert nx.allclose(output, np.triu_indices(argument_a, argument_b))
+    else:
+        output = nx.triu_indices(argument_a, argument_b, argument_c)
+        assert nx.allclose(output, np.triu_indices(argument_a, argument_b, argument_c))
 
 
 @pytest.mark.parametrize(

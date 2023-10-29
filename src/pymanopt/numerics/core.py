@@ -267,6 +267,8 @@ def tanh(_):
 def tensordot(_):
     pass
 
+triu_indices = np.triu_indices
+
 
 vectorize = np.vectorize
 
