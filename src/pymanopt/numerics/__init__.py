@@ -53,7 +53,8 @@ __all__ = [
     "vectorize",
     "vstack",
     "where",
-    "zeros"
+    "zeros",
+    "zeros_like",
 ]
 
 
@@ -111,7 +112,8 @@ from pymanopt.numerics.core import (
     vectorize,
     vstack,
     where,
-    zeros
+    zeros,
+    zeros_like,
 )
 from pymanopt.numerics import linalg, special
 from numpy import random

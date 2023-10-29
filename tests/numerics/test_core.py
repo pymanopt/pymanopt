@@ -626,3 +626,15 @@ def test_where(argument):
 def test_zeros(argument):
     output = nx.zeros(argument)
     assert nx.allclose(output, np.zeros(argument))
+
+
+@pytest.mark.parametrize(
+    "argument",
+    [
+        2,
+        [2, 1],
+    ]
+)
+def test_zeros_like(argument):
+    output = nx.zeros_like(argument)
+    assert nx.allclose(output, np.zeros_like(argument))

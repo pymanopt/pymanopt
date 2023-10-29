@@ -283,3 +283,8 @@ def _(arrays: generic_np_type) -> np.ndarray:
 @nx.where.register
 def _(condition: generic_np_type) -> np.ndarray:
     return np.where(condition)
+
+
+@nx.zeros_like.register
+def _(array: generic_np_type) -> np.ndarray:
+    return np.zeros_like(array)

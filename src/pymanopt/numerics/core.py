@@ -287,3 +287,9 @@ def where(_):
 
 
 zeros = np.zeros
+
+
+@functools.singledispatch
+@_not_implemented
+def zeros_like(_):
+    pass
