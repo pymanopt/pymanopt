@@ -41,6 +41,7 @@ __all__ = [
     "sinc",
     "sort",
     "spacing",
+    "special",
     "sqrt",
     "sum",
     "tile",
@@ -110,7 +111,7 @@ from pymanopt.numerics.core import (
     where,
     zeros
 )
-from pymanopt.numerics import linalg
+from pymanopt.numerics import linalg, special
 from numpy import random
 
 _BACKENDS = ["numpy", "jax", "pytorch", "tensorflow"]

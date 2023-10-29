@@ -67,6 +67,11 @@ def _(arrays: generic_np_type) -> np.ndarray:
     return np.block(arrays)
 
 
+@nx.special.comb.register
+def _(n: int, k: int) -> int:
+    return scipy.special.comb(n, k, exact=True)
+
+
 @nx.conjugate.register
 def _(array: generic_np_type) -> generic_np_type:
     return np.conjugate(array)
