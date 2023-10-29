@@ -569,7 +569,10 @@ def test_triu_indices(argument_a, argument_b, argument_c):
         assert nx.allclose(output, np.triu_indices(argument_a, argument_b))
     else:
         output = nx.triu_indices(argument_a, argument_b, argument_c)
-        assert nx.allclose(output, np.triu_indices(argument_a, argument_b, argument_c))
+        assert nx.allclose(
+            output,
+            np.triu_indices(argument_a, argument_b, argument_c)
+        )
 
 
 @pytest.mark.parametrize(
