@@ -162,8 +162,8 @@ def test_solve_continuous_lyapunov(argument_a, argument_b):
     ],
 )
 def test_svd(argument):
-    U, S, Vh = nx.linalg.svd(argument)
-    true_U, true_S, true_Vh = np.linalg.svd(argument)
-    assert nx.allclose(U, true_U)
-    assert nx.allclose(S, true_S)
-    assert nx.allclose(Vh, true_Vh)
+    u, s, vh = nx.linalg.svd(argument)
+    true_u, true_s, true_vh = np.linalg.svd(argument)
+    assert nx.allclose(u, true_u)
+    assert nx.allclose(s, true_s)
+    assert nx.allclose(vh, true_vh)
