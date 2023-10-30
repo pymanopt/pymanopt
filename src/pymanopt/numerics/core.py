@@ -1,8 +1,5 @@
 import functools
 import numpy as np
-import torch
-import jax
-import tensorflow as tf
 
 
 def _not_implemented(function):
@@ -167,6 +164,21 @@ logspace = np.logspace
 
 
 ndarray = np.ndarray | torch.Tensor | jax.numpy.ndarray | tf.Tensor
+try:
+    import torch
+    ndarray = ndarray | torch.Tensor
+except ImportError:
+    pass
+try:
+    import jax
+    ndarray = ndarray | jax.numpy.ndarray
+except ImportError:
+    pass
+try:
+    import tensorflow as tf
+    ndarray = ndarray | tf.Tensor
+except ImportError:
+    pass
 
 
 newaxis = None
