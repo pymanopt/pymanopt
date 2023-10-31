@@ -21,11 +21,11 @@ def raise_not_implemented_error(method):
 class BackendManifold(type):
     def __new__(cls, name, bases, attrs):
         if 'random_point' in attrs:
-            attrs['random_point'] = cls._point_to_numerics(attrs['random_point'])
+            attrs['random_point'] = cls._point_to_numerics(cls, attrs['random_point'])
 
         return super().__new__(cls, name, bases, attrs)
 
-    def _point_to_numerics(method):
+    def _point_to_numerics(cls, method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             backend = self.backend
@@ -34,24 +34,43 @@ class BackendManifold(type):
 
             point = method(self, *args, **kwargs)
 
-            if backend == 'numpy':
-                import numpy as np
-                point = np.array(point, dtype=np.float64)
-            elif backend == 'pytorch':
-                import torch
-                point = torch.tensor(point, dtype=torch.float64)
-            elif backend == 'jax':
-                import jax.numpy as jnp
-                point = jnp.array(point, dtype=jnp.float64)
-            elif backend == 'tensorflow':
-                import tensorflow as tf
-                point = tf.convert_to_tensor(point, dtype=tf.float64)
+            # if point is a namedtuple, convert each point
+            if hasattr(point, '_fields'):
+                point = point.__class__(*[
+                    cls._single_point_transformation(p, backend) for p in point])
+            # if is a Sequence, convert each point
+            elif isinstance(point, Sequence):
+                for i, p in enumerate(point):
+                    point[i] = cls._single_point_transformation(p, backend)
             else:
-                raise ValueError(f"Unknown backend '{backend}'")
+                point = cls._single_point_transformation(point, backend)
 
             return point
 
         return wrapper
+
+    def _single_point_transformation(point, backend):
+        if point.dtype.kind == 'c':
+            dtype = 'complex128'
+        else:
+            dtype = 'float64'
+
+        if backend == 'numpy':
+            import numpy as np
+            point = np.array(point, dtype=dtype)
+        elif backend == 'pytorch':
+            import torch
+            point = torch.tensor(point, dtype=getattr(torch, dtype))
+        elif backend == 'jax':
+            import jax.numpy as jnp
+            point = jnp.array(point, dtype=dtype)
+        elif backend == 'tensorflow':
+            import tensorflow as tf
+            point = tf.convert_to_tensor(point, dtype=getattr(tf, dtype))
+        else:
+            raise ValueError(f"Unknown backend '{backend}'")
+
+        return point
 
 
 class Manifold(metaclass=BackendManifold):
