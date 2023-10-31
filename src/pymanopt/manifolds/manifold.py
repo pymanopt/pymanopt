@@ -18,31 +18,41 @@ def raise_not_implemented_error(method):
     return wrapper
 
 
-def _point_to_numerics(method):
-    @functools.wraps(method)
-    def wrapper(self, *args, **kwargs):
-        point = method(self, *args, **kwargs)
-        backend = self._backend
-        if backend == 'pytorch':
-            import torch
-            point = torch.tensor(point, dtype=torch.float64)
-        elif backend == 'jax':
-            import jax.numpy as jnp
-            point = jnp.array(point, dtype=jnp.float64)
-        elif backend == 'tensorflow':
-            import tensorflow as tf
-            point = tf.convert_to_tensor(point, dtype=tf.float64)
-        elif backend is None:
-            warnings.warn(
-                f"Manifold '{self.__class__.__name__}' has not been "
-                "provided a numerical backend. "
-                "The value of backend should be set. Falling back to NumPy."
-            )
-        return point
-    return wrapper
+class BackendManifold(type):
+    def __new__(cls, name, bases, attrs):
+        if 'random_point' in attrs:
+            attrs['random_point'] = cls._point_to_numerics(attrs['random_point'])
+
+        return super().__new__(cls, name, bases, attrs)
+
+    def _point_to_numerics(method):
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+            point = method(self, *args, **kwargs)
+            backend = self._backend
+            if backend == 'numpy':
+                import numpy as np
+                point = np.array(point, dtype=np.float64)
+            elif backend == 'pytorch':
+                import torch
+                point = torch.tensor(point, dtype=torch.float64)
+            elif backend == 'jax':
+                import jax.numpy as jnp
+                point = jnp.array(point, dtype=jnp.float64)
+            elif backend == 'tensorflow':
+                import tensorflow as tf
+                point = tf.convert_to_tensor(point, dtype=tf.float64)
+            else:
+                raise ValueError(f"Unknown backend '{backend}'")
+
+            print(f"Manifold '{self.__class__.__name__}': backend is {backend}")
+
+            return point
+
+        return wrapper
 
 
-class Manifold(metaclass=abc.ABCMeta):
+class Manifold(metaclass=BackendManifold):
     """Riemannian manifold base class.
 
     Abstract base class setting out a template for manifold classes.
@@ -103,7 +113,7 @@ class Manifold(metaclass=abc.ABCMeta):
         self._name = name
         self._dimension = dimension
         self._point_layout = point_layout
-        self._backend = None
+        self._backend = 'numpy'
 
     def __str__(self):
         return self._name
@@ -201,7 +211,6 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    @_point_to_numerics
     def random_point(self):
         """Returns a random point on the manifold.
 
@@ -432,7 +441,7 @@ class Manifold(metaclass=abc.ABCMeta):
         return tangent_vector
 
 
-class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
+class RiemannianSubmanifold(Manifold):
     """Base class for Riemannian submanifolds of Euclidean space.
 
     This class provides a generic method to project Euclidean gradients to
