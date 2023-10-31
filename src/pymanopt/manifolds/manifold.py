@@ -28,8 +28,12 @@ class BackendManifold(type):
     def _point_to_numerics(method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
+            backend = self.backend
+            if backend is None:
+                self.backend = backend = 'numpy'
+
             point = method(self, *args, **kwargs)
-            backend = self._backend
+
             if backend == 'numpy':
                 import numpy as np
                 point = np.array(point, dtype=np.float64)
@@ -44,8 +48,6 @@ class BackendManifold(type):
                 point = tf.convert_to_tensor(point, dtype=tf.float64)
             else:
                 raise ValueError(f"Unknown backend '{backend}'")
-
-            print(f"Manifold '{self.__class__.__name__}': backend is {backend}")
 
             return point
 
@@ -113,7 +115,7 @@ class Manifold(metaclass=BackendManifold):
         self._name = name
         self._dimension = dimension
         self._point_layout = point_layout
-        self._backend = 'numpy'
+        self._backend = None
 
     def __str__(self):
         return self._name
@@ -230,6 +232,7 @@ class Manifold(metaclass=BackendManifold):
             backend: The backend to use.
         """
         backend = str(backend).lower()
+        print(f"Manifold '{self.__class__.__name__}': backend is {backend}")
         if backend not in _BACKENDS:
             raise ValueError(
                 f"Invalid backend '{backend}': must be one of {_BACKENDS}"
