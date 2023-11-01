@@ -1,42 +1,285 @@
-import typing
-
 import torch
 
-import pymanopt.numerics.core as nx
+import pymanopt.numerics as nx
+
+tensor_like = torch.Tensor
 
 
 @nx.abs.register
-def _(array: torch.Tensor) -> torch.Tensor:
-    return torch.abs(array)
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.abs(tensor)
 
 
 @nx.all.register
-def _(array: torch.Tensor) -> torch.Tensor:
-    return torch.all(array)
+def _(tensor: tensor_like) -> bool:
+    return torch.all(tensor)
 
 
 @nx.allclose.register
-def _(
-    array_a: torch.Tensor, array_b: typing.Union[torch.Tensor, float, int]
-) -> bool:
-    # PyTorch does not automatically coerce values to tensors.
-    if isinstance(array_b, (float, int)):
-        array_b = torch.Tensor([array_b])
-    return torch.allclose(array_a, array_b)
+def _(tensor_a: tensor_like, tensor_b: tensor_like) -> bool:
+    return torch.allclose(tensor_a, tensor_b)
+
+
+@nx.any.register
+def _(tensor: tensor_like) -> bool:
+    return torch.any(tensor)
+
+
+@nx.arccos.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.acos(tensor)
+
+
+@nx.arccosh.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.acosh(tensor)
+
+
+@nx.arctan.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.atan(tensor)
+
+
+@nx.arctanh.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.atanh(tensor)
+
+
+@nx.argmin.register
+def _(tensor: tensor_like) -> int:
+    return torch.argmin(tensor)
+
+
+@nx.array.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.tensor(tensor)
+
+
+@nx.block.register
+def _(tensors: tensor_like) -> torch.Tensor:
+    return torch.cat(tensors)
+
+
+@nx.conjugate.register
+def _(tensor: tensor_like) -> tensor_like:
+    return torch.conj(tensor)
+
+
+@nx.cos.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.cos(tensor)
+
+
+@nx.diag.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.diag(tensor)
+
+
+@nx.diagonal.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.diagonal(tensor)
 
 
 @nx.exp.register
-def _(array: torch.Tensor) -> torch.Tensor:
-    return torch.exp(array)
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.exp(tensor)
+
+
+@nx.expand_dims.register
+def _(
+    tensor: tensor_like,
+    axis: int | tuple[int, ...] = None
+) -> torch.Tensor:
+    return torch.unsqueeze(tensor, axis)
+
+
+@nx.hstack.register
+def _(tensors: tensor_like) -> torch.Tensor:
+    return torch.cat(tensors, dim=1)
+
+
+@nx.iscomplexobj.register
+def _(tensor: tensor_like) -> bool:
+    return torch.is_complex(tensor)
+
+
+@nx.isnan.register
+def _(tensor: tensor_like) -> bool:
+    return torch.isnan(tensor)
+
+
+@nx.isrealobj.register
+def _(tensor: tensor_like) -> bool:
+    return torch.is_real(tensor)
+
+
+@nx.log.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.log(tensor)
+
+
+@nx.linalg.cholesky.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.cholesky(tensor)
+
+
+@nx.linalg.det.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.det(tensor)
+
+
+@nx.linalg.eigh.register
+def _(tensor: tensor_like) -> tuple[torch.Tensor, torch.Tensor]:
+    eigval, eigvec = torch.symeig(tensor, eigenvectors=True)
+    return eigval, eigvec
+
+
+@nx.linalg.expm.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.matrix_exp(tensor)
+
+
+@nx.linalg.inv.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.inverse(tensor)
+
+
+@nx.linalg.logm.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.logm(tensor)
+
+
+@nx.linalg.matrix_rank.register
+def _(tensor: tensor_like) -> int:
+    return torch.matrix_rank(tensor)
+
+
+@nx.linalg.norm.register
+def _(
+    tensor: tensor_like,
+    *args: tuple,
+    **kwargs: dict,
+) -> float:
+    return torch.norm(tensor, *args, **kwargs)
+
+
+@nx.linalg.qr.register
+def _(tensor: tensor_like) -> tuple[torch.Tensor, torch.Tensor]:
+    q, r = torch.qr(tensor)
+    return q, r
+
+
+@nx.linalg.solve.register
+def _(tensor_a: tensor_like, tensor_b: tensor_like) -> torch.Tensor:
+    return torch.solve(tensor_b, tensor_a)[0]
+
+
+@nx.linalg.solve_continuous_lyapunov.register
+def _(tensor_a: tensor_like, tensor_q: tensor_like) -> torch.Tensor:
+    return torch.solve(tensor_q, tensor_a)[0]
+
+
+@nx.linalg.svd.register
+def _(
+    tensor: tensor_like,
+    *args: tuple,
+    **kwargs: dict
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    U, S, V = torch.svd(tensor, *args, **kwargs)
+    return U, S, V
+
+
+@nx.polyfit.register
+def _(x: tensor_like, y: tensor_like, deg: int) -> torch.Tensor:
+    return torch.polyfit(x, y, deg)
+
+
+@nx.polyval.register
+def _(p: tensor_like, x: tensor_like) -> torch.Tensor:
+    return torch.polyval(p, x)
+
+
+@nx.prod.register
+def _(tensor: tensor_like) -> float:
+    return torch.prod(tensor)
+
+
+@nx.real.register
+def _(tensor: tensor_like) -> tensor_like:
+    return torch.real(tensor)
+
+
+@nx.sin.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.sin(tensor)
+
+
+@nx.sinc.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.sinc(tensor)
+
+
+@nx.sort.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.sort(tensor).values
+
+
+@nx.spacing.register
+def _(tensor: tensor_like) -> float:
+    return torch.spacing(tensor)
+
+
+@nx.sqrt.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.sqrt(tensor)
+
+
+@nx.sum.register
+def _(
+    tensor: tensor_like,
+    *args: tuple,
+    **kwargs: dict
+) -> torch.Tensor:
+    return torch.sum(tensor, *args, **kwargs)
+
+
+@nx.tanh.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.tanh(tensor)
 
 
 @nx.tensordot.register
 def _(
-    array_a: torch.Tensor, array_b: torch.Tensor, *, axes: int = 2
+    tensor_a: tensor_like,
+    tensor_b: tensor_like,
+    *args: tuple,
+    **kwargs: dict
 ) -> torch.Tensor:
-    return torch.tensordot(array_a, array_b, dims=axes)
+    if 'axes' in kwargs:
+        axes = kwargs.pop('axes')
+        kwargs['dims'] = axes
+    return torch.tensordot(tensor_a, tensor_b, *args, **kwargs)
 
 
-@nx.tanh.register
-def _(array: torch.Tensor) -> torch.Tensor:
-    return torch.tanh(array)
+@nx.tile.register
+def _(tensor: tensor_like, reps: int | tuple[int, ...]) -> torch.Tensor:
+    return torch.tile(tensor, reps)
+
+
+@nx.trace.register
+def _(
+    tensor: tensor_like,
+    *args: tuple,
+    **kwargs: dict
+) -> float:
+    return torch.trace(tensor, *args, **kwargs)
+
+
+@nx.transpose.register
+def _(tensor: tensor_like, axes: tuple[int, ...] | None = None) -> torch.Tensor:
+    return torch.transpose(tensor, dim0=axes[0], dim1=axes[1])
+
+
+@nx.vstack.register
+def _(tensors: tensor_like) -> torch.Tensor:
+    return torch.cat(tensors, dim=0)
