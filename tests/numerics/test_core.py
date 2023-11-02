@@ -628,8 +628,8 @@ def test_vectorize(argument_a, argument_b, argument_c, expected_output):
 @pytest.mark.parametrize(
     "argument, expected_output",
     [
-        ([2, 1], np.array([2, 1])),
-        (np.array([2, 1]), np.array([2, 1])),
+        ([2, 1], np.vstack([2, 1])),
+        (np.array([2, 1]), np.vstack(np.array([2, 1]))),
         (
             [np.array([2, 1]), np.array([2, 1])],
             np.vstack([np.array([2, 1]), np.array([2, 1])])
