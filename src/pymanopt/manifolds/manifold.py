@@ -231,7 +231,8 @@ class Manifold(metaclass=BackendManifold):
         print(f"Manifold '{self.__class__.__name__}': backend is {backend}")
         if backend not in NUMERICS_SUPPORTED_BACKENDS:
             raise ValueError(
-                f"Invalid backend '{backend}': must be one of {NUMERICS_SUPPORTED_BACKENDS}"
+                "Invalid backend '{backend}': must be one of "
+                f"{NUMERICS_SUPPORTED_BACKENDS}"
             )
         self._backend = backend
 
