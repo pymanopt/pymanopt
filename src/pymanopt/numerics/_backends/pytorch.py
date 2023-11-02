@@ -17,6 +17,8 @@ def _(tensor: tensor_like) -> bool:
 
 @nx.allclose.register
 def _(tensor_a: tensor_like, tensor_b: tensor_like) -> bool:
+    if type(tensor_b) is not torch.Tensor:
+        tensor_b = torch.tensor(tensor_b).to(tensor_a)
     return torch.allclose(tensor_a, tensor_b)
 
 
