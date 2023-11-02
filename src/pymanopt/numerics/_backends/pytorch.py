@@ -289,6 +289,11 @@ def _(tensors: tensor_like) -> torch.Tensor:
     return torch.cat(tensors, dim=0)
 
 
+@nx.where.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.as_tensor(tensor).nonzero()
+
+
 @nx.zeros_like.register
 def _(array: tensor_like) -> torch.Tensor:
     return torch.zeros_like(array)
