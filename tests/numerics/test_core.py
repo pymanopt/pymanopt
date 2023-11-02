@@ -1,8 +1,5 @@
-import jax.numpy as jnp
 import numpy as np
 import pytest
-import tensorflow as tf
-import torch
 import scipy
 
 import pymanopt.numerics as nx
@@ -594,90 +591,92 @@ def test_transpose(argument_a, argument_b, expected_output):
 
 
 @pytest.mark.parametrize(
-    "argument_a, argument_b, argument_c",
+    "argument_a, argument_b, argument_c, expected_output",
     [
-        (1, 2, None),
-        (2, 1, 1),
+        (1, 2, None, np.triu_indices(1, 2)),
+        (2, 1, 1, np.triu_indices(2, 1, 1)),
     ]
 )
 @_test_numerics_supported_backends
-def test_triu_indices(argument_a, argument_b, argument_c):
+def test_triu_indices(argument_a, argument_b, argument_c, expected_output):
     if argument_c is None:
         output = nx.triu_indices(argument_a, argument_b)
-        assert nx.allclose(output, np.triu_indices(argument_a, argument_b))
     else:
         output = nx.triu_indices(argument_a, argument_b, argument_c)
-        assert nx.allclose(
-            output,
-            np.triu_indices(argument_a, argument_b, argument_c)
-        )
+    assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument_a, argument_b, argument_c",
+    "argument_a, argument_b, argument_c, expected_output",
     [
-        (scipy.linalg.expm, "(m,m)->(m,m)", [
-            np.array([[1, 2], [3, 4]]), np.array([[1, 2], [3, 4]])]),
+        (
+            scipy.linalg.expm,
+            "(m,m)->(m,m)",
+            [np.array([[1, 2], [3, 4]]), np.array([[1, 2], [3, 4]])],
+            np.array([
+                scipy.linalg.expm(np.array([[1, 2], [3, 4]])) for _ in range(2)
+            ])
+        ),
     ]
 )
 @_test_numerics_supported_backends
-def test_vectorize(argument_a, argument_b, argument_c):
+def test_vectorize(argument_a, argument_b, argument_c, expected_output):
     output = nx.vectorize(argument_a, signature=argument_b)
-    assert nx.allclose(
-        output(argument_c),
-        np.vectorize(argument_a, signature=argument_b)(argument_c)
-    )
+    assert nx.allclose(output(argument_c), expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        [2, 1],
-        np.array([2, 1]),
-        [np.array([2, 1]), np.array([2, 1])],
+        ([2, 1], np.array([2, 1])),
+        (np.array([2, 1]), np.array([2, 1])),
+        (
+            [np.array([2, 1]), np.array([2, 1])],
+            np.vstack([np.array([2, 1]), np.array([2, 1])])
+        ),
     ]
 )
 @_test_numerics_supported_backends
-def test_vstack(argument):
+def test_vstack(argument, expected_output):
     output = nx.vstack(argument)
-    assert nx.allclose(output, np.vstack(argument))
+    assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        False,
-        [False, True],
-        np.array([False, True]),
+        (False, False),
+        ([False, True], np.where([False, True])),
+        (np.array([False, True]), np.where(np.array([False, True]))),
     ]
 )
 @_test_numerics_supported_backends
-def test_where(argument):
+def test_where(argument, expected_output):
     output = nx.where(argument)
-    assert nx.allclose(output, np.where(argument))
+    assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        2,
-        [2, 1],
+        (2, np.zeros(2)),
+        ([2, 1], np.zeros([2, 1])),
     ]
 )
 @_test_numerics_supported_backends
-def test_zeros(argument):
+def test_zeros(argument, expected_output):
     output = nx.zeros(argument)
-    assert nx.allclose(output, np.zeros(argument))
+    assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        2,
-        [2, 1],
+        (2, np.zeros_like(2)),
+        ([2, 1], np.zeros_like([2, 1])),
     ]
 )
 @_test_numerics_supported_backends
-def test_zeros_like(argument):
+def test_zeros_like(argument, expected_output):
     output = nx.zeros_like(argument)
-    assert nx.allclose(output, np.zeros_like(argument))
+    assert nx.allclose(output, expected_output)
