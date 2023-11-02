@@ -36,8 +36,7 @@ class BackendManifold(type):
 
             # if point is a namedtuple, convert each point
             if hasattr(point, '_fields'):
-                point = point.__class__(*[
-                    cls._single_point_transformation(p, backend) for p in point])
+                point = point.__class__(*[numpy_to_backend(p, backend) for p in point])
             # if is a Sequence, convert each point
             elif isinstance(point, Sequence):
                 for i, p in enumerate(point):
