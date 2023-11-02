@@ -287,3 +287,8 @@ def _(tensor: tensor_like, axes: tuple[int, ...] | None = None) -> torch.Tensor:
 @nx.vstack.register
 def _(tensors: tensor_like) -> torch.Tensor:
     return torch.cat(tensors, dim=0)
+
+
+@nx.zeros_like.register
+def _(array: tensor_like) -> torch.Tensor:
+    return torch.zeros_like(array)
