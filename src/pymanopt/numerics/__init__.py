@@ -118,11 +118,11 @@ from pymanopt.numerics.core import (
 from pymanopt.numerics import linalg, special
 from numpy import random
 
-_BACKENDS = ["numpy", "jax", "pytorch", "tensorflow"]
+NUMERICS_SUPPORTED_BACKENDS = ["numpy", "pytorch"]
 
 
 def register_backends():
-    for backend in _BACKENDS:
+    for backend in NUMERICS_SUPPORTED_BACKENDS:
         try:
             importlib.import_module(f"pymanopt.numerics._backends.{backend}")
         except ImportError:
