@@ -312,8 +312,8 @@ def test_iscomplexobj(argument, expected_output):
     "argument, expected_output",
     [
         (np.nan, True),
-        (np.array([np.nan, 1]), True),
-        (np.array([1, 2]), False),
+        (np.array([np.nan, 1]), [True, False]),
+        (np.array([1, 2]), [False, False]),
     ]
 )
 @_test_numerics_supported_backends
