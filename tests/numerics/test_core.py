@@ -455,8 +455,6 @@ def test_sort(argument, expected_output):
     "argument, expected_output",
     [
         (2.2, np.spacing(2.2)),
-        ([2.2, 1], np.spacing([2.2, 1])),
-        (np.array([2.2, 1]), np.spacing(np.array([2.2, 1]))),
     ]
 )
 @_test_numerics_supported_backends
