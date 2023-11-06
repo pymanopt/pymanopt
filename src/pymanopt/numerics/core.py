@@ -127,12 +127,6 @@ finfo = np.finfo
 float64 = np.float64
 
 
-@functools.singledispatch
-@not_implemented
-def hstack(_):
-    pass
-
-
 integer = np.integer
 
 
@@ -284,12 +278,6 @@ triu_indices = np.triu_indices
 
 
 vectorize = np.vectorize
-
-
-@functools.singledispatch
-@not_implemented
-def vstack(_):
-    pass
 
 
 @functools.singledispatch

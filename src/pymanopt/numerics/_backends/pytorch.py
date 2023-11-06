@@ -95,11 +95,6 @@ def _(
     return torch.unsqueeze(tensor, axis)
 
 
-@nx.hstack.register
-def _(tensors: tensor_like) -> torch.Tensor:
-    return torch.cat(tensors, dim=1)
-
-
 @nx.iscomplexobj.register
 def _(tensor: tensor_like) -> bool:
     return torch.is_complex(tensor)
@@ -282,11 +277,6 @@ def _(tensor: tensor_like, axes: tuple[int, ...] | None = None) -> torch.Tensor:
     if axes is None:
         return tensor
     return torch.transpose(tensor, dim0=axes[0], dim1=axes[1])
-
-
-@nx.vstack.register
-def _(tensor: tensor_like) -> torch.Tensor:
-    return tensor[None, ...]
 
 
 @nx.where.register
