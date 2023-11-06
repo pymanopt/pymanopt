@@ -94,11 +94,6 @@ def _(
     return np.expand_dims(array, axis)
 
 
-@nx.hstack.register
-def _(arrays: array_like) -> np.ndarray:
-    return np.hstack(arrays)
-
-
 @nx.iscomplexobj.register
 def _(array: array_like) -> bool:
     return np.iscomplexobj(array)
@@ -273,11 +268,6 @@ def _(
 @nx.transpose.register
 def _(array: array_like, axes: tuple[int, ...] | None = None) -> np.ndarray:
     return np.transpose(array, axes)
-
-
-@nx.vstack.register
-def _(arrays: array_like) -> np.ndarray:
-    return np.vstack(arrays)
 
 
 @nx.where.register

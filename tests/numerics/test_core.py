@@ -281,22 +281,6 @@ def test_float64():
 @pytest.mark.parametrize(
     "argument, expected_output",
     [
-        ([1, 2], np.hstack([1, 2])),
-        (
-            [np.array([1, 2]), np.array([3, 4])],
-            np.hstack([np.array([1, 2]), np.array([3, 4])])
-        ),
-    ]
-)
-@_test_numerics_supported_backends
-def test_hstack(argument, expected_output):
-    output = nx.hstack(argument)
-    assert nx.allclose(output, expected_output)
-
-
-@pytest.mark.parametrize(
-    "argument, expected_output",
-    [
         (1, False),
         (1 + 2j, True),
         (np.array([1 + 1j, 2]), True),
@@ -623,23 +607,6 @@ def test_triu_indices(argument_a, argument_b, argument_c, expected_output):
 def test_vectorize(argument_a, argument_b, argument_c, expected_output):
     output = nx.vectorize(argument_a, signature=argument_b)
     assert nx.allclose(output(argument_c), expected_output)
-
-
-@pytest.mark.parametrize(
-    "argument, expected_output",
-    [
-        ([2, 1], np.vstack([2, 1])),
-        (np.array([2, 1]), np.vstack(np.array([2, 1]))),
-        (
-            [np.array([2, 1]), np.array([2, 1])],
-            np.vstack([np.array([2, 1]), np.array([2, 1])])
-        ),
-    ]
-)
-@_test_numerics_supported_backends
-def test_vstack(argument, expected_output):
-    output = nx.vstack(argument)
-    assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
