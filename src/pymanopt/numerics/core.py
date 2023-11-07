@@ -193,18 +193,6 @@ pi = np.pi
 
 @functools.singledispatch
 @not_implemented
-def polyfit(_):
-    pass
-
-
-@functools.singledispatch
-@not_implemented
-def polyval(_):
-    pass
-
-
-@functools.singledispatch
-@not_implemented
 def prod(_):
     pass
 

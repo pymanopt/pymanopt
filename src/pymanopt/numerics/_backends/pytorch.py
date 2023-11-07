@@ -191,16 +191,6 @@ def _(
     return U, S, V
 
 
-@nx.polyfit.register
-def _(x: tensor_like, y: tensor_like, deg: int) -> torch.Tensor:
-    return torch.polyfit(x, y, deg)
-
-
-@nx.polyval.register
-def _(p: tensor_like, x: tensor_like) -> torch.Tensor:
-    return torch.polyval(p, x)
-
-
 @nx.prod.register
 def _(tensor: tensor_like) -> float:
     return torch.prod(tensor)

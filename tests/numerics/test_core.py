@@ -354,40 +354,6 @@ def test_pi():
 
 
 @pytest.mark.parametrize(
-    "argument_a, argument_b, expected_output",
-    [
-        (
-            np.array([1.2, 2]),
-            np.array([3, 4]),
-            np.polyfit(
-                np.array([1.2, 2]), np.array([3, 4]), 1
-            )
-        ),
-    ]
-)
-@_test_numerics_supported_backends
-def test_polyfit(argument_a, argument_b, expected_output):
-    output = nx.polyfit(argument_a, argument_b, 1)
-    assert nx.allclose(output, expected_output)
-
-
-@pytest.mark.parametrize(
-    "argument_a, argument_b, expected_output",
-    [
-        (
-            np.array([1.2, 2]),
-            np.array([3, 4]),
-            np.polyval(np.array([1.2, 2]), np.array([3, 4]))
-        ),
-    ]
-)
-@_test_numerics_supported_backends
-def test_polyval(argument_a, argument_b, expected_output):
-    output = nx.polyval(argument_a, argument_b)
-    assert nx.allclose(output, expected_output)
-
-
-@pytest.mark.parametrize(
     "argument, expected_output",
     [
         (np.array([1.2, 2]), 2.4),

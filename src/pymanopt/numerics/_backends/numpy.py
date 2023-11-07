@@ -183,16 +183,6 @@ def _(
     return np.linalg.svd(array, *args, **kwargs)
 
 
-@nx.polyfit.register
-def _(x: array_like, y: array_like, deg: int) -> np.ndarray:
-    return np.polyfit(x, y, deg)
-
-
-@nx.polyval.register
-def _(p: array_like, x: array_like) -> np.ndarray:
-    return np.polyval(p, x)
-
-
 @nx.prod.register
 def _(array: array_like) -> np.float64:
     return np.prod(array)
