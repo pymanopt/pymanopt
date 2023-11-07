@@ -3,167 +3,198 @@ import pytest
 import scipy
 
 import pymanopt.numerics as nx
+from tests.numerics import _test_numerics_supported_backends
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[1]]),
-        np.array([[2, 1], [1, 2]])
+        (np.array([[1]]), np.linalg.cholesky(np.array([[1]]))),
+        (np.array([[2, 1], [1, 2]]), np.linalg.cholesky(np.array([[2, 1], [1, 2]]))),
     ],
 )
-def test_cholesky(argument):
+@_test_numerics_supported_backends
+def test_cholesky(argument, expected_output):
     output = nx.linalg.cholesky(argument)
-    expected_output = np.linalg.cholesky(argument)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[1]]),
-        np.array([[2, 1], [1, 2]]),
+        (np.array([[1]]), np.linalg.det(np.array([[1]]))),
+        (np.array([[2, 1], [1, 2]]), np.linalg.det(np.array([[2, 1], [1, 2]]))),
     ],
 )
-def test_det(argument):
+@_test_numerics_supported_backends
+def test_det(argument, expected_output):
     output = nx.linalg.det(argument)
-    expected_output = np.linalg.det(argument)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[2, 1], [1, 2]])
+        (np.array([[2, 1], [1, 2]]), np.linalg.eigh(np.array([[2, 1], [1, 2]]))),
     ],
 )
-def test_eigh(argument):
+@_test_numerics_supported_backends
+def test_eigh(argument, expected_output):
     eigenvalues, eigenvectors = nx.linalg.eigh(argument)
-    true_eigenvalues, true_eigenvectors = np.linalg.eigh(argument)
-    assert nx.allclose(eigenvalues, true_eigenvalues)
-    assert nx.allclose(eigenvectors, true_eigenvectors)
+    assert nx.allclose(eigenvalues, expected_output[0])
+    assert nx.allclose(eigenvectors, expected_output[1])
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[1]]),
-        np.array([[1, 1.3], [1.3, 1]]),
+        (np.array([[1]]), scipy.linalg.expm(np.array([[1]]))),
+        (
+            np.array([[1, 1.3], [1.3, 1]]),
+            scipy.linalg.expm(np.array([[1, 1.3], [1.3, 1]]))
+        ),
     ],
 )
-def test_expm(argument):
+@_test_numerics_supported_backends
+def test_expm(argument, expected_output):
     output = nx.linalg.expm(argument)
-    expected_output = scipy.linalg.expm(argument)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[1]]),
-        np.array([[2, 1], [1, 2]]),
+        (np.array([[1]]), np.linalg.inv(np.array([[1]]))),
+        (
+            np.array([[2, 1], [1, 2]]),
+            np.linalg.inv(np.array([[2, 1], [1, 2]]))
+        ),
     ],
 )
-def test_inv(argument):
+@_test_numerics_supported_backends
+def test_inv(argument, expected_output):
     output = nx.linalg.inv(argument)
-    expected_output = np.linalg.inv(argument)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[1]]),
-        np.array([[2, 1], [1, 2]]),
+        (np.array([[1]]), scipy.linalg.logm(np.array([[1]]))),
+        (
+            np.array([[2, 1], [1, 2]]),
+            scipy.linalg.logm(np.array([[2, 1], [1, 2]]))
+        ),
     ],
 )
-def test_logm(argument):
+@_test_numerics_supported_backends
+def test_logm(argument, expected_output):
     output = nx.linalg.logm(argument)
-    expected_output = scipy.linalg.logm(argument)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[1]]),
-        np.array([[2, 1], [4, 2]]),
-        np.array([[2, 1], [4, 1]]),
+        (np.array([[1]]), np.linalg.matrix_rank(np.array([[1]]))),
+        (
+            np.array([[2, 1], [4, 2]]),
+            np.linalg.matrix_rank(np.array([[2, 1], [4, 2]]))
+        ),
+        (
+            np.array([[2, 1], [4, 1]]),
+            np.linalg.matrix_rank(np.array([[2, 1], [4, 1]]))
+        ),
     ]
 )
-def test_matrix_rank(argument):
+@_test_numerics_supported_backends
+def test_matrix_rank(argument, expected_output):
     output = nx.linalg.matrix_rank(argument)
-    expected_output = np.linalg.matrix_rank(argument)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument_a, argument_b",
+    "argument_a, argument_b, expected_output",
     [
-        (1, None),
-        ([2], None),
-        (np.array([1, 4.2]), None),
-        (np.array([[1, 2], [3, 4.2]]), 0)
+        (1, None, np.linalg.norm(1)),
+        ([2], None, np.linalg.norm([2])),
+        (np.array([1, 4.2]), None, np.linalg.norm(np.array([1, 4.2]))),
+        (
+            np.array([[1, 2], [3, 4.2]]), 0,
+            np.linalg.norm(np.array([[1, 2], [3, 4.2]]), axis=0)
+        ),
     ]
 )
-def test_norm(argument_a, argument_b):
+@_test_numerics_supported_backends
+def test_norm(argument_a, argument_b, expected_output):
     output = nx.linalg.norm(argument_a, axis=argument_b)
-    if argument_b is None:
-        expected_output = np.linalg.norm(argument_a)
-    else:
-        expected_output = np.linalg.norm(argument_a, axis=argument_b)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[1]]),
-        np.array([[2, 1], [1, 2]]),
+        (np.array([[1]]), np.linalg.qr(np.array([[1]]))),
+        (
+            np.array([[2, 1], [1, 2]]),
+            np.linalg.qr(np.array([[2, 1], [1, 2]]))
+        ),
     ],
 )
-def test_qr(argument):
+@_test_numerics_supported_backends
+def test_qr(argument, expected_output):
     output = nx.linalg.qr(argument)
-    expected_output = np.linalg.qr(argument)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument_a, argument_b",
+    "argument_a, argument_b, expected_output",
     [
-        (np.array([[1]]), np.array([[1]])),
-        (np.array([[2, 1], [1, 2]]), -np.array([[2, 1], [1, 2]])),
+        (
+            np.array([[1]]), np.array([[1]]),
+            np.linalg.solve(np.array([[1]]), np.array([[1]]))
+        ),
+        (
+            np.array([[2, 1], [1, 2]]), -np.array([[2, 1], [1, 2]]),
+            np.linalg.solve(np.array([[2, 1], [1, 2]]), -np.array([[2, 1], [1, 2]]))
+        ),
     ],
 )
-def test_solve(argument_a, argument_b):
+@_test_numerics_supported_backends
+def test_solve(argument_a, argument_b, expected_output):
     output = nx.linalg.solve(argument_a, argument_b)
-    expected_output = np.linalg.solve(argument_a, argument_b)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument_a, argument_b",
+    "argument_a, argument_b, expected_output",
     [
-        (np.array([[1]]), np.array([[3]])),
-        (np.array([[2, 1], [1, 2]]), np.array([[1.2, 4], [2, 1]])),
+        (
+            np.array([[1]]), np.array([[3]]),
+            np.linalg.solve(np.array([[1]]), np.array([[3]]))
+        ),
+        (
+            np.array([[2, 1], [1, 2]]), np.array([[1.2, 4], [2, 1]]),
+            np.linalg.solve(np.array([[2, 1], [1, 2]]), np.array([[1.2, 4], [2, 1]]))
+        ),
     ],
 )
-def test_solve_continuous_lyapunov(argument_a, argument_b):
+@_test_numerics_supported_backends
+def test_solve_continuous_lyapunov(argument_a, argument_b, expected_output):
     output = nx.linalg.solve_continuous_lyapunov(argument_a, argument_b)
-    expected_output = scipy.linalg.solve_continuous_lyapunov(argument_a, argument_b)
     assert nx.allclose(output, expected_output)
 
 
 @pytest.mark.parametrize(
-    "argument",
+    "argument, expected_output",
     [
-        np.array([[1]]),
-        np.array([[2, 1], [1, 2]]),
+        (np.array([[1]]), np.linalg.svd(np.array([[1]]))),
+        (np.array([[2, 1], [1, 2]]), np.linalg.svd(np.array([[2, 1], [1, 2]]))),
     ],
 )
-def test_svd(argument):
+@_test_numerics_supported_backends
+def test_svd(argument, expected_output):
     u, s, vh = nx.linalg.svd(argument)
-    true_u, true_s, true_vh = np.linalg.svd(argument)
-    assert nx.allclose(u, true_u)
-    assert nx.allclose(s, true_s)
-    assert nx.allclose(vh, true_vh)
+    assert nx.allclose(u, expected_output[0])
+    assert nx.allclose(s, expected_output[1])
+    assert nx.allclose(vh, expected_output[2])
