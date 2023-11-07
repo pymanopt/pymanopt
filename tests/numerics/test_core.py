@@ -13,7 +13,7 @@ from tests.numerics import _test_numerics_supported_backends
         (np.array([-4, 2]), np.array([4, 2])),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_abs(argument, expected_output):
     output = nx.abs(argument)
     assert nx.allclose(output, expected_output)
@@ -26,7 +26,7 @@ def test_abs(argument, expected_output):
         (np.array([False, True]), False),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_all(argument, expected_output):
     output = nx.all(argument)
     assert output == expected_output
@@ -42,7 +42,7 @@ def test_all(argument, expected_output):
         (np.array([4, 2]), np.array([2, 4]), False),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_allclose(argument_a, argument_b, expected_output):
     assert nx.allclose(argument_a, argument_b) == expected_output
 
@@ -56,7 +56,7 @@ def test_allclose(argument_a, argument_b, expected_output):
         (np.array([False, False]), False),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_any(argument, expected_output):
     assert nx.any(argument) == expected_output
 
@@ -68,7 +68,7 @@ def test_any(argument, expected_output):
         ((1, 3), np.arange(1, 3)),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_arange(argument, expected_output):
     if isinstance(argument, Sequence):
         output = nx.arange(*argument)
@@ -85,7 +85,7 @@ def test_arange(argument, expected_output):
         (np.array([-0.2, 0.3]), np.arccos([-0.2, 0.3])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_arccos(argument, expected_output):
     output = nx.arccos(argument)
     assert nx.allclose(output, expected_output)
@@ -99,7 +99,7 @@ def test_arccos(argument, expected_output):
         (np.array([1.2, 2]), np.arccosh([1.2, 2])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_arccosh(argument, expected_output):
     output = nx.arccosh(argument)
     assert nx.allclose(output, expected_output)
@@ -113,7 +113,7 @@ def test_arccosh(argument, expected_output):
         (np.array([1.2, 2]), np.arctan([1.2, 2])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_arctan(argument, expected_output):
     output = nx.arctan(argument)
     assert nx.allclose(output, expected_output)
@@ -127,7 +127,7 @@ def test_arctan(argument, expected_output):
         (np.array([0.2, -0.3]), np.arctanh([0.2, -0.3])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_arctanh(argument, expected_output):
     output = nx.arctanh(argument)
     assert nx.allclose(output, expected_output)
@@ -140,7 +140,7 @@ def test_arctanh(argument, expected_output):
         (np.array([2, 1, 3]), 1),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_argmin(argument, expected_output):
     assert nx.argmin(argument) == expected_output
 
@@ -153,7 +153,7 @@ def test_argmin(argument, expected_output):
         (np.array([1, 2]), np.array([1, 2])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_array(argument, expected_output):
     output = nx.array(argument)
     assert nx.allclose(output, expected_output)
@@ -168,7 +168,7 @@ def test_array(argument, expected_output):
         ], np.array([1, 2, 3, 4])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_block(argument, expected_output):
     output = nx.block(argument)
     assert nx.allclose(output, expected_output)
@@ -181,7 +181,7 @@ def test_block(argument, expected_output):
         (np.array([1 + 2j, 3 + 4j]), np.array([1 - 2j, 3 - 4j])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_conjugate(argument, expected_output):
     output = nx.conjugate(argument)
     assert nx.allclose(output, expected_output)
@@ -195,7 +195,7 @@ def test_conjugate(argument, expected_output):
         (np.array([1.2, 2]), np.cos([1.2, 2]))
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_cos(argument, expected_output):
     output = nx.cos(argument)
     assert nx.allclose(output, expected_output)
@@ -207,7 +207,7 @@ def test_cos(argument, expected_output):
         (np.array([[1, 2], [3, 4]]), np.array([1, 4])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_diag(argument, expected_output):
     output = nx.diag(argument)
     assert nx.allclose(output, expected_output)
@@ -219,7 +219,7 @@ def test_diag(argument, expected_output):
         (np.array([[1, 2], [3, 4]]), np.diagonal(np.array([[1, 2], [3, 4]]))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_diagonal(argument, expected_output):
     output = nx.diagonal(argument)
     assert nx.allclose(output, expected_output)
@@ -232,7 +232,7 @@ def test_diagonal(argument, expected_output):
         (2, np.eye(2)),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_eye(argument, expected_output):
     output = nx.eye(argument)
     assert nx.allclose(output, expected_output)
@@ -244,7 +244,7 @@ def test_eye(argument, expected_output):
         (np.log(np.array([4, 2])), np.array([4, 2])),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_exp(argument, expected_output):
     output = nx.exp(argument)
     assert nx.allclose(output, expected_output)
@@ -257,7 +257,7 @@ def test_exp(argument, expected_output):
         (np.array([4, 2]), (0, 1), np.expand_dims(np.array([4, 2]), axis=(0, 1))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_expand_dims(argument_a, argument_b, expected_output):
     output = nx.expand_dims(argument_a, argument_b)
     assert nx.allclose(output, expected_output)
@@ -270,7 +270,7 @@ def test_expand_dims(argument_a, argument_b, expected_output):
         np.complex128,
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_finfo(argument):
     assert nx.finfo(argument) == np.finfo(argument)
 
@@ -287,7 +287,7 @@ def test_float64():
         (np.array([1 + 1j, 2]), True),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_iscomplexobj(argument, expected_output):
     output = nx.iscomplexobj(argument)
     assert nx.allclose(output, expected_output)
@@ -301,7 +301,7 @@ def test_iscomplexobj(argument, expected_output):
         (np.array([1, 2]), [False, False]),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_isnan(argument, expected_output):
     output = nx.isnan(argument)
     assert nx.allclose(output, expected_output)
@@ -314,7 +314,7 @@ def test_isnan(argument, expected_output):
         (np.array([1, 2]), np.log(np.array([1, 2]))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_log(argument, expected_output):
     output = nx.log(argument)
     assert nx.allclose(output, expected_output)
@@ -326,7 +326,7 @@ def test_log(argument, expected_output):
         ((3, 6, 8), np.logspace(3, 6, 8)),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_logspace(argument, expected_output):
     output = nx.logspace(*argument)
     assert nx.allclose(output, expected_output)
@@ -343,7 +343,7 @@ def test_newaxis():
         ((3, 2), np.ones((3, 2))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_ones(argument, expected_output):
     output = nx.ones(argument)
     assert nx.allclose(output, expected_output)
@@ -359,7 +359,7 @@ def test_pi():
         (np.array([1.2, 2]), 2.4),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_prod(argument, expected_output):
     output = nx.prod(argument)
     assert nx.allclose(output, expected_output)
@@ -373,7 +373,7 @@ def test_prod(argument, expected_output):
         (np.array([1 + 1j, 2]), np.array([1, 2])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_real(argument, expected_output):
     output = nx.real(argument)
     assert nx.allclose(output, expected_output)
@@ -386,7 +386,7 @@ def test_real(argument, expected_output):
         (np.array([1, 2]), np.sin(np.array([1, 2]))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_sin(argument, expected_output):
     output = nx.sin(argument)
     assert nx.allclose(output, expected_output)
@@ -399,7 +399,7 @@ def test_sin(argument, expected_output):
         (np.array([1, 2]), np.sinc(np.array([1, 2]))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_sinc(argument, expected_output):
     output = nx.sinc(argument)
     assert nx.allclose(output, expected_output)
@@ -412,7 +412,7 @@ def test_sinc(argument, expected_output):
         (np.array([2, 1]), np.sort(np.array([2, 1]))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_sort(argument, expected_output):
     output = nx.sort(argument)
     assert nx.allclose(output, expected_output)
@@ -424,7 +424,7 @@ def test_sort(argument, expected_output):
         (2.2, np.spacing(2.2)),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_spacing(argument, expected_output):
     output = nx.spacing(argument)
     assert nx.allclose(output, expected_output)
@@ -438,7 +438,7 @@ def test_spacing(argument, expected_output):
         (np.array([2, 1]), np.sqrt(np.array([2, 1]))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_sqrt(argument, expected_output):
     output = nx.sqrt(argument)
     assert nx.allclose(output, expected_output)
@@ -453,7 +453,7 @@ def test_sqrt(argument, expected_output):
         (np.array([[1, 2], [3, 4]]), 1, np.sum(np.array([[1, 2], [3, 4]]), 1)),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_sum(argument_a, argument_b, expected_output):
     if argument_b is None:
         output = nx.sum(argument_a)
@@ -474,7 +474,7 @@ def test_sum(argument_a, argument_b, expected_output):
         ),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_tile(argument_a, argument_b, expected_output):
     output = nx.tile(argument_a, argument_b)
     assert nx.allclose(output, expected_output)
@@ -486,7 +486,7 @@ def test_tile(argument_a, argument_b, expected_output):
         (np.arctanh(np.array([0.4, 0.2])), np.array([0.4, 0.2])),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_tanh(argument, expected_output):
     output = nx.tanh(argument)
     assert nx.allclose(output, expected_output)
@@ -498,7 +498,7 @@ def test_tanh(argument, expected_output):
         (np.array([-4, 2]), np.array([1, 3]), 2),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_tensordot(argument_a, argument_b, expected_output):
     output = nx.tensordot(argument_a, argument_b, axes=argument_a.ndim)
     assert nx.allclose(output, expected_output)
@@ -511,7 +511,7 @@ def test_tensordot(argument_a, argument_b, expected_output):
         (np.array([[1, 2], [3, 4]]), np.trace(np.array([[1, 2], [3, 4]]))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_trace(argument, expected_output):
     output = nx.trace(argument)
     assert nx.allclose(output, expected_output)
@@ -530,7 +530,7 @@ def test_trace(argument, expected_output):
         ),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_transpose(argument_a, argument_b, expected_output):
     if argument_b is None:
         output = nx.transpose(argument_a)
@@ -546,7 +546,7 @@ def test_transpose(argument_a, argument_b, expected_output):
         (2, 1, 1, np.triu_indices(2, 1, 1)),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_triu_indices(argument_a, argument_b, argument_c, expected_output):
     if argument_c is None:
         output = nx.triu_indices(argument_a, argument_b)
@@ -568,7 +568,7 @@ def test_triu_indices(argument_a, argument_b, argument_c, expected_output):
         ),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_vectorize(argument_a, argument_b, argument_c, expected_output):
     output = nx.vectorize(argument_a, signature=argument_b)
     assert nx.allclose(output(argument_c), expected_output)
@@ -581,7 +581,7 @@ def test_vectorize(argument_a, argument_b, argument_c, expected_output):
         (np.array([False, True]), np.where(np.array([False, True]))),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_where(argument, expected_output):
     output = nx.where(argument)
     assert nx.allclose(output, expected_output)
@@ -594,7 +594,7 @@ def test_where(argument, expected_output):
         ([2, 1], np.zeros([2, 1])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_zeros(argument, expected_output):
     output = nx.zeros(argument)
     assert nx.allclose(output, expected_output)
@@ -607,7 +607,7 @@ def test_zeros(argument, expected_output):
         ([2, 1], np.zeros_like([2, 1])),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_zeros_like(argument, expected_output):
     output = nx.zeros_like(argument)
     assert nx.allclose(output, expected_output)

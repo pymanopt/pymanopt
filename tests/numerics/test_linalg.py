@@ -13,7 +13,7 @@ from tests.numerics import _test_numerics_supported_backends
         (np.array([[2, 1], [1, 2]]), np.linalg.cholesky(np.array([[2, 1], [1, 2]]))),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_cholesky(argument, expected_output):
     output = nx.linalg.cholesky(argument)
     assert nx.allclose(output, expected_output)
@@ -26,7 +26,7 @@ def test_cholesky(argument, expected_output):
         (np.array([[2, 1], [1, 2]]), np.linalg.det(np.array([[2, 1], [1, 2]]))),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_det(argument, expected_output):
     output = nx.linalg.det(argument)
     assert nx.allclose(output, expected_output)
@@ -38,7 +38,7 @@ def test_det(argument, expected_output):
         (np.array([[2, 1], [1, 2]]), np.linalg.eigh(np.array([[2, 1], [1, 2]]))),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_eigh(argument, expected_output):
     eigenvalues, eigenvectors = nx.linalg.eigh(argument)
     assert nx.allclose(eigenvalues, expected_output[0])
@@ -55,7 +55,7 @@ def test_eigh(argument, expected_output):
         ),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_expm(argument, expected_output):
     output = nx.linalg.expm(argument)
     assert nx.allclose(output, expected_output)
@@ -71,7 +71,7 @@ def test_expm(argument, expected_output):
         ),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_inv(argument, expected_output):
     output = nx.linalg.inv(argument)
     assert nx.allclose(output, expected_output)
@@ -87,7 +87,7 @@ def test_inv(argument, expected_output):
         ),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_logm(argument, expected_output):
     output = nx.linalg.logm(argument)
     assert nx.allclose(output, expected_output)
@@ -107,7 +107,7 @@ def test_logm(argument, expected_output):
         ),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_matrix_rank(argument, expected_output):
     output = nx.linalg.matrix_rank(argument)
     assert nx.allclose(output, expected_output)
@@ -125,7 +125,7 @@ def test_matrix_rank(argument, expected_output):
         ),
     ]
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_norm(argument_a, argument_b, expected_output):
     output = nx.linalg.norm(argument_a, axis=argument_b)
     assert nx.allclose(output, expected_output)
@@ -141,7 +141,7 @@ def test_norm(argument_a, argument_b, expected_output):
         ),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_qr(argument, expected_output):
     output = nx.linalg.qr(argument)
     assert nx.allclose(output, expected_output)
@@ -160,7 +160,7 @@ def test_qr(argument, expected_output):
         ),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_solve(argument_a, argument_b, expected_output):
     output = nx.linalg.solve(argument_a, argument_b)
     assert nx.allclose(output, expected_output)
@@ -181,7 +181,7 @@ def test_solve(argument_a, argument_b, expected_output):
         ),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_solve_continuous_lyapunov(argument_a, argument_b, expected_output):
     output = nx.linalg.solve_continuous_lyapunov(argument_a, argument_b)
     assert nx.allclose(output, expected_output)
@@ -194,7 +194,7 @@ def test_solve_continuous_lyapunov(argument_a, argument_b, expected_output):
         (np.array([[2, 1], [1, 2]]), np.linalg.svd(np.array([[2, 1], [1, 2]]))),
     ],
 )
-@_test_numerics_supported_backends
+@_test_numerics_supported_backends()
 def test_svd(argument, expected_output):
     u, s, vh = nx.linalg.svd(argument)
     assert nx.allclose(u, expected_output[0])
