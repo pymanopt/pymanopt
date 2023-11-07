@@ -162,7 +162,7 @@ def _(
     *args: tuple,
     **kwargs: dict,
 ) -> float:
-    return torch.norm(tensor, *args, **kwargs)
+    return torch.linalg.norm(tensor, *args, **kwargs)
 
 
 @nx.linalg.qr.register
