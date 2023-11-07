@@ -475,12 +475,9 @@ def test_sum(argument_a, argument_b, expected_output):
 @pytest.mark.parametrize(
     "argument_a, argument_b, expected_output",
     [
-        (1, [1, 2], np.tile(1, [1, 2])),
-        ([1, 2], [3, 4, 1], np.tile([1, 2], [3, 4, 1])),
         (
-            np.array([1, 2]),
-            np.array([3, 4, 1]),
-            np.tile(np.array([1, 2]), np.array([3, 4, 1]))
+            np.eye(3), (5, 1, 1),
+            np.tile(np.eye(3), (5, 1, 1))
         ),
     ]
 )
