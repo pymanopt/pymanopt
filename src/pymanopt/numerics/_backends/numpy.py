@@ -1,5 +1,7 @@
 import numpy as np
+import packaging.version as pv
 import scipy
+import scipy.version
 from typing import Sequence
 
 import pymanopt.numerics as nx
@@ -132,7 +134,15 @@ def _(array: array_like) -> tuple[np.ndarray, np.ndarray]:
 
 @nx.linalg.expm.register
 def _(array: array_like) -> np.float64 | np.ndarray:
-    return scipy.linalg.expm(array)
+    # Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked matrices.
+    if pv.parse(scipy.version.version) >= pv.parse("1.9.0"):
+        scipy_expm = scipy.linalg.expm
+    else:
+        scipy_expm = scipy.vectorize(
+            nx.linalg.expm,
+            signature="(m,m)->(m,m)"
+        )
+    return scipy_expm(array)
 
 
 @nx.linalg.inv.register
@@ -142,7 +152,10 @@ def _(array: array_like) -> np.ndarray:
 
 @nx.linalg.logm.register
 def _(array: array_like) -> np.float64 | np.ndarray:
-    return scipy.linalg.logm(array)
+    return np.vectorize(
+        scipy.linalg.logm,
+        signature="(m,m)->(m,m)"
+    )(array)
 
 
 @nx.linalg.matrix_rank.register
