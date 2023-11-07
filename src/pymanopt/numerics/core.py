@@ -1,6 +1,8 @@
 import functools
 import numpy as np
 
+from .dispatch import SequenceDispatch
+
 
 def not_implemented(function):
     @functools.wraps(function)
@@ -76,7 +78,7 @@ def array(_):
     pass
 
 
-@functools.singledispatch
+@SequenceDispatch
 @not_implemented
 def block(_):
     pass

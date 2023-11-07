@@ -1,5 +1,6 @@
 import numpy as np
 import scipy
+from typing import Sequence
 
 import pymanopt.numerics as nx
 
@@ -57,7 +58,7 @@ def _(array: array_like) -> np.ndarray:
 
 
 @nx.block.register
-def _(arrays: array_like) -> np.ndarray:
+def _(arrays: Sequence[np.ndarray]) -> np.ndarray:
     return np.block(arrays)
 
 

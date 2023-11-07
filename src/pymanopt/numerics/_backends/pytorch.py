@@ -57,9 +57,9 @@ def _(tensor: tensor_like) -> torch.Tensor:
     return torch.tensor(tensor)
 
 
-@nx.block.register
-def _(tensors: tensor_like) -> torch.Tensor:
-    return torch.cat(tensors)
+# @nx.block.register
+# def _(tensors: tensor_like) -> torch.Tensor:
+#     return torch.cat(tensors)
 
 
 @nx.conjugate.register
