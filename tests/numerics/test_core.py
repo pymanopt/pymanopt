@@ -255,6 +255,16 @@ def test_exp(argument, expected_output):
     [
         (np.array([4, 2]), 0, np.expand_dims(np.array([4, 2]), axis=0)),
         (np.array([4, 2]), (0, 1), np.expand_dims(np.array([4, 2]), axis=(0, 1))),
+        (
+            np.array([[1, 2], [3, 4]]),
+            (-1, 0),
+            np.expand_dims(np.array([[1, 2], [3, 4]]), axis=(-1, 0))
+        ),
+        (
+            np.array([[1, 2], [3, 4]]),
+            (-2, -1),
+            np.expand_dims(np.array([[1, 2], [3, 4]]), axis=(-2, -1))
+        ),
     ]
 )
 @_test_numerics_supported_backends()

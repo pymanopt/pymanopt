@@ -93,7 +93,32 @@ def _(
     tensor: tensor_like,
     axis: int | tuple[int, ...] = None
 ) -> torch.Tensor:
-    return torch.unsqueeze(tensor, axis)
+    if isinstance(axis, int):
+        axis = [axis]
+
+    # Normalize axis values for negative indices
+    positive_axis = list()
+    for ax in axis:
+        if ax >= 0:
+            positive_axis.append(ax)
+    negative_axis = list()
+    for ax in axis:
+        if ax < 0:
+            negative_axis.append(ax)
+
+    # Sort the axis list
+    positive_axis.sort()
+    negative_axis.sort()
+    negative_axis = negative_axis[::-1]
+
+    for i in range(len(positive_axis)):
+        tensor = torch.unsqueeze(tensor, dim=positive_axis[i])
+
+    for i in range(len(negative_axis)):
+        dim = tensor.ndim + negative_axis[i] + 1
+        tensor = torch.unsqueeze(tensor, dim=dim)
+
+    return tensor
 
 
 @nx.iscomplexobj.register
@@ -173,7 +198,7 @@ def _(tensor: tensor_like) -> tuple[torch.Tensor, torch.Tensor]:
 
 @nx.linalg.solve.register
 def _(tensor_a: tensor_like, tensor_b: tensor_like) -> torch.Tensor:
-    return torch.solve(tensor_b, tensor_a)[0]
+    return torch.linalg.solve(tensor_b, tensor_a)[0]
 
 
 @nx.linalg.solve_continuous_lyapunov.register
