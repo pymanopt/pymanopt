@@ -1,5 +1,6 @@
 import functools
 import numpy as np
+from typing import Sequence
 
 from .dispatch import SequenceDispatch
 
@@ -7,9 +8,13 @@ from .dispatch import SequenceDispatch
 def not_implemented(function):
     @functools.wraps(function)
     def inner(*arguments):
+        if isinstance(arguments[0], Sequence):
+            type_str = f"Sequence[{type(arguments[0][0])}]"
+        else:
+            type_str = str(type(arguments[0]))
         raise TypeError(
             f"Function '{function.__name__}' not implemented for arguments of "
-            f"type '{type(arguments[0])}'"
+            f"type '{type_str}'."
         )
 
     return inner
