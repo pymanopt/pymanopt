@@ -1,14 +1,4 @@
-import packaging.version as pv
-import scipy.version
-
 import pymanopt.numerics as nx
-
-
-# Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked matrices.
-if pv.parse(scipy.version.version) >= pv.parse("1.9.0"):
-    scipy_expm = nx.linalg.expm
-else:
-    scipy_expm = nx.vectorize(nx.linalg.expm, signature="(m,m)->(m,m)")
 
 
 def multitransp(A):
@@ -66,7 +56,7 @@ def multieye(k, n):
 def multilogm(A, *, positive_definite=False):
     """Vectorized matrix logarithm."""
     if not positive_definite:
-        return nx.vectorize(scipy.linalg.logm, signature="(m,m)->(m,m)")(A)
+        return nx.linalg.logm(A)
 
     w, v = nx.linalg.eigh(A)
     w = nx.expand_dims(nx.log(w), axis=-1)
@@ -79,7 +69,7 @@ def multilogm(A, *, positive_definite=False):
 def multiexpm(A, *, symmetric=False):
     """Vectorized matrix exponential."""
     if not symmetric:
-        return scipy_expm(A)
+        return nx.linalg.expm(A)
 
     w, v = nx.linalg.eigh(A)
     w = nx.expand_dims(nx.exp(w), axis=-1)
@@ -94,7 +84,7 @@ def multiqr(A):
     if A.ndim not in (2, 3):
         raise ValueError("Input must be a matrix or a stacked matrix")
 
-    q, r = nx.vectorize(nx.linalg.qr, signature="(m,n)->(m,k),(k,n)")(A)
+    q, r = nx.linalg.qr(A)
 
     # Compute signs or unit-modulus phase of entries of diagonal of r.
     s = nx.diagonal(r, axis1=-2, axis2=-1).copy()
