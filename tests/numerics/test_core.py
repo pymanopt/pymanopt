@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import scipy
+from typing import Sequence
 
 import pymanopt.numerics as nx
 from tests.numerics import _test_numerics_supported_backends
@@ -69,7 +70,7 @@ def test_any(argument, expected_output):
 )
 @_test_numerics_supported_backends
 def test_arange(argument, expected_output):
-    if isinstance(argument, tuple):
+    if isinstance(argument, Sequence):
         output = nx.arange(*argument)
     else:
         output = nx.arange(argument)
