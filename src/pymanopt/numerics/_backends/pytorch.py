@@ -55,7 +55,7 @@ def _(tensor: tensor_like) -> int:
 
 @nx.array.register
 def _(tensor: tensor_like) -> torch.Tensor:
-    return torch.tensor(tensor)
+    return tensor
 
 
 @nx.block.register
