@@ -153,7 +153,7 @@ def _(tensor: tensor_like) -> torch.Tensor:
 
 @nx.linalg.matrix_rank.register
 def _(tensor: tensor_like) -> int:
-    return torch.matrix_rank(tensor)
+    return torch.linalg.matrix_rank(tensor)
 
 
 @nx.linalg.norm.register
