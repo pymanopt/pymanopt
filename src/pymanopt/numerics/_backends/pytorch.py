@@ -118,7 +118,7 @@ def _(tensor: tensor_like) -> torch.Tensor:
 
 @nx.linalg.cholesky.register
 def _(tensor: tensor_like) -> torch.Tensor:
-    return torch.cholesky(tensor)
+    return torch.linalg.cholesky(tensor)
 
 
 @nx.linalg.det.register
