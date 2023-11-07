@@ -128,7 +128,7 @@ def _(tensor: tensor_like) -> torch.Tensor:
 
 @nx.linalg.eigh.register
 def _(tensor: tensor_like) -> tuple[torch.Tensor, torch.Tensor]:
-    eigval, eigvec = torch.symeig(tensor, eigenvectors=True)
+    eigval, eigvec = torch.linalg.eigh(tensor)
     return eigval, eigvec
 
 
