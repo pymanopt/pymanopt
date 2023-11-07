@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-import scipy
 from typing import Sequence
 
 import pymanopt.numerics as nx
@@ -560,25 +559,6 @@ def test_triu_indices(argument_a, argument_b, argument_c, expected_output):
     else:
         output = nx.triu_indices(argument_a, argument_b, argument_c)
     assert nx.allclose(output, expected_output)
-
-
-@pytest.mark.parametrize(
-    "argument_a, argument_b, argument_c, expected_output",
-    [
-        (
-            scipy.linalg.expm,
-            "(m,m)->(m,m)",
-            [np.array([[1, 2], [3, 4]]), np.array([[1, 2], [3, 4]])],
-            np.array([
-                scipy.linalg.expm(np.array([[1, 2], [3, 4]])) for _ in range(2)
-            ])
-        ),
-    ]
-)
-@_test_numerics_supported_backends()
-def test_vectorize(argument_a, argument_b, argument_c, expected_output):
-    output = nx.vectorize(argument_a, signature=argument_b)
-    assert nx.allclose(output(argument_c), expected_output)
 
 
 @pytest.mark.parametrize(

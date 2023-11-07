@@ -272,9 +272,6 @@ def tensordot(_):
 triu_indices = np.triu_indices
 
 
-vectorize = np.vectorize
-
-
 @functools.singledispatch
 @not_implemented
 def where(_):
