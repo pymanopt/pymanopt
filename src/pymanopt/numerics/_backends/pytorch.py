@@ -178,7 +178,12 @@ def _(tensor_a: tensor_like, tensor_b: tensor_like) -> torch.Tensor:
 
 @nx.linalg.solve_continuous_lyapunov.register
 def _(tensor_a: tensor_like, tensor_q: tensor_like) -> torch.Tensor:
-    return torch.solve(tensor_q, tensor_a)[0]
+    # solve_continuous_lyapunov is not implemented in PyTorch
+    # we use the SciPy implementation
+    numpy_a = tensor_a.detach().numpy()
+    numpy_q = tensor_q.detach().numpy()
+    return torch.tensor(nx.linalg.solve_continuous_lyapunov(
+        numpy_a, numpy_q))
 
 
 @nx.linalg.svd.register

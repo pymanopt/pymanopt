@@ -171,11 +171,13 @@ def test_solve(argument_a, argument_b, expected_output):
     [
         (
             np.array([[1]]), np.array([[3]]),
-            np.linalg.solve(np.array([[1]]), np.array([[3]]))
+            scipy.linalg.solve_continuous_lyapunov(
+                np.array([[1]]), np.array([[3]]))
         ),
         (
             np.array([[2, 1], [1, 2]]), np.array([[1.2, 4], [2, 1]]),
-            np.linalg.solve(np.array([[2, 1], [1, 2]]), np.array([[1.2, 4], [2, 1]]))
+            scipy.linalg.solve_continuous_lyapunov(
+                np.array([[2, 1], [1, 2]]), np.array([[1.2, 4], [2, 1]]))
         ),
     ],
 )
