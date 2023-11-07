@@ -155,8 +155,9 @@ def test_qr(argument, expected_output):
             np.linalg.solve(np.array([[1]]), np.array([[1]]))
         ),
         (
-            np.array([[2, 1], [1, 2]]), -np.array([[2, 1], [1, 2]]),
-            np.linalg.solve(np.array([[2, 1], [1, 2]]), -np.array([[2, 1], [1, 2]]))
+            np.array([[2, 1], [1, 2]]), -np.array([[4.2, 0.3], [0.3, 4.2]]),
+            np.linalg.solve(
+                np.array([[2, 1], [1, 2]]), -np.array([[4.2, 0.3], [0.3, 4.2]]))
         ),
     ],
 )

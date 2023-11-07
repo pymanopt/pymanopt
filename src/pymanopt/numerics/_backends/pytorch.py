@@ -198,7 +198,7 @@ def _(tensor: tensor_like) -> tuple[torch.Tensor, torch.Tensor]:
 
 @nx.linalg.solve.register
 def _(tensor_a: tensor_like, tensor_b: tensor_like) -> torch.Tensor:
-    return torch.linalg.solve(tensor_b, tensor_a)[0]
+    return torch.linalg.inv(tensor_a) @ tensor_b
 
 
 @nx.linalg.solve_continuous_lyapunov.register
