@@ -167,7 +167,7 @@ def test_array(argument, expected_output):
         ], np.array([1, 2, 3, 4])),
     ]
 )
-# @_test_numerics_supported_backends
+@_test_numerics_supported_backends
 def test_block(argument, expected_output):
     output = nx.block(argument)
     assert nx.allclose(output, expected_output)
