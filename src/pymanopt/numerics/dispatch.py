@@ -34,7 +34,7 @@ class SequenceDispatch:
     ```
     """
     def __init__(self, func):
-        wraps(func)(self)
+        func = wraps(func)(self)
         self.default_func = func
         self.registry = {}
 
