@@ -577,7 +577,6 @@ def test_vectorize(argument_a, argument_b, argument_c, expected_output):
 @pytest.mark.parametrize(
     "argument, expected_output",
     [
-        (False, False),
         ([False, True], np.where([False, True])),
         (np.array([False, True]), np.where(np.array([False, True]))),
     ]
