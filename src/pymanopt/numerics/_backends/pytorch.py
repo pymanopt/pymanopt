@@ -163,7 +163,7 @@ def _(
 
 @nx.linalg.qr.register
 def _(tensor: tensor_like) -> tuple[torch.Tensor, torch.Tensor]:
-    q, r = torch.qr(tensor)
+    q, r = torch.linalg.qr(tensor)
     return q, r
 
 
