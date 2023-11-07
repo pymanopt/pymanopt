@@ -144,7 +144,11 @@ def _(tensor: tensor_like) -> torch.Tensor:
 
 @nx.linalg.logm.register
 def _(tensor: tensor_like) -> torch.Tensor:
-    return torch.logm(tensor)
+    # logm is not implemented in PyTorch
+    # see: https://github.com/pytorch/pytorch/issues/9983
+    # hence we use the SciPy implementation
+    numpy_tensor = tensor.detach().numpy()
+    return torch.tensor(nx.linalg.logm(numpy_tensor))
 
 
 @nx.linalg.matrix_rank.register
