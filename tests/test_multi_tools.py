@@ -87,6 +87,25 @@ def test_multieye(k, m, expected_output):
     assert nx.allclose(output, expected_output)
 
 
+def parametrize_test_multilogm_singlemat(m):
+    def wrapper(test_func):
+        a = np.diag(np.random.uniform(size=m))
+        q, _ = np.linalg.qr(np.random.normal(size=(m, m)))
+        # A is a positive definite matrix
+        A = q @ a @ q.T
+        L = logm(A)
+        params = [(A, L)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+
+    return wrapper
+
+@parametrize_test_multilogm_singlemat(m=40)
+@_test_numerics_supported_backends()
+def test_multilogm_singlemat(A, expected_output):
+    output = multilogm(A, positive_definite=True)
+    assert nx.allclose(output, expected_output)
+
+
 def parametrize_test_multilogm(k, m):
     def wrapper(test_func):
         A = np.zeros((k, m, m))
