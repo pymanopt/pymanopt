@@ -58,7 +58,6 @@ __all__ = [
 
 
 import importlib
-from typing import Union
 
 from pymanopt.numerics.core import (
     abs,
@@ -166,8 +165,16 @@ def get_backend(point):
 
 
 def numpy_to_backend(point, backend):
-    if isinstance(point, Union[tuple, list]):
+    if isinstance(point, tuple):
         return tuple(numpy_to_backend(p, backend) for p in point)
+    if isinstance(point, list):
+        return [numpy_to_backend(p, backend) for p in point]
+    # if point is a namedtuple, convert each point
+    if hasattr(point, '_fields'):
+        point = point.__class__(*[
+            numpy_to_backend(p, backend) for p in point
+        ])
+        return point
 
     if point.dtype.kind == 'c':
         dtype = 'complex128'
