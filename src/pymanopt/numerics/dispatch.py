@@ -1,4 +1,5 @@
 from functools import wraps
+from typing import Union
 
 
 class SequenceDispatch:
@@ -58,6 +59,9 @@ class SequenceDispatch:
         if not data_list:  # Handle the case of an empty list
             return self.default_func(*args, **kwargs)
 
-        type_ = type(data_list[0])
+        d = data_list[0]
+        while isinstance(d , (tuple, list)):
+            d = d[0]
+        type_ = type(d)
         func = self.registry.get(type_, self.default_func)
         return func(*args, **kwargs)
