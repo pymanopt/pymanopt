@@ -4,7 +4,11 @@ import warnings
 from typing import Sequence, Union
 
 import pymanopt.numerics as nx
-from pymanopt.numerics import NUMERICS_SUPPORTED_BACKENDS, numpy_to_backend
+from pymanopt.numerics import (
+    get_backend,
+    NUMERICS_SUPPORTED_BACKENDS,
+    numpy_to_backend
+)
 
 
 def raise_not_implemented_error(method):
@@ -29,23 +33,13 @@ class BackendManifold(type):
     def _point_to_numerics(cls, method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
+            point = method(self, *args, **kwargs)
+
             backend = self.backend
             if backend is None:
                 self.backend = backend = 'numpy'
 
-            point = method(self, *args, **kwargs)
-
-            # if point is a namedtuple, convert each point
-            if hasattr(point, '_fields'):
-                point = point.__class__(*[
-                    numpy_to_backend(p, backend) for p in point
-                ])
-            # if is a Sequence, convert each point
-            elif isinstance(point, Sequence):
-                for i, p in enumerate(point):
-                    point[i] = numpy_to_backend(p, backend)
-            else:
-                point = numpy_to_backend(point, backend)
+            point = numpy_to_backend(point, backend)
 
             return point
 
