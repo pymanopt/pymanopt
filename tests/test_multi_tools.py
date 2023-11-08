@@ -229,17 +229,49 @@ def test_multiexpm_conjugate_symmetric(A, expected_output):
 def parametrize_test_multiqr_singlemat(m, n):
     def wrapper(test_func):
         np.random.seed(0)
-        shape = (m, n)
-        A = np.random.normal(size=shape)
-        Q, R = scipy.linalg.qr(A)
-        params = [(A, (Q, R))]
-        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+        A = np.random.normal(size=(m, n))
+        params = [(A)]
+        return pytest.mark.parametrize("A", params)(test_func)
 
     return wrapper
 
 
 @parametrize_test_multiqr_singlemat(m=40, n=50)
 @_test_numerics_supported_backends()
-def test_multiqr_singlemat(A, expected_output):
+def test_multiqr_singlemat(A):
     Q, R = multiqr(A)
-    assert nx.allclose(Q @ R, expected_output[0] @ expected_output[1])
+    assert nx.allclose(Q @ R, A)
+
+
+def parametrize_test_multiqr_singlemat_complex(m, n):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(m, n)) + 1j * np.random.normal(size=(m, n))
+        params = [(A)]
+        return pytest.mark.parametrize("A", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiqr_singlemat_complex(m=40, n=50)
+@_test_numerics_supported_backends()
+def test_multiqr_singlemat_complex(A):
+    Q, R = multiqr(A)
+    assert nx.allclose(Q @ R, A)
+
+
+def parametrize_test_multiqr(k, m, n):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(k, m, n)) + 1j * np.random.normal(size=(k, m, n))
+        params = [(A)]
+        return pytest.mark.parametrize("A", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiqr(k=5, m=40, n=50)
+@_test_numerics_supported_backends()
+def test_multiqr(A):
+    Q, R = multiqr(A)
+    assert nx.allclose(Q @ R, A)
