@@ -281,17 +281,33 @@ class TestMatrix:
         m = self.m = 10
         n = self.n = 15
 
-        Y = self.Y = nx.random.normal(size=(m, n))
-        A = self.A = nx.random.normal(size=(m, n))
+    def test_compile(self):
+        m, n = self.m, self.n
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=(m, n)), backend)
 
-        # Calculate correct cost and grad...
-        self.correct_cost = nx.exp(nx.sum(Y**2))
-        self.correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
+        correct_cost = nx.exp(nx.sum(Y**2))
 
-        # ... and hess
-        # First form hessian tensor H (4th order)
+        nx.allclose(correct_cost, self.cost(Y))
+
+    def test_grad(self):
+        m, n = self.m, self.n
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=(m, n)), backend)
+
+        correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
+
+        grad = self.cost.get_gradient_operator()
+
+        nx.allclose(correct_grad, grad(Y))
+
+    def test_hessian(self):
+        m, n = self.m, self.n
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=(m, n)), backend)
         Y1 = Y.reshape(m, n, 1, 1)
         Y2 = Y.reshape(1, 1, m, n)
+        A = numpy_to_backend(nx.random.normal(size=(m, n)), backend)
 
         # Create an m x n x m x n array with diag[i,j,k,l] == 1 iff
         # (i == k and j == l), this is a 'diagonal' tensor.
@@ -302,20 +318,12 @@ class TestMatrix:
         # Then 'right multiply' H by A
         Atensor = A.reshape(1, 1, m, n)
 
-        self.correct_hess = nx.sum(H * Atensor, axis=(2, 3))
+        correct_hess = nx.sum(H * Atensor, axis=(2, 3))
 
-    def test_compile(self):
-        nx.allclose(self.correct_cost, self.cost(self.Y))
-
-    def test_grad(self):
-        grad = self.cost.get_gradient_operator()
-        nx.allclose(self.correct_grad, grad(self.Y))
-
-    def test_hessian(self):
         hess = self.cost.get_hessian_operator()
 
         # Now test hess
-        nx.allclose(self.correct_hess, hess(self.Y, self.A))
+        nx.allclose(correct_hess, hess(Y, A))
 
 
 class TestTensor3:
