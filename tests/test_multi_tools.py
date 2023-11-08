@@ -174,7 +174,7 @@ def parametrize_test_multiexpm_singlemat(m):
     return wrapper
 
 
-@parametrize_test_multiexpm_singlemat(m=2)
+@parametrize_test_multiexpm_singlemat(m=40)
 @_test_numerics_supported_backends()
 def test_multiexpm_singlemat(A, expected_output):
     output = multiexpm(A, symmetric=True)
