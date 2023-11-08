@@ -1,5 +1,4 @@
 from functools import wraps
-from typing import Union
 
 
 class SequenceDispatch:
