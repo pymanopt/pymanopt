@@ -128,6 +128,43 @@ def register_backends():
             pass
 
 
+def get_backend(point):
+    backend = None
+
+    while isinstance(point, (tuple, list)):
+        point = point[0]
+
+    import numpy as np
+    if isinstance(point, np.ndarray):
+        backend = "numpy"
+
+    try:
+        import torch
+        if isinstance(point, torch.Tensor):
+            backend = "pytorch"
+    except ImportError:
+        pass
+
+    try:
+        import jax.numpy as jnp
+        if isinstance(point, jnp.ndarray):
+            backend = "jax"
+    except ImportError:
+        pass
+
+    try:
+        import tensorflow as tf
+        if isinstance(point, tf.Tensor):
+            backend = "tensorflow"
+    except ImportError:
+        pass
+
+    if backend is None:
+        raise ValueError("Unknown backend...")
+
+    return backend
+
+
 def numpy_to_backend(point, backend):
     if isinstance(point, Union[tuple, list]):
         return tuple(numpy_to_backend(p, backend) for p in point)
