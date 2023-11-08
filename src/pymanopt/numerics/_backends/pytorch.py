@@ -301,7 +301,7 @@ def _(
 def _(tensor: tensor_like, axes: tuple[int, ...] | None = None) -> torch.Tensor:
     if axes is None:
         return tensor
-    return torch.transpose(tensor, dim0=axes[0], dim1=axes[1])
+    return torch.transpose(tensor, dim0=axes[-2], dim1=axes[-1])
 
 
 @nx.where.register
