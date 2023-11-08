@@ -255,6 +255,12 @@ def sqrt(_):
 
 @functools.singledispatch
 @not_implemented
+def squeeze(_):
+    pass
+
+
+@functools.singledispatch
+@not_implemented
 def sum(_):
     pass
 
