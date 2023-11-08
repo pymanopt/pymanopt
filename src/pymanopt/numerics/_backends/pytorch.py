@@ -79,8 +79,8 @@ def _(tensor: tensor_like) -> torch.Tensor:
 
 
 @nx.diagonal.register
-def _(tensor: tensor_like) -> torch.Tensor:
-    return torch.diagonal(tensor)
+def _(tensor: tensor_like, axis1: int = 0, axis2: int = 1) -> torch.Tensor:
+    return torch.diagonal(tensor, dim1=axis1, dim2=axis2)
 
 
 @nx.exp.register

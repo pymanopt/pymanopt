@@ -1,3 +1,5 @@
+from copy import deepcopy as copy
+
 import pymanopt.numerics as nx
 
 
@@ -87,7 +89,7 @@ def multiqr(A):
     q, r = nx.linalg.qr(A)
 
     # Compute signs or unit-modulus phase of entries of diagonal of r.
-    s = nx.diagonal(r, axis1=-2, axis2=-1).copy()
+    s = copy(nx.diagonal(r, axis1=-2, axis2=-1))
     s[s == 0] = 1
     s = s / nx.abs(s)
 

@@ -224,3 +224,22 @@ def test_multiexpm_conjugate_symmetric(A, expected_output):
 
     output = multiexpm(A, symmetric=True)
     assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multiqr_singlemat(m, n):
+    def wrapper(test_func):
+        np.random.seed(0)
+        shape = (m, n)
+        A = np.random.normal(size=shape)
+        Q, R = scipy.linalg.qr(A)
+        params = [(A, (Q, R))]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiqr_singlemat(m=40, n=50)
+@_test_numerics_supported_backends()
+def test_multiqr_singlemat(A, expected_output):
+    Q, R = multiqr(A)
+    assert nx.allclose(Q @ R, expected_output[0] @ expected_output[1])

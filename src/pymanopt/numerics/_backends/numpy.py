@@ -80,8 +80,8 @@ def _(array: array_like) -> np.ndarray:
 
 
 @nx.diagonal.register
-def _(array: array_like) -> np.ndarray:
-    return np.diagonal(array)
+def _(array: array_like, axis1: int = 0, axis2: int = 1) -> np.ndarray:
+    return np.diagonal(array, axis1=axis1, axis2=axis2)
 
 
 @nx.exp.register
