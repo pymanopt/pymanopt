@@ -26,11 +26,15 @@ class BackendManifold(type):
     def __new__(cls, name, bases, attrs):
         for method in ['random_point', 'zero_vector']:
             if method in attrs:
-                attrs[method] = cls._point_to_numerics(cls, attrs[method])
+                attrs[method] = cls._to_numerics_from_self(cls, attrs[method])
+
+        if 'random_tangent_vector' in attrs:
+            attrs['random_tangent_vector'] = cls._to_numerics_from_point(
+                cls, attrs['random_tangent_vector'])
 
         return super().__new__(cls, name, bases, attrs)
 
-    def _point_to_numerics(cls, method):
+    def _to_numerics_from_self(cls, method):
         @functools.wraps(method)
         def wrapper(self, *args, **kwargs):
             point = method(self, *args, **kwargs)
@@ -42,6 +46,22 @@ class BackendManifold(type):
             point = numpy_to_backend(point, backend)
 
             return point
+
+        return wrapper
+
+    def _to_numerics_from_point(cls, method):
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+            tangent_vec = method(self, *args, **kwargs)
+
+            if len(args) > 0:
+                point = args[0]
+            else:
+                point = kwargs['point']
+
+            tangent_vec = nx.array_as(tangent_vec, as_=point)
+
+            return tangent_vec
 
         return wrapper
 
