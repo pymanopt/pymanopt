@@ -85,7 +85,8 @@ class TestUnaryComplexFunction:
         n = self.n
         backend = self.backend
 
-        x = numpy_to_backend(nx.random.normal(size=n) + 1j * nx.random.normal(size=n), backend)
+        x = numpy_to_backend(
+            nx.random.normal(size=n) + 1j * nx.random.normal(size=n), backend)
 
         # Test whether cost function accepts single argument.
         assert nx.allclose(nx.sum(x**2).real, cost(x))
@@ -95,7 +96,8 @@ class TestUnaryComplexFunction:
         nx.allclose(2 * x.conj(), euclidean_gradient(x))
 
         # Test the Hessian.
-        u = numpy_to_backend(nx.random.normal(size=n) + 1j * nx.random.normal(size=n), backend)
+        u = numpy_to_backend(
+            nx.random.normal(size=n) + 1j * nx.random.normal(size=n), backend)
 
         # Test whether Hessian accepts two regular arguments.
         ehess = cost.get_hessian_operator()
@@ -184,7 +186,8 @@ class TestNaryParameterGrouping:
         n = self.n
         backend = self.backend
 
-        x, y, z = [numpy_to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
+        x, y, z = [
+            numpy_to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
 
         assert nx.allclose(nx.sum(x**2 + y + z**3), cost(x, y, z))
 
@@ -203,7 +206,8 @@ class TestNaryParameterGrouping:
         nx.allclose(g_z, 3 * z**2)
 
         # Test the Hessian.
-        u, v, w = [numpy_to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
+        u, v, w = [
+            numpy_to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
 
         ehess = cost.get_hessian_operator()
         h = ehess(x, y, z, u, v, w)
@@ -226,7 +230,7 @@ class TestVector:
     def initialize_test_case(self):
         nx.seterr(all="raise")
         self.manifold = manifold_factory(point_layout=1)
-        n = self.n = 15
+        self.n = 15
 
     def test_compile(self):
         n = self.n
@@ -278,8 +282,8 @@ class TestMatrix:
 
         self.manifold = manifold_factory(point_layout=1)
 
-        m = self.m = 10
-        n = self.n = 15
+        self.m = 10
+        self.n = 15
 
     def test_compile(self):
         m, n = self.m, self.n
