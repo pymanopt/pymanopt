@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
-from numpy import testing as np_testing
-from scipy.linalg import expm, logm
+import scipy.linalg
 
 from pymanopt.tools.multi import (
     multiexpm,
@@ -25,6 +24,7 @@ def parametrize_test_multitransp_singlemat(m, n):
 
     return wrapper
 
+
 @parametrize_test_multitransp_singlemat(m=40, n=50)
 @_test_numerics_supported_backends()
 def test_multitransp_singlemat(A, expected_output):
@@ -43,6 +43,7 @@ def parametrize_test_multitransp(k, m, n):
         return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
     return wrapper
+
 
 @parametrize_test_multitransp(k=5, m=40, n=50)
 @_test_numerics_supported_backends()
@@ -63,6 +64,7 @@ def parametrize_test_multisym(k, m):
 
     return wrapper
 
+
 @parametrize_test_multisym(k=5, m=40)
 @_test_numerics_supported_backends()
 def test_multisym(A, expected_output):
@@ -80,6 +82,7 @@ def parametrize_test_multieye(k, m):
 
     return wrapper
 
+
 @parametrize_test_multieye(k=5, m=40)
 @_test_numerics_supported_backends()
 def test_multieye(k, m, expected_output):
@@ -93,11 +96,12 @@ def parametrize_test_multilogm_singlemat(m):
         q, _ = np.linalg.qr(np.random.normal(size=(m, m)))
         # A is a positive definite matrix
         A = q @ a @ q.T
-        L = logm(A)
+        L = scipy.linalg.logm(A)
         params = [(A, L)]
         return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
     return wrapper
+
 
 @parametrize_test_multilogm_singlemat(m=40)
 @_test_numerics_supported_backends()
@@ -114,11 +118,12 @@ def parametrize_test_multilogm(k, m):
             a = np.diag(np.random.uniform(size=m))
             q, _ = np.linalg.qr(np.random.normal(size=(m, m)))
             A[i] = q @ a @ q.T
-            L[i] = logm(A[i])
+            L[i] = scipy.linalg.logm(A[i])
         params = [(A, L)]
         return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
     return wrapper
+
 
 @parametrize_test_multilogm(k=5, m=40)
 @_test_numerics_supported_backends()
@@ -134,11 +139,12 @@ def parametrize_test_multilogm_complex_positive_definite(k, m):
         A = A @ multihconj(A)
         L = np.zeros(shape, dtype=np.complex128)
         for i in range(k):
-            L[i] = logm(A[i])
+            L[i] = scipy.linalg.logm(A[i])
         params = [(A, L)]
         return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
     return wrapper
+
 
 @parametrize_test_multilogm_complex_positive_definite(k=5, m=40)
 @_test_numerics_supported_backends()
