@@ -203,6 +203,26 @@ def real(_):
     pass
 
 
+def seterr(all=None):
+    np.seterr(all=all)
+    if all == 'raise':
+        try:
+            import torch
+            torch.autograd.set_detect_anomaly(True)
+        except ImportError:
+            pass
+        try:
+            import jax
+            jax.config.update("jax_debug_nans", True)
+        except ImportError:
+            pass
+        try:
+            import tensorflow as tf
+            tf.debugging.enable_check_numerics()
+        except ImportError:
+            pass
+
+
 @functools.singledispatch
 @not_implemented
 def sin(_):
