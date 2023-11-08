@@ -4,7 +4,7 @@ from numpy import testing as np_testing
 
 import pymanopt
 
-from . import _backend_tests
+from . import _backend_tests_numpy as _backend_tests
 
 
 class TestNumPyBackend:
