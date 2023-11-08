@@ -232,6 +232,9 @@ class TestVector:
         self.manifold = manifold_factory(point_layout=1)
         self.n = 15
 
+        self.cost = None
+        self.backend = 'numpy'
+
     def test_compile(self):
         n = self.n
         backend = self.backend
@@ -284,6 +287,9 @@ class TestMatrix:
 
         self.m = 10
         self.n = 15
+
+        self.cost = None
+        self.backend = 'numpy'
 
     def test_compile(self):
         m, n = self.m, self.n
@@ -340,6 +346,9 @@ class TestTensor3:
         self.n1 = 3
         self.n2 = 4
         self.n3 = 5
+
+        self.cost = None
+        self.backend = 'numpy'
 
     def test_compile(self):
         n1, n2, n3 = self.n1, self.n2, self.n3
