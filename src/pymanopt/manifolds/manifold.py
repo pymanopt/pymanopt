@@ -22,6 +22,8 @@ class BackendManifold(type):
     def __new__(cls, name, bases, attrs):
         if 'random_point' in attrs:
             attrs['random_point'] = cls._point_to_numerics(cls, attrs['random_point'])
+        if 'zero_vector' in attrs:
+            attrs['zero_vector'] = cls._point_to_numerics(cls, attrs['zero_vector'])
 
         return super().__new__(cls, name, bases, attrs)
 
