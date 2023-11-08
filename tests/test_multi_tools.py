@@ -87,7 +87,7 @@ def test_multieye(k, m, expected_output):
     assert nx.allclose(output, expected_output)
 
 
-def parametrize_test_multilogm_singlemat(k, m):
+def parametrize_test_multilogm(k, m):
     def wrapper(test_func):
         A = np.zeros((k, m, m))
         L = np.zeros((k, m, m))
@@ -101,7 +101,7 @@ def parametrize_test_multilogm_singlemat(k, m):
 
     return wrapper
 
-@parametrize_test_multilogm_singlemat(k=5, m=40)
+@parametrize_test_multilogm(k=5, m=40)
 @_test_numerics_supported_backends()
 def test_multilogm_singlemat(A, expected_output):
     output = multilogm(A, positive_definite=True)
