@@ -337,18 +337,36 @@ class TestTensor3:
 
         self.manifold = manifold_factory(point_layout=1)
 
-        n1 = self.n1 = 3
-        n2 = self.n2 = 4
-        n3 = self.n3 = 5
+        self.n1 = 3
+        self.n2 = 4
+        self.n3 = 5
 
-        Y = self.Y = nx.random.normal(size=(n1, n2, n3))
-        A = self.A = nx.random.normal(size=(n1, n2, n3))
+    def test_compile(self):
+        n1, n2, n3 = self.n1, self.n2, self.n3
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
 
-        # Calculate correct cost and grad...
-        self.correct_cost = nx.exp(nx.sum(Y**2))
-        self.correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
+        correct_cost = nx.exp(nx.sum(Y**2))
 
-        # ... and hess
+        nx.allclose(correct_cost, self.cost(Y))
+
+    def test_grad(self):
+        n1, n2, n3 = self.n1, self.n2, self.n3
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
+
+        correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
+
+        grad = self.cost.get_gradient_operator()
+
+        nx.allclose(correct_grad, grad(Y))
+
+    def test_hessian(self):
+        n1, n2, n3 = self.n1, self.n2, self.n3
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
+        A = numpy_to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
+
         # First form hessian tensor H (6th order)
         Y1 = Y.reshape(n1, n2, n3, 1, 1, 1)
         Y2 = Y.reshape(1, 1, 1, n1, n2, n3)
@@ -361,20 +379,12 @@ class TestTensor3:
         # Then 'right multiply' H by A
         Atensor = A.reshape(1, 1, 1, n1, n2, n3)
 
-        self.correct_hess = nx.sum(H * Atensor, axis=(3, 4, 5))
+        correct_hess = nx.sum(H * Atensor, axis=(3, 4, 5))
 
-    def test_compile(self):
-        nx.allclose(self.correct_cost, self.cost(self.Y))
-
-    def test_grad(self):
-        grad = self.cost.get_gradient_operator()
-        nx.allclose(self.correct_grad, grad(self.Y))
-
-    def test_hessian(self):
         hess = self.cost.get_hessian_operator()
 
         # Now test hess
-        nx.allclose(self.correct_hess, hess(self.Y, self.A))
+        nx.allclose(correct_hess, hess(Y, A))
 
 
 class TestMixed:
