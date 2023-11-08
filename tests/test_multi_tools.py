@@ -68,3 +68,20 @@ def parametrize_test_multisym(k, m):
 def test_multisym(A, expected_output):
     output = multisym(A)
     assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multieye(k, m):
+    def wrapper(test_func):
+        C = np.zeros((k, m, m))
+        for i in range(k):
+            C[i] = np.eye(m)
+        params = [(k, m, C)]
+        return pytest.mark.parametrize("k, m, expected_output", params)(test_func)
+
+    return wrapper
+
+@parametrize_test_multieye(k=5, m=40)
+@_test_numerics_supported_backends()
+def test_multieye(k, m, expected_output):
+    output = multieye(k, m)
+    assert nx.allclose(output, expected_output)
