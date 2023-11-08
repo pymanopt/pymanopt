@@ -103,6 +103,6 @@ def parametrize_test_multilogm(k, m):
 
 @parametrize_test_multilogm(k=5, m=40)
 @_test_numerics_supported_backends()
-def test_multilogm_singlemat(A, expected_output):
+def test_multilogm(A, expected_output):
     output = multilogm(A, positive_definite=True)
     assert nx.allclose(output, expected_output)
