@@ -56,6 +56,7 @@ __all__ = [
 
 
 import importlib
+from typing import Union
 
 from pymanopt.numerics.core import (
     abs,
@@ -124,6 +125,9 @@ def register_backends():
 
 
 def numpy_to_backend(point, backend):
+    if isinstance(point, Union[tuple, list]):
+        return tuple(numpy_to_backend(p, backend) for p in point)
+
     if point.dtype.kind == 'c':
         dtype = 'complex128'
     else:
