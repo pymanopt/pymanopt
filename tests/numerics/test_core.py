@@ -579,6 +579,21 @@ def test_triu_indices(argument_a, argument_b, argument_c, expected_output):
 @pytest.mark.parametrize(
     "argument, expected_output",
     [
+        ((np.array([1, 2]), np.array([3, 4])),
+         np.vstack((np.array([1, 2]), np.array([3, 4])))),
+        ((np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])),
+         np.vstack((np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])))),
+    ]
+)
+@_test_numerics_supported_backends()
+def test_vstack(argument, expected_output):
+    output = nx.vstack(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
         ([False, True], np.where([False, True])),
         (np.array([False, True]), np.where(np.array([False, True]))),
     ]

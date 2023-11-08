@@ -314,6 +314,11 @@ def _(tensor: tensor_like, axes: tuple[int, ...] | None = None) -> torch.Tensor:
     return torch.transpose(tensor, dim0=axes[-2], dim1=axes[-1])
 
 
+@nx.vstack.register
+def _(tensors: Sequence[tensor_like]) -> torch.Tensor:
+    return torch.vstack(tensors)
+
+
 @nx.where.register
 def _(tensor: tensor_like) -> torch.Tensor:
     return torch.as_tensor(tensor).nonzero()

@@ -284,6 +284,11 @@ def _(array: array_like, axes: tuple[int, ...] | None = None) -> np.ndarray:
     return np.transpose(array, axes)
 
 
+@nx.vstack.register
+def _(arrays: Sequence[np.ndarray]) -> np.ndarray:
+    return np.vstack(arrays)
+
+
 @nx.where.register
 def _(condition: array_like) -> np.ndarray:
     return np.where(condition)

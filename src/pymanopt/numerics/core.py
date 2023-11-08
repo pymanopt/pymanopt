@@ -304,6 +304,12 @@ def tensordot(_):
 triu_indices = np.triu_indices
 
 
+@SequenceDispatch
+@not_implemented
+def vstack(_):
+    pass
+
+
 @functools.singledispatch
 @not_implemented
 def where(_):
