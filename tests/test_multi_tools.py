@@ -125,3 +125,26 @@ def parametrize_test_multilogm(k, m):
 def test_multilogm(A, expected_output):
     output = multilogm(A, positive_definite=True)
     assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multilogm_complex_positive_definite(k, m):
+    def wrapper(test_func):
+        shape = (k, m, m)
+        A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
+        A = A @ multihconj(A)
+        L = np.zeros(shape, dtype=np.complex128)
+        for i in range(k):
+            L[i] = logm(A[i])
+        params = [(A, L)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+
+    return wrapper
+
+@parametrize_test_multilogm_complex_positive_definite(k=5, m=40)
+@_test_numerics_supported_backends()
+def test_multilogm_complex_positive_definite(A, expected_output):
+    output = multilogm(A, positive_definite=False)
+    assert nx.allclose(output, expected_output)
+
+    output = multilogm(A, positive_definite=True)
+    assert nx.allclose(output, expected_output)
