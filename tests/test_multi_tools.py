@@ -199,3 +199,28 @@ def parametrize_test_multiexpm(k, m):
 def test_multiexpm(A, expected_output):
     output = multiexpm(A, symmetric=True)
     assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multiexpm_conjugate_symmetric(k, m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        shape = (k, m, m)
+        A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
+        A = A + multihconj(A) / 2
+        E = np.zeros(shape, dtype=np.complex128)
+        for i in range(k):
+            E[i] = scipy.linalg.expm(A[i])
+        params = [(A, E)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiexpm(k=5, m=40)
+@_test_numerics_supported_backends()
+def test_multiexpm_conjugate_symmetric(A, expected_output):
+    output = multiexpm(A, symmetric=False)
+    assert nx.allclose(output, expected_output)
+
+    output = multiexpm(A, symmetric=True)
+    assert nx.allclose(output, expected_output)
