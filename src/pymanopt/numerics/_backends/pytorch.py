@@ -133,7 +133,7 @@ def _(tensor: tensor_like) -> bool:
 
 @nx.isrealobj.register
 def _(tensor: tensor_like) -> bool:
-    return torch.is_real(tensor)
+    return torch.isreal(tensor).all()
 
 
 @nx.log.register
