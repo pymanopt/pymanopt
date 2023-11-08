@@ -179,3 +179,23 @@ def parametrize_test_multiexpm_singlemat(m):
 def test_multiexpm_singlemat(A, expected_output):
     output = multiexpm(A, symmetric=True)
     assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multiexpm(k, m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = multisym(np.random.normal(size=(k, m, m)))
+        E = np.zeros((k, m, m))
+        for i in range(k):
+            E[i] = scipy.linalg.expm(A[i])
+        params = [(A, E)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiexpm(k=5, m=40)
+@_test_numerics_supported_backends()
+def test_multiexpm(A, expected_output):
+    output = multiexpm(A, symmetric=True)
+    assert nx.allclose(output, expected_output)
