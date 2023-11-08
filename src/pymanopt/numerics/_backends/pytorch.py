@@ -121,6 +121,11 @@ def _(
     return tensor
 
 
+@nx.hstack.register
+def _(tensors: Sequence[tensor_like]) -> torch.Tensor:
+    return torch.hstack(tensors)
+
+
 @nx.iscomplexobj.register
 def _(tensor: tensor_like) -> bool:
     return torch.is_complex(tensor)

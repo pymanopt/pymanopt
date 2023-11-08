@@ -97,6 +97,11 @@ def _(
     return np.expand_dims(array, axis)
 
 
+@nx.hstack.register
+def _(arrays: Sequence[np.ndarray]) -> np.ndarray:
+    return np.hstack(arrays)
+
+
 @nx.iscomplexobj.register
 def _(array: array_like) -> bool:
     return np.iscomplexobj(array)

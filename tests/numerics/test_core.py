@@ -291,6 +291,21 @@ def test_float64():
 @pytest.mark.parametrize(
     "argument, expected_output",
     [
+        ((np.array([1, 2]), np.array([3, 4])),
+         np.hstack((np.array([1, 2]), np.array([3, 4])))),
+        ((np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])),
+         np.hstack((np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])))),
+    ]
+)
+@_test_numerics_supported_backends()
+def test_hstack(argument, expected_output):
+    output = nx.hstack(argument)
+    assert nx.allclose(output, expected_output)
+
+
+@pytest.mark.parametrize(
+    "argument, expected_output",
+    [
         (1, False),
         (1 + 2j, True),
         (np.array([1 + 1j, 2]), True),

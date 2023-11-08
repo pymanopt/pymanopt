@@ -134,6 +134,12 @@ finfo = np.finfo
 float64 = np.float64
 
 
+@SequenceDispatch
+@not_implemented
+def hstack(_):
+    pass
+
+
 integer = np.integer
 
 
