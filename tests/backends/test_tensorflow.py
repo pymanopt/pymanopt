@@ -3,7 +3,7 @@ import tensorflow as tf
 
 import pymanopt
 
-from . import _backend_tests_numpy as _backend_tests
+from . import _backend_tests
 
 
 class TestUnaryFunction(_backend_tests.TestUnaryFunction):
