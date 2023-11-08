@@ -222,7 +222,7 @@ def _(
     *args: tuple,
     **kwargs: dict
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    U, S, V = torch.svd(tensor, *args, **kwargs)
+    U, S, V = torch.linalg.svd(tensor, *args, **kwargs)
     return U, S, V
 
 
