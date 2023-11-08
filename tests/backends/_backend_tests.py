@@ -403,29 +403,45 @@ class TestMixed:
 
         self.manifold = manifold_factory(point_layout=3)
 
-        n1 = self.n1 = 3
-        n2 = self.n2 = 4
-        n3 = self.n3 = 5
-        n4 = self.n4 = 6
-        n5 = self.n5 = 7
-        n6 = self.n6 = 8
+        self.n1 = 3
+        self.n2 = 4
+        self.n3 = 5
+        self.n4 = 6
+        self.n5 = 7
+        self.n6 = 8
 
-        self.y = y = (
+        self.cost = None
+        self.backend = 'numpy'
+
+    def test_compile(self):
+        n1, n2, n3, n4, n5, n6 = self.n1, self.n2, self.n3, self.n4, self.n5, self.n6
+        backend = self.backend
+        y = numpy_to_backend((
             nx.random.normal(size=n1),
             nx.random.normal(size=(n2, n3)),
             nx.random.normal(size=(n4, n5, n6)),
-        )
-        self.a = a = (
-            nx.random.normal(size=n1),
-            nx.random.normal(size=(n2, n3)),
-            nx.random.normal(size=(n4, n5, n6)),
-        )
+        ), backend)
 
-        self.correct_cost = (
+        correct_cost = (
             nx.exp(nx.sum(y[0] ** 2))
             + nx.exp(nx.sum(y[1] ** 2))
             + nx.exp(nx.sum(y[2] ** 2))
         )
+
+        nx.allclose(correct_cost, self.cost(*y))
+
+    def test_grad(self):
+        n1, n2, n3, n4, n5, n6 = self.n1, self.n2, self.n3, self.n4, self.n5, self.n6
+        backend = self.backend
+        y = numpy_to_backend((
+            nx.random.normal(size=n1),
+            nx.random.normal(size=(n2, n3)),
+            nx.random.normal(size=(n4, n5, n6)),
+        ), backend)
+
+        grad = self.cost.get_gradient_operator()
+
+        g = grad(*y)
 
         # Calculate correct grad
         g1 = 2 * y[0] * nx.exp(nx.sum(y[0] ** 2))
@@ -433,6 +449,23 @@ class TestMixed:
         g3 = 2 * y[2] * nx.exp(nx.sum(y[2] ** 2))
 
         self.correct_grad = (g1, g2, g3)
+
+        for k in range(len(g)):
+            nx.allclose(self.correct_grad[k], g[k])
+
+    def test_hessian(self):
+        n1, n2, n3, n4, n5, n6 = self.n1, self.n2, self.n3, self.n4, self.n5, self.n6
+        backend = self.backend
+        y = numpy_to_backend((
+            nx.random.normal(size=n1),
+            nx.random.normal(size=(n2, n3)),
+            nx.random.normal(size=(n4, n5, n6)),
+        ), backend)
+        a = numpy_to_backend((
+            nx.random.normal(size=n1),
+            nx.random.normal(size=(n2, n3)),
+            nx.random.normal(size=(n4, n5, n6)),
+        ), backend)
 
         # Calculate correct hess
         # 1. Vector
@@ -477,21 +510,11 @@ class TestMixed:
 
         h3 = nx.sum(H * Atensor, axis=(3, 4, 5))
 
-        self.correct_hess = (h1, h2, h3)
+        correct_hess = (h1, h2, h3)
 
-    def test_compile(self):
-        nx.allclose(self.correct_cost, self.cost(*self.y))
-
-    def test_grad(self):
-        grad = self.cost.get_gradient_operator()
-        g = grad(*self.y)
-        for k in range(len(g)):
-            nx.allclose(self.correct_grad[k], g[k])
-
-    def test_hessian(self):
         hess = self.cost.get_hessian_operator()
 
         # Now test hess
-        h = hess(*self.y, *self.a)
+        h = hess(*y, *a)
         for k in range(len(h)):
-            nx.allclose(self.correct_hess[k], h[k])
+            nx.allclose(correct_hess[k], h[k])
