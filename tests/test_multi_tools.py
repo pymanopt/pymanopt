@@ -154,3 +154,21 @@ def test_multilogm_complex_positive_definite(A, expected_output):
 
     output = multilogm(A, positive_definite=True)
     assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multiexpm_singlemat(m):
+    def wrapper(test_func):
+        A = np.random.normal(size=(m, m))
+        A = A + A.T
+        L = scipy.linalg.expm(A)
+        params = [(A, L)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiexpm_singlemat(m=2)
+@_test_numerics_supported_backends()
+def test_multiexpm_singlemat(A, expected_output):
+    output = multiexpm(A, symmetric=True)
+    assert nx.allclose(output, expected_output)
