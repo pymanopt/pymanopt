@@ -49,3 +49,22 @@ def parametrize_test_multitransp(k, m, n):
 def test_multitransp(A, expected_output):
     output = multitransp(A)
     assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multisym(k, m):
+    def wrapper(test_func):
+        A = np.random.normal(size=(k, m, m))
+
+        C = np.zeros((k, m, m))
+        for i in range(k):
+            C[i] = (A[i] + A[i].T) / 2
+        params = [(A, C)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+
+    return wrapper
+
+@parametrize_test_multisym(k=5, m=40)
+@_test_numerics_supported_backends()
+def test_multisym(A, expected_output):
+    output = multisym(A)
+    assert nx.allclose(output, expected_output)
