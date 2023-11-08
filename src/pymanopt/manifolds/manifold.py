@@ -20,7 +20,7 @@ def raise_not_implemented_error(method):
 
 class BackendManifold(type):
     def __new__(cls, name, bases, attrs):
-        for method in ['random_point', 'random_tangent_vector', 'zero_vector']:
+        for method in ['random_point', 'zero_vector']:
             if method in attrs:
                 attrs[method] = cls._point_to_numerics(cls, attrs[method])
 
