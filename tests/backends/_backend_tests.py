@@ -77,13 +77,15 @@ class TestUnaryComplexFunction:
         self.manifold = manifold_factory(point_layout=1)
         self.n = 10
         self.cost = None
+        self.backend = 'numpy'
 
     def test_unary_function(self):
         cost = self.cost
         assert cost is not None
         n = self.n
+        backend = self.backend
 
-        x = nx.random.normal(size=n) + 1j * nx.random.normal(size=n)
+        x = numpy_to_backend(nx.random.normal(size=n) + 1j * nx.random.normal(size=n), backend)
 
         # Test whether cost function accepts single argument.
         assert nx.allclose(nx.sum(x**2).real, cost(x))
@@ -93,7 +95,7 @@ class TestUnaryComplexFunction:
         nx.allclose(2 * x.conj(), euclidean_gradient(x))
 
         # Test the Hessian.
-        u = nx.random.normal(size=n) + 1j * nx.random.normal(size=n)
+        u = numpy_to_backend(nx.random.normal(size=n) + 1j * nx.random.normal(size=n), backend)
 
         # Test whether Hessian accepts two regular arguments.
         ehess = cost.get_hessian_operator()
@@ -118,14 +120,16 @@ class TestNaryFunction:
         self.manifold = manifold_factory(point_layout=2)
         self.n = 10
         self.cost = None
+        self.backend = 'numpy'
 
     def test_nary_function(self):
         cost = self.cost
         assert cost is not None
         n = self.n
+        backend = self.backend
 
-        x = nx.random.normal(size=n)
-        y = nx.random.normal(size=n)
+        x = numpy_to_backend(nx.random.normal(size=n), backend)
+        y = numpy_to_backend(nx.random.normal(size=n), backend)
 
         assert nx.allclose(x @ y, cost(x, y))
 
@@ -140,8 +144,8 @@ class TestNaryFunction:
         nx.allclose(g_y, x)
 
         # Test the Hessian-vector product.
-        u = nx.random.normal(size=n)
-        v = nx.random.normal(size=n)
+        u = numpy_to_backend(nx.random.normal(size=n), backend)
+        v = numpy_to_backend(nx.random.normal(size=n), backend)
 
         ehess = cost.get_hessian_operator()
         h = ehess(x, y, u, v)
@@ -172,13 +176,15 @@ class TestNaryParameterGrouping:
         self.manifold = manifold_factory(point_layout=3)
         self.n = 10
         self.cost = None
+        self.backend = 'numpy'
 
     def test_nary_parameter_grouping(self):
         cost = self.cost
         assert cost is not None
         n = self.n
+        backend = self.backend
 
-        x, y, z = [nx.random.normal(size=n) for _ in range(3)]
+        x, y, z = [numpy_to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
 
         assert nx.allclose(nx.sum(x**2 + y + z**3), cost(x, y, z))
 
@@ -197,7 +203,7 @@ class TestNaryParameterGrouping:
         nx.allclose(g_z, 3 * z**2)
 
         # Test the Hessian.
-        u, v, w = [nx.random.normal(size=n) for _ in range(3)]
+        u, v, w = [numpy_to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
 
         ehess = cost.get_hessian_operator()
         h = ehess(x, y, z, u, v, w)
@@ -219,19 +225,35 @@ class TestVector:
     @pytest.fixture(autouse=True)
     def initialize_test_case(self):
         nx.seterr(all="raise")
-
         self.manifold = manifold_factory(point_layout=1)
-
         n = self.n = 15
 
-        Y = self.Y = nx.random.normal(size=n)
-        A = self.A = nx.random.normal(size=n)
+    def test_compile(self):
+        n = self.n
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=n), backend)
 
-        # Calculate correct cost and grad...
-        self.correct_cost = nx.exp(nx.sum(Y**2))
-        self.correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
+        correct_cost = nx.exp(nx.sum(Y**2))
 
-        # ... and hess
+        nx.allclose(correct_cost, self.cost(Y))
+
+    def test_grad(self):
+        n = self.n
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=n), backend)
+
+        correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
+
+        grad = self.cost.get_gradient_operator()
+
+        nx.allclose(correct_grad, grad(Y))
+
+    def test_hessian(self):
+        n = self.n
+        backend = self.backend
+        Y = numpy_to_backend(nx.random.normal(size=n), backend)
+        A = numpy_to_backend(nx.random.normal(size=n), backend)
+
         # First form hessian matrix H
         # Convert Y and A into matrices (row vectors)
         Ymat = Y[nx.newaxis, :]
@@ -242,20 +264,11 @@ class TestVector:
         H = nx.exp(nx.sum(Y**2)) * (4 * Ymat.T @ Ymat + 2 * diag)
 
         # Then 'left multiply' H by A
-        self.correct_hess = nx.squeeze(nx.array(Amat @ H))
+        correct_hess = nx.squeeze(nx.array(Amat @ H))
 
-    def test_compile(self):
-        nx.allclose(self.correct_cost, self.cost(self.Y))
-
-    def test_grad(self):
-        grad = self.cost.get_gradient_operator()
-        nx.allclose(self.correct_grad, grad(self.Y))
-
-    def test_hessian(self):
         hess = self.cost.get_hessian_operator()
 
-        # Now test hess
-        nx.allclose(self.correct_hess, hess(self.Y, self.A))
+        nx.allclose(correct_hess, hess(Y, A))
 
 
 class TestMatrix:
