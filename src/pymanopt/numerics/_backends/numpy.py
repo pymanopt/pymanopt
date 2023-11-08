@@ -231,6 +231,11 @@ def _(array: array_like) -> np.float64 | np.ndarray:
     return np.sqrt(array)
 
 
+@nx.squeeze.register
+def _(array: array_like) -> np.ndarray:
+    return np.squeeze(array)
+
+
 @nx.sum.register
 def _(
     array: array_like,

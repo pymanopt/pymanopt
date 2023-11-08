@@ -256,6 +256,11 @@ def _(tensor: tensor_like) -> torch.Tensor:
     return torch.sqrt(tensor)
 
 
+@nx.squeeze.register
+def _(tensor: tensor_like) -> torch.Tensor:
+    return torch.squeeze(tensor)
+
+
 @nx.sum.register
 def _(
     tensor: tensor_like,
