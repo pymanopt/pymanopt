@@ -192,4 +192,9 @@ def numpy_to_backend(point, backend):
     return point
 
 
+def array_as(point, as_):
+    backend = get_backend(as_)
+    return numpy_to_backend(point, backend)
+
+
 register_backends()
