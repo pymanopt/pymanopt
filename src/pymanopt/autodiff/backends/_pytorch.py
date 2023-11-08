@@ -42,9 +42,7 @@ class PyTorchBackend(Backend):
     @Backend._assert_backend_available
     def generate_hessian_operator(self, function, num_arguments):
         def hessian_vector_product(*args):
-            arguments, vectors = bisect_sequence(
-                list(map(self._from_numpy, args))
-            )
+            arguments, vectors = bisect_sequence(args)
             arguments = [argument.requires_grad_() for argument in arguments]
             gradients = autograd.grad(
                 function(*arguments),

@@ -3,12 +3,14 @@ import torch
 
 import pymanopt
 
-from . import _backend_tests_numpy as _backend_tests
+from . import _backend_tests
 
 
 class TestUnaryFunction(_backend_tests.TestUnaryFunction):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(x):
             return torch.sum(x**2)
