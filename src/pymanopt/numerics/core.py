@@ -91,6 +91,12 @@ def assert_almost_equal(_):
 
 @functools.singledispatch
 @not_implemented
+def assert_allclose(_):
+    pass
+
+
+@functools.singledispatch
+@not_implemented
 def assert_array_almost_equal(_):
     pass
 
