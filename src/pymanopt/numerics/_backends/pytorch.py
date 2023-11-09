@@ -58,6 +58,30 @@ def _(tensor: tensor_like) -> torch.Tensor:
     return tensor
 
 
+@nx.assert_allclose.register
+def _(tensor_a: tensor_like, tensor_b: tensor_like) -> None:
+    tensor_a = tensor_a.detach().cpu().numpy()
+    if isinstance(tensor_b, torch.Tensor):
+        tensor_b = tensor_b.detach().cpu().numpy()
+    nx.assert_allclose(tensor_a, tensor_b)
+
+
+@nx.assert_almost_equal.register
+def _(tensor_a: tensor_like, tensor_b: tensor_like) -> None:
+    tensor_a = tensor_a.detach().cpu().numpy()
+    if isinstance(tensor_b, torch.Tensor):
+        tensor_b = tensor_b.detach().cpu().numpy()
+    nx.assert_almost_equal(tensor_a, tensor_b)
+
+
+@nx.assert_array_almost_equal.register
+def _(tensor_a: tensor_like, tensor_b: tensor_like) -> None:
+    tensor_a = tensor_a.detach().cpu().numpy()
+    if isinstance(tensor_b, torch.Tensor):
+        tensor_b = tensor_b.detach().cpu().numpy()
+    nx.assert_array_almost_equal(tensor_a, tensor_b)
+
+
 @nx.block.register
 def _(tensors: Sequence[tensor_like]) -> torch.Tensor:
     return torch.cat(tensors)
