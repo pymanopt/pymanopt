@@ -4,11 +4,6 @@ import warnings
 from typing import Sequence, Union
 
 import pymanopt.numerics as nx
-from pymanopt.numerics import (
-    get_backend,
-    NUMERICS_SUPPORTED_BACKENDS,
-    numpy_to_backend
-)
 
 
 def raise_not_implemented_error(method):
@@ -43,7 +38,7 @@ class BackendManifold(type):
             if backend is None:
                 self.backend = backend = 'numpy'
 
-            point = numpy_to_backend(point, backend)
+            point = nx.numpy_to_backend(point, backend)
 
             return point
 
@@ -245,10 +240,10 @@ class Manifold(metaclass=BackendManifold):
         """
         backend = str(backend).lower()
         print(f"Manifold '{self.__class__.__name__}': backend is {backend}")
-        if backend not in NUMERICS_SUPPORTED_BACKENDS:
+        if backend not in nx.NUMERICS_SUPPORTED_BACKENDS:
             raise ValueError(
                 "Invalid backend '{backend}': must be one of "
-                f"{NUMERICS_SUPPORTED_BACKENDS}"
+                f"{nx.NUMERICS_SUPPORTED_BACKENDS}"
             )
         self._backend = backend
 
