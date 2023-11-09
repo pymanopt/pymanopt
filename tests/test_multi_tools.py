@@ -13,7 +13,7 @@ from pymanopt.tools.multi import (
 )
 import pymanopt.numerics as nx
 
-from tests.numerics import _test_numerics_supported_backends
+from tests.numerics import test_numerics_supported_backends
 
 
 def parametrize_test_multitransp_singlemat(m, n):
@@ -27,7 +27,7 @@ def parametrize_test_multitransp_singlemat(m, n):
 
 
 @parametrize_test_multitransp_singlemat(m=40, n=50)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multitransp_singlemat(A, expected_output):
     output = multitransp(A)
     assert nx.allclose(output, expected_output)
@@ -48,7 +48,7 @@ def parametrize_test_multitransp(k, m, n):
 
 
 @parametrize_test_multitransp(k=5, m=40, n=50)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multitransp(A, expected_output):
     output = multitransp(A)
     assert nx.allclose(output, expected_output)
@@ -69,7 +69,7 @@ def parametrize_test_multisym(k, m):
 
 
 @parametrize_test_multisym(k=5, m=40)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multisym(A, expected_output):
     output = multisym(A)
     assert nx.allclose(output, expected_output)
@@ -87,7 +87,7 @@ def parametrize_test_multieye(k, m):
 
 
 @parametrize_test_multieye(k=5, m=40)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multieye(k, m, expected_output):
     output = multieye(k, m)
     assert nx.allclose(output, expected_output)
@@ -108,7 +108,7 @@ def parametrize_test_multilogm_singlemat(m):
 
 
 @parametrize_test_multilogm_singlemat(m=40)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multilogm_singlemat(A, expected_output):
     output = multilogm(A, positive_definite=True)
     assert nx.allclose(output, expected_output)
@@ -131,7 +131,7 @@ def parametrize_test_multilogm(k, m):
 
 
 @parametrize_test_multilogm(k=5, m=40)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multilogm(A, expected_output):
     output = multilogm(A, positive_definite=True)
     assert nx.allclose(output, expected_output)
@@ -153,7 +153,7 @@ def parametrize_test_multilogm_complex_positive_definite(k, m):
 
 
 @parametrize_test_multilogm_complex_positive_definite(k=5, m=40)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multilogm_complex_positive_definite(A, expected_output):
     output = multilogm(A, positive_definite=False)
     assert nx.allclose(output, expected_output)
@@ -175,7 +175,7 @@ def parametrize_test_multiexpm_singlemat(m):
 
 
 @parametrize_test_multiexpm_singlemat(m=40)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multiexpm_singlemat(A, expected_output):
     output = multiexpm(A, symmetric=True)
     assert nx.allclose(output, expected_output)
@@ -195,7 +195,7 @@ def parametrize_test_multiexpm(k, m):
 
 
 @parametrize_test_multiexpm(k=5, m=40)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multiexpm(A, expected_output):
     output = multiexpm(A, symmetric=True)
     assert nx.allclose(output, expected_output)
@@ -217,7 +217,7 @@ def parametrize_test_multiexpm_conjugate_symmetric(k, m):
 
 
 @parametrize_test_multiexpm(k=5, m=40)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multiexpm_conjugate_symmetric(A, expected_output):
     output = multiexpm(A, symmetric=False)
     assert nx.allclose(output, expected_output)
@@ -237,7 +237,7 @@ def parametrize_test_multiqr_singlemat(m, n):
 
 
 @parametrize_test_multiqr_singlemat(m=40, n=50)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multiqr_singlemat(A):
     Q, R = multiqr(A)
     assert nx.allclose(Q @ R, A)
@@ -254,7 +254,7 @@ def parametrize_test_multiqr_singlemat_complex(m, n):
 
 
 @parametrize_test_multiqr_singlemat_complex(m=40, n=50)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multiqr_singlemat_complex(A):
     Q, R = multiqr(A)
     assert nx.allclose(Q @ R, A)
@@ -271,7 +271,7 @@ def parametrize_test_multiqr(k, m, n):
 
 
 @parametrize_test_multiqr(k=5, m=40, n=50)
-@_test_numerics_supported_backends()
+@test_numerics_supported_backends()
 def test_multiqr(A):
     Q, R = multiqr(A)
     assert nx.allclose(Q @ R, A)
