@@ -49,7 +49,7 @@ def numpy_to_backend(point, backend):
     if issubclass(point.__class__, (tuple, list)):
         return point.__class__([
             numpy_to_backend(p, backend) for p in point])
-    
+
     # if point is not a numpy array, return it
     # e.g. torch.Tensor, jnp.ndarray, tf.Tensor
     if type(point) != np.ndarray:

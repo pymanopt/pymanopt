@@ -11,10 +11,10 @@ from pymanopt.manifolds import (
 )
 from pymanopt.tools import testing
 
-from tests.manifolds.test_manifold import TestBackendManifoldFactory
+from tests.manifolds.test_manifold import TestBackendManifoldFactory as TBMF
 
 
-class TestSphereManifold(metaclass=TestBackendManifoldFactory('numpy')):
+class TestSphereManifold(metaclass=TBMF()):
     @pytest.fixture(autouse=True)
     def setup(self):
         self.m = m = 100
@@ -157,7 +157,7 @@ class TestSphereManifold(metaclass=TestBackendManifoldFactory('numpy')):
         nx.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
 
 
-class TestSphereSubspaceIntersectionManifold:
+class TestSphereSubspaceIntersectionManifold(metaclass=TBMF()):
     @pytest.fixture(autouse=True)
     def setup(self):
         self.n = 2
@@ -204,14 +204,14 @@ class TestSphereSubspaceIntersectionManifold:
         assert manifold.dim == dim
 
 
-class TestSphereSubspaceIntersectionManifoldGradient:
+class TestSphereSubspaceIntersectionManifoldGradient(metaclass=TBMF()):
     @pytest.fixture(autouse=True)
     def setup(self):
         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
         self.manifold = SphereSubspaceIntersection(span_matrix)
 
 
-class TestSphereSubspaceComplementIntersectionManifold:
+class TestSphereSubspaceComplementIntersectionManifold(metaclass=TBMF()):
     @pytest.fixture(autouse=True)
     def setup(self):
         self.n = 2
@@ -267,7 +267,7 @@ class TestSphereSubspaceComplementIntersectionManifold:
         nx.assert_array_almost_equal(U.T @ x, nx.zeros(U.shape[1]))
 
 
-class TestSphereSubspaceComplementIntersectionManifoldGradient:
+class TestSphereSubspaceComplementIntersectionManifoldGradient(metaclass=TBMF()):
     @pytest.fixture(autouse=True)
     def setup(self):
         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()

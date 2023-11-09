@@ -1,4 +1,3 @@
-import pytest
 from copy import deepcopy
 
 from pymanopt.numerics import NUMERICS_SUPPORTED_BACKENDS
@@ -16,7 +15,8 @@ def TestBackendManifoldFactory(backends=NUMERICS_SUPPORTED_BACKENDS):
                 if key.startswith("test_"):
                     test = deepcopy(attrs[key])
                     for backend in backends:
-                        attrs[f"{key}_{backend}"] = cls.test_with_backends(cls, test, backend)
+                        attrs[f"{key}_{backend}"] = cls.test_with_backends(
+                            cls, test, backend)
                     del attrs[key]
 
             return super().__new__(cls, name, bases, attrs)
