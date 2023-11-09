@@ -59,6 +59,16 @@ def _(array: array_like) -> np.ndarray:
     return np.array(array)
 
 
+@nx.assert_almost_equal.register
+def _(array_a: array_like, array_b: array_like) -> None:
+    np.testing.assert_almost_equal(array_a, array_b)
+
+
+@nx.assert_array_almost_equal.register
+def _(array_a: array_like, array_b: array_like) -> None:
+    np.testing.assert_array_almost_equal(array_a, array_b)
+
+
 @nx.block.register
 def _(arrays: Sequence[np.ndarray]) -> np.ndarray:
     return np.block(arrays)

@@ -83,6 +83,18 @@ def array(_):
     pass
 
 
+@functools.singledispatch
+@not_implemented
+def assert_almost_equal(_):
+    pass
+
+
+@functools.singledispatch
+@not_implemented
+def assert_array_almost_equal(_):
+    pass
+
+
 @SequenceDispatch
 @not_implemented
 def block(_):
