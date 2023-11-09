@@ -1,5 +1,3 @@
-import numpy as np
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold
 
@@ -61,7 +59,7 @@ class Positive(Manifold):
 
     @property
     def typical_dist(self):
-        return np.sqrt(self.dim)
+        return nx.sqrt(self.dim)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return nx.tensordot(
@@ -76,26 +74,26 @@ class Positive(Manifold):
     to_tangent_space = projection
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return nx.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
     def random_point(self):
-        point = nx.exp(np.random.normal(size=(self._k, self._m, self._n)))
+        point = nx.exp(nx.random.normal(size=(self._k, self._m, self._n)))
         if self._k == 1:
             return point[0]
         return point
 
     def random_tangent_vector(self, point):
-        vector = np.random.normal(size=point.shape) * point
+        vector = nx.random.normal(size=point.shape) * point
         return vector / self.norm(point, vector)
 
     def zero_vector(self, point):
-        return np.zeros(point.shape)
+        return nx.zeros(point.shape)
 
     def dist(self, point_a, point_b):
-        log_ratio = np.log(point_a) - np.log(point_b)
-        return np.sqrt(nx.tensordot(log_ratio, log_ratio, axes=point_a.ndim))
+        log_ratio = nx.log(point_a) - nx.log(point_b)
+        return nx.sqrt(nx.tensordot(log_ratio, log_ratio, axes=point_a.ndim))
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient * point**2
@@ -112,7 +110,7 @@ class Positive(Manifold):
         return point * nx.exp(tangent_vector / point)
 
     def log(self, point_a, point_b):
-        return point_a * (np.log(point_b) - np.log(point_a))
+        return point_a * (nx.log(point_b) - nx.log(point_a))
 
     def retraction(self, point, tangent_vector):
         return point + tangent_vector + tangent_vector**2 / point / 2

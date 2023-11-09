@@ -1,6 +1,3 @@
-import numpy as np
-import scipy.linalg
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
 
@@ -26,12 +23,12 @@ class _PSDFixedRank(Manifold):
         return self.norm(point_a, self.log(point_a, point_b))
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return nx.linalg.norm(tangent_vector)
 
     def projection(self, point, vector):
         YtY = point.T.conj() @ point
         AS = point.T.conj() @ vector - vector.T.conj() @ point
-        Omega = scipy.linalg.solve_continuous_lyapunov(YtY, AS)
+        Omega = nx.linalg.solve_continuous_lyapunov(YtY, AS)
         return vector - point @ Omega
 
     to_tangent_space = projection
@@ -50,11 +47,11 @@ class _PSDFixedRank(Manifold):
     retraction = exp
 
     def log(self, point_a, point_b):
-        u, _, vh = np.linalg.svd(point_b.T.conj() @ point_a)
+        u, _, vh = nx.linalg.svd(point_b.T.conj() @ point_a)
         return point_b @ u @ vh - point_a
 
     def random_point(self):
-        return np.random.normal(size=(self._n, self._k))
+        return nx.random.normal(size=(self._n, self._k))
 
     def random_tangent_vector(self, point):
         random_vector = self.random_point()
@@ -65,10 +62,10 @@ class _PSDFixedRank(Manifold):
         return self.projection(point_b, tangent_vector_a)
 
     def _normalize(self, array):
-        return array / np.linalg.norm(array)
+        return array / nx.linalg.norm(array)
 
     def zero_vector(self, point):
-        return np.zeros((self._n, self._k))
+        return nx.zeros((self._n, self._k))
 
 
 class PSDFixedRank(_PSDFixedRank):
@@ -157,9 +154,9 @@ class PSDFixedRankComplex(_PSDFixedRank):
         super().__init__(n, k, name, dimension)
 
     def random_point(self):
-        return np.random.normal(
+        return nx.random.normal(
             size=(self._n, self._k)
-        ) + 1j * np.random.normal(size=(self._n, self._k))
+        ) + 1j * nx.random.normal(size=(self._n, self._k))
 
 
 class Elliptope(Manifold, RetrAsExpMixin):
@@ -226,7 +223,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return nx.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
@@ -234,7 +231,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         eta = self._project_rows(point, vector)
         YtY = point.T @ point
         AS = point.T @ eta - vector.T @ point
-        Omega = scipy.linalg.solve_continuous_lyapunov(YtY, -AS)
+        Omega = nx.linalg.solve_continuous_lyapunov(YtY, -AS)
         return eta - point @ (Omega - Omega.T) / 2
 
     to_tangent_space = projection
@@ -249,15 +246,15 @@ class Elliptope(Manifold, RetrAsExpMixin):
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         scaling_grad = (euclidean_gradient * point).sum(axis=1)
-        hess = euclidean_hessian - tangent_vector * scaling_grad[:, np.newaxis]
+        hess = euclidean_hessian - tangent_vector * scaling_grad[:, nx.newaxis]
         scaling_hess = (
             tangent_vector * euclidean_gradient + point * euclidean_hessian
         ).sum(axis=1)
-        hess -= point * scaling_hess[:, np.newaxis]
+        hess -= point * scaling_hess[:, nx.newaxis]
         return self.projection(point, hess)
 
     def random_point(self):
-        return self._normalize_rows(np.random.normal(size=(self._n, self._k)))
+        return self._normalize_rows(nx.random.normal(size=(self._n, self._k)))
 
     def random_tangent_vector(self, point):
         tangent_vector = self.projection(point, self.random_point())
@@ -267,11 +264,11 @@ class Elliptope(Manifold, RetrAsExpMixin):
         return self.projection(point_b, tangent_vector_a)
 
     def _normalize_rows(self, array):
-        return array / np.linalg.norm(array, axis=1)[:, np.newaxis]
+        return array / nx.linalg.norm(array, axis=1)[:, nx.newaxis]
 
     def _project_rows(self, point, vector):
         inner_products = (point * vector).sum(axis=1)
-        return vector - point * inner_products[:, np.newaxis]
+        return vector - point * inner_products[:, nx.newaxis]
 
     def zero_vector(self, point):
-        return np.zeros((self._n, self._k))
+        return nx.zeros((self._n, self._k))

@@ -3,7 +3,12 @@ import functools
 import warnings
 from typing import Sequence, Union
 
-import numpy as np
+import pymanopt.numerics as nx
+from pymanopt.numerics import (
+    get_backend,
+    NUMERICS_SUPPORTED_BACKENDS,
+    numpy_to_backend
+)
 
 
 def raise_not_implemented_error(method):
@@ -17,7 +22,51 @@ def raise_not_implemented_error(method):
     return wrapper
 
 
-class Manifold(metaclass=abc.ABCMeta):
+class BackendManifold(type):
+    def __new__(cls, name, bases, attrs):
+        for method in ['random_point', 'zero_vector']:
+            if method in attrs:
+                attrs[method] = cls._to_numerics_from_self(cls, attrs[method])
+
+        if 'random_tangent_vector' in attrs:
+            attrs['random_tangent_vector'] = cls._to_numerics_from_point(
+                cls, attrs['random_tangent_vector'])
+
+        return super().__new__(cls, name, bases, attrs)
+
+    def _to_numerics_from_self(cls, method):
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+            point = method(self, *args, **kwargs)
+
+            backend = self.backend
+            if backend is None:
+                self.backend = backend = 'numpy'
+
+            point = numpy_to_backend(point, backend)
+
+            return point
+
+        return wrapper
+
+    def _to_numerics_from_point(cls, method):
+        @functools.wraps(method)
+        def wrapper(self, *args, **kwargs):
+            tangent_vec = method(self, *args, **kwargs)
+
+            if len(args) > 0:
+                point = args[0]
+            else:
+                point = kwargs['point']
+
+            tangent_vec = nx.array_as(tangent_vec, as_=point)
+
+            return tangent_vec
+
+        return wrapper
+
+
+class Manifold(metaclass=BackendManifold):
     """Riemannian manifold base class.
 
     Abstract base class setting out a template for manifold classes.
@@ -55,7 +104,7 @@ class Manifold(metaclass=abc.ABCMeta):
         dimension: int,
         point_layout: Union[int, Sequence[int]] = 1,
     ):
-        if not isinstance(dimension, (int, np.integer)):
+        if not isinstance(dimension, (int, nx.integer)):
             raise TypeError("Manifold dimension must be of type int")
         if dimension < 0:
             raise ValueError("Manifold dimension must be positive")
@@ -78,6 +127,7 @@ class Manifold(metaclass=abc.ABCMeta):
         self._name = name
         self._dimension = dimension
         self._point_layout = point_layout
+        self._backend = None
 
     def __str__(self):
         return self._name
@@ -128,9 +178,9 @@ class Manifold(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def inner_product(
         self,
-        point: np.ndarray,
-        tangent_vector_a: np.ndarray,
-        tangent_vector_b: np.ndarray,
+        point: nx.ndarray,
+        tangent_vector_a: nx.ndarray,
+        tangent_vector_b: nx.ndarray,
     ) -> float:
         """Inner product between tangent vectors at a point on the manifold.
 
@@ -181,6 +231,26 @@ class Manifold(metaclass=abc.ABCMeta):
         Returns:
             A randomly chosen point on the manifold.
         """
+
+    @property
+    def backend(self):
+        return self._backend
+
+    @backend.setter
+    def backend(self, backend):
+        """Set the backend used by the random_point method.
+
+        Args:
+            backend: The backend to use.
+        """
+        backend = str(backend).lower()
+        print(f"Manifold '{self.__class__.__name__}': backend is {backend}")
+        if backend not in NUMERICS_SUPPORTED_BACKENDS:
+            raise ValueError(
+                "Invalid backend '{backend}': must be one of "
+                f"{NUMERICS_SUPPORTED_BACKENDS}"
+            )
+        self._backend = backend
 
     @abc.abstractmethod
     def random_tangent_vector(self, point):
@@ -387,7 +457,7 @@ class Manifold(metaclass=abc.ABCMeta):
         return tangent_vector
 
 
-class RiemannianSubmanifold(Manifold, metaclass=abc.ABCMeta):
+class RiemannianSubmanifold(Manifold):
     """Base class for Riemannian submanifolds of Euclidean space.
 
     This class provides a generic method to project Euclidean gradients to

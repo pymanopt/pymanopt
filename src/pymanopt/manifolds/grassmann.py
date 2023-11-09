@@ -1,5 +1,3 @@
-import numpy as np
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools.multi import multihconj, multiqr, multitransp
@@ -12,16 +10,16 @@ class _GrassmannBase(Manifold):
 
     @property
     def typical_dist(self):
-        return np.sqrt(self._p * self._k)
+        return nx.sqrt(self._p * self._k)
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return nx.linalg.norm(tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(point_b, tangent_vector_a)
 
     def zero_vector(self, point):
-        zero = np.zeros((self._k, self._n, self._p))
+        zero = nx.zeros((self._k, self._n, self._p))
         if self._k == 1:
             return zero[0]
         return zero
@@ -76,10 +74,10 @@ class Grassmann(_GrassmannBase):
         super().__init__(name, dimension)
 
     def dist(self, point_a, point_b):
-        s = np.linalg.svd(multitransp(point_a) @ point_b, compute_uv=False)
+        s = nx.linalg.svd(multitransp(point_a) @ point_b, compute_uv=False)
         s[s > 1] = 1
-        s = np.arccos(s)
-        return np.linalg.norm(s)
+        s = nx.arccos(s)
+        return nx.linalg.norm(s)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return nx.tensordot(
@@ -103,24 +101,24 @@ class Grassmann(_GrassmannBase):
         # columns. Compare this with the Stiefel manifold.
 
         # Compute the polar factorization of Y = X + G.
-        u, _, vt = np.linalg.svd(point + tangent_vector, full_matrices=False)
+        u, _, vt = nx.linalg.svd(point + tangent_vector, full_matrices=False)
         return u @ vt
 
     def random_point(self):
-        q, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
+        q, _ = multiqr(nx.random.normal(size=(self._k, self._n, self._p)))
         if self._k == 1:
             return q[0]
         return q
 
     def random_tangent_vector(self, point):
-        tangent_vector = np.random.normal(size=point.shape)
+        tangent_vector = nx.random.normal(size=point.shape)
         tangent_vector = self.projection(point, tangent_vector)
-        return tangent_vector / np.linalg.norm(tangent_vector)
+        return tangent_vector / nx.linalg.norm(tangent_vector)
 
     def exp(self, point, tangent_vector):
-        u, s, vt = np.linalg.svd(tangent_vector, full_matrices=False)
-        cos_s = np.expand_dims(np.cos(s), -2)
-        sin_s = np.expand_dims(np.sin(s), -2)
+        u, s, vt = nx.linalg.svd(tangent_vector, full_matrices=False)
+        cos_s = nx.expand_dims(nx.cos(s), -2)
+        sin_s = nx.expand_dims(nx.sin(s), -2)
 
         Y = point @ (multitransp(vt) * cos_s) @ vt + (u * sin_s) @ vt
 
@@ -132,9 +130,9 @@ class Grassmann(_GrassmannBase):
     def log(self, point_a, point_b):
         ytx = multitransp(point_b) @ point_a
         At = multitransp(point_b) - ytx @ multitransp(point_a)
-        Bt = np.linalg.solve(ytx, At)
-        u, s, vt = np.linalg.svd(multitransp(Bt), full_matrices=False)
-        arctan_s = np.expand_dims(np.arctan(s), -2)
+        Bt = nx.linalg.solve(ytx, At)
+        u, s, vt = nx.linalg.svd(multitransp(Bt), full_matrices=False)
+        arctan_s = nx.expand_dims(nx.arctan(s), -2)
         return (u * arctan_s) @ vt
 
 
@@ -180,15 +178,15 @@ class ComplexGrassmann(_GrassmannBase):
         super().__init__(name, dimension)
 
     def dist(self, point_a, point_b):
-        s = np.linalg.svd(multihconj(point_a) @ point_b, compute_uv=False)
+        s = nx.linalg.svd(multihconj(point_a) @ point_b, compute_uv=False)
         s[s > 1] = 1
-        s = np.arccos(s)
-        return np.linalg.norm(np.real(s))
+        s = nx.arccos(s)
+        return nx.linalg.norm(nx.real(s))
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.real(
+        return nx.real(
             nx.tensordot(
-                np.conjugate(tangent_vector_a),
+                nx.conjugate(tangent_vector_a),
                 tangent_vector_b,
                 axes=tangent_vector_a.ndim,
             )
@@ -211,29 +209,29 @@ class ComplexGrassmann(_GrassmannBase):
         # columns. Compare this with the Stiefel manifold.
 
         # Compute the polar factorization of Y = X+G
-        u, _, vh = np.linalg.svd(point + tangent_vector, full_matrices=False)
+        u, _, vh = nx.linalg.svd(point + tangent_vector, full_matrices=False)
         return u @ vh
 
     def random_point(self):
         q, _ = multiqr(
-            np.random.normal(size=(self._k, self._n, self._p))
-            + 1j * np.random.normal(size=(self._k, self._n, self._p))
+            nx.random.normal(size=(self._k, self._n, self._p))
+            + 1j * nx.random.normal(size=(self._k, self._n, self._p))
         )
         if self._k == 1:
             return q[0]
         return q
 
     def random_tangent_vector(self, point):
-        tangent_vector = np.random.normal(
+        tangent_vector = nx.random.normal(
             size=point.shape
-        ) + 1j * np.random.normal(size=point.shape)
+        ) + 1j * nx.random.normal(size=point.shape)
         tangent_vector = self.projection(point, tangent_vector)
-        return tangent_vector / np.linalg.norm(tangent_vector)
+        return tangent_vector / nx.linalg.norm(tangent_vector)
 
     def exp(self, point, tangent_vector):
-        U, S, VH = np.linalg.svd(tangent_vector, full_matrices=False)
-        cos_S = np.expand_dims(np.cos(S), -2)
-        sin_S = np.expand_dims(np.sin(S), -2)
+        U, S, VH = nx.linalg.svd(tangent_vector, full_matrices=False)
+        cos_S = nx.expand_dims(nx.cos(S), -2)
+        sin_S = nx.expand_dims(nx.sin(S), -2)
         Y = point @ (multihconj(VH) * cos_S) @ VH + (U * sin_S) @ VH
 
         # From numerical experiments, it seems necessary to
@@ -244,7 +242,7 @@ class ComplexGrassmann(_GrassmannBase):
     def log(self, point_a, point_b):
         YHX = multihconj(point_b) @ point_a
         AH = multihconj(point_b) - YHX @ multihconj(point_a)
-        BH = np.linalg.solve(YHX, AH)
-        U, S, VH = np.linalg.svd(multihconj(BH), full_matrices=False)
-        arctan_S = np.expand_dims(np.arctan(S), -2)
+        BH = nx.linalg.solve(YHX, AH)
+        U, S, VH = nx.linalg.svd(multihconj(BH), full_matrices=False)
+        arctan_S = nx.expand_dims(nx.arctan(S), -2)
         return (U * arctan_S) @ VH

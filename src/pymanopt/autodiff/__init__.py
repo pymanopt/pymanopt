@@ -13,7 +13,7 @@ class Function:
 
         self._original_function = function
         self._backend = backend
-        self._function = backend.prepare_function(function)
+        self._function = function
         self._num_arguments = manifold.num_values
 
         self._gradient = None

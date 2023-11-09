@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
-from numpy import testing as np_testing
-from scipy.linalg import expm, logm
+import scipy.linalg
 
 from pymanopt.tools.multi import (
     multiexpm,
@@ -12,118 +11,267 @@ from pymanopt.tools.multi import (
     multisym,
     multitransp,
 )
+import pymanopt.numerics as nx
+
+from tests.numerics import test_numerics_supported_backends
 
 
-class TestMulti:
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        self.m = 40
-        self.n = 50
-        self.p = 40
-        self.k = 10
+def parametrize_test_multitransp_singlemat(m, n):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(m, n))
+        params = [(A, A.T)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
-    def test_multitransp_singlemat(self):
-        A = np.random.normal(size=(self.m, self.n))
-        np_testing.assert_array_equal(A.T, multitransp(A))
+    return wrapper
 
-    def test_multitransp(self):
-        A = np.random.normal(size=(self.k, self.m, self.n))
 
-        C = np.zeros((self.k, self.n, self.m))
-        for i in range(self.k):
+@parametrize_test_multitransp_singlemat(m=40, n=50)
+@test_numerics_supported_backends()
+def test_multitransp_singlemat(A, expected_output):
+    output = multitransp(A)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multitransp(k, m, n):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(k, m, n))
+
+        C = np.zeros((k, n, m))
+        for i in range(k):
             C[i] = A[i].T
+        params = [(A, C)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
-        np_testing.assert_array_equal(C, multitransp(A))
+    return wrapper
 
-    def test_multisym(self):
-        A = np.random.normal(size=(self.k, self.m, self.m))
 
-        C = np.zeros((self.k, self.m, self.m))
-        for i in range(self.k):
-            C[i] = 0.5 * (A[i] + A[i].T)
+@parametrize_test_multitransp(k=5, m=40, n=50)
+@test_numerics_supported_backends()
+def test_multitransp(A, expected_output):
+    output = multitransp(A)
+    assert nx.allclose(output, expected_output)
 
-        np.testing.assert_allclose(C, multisym(A))
 
-    def test_multieye(self):
-        A = np.zeros((self.k, self.n, self.n))
-        for i in range(self.k):
-            A[i] = np.eye(self.n)
+def parametrize_test_multisym(k, m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(k, m, m))
 
-        np_testing.assert_allclose(A, multieye(self.k, self.n))
+        C = np.zeros((k, m, m))
+        for i in range(k):
+            C[i] = (A[i] + A[i].T) / 2
+        params = [(A, C)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
-    def test_multilogm_singlemat(self):
-        a = np.diag(np.random.uniform(size=self.m))
-        q, _ = np.linalg.qr(np.random.normal(size=(self.m, self.m)))
+    return wrapper
+
+
+@parametrize_test_multisym(k=5, m=40)
+@test_numerics_supported_backends()
+def test_multisym(A, expected_output):
+    output = multisym(A)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multieye(k, m):
+    def wrapper(test_func):
+        C = np.zeros((k, m, m))
+        for i in range(k):
+            C[i] = np.eye(m)
+        params = [(k, m, C)]
+        return pytest.mark.parametrize("k, m, expected_output", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multieye(k=5, m=40)
+@test_numerics_supported_backends()
+def test_multieye(k, m, expected_output):
+    output = multieye(k, m)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multilogm_singlemat(m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        a = np.diag(np.random.uniform(size=m))
+        q, _ = np.linalg.qr(np.random.normal(size=(m, m)))
         # A is a positive definite matrix
         A = q @ a @ q.T
-        np_testing.assert_allclose(
-            multilogm(A, positive_definite=True), logm(A)
-        )
+        L = scipy.linalg.logm(A)
+        params = [(A, L)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
-    def test_multilogm(self):
-        A = np.zeros((self.k, self.m, self.m))
-        L = np.zeros((self.k, self.m, self.m))
-        for i in range(self.k):
-            a = np.diag(np.random.uniform(size=self.m))
-            q, _ = np.linalg.qr(np.random.normal(size=(self.m, self.m)))
+    return wrapper
+
+
+@parametrize_test_multilogm_singlemat(m=40)
+@test_numerics_supported_backends()
+def test_multilogm_singlemat(A, expected_output):
+    output = multilogm(A, positive_definite=True)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multilogm(k, m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.zeros((k, m, m))
+        L = np.zeros((k, m, m))
+        for i in range(k):
+            a = np.diag(np.random.uniform(size=m))
+            q, _ = np.linalg.qr(np.random.normal(size=(m, m)))
             A[i] = q @ a @ q.T
-            L[i] = logm(A[i])
-        np_testing.assert_allclose(multilogm(A, positive_definite=True), L)
+            L[i] = scipy.linalg.logm(A[i])
+        params = [(A, L)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
-    def test_multilogm_complex_positive_definite(self):
-        shape = (self.k, self.m, self.m)
+    return wrapper
+
+
+@parametrize_test_multilogm(k=5, m=40)
+@test_numerics_supported_backends()
+def test_multilogm(A, expected_output):
+    output = multilogm(A, positive_definite=True)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multilogm_complex_positive_definite(k, m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        shape = (k, m, m)
         A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
         A = A @ multihconj(A)
-        # Compare fast path for positive definite matrices vs. general slow
-        # one.
-        np_testing.assert_allclose(
-            multilogm(A, positive_definite=True),
-            multilogm(A, positive_definite=False),
-        )
+        L = np.zeros(shape, dtype=np.complex128)
+        for i in range(k):
+            L[i] = scipy.linalg.logm(A[i])
+        params = [(A, L)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
-    def test_multiexpm_singlemat(self):
-        # A is a positive definite matrix
-        A = np.random.normal(size=(self.m, self.m))
+    return wrapper
+
+
+@parametrize_test_multilogm_complex_positive_definite(k=5, m=40)
+@test_numerics_supported_backends()
+def test_multilogm_complex_positive_definite(A, expected_output):
+    output = multilogm(A, positive_definite=False)
+    assert nx.allclose(output, expected_output)
+
+    output = multilogm(A, positive_definite=True)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multiexpm_singlemat(m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(m, m))
         A = A + A.T
-        np_testing.assert_allclose(multiexpm(A, symmetric=True), expm(A))
+        L = scipy.linalg.expm(A)
+        params = [(A, L)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
-    def test_multiexpm(self):
-        A = multisym(np.random.normal(size=(self.k, self.m, self.m)))
-        e = np.zeros((self.k, self.m, self.m))
-        for i in range(self.k):
-            e[i] = expm(A[i])
-        np_testing.assert_allclose(multiexpm(A, symmetric=True), e)
+    return wrapper
 
-    def test_multiexpm_conjugate_symmetric(self):
-        shape = (self.k, self.m, self.m)
+
+@parametrize_test_multiexpm_singlemat(m=40)
+@test_numerics_supported_backends()
+def test_multiexpm_singlemat(A, expected_output):
+    output = multiexpm(A, symmetric=True)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multiexpm(k, m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = multisym(np.random.normal(size=(k, m, m)))
+        E = np.zeros((k, m, m))
+        for i in range(k):
+            E[i] = scipy.linalg.expm(A[i])
+        params = [(A, E)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiexpm(k=5, m=40)
+@test_numerics_supported_backends()
+def test_multiexpm(A, expected_output):
+    output = multiexpm(A, symmetric=True)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multiexpm_conjugate_symmetric(k, m):
+    def wrapper(test_func):
+        np.random.seed(0)
+        shape = (k, m, m)
         A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
-        A = 0.5 * (A + multihconj(A))
-        # Compare fast path for conjugate symmetric matrices vs. general slow
-        # one.
-        np_testing.assert_allclose(
-            multiexpm(A, symmetric=True), multiexpm(A, symmetric=False)
-        )
+        A = A + multihconj(A) / 2
+        E = np.zeros(shape, dtype=np.complex128)
+        for i in range(k):
+            E[i] = scipy.linalg.expm(A[i])
+        params = [(A, E)]
+        return pytest.mark.parametrize("A, expected_output", params)(test_func)
 
-    def test_multiqr_singlemat(self):
-        shape = (self.m, self.n)
-        A_real = np.random.normal(size=shape)
-        q, r = multiqr(A_real)
-        np_testing.assert_allclose(q @ r, A_real)
+    return wrapper
 
-        A_complex = np.random.normal(size=shape) + 1j * np.random.normal(
-            size=shape
-        )
-        q, r = multiqr(A_complex)
-        np_testing.assert_allclose(q @ r, A_complex)
 
-    def test_multiqr(self):
-        shape = (self.k, self.m, self.n)
-        A_real = np.random.normal(size=shape)
-        q, r = multiqr(A_real)
-        np_testing.assert_allclose(q @ r, A_real)
+@parametrize_test_multiexpm(k=5, m=40)
+@test_numerics_supported_backends()
+def test_multiexpm_conjugate_symmetric(A, expected_output):
+    output = multiexpm(A, symmetric=False)
+    assert nx.allclose(output, expected_output)
 
-        A_complex = np.random.normal(size=shape) + 1j * np.random.normal(
-            size=shape
-        )
-        q, r = multiqr(A_complex)
-        np_testing.assert_allclose(q @ r, A_complex)
+    output = multiexpm(A, symmetric=True)
+    assert nx.allclose(output, expected_output)
+
+
+def parametrize_test_multiqr_singlemat(m, n):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(m, n))
+        params = [(A)]
+        return pytest.mark.parametrize("A", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiqr_singlemat(m=40, n=50)
+@test_numerics_supported_backends()
+def test_multiqr_singlemat(A):
+    Q, R = multiqr(A)
+    assert nx.allclose(Q @ R, A)
+
+
+def parametrize_test_multiqr_singlemat_complex(m, n):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(m, n)) + 1j * np.random.normal(size=(m, n))
+        params = [(A)]
+        return pytest.mark.parametrize("A", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiqr_singlemat_complex(m=40, n=50)
+@test_numerics_supported_backends()
+def test_multiqr_singlemat_complex(A):
+    Q, R = multiqr(A)
+    assert nx.allclose(Q @ R, A)
+
+
+def parametrize_test_multiqr(k, m, n):
+    def wrapper(test_func):
+        np.random.seed(0)
+        A = np.random.normal(size=(k, m, n)) + 1j * np.random.normal(size=(k, m, n))
+        params = [(A)]
+        return pytest.mark.parametrize("A", params)(test_func)
+
+    return wrapper
+
+
+@parametrize_test_multiqr(k=5, m=40, n=50)
+@test_numerics_supported_backends()
+def test_multiqr(A):
+    Q, R = multiqr(A)
+    assert nx.allclose(Q @ R, A)

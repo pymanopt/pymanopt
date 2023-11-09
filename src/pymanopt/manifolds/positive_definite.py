@@ -1,5 +1,3 @@
-import numpy as np
-
 import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import (
     RiemannianSubmanifold,
@@ -22,24 +20,24 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
 
     @property
     def typical_dist(self):
-        return np.sqrt(self.dim)
+        return nx.sqrt(self.dim)
 
     def dist(self, point_a, point_b):
-        c = np.linalg.cholesky(point_a)
-        c_inv = np.linalg.inv(c)
+        c = nx.linalg.cholesky(point_a)
+        c_inv = nx.linalg.inv(c)
         logm = multilogm(
             c_inv @ point_b @ multihconj(c_inv),
             positive_definite=True,
         )
-        return np.real(np.linalg.norm(logm))
+        return nx.real(nx.linalg.norm(logm))
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        p_inv_tv_a = np.linalg.solve(point, tangent_vector_a)
+        p_inv_tv_a = nx.linalg.solve(point, tangent_vector_a)
         if tangent_vector_a is tangent_vector_b:
             p_inv_tv_b = p_inv_tv_a
         else:
-            p_inv_tv_b = np.linalg.solve(point, tangent_vector_b)
-        return np.real(
+            p_inv_tv_b = nx.linalg.solve(point, tangent_vector_b)
+        return nx.real(
             nx.tensordot(
                 p_inv_tv_a,
                 multitransp(p_inv_tv_b),
@@ -63,18 +61,18 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return nx.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
     def random_point(self):
         # Generate eigenvalues between 1 and 2.
-        d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
+        d = 1.0 + nx.random.uniform(size=(self._k, self._n, 1))
 
         # Generate a unitary matrix.
         q, _ = multiqr(
-            np.random.normal(size=(self._n, self._n))
-            + 1j * np.random.normal(size=(self._n, self._n))
+            nx.random.normal(size=(self._n, self._n))
+            + 1j * nx.random.normal(size=(self._n, self._n))
         )
         point = q @ (d * multihconj(q))
         return point if self._k > 1 else point[0]
@@ -83,13 +81,13 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         k = self._k
         n = self._n
         if k == 1:
-            tangent_vector = np.random.randn(n, n)
-            if np.iscomplexobj(point):
-                tangent_vector = tangent_vector + 1j * np.random.randn(n, n)
+            tangent_vector = nx.random.randn(n, n)
+            if nx.iscomplexobj(point):
+                tangent_vector = tangent_vector + 1j * nx.random.randn(n, n)
         else:
-            tangent_vector = np.random.randn(k, n, n)
-            if np.iscomplexobj(point):
-                tangent_vector = tangent_vector + 1j * np.random.randn(k, n, n)
+            tangent_vector = nx.random.randn(k, n, n)
+            if nx.iscomplexobj(point):
+                tangent_vector = tangent_vector + 1j * nx.random.randn(k, n, n)
         tangent_vector = multiherm(tangent_vector)
         return tangent_vector / self.norm(point, tangent_vector)
 
@@ -97,18 +95,18 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         return tangent_vector_a
 
     def exp(self, point, tangent_vector):
-        p_inv_tv = np.linalg.solve(point, tangent_vector)
+        p_inv_tv = nx.linalg.solve(point, tangent_vector)
         return point @ multiexpm(p_inv_tv, symmetric=False)
 
     def retraction(self, point, tangent_vector):
-        p_inv_tv = np.linalg.solve(point, tangent_vector)
+        p_inv_tv = nx.linalg.solve(point, tangent_vector)
         return multiherm(
             point + tangent_vector + tangent_vector @ p_inv_tv / 2
         )
 
     def log(self, point_a, point_b):
-        c = np.linalg.cholesky(point_a)
-        c_inv = np.linalg.inv(c)
+        c = nx.linalg.cholesky(point_a)
+        c_inv = nx.linalg.inv(c)
         logm = multilogm(
             c_inv @ point_b @ multihconj(c_inv),
             positive_definite=True,
@@ -119,8 +117,8 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         k = self._k
         n = self._n
         if k == 1:
-            return np.zeros((n, n), dtype=point.dtype)
-        return np.zeros((k, n, n), dtype=point.dtype)
+            return nx.zeros((n, n), dtype=point.dtype)
+        return nx.zeros((k, n, n), dtype=point.dtype)
 
 
 class SymmetricPositiveDefinite(_PositiveDefiniteBase):
@@ -221,7 +219,7 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
 
         # Unit determinant.
         shape = (k, 1, 1) if k > 1 else (1, 1)
-        det = (np.linalg.det(point) ** (1 / n)).reshape(shape)
+        det = (nx.linalg.det(point) ** (1 / n)).reshape(shape)
         return point / det
 
     def random_tangent_vector(self, point):
@@ -242,8 +240,8 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
 
         # Project on tangent space of SHPD at x.
         shape = (k, 1, 1) if k > 1 else (1, 1)
-        t = np.real(
-            np.trace(np.linalg.solve(point, vector), axis1=-2, axis2=-1)
+        t = nx.real(
+            nx.trace(nx.linalg.solve(point, vector), axis1=-2, axis2=-1)
         ).reshape(shape)
         return vector - (1 / n) * t * point
 
@@ -271,7 +269,7 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         # Normalize them. (This is not necessary, but it is good for numerical
         # stability.)
         shape = (k, 1, 1) if k > 1 else (1, 1)
-        det = (np.linalg.det(e) ** (1 / n)).reshape(shape)
+        det = (nx.linalg.det(e) ** (1 / n)).reshape(shape)
         return e / det
 
     def retraction(self, point, tangent_vector):
@@ -283,7 +281,7 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
 
         # Unit determinant.
         shape = (k, 1, 1) if k > 1 else (1, 1)
-        det = (np.linalg.det(r) ** (1 / n)).reshape(shape)
+        det = (nx.linalg.det(r) ** (1 / n)).reshape(shape)
         return r / det
 
     def transport(self, point_a, point_b, tangent_vector_a):

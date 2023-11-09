@@ -9,6 +9,8 @@ from . import _backend_tests
 class TestUnaryFunction(_backend_tests.TestUnaryFunction):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(x):
             return torch.sum(x**2)
@@ -19,6 +21,8 @@ class TestUnaryFunction(_backend_tests.TestUnaryFunction):
 class TestUnaryComplexFunction(_backend_tests.TestUnaryComplexFunction):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(x):
             return torch.real(torch.sum(x**2))
@@ -29,6 +33,8 @@ class TestUnaryComplexFunction(_backend_tests.TestUnaryComplexFunction):
 class TestUnaryVarargFunction(_backend_tests.TestUnaryFunction):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(*x):
             (x,) = x
@@ -40,6 +46,8 @@ class TestUnaryVarargFunction(_backend_tests.TestUnaryFunction):
 class TestNaryFunction(_backend_tests.TestNaryFunction):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(x, y):
             return torch.dot(x, y)
@@ -50,6 +58,8 @@ class TestNaryFunction(_backend_tests.TestNaryFunction):
 class TestNaryVarargFunction(_backend_tests.TestNaryFunction):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(*args):
             return torch.dot(*args)
@@ -60,6 +70,8 @@ class TestNaryVarargFunction(_backend_tests.TestNaryFunction):
 class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(x, y, z):
             return torch.sum(x**2 + y + z**3)
@@ -70,6 +82,8 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
 class TestVector(_backend_tests.TestVector):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(X):
             return torch.exp(torch.sum(X**2))
@@ -80,6 +94,8 @@ class TestVector(_backend_tests.TestVector):
 class TestMatrix(_backend_tests.TestMatrix):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(X):
             return torch.exp(torch.sum(X**2))
@@ -90,6 +106,8 @@ class TestMatrix(_backend_tests.TestMatrix):
 class TestTensor3(_backend_tests.TestTensor3):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(X):
             return torch.exp(torch.sum(X**2))
@@ -100,6 +118,8 @@ class TestTensor3(_backend_tests.TestTensor3):
 class TestMixed(_backend_tests.TestMixed):
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.backend = 'pytorch'
+
         @pymanopt.function.pytorch(self.manifold)
         def cost(x, y, z):
             return (

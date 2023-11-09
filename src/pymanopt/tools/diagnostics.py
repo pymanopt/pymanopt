@@ -27,7 +27,7 @@ def identify_linear_piece(x, y, window_length):
         poly, residuals, *_ = np.polyfit(
             x[segment], y[segment], deg=1, full=True
         )
-        residues[k] = np.sqrt(residuals)
+        residues[k] = np.sqrt(residuals.item())
         polys[:, k] = poly
     best = np.argmin(residues)
     segment = np.arange(best, best + window_length + 1)

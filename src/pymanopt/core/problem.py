@@ -7,6 +7,7 @@ import numpy as np
 
 from ..autodiff import Function
 from ..manifolds.manifold import Manifold
+from ..numerics import NUMERICS_SUPPORTED_BACKENDS
 
 
 class Problem:
@@ -53,6 +54,10 @@ class Problem:
         riemannian_hessian: Optional[Function] = None,
         preconditioner: Optional[Callable] = None,
     ):
+        if str(cost._backend).lower() in NUMERICS_SUPPORTED_BACKENDS:
+            manifold.backend = str(cost._backend).lower()
+        else:
+            manifold.backend = "numpy"
         self.manifold = manifold
 
         for function, name in (

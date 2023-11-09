@@ -1,15 +1,6 @@
-import numpy as np
-import scipy.linalg
-import scipy.version
+from copy import deepcopy as copy
 
 import pymanopt.numerics as nx
-
-
-# Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked matrices.
-if scipy.version.version >= "1.9.0":
-    scipy_expm = scipy.linalg.expm
-else:
-    scipy_expm = np.vectorize(scipy.linalg.expm, signature="(m,m)->(m,m)")
 
 
 def multitransp(A):
@@ -23,12 +14,12 @@ def multitransp(A):
     """
     if A.ndim == 2:
         return A.T
-    return np.transpose(A, (0, 2, 1))
+    return nx.transpose(A, (0, 2, 1))
 
 
 def multihconj(A):
     """Vectorized matrix conjugate transpose."""
-    return np.conjugate(multitransp(A))
+    return nx.conjugate(multitransp(A))
 
 
 def multisym(A):
@@ -61,32 +52,32 @@ def multiskewh(A):
 
 def multieye(k, n):
     """Array of ``k`` ``n x n`` identity matrices."""
-    return np.tile(np.eye(n), (k, 1, 1))
+    return nx.tile(nx.eye(n), (k, 1, 1))
 
 
 def multilogm(A, *, positive_definite=False):
     """Vectorized matrix logarithm."""
     if not positive_definite:
-        return np.vectorize(scipy.linalg.logm, signature="(m,m)->(m,m)")(A)
+        return nx.linalg.logm(A)
 
-    w, v = np.linalg.eigh(A)
-    w = np.expand_dims(np.log(w), axis=-1)
+    w, v = nx.linalg.eigh(A)
+    w = nx.expand_dims(nx.log(w), axis=-1)
     logmA = v @ (w * multihconj(v))
-    if np.isrealobj(A):
-        return np.real(logmA)
+    if nx.isrealobj(A):
+        return nx.real(logmA)
     return logmA
 
 
 def multiexpm(A, *, symmetric=False):
     """Vectorized matrix exponential."""
     if not symmetric:
-        return scipy_expm(A)
+        return nx.linalg.expm(A)
 
-    w, v = np.linalg.eigh(A)
-    w = np.expand_dims(nx.exp(w), axis=-1)
+    w, v = nx.linalg.eigh(A)
+    w = nx.expand_dims(nx.exp(w), axis=-1)
     expmA = v @ (w * multihconj(v))
-    if np.isrealobj(A):
-        return np.real(expmA)
+    if nx.isrealobj(A):
+        return nx.real(expmA)
     return expmA
 
 
@@ -95,14 +86,14 @@ def multiqr(A):
     if A.ndim not in (2, 3):
         raise ValueError("Input must be a matrix or a stacked matrix")
 
-    q, r = np.vectorize(np.linalg.qr, signature="(m,n)->(m,k),(k,n)")(A)
+    q, r = nx.linalg.qr(A)
 
     # Compute signs or unit-modulus phase of entries of diagonal of r.
-    s = np.diagonal(r, axis1=-2, axis2=-1).copy()
+    s = copy(nx.diagonal(r, axis1=-2, axis2=-1))
     s[s == 0] = 1
     s = s / nx.abs(s)
 
-    s = np.expand_dims(s, axis=-1)
+    s = nx.expand_dims(s, axis=-1)
     q = q * multitransp(s)
-    r = r * np.conjugate(s)
+    r = r * nx.conjugate(s)
     return q, r
