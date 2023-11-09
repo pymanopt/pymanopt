@@ -64,6 +64,11 @@ def _(array_a: array_like, array_b: array_like) -> None:
     np.testing.assert_almost_equal(array_a, array_b)
 
 
+@nx.assert_allclose.register
+def _(array_a: array_like, array_b: array_like) -> None:
+    np.testing.assert_allclose(array_a, array_b)
+
+
 @nx.assert_array_almost_equal.register
 def _(array_a: array_like, array_b: array_like) -> None:
     np.testing.assert_array_almost_equal(array_a, array_b)
