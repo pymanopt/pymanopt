@@ -2,7 +2,6 @@ import warnings
 
 import autograd.numpy as np
 import pytest
-from numpy import testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import (
@@ -21,19 +20,19 @@ class TestSphereManifold:
         self.manifold = Sphere(m, n)
 
         # For automatic testing of euclidean_to_riemannian_hessian
-        self.projection = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
+        self.projection = lambda x, u: u - nx.tensordot(x, u, nx.ndim(u)) * x
 
     def test_dim(self):
         assert self.manifold.dim == self.m * self.n - 1
 
     def test_typical_dist(self):
-        np_testing.assert_almost_equal(self.manifold.typical_dist, np.pi)
+        np_testing.assert_almost_equal(self.manifold.typical_dist, nx.pi)
 
     def test_dist(self):
         s = self.manifold
         x = s.random_point()
         y = s.random_point()
-        correct_dist = np.arccos(np.tensordot(x, y))
+        correct_dist = nx.arccos(nx.tensordot(x, y))
         np_testing.assert_almost_equal(correct_dist, s.dist(x, y))
 
     def test_inner_product(self):
@@ -41,41 +40,41 @@ class TestSphereManifold:
         x = s.random_point()
         u = s.random_tangent_vector(x)
         v = s.random_tangent_vector(x)
-        np_testing.assert_almost_equal(np.sum(u * v), s.inner_product(x, u, v))
+        np_testing.assert_almost_equal(nx.sum(u * v), s.inner_product(x, u, v))
 
     def test_projection(self):
         #  Construct a random point X on the manifold.
-        X = np.random.normal(size=(self.m, self.n))
-        X /= np.linalg.norm(X, "fro")
+        X = nx.random.normal(size=(self.m, self.n))
+        X /= nx.linalg.norm(X, "fro")
 
         #  Construct a vector H in the ambient space.
-        H = np.random.normal(size=(self.m, self.n))
+        H = nx.random.normal(size=(self.m, self.n))
 
         #  Compare the projections.
         np_testing.assert_array_almost_equal(
-            H - X * np.trace(X.T @ H), self.manifold.projection(X, H)
+            H - X * nx.trace(X.T @ H), self.manifold.projection(X, H)
         )
 
     def test_euclidean_to_riemannian_gradient(self):
         # Should be the same as proj
         #  Construct a random point X on the manifold.
-        X = np.random.normal(size=(self.m, self.n))
-        X /= np.linalg.norm(X, "fro")
+        X = nx.random.normal(size=(self.m, self.n))
+        X /= nx.linalg.norm(X, "fro")
 
         #  Construct a vector H in the ambient space.
-        H = np.random.normal(size=(self.m, self.n))
+        H = nx.random.normal(size=(self.m, self.n))
 
         #  Compare the projections.
         np_testing.assert_array_almost_equal(
-            H - X * np.trace(X.T @ H),
+            H - X * nx.trace(X.T @ H),
             self.manifold.euclidean_to_riemannian_gradient(X, H),
         )
 
     def test_euclidean_to_riemannian_hessian(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
-        egrad = np.random.normal(size=(self.m, self.n))
-        ehess = np.random.normal(size=(self.m, self.n))
+        egrad = nx.random.normal(size=(self.m, self.n))
+        ehess = nx.random.normal(size=(self.m, self.n))
 
         np_testing.assert_allclose(
             testing.euclidean_to_riemannian_hessian(self.projection)(
@@ -91,7 +90,7 @@ class TestSphereManifold:
         u = self.manifold.random_tangent_vector(x)
 
         xretru = self.manifold.retraction(x, u)
-        np_testing.assert_almost_equal(np.linalg.norm(xretru), 1)
+        np_testing.assert_almost_equal(nx.linalg.norm(xretru), 1)
 
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
@@ -102,7 +101,7 @@ class TestSphereManifold:
         u = self.manifold.random_tangent_vector(x)
 
         np_testing.assert_almost_equal(
-            self.manifold.norm(x, u), np.linalg.norm(u)
+            self.manifold.norm(x, u), nx.linalg.norm(u)
         )
 
     def test_random_point(self):
@@ -110,9 +109,9 @@ class TestSphereManifold:
         # if you generate two they are not equal.
         s = self.manifold
         x = s.random_point()
-        np_testing.assert_almost_equal(np.linalg.norm(x), 1)
+        np_testing.assert_almost_equal(nx.linalg.norm(x), 1)
         y = s.random_point()
-        assert np.linalg.norm(x - y) > 1e-3
+        assert nx.linalg.norm(x - y) > 1e-3
 
     def test_random_tangent_vector(self):
         # Just make sure that things generated are in the tangent space and
@@ -121,9 +120,9 @@ class TestSphereManifold:
         x = s.random_point()
         u = s.random_tangent_vector(x)
         v = s.random_tangent_vector(x)
-        np_testing.assert_almost_equal(np.tensordot(x, u), 0)
+        np_testing.assert_almost_equal(nx.tensordot(x, u), 0)
 
-        assert np.linalg.norm(u - v) > 1e-3
+        assert nx.linalg.norm(u - v) > 1e-3
 
     def test_transport(self):
         # Should be the same as proj
@@ -163,7 +162,7 @@ class TestSphereSubspaceIntersectionManifold:
         # Defines the 1-sphere intersected with the 1-dimensional subspace
         # passing through (1, 1) / sqrt(2). This creates a 0-dimensional
         # manifold as it only consists of isolated points in R^2.
-        self.U = np.ones((self.n, 1)) / np.sqrt(2)
+        self.U = nx.ones((self.n, 1)) / nx.sqrt(2)
         with warnings.catch_warnings(record=True):
             self.manifold = SphereSubspaceIntersection(self.U)
 
@@ -172,19 +171,19 @@ class TestSphereSubspaceIntersectionManifold:
 
     def test_random_point(self):
         x = self.manifold.random_point()
-        p = np.ones(2) / np.sqrt(2)
-        assert np.allclose(x, p) or np.allclose(x, -p)
+        p = nx.ones(2) / nx.sqrt(2)
+        assert nx.allclose(x, p) or nx.allclose(x, -p)
 
     def test_projection(self):
-        h = np.random.normal(size=self.n)
+        h = nx.random.normal(size=self.n)
         x = self.manifold.random_point()
         p = self.manifold.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
-        np_testing.assert_array_almost_equal(p, np.zeros(self.n))
+        np_testing.assert_array_almost_equal(p, nx.zeros(self.n))
 
     def test_dim_1(self):
-        U = np.zeros((3, 2))
+        U = nx.zeros((3, 2))
         U[0, 0] = U[1, 1] = 1
         manifold = SphereSubspaceIntersection(U)
         # U spans the x-y plane, therefore the manifold consists of the
@@ -197,8 +196,8 @@ class TestSphereSubspaceIntersectionManifold:
 
     def test_dim_rand(self):
         n = 100
-        U = np.random.normal(size=(n, n // 3))
-        dim = np.linalg.matrix_rank(U) - 1
+        U = nx.random.normal(size=(n, n // 3))
+        dim = nx.linalg.matrix_rank(U) - 1
         manifold = SphereSubspaceIntersection(U)
         assert manifold.dim == dim
 
@@ -218,7 +217,7 @@ class TestSphereSubspaceComplementIntersectionManifold:
         # orthogonal to the line passing through (1, 1) / sqrt(2). This creates
         # a 0-dimensional manifold as it only consits of isolated points in
         # R^2.
-        self.U = np.ones((self.n, 1)) / np.sqrt(2)
+        self.U = nx.ones((self.n, 1)) / nx.sqrt(2)
         with warnings.catch_warnings(record=True):
             self.manifold = SphereSubspaceComplementIntersection(self.U)
 
@@ -227,19 +226,19 @@ class TestSphereSubspaceComplementIntersectionManifold:
 
     def test_random_point(self):
         x = self.manifold.random_point()
-        p = np.array([-1, 1]) / np.sqrt(2)
-        assert np.allclose(x, p) or np.allclose(x, -p)
+        p = nx.array([-1, 1]) / nx.sqrt(2)
+        assert nx.allclose(x, p) or nx.allclose(x, -p)
 
     def test_projection(self):
-        h = np.random.normal(size=self.n)
+        h = nx.random.normal(size=self.n)
         x = self.manifold.random_point()
         p = self.manifold.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
-        np_testing.assert_array_almost_equal(p, np.zeros(self.n))
+        np_testing.assert_array_almost_equal(p, nx.zeros(self.n))
 
     def test_dim_1(self):
-        U = np.zeros((3, 1))
+        U = nx.zeros((3, 1))
         U[-1, -1] = 1
         manifold = SphereSubspaceComplementIntersection(U)
         # U spans the z-axis with its orthogonal complement being the x-y
@@ -253,17 +252,17 @@ class TestSphereSubspaceComplementIntersectionManifold:
 
     def test_dim_rand(self):
         n = 100
-        U = np.random.normal(size=(n, n // 3))
+        U = nx.random.normal(size=(n, n // 3))
         # By the rank-nullity theorem the orthogonal complement of span(U) has
         # dimension n - rank(U).
-        dim = n - np.linalg.matrix_rank(U) - 1
+        dim = n - nx.linalg.matrix_rank(U) - 1
         manifold = SphereSubspaceComplementIntersection(U)
         assert manifold.dim == dim
 
         # Test if a random element really lies in the left null space of U.
         x = manifold.random_point()
-        np_testing.assert_almost_equal(np.linalg.norm(x), 1)
-        np_testing.assert_array_almost_equal(U.T @ x, np.zeros(U.shape[1]))
+        np_testing.assert_almost_equal(nx.linalg.norm(x), 1)
+        np_testing.assert_array_almost_equal(U.T @ x, nx.zeros(U.shape[1]))
 
 
 class TestSphereSubspaceComplementIntersectionManifoldGradient:
