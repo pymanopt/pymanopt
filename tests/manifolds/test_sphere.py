@@ -11,10 +11,10 @@ from pymanopt.manifolds import (
 )
 from pymanopt.tools import testing
 
-from tests.manifolds.test_manifold import BackendManifold
+from tests.manifolds.test_manifold import TestBackendManifoldFactory
 
 
-class TestSphereManifold(metaclass=BackendManifold):
+class TestSphereManifold(metaclass=TestBackendManifoldFactory('numpy')):
     @pytest.fixture(autouse=True)
     def setup(self):
         self.m = m = 100
