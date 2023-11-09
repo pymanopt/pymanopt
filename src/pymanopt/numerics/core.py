@@ -203,6 +203,12 @@ except ImportError:
 newaxis = None
 
 
+@functools.singledispatch
+@not_implemented
+def ndim(_):
+    pass
+
+
 ones = np.ones
 
 
