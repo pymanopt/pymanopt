@@ -1,9 +1,9 @@
 import warnings
 
-import autograd.numpy as np
 import pytest
 
 import pymanopt
+import pymanopt.numerics as nx
 from pymanopt.manifolds import (
     Sphere,
     SphereSubspaceComplementIntersection,
