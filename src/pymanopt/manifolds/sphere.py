@@ -57,7 +57,7 @@ class _SphereBase(RiemannianSubmanifold):
         return self._normalize(point)
 
     def random_tangent_vector(self, point):
-        vector = nx.random.normal(size=self._shape)
+        vector = nx.array_as(nx.random.normal(size=self._shape), as_=point)
         return self._normalize(self.projection(point, vector))
 
     def transport(self, point_a, point_b, tangent_vector_a):
