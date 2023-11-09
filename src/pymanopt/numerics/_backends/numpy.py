@@ -216,6 +216,11 @@ def _(
     return np.linalg.svd(array, *args, **kwargs)
 
 
+@nx.ndim.register
+def _(array: array_like) -> int:
+    return np.ndim(array)
+
+
 @nx.prod.register
 def _(array: array_like) -> np.float64:
     return np.prod(array)
