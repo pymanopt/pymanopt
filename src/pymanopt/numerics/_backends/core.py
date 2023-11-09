@@ -1,10 +1,12 @@
+import numpy as np
+
+
 def get_backend(point):
     backend = None
 
     while isinstance(point, (tuple, list)):
         point = point[0]
 
-    import numpy as np
     if isinstance(point, np.ndarray):
         backend = "numpy"
 
@@ -47,6 +49,11 @@ def numpy_to_backend(point, backend):
     if issubclass(point.__class__, (tuple, list)):
         return point.__class__([
             numpy_to_backend(p, backend) for p in point])
+    
+    # if point is not a numpy array, return it
+    # e.g. torch.Tensor, jnp.ndarray, tf.Tensor
+    if type(point) != np.ndarray:
+        return point
 
     if point.dtype.kind == 'c':
         dtype = 'complex128'
@@ -54,7 +61,6 @@ def numpy_to_backend(point, backend):
         dtype = 'float64'
 
     if backend == 'numpy':
-        import numpy as np
         point = np.array(point, dtype=dtype)
     elif backend == 'pytorch':
         import torch
