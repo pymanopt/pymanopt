@@ -21,7 +21,7 @@ class ParametersBackend(SimpleNamespace):
 
     def update_backend(self, backend):
         for name, value in self.__dict__.items():
-            setattr(self, name, nx.to_backend(value, backend))
+            self.__dict__[name] = nx.to_backend(value, backend)
 
 
 def raise_not_implemented_error(method):
