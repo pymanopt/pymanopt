@@ -191,7 +191,7 @@ class SphereSubspaceComplementIntersection(
         self._validate_span_matrix(matrix)
         m = matrix.shape[0]
         q, _ = nx.linalg.qr(matrix)
-        projector = nx.eye(m) - q @ q.T
+        projector = nx.array_as(nx.eye(m), as_=q) - q @ q.T
         subspace_dimension = nx.linalg.matrix_rank(projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors orthogonal "
