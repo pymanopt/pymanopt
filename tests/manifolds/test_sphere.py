@@ -46,11 +46,10 @@ class TestSphereManifold(metaclass=TBMF()):
 
     def test_projection(self):
         #  Construct a random point X on the manifold.
-        X = nx.random.normal(size=(self.m, self.n))
-        X /= nx.linalg.norm(X, "fro")
+        X = self.manifold.random_point()
 
         #  Construct a vector H in the ambient space.
-        H = nx.random.normal(size=(self.m, self.n))
+        H = nx.array_as(nx.random.normal(size=(self.m, self.n)), as_=X)
 
         #  Compare the projections.
         nx.assert_array_almost_equal(
@@ -60,11 +59,10 @@ class TestSphereManifold(metaclass=TBMF()):
     def test_euclidean_to_riemannian_gradient(self):
         # Should be the same as proj
         #  Construct a random point X on the manifold.
-        X = nx.random.normal(size=(self.m, self.n))
-        X /= nx.linalg.norm(X, "fro")
+        X = self.manifold.random_point()
 
         #  Construct a vector H in the ambient space.
-        H = nx.random.normal(size=(self.m, self.n))
+        H = nx.array_as(nx.random.normal(size=(self.m, self.n)), as_=X)
 
         #  Compare the projections.
         nx.assert_array_almost_equal(
@@ -75,8 +73,8 @@ class TestSphereManifold(metaclass=TBMF()):
     def test_euclidean_to_riemannian_hessian(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
-        egrad = nx.random.normal(size=(self.m, self.n))
-        ehess = nx.random.normal(size=(self.m, self.n))
+        egrad = nx.array_as(nx.random.normal(size=(self.m, self.n)), as_=x)
+        ehess = nx.array_as(nx.random.normal(size=(self.m, self.n)), as_=x)
 
         nx.assert_allclose(
             testing.euclidean_to_riemannian_hessian(self.projection)(
@@ -177,8 +175,8 @@ class TestSphereSubspaceIntersectionManifold(metaclass=TBMF()):
         assert nx.allclose(x, p) or nx.allclose(x, -p)
 
     def test_projection(self):
-        h = nx.random.normal(size=self.n)
         x = self.manifold.random_point()
+        h = nx.array_as(nx.random.normal(size=self.n), as_=x)
         p = self.manifold.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
@@ -198,7 +196,10 @@ class TestSphereSubspaceIntersectionManifold(metaclass=TBMF()):
 
     def test_dim_rand(self):
         n = 100
-        U = nx.random.normal(size=(n, n // 3))
+        U = nx.array_as(
+            nx.random.normal(size=(n, n // 3)),
+            as_=self.manifold.random_point()
+        )
         dim = nx.linalg.matrix_rank(U) - 1
         manifold = SphereSubspaceIntersection(U)
         assert manifold.dim == dim
@@ -232,8 +233,8 @@ class TestSphereSubspaceComplementIntersectionManifold(metaclass=TBMF()):
         assert nx.allclose(x, p) or nx.allclose(x, -p)
 
     def test_projection(self):
-        h = nx.random.normal(size=self.n)
         x = self.manifold.random_point()
+        h = nx.array_as(nx.random.normal(size=self.n), as_=x)
         p = self.manifold.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
@@ -254,7 +255,10 @@ class TestSphereSubspaceComplementIntersectionManifold(metaclass=TBMF()):
 
     def test_dim_rand(self):
         n = 100
-        U = nx.random.normal(size=(n, n // 3))
+        U = nx.array_as(
+            nx.random.normal(size=(n, n // 3)),
+            as_=self.manifold.random_point()
+        )
         # By the rank-nullity theorem the orthogonal complement of span(U) has
         # dimension n - rank(U).
         dim = n - nx.linalg.matrix_rank(U) - 1
