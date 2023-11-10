@@ -51,7 +51,7 @@ def euclidean_to_riemannian_hessian(projector):
         # keep a copy of point for backend compatibility
         point_copy = deepcopy(point)
 
-        # tranform everything to numpy arrays
+        # tranform everything to torch tensors
         point = nx.to_backend(point, 'pytorch')
         euclidean_gradient = nx.to_backend(euclidean_gradient, 'pytorch')
         euclidean_hessian = nx.to_backend(euclidean_hessian, 'pytorch')
