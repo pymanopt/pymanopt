@@ -121,8 +121,8 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
                 "therefore has dimension 0 as it only consists of isolated "
                 "points"
             )
-        self._subspace_projector = projector
         super().__init__(n, name=name, dimension=dimension)
+        self.parameters._subspace_projector = projector
 
     def _validate_span_matrix(self, matrix):
         if len(matrix.shape) != 2:
@@ -134,15 +134,15 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
             )
 
     def projection(self, point, vector):
-        return self._subspace_projector @ super().projection(point, vector)
+        return self.parameters._subspace_projector @ super().projection(point, vector)
 
     def random_point(self):
         point = super().random_point()
-        return self._normalize(self._subspace_projector @ point)
+        return self._normalize(self.parameters._subspace_projector @ point)
 
     def random_tangent_vector(self, point):
         vector = super().random_tangent_vector(point)
-        return self._normalize(self._subspace_projector @ vector)
+        return self._normalize(self.parameters._subspace_projector @ vector)
 
 
 @extend_docstring(DOCSTRING_NOTE)
