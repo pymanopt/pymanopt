@@ -250,6 +250,11 @@ def _(
     return U, S, V
 
 
+@nx.ndim.register
+def _(tensor: tensor_like) -> int:
+    return tensor.ndim
+
+
 @nx.prod.register
 def _(tensor: tensor_like) -> float:
     return torch.prod(tensor)
