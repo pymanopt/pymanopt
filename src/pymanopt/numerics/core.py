@@ -158,6 +158,9 @@ def hstack(_):
     pass
 
 
+inf = np.inf
+
+
 integer = np.integer
 
 
