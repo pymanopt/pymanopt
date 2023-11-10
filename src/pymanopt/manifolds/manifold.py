@@ -16,12 +16,12 @@ class ParametersBackend(SimpleNamespace):
         super().__init__()
 
     def __setattr__(self, name, value):
-        value = nx.numpy_to_backend(value, 'numpy')
+        value = nx.to_backend(value, 'numpy')
         super().__setattr__(name, value)
 
     def update_backend(self, backend):
         for name, value in self.__dict__.items():
-            setattr(self, name, nx.numpy_to_backend(value, backend))
+            setattr(self, name, nx.to_backend(value, backend))
 
 
 def raise_not_implemented_error(method):
@@ -56,7 +56,7 @@ class BackendManifold(type):
             if backend is None:
                 self.backend = backend = 'numpy'
 
-            point = nx.numpy_to_backend(point, backend)
+            point = nx.to_backend(point, backend)
 
             return point
 

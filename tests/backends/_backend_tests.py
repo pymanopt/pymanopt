@@ -45,7 +45,7 @@ class TestUnaryFunction:
         n = self.n
         backend = self.backend
 
-        x = nx.numpy_to_backend(nx.random.normal(size=n), backend)
+        x = nx.to_backend(nx.random.normal(size=n), backend)
 
         # Test whether cost function accepts single argument.
         assert nx.allclose(nx.sum(x**2), cost(x))
@@ -55,7 +55,7 @@ class TestUnaryFunction:
         nx.allclose(2 * x, euclidean_gradient(x))
 
         # Test the Hessian.
-        u = nx.numpy_to_backend(nx.random.normal(size=n), backend)
+        u = nx.to_backend(nx.random.normal(size=n), backend)
 
         # Test whether Hessian accepts two regular arguments.
         ehess = cost.get_hessian_operator()
@@ -84,7 +84,7 @@ class TestUnaryComplexFunction:
         n = self.n
         backend = self.backend
 
-        x = nx.numpy_to_backend(
+        x = nx.to_backend(
             nx.random.normal(size=n) + 1j * nx.random.normal(size=n), backend)
 
         # Test whether cost function accepts single argument.
@@ -95,7 +95,7 @@ class TestUnaryComplexFunction:
         nx.allclose(2 * x.conj(), euclidean_gradient(x))
 
         # Test the Hessian.
-        u = nx.numpy_to_backend(
+        u = nx.to_backend(
             nx.random.normal(size=n) + 1j * nx.random.normal(size=n), backend)
 
         # Test whether Hessian accepts two regular arguments.
@@ -129,8 +129,8 @@ class TestNaryFunction:
         n = self.n
         backend = self.backend
 
-        x = nx.numpy_to_backend(nx.random.normal(size=n), backend)
-        y = nx.numpy_to_backend(nx.random.normal(size=n), backend)
+        x = nx.to_backend(nx.random.normal(size=n), backend)
+        y = nx.to_backend(nx.random.normal(size=n), backend)
 
         assert nx.allclose(x @ y, cost(x, y))
 
@@ -145,8 +145,8 @@ class TestNaryFunction:
         nx.allclose(g_y, x)
 
         # Test the Hessian-vector product.
-        u = nx.numpy_to_backend(nx.random.normal(size=n), backend)
-        v = nx.numpy_to_backend(nx.random.normal(size=n), backend)
+        u = nx.to_backend(nx.random.normal(size=n), backend)
+        v = nx.to_backend(nx.random.normal(size=n), backend)
 
         ehess = cost.get_hessian_operator()
         h = ehess(x, y, u, v)
@@ -186,7 +186,7 @@ class TestNaryParameterGrouping:
         backend = self.backend
 
         x, y, z = [
-            nx.numpy_to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
+            nx.to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
 
         assert nx.allclose(nx.sum(x**2 + y + z**3), cost(x, y, z))
 
@@ -206,7 +206,7 @@ class TestNaryParameterGrouping:
 
         # Test the Hessian.
         u, v, w = [
-            nx.numpy_to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
+            nx.to_backend(nx.random.normal(size=n), backend) for _ in range(3)]
 
         ehess = cost.get_hessian_operator()
         h = ehess(x, y, z, u, v, w)
@@ -237,7 +237,7 @@ class TestVector:
     def test_compile(self):
         n = self.n
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=n), backend)
+        Y = nx.to_backend(nx.random.normal(size=n), backend)
 
         correct_cost = nx.exp(nx.sum(Y**2))
 
@@ -246,7 +246,7 @@ class TestVector:
     def test_grad(self):
         n = self.n
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=n), backend)
+        Y = nx.to_backend(nx.random.normal(size=n), backend)
 
         correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
 
@@ -257,8 +257,8 @@ class TestVector:
     def test_hessian(self):
         n = self.n
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=n), backend)
-        A = nx.numpy_to_backend(nx.random.normal(size=n), backend)
+        Y = nx.to_backend(nx.random.normal(size=n), backend)
+        A = nx.to_backend(nx.random.normal(size=n), backend)
 
         # First form hessian matrix H
         # Convert Y and A into matrices (row vectors)
@@ -293,7 +293,7 @@ class TestMatrix:
     def test_compile(self):
         m, n = self.m, self.n
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=(m, n)), backend)
+        Y = nx.to_backend(nx.random.normal(size=(m, n)), backend)
 
         correct_cost = nx.exp(nx.sum(Y**2))
 
@@ -302,7 +302,7 @@ class TestMatrix:
     def test_grad(self):
         m, n = self.m, self.n
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=(m, n)), backend)
+        Y = nx.to_backend(nx.random.normal(size=(m, n)), backend)
 
         correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
 
@@ -313,10 +313,10 @@ class TestMatrix:
     def test_hessian(self):
         m, n = self.m, self.n
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=(m, n)), backend)
+        Y = nx.to_backend(nx.random.normal(size=(m, n)), backend)
         Y1 = Y.reshape(m, n, 1, 1)
         Y2 = Y.reshape(1, 1, m, n)
-        A = nx.numpy_to_backend(nx.random.normal(size=(m, n)), backend)
+        A = nx.to_backend(nx.random.normal(size=(m, n)), backend)
 
         # Create an m x n x m x n array with diag[i,j,k,l] == 1 iff
         # (i == k and j == l), this is a 'diagonal' tensor.
@@ -352,7 +352,7 @@ class TestTensor3:
     def test_compile(self):
         n1, n2, n3 = self.n1, self.n2, self.n3
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
+        Y = nx.to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
 
         correct_cost = nx.exp(nx.sum(Y**2))
 
@@ -361,7 +361,7 @@ class TestTensor3:
     def test_grad(self):
         n1, n2, n3 = self.n1, self.n2, self.n3
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
+        Y = nx.to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
 
         correct_grad = 2 * Y * nx.exp(nx.sum(Y**2))
 
@@ -372,8 +372,8 @@ class TestTensor3:
     def test_hessian(self):
         n1, n2, n3 = self.n1, self.n2, self.n3
         backend = self.backend
-        Y = nx.numpy_to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
-        A = nx.numpy_to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
+        Y = nx.to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
+        A = nx.to_backend(nx.random.normal(size=(n1, n2, n3)), backend)
 
         # First form hessian tensor H (6th order)
         Y1 = Y.reshape(n1, n2, n3, 1, 1, 1)
@@ -415,7 +415,7 @@ class TestMixed:
     def test_compile(self):
         n1, n2, n3, n4, n5, n6 = self.n1, self.n2, self.n3, self.n4, self.n5, self.n6
         backend = self.backend
-        y = nx.numpy_to_backend((
+        y = nx.to_backend((
             nx.random.normal(size=n1),
             nx.random.normal(size=(n2, n3)),
             nx.random.normal(size=(n4, n5, n6)),
@@ -432,7 +432,7 @@ class TestMixed:
     def test_grad(self):
         n1, n2, n3, n4, n5, n6 = self.n1, self.n2, self.n3, self.n4, self.n5, self.n6
         backend = self.backend
-        y = nx.numpy_to_backend((
+        y = nx.to_backend((
             nx.random.normal(size=n1),
             nx.random.normal(size=(n2, n3)),
             nx.random.normal(size=(n4, n5, n6)),
@@ -455,12 +455,12 @@ class TestMixed:
     def test_hessian(self):
         n1, n2, n3, n4, n5, n6 = self.n1, self.n2, self.n3, self.n4, self.n5, self.n6
         backend = self.backend
-        y = nx.numpy_to_backend((
+        y = nx.to_backend((
             nx.random.normal(size=n1),
             nx.random.normal(size=(n2, n3)),
             nx.random.normal(size=(n4, n5, n6)),
         ), backend)
-        a = nx.numpy_to_backend((
+        a = nx.to_backend((
             nx.random.normal(size=n1),
             nx.random.normal(size=(n2, n3)),
             nx.random.normal(size=(n4, n5, n6)),

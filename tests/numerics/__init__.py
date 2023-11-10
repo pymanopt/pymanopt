@@ -2,7 +2,7 @@ import functools
 import numpy as np
 from typing import Union, Sequence
 
-from pymanopt.numerics import NUMERICS_SUPPORTED_BACKENDS, numpy_to_backend
+from pymanopt.numerics import NUMERICS_SUPPORTED_BACKENDS, to_backend
 
 
 def test_numerics_supported_backends(
@@ -18,12 +18,12 @@ def test_numerics_supported_backends(
             for backend in backends:
                 for key, value in kwargs.items():
                     if type(value) == np.ndarray:
-                        kwargs[key] = numpy_to_backend(value, backend)
+                        kwargs[key] = to_backend(value, backend)
                     if isinstance(value, Sequence):
                         new_value = list()
                         for item in value:
                             if type(item) == np.ndarray:
-                                new_value.append(numpy_to_backend(item, backend))
+                                new_value.append(to_backend(item, backend))
                             else:
                                 new_value.append(item)
                         kwargs[key] = new_value

@@ -1,5 +1,7 @@
 import numpy as np
 
+import pymanopt.numerics as nx
+
 
 def get_backend(point):
     backend = None
@@ -37,28 +39,29 @@ def get_backend(point):
     return backend
 
 
-def numpy_to_backend(point, backend):
+def to_backend(point, backend):
     # if point is a namedtuple,
     # convert each point
     if hasattr(point, '_fields'):
         return point.__class__(*[
-            numpy_to_backend(p, backend) for p in point])
+            to_backend(p, backend) for p in point])
 
     # if point has a class that inherits from list or tuple,
     # convert each point
     if issubclass(point.__class__, (tuple, list)):
         return point.__class__([
-            numpy_to_backend(p, backend) for p in point])
+            to_backend(p, backend) for p in point])
 
-    # if point is not a numpy array, return it
-    # e.g. torch.Tensor, jnp.ndarray, tf.Tensor
-    if type(point) != np.ndarray:
-        return point
-
-    if point.dtype.kind == 'c':
+    if nx.iscomplexobj(point):
         dtype = 'complex128'
     else:
         dtype = 'float64'
+
+    # if point is not a numpy array,
+    # e.g. torch.Tensor, jnp.ndarray, tf.Tensor
+    # convert it to numpy array
+    if type(point) != np.ndarray:
+        point = np.array(point, dtype=dtype)
 
     if backend == 'numpy':
         point = np.array(point, dtype=dtype)
@@ -79,4 +82,4 @@ def numpy_to_backend(point, backend):
 
 def array_as(point, as_):
     backend = get_backend(as_)
-    return numpy_to_backend(point, backend)
+    return to_backend(point, backend)

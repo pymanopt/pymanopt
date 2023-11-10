@@ -36,7 +36,7 @@ __all__ = [
     "ndarray",
     "ndim",
     "newaxis",
-    "numpy_to_backend",
+    "to_backend",
     "ones",
     "pi",
     "prod",
@@ -128,7 +128,7 @@ from pymanopt.numerics import linalg, special
 from pymanopt.numerics._backends.core import (
     array_as,
     get_backend,
-    numpy_to_backend
+    to_backend
 )
 from numpy import random
 
