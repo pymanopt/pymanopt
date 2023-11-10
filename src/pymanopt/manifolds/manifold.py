@@ -2,8 +2,26 @@ import abc
 import functools
 import warnings
 from typing import Sequence, Union
+from types import SimpleNamespace
 
 import pymanopt.numerics as nx
+
+
+class ParametersBackend(SimpleNamespace):
+    """A class to store parameters of a manifold.
+
+    It handles the different backends from nx.
+    """
+    def __init__(self):
+        super().__init__()
+
+    def __setattr__(self, name, value):
+        value = nx.numpy_to_backend(value, 'numpy')
+        super().__setattr__(name, value)
+
+    def update_backend(self, backend):
+        for name, value in self.__dict__.items():
+            setattr(self, name, nx.numpy_to_backend(value, backend))
 
 
 def raise_not_implemented_error(method):
@@ -123,6 +141,7 @@ class Manifold(metaclass=BackendManifold):
         self._dimension = dimension
         self._point_layout = point_layout
         self._backend = None
+        self.parameters = ParametersBackend()
 
     def __str__(self):
         return self._name
@@ -246,6 +265,8 @@ class Manifold(metaclass=BackendManifold):
                 f"{nx.NUMERICS_SUPPORTED_BACKENDS}"
             )
         self._backend = backend
+
+        self.parameters.update_backend(backend)
 
     @abc.abstractmethod
     def random_tangent_vector(self, point):
