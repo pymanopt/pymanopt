@@ -5,7 +5,7 @@ from typing import Union, Sequence
 from pymanopt.numerics import NUMERICS_SUPPORTED_BACKENDS, to_backend
 
 
-def test_numerics_supported_backends(
+def decorator_test_numerics_supported_backends(
     backends=NUMERICS_SUPPORTED_BACKENDS
 ):
     """Decorator to test a function with all supported backends."""
