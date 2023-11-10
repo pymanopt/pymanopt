@@ -7,8 +7,12 @@ Note:
     projection is an orthogonal projection onto the tangent space.
 """
 
-import numpy as np
-from autograd import grad, jacobian
+from copy import deepcopy
+from torch.autograd import grad
+from torch.autograd.functional import jacobian
+
+
+import pymanopt.numerics as nx
 
 
 def riemannian_gradient(cost, projector):
@@ -40,19 +44,31 @@ def euclidean_to_riemannian_hessian(projector):
     Similar to :func:`riemannian_hessian`, this is not efficient as it computes the
     Jacobian explicitly.
     """
-    jacobian_projector = jacobian(projector)
 
     def converter(
         point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return projector(
+        # keep a copy of point for backend compatibility
+        point_copy = deepcopy(point)
+
+        # tranform everything to numpy arrays
+        point = nx.to_backend(point, 'pytorch')
+        euclidean_gradient = nx.to_backend(euclidean_gradient, 'pytorch')
+        euclidean_hessian = nx.to_backend(euclidean_hessian, 'pytorch')
+        tangent_vector = nx.to_backend(tangent_vector, 'pytorch')
+
+        # compute the Riemannian Hessian
+        riemannian_hessian = projector(
             point,
             euclidean_hessian
-            + np.tensordot(
-                jacobian_projector(point, euclidean_gradient),
+            + nx.tensordot(
+                jacobian(projector, (point, euclidean_gradient))[0],
                 tangent_vector,
-                axes=tangent_vector.ndim,
+                axes=nx.ndim(tangent_vector)
             ),
         )
+
+        # convert back to the original backend and return
+        return nx.array_as(riemannian_hessian, as_=point_copy)
 
     return converter
