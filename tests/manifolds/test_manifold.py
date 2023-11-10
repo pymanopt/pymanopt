@@ -23,7 +23,7 @@ def TestBackendManifoldFactory(backends=NUMERICS_SUPPORTED_BACKENDS):
 
         def test_with_backends(cls, test, backend):
             def wrapped_test(self, *args, **kwargs):
-                self.manifold._backend = backend
+                self.manifold.backend = backend
                 test(self, *args, **kwargs)
             return wrapped_test
 
