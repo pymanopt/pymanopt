@@ -64,7 +64,7 @@ class FrankWolfe(Optimizer):
         return np.linalg.inv(X) @ Q @ (Pstar @ self.sgnplus(D) @ P + Lcap) @ Qstar @ np.linalg.inv(X)
 
     def run(
-        self, problem, L, U, *, initial_point=None,
+        self, problem, L, U, *args, initial_point=None,
     ) -> OptimizerResult:
         """Run FW method.
 
