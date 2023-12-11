@@ -9,7 +9,7 @@ class TestFrankWolfe:
     N = 50
     matrices = [np.random.uniform(size=(n, n)) for i in range(N)]
     matricespd = np.array([
-        matrix @ matrix.T for matrix in matrices
+        (matrix @ matrix.T) + np.diag(np.ones(n)) for matrix in matrices
     ])
     matricesinv = np.array([
         np.linalg.inv(matrix) for matrix in matricespd
@@ -28,15 +28,16 @@ class TestFrankWolfe:
         )
     @pymanopt.function.autograd(manifold)
     def rieman_grad(X):
+          print(X)
           Xinv = np.linalg.inv(X)
-          return sum(
-            Xinv @ scipy.linalg.logm(X @ matrix) for matrix in matricesinv
+          return Xinv @ sum(
+            scipy.linalg.logm(X @ matrix) for matrix in matricesinv
         )
     problem = pymanopt.Problem(manifold, cost, riemannian_gradient=rieman_grad)
     U = np.mean(matricespd, axis = 0)
     U = U
     print(matricespd)
-    L = np.linalg.inv(np.sum(1/len(matrices)*matricesinv, axis = 0))
+    L = np.linalg.inv(np.sum(matricesinv, axis = 0))
     L = L
     print(L)
     print(U)

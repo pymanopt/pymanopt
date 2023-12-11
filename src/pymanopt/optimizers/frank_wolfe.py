@@ -63,13 +63,13 @@ class FrankWolfe(Optimizer):
     def step_direction(self, objective, manifold, gradient, grad, cost, X, L, U):
         sqrtX = scipy.linalg.sqrtm(X)
         D, Q = np.linalg.eigh(sqrtX @ grad @ sqrtX)
-        print(D)
+        # print(D)
         Qstar = np.matrix(Q).H
 
         Lcap = Qstar @ X @ L @ X @ Q
         Ucap = Qstar @ X @ U @ X @ Q
         A = Ucap - Lcap
-        print(A)
+        # print(A)
         # B = (A + A.T) / 2
         # _, s, V = np.linalg.svd(B)
 
@@ -95,7 +95,7 @@ class FrankWolfe(Optimizer):
         P = np.linalg.cholesky(A)
         Pstar = P.T.conj()
 
-        return np.linalg.inv(X) @ Q @ (Pstar @ self.sgnplus(D) @ P + Lcap) @ Qstar @ np.linalg.inv(X)
+        return Q @ (Pstar @ self.sgnplus(D) @ P + Lcap) @ Qstar
 
     def run(
         self, problem, L, U, *args, initial_point=None,
