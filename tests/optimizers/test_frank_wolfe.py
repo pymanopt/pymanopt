@@ -9,7 +9,7 @@ class TestFrankWolfe:
     N = 50
     matrices = [np.random.uniform(size=(n, n)) for i in range(N)]
     matricespd = np.array([
-        matrix * matrix.T for matrix in matrices
+        matrix @ matrix.T for matrix in matrices
     ])
     matricesinv = np.array([
         np.linalg.inv(matrix) for matrix in matricespd
@@ -36,7 +36,7 @@ class TestFrankWolfe:
     U = np.mean(matricespd, axis = 0)
     U = U
     print(matricespd)
-    L = np.linalg.inv(np.sum(matricesinv, axis = 0))
+    L = np.linalg.inv(np.sum(1/len(matrices)*matricesinv, axis = 0))
     L = L
     print(L)
     print(U)

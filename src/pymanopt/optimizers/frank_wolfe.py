@@ -61,36 +61,39 @@ class FrankWolfe(Optimizer):
             return False
     
     def step_direction(self, objective, manifold, gradient, grad, cost, X, L, U):
-        D, Q = np.linalg.eigh(grad)
+        sqrtX = scipy.linalg.sqrtm(X)
+        D, Q = np.linalg.eigh(sqrtX @ grad @ sqrtX)
+        print(D)
         Qstar = np.matrix(Q).H
 
         Lcap = Qstar @ X @ L @ X @ Q
         Ucap = Qstar @ X @ U @ X @ Q
         A = Ucap - Lcap
-        B = (A + A.T) / 2
-        _, s, V = np.linalg.svd(B)
+        print(A)
+        # B = (A + A.T) / 2
+        # _, s, V = np.linalg.svd(B)
 
-        H = np.dot(V.T, np.dot(np.diag(s), V))
+        # H = np.dot(V.T, np.dot(np.diag(s), V))
 
-        A2 = (B + H) / 2
+        # A2 = (B + H) / 2
 
-        A3 = (A2 + A2.T) / 2
+        # A3 = (A2 + A2.T) / 2
 
-        if self.isPD(A3):
-            P = np.linalg.cholesky(A3)
-            Pstar = P.T.conj()
-        else:
-            spacing = np.spacing(np.linalg.norm(A))
-            I = np.eye(A.shape[0])
-            k = 1
-            while not self.isPD(A3):
-                mineig = np.min(np.real(np.linalg.eigvals(A3)))
-                A3 += I * (-mineig * k**2 + spacing)
-                k += 1
-            # print(X)
-            # print(Mcap)
-            P = np.linalg.cholesky(A3)
-            Pstar = P.T.conj()
+        # if self.isPD(A3):
+        #     P = np.linalg.cholesky(A3)
+        #     Pstar = P.T.conj()
+        # else:
+        #     spacing = np.spacing(np.linalg.norm(A))
+        #     I = np.eye(A.shape[0])
+        #     k = 1
+        #     while not self.isPD(A3):
+        #         mineig = np.min(np.real(np.linalg.eigvals(A3)))
+        #         A3 += I * (-mineig * k**2 + spacing)
+        #         k += 1
+        #     # print(X)
+        #     # print(Mcap)
+        P = np.linalg.cholesky(A)
+        Pstar = P.T.conj()
 
         return np.linalg.inv(X) @ Q @ (Pstar @ self.sgnplus(D) @ P + Lcap) @ Qstar @ np.linalg.inv(X)
 
@@ -193,6 +196,7 @@ class FrankWolfe(Optimizer):
             cost = newcost
             grad = newgrad
             gradient_norm = newgradient_norm
+            iteration += 1 
             step_size = 2 / (iteration + 2)
 
         return self._return_result(
