@@ -47,7 +47,7 @@ class FrankWolfe(Optimizer):
         self.sub_problem = sub_problem
 
     def sgnplus(self, D):
-        Dsigns = np.sign(D)
+        Dsigns =  -1 * np.sign(D)
         Dsigns[Dsigns == -1] = 0
         return Dsigns
 
@@ -62,40 +62,18 @@ class FrankWolfe(Optimizer):
     
     def step_direction(self, objective, manifold, gradient, grad, cost, X, L, U):
         sqrtX = scipy.linalg.sqrtm(X)
-        D, Q = np.linalg.eig(sqrtX @ grad @ sqrtX)
+        D, Q = np.linalg.eigh(grad)
         # print(D)
         Qstar = np.matrix(Q).H
+        Xinv = np.linalg.inv(sqrtX)
 
-        Lcap = Qstar @ X @ L @ X @ Q
-        Ucap = Qstar @ X @ U @ X @ Q
+        Lcap = Qstar @ L @ Q
+        Ucap = Qstar @ U @ Q
         A = Ucap - Lcap
-        # print(A)
-        # B = (A + A.T) / 2
-        # _, s, V = np.linalg.svd(B)
-
-        # H = np.dot(V.T, np.dot(np.diag(s), V))
-
-        # A2 = (B + H) / 2
-
-        # A3 = (A2 + A2.T) / 2
-
-        # if self.isPD(A3):
-        #     P = np.linalg.cholesky(A3)
-        #     Pstar = P.T.conj()
-        # else:
-        #     spacing = np.spacing(np.linalg.norm(A))
-        #     I = np.eye(A.shape[0])
-        #     k = 1
-        #     while not self.isPD(A3):
-        #         mineig = np.min(np.real(np.linalg.eigvals(A3)))
-        #         A3 += I * (-mineig * k**2 + spacing)
-        #         k += 1
-        #     # print(X)
-        #     # print(Mcap)
         P = np.linalg.cholesky(A)
         Pstar = P.T.conj()
 
-        return Q @ (Pstar @ self.sgnplus(D) @ P + Lcap) @ Qstar
+        return Q @ (Pstar @ self.sgnplus(np.diag(D)) @ P + Lcap) @ Qstar
 
     def run(
         self, problem, L, U, *args, initial_point=None,
@@ -150,6 +128,7 @@ class FrankWolfe(Optimizer):
         iteration = 0
         step_size = 1.0
         start_time = time.time()
+        self._initialize_log()
 
         while True:
 
@@ -184,8 +163,9 @@ class FrankWolfe(Optimizer):
             
             Xinv = np.linalg.inv(x)
             Xinvsqrt = scipy.linalg.sqrtm(Xinv)
-            newx = scipy.linalg.sqrtm(x) @ scipy.linalg.fractional_matrix_power(Xinvsqrt @ Z @ Xinvsqrt, step_size) @ scipy.linalg.sqrtm(x)
 
+            newx = scipy.linalg.sqrtm(x) @ scipy.linalg.fractional_matrix_power(Xinvsqrt @ Z @ Xinvsqrt, step_size) @ scipy.linalg.sqrtm(x)
+            # newx = x + step_size * (Z - x)
             # Compute the new cost-related quantities for newx
             newcost = objective(newx)
             newgrad = gradient(newx)
@@ -196,7 +176,7 @@ class FrankWolfe(Optimizer):
             cost = newcost
             grad = newgrad
             gradient_norm = newgradient_norm
-            iteration += 1 
+            iteration += 1
             step_size = 2 / (iteration + 2)
 
         return self._return_result(
