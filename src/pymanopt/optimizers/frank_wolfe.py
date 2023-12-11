@@ -62,7 +62,7 @@ class FrankWolfe(Optimizer):
     
     def step_direction(self, objective, manifold, gradient, grad, cost, X, L, U):
         sqrtX = scipy.linalg.sqrtm(X)
-        D, Q = np.linalg.eigh(sqrtX @ grad @ sqrtX)
+        D, Q = np.linalg.eig(sqrtX @ grad @ sqrtX)
         # print(D)
         Qstar = np.matrix(Q).H
 

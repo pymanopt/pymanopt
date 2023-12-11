@@ -15,6 +15,7 @@ class TestFrankWolfe:
         np.linalg.inv(matrix) for matrix in matricespd
     ])
     manifold = manifold = SymmetricPositiveDefinite(n)
+
     @pymanopt.function.autograd(manifold)
     def cost(X):
         # print(type(X))
@@ -23,11 +24,13 @@ class TestFrankWolfe:
         # evalues, evectors = np.linalg.eig()
         Xinvsqrt = np.array(np.linalg.inv(scipy.linalg.sqrtm(X)))
         # print(type(Xinvsqrt))
+        log_matrix_array = np.array([np.linalg.norm(scipy.linalg.logm(Xinvsqrt @ matrix @ Xinvsqrt), ord='fro') for matrix in matricespd])
         return sum(
-            np.linalg.norm(scipy.linalg.logm(Xinvsqrt @ matrix @ Xinvsqrt)) for matrix in matricespd
+            # np.linalg.norm(scipy.linalg.logm(Xinvsqrt @ matrix @ Xinvsqrt)) for matrix in matricespd
+            log_matrix_array
         )
     @pymanopt.function.autograd(manifold)
-    def rieman_grad(X):
+    def rieman_grad(X, matricesinv = matricesinv):
           print(X)
           Xinv = np.linalg.inv(X)
           return Xinv @ sum(
