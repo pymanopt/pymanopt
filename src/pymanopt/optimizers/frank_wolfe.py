@@ -2,8 +2,9 @@ import time
 from copy import deepcopy
 
 import numpy as np
+import scipy
 
-from pymanopt.manifolds import _PositiveDefiniteBase
+from pymanopt.manifolds import HermitianPositiveDefinite, SpecialHermitianPositiveDefinite, SymmetricPositiveDefinite
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
@@ -42,24 +43,54 @@ class FrankWolfe(Optimizer):
         *args,
         **kwargs,
     ):
-        super().__init__(sub_problem, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+        self.sub_problem = sub_problem
 
     def sgnplus(self, D):
         Dsigns = np.sign(D)
         Dsigns[Dsigns == -1] = 0
         return Dsigns
 
+
+    def isPD(self, B):
+        """Returns true when input is positive-definite, via Cholesky"""
+        try:
+            np.linalg.cholesky(B)
+            return True
+        except np.linalg.LinAlgError:
+            return False
+    
     def step_direction(self, objective, manifold, gradient, grad, cost, X, L, U):
-        svdres = np.linalg.svd(grad)
-        Q = svdres.U
-        D = svdres.S
-        Qstar = svdres.Vh
+        D, Q = np.linalg.eigh(grad)
+        Qstar = np.matrix(Q).H
 
         Lcap = Qstar @ X @ L @ X @ Q
-        Ucap = Qstar @ X @ L @ X @ Q
+        Ucap = Qstar @ X @ U @ X @ Q
+        A = Ucap - Lcap
+        B = (A + A.T) / 2
+        _, s, V = np.linalg.svd(B)
 
-        P = np.linalg.cholesky(Ucap - Lcap)
-        Pstar = P.T.conj()
+        H = np.dot(V.T, np.dot(np.diag(s), V))
+
+        A2 = (B + H) / 2
+
+        A3 = (A2 + A2.T) / 2
+
+        if self.isPD(A3):
+            P = np.linalg.cholesky(A3)
+            Pstar = P.T.conj()
+        else:
+            spacing = np.spacing(np.linalg.norm(A))
+            I = np.eye(A.shape[0])
+            k = 1
+            while not self.isPD(A3):
+                mineig = np.min(np.real(np.linalg.eigvals(A3)))
+                A3 += I * (-mineig * k**2 + spacing)
+                k += 1
+            # print(X)
+            # print(Mcap)
+            P = np.linalg.cholesky(A3)
+            Pstar = P.T.conj()
 
         return np.linalg.inv(X) @ Q @ (Pstar @ self.sgnplus(D) @ P + Lcap) @ Qstar @ np.linalg.inv(X)
 
@@ -84,7 +115,7 @@ class FrankWolfe(Optimizer):
         objective = problem.cost
         gradient = problem.riemannian_gradient
         sub_problem = self.sub_problem
-        if sub_problem is None and _PositiveDefiniteBase.isinstance(problem.manifold):
+        if sub_problem is None and isinstance(problem.manifold, (HermitianPositiveDefinite, SymmetricPositiveDefinite, SpecialHermitianPositiveDefinite)):
             sub_problem = self.step_direction
         elif sub_problem is None:
             RuntimeError("No subproblem provided and manifold is not positive definite.")
@@ -120,6 +151,7 @@ class FrankWolfe(Optimizer):
         while True:
 
             cost = objective(x)
+            # print(type(x))
             grad = gradient(x)
             gradient_norm = manifold.norm(x, grad)
 
@@ -146,8 +178,10 @@ class FrankWolfe(Optimizer):
                     print(stopping_criterion)
                     print("")
                 break
-
-            newx = (1 - step_size) * x + step_size * Z
+            
+            Xinv = np.linalg.inv(x)
+            Xinvsqrt = scipy.linalg.sqrtm(Xinv)
+            newx = scipy.linalg.sqrtm(x) @ scipy.linalg.fractional_matrix_power(Xinvsqrt @ Z @ Xinvsqrt, step_size) @ scipy.linalg.sqrtm(x)
 
             # Compute the new cost-related quantities for newx
             newcost = objective(newx)
