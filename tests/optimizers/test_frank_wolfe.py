@@ -5,7 +5,7 @@ import pymanopt
 from pymanopt.optimizers import FrankWolfe
 from pymanopt.manifolds import SymmetricPositiveDefinite
 
-n = 100
+n = 50
 N = 50
 matrices = [np.random.uniform(size=(n, n)) for i in range(N)]
 matricespd = np.array([
@@ -30,7 +30,6 @@ def cost(X):
     )
 @pymanopt.function.autograd(manifold)
 def rieman_grad(X, matricesinv = matricesinv):
-      print(X)
       Xinv = np.linalg.inv(X)
       return 1/N * Xinv @ np.sum(
         scipy.linalg.logm(X @ matrix) for matrix in matricesinv
@@ -43,8 +42,8 @@ L = np.linalg.inv(np.sum(1/N * matricesinv, axis = 0))
 L = L
 print(L)
 print(U)
-optimizer = FrankWolfe(max_iterations = 20, log_verbosity = 1)
-initial_point = U
+optimizer = FrankWolfe(max_iterations = 50, log_verbosity = 1)
+initial_point = (L+U)/2
 print(np.linalg.cholesky(U))
 print(np.linalg.cholesky(L))
 result = optimizer.run(problem, L, U, initial_point = initial_point)

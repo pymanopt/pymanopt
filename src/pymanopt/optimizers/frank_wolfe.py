@@ -5,6 +5,8 @@ import numpy as np
 import scipy
 
 from pymanopt.manifolds import HermitianPositiveDefinite, SpecialHermitianPositiveDefinite, SymmetricPositiveDefinite
+from pymanopt.optimizers.line_search import BackTrackingLineSearcher
+from pymanopt.optimizers.line_search import AdaptiveLineSearcher
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.tools import printer
 
@@ -63,8 +65,8 @@ class FrankWolfe(Optimizer):
     def step_direction(self, objective, manifold, gradient, grad, cost, X, L, U):
         sqrtX = scipy.linalg.sqrtm(X)
         D, Q = np.linalg.eigh(grad)
-        # print(D)
-        Qstar = np.matrix(Q).H
+
+        Qstar = np.matrix(Q).T.conj()
         Xinv = np.linalg.inv(sqrtX)
 
         Lcap = Qstar @ L @ Q
@@ -127,6 +129,7 @@ class FrankWolfe(Optimizer):
         # Initialize iteration counter and timer.
         iteration = 0
         step_size = 1.0
+        line_searcher = AdaptiveLineSearcher()
         start_time = time.time()
         self._initialize_log()
 
@@ -152,7 +155,6 @@ class FrankWolfe(Optimizer):
                 start_time=start_time,
                 gradient_norm=gradient_norm,
                 iteration=iteration,
-                step_size=step_size,
             )
 
             if stopping_criterion:
@@ -163,7 +165,8 @@ class FrankWolfe(Optimizer):
             
             Xinv = np.linalg.inv(x)
             Xinvsqrt = scipy.linalg.sqrtm(Xinv)
-
+            
+            # step_size, newx = line_searcher.search(objective, manifold, x, Z, cost, manifold.norm(x, Z))
             newx = scipy.linalg.sqrtm(x) @ scipy.linalg.fractional_matrix_power(Xinvsqrt @ Z @ Xinvsqrt, step_size) @ scipy.linalg.sqrtm(x)
             # newx = x + step_size * (Z - x)
             # Compute the new cost-related quantities for newx
