@@ -4,6 +4,7 @@ __all__ = [
     "Elliptope",
     "Euclidean",
     "ComplexEuclidean",
+    "DoublyStochastic",
     "FixedRankEmbedded",
     "Grassmann",
     "HermitianPositiveDefinite",
@@ -46,3 +47,4 @@ from .sphere import (
     SphereSubspaceIntersection,
 )
 from .stiefel import Stiefel
+from .doublystochastic import DoublyStochastic
