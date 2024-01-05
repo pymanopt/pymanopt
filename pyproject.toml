@@ -95,7 +95,12 @@ write_to = "src/pymanopt/_version.py"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-exclude = ["tests*"]
+exclude = [
+  "tests*",
+  ".*.yaml",
+  "TODO.md",
+  ".github*",
+]
 
 [tool.black]
 include = '\.py$'
