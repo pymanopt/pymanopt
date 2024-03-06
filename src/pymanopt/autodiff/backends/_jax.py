@@ -9,7 +9,12 @@ except ImportError:
     jax = None
 else:
     import jax.numpy as jnp
-    from jax import config
+
+    # for backward compatibility with older versions of jax
+    try:
+        from jax import config
+    except ImportError:
+        from jax.config import config
 
     config.update("jax_enable_x64", True)
 
