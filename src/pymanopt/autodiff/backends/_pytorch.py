@@ -85,7 +85,7 @@ class PyTorchBackend(Backend):
             for gradient, vector in zip(gradients, vectors):
                 dot_product += torch.tensordot(
                     gradient.conj(), vector, dims=gradient.ndim
-                )
+                ).real
             dot_product.backward()
             return self._sanitize_gradients(arguments)
 
