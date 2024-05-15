@@ -37,7 +37,7 @@ classifiers = [
 ]
 dependencies = [
   "numpy>=1.16.0",
-  "scipy>=1.0,<1.10",
+  "scipy>=1.0,!=1.10.*,!=1.11.*,!=1.12.*",
 ]
 [project.urls]
 homepage = "https://pymanopt.org"
