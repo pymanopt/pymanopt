@@ -9,9 +9,9 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.13.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: pymanopt-3.7.10
 #     language: python
-#     name: python
+#     name: pymanopt-3.7.10
 # ---
 
 # # Riemannian Optimization for Inference in MoG models
@@ -31,11 +31,25 @@
 # Let's generate $N=1000$ samples of that MoG model and scatter plot the samples:
 
 # +
-import autograd.numpy as np
+import sys
+
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+
+# +
+import numpy as np
+from jax.scipy.special import logsumexp
+
+import pymanopt
+from pymanopt import Problem
+from pymanopt.manifolds import Euclidean, Product, SymmetricPositiveDefinite
+from pymanopt.optimizers import SteepestDescent
+
+
+np.random.seed(42)
 
 
 np.set_printoptions(precision=2)
-import matplotlib.pyplot as plt
 
 
 # %matplotlib inline
@@ -110,18 +124,8 @@ plt.show()
 #
 # So let's infer the parameters of our toy example by Riemannian optimisation using Pymanopt:
 
-# +
-import sys
-
 
 sys.path.insert(0, "../..")
-
-from autograd.scipy.special import logsumexp
-
-import pymanopt
-from pymanopt import Problem
-from pymanopt.manifolds import Euclidean, Product, SymmetricPositiveDefinite
-from pymanopt.optimizers import SteepestDescent
 
 
 # (1) Instantiate the manifold
@@ -129,26 +133,26 @@ manifold = Product([SymmetricPositiveDefinite(D + 1, k=K), Euclidean(K - 1)])
 
 # (2) Define cost function
 # The parameters must be contained in a list theta.
-@pymanopt.function.autograd(manifold)
+@pymanopt.function.jax(manifold)
 def cost(S, v):
     # Unpack parameters
-    nu = np.append(v, 0)
+    nu = jnp.append(v, 0)
 
-    logdetS = np.expand_dims(np.linalg.slogdet(S)[1], 1)
-    y = np.concatenate([samples.T, np.ones((1, N))], axis=0)
+    logdetS = jnp.expand_dims(jnp.linalg.slogdet(S)[1], 1)
+    y = jnp.concatenate([samples.T, jnp.ones((1, N))], axis=0)
 
     # Calculate log_q
-    y = np.expand_dims(y, 0)
+    y = jnp.expand_dims(y, 0)
 
     # 'Probability' of y belonging to each cluster
-    log_q = -0.5 * (np.sum(y * np.linalg.solve(S, y), axis=1) + logdetS)
+    log_q = -0.5 * (jnp.sum(y * jnp.linalg.solve(S, y), axis=1) + logdetS)
 
-    alpha = np.exp(nu)
-    alpha = alpha / np.sum(alpha)
-    alpha = np.expand_dims(alpha, 1)
+    alpha = jnp.exp(nu)
+    alpha = alpha / jnp.sum(alpha)
+    alpha = jnp.expand_dims(alpha, 1)
 
-    loglikvec = logsumexp(np.log(alpha) + log_q, axis=0)
-    return -np.sum(loglikvec)
+    loglikvec = logsumexp(jnp.log(alpha) + log_q, axis=0)
+    return -jnp.sum(loglikvec)
 
 
 problem = Problem(manifold, cost)
@@ -202,13 +206,11 @@ print(pihat[2])
 
 # ## When Things Go Astray
 #
-# A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [BackTrackingLineSearcher](https://github.com/pymanopt/pymanopt/blob/master/pymanopt/optimizers/line_search.py)) -- here we demonstrate this approach:
+# A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [BackTrackingLineSearcher](https://github.com/pymanopt/pymanopt/blob/master/src/pymanopt/optimizers/line_search.py)) -- here we demonstrate this approach:
 
 
 class LineSearchMoG:
-    """
-    Back-tracking line-search that checks for close to singular matrices.
-    """
+    """Back-tracking line-search that checks for close to singular matrices."""
 
     def __init__(
         self,
@@ -227,24 +229,19 @@ class LineSearchMoG:
         self._oldf0 = None
 
     def search(self, objective, manifold, x, d, f0, df0):
-        """
-        Function to perform backtracking line-search.
-        Arguments:
-            - objective
-                objective function to optimise
-            - manifold
-                manifold to optimise over
-            - x
-                starting point on the manifold
-            - d
-                tangent vector at x (descent direction)
-            - df0
-                directional derivative at x along d
+        """Function to perform backtracking line search.
+
+        Args:
+            objective: Objective function to optimize.
+            manifold: The manifold to optimize over.
+            x: Starting point on the manifold.
+            d: Tangent vector at ``x``, i.e., a descent direction.
+            df0: Directional derivative at ``x`` along ``d``.
+
         Returns:
-            - step_size
-                norm of the vector retracted to reach newx from x
-            - newx
-                next iterate suggested by the line-search
+            A tuple ``(step_size, newx)`` where ``step_size`` is the norm of
+            the vector retracted to reach the suggested iterate ``newx`` from
+            ``x``.
         """
         # Compute the norm of the search direction
         norm_d = manifold.norm(x, d)

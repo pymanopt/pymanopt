@@ -1,5 +1,7 @@
 import numpy as np
 
+import pymanopt.numerics as nx
+
 
 try:
     import matplotlib.pyplot as plt
@@ -79,7 +81,7 @@ def check_directional_derivative(
         model = np.polyval([df0, f0], h)
 
     # Compute the approximation error
-    error = np.abs(model - value)
+    error = nx.abs(model - value)
     model_is_exact = np.all(error < 1e-12)
     if model_is_exact:
         if use_quadratic_model:

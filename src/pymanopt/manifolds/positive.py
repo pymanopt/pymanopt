@@ -1,5 +1,6 @@
 import numpy as np
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import Manifold
 
 
@@ -63,7 +64,7 @@ class Positive(Manifold):
         return np.sqrt(self.dim)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return nx.tensordot(
             tangent_vector_a / point,
             tangent_vector_b / point,
             axes=tangent_vector_a.ndim,
@@ -80,7 +81,7 @@ class Positive(Manifold):
         )
 
     def random_point(self):
-        point = np.exp(np.random.normal(size=(self._k, self._m, self._n)))
+        point = nx.exp(np.random.normal(size=(self._k, self._m, self._n)))
         if self._k == 1:
             return point[0]
         return point
@@ -94,7 +95,7 @@ class Positive(Manifold):
 
     def dist(self, point_a, point_b):
         log_ratio = np.log(point_a) - np.log(point_b)
-        return np.sqrt(np.tensordot(log_ratio, log_ratio, axes=point_a.ndim))
+        return np.sqrt(nx.tensordot(log_ratio, log_ratio, axes=point_a.ndim))
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient * point**2
@@ -108,7 +109,7 @@ class Positive(Manifold):
         )
 
     def exp(self, point, tangent_vector):
-        return point * np.exp(tangent_vector / point)
+        return point * nx.exp(tangent_vector / point)
 
     def log(self, point_a, point_b):
         return point_a * (np.log(point_b) - np.log(point_a))

@@ -1,4 +1,4 @@
-import autograd.numpy as np
+import numpy as np
 import pytest
 
 import pymanopt
@@ -14,7 +14,7 @@ class TestOptimizers:
         self.manifold = manifold = Sphere(n)
         self.max_iterations = 50
 
-        @pymanopt.function.autograd(manifold)
+        @pymanopt.function.jax(manifold)
         def cost(point):
             return -point.T @ matrix @ point
 

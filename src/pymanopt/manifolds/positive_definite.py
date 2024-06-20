@@ -1,5 +1,6 @@
 import numpy as np
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import (
     RiemannianSubmanifold,
     raise_not_implemented_error,
@@ -39,7 +40,7 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         else:
             p_inv_tv_b = np.linalg.solve(point, tangent_vector_b)
         return np.real(
-            np.tensordot(
+            nx.tensordot(
                 p_inv_tv_a,
                 multitransp(p_inv_tv_b),
                 axes=point.ndim,

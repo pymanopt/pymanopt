@@ -1,5 +1,5 @@
-import autograd.numpy as np
 import jax.numpy as jnp
+import numpy as np
 import tensorflow as tf
 import torch
 
@@ -9,19 +9,13 @@ from pymanopt.manifolds import Grassmann
 from pymanopt.optimizers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, matrix, backend):
     euclidean_gradient = euclidean_hessian = None
 
-    if backend == "autograd":
-
-        @pymanopt.function.autograd(manifold)
-        def cost(X):
-            return -np.trace(X.T @ matrix @ X)
-
-    elif backend == "jax":
+    if backend == "jax":
 
         @pymanopt.function.jax(manifold)
         def cost(X):

@@ -1,5 +1,6 @@
 import numpy as np
 
+import pymanopt.numerics as nx
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools.multi import multiskew, multisym
 
@@ -16,7 +17,7 @@ class _Euclidean(RiemannianSubmanifold):
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return float(
             np.real(
-                np.tensordot(
+                nx.tensordot(
                     tangent_vector_a.conj(),
                     tangent_vector_b,
                     axes=tangent_vector_a.ndim,
