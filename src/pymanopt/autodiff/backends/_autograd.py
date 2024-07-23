@@ -2,7 +2,7 @@ import functools
 
 
 try:
-    import autograd
+    import autograd.differential_operators as autograd
 except ImportError:
     autograd = None
 else:
