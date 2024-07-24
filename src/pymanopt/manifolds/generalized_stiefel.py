@@ -23,8 +23,8 @@ class GeneralizedStiefel(Manifold):
             Possible choices are ``qr`` and ``polar``.
 
     Note:
-        The matrix :math:`\vmB` can be provided as a numpy array or
-        as a scipy sparse matrix.
+        The matrix :math:`\vmB` can be provided as a numpy array, a
+        scipy sparse matrix, or a scipy linear operator.
 
         The default retraction used here is a first-order one based on
         the QR decomposition.
@@ -32,8 +32,10 @@ class GeneralizedStiefel(Manifold):
         ``GeneralizedStiefel(n, p, B, retraction="polar")``.
 
         Obtaining the Riemannian gradient from the Euclidean gradient requires
-        the inverse of :math:`\vmB`. If this is known the inverse can be provided
-        to speed up this operation.
+        the inverse of :math:`\vmB`. If this is known, the inverse can be provided
+        to speed up this operation. Otherwise, the LU transorm is computed and
+        stored the first time this function is called. If :math:`\vmB` is given
+        as a scipy linear operator, :math:`\vmB^{-1}` must be supplied.
     """
 
     def __init__(
@@ -49,6 +51,7 @@ class GeneralizedStiefel(Manifold):
         self._p = p
         self.B = B
         self.Binv = Binv
+        self.LU = None
         # Check that n is greater than or equal to p
         if n < p or p < 1:
             raise ValueError(
@@ -113,7 +116,11 @@ class GeneralizedStiefel(Manifold):
         if self.Binv is not None:
             egrad_scaled = self.Binv @ euclidean_gradient
         else:
-            egrad_scaled = scipy.linalg.solve(self.B, euclidean_gradient)
+            if self.LU is None:
+                self.LU = scipy.sparse.linalg.splu(self.B)
+                egrad_scaled = self.LU.solve(euclidean_gradient)
+            else:
+                egrad_scaled = self.LU.solve(euclidean_gradient)
         rgrad = egrad_scaled - point @ self.sym(point.T @ euclidean_gradient)
         return rgrad
 
