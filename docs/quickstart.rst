@@ -18,7 +18,7 @@ Usually only the following steps are required:
 Installation
 ------------
 
-Pymanopt is compatible with Python 3.6+, and depends on NumPy and SciPy.
+Pymanopt is compatible with Python 3.8+, and depends on NumPy and SciPy.
 Additionally, to use Pymanopt's built-in automatic differentiation, which we
 strongly recommend, you need to setup your cost functions using either
 `Autograd <https://github.com/HIPS/autograd>`_, `JAX
@@ -28,11 +28,12 @@ If you are unfamiliar with these packages and you are unsure which to go for,
 we suggest to start with Autograd.
 Autograd wraps thinly around NumPy, and is very simple to use, particularly if
 you're already familiar with NumPy.
-To get the latest version of Pymanopt, install it via pip:
+To get the latest version of Pymanopt, install it via pip by specifying the 
+backend you want to use:
 
 .. code-block:: bash
 
-    $ pip install pymanopt
+    $ pip install pymanopt[autograd] # or [jax], [tensorflow], [pytorch]
 
 A Simple Example
 ----------------
@@ -79,8 +80,6 @@ optimizers.
 
     import autograd.numpy as anp
     import pymanopt
-    import pymanopt.manifolds
-    import pymanopt.optimizers
 
     anp.random.seed(42)
 
