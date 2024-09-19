@@ -1,7 +1,5 @@
 import functools
 
-import numpy as np
-
 
 try:
     import jax
@@ -30,14 +28,6 @@ def conjugate_result(function):
     return wrapper
 
 
-def to_ndarray(function):
-    @functools.wraps(function)
-    def wrapper(*args, **kwargs):
-        return list(map(np.asarray, function(*args, **kwargs)))
-
-    return wrapper
-
-
 class JaxBackend(Backend):
     def __init__(self):
         super().__init__("Jax")
@@ -47,21 +37,15 @@ class JaxBackend(Backend):
         return jax is not None
 
     @Backend._assert_backend_available
-    def prepare_function(self, function):
-        return function
-
-    @Backend._assert_backend_available
     def generate_gradient_operator(self, function, num_arguments):
-        gradient = to_ndarray(
-            conjugate_result(jax.grad(function, argnums=range(num_arguments)))
-        )
+        gradient = conjugate_result(
+            jax.grad(function, argnums=range(num_arguments)))
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
         return gradient
 
     @Backend._assert_backend_available
     def generate_hessian_operator(self, function, num_arguments):
-        @to_ndarray
         @conjugate_result
         def hessian_vector_product(arguments, vectors):
             return jax.jvp(
