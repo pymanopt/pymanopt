@@ -29,11 +29,11 @@ we suggest to start with Autograd.
 Autograd wraps thinly around NumPy, and is very simple to use, particularly if
 you're already familiar with NumPy.
 To get the latest version of Pymanopt, install it via pip by specifying the 
-backend you want to use:
+backend(s) you want to use:
 
 .. code-block:: bash
 
-    $ pip install pymanopt[autograd] # or [jax], [tensorflow], [pytorch]
+    $ pip install "pymanopt[autograd]" # or [jax], [tensorflow], [torch]
 
 A Simple Example
 ----------------
