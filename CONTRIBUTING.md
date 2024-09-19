@@ -3,16 +3,16 @@
 [Fork and clone the repository][fork] by going to
 https://github.com/pymanopt/pymanopt/fork, and cloning the repository with
 
-    $ git clone git@github.com:<your-username>/pymanopt.git
+    git clone git@github.com:<your-username>/pymanopt.git
 
 Set up a local development environment, installing both the runtime and
 development dependencies by running
 
-    $ pip install -e ".[all]"
+    pip install -e ".[all]"
 
 Verify that all existing tests pass by executing the test suite with:
 
-    $ pytest -v --cov-report= --cov=src/pymanopt tests
+    pytest -v --cov-report= --cov=src/pymanopt tests
 
 Note that we run the [flake8][flake8] utility on every python file in the
 package to verify coding style consistency during our integration tests.
@@ -24,7 +24,7 @@ invokes flake8 on all files staged for commit when running `git commit`.
 To enable the hook, simply run `pre-commit install` after installing
 `pre-commit` either manually via `pip` or as part of `dev` variant, e.g.
 
-    $ pip install -e ".[dev]"
+    pip install -e ".[dev]"
 
 Push a feature branch to your fork and [submit a pull request][pr].
 Refer to [this guide][commits] on how to write good commit messages.
@@ -57,7 +57,6 @@ using your real name and email address.
 Running the git-commit command with the -s option automatically adds this line.
 
 [fork]: https://help.github.com/articles/cloning-a-repository/
-[nose2]: https://docs.nose2.io/en/latest/
 [flake8]: http://flake8.pycqa.org/en/latest/
 [pre-commit]: https://pre-commit.com/
 [style]: https://www.python.org/dev/peps/pep-0008/
