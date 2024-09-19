@@ -10,10 +10,9 @@ development dependencies by running
 
     $ pip install -e ".[all]"
 
-Verify that all existing tests pass by executing the test suite via
-[nose2][nose2]:
+Verify that all existing tests pass by executing the test suite with:
 
-    $ nose2 tests
+    $ pytest -v --cov-report= --cov=src/pymanopt tests
 
 Note that we run the [flake8][flake8] utility on every python file in the
 package to verify coding style consistency during our integration tests.
@@ -35,14 +34,14 @@ Refer to [this guide][commits] on how to write good commit messages.
 By making a contribution (pull requesting or committing) to the Pymanopt
 project you certify that
 
-* you have the right to submit it to Pymanopt.
+- you have the right to submit it to Pymanopt.
 
-* you created the contribution/modification; or you based it on previous work
+- you created the contribution/modification; or you based it on previous work
   that, to the best of your knowledge, is covered by a compatible open source
   license; or someone who did one of the former provided you with this
   contribution/modification and you are submitting it without changes.
 
-* you understand and agree that your contribution/modification to this
+- you understand and agree that your contribution/modification to this
   project is public and that a record of it (including all information you
   submit with it, including copyright notices and your sign-off) is
   maintained indefinitely and may be redistributed consistent with Pymanopt's
