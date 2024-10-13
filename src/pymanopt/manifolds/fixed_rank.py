@@ -1,9 +1,9 @@
 import collections
-
-import numpy as np
+from typing import Optional
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
+from pymanopt.numerics import NumericsBackend
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
@@ -55,25 +55,33 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         * The second-order retraction follows results presented in [AM2012]_.
     """
 
-    def __init__(self, m: int, n: int, k: int):
+    def __init__(
+        self, m: int, n: int, k: int, backend: Optional[NumericsBackend] = None
+    ):
         self._m = m
         self._n = n
         self._k = k
-        self._stiefel_m = Stiefel(m, k)
-        self._stiefel_n = Stiefel(n, k)
+        self._stiefel_m = Stiefel(m, k, backend=backend)
+        self._stiefel_n = Stiefel(n, k, backend=backend)
 
         name = f"Embedded manifold of {m}x{n} matrices of rank {k}"
         dimension = (m + n - k) * k
-        super().__init__(name, dimension, point_layout=3)
+        super().__init__(name, dimension, point_layout=3, backend=backend)
+
+    @RiemannianSubmanifold.backend.setter
+    def _(self, backend: NumericsBackend):
+        self._backend = backend
+        self._stiefel_m.backend = backend
+        self._stiefel_n.backend = backend
 
     @property
     def typical_dist(self):
         return self.dim
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.sum(
+        return self.backend.sum(
             [
-                np.tensordot(a, b)
+                self.backend.tensordot(a, b)
                 for (a, b) in zip(tangent_vector_a, tangent_vector_b)
             ]
         )
@@ -125,13 +133,17 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         vvtdv = vt.T @ vtdv
         Vp = (dvt.T - vvtdv) / s
 
-        identity = np.eye(self._k)
-        f = 1 / (s[np.newaxis, :] ** 2 - s[:, np.newaxis] ** 2 + identity)
+        identity = self.backend.eye(self._k)
+        f = 1 / (
+            s[self.backend.newaxis, :] ** 2
+            - s[:, self.backend.newaxis] ** 2
+            + identity
+        )
 
         M = (
             f * (utdu - utdu.T) * s
-            + s[:, np.newaxis] * f * (vtdv - vtdv.T)
-            + np.diag(ds)
+            + s[:, self.backend.newaxis] * f * (vtdv - vtdv.T)
+            + self.backend.diag(ds)
         )
 
         return _FixedRankTangentVector(Up, M, Vp)
@@ -140,30 +152,32 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         u, s, vt = point
         du, ds, dvt = tangent_vector
 
-        Qu, Ru = np.linalg.qr(du)
-        Qv, Rv = np.linalg.qr(dvt)
-        T = np.vstack(
+        Qu, Ru = self.backend.linalg_qr(du)
+        Qv, Rv = self.backend.linalg_qr(dvt)
+        T = self.backend.vstack(
             (
-                np.hstack((np.diag(s) + ds, Rv.T)),
-                np.hstack((Ru, np.zeros((self._k, self._k)))),
+                self.backend.hstack((self.backend.diag(s) + ds, Rv.T)),
+                self.backend.hstack(
+                    (Ru, self.backend.zeros((self._k, self._k)))
+                ),
             )
         )
         # Numpy svd outputs St as a 1d vector, not a matrix.
-        Ut, St, Vt = np.linalg.svd(T, full_matrices=False)
+        Ut, St, Vt = self.backend.linalg_svd(T, full_matrices=False)
 
-        U = np.hstack((u, Qu)) @ Ut[:, : self._k]
-        S = St[: self._k] + np.spacing(1)
-        V = np.hstack((vt.T, Qv)) @ Vt.T[:, : self._k]
+        U = self.backend.hstack((u, Qu)) @ Ut[:, : self._k]
+        S = St[: self._k] + self.backend.spacing(1)
+        V = self.backend.hstack((vt.T, Qv)) @ Vt.T[:, : self._k]
         return _FixedRankPoint(U, S, V.T)
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return self.backend.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
     def random_point(self):
         u = self._stiefel_m.random_point()
-        s = np.sort(np.random.uniform(size=self._k))[::-1]
+        s = self.backend.sort(self.backend.random_uniform(size=self._k))[::-1]
         vt = self._stiefel_n.random_point().T
         return _FixedRankPoint(u, s, vt)
 
@@ -174,9 +188,9 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         return _FixedRankTangentVector(Up, vector.M, Vp)
 
     def random_tangent_vector(self, point):
-        Up = np.random.normal(size=(self._m, self._k))
-        Vp = np.random.normal(size=(self._n, self._k))
-        M = np.random.normal(size=(self._k, self._k))
+        Up = self.backend.random_normal(size=(self._m, self._k))
+        Vp = self.backend.random_normal(size=(self._n, self._k))
+        M = self.backend.random_normal(size=(self._k, self._k))
 
         tangent_vector = self.to_tangent_space(
             point, _FixedRankTangentVector(Up, M, Vp)
@@ -185,9 +199,9 @@ class FixedRankEmbedded(RiemannianSubmanifold):
 
     def embedding(self, point, tangent_vector):
         u, _, vt = point
-        U = np.hstack((u @ tangent_vector.M + tangent_vector.Up, u))
-        S = np.eye(2 * self._k)
-        V = np.hstack(([vt.T, tangent_vector.Vp]))
+        U = self.backend.hstack((u @ tangent_vector.M + tangent_vector.Up, u))
+        S = self.backend.eye(2 * self._k)
+        V = self.backend.hstack(([vt.T, tangent_vector.Vp]))
         return U, S, V
 
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -197,9 +211,9 @@ class FixedRankEmbedded(RiemannianSubmanifold):
 
     def zero_vector(self, point):
         return _FixedRankTangentVector(
-            np.zeros((self._m, self._k)),
-            np.zeros((self._k, self._k)),
-            np.zeros((self._n, self._k)),
+            self.backend.zeros((self._m, self._k)),
+            self.backend.zeros((self._k, self._k)),
+            self.backend.zeros((self._n, self._k)),
         )
 
 

@@ -1,22 +1,22 @@
-import numpy as np
+from typing import Optional
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools.multi import multihconj, multiqr, multitransp
+from pymanopt.numerics import NumericsBackend
 
 
 class _GrassmannBase(Manifold):
     @property
     def typical_dist(self):
-        return np.sqrt(self._p * self._k)
+        return self.backend.sqrt(self._p * self._k)
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return self.backend.linalg_norm(tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return self.projection(point_b, tangent_vector_a)
 
     def zero_vector(self, point):
-        zero = np.zeros((self._k, self._n, self._p))
+        zero = self.backend.zeros((self._k, self._n, self._p))
         if self._k == 1:
             return zero[0]
         return zero
@@ -51,7 +51,14 @@ class Grassmann(_GrassmannBase):
         : \transp{\vmQ}\vmQ = \vmQ\transp{\vmQ} = \Id_p}`.
     """
 
-    def __init__(self, n: int, p: int, *, k: int = 1):
+    def __init__(
+        self,
+        n: int,
+        p: int,
+        *,
+        k: int = 1,
+        backend: Optional[NumericsBackend] = None,
+    ):
         self._n = n
         self._p = p
         self._k = k
@@ -64,31 +71,33 @@ class Grassmann(_GrassmannBase):
             raise ValueError(f"Need k >= 1. Value supplied was k = {k}")
 
         if k == 1:
-            name = f"Grassmann manifold Gr({n},{p})"
+            name = f"Grassmann manifold Gr({n}, {p})"
         elif k >= 2:
-            name = f"Product Grassmann manifold Gr({n},{p})^{k}"
+            name = f"Product Grassmann manifold Gr({n}, {p})^{k}"
         dimension = int(k * (n * p - p**2))
-        super().__init__(name, dimension)
+        super().__init__(name, dimension, backend=backend)
 
     def dist(self, point_a, point_b):
-        s = np.linalg.svd(multitransp(point_a) @ point_b, compute_uv=False)
+        s = self.backend.linalg_svd(
+            self.backend.transpose(point_a) @ point_b, compute_uv=False
+        )
         s[s > 1] = 1
-        s = np.arccos(s)
-        return np.linalg.norm(s)
+        s = self.backend.arccos(s)
+        return self.backend.linalg_norm(s)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return self.backend.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def projection(self, point, vector):
-        return vector - point @ (multitransp(point) @ vector)
+        return vector - point @ (self.backend.transpose(point) @ vector)
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         PXehess = self.projection(point, euclidean_hessian)
-        XtG = multitransp(point) @ euclidean_gradient
+        XtG = self.backend.transpose(point) @ euclidean_gradient
         HXtG = tangent_vector @ XtG
         return PXehess - HXtG
 
@@ -98,38 +107,49 @@ class Grassmann(_GrassmannBase):
         # columns. Compare this with the Stiefel manifold.
 
         # Compute the polar factorization of Y = X + G.
-        u, _, vt = np.linalg.svd(point + tangent_vector, full_matrices=False)
+        u, _, vt = self.backend.linalg_svd(
+            point + tangent_vector, full_matrices=False
+        )
         return u @ vt
 
     def random_point(self):
-        q, _ = multiqr(np.random.normal(size=(self._k, self._n, self._p)))
+        q, _ = self.backend.linalg_qr(
+            self.backend.random_normal(size=(self._k, self._n, self._p))
+        )
         if self._k == 1:
             return q[0]
         return q
 
     def random_tangent_vector(self, point):
-        tangent_vector = np.random.normal(size=point.shape)
+        tangent_vector = self.backend.random_normal(size=point.shape)
         tangent_vector = self.projection(point, tangent_vector)
-        return tangent_vector / np.linalg.norm(tangent_vector)
+        return tangent_vector / self.backend.linalg_norm(tangent_vector)
 
     def exp(self, point, tangent_vector):
-        u, s, vt = np.linalg.svd(tangent_vector, full_matrices=False)
-        cos_s = np.expand_dims(np.cos(s), -2)
-        sin_s = np.expand_dims(np.sin(s), -2)
+        u, s, vt = self.backend.linalg_svd(tangent_vector, full_matrices=False)
+        cos_s = self.backend.expand_dims(self.backend.cos(s), -2)
+        sin_s = self.backend.expand_dims(self.backend.sin(s), -2)
 
-        Y = point @ (multitransp(vt) * cos_s) @ vt + (u * sin_s) @ vt
+        Y = (
+            point @ (self.backend.transpose(vt) * cos_s) @ vt
+            + (u * sin_s) @ vt
+        )
 
         # From numerical experiments, it seems necessary to re-orthonormalize.
         # This is quite expensive.
-        q, _ = multiqr(Y)
+        q, _ = self.backend.linalg_qr(Y)
         return q
 
     def log(self, point_a, point_b):
-        ytx = multitransp(point_b) @ point_a
-        At = multitransp(point_b) - ytx @ multitransp(point_a)
-        Bt = np.linalg.solve(ytx, At)
-        u, s, vt = np.linalg.svd(multitransp(Bt), full_matrices=False)
-        arctan_s = np.expand_dims(np.arctan(s), -2)
+        ytx = self.backend.transpose(point_b) @ point_a
+        At = self.backend.transpose(point_b) - ytx @ self.backend.transpose(
+            point_a
+        )
+        Bt = self.backend.linalg_solve(ytx, At)
+        u, s, vt = self.backend.linalg_svd(
+            self.backend.transpose(Bt), full_matrices=False
+        )
+        arctan_s = self.backend.expand_dims(self.backend.arctan(s), -2)
         return (u * arctan_s) @ vt
 
 
@@ -155,7 +175,16 @@ class ComplexGrassmann(_GrassmannBase):
         : \transp{\vmU}\vmU = \vmU\transp{\vmU} = \Id_p}`.
     """
 
-    def __init__(self, n: int, p: int, *, k: int = 1):
+    IS_COMPLEX = True
+
+    def __init__(
+        self,
+        n: int,
+        p: int,
+        *,
+        k: int = 1,
+        backend: Optional[NumericsBackend] = None,
+    ):
         self._n = n
         self._p = p
         self._k = k
@@ -168,35 +197,40 @@ class ComplexGrassmann(_GrassmannBase):
             raise ValueError(f"Need k >= 1. Value supplied was k = {k}")
 
         if k == 1:
-            name = f"Complex Grassmann manifold Gr({n},{p})"
+            name = f"Complex Grassmann manifold Gr({n}, {p})"
         elif k >= 2:
-            name = f"Product complex Grassmann manifold Gr({n},{p})^{k}"
+            name = f"Product complex Grassmann manifold Gr({n}, {p})^{k}"
         dimension = int(2 * k * (n * p - p**2))
-        super().__init__(name, dimension)
+        super().__init__(name, dimension, backend=backend)
 
     def dist(self, point_a, point_b):
-        s = np.linalg.svd(multihconj(point_a) @ point_b, compute_uv=False)
+        s = self.backend.linalg_svd(
+            self.backend.conjugate_transpose(point_a) @ point_b,
+            compute_uv=False,
+        )
         s[s > 1] = 1
-        s = np.arccos(s)
-        return np.linalg.norm(np.real(s))
+        s = self.backend.arccos(s)
+        return self.backend.linalg_norm(self.backend.real(s))
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.real(
-            np.tensordot(
-                np.conjugate(tangent_vector_a),
+        return self.backend.real(
+            self.backend.tensordot(
+                self.backend.conjugate(tangent_vector_a),
                 tangent_vector_b,
                 axes=tangent_vector_a.ndim,
             )
         )
 
     def projection(self, point, vector):
-        return vector - point @ multihconj(point) @ vector
+        return (
+            vector - point @ self.backend.conjugate_transpose(point) @ vector
+        )
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         PXehess = self.projection(point, euclidean_hessian)
-        XHG = multihconj(point) @ euclidean_gradient
+        XHG = self.backend.conjugate_transpose(point) @ euclidean_gradient
         HXHG = tangent_vector @ XHG
         return PXehess - HXHG
 
@@ -206,40 +240,49 @@ class ComplexGrassmann(_GrassmannBase):
         # columns. Compare this with the Stiefel manifold.
 
         # Compute the polar factorization of Y = X+G
-        u, _, vh = np.linalg.svd(point + tangent_vector, full_matrices=False)
+        u, _, vh = self.backend.linalg_svd(
+            point + tangent_vector, full_matrices=False
+        )
         return u @ vh
 
     def random_point(self):
-        q, _ = multiqr(
-            np.random.normal(size=(self._k, self._n, self._p))
-            + 1j * np.random.normal(size=(self._k, self._n, self._p))
+        q, _ = self.backend.linalg_qr(
+            self.backend.random_normal(size=(self._k, self._n, self._p))
+            + 1j * self.backend.random_normal(size=(self._k, self._n, self._p))
         )
         if self._k == 1:
             return q[0]
         return q
 
     def random_tangent_vector(self, point):
-        tangent_vector = np.random.normal(
+        tangent_vector = self.backend.random_normal(
             size=point.shape
-        ) + 1j * np.random.normal(size=point.shape)
+        ) + 1j * self.backend.random_normal(size=point.shape)
         tangent_vector = self.projection(point, tangent_vector)
-        return tangent_vector / np.linalg.norm(tangent_vector)
+        return tangent_vector / self.backend.linalg_norm(tangent_vector)
 
     def exp(self, point, tangent_vector):
-        U, S, VH = np.linalg.svd(tangent_vector, full_matrices=False)
-        cos_S = np.expand_dims(np.cos(S), -2)
-        sin_S = np.expand_dims(np.sin(S), -2)
-        Y = point @ (multihconj(VH) * cos_S) @ VH + (U * sin_S) @ VH
+        U, S, VH = self.backend.linalg_svd(tangent_vector, full_matrices=False)
+        cos_S = self.backend.expand_dims(self.backend.cos(S), -2)
+        sin_S = self.backend.expand_dims(self.backend.sin(S), -2)
+        Y = (
+            point @ (self.backend.conjugate_transpose(VH) * cos_S) @ VH
+            + (U * sin_S) @ VH
+        )
 
         # From numerical experiments, it seems necessary to
         # re-orthonormalize. This is overall quite expensive.
-        q, _ = multiqr(Y)
+        q, _ = self.backend.linalg_qr(Y)
         return q
 
     def log(self, point_a, point_b):
-        YHX = multihconj(point_b) @ point_a
-        AH = multihconj(point_b) - YHX @ multihconj(point_a)
-        BH = np.linalg.solve(YHX, AH)
-        U, S, VH = np.linalg.svd(multihconj(BH), full_matrices=False)
-        arctan_S = np.expand_dims(np.arctan(S), -2)
+        YHX = self.backend.conjugate_transpose(point_b) @ point_a
+        AH = self.backend.conjugate_transpose(
+            point_b
+        ) - YHX @ self.backend.conjugate_transpose(point_a)
+        BH = self.backend.linalg_solve(YHX, AH)
+        U, S, VH = self.backend.linalg_svd(
+            self.backend.conjugate_transpose(BH), full_matrices=False
+        )
+        arctan_S = self.backend.expand_dims(self.backend.arctan(S), -2)
         return (U * arctan_S) @ VH

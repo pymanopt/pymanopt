@@ -1,7 +1,7 @@
-import numpy.testing as np_testing
 import pytest
 
 from pymanopt.manifolds import Oblique
+from pymanopt.numerics import NumpyNumericsBackend
 
 
 class TestObliqueManifold:
@@ -9,7 +9,8 @@ class TestObliqueManifold:
     def setup(self):
         self.m = m = 100
         self.n = n = 50
-        self.manifold = Oblique(m, n)
+        self.backend = NumpyNumericsBackend()
+        self.manifold = Oblique(m, n, backend=self.backend)
 
     # def test_dim(self):
 
@@ -39,7 +40,7 @@ class TestObliqueManifold:
         y = s.random_point()
         u = s.log(x, y)
         z = s.exp(x, u)
-        np_testing.assert_almost_equal(0, s.dist(y, z), decimal=6)
+        self.backend.assert_almost_equal(0, s.dist(y, z))
 
     def test_log_exp_inverse(self):
         s = self.manifold
@@ -49,11 +50,11 @@ class TestObliqueManifold:
         v = s.log(x, y)
         # Check that the manifold difference between the tangent vectors u and
         # v is 0
-        np_testing.assert_almost_equal(0, s.norm(x, u - v))
+        self.backend.assert_almost_equal(0, s.norm(x, u - v))
 
     def test_pair_mean(self):
         s = self.manifold
         X = s.random_point()
         Y = s.random_point()
         Z = s.pair_mean(X, Y)
-        np_testing.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
+        self.backend.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))

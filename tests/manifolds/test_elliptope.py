@@ -1,6 +1,7 @@
 import pytest
 
 from pymanopt.manifolds import Elliptope
+from pymanopt.numerics import NumpyNumericsBackend
 
 
 class TestElliptopeManifold:
@@ -8,7 +9,7 @@ class TestElliptopeManifold:
     def setup(self):
         n = 50
         k = 10
-        self.manifold = Elliptope(n, k)
+        self.manifold = Elliptope(n, k, backend=NumpyNumericsBackend())
 
     # def test_dim(self):
 

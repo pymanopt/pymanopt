@@ -22,6 +22,10 @@ class Function:
     def __str__(self):
         return f"Function <{self._backend}>"
 
+    @property
+    def backend(self):
+        return self._backend
+
     def get_gradient_operator(self):
         if self._gradient is None:
             self._gradient = self._backend.generate_gradient_operator(

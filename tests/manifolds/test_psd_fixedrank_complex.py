@@ -1,8 +1,9 @@
-import numpy.testing as np_testing
+import numpy as np
 import pytest
 import scipy.stats
 
 from pymanopt.manifolds import PSDFixedRankComplex
+from pymanopt.numerics import NumpyNumericsBackend
 
 
 class TestPSDFixedRankComplexManifold:
@@ -10,7 +11,10 @@ class TestPSDFixedRankComplexManifold:
     def setup(self):
         self.n = 50
         self.k = 10
-        self.manifold = PSDFixedRankComplex(self.n, self.k)
+        self.backend = NumpyNumericsBackend(dtype=np.complex128)
+        self.manifold = PSDFixedRankComplex(
+            self.n, self.k, backend=self.backend
+        )
 
     # def test_dim(self):
 
@@ -20,7 +24,9 @@ class TestPSDFixedRankComplexManifold:
         point_a = self.manifold.random_point()
         U = scipy.stats.unitary_group.rvs(self.k)
         point_b = point_a @ U
-        np_testing.assert_almost_equal(self.manifold.dist(point_a, point_b), 0)
+        self.backend.assert_almost_equal(
+            self.manifold.dist(point_a, point_b), 0
+        )
 
     # def test_inner_product(self):
 
@@ -45,14 +51,14 @@ class TestPSDFixedRankComplexManifold:
         X = s.random_point()
         Y = s.random_point()
         Yexplog = s.exp(X, s.log(X, Y))
-        np_testing.assert_almost_equal(s.dist(Y, Yexplog), 0)
+        self.backend.assert_almost_equal(s.dist(Y, Yexplog), 0)
 
     def test_log_exp_inverse(self):
         s = self.manifold
         X = s.random_point()
         U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
-        np_testing.assert_almost_equal(s.norm(X, U - Ulogexp), 0)
+        self.backend.assert_almost_equal(s.norm(X, U - Ulogexp), 0)
 
     # def test_pair_mean(self):
     # s = self.manifold

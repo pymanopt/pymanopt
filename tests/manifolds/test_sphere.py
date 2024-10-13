@@ -10,6 +10,7 @@ from pymanopt.manifolds import (
     SphereSubspaceComplementIntersection,
     SphereSubspaceIntersection,
 )
+from pymanopt.numerics import NumpyNumericsBackend
 from pymanopt.tools import testing
 
 
@@ -18,7 +19,7 @@ class TestSphereManifold:
     def setup(self):
         self.m = m = 100
         self.n = n = 50
-        self.manifold = Sphere(m, n)
+        self.manifold = Sphere(m, n, backend=NumpyNumericsBackend())
 
         # For automatic testing of euclidean_to_riemannian_hessian
         self.projection = lambda x, u: u - np.tensordot(x, u, np.ndim(u)) * x
@@ -165,7 +166,9 @@ class TestSphereSubspaceIntersectionManifold:
         # manifold as it only consists of isolated points in R^2.
         self.U = np.ones((self.n, 1)) / np.sqrt(2)
         with warnings.catch_warnings(record=True):
-            self.manifold = SphereSubspaceIntersection(self.U)
+            self.manifold = SphereSubspaceIntersection(
+                self.U, backend=NumpyNumericsBackend()
+            )
 
     def test_dim(self):
         assert self.manifold.dim == 0
@@ -186,7 +189,9 @@ class TestSphereSubspaceIntersectionManifold:
     def test_dim_1(self):
         U = np.zeros((3, 2))
         U[0, 0] = U[1, 1] = 1
-        manifold = SphereSubspaceIntersection(U)
+        manifold = SphereSubspaceIntersection(
+            U, backend=NumpyNumericsBackend()
+        )
         # U spans the x-y plane, therefore the manifold consists of the
         # 1-sphere in the x-y plane, and has dimension 1.
         assert manifold.dim == 1
@@ -199,7 +204,9 @@ class TestSphereSubspaceIntersectionManifold:
         n = 100
         U = np.random.normal(size=(n, n // 3))
         dim = np.linalg.matrix_rank(U) - 1
-        manifold = SphereSubspaceIntersection(U)
+        manifold = SphereSubspaceIntersection(
+            U, backend=NumpyNumericsBackend()
+        )
         assert manifold.dim == dim
 
 
@@ -207,7 +214,9 @@ class TestSphereSubspaceIntersectionManifoldGradient:
     @pytest.fixture(autouse=True)
     def setup(self):
         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
-        self.manifold = SphereSubspaceIntersection(span_matrix)
+        self.manifold = SphereSubspaceIntersection(
+            span_matrix, backend=NumpyNumericsBackend()
+        )
 
 
 class TestSphereSubspaceComplementIntersectionManifold:
@@ -220,7 +229,9 @@ class TestSphereSubspaceComplementIntersectionManifold:
         # R^2.
         self.U = np.ones((self.n, 1)) / np.sqrt(2)
         with warnings.catch_warnings(record=True):
-            self.manifold = SphereSubspaceComplementIntersection(self.U)
+            self.manifold = SphereSubspaceComplementIntersection(
+                self.U, backend=NumpyNumericsBackend()
+            )
 
     def test_dim(self):
         assert self.manifold.dim == 0
@@ -241,7 +252,9 @@ class TestSphereSubspaceComplementIntersectionManifold:
     def test_dim_1(self):
         U = np.zeros((3, 1))
         U[-1, -1] = 1
-        manifold = SphereSubspaceComplementIntersection(U)
+        manifold = SphereSubspaceComplementIntersection(
+            U, backend=NumpyNumericsBackend()
+        )
         # U spans the z-axis with its orthogonal complement being the x-y
         # plane, therefore the manifold consists of the 1-sphere in the x-y
         # plane, and has dimension 1.
@@ -257,7 +270,9 @@ class TestSphereSubspaceComplementIntersectionManifold:
         # By the rank-nullity theorem the orthogonal complement of span(U) has
         # dimension n - rank(U).
         dim = n - np.linalg.matrix_rank(U) - 1
-        manifold = SphereSubspaceComplementIntersection(U)
+        manifold = SphereSubspaceComplementIntersection(
+            U, backend=NumpyNumericsBackend()
+        )
         assert manifold.dim == dim
 
         # Test if a random element really lies in the left null space of U.
@@ -270,4 +285,6 @@ class TestSphereSubspaceComplementIntersectionManifoldGradient:
     @pytest.fixture(autouse=True)
     def setup(self):
         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
-        self.manifold = SphereSubspaceComplementIntersection(span_matrix)
+        self.manifold = SphereSubspaceComplementIntersection(
+            span_matrix, backend=NumpyNumericsBackend()
+        )
