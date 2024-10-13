@@ -4,6 +4,7 @@ from numpy import testing as np_testing
 
 import pymanopt
 from pymanopt.manifolds import FixedRankEmbedded
+from pymanopt.numerics import NumpyNumericsBackend
 
 
 class TestFixedRankEmbeddedManifold:
@@ -12,7 +13,9 @@ class TestFixedRankEmbeddedManifold:
         self.m = m = 10
         self.n = n = 5
         self.k = k = 3
-        self.manifold = FixedRankEmbedded(m, n, k)
+        self.manifold = FixedRankEmbedded(
+            m, n, k, backend=NumpyNumericsBackend()
+        )
 
         u, s, vt = self.manifold.random_point()
         matrix = (u * s) @ vt

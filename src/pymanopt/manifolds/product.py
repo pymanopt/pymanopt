@@ -1,9 +1,11 @@
 import functools
-from typing import Sequence
+import warnings
+from typing import Optional, Sequence
 
 import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
+from pymanopt.numerics import NumericsBackend
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
@@ -19,17 +21,44 @@ class Product(Manifold):
         manifolds: The collection of manifolds in the product.
     """
 
-    def __init__(self, manifolds: Sequence[Manifold]):
+    def __init__(
+        self,
+        manifolds: Sequence[Manifold],
+        backend: Optional[NumericsBackend] = None,
+    ):
+        # if backend is None:
+        #     backend = manifolds[0].backend
+        #     for manifold in manifolds[1:]:
+        #         if manifold.backend != backend:
+        #             raise ValueError(
+        #                 "All manifolds must have the same backend "
+        #                 f"(got {manifold.backend} and {backend})"
+        #             )
+
         for manifold in manifolds:
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
+
         self.manifolds = tuple(manifolds)
         manifold_names = " x ".join([str(manifold) for manifold in manifolds])
         name = f"Product manifold: {manifold_names}"
 
         dimension = np.sum([manifold.dim for manifold in manifolds])
         point_layout = tuple(manifold.point_layout for manifold in manifolds)
-        super().__init__(name, dimension, point_layout=point_layout)
+        super().__init__(
+            name, dimension, point_layout=point_layout, backend=None
+        )
+
+    @Manifold.backend.setter
+    def backend(self, backend: NumericsBackend):
+        warnings.warn(
+            "Setting backend of Product manifold is not supported. "
+            "One should directly set the backend of each underlying manifold."
+        )
+
+    def set_backend_with_default_dtype(self, backend_type: type):
+        for manifold in self.manifolds:
+            manifold.set_backend_with_default_dtype(backend_type)
 
     @property
     def typical_dist(self):

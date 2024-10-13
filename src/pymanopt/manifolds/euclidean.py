@@ -1,22 +1,31 @@
+import math
+from typing import Optional
+
 import numpy as np
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.tools.multi import multiskew, multisym
+from pymanopt.numerics import NumericsBackend
 
 
 class _Euclidean(RiemannianSubmanifold):
-    def __init__(self, name, dimension, *shape):
+    def __init__(
+        self,
+        name,
+        dimension,
+        *shape,
+        backend: Optional[NumericsBackend] = None,
+    ):
         self._shape = shape
-        super().__init__(name, dimension)
+        super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return np.sqrt(self.dim)
+        return self.backend.sqrt(self.dim)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return float(
-            np.real(
-                np.tensordot(
+            self.backend.real(
+                self.backend.tensordot(
                     tangent_vector_a.conj(),
                     tangent_vector_b,
                     axes=tangent_vector_a.ndim,
@@ -25,10 +34,10 @@ class _Euclidean(RiemannianSubmanifold):
         )
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return self.backend.linalg_norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        return np.linalg.norm(point_a - point_b)
+        return self.backend.linalg_norm(point_a - point_b)
 
     def projection(self, point, vector):
         return vector
@@ -49,7 +58,7 @@ class _Euclidean(RiemannianSubmanifold):
         return point_b - point_a
 
     def random_point(self):
-        return np.random.normal(size=self._shape)
+        return self.backend.random_normal(size=self._shape)
 
     def random_tangent_vector(self, point):
         tangent_vector = self.random_point()
@@ -62,7 +71,7 @@ class _Euclidean(RiemannianSubmanifold):
         return (point_a + point_b) / 2
 
     def zero_vector(self, point):
-        return np.zeros(self._shape)
+        return self.backend.zeros(self._shape)
 
 
 class Euclidean(_Euclidean):
@@ -81,7 +90,7 @@ class Euclidean(_Euclidean):
         corresponding to the usual tensor dot product.
     """
 
-    def __init__(self, *shape: int):
+    def __init__(self, *shape: int, backend: Optional[NumericsBackend] = None):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
@@ -92,8 +101,13 @@ class Euclidean(_Euclidean):
             name = f"Euclidean manifold of {n1}x{n2} matrices"
         else:
             name = f"Euclidean manifold of shape {shape} tensors"
-        dimension = np.prod(shape)
-        super().__init__(name, dimension, *shape)
+        dimension = math.prod(shape)
+        super().__init__(name, dimension, *shape, backend=backend)
+
+        @RiemannianSubmanifold.backend.setter
+        def _(self, backend: NumericsBackend):
+            assert backend.is_dtype_real()
+            super().backend = backend
 
 
 class ComplexEuclidean(_Euclidean):
@@ -112,7 +126,9 @@ class ComplexEuclidean(_Euclidean):
         corresponding to the usual tensor dot product.
     """
 
-    def __init__(self, *shape):
+    IS_COMPLEX = True
+
+    def __init__(self, *shape, backend: Optional[NumericsBackend] = None):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
@@ -124,12 +140,17 @@ class ComplexEuclidean(_Euclidean):
         else:
             name = f"Complex Euclidean manifold of shape {shape} tensors"
         dimension = 2 * np.prod(shape)
-        super().__init__(name, dimension, *shape)
+        super().__init__(name, dimension, *shape, backend=backend)
+
+    @RiemannianSubmanifold.backend.setter
+    def _(self, backend: NumericsBackend):
+        assert not backend.is_dtype_real()
+        super().backend = backend
 
     def random_point(self):
-        return np.random.randn(*self._shape) + 1j * np.random.randn(
+        return self.backend.random_randn(
             *self._shape
-        )
+        ) + 1j * self.backend.random_randn(*self._shape)
 
     def zero_vector(self, point):
         return np.zeros(self._shape, dtype=complex)
@@ -149,7 +170,9 @@ class Symmetric(_Euclidean):
         n`` matrices represented as arrays of shape ``(k, n, n)``.
     """
 
-    def __init__(self, n: int, k: int = 1):
+    def __init__(
+        self, n: int, k: int = 1, backend: Optional[NumericsBackend] = None
+    ):
         if k == 1:
             shape = (n, n)
             name = f"Manifold of {n}x{n} symmetric matrices"
@@ -159,22 +182,24 @@ class Symmetric(_Euclidean):
         else:
             raise ValueError(f"k must be an integer no less than 1, got {k}")
         dimension = int(k * n * (n + 1) / 2)
-        super().__init__(name, dimension, *shape)
+        super().__init__(name, dimension, *shape, backend=backend)
 
     def projection(self, point, vector):
-        return multisym(vector)
+        return self.backend.sym(vector)
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return multisym(euclidean_hessian)
+        return self.backend.sym(euclidean_hessian)
 
     def random_point(self):
-        return multisym(np.random.normal(size=self._shape))
+        return self.backend.sym(self.backend.random_normal(size=self._shape))
 
     def random_tangent_vector(self, point):
         tangent_vector = self.random_point()
-        return multisym(tangent_vector / self.norm(point, tangent_vector))
+        return self.backend.sym(
+            tangent_vector / self.norm(point, tangent_vector)
+        )
 
 
 class SkewSymmetric(_Euclidean):
@@ -191,7 +216,7 @@ class SkewSymmetric(_Euclidean):
         ``n x n`` matrices represented as arrays of shape ``(k, n, n)``.
     """
 
-    def __init__(self, n, k=1):
+    def __init__(self, n, k=1, backend: Optional[NumericsBackend] = None):
         if k == 1:
             shape = (n, n)
             name = f"Manifold of {n}x{n} skew-symmetric matrices"
@@ -201,19 +226,21 @@ class SkewSymmetric(_Euclidean):
         else:
             raise ValueError("k must be an integer no less than 1")
         dimension = int(k * n * (n - 1) / 2)
-        super().__init__(name, dimension, *shape)
+        super().__init__(name, dimension, *shape, backend=backend)
 
     def projection(self, point, vector):
-        return multiskew(vector)
+        return self.backend.skew(vector)
 
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return multiskew(euclidean_hessian)
+        return self.backend.skew(euclidean_hessian)
 
     def random_point(self):
-        return multiskew(np.random.normal(size=self._shape))
+        return self.backend.skew(self.backend.random_normal(size=self._shape))
 
     def random_tangent_vector(self, point):
         tangent_vector = self.random_point()
-        return multiskew(tangent_vector / self.norm(point, tangent_vector))
+        return self.backend.skew(
+            tangent_vector / self.norm(point, tangent_vector)
+        )

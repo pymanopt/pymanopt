@@ -1,41 +1,33 @@
-import autograd.numpy as np
-import numpy.testing as np_testing
 import pytest
-from scipy.linalg import eigvalsh, expm, logm
+from numpy import complex128, float64
 
 from pymanopt.manifolds import (
     HermitianPositiveDefinite,
     SpecialHermitianPositiveDefinite,
     SymmetricPositiveDefinite,
 )
-from pymanopt.tools.multi import (
-    multiexpm,
-    multihconj,
-    multiherm,
-    multilogm,
-    multisym,
-    multitransp,
-)
+from pymanopt.numerics import NumpyNumericsBackend
 
 
-def geodesic(point_a, point_b, alpha):
+def geodesic(point_a, point_b, alpha, backend):
     if alpha < 0 or 1 < alpha:
         raise ValueError("Exponent must be in [0,1]")
-    c = np.linalg.cholesky(point_a)
-    c_inv = np.linalg.inv(c)
-    log_cbc = multilogm(
-        c_inv @ point_b @ multihconj(c_inv),
+    c = backend.linalg_cholesky(point_a)
+    c_inv = backend.linalg_inv(c)
+    log_cbc = backend.linalg_logm(
+        c_inv @ point_b @ backend.conjugate_transpose(c_inv),
         positive_definite=True,
     )
-    powm = multiexpm(alpha * log_cbc, symmetric=False)
-    return c @ powm @ multihconj(c)
+    powm = backend.linalg_expm(alpha * log_cbc, symmetric=False)
+    return c @ powm @ backend.conjugate_transpose(c)
 
 
 class TestSingleSymmetricPositiveDefiniteManifold:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.n = n = 15
-        self.manifold = SymmetricPositiveDefinite(n)
+        self.backend = NumpyNumericsBackend()
+        self.manifold = SymmetricPositiveDefinite(n, backend=self.backend)
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -44,13 +36,13 @@ class TestSingleSymmetricPositiveDefiniteManifold:
         manifold = self.manifold
         x = manifold.random_point()
 
-        assert np.shape(x) == (n, n)
+        assert x.shape == (n, n)
 
         # Check symmetry
-        np_testing.assert_allclose(x, multisym(x))
+        self.backend.assert_allclose(x, self.backend.sym(x))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(x)
+        w = self.backend.linalg_eigvalsh(x)
         assert (w > [0]).all()
 
     def test_dist(self):
@@ -60,10 +52,10 @@ class TestSingleSymmetricPositiveDefiniteManifold:
         z = manifold.random_point()
 
         # Test separability
-        np_testing.assert_almost_equal(manifold.dist(x, x), 0.0)
+        self.backend.assert_almost_equal(manifold.dist(x, x), 0.0)
 
         # Test symmetry
-        np_testing.assert_almost_equal(
+        self.backend.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(y, x)
         )
 
@@ -71,36 +63,44 @@ class TestSingleSymmetricPositiveDefiniteManifold:
         assert manifold.dist(x, y) <= manifold.dist(x, z) + manifold.dist(z, y)
 
         # Test alternative implementation (see equation (6.14) in [Bha2007]).
-        d = np.sqrt((np.log(eigvalsh(x, y)) ** 2).sum())
-        np_testing.assert_almost_equal(manifold.dist(x, y), d)
+        d = self.backend.sqrt(
+            (self.backend.log(self.backend.linalg_eigvalsh(x, y)) ** 2).sum()
+        )
+        self.backend.assert_almost_equal(manifold.dist(x, y), d)
 
         # Test exponential metric increasing property
         # (see equation (6.8) in [Bha2007]).
-        assert manifold.dist(x, y) >= np.linalg.norm(logm(x) - logm(y))
+        assert manifold.dist(x, y) >= self.backend.linalg_norm(
+            self.backend.linalg_logm(x) - self.backend.linalg_logm(y)
+        )
 
         # check that dist is consistent with log
-        np_testing.assert_almost_equal(
+        self.backend.assert_almost_equal(
             manifold.dist(x, y), manifold.norm(x, manifold.log(x, y))
         )
 
         # Test invariance under inversion
-        np_testing.assert_almost_equal(
+        self.backend.assert_almost_equal(
             manifold.dist(x, y),
-            manifold.dist(np.linalg.inv(y), np.linalg.inv(x)),
+            manifold.dist(
+                self.backend.linalg_inv(y), self.backend.linalg_inv(x)
+            ),
         )
 
         # Test congruence-invariance
-        a = np.random.normal(size=(self.n, self.n))  # must be invertible
-        axa = a @ x @ multitransp(a)
-        aya = a @ y @ multitransp(a)
-        np_testing.assert_almost_equal(
+        a = self.backend.random_normal(
+            size=(self.n, self.n)
+        )  # must be invertible
+        axa = a @ x @ self.backend.transpose(a)
+        aya = a @ y @ self.backend.transpose(a)
+        self.backend.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(axa, aya)
         )
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
-        alpha = np.random.uniform()
-        np_testing.assert_almost_equal(
-            manifold.dist(x, geodesic(x, y, alpha)),
+        alpha = self.backend.random_uniform()
+        self.backend.assert_almost_equal(
+            manifold.dist(x, geodesic(x, y, alpha, self.backend)),
             alpha * manifold.dist(x, y),
         )
 
@@ -108,11 +108,11 @@ class TestSingleSymmetricPositiveDefiniteManifold:
         manifold = self.manifold
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
-        e = expm(np.linalg.solve(x, u))
+        e = self.backend.linalg_expm(self.backend.linalg_solve(x, u))
 
-        np_testing.assert_allclose(x @ e, manifold.exp(x, u))
+        self.backend.assert_allclose(x @ e, manifold.exp(x, u))
         u = u * 1e-6
-        np_testing.assert_allclose(manifold.exp(x, u), x + u)
+        self.backend.assert_allclose(manifold.exp(x, u), x + u)
 
     def test_random_tangent_vector(self):
         # Just test that random_tangent_vector returns an element of the tangent space
@@ -121,15 +121,16 @@ class TestSingleSymmetricPositiveDefiniteManifold:
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
         v = manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(multiherm(u), u)
-        np_testing.assert_almost_equal(1, manifold.norm(x, u))
-        assert np.linalg.norm(u - v) > 1e-3
+        self.backend.assert_allclose(self.backend.herm(u), u)
+        self.backend.assert_almost_equal(1, manifold.norm(x, u))
+        assert self.backend.linalg_norm(u - v) > 1e-3
 
     def test_norm(self):
         manifold = self.manifold
         x = manifold.random_point()
-        np_testing.assert_almost_equal(
-            manifold.norm(np.eye(self.n), x), np.linalg.norm(x)
+        self.backend.assert_almost_equal(
+            manifold.norm(self.backend.eye(self.n), x),
+            self.backend.linalg_norm(x),
         )
 
     def test_exp_log_inverse(self):
@@ -137,14 +138,14 @@ class TestSingleSymmetricPositiveDefiniteManifold:
         x = manifold.random_point()
         y = manifold.random_point()
         u = manifold.log(x, y)
-        np_testing.assert_allclose(manifold.exp(x, u), y)
+        self.backend.assert_allclose(manifold.exp(x, u), y)
 
     def test_log_exp_inverse(self):
         manifold = self.manifold
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
         y = manifold.exp(x, u)
-        np_testing.assert_allclose(manifold.log(x, y), u)
+        self.backend.assert_allclose(manifold.log(x, y), u)
 
 
 class TestSingleHermitianPositiveDefiniteManifold(
@@ -153,12 +154,13 @@ class TestSingleHermitianPositiveDefiniteManifold(
     @pytest.fixture(autouse=True)
     def setup(self):
         self.n = n = 15
-        self.manifold = HermitianPositiveDefinite(n)
+        self.backend = NumpyNumericsBackend(dtype=complex128)
+        self.manifold = HermitianPositiveDefinite(n, backend=self.backend)
 
     def test_dim(self):
         manifold = self.manifold
         n = self.n
-        np_testing.assert_equal(manifold.dim, n * (n + 1))
+        self.backend.assert_equal(manifold.dim, n * (n + 1))
 
     def test_random_point(self):
         # Just test that random_point returns a point on the manifold and two
@@ -167,14 +169,14 @@ class TestSingleHermitianPositiveDefiniteManifold(
         manifold = self.manifold
         x = manifold.random_point()
 
-        assert np.shape(x) == (n, n)
-        assert x.dtype == complex
+        assert x.shape == (n, n)
+        assert x.dtype == self.backend.dtype
 
         # Check symmetry
-        np_testing.assert_allclose(x, multiherm(x))
+        self.backend.assert_allclose(x, self.backend.herm(x))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(x)
+        w = self.backend.linalg_eigvalsh(x)
         assert (w > [0]).all()
 
     def test_random_tangent_vector(self):
@@ -184,11 +186,11 @@ class TestSingleHermitianPositiveDefiniteManifold(
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
         v = manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(multiherm(u), u)
-        np_testing.assert_almost_equal(1, manifold.norm(x, u))
+        self.backend.assert_allclose(self.backend.herm(u), u)
+        self.backend.assert_almost_equal(1, manifold.norm(x, u))
         assert u.shape == (self.n, self.n)
-        assert u.dtype == complex
-        assert np.linalg.norm(u - v) > 1e-3
+        assert u.dtype == self.backend.dtype
+        assert self.backend.linalg_norm(u - v) > 1e-3
 
 
 class TestMultiSymmetricPositiveDefiniteManifold:
@@ -196,17 +198,20 @@ class TestMultiSymmetricPositiveDefiniteManifold:
     def setup(self):
         self.n = n = 10
         self.k = k = 3
-        self.manifold = SymmetricPositiveDefinite(n, k=k)
+        self.backend = NumpyNumericsBackend(dtype=float64)
+        self.manifold = SymmetricPositiveDefinite(n, k=k, backend=self.backend)
 
     def test_dim(self):
         manifold = self.manifold
         n = self.n
         k = self.k
-        np_testing.assert_equal(manifold.dim, 0.5 * k * n * (n + 1))
+        self.backend.assert_equal(manifold.dim, 0.5 * k * n * (n + 1))
 
     def test_typical_dist(self):
         manifold = self.manifold
-        np_testing.assert_equal(manifold.typical_dist, np.sqrt(manifold.dim))
+        self.backend.assert_equal(
+            manifold.typical_dist, self.backend.sqrt(manifold.dim)
+        )
 
     def test_dist(self):
         # n = self.n
@@ -216,10 +221,10 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         z = manifold.random_point()
 
         # Test separability
-        np_testing.assert_almost_equal(manifold.dist(x, x), 0.0)
+        self.backend.assert_almost_equal(manifold.dist(x, x), 0.0)
 
         # Test symmetry
-        np_testing.assert_almost_equal(
+        self.backend.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(y, x)
         )
 
@@ -228,32 +233,36 @@ class TestMultiSymmetricPositiveDefiniteManifold:
 
         # Test exponential metric increasing property
         # (see equation (6.8) in [Bha2007]).
-        logx, logy = multilogm(x), multilogm(y)
-        assert manifold.dist(x, y) >= np.linalg.norm(logx - logy)
+        logx, logy = self.backend.linalg_logm(x), self.backend.linalg_logm(y)
+        assert manifold.dist(x, y) >= self.backend.linalg_norm(logx - logy)
 
         # check that dist is consistent with log
-        np_testing.assert_almost_equal(
+        self.backend.assert_almost_equal(
             manifold.dist(x, y), manifold.norm(x, manifold.log(x, y))
         )
 
         # Test invariance under inversion
-        np_testing.assert_almost_equal(
+        self.backend.assert_almost_equal(
             manifold.dist(x, y),
-            manifold.dist(np.linalg.inv(y), np.linalg.inv(x)),
+            manifold.dist(
+                self.backend.linalg_inv(y), self.backend.linalg_inv(x)
+            ),
         )
 
         # Test congruence-invariance
-        a = np.random.normal(size=(self.n, self.n))  # must be invertible
-        axa = a @ x @ multitransp(a)
-        aya = a @ y @ multitransp(a)
-        np_testing.assert_almost_equal(
+        a = self.backend.random_normal(
+            size=(self.n, self.n)
+        )  # must be invertible
+        axa = a @ x @ self.backend.transpose(a)
+        aya = a @ y @ self.backend.transpose(a)
+        self.backend.assert_almost_equal(
             manifold.dist(x, y), manifold.dist(axa, aya)
         )
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
-        alpha = np.random.uniform()
-        np_testing.assert_almost_equal(
-            manifold.dist(x, geodesic(x, y, alpha)),
+        alpha = self.backend.random_uniform()
+        self.backend.assert_almost_equal(
+            manifold.dist(x, geodesic(x, y, alpha, self.backend)),
             alpha * manifold.dist(x, y),
         )
 
@@ -262,25 +271,27 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         k = self.k
         n = self.n
         x = manifold.random_point()
-        a, b = np.random.normal(size=(2, k, n, n))
-        np_testing.assert_almost_equal(
-            np.tensordot(a, b.transpose((0, 2, 1)), axes=a.ndim),
+        a, b = self.backend.random_normal(size=(2, k, n, n))
+        self.backend.assert_almost_equal(
+            self.backend.tensordot(a, b.transpose((0, 2, 1)), axes=a.ndim),
             manifold.inner_product(x, x @ a, x @ b),
         )
 
     def test_projection(self):
         manifold = self.manifold
         x = manifold.random_point()
-        a = np.random.normal(size=(self.k, self.n, self.n))
-        np_testing.assert_allclose(manifold.projection(x, a), multiherm(a))
+        a = self.backend.random_normal(size=(self.k, self.n, self.n))
+        self.backend.assert_allclose(
+            manifold.projection(x, a), self.backend.herm(a)
+        )
 
     def test_euclidean_to_riemannian_gradient(self):
         manifold = self.manifold
         x = manifold.random_point()
-        u = np.random.normal(size=(self.k, self.n, self.n))
-        np_testing.assert_allclose(
+        u = self.backend.random_normal(size=(self.k, self.n, self.n))
+        self.backend.assert_allclose(
             manifold.euclidean_to_riemannian_gradient(x, u),
-            x @ multiherm(u) @ x,
+            x @ self.backend.herm(u) @ x,
         )
 
     def test_euclidean_to_riemannian_hessian(self):
@@ -289,24 +300,26 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         n = self.n
         k = self.k
         x = manifold.random_point()
-        egrad, ehess = np.random.normal(size=(2, k, n, n))
+        egrad, ehess = self.backend.random_normal(size=(2, k, n, n))
         u = manifold.random_tangent_vector(x)
 
-        Hess = x @ multiherm(ehess) @ x + 2 * multiherm(
-            u @ multiherm(egrad) @ x
+        Hess = x @ self.backend.herm(ehess) @ x + 2 * self.backend.herm(
+            u @ self.backend.herm(egrad) @ x
         )
 
         # Correction factor for the non-constant metric
-        Hess = Hess - multiherm(u @ multiherm(egrad) @ x)
-        np_testing.assert_almost_equal(
+        Hess = Hess - self.backend.herm(u @ self.backend.herm(egrad) @ x)
+        self.backend.assert_almost_equal(
             Hess, manifold.euclidean_to_riemannian_hessian(x, egrad, ehess, u)
         )
 
     def test_norm(self):
         manifold = self.manifold
         x = manifold.random_point()
-        Id = np.array(self.k * [np.eye(self.n)])
-        np_testing.assert_almost_equal(manifold.norm(Id, x), np.linalg.norm(x))
+        Id = self.backend.array(self.k * [self.backend.eye(self.n)])
+        self.backend.assert_almost_equal(
+            manifold.norm(Id, x), self.backend.linalg_norm(x)
+        )
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -316,13 +329,14 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         manifold = self.manifold
         x = manifold.random_point()
 
-        assert np.shape(x) == (k, n, n)
+        assert x.shape == (k, n, n)
 
         # Check symmetry
-        np_testing.assert_allclose(x, multisym(x))
+        self.backend.assert_allclose(x, self.backend.sym(x))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(x)
+        # breakpoint()
+        w = self.backend.linalg_eigvalsh(x)
         assert (w > [[0]]).all()
 
     def test_random_tangent_vector(self):
@@ -332,9 +346,9 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
         v = manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(multisym(u), u)
-        np_testing.assert_almost_equal(1, manifold.norm(x, u))
-        assert np.linalg.norm(u - v) > 1e-3
+        self.backend.assert_allclose(self.backend.sym(u), u)
+        self.backend.assert_almost_equal(1, manifold.norm(x, u))
+        assert self.backend.linalg_norm(u - v) > 1e-3
 
     def test_transport(self):
         manifold = self.manifold
@@ -343,7 +357,7 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         u = manifold.random_tangent_vector(x)
         u_transp = manifold.transport(x, y, u)
         u_transp_proj = manifold.projection(y, u_transp)
-        np_testing.assert_allclose(u_transp, u_transp_proj)
+        self.backend.assert_allclose(u_transp, u_transp_proj)
 
     def test_exp(self):
         # Test against manopt implementation, test that for small vectors
@@ -351,12 +365,14 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         manifold = self.manifold
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
-        e = np.zeros_like(x)
+        e = self.backend.zeros_like(x)
         for i in range(self.k):
-            e[i] = expm(np.linalg.solve(x[i], u[i]))
-        np_testing.assert_allclose(x @ e, manifold.exp(x, u))
+            e[i] = self.backend.linalg_expm(
+                self.backend.linalg_solve(x[i], u[i])
+            )
+        self.backend.assert_allclose(x @ e, manifold.exp(x, u))
         u = u * 1e-6
-        np_testing.assert_allclose(manifold.exp(x, u), x + u)
+        self.backend.assert_allclose(manifold.exp(x, u), x + u)
 
     def test_retraction(self):
         # Check that result is on manifold and for small vectors
@@ -366,30 +382,30 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         u = manifold.random_tangent_vector(x)
         y = manifold.retraction(x, u)
 
-        assert np.shape(y) == (self.k, self.n, self.n)
+        assert y.shape == (self.k, self.n, self.n)
         # Check symmetry
-        np_testing.assert_allclose(y, multiherm(y))
+        self.backend.assert_allclose(y, self.backend.herm(y))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(y)
+        w = self.backend.linalg_eigvalsh(y)
         assert (w > [[0]]).all()
 
         u = u * 1e-6
-        np_testing.assert_allclose(manifold.retraction(x, u), x + u)
+        self.backend.assert_allclose(manifold.retraction(x, u), x + u)
 
     def test_exp_log_inverse(self):
         manifold = self.manifold
         x = manifold.random_point()
         y = manifold.random_point()
         u = manifold.log(x, y)
-        np_testing.assert_allclose(manifold.exp(x, u), y)
+        self.backend.assert_allclose(manifold.exp(x, u), y)
 
     def test_log_exp_inverse(self):
         manifold = self.manifold
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
         y = manifold.exp(x, u)
-        np_testing.assert_allclose(manifold.log(x, y), u)
+        self.backend.assert_allclose(manifold.log(x, y), u)
 
 
 class TestMultiHermitianPositiveDefiniteManifold(
@@ -399,13 +415,14 @@ class TestMultiHermitianPositiveDefiniteManifold(
     def setup(self):
         self.n = n = 10
         self.k = k = 3
-        self.manifold = HermitianPositiveDefinite(n, k=k)
+        self.backend = NumpyNumericsBackend(dtype=complex128)
+        self.manifold = HermitianPositiveDefinite(n, k=k, backend=self.backend)
 
     def test_dim(self):
         manifold = self.manifold
         n = self.n
         k = self.k
-        np_testing.assert_equal(manifold.dim, k * n * (n + 1))
+        self.backend.assert_equal(manifold.dim, k * n * (n + 1))
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -415,14 +432,14 @@ class TestMultiHermitianPositiveDefiniteManifold(
         manifold = self.manifold
         x = manifold.random_point()
 
-        assert np.shape(x) == (k, n, n)
-        assert x.dtype == complex
+        assert x.shape == (k, n, n)
+        assert x.dtype == self.backend.dtype
 
         # Check symmetry
-        np_testing.assert_allclose(x, multiherm(x))
+        self.backend.assert_allclose(x, self.backend.herm(x))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(x)
+        w = self.backend.linalg_eigvalsh(x)
         assert (w > [[0]]).all()
 
     def test_random_tangent_vector(self):
@@ -434,10 +451,10 @@ class TestMultiHermitianPositiveDefiniteManifold(
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
         v = manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(multiherm(u), u)
-        np_testing.assert_almost_equal(1, manifold.norm(x, u))
+        self.backend.assert_allclose(self.backend.herm(u), u)
+        self.backend.assert_almost_equal(1, manifold.norm(x, u))
         assert u.shape == (k, n, n)
-        assert np.linalg.norm(u - v) > 1e-3
+        assert self.backend.linalg_norm(u - v) > 1e-3
 
 
 class TestSingleSpecialHermitianPositiveDefiniteManifold(
@@ -447,12 +464,15 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold(
     def setup(self):
         self.n = n = 10
         self.k = k = 1
-        self.manifold = SpecialHermitianPositiveDefinite(n, k=k)
+        self.backend = NumpyNumericsBackend(dtype=complex128)
+        self.manifold = SpecialHermitianPositiveDefinite(
+            n, k=k, backend=self.backend
+        )
 
     def test_dim(self):
         manifold = self.manifold
         n = self.n
-        np_testing.assert_equal(manifold.dim, n * (n + 1) - 1)
+        self.backend.assert_equal(manifold.dim, n * (n + 1) - 1)
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -462,22 +482,22 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold(
         x = manifold.random_point()
         y = manifold.random_point()
 
-        assert np.shape(x) == (n, n)
-        assert x.dtype == complex
+        assert x.shape == (n, n)
+        assert x.dtype == self.backend.dtype
 
         # Check symmetry
-        np_testing.assert_allclose(x, multiherm(x))
+        self.backend.assert_allclose(x, self.backend.herm(x))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(x)
+        w = self.backend.linalg_eigvalsh(x)
         assert (w > [[0]]).all()
 
         # Check unit determinant
-        d = np.real(np.linalg.det(x))
-        np_testing.assert_allclose(d, 1)
+        d = self.backend.real(self.backend.linalg_det(x))
+        self.backend.assert_allclose(d, 1)
 
         # Check randomness
-        assert np.linalg.norm(x - y) > 1e-3
+        assert self.backend.linalg_norm(x - y) > 1e-3
 
     def test_random_tangent_vector(self):
         # Just test that randvec returns an element of the tangent space
@@ -488,40 +508,44 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold(
         u = manifold.random_tangent_vector(x)
         v = manifold.random_tangent_vector(x)
 
-        assert np.shape(x) == (n, n)
-        assert x.dtype == complex
+        assert x.shape == (n, n)
+        assert x.dtype == self.backend.dtype
 
-        np_testing.assert_allclose(multiherm(u), u)
+        self.backend.assert_allclose(self.backend.herm(u), u)
 
-        t = np.real(np.trace(np.linalg.solve(x, u)))
-        np_testing.assert_almost_equal(t, 0)
+        t = self.backend.real(
+            self.backend.trace(self.backend.linalg_solve(x, u))
+        )
+        self.backend.assert_almost_equal(t, 0)
 
-        np_testing.assert_almost_equal(1, manifold.norm(x, u))
+        self.backend.assert_almost_equal(1, manifold.norm(x, u))
 
-        assert np.linalg.norm(u - v) > 1e-3
+        assert self.backend.linalg_norm(u - v) > 1e-3
 
     def test_projection(self):
         manifold = self.manifold
         x = manifold.random_point()
-        a = np.random.randn(self.n, self.n) + 1j * np.random.randn(
+        a = self.backend.random_randn(
             self.n, self.n
-        )
+        ) + 1j * self.backend.random_randn(self.n, self.n)
         p = manifold.projection(x, a)
 
-        assert np.shape(p) == (self.n, self.n)
+        assert p.shape == (self.n, self.n)
 
-        np_testing.assert_allclose(p, multiherm(p))
+        self.backend.assert_allclose(p, self.backend.herm(p))
 
-        t = np.real(np.trace(np.linalg.solve(x, p)))
-        np_testing.assert_almost_equal(t, 0)
+        t = self.backend.real(
+            self.backend.trace(self.backend.linalg_solve(x, p))
+        )
+        self.backend.assert_almost_equal(t, 0)
 
-        np_testing.assert_allclose(p, manifold.projection(x, p))
+        self.backend.assert_allclose(p, manifold.projection(x, p))
 
     def test_euclidean_to_riemannian_gradient(self):
         manifold = self.manifold
         x = manifold.random_point()
-        u = np.random.normal(size=(self.k, self.n, self.n))
-        np_testing.assert_allclose(
+        u = self.backend.random_normal(size=(self.k, self.n, self.n))
+        self.backend.assert_allclose(
             manifold.euclidean_to_riemannian_gradient(x, u),
             manifold.projection(x, x @ u @ x),
         )
@@ -533,21 +557,21 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold(
         x = manifold.random_point()
         u = manifold.random_tangent_vector(x)
         e = manifold.exp(x, u)
-        assert np.shape(e) == (self.n, self.n)
+        assert e.shape == (self.n, self.n)
 
         # Check symmetry
-        np_testing.assert_allclose(e, multiherm(e))
+        self.backend.assert_allclose(e, self.backend.herm(e))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(e)
+        w = self.backend.linalg_eigvalsh(e)
         assert (w > [[0]]).all()
 
         # Check unit determinant
-        d = np.linalg.det(e)
-        np_testing.assert_allclose(d, 1)
+        d = self.backend.linalg_det(e)
+        self.backend.assert_allclose(d, 1)
 
         u = u * 1e-6
-        np_testing.assert_allclose(manifold.exp(x, u), x + u)
+        self.backend.assert_allclose(manifold.exp(x, u), x + u)
 
     def test_retraction(self):
         # Check that result is on manifold and for small vectors
@@ -557,20 +581,20 @@ class TestSingleSpecialHermitianPositiveDefiniteManifold(
         u = manifold.random_tangent_vector(x)
         y = manifold.retraction(x, u)
 
-        assert np.shape(y) == (self.n, self.n)
+        assert y.shape == (self.n, self.n)
         # Check symmetry
-        np_testing.assert_allclose(y, multiherm(y))
+        self.backend.assert_allclose(y, self.backend.herm(y))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(y)
+        w = self.backend.linalg_eigvalsh(y)
         assert (w > [[0]]).all()
 
         # Check unit determinant
-        d = np.linalg.det(y)
-        np_testing.assert_allclose(d, 1)
+        d = self.backend.linalg_det(y)
+        self.backend.assert_allclose(d, 1)
 
         u = u * 1e-6
-        np_testing.assert_allclose(manifold.retraction(x, u), x + u)
+        self.backend.assert_allclose(manifold.retraction(x, u), x + u)
 
 
 class TestMultiSpecialHermitianPositiveDefiniteManifold(
@@ -580,13 +604,16 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold(
     def setup(self):
         self.n = n = 10
         self.k = k = 3
-        self.manifold = SpecialHermitianPositiveDefinite(n, k=k)
+        self.backend = NumpyNumericsBackend(dtype=complex128)
+        self.manifold = SpecialHermitianPositiveDefinite(
+            n, k=k, backend=self.backend
+        )
 
     def test_dim(self):
         manifold = self.manifold
         n = self.n
         k = self.k
-        np_testing.assert_equal(manifold.dim, k * (n * (n + 1) - 1))
+        self.backend.assert_equal(manifold.dim, k * (n * (n + 1) - 1))
 
     def test_random_point(self):
         # Just test that rand returns a point on the manifold and two
@@ -597,22 +624,22 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold(
         x = manifold.random_point()
         y = manifold.random_point()
 
-        assert np.shape(x) == (k, n, n)
-        assert x.dtype == complex
+        assert x.shape == (k, n, n)
+        assert x.dtype == self.backend.dtype
 
         # Check symmetry
-        np_testing.assert_allclose(x, multiherm(x))
+        self.backend.assert_allclose(x, self.backend.herm(x))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(x)
+        w = self.backend.linalg_eigvalsh(x)
         assert (w > [[0]]).all()
 
         # Check unit determinant
-        d = np.real(np.linalg.det(x))
-        np_testing.assert_allclose(d, 1)
+        d = self.backend.real(self.backend.linalg_det(x))
+        self.backend.assert_allclose(d, 1)
 
         # Check randomness
-        assert np.linalg.norm(x - y) > 1e-3
+        assert self.backend.linalg_norm(x - y) > 1e-3
 
     def test_random_tangent_vector(self):
         # Just test that randvec returns an element of the tangent space
@@ -622,41 +649,41 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold(
         u = manifold.random_tangent_vector(x)
         v = manifold.random_tangent_vector(x)
 
-        np_testing.assert_allclose(multiherm(u), u)
+        self.backend.assert_allclose(self.backend.herm(u), u)
 
-        t = np.empty(manifold._k, dtype=complex)
-        temp = np.linalg.solve(x, u)
+        t = self.backend.zeros(manifold._k)
+        temp = self.backend.linalg_solve(x, u)
         for i in range(manifold._k):
-            t[i] = np.real(np.trace(temp[i, :, :]))
-        np_testing.assert_allclose(t, 0, atol=1e-7)
+            t[i] = self.backend.real(self.backend.trace(temp[i, :, :]))
+        self.backend.assert_allclose(t, 0, atol=1e-7)
 
-        np_testing.assert_almost_equal(1, manifold.norm(x, u))
+        self.backend.assert_almost_equal(1, manifold.norm(x, u))
 
-        assert np.linalg.norm(u - v) > 1e-3
+        assert self.backend.linalg_norm(u - v) > 1e-3
 
     def test_projection(self):
         manifold = self.manifold
         x = manifold.random_point()
-        a = np.random.randn(self.k, self.n, self.n) + 1j * np.random.randn(
+        a = self.backend.random_randn(
             self.k, self.n, self.n
-        )
+        ) + 1j * self.backend.random_randn(self.k, self.n, self.n)
         p = manifold.projection(x, a)
 
-        np_testing.assert_allclose(p, multiherm(p))
+        self.backend.assert_allclose(p, self.backend.herm(p))
 
-        t = np.ones(manifold._k, dtype=complex)
-        temp = np.linalg.solve(x, p)
+        t = self.backend.ones(manifold._k)
+        temp = self.backend.linalg_solve(x, p)
         for i in range(manifold._k):
-            t[i] = np.real(np.trace(temp[i, :, :]))
-        np_testing.assert_allclose(t, 0, atol=1e-7)
+            t[i] = self.backend.real(self.backend.trace(temp[i, :, :]))
+        self.backend.assert_allclose(t, 0, atol=1e-7)
 
-        np_testing.assert_allclose(p, manifold.projection(x, p))
+        self.backend.assert_allclose(p, manifold.projection(x, p))
 
     def test_euclidean_to_riemannian_gradient(self):
         manifold = self.manifold
         x = manifold.random_point()
-        u = np.random.normal(size=(self.k, self.n, self.n))
-        np_testing.assert_allclose(
+        u = self.backend.random_normal(size=(self.k, self.n, self.n))
+        self.backend.assert_allclose(
             manifold.euclidean_to_riemannian_gradient(x, u),
             manifold.projection(x, x @ u @ x),
         )
@@ -673,18 +700,18 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold(
         e = manifold.exp(x, u)
 
         # Check symmetry
-        np_testing.assert_allclose(e, multiherm(e))
+        self.backend.assert_allclose(e, self.backend.herm(e))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(e)
+        w = self.backend.linalg_eigvalsh(e)
         assert (w > [[0]]).all()
 
         # Check unit determinant
-        d = np.linalg.det(e)
-        np_testing.assert_allclose(d, 1)
+        d = self.backend.linalg_det(e)
+        self.backend.assert_allclose(d, 1)
 
         u = u * 1e-6
-        np_testing.assert_allclose(manifold.exp(x, u), x + u)
+        self.backend.assert_allclose(manifold.exp(x, u), x + u)
 
     def test_retraction(self):
         # Check that result is on manifoldifold and for small vectors
@@ -694,17 +721,17 @@ class TestMultiSpecialHermitianPositiveDefiniteManifold(
         u = manifold.random_tangent_vector(x)
         y = manifold.retraction(x, u)
 
-        assert np.shape(y) == (self.k, self.n, self.n)
+        assert y.shape == (self.k, self.n, self.n)
         # Check symmetry
-        np_testing.assert_allclose(y, multiherm(y))
+        self.backend.assert_allclose(y, self.backend.herm(y))
 
         # Check positivity of eigenvalues
-        w = np.linalg.eigvalsh(y)
+        w = self.backend.linalg_eigvalsh(y)
         assert (w > [[0]]).all()
 
         # Check unit determinant
-        d = np.linalg.det(y)
-        np_testing.assert_allclose(d, 1)
+        d = self.backend.linalg_det(y)
+        self.backend.assert_allclose(d, 1)
 
         u = u * 1e-6
-        np_testing.assert_allclose(manifold.retraction(x, u), x + u)
+        self.backend.assert_allclose(manifold.retraction(x, u), x + u)

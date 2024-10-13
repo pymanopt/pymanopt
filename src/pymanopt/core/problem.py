@@ -5,6 +5,19 @@ from typing import Callable, Optional
 
 import numpy as np
 
+from pymanopt.autodiff.backends import (
+    JaxBackend,
+    NumPyBackend,
+    PyTorchBackend,
+    TensorFlowBackend,
+)
+from pymanopt.numerics import (
+    JaxNumericsBackend,
+    NumpyNumericsBackend,
+    PytorchNumericsBackend,
+    TensorflowNumericsBackend,
+)
+
 from ..autodiff import Function
 from ..manifolds.manifold import Manifold
 
@@ -63,6 +76,21 @@ class Problem:
             (riemannian_hessian, "riemannian_hessian"),
         ):
             self._validate_function(function, name)
+
+        if manifold.backend is None:
+            if isinstance(cost.backend, NumPyBackend):
+                # manifold.backend = NumpyNumericsBackend()
+                manifold.set_backend_with_default_dtype(NumpyNumericsBackend)
+            elif isinstance(cost.backend, PyTorchBackend):
+                manifold.backend = PytorchNumericsBackend()
+            elif isinstance(cost.backend, JaxBackend):
+                manifold.backend = JaxNumericsBackend()
+            elif isinstance(cost.backend, TensorFlowBackend):
+                manifold.backend = TensorflowNumericsBackend()
+            else:
+                raise ValueError(
+                    f"Backend '{cost.backend}' is not supported by Pymanopt"
+                )
 
         if euclidean_gradient is not None and riemannian_gradient is not None:
             raise ValueError(

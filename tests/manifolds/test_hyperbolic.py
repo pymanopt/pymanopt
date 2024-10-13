@@ -1,31 +1,33 @@
-import autograd.numpy as np
 import pytest
-from numpy import testing as np_testing
 
 from pymanopt.manifolds import PoincareBall
+from pymanopt.numerics import NumpyNumericsBackend
 
 
 class TestSinglePoincareBallManifold:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.n = 50
-        self.manifold = PoincareBall(self.n)
+        self.backend = NumpyNumericsBackend()
+        self.manifold = PoincareBall(self.n, backend=self.backend)
 
     def test_dim(self):
         assert self.manifold.dim == self.n
 
     def test_conformal_factor(self):
         x = self.manifold.random_point() / 2
-        np_testing.assert_allclose(
-            1 - 2 / self.manifold.conformal_factor(x), np.linalg.norm(x) ** 2
+        self.backend.assert_allclose(
+            1 - 2 / self.manifold.conformal_factor(x),
+            self.backend.linalg_norm(x) ** 2,
         )
 
     def test_inner_product(self):
         x = self.manifold.random_point() / 2
         u = self.manifold.random_tangent_vector(x)
         v = self.manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(
-            (2 / (1 - np.linalg.norm(x) ** 2)) ** 2 * np.inner(u, v),
+        self.backend.assert_allclose(
+            (2 / (1 - self.backend.linalg_norm(x) ** 2)) ** 2
+            * self.backend.tensordot(u, v, axes=1),
             self.manifold.inner_product(x, u, v),
         )
 
@@ -33,16 +35,20 @@ class TestSinglePoincareBallManifold:
         x = self.manifold.random_point() / 2
         u = self.manifold.random_tangent_vector(x)
         v = self.manifold.random_tangent_vector(x)
-        cos_eangle = np.sum(u * v) / np.linalg.norm(u) / np.linalg.norm(v)
+        cos_eangle = (
+            self.backend.sum(u * v)
+            / self.backend.linalg_norm(u)
+            / self.backend.linalg_norm(v)
+        )
         cos_rangle = (
             self.manifold.inner_product(x, u, v)
             / self.manifold.norm(x, u)
             / self.manifold.norm(x, v)
         )
-        np_testing.assert_allclose(cos_rangle, cos_eangle)
+        self.backend.assert_allclose(cos_rangle, cos_eangle)
 
         # Test symmetry.
-        np_testing.assert_allclose(
+        self.backend.assert_allclose(
             self.manifold.inner_product(x, u, v),
             self.manifold.inner_product(x, v, u),
         )
@@ -50,14 +56,16 @@ class TestSinglePoincareBallManifold:
     def test_proj(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(u, self.manifold.projection(x, u))
+        self.backend.assert_allclose(u, self.manifold.projection(x, u))
 
     def test_norm(self):
         x = self.manifold.random_point() / 2
         u = self.manifold.random_tangent_vector(x)
 
-        np_testing.assert_allclose(
-            2 / (1 - np.linalg.norm(x) ** 2) * np.linalg.norm(u),
+        self.backend.assert_allclose(
+            2
+            / (1 - self.backend.linalg_norm(x) ** 2)
+            * self.backend.linalg_norm(u),
             self.manifold.norm(x, u),
         )
 
@@ -65,9 +73,9 @@ class TestSinglePoincareBallManifold:
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         x = self.manifold.random_point()
-        np_testing.assert_array_less(np.linalg.norm(x), 1)
+        assert self.backend.all(self.backend.linalg_norm(x) < 1)
         y = self.manifold.random_point()
-        assert not np.array_equal(x, y)
+        assert self.backend.all(x != y)
 
     def test_random_tangent_vector(self):
         # Just make sure that things generated are in the tangent space and
@@ -76,30 +84,30 @@ class TestSinglePoincareBallManifold:
         u = self.manifold.random_tangent_vector(x)
         v = self.manifold.random_tangent_vector(x)
 
-        assert not np.array_equal(u, v)
+        assert self.backend.all(u != v)
 
     def test_zero_vector(self):
         x = self.manifold.random_point()
         u = self.manifold.zero_vector(x)
-        np_testing.assert_allclose(np.linalg.norm(u), 0)
+        self.backend.assert_allclose(self.backend.linalg_norm(u), 0)
 
     def test_dist(self):
         x = self.manifold.random_point() / 2
         y = self.manifold.random_point() / 2
-        correct_dist = np.arccosh(
+        correct_dist = self.backend.arccosh(
             1
             + 2
-            * np.linalg.norm(x - y) ** 2
-            / (1 - np.linalg.norm(x) ** 2)
-            / (1 - np.linalg.norm(y) ** 2)
+            * self.backend.linalg_norm(x - y) ** 2
+            / (1 - self.backend.linalg_norm(x) ** 2)
+            / (1 - self.backend.linalg_norm(y) ** 2)
         )
-        np_testing.assert_allclose(correct_dist, self.manifold.dist(x, y))
+        self.backend.assert_allclose(correct_dist, self.manifold.dist(x, y))
 
     def test_euclidean_to_riemannian_gradient(self):
         # For now just test whether the method returns an array of the correct
         # shape.
         point = self.manifold.random_point()
-        euclidean_gradient = np.random.normal(size=point.shape)
+        euclidean_gradient = self.backend.random_normal(size=point.shape)
         riemannian_gradient = self.manifold.euclidean_to_riemannian_gradient(
             point, euclidean_gradient
         )
@@ -109,8 +117,8 @@ class TestSinglePoincareBallManifold:
         # For now just test whether the method returns an array of the correct
         # shape.
         point = self.manifold.random_point()
-        euclidean_gradient = np.random.normal(size=point.shape)
-        euclidean_hessian = np.random.normal(size=point.shape)
+        euclidean_gradient = self.backend.random_normal(size=point.shape)
+        euclidean_hessian = self.backend.random_normal(size=point.shape)
         tangent_vector = self.manifold.random_tangent_vector(point)
         riemannian_hessian = self.manifold.euclidean_to_riemannian_hessian(
             point, euclidean_gradient, euclidean_hessian, tangent_vector
@@ -121,7 +129,7 @@ class TestSinglePoincareBallManifold:
         x = self.manifold.random_point() / 2
         u = self.manifold.random_tangent_vector(x)
         y = self.manifold.retraction(x, u)
-        assert np.linalg.norm(y) <= 1 + 1e-10
+        assert self.backend.linalg_norm(y) <= 1 + 1e-10
 
     def test_mobius_addition(self):
         # test if Mobius addition is closed in the Poincare ball
@@ -130,13 +138,13 @@ class TestSinglePoincareBallManifold:
         z = self.manifold.mobius_addition(x, y)
         # The norm of z may be slightly more than one because of
         # round-off errors.
-        assert np.linalg.norm(z) <= 1 + 1e-10
+        assert self.backend.linalg_norm(z) <= 1 + 1e-10
 
     def test_exp_log_inverse(self):
         x = self.manifold.random_point() / 2
         y = self.manifold.random_point() / 2
         explog = self.manifold.exp(x, self.manifold.log(x, y))
-        np_testing.assert_allclose(y, explog)
+        self.backend.assert_allclose(y, explog)
 
     def test_log_exp_inverse(self):
         x = self.manifold.random_point() / 2
@@ -144,13 +152,13 @@ class TestSinglePoincareBallManifold:
         # numerical approximations
         u = self.manifold.random_tangent_vector(x) / self.manifold.dim
         logexp = self.manifold.log(x, self.manifold.exp(x, u))
-        np_testing.assert_allclose(u, logexp)
+        self.backend.assert_allclose(u, logexp)
 
     def test_pair_mean(self):
         x = self.manifold.random_point() / 2
         y = self.manifold.random_point() / 2
         z = self.manifold.pair_mean(x, y)
-        np_testing.assert_allclose(
+        self.backend.assert_allclose(
             self.manifold.dist(x, z), self.manifold.dist(y, z)
         )
 
@@ -160,32 +168,33 @@ class TestMultiplePoincareBallManifold:
     def setup(self):
         self.n = 50
         self.k = 20
-        self.manifold = PoincareBall(self.n, k=self.k)
+        self.backend = NumpyNumericsBackend()
+        self.manifold = PoincareBall(self.n, k=self.k, backend=self.backend)
 
     def test_dim(self):
         assert self.manifold.dim == self.k * self.n
 
     def test_conformal_factor(self):
         x = self.manifold.random_point() / 2
-        np_testing.assert_allclose(
+        self.backend.assert_allclose(
             1 - 2 / self.manifold.conformal_factor(x),
-            np.linalg.norm(x, axis=-1, keepdims=True) ** 2,
+            self.backend.linalg_norm(x, axis=-1, keepdims=True) ** 2,
         )
 
     def test_inner_product(self):
         x = self.manifold.random_point() / 2
         u = self.manifold.random_tangent_vector(x)
         v = self.manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(
-            np.sum(
-                (2 / (1 - np.linalg.norm(x, axis=-1) ** 2)) ** 2
-                * np.sum(u * v, axis=-1)
+        self.backend.assert_allclose(
+            self.backend.sum(
+                (2 / (1 - self.backend.linalg_norm(x, axis=-1) ** 2)) ** 2
+                * self.backend.sum(u * v, axis=-1)
             ),
             self.manifold.inner_product(x, u, v),
         )
 
         # Test symmetry.
-        np_testing.assert_allclose(
+        self.backend.assert_allclose(
             self.manifold.inner_product(x, u, v),
             self.manifold.inner_product(x, v, u),
         )
@@ -193,17 +202,17 @@ class TestMultiplePoincareBallManifold:
     def test_proj(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
-        np_testing.assert_allclose(u, self.manifold.projection(x, u))
+        self.backend.assert_allclose(u, self.manifold.projection(x, u))
 
     def test_norm(self):
         # Divide by 2 to avoid round-off errors.
         x = self.manifold.random_point() / 2
         u = self.manifold.random_tangent_vector(x)
 
-        np_testing.assert_allclose(
-            np.sum(
-                (2 / (1 - np.linalg.norm(x, axis=-1) ** 2)) ** 2
-                * np.sum(u * u, axis=-1)
+        self.backend.assert_allclose(
+            self.backend.sum(
+                (2 / (1 - self.backend.linalg_norm(x, axis=-1) ** 2)) ** 2
+                * self.backend.sum(u * u, axis=-1)
             ),
             self.manifold.norm(x, u) ** 2,
         )
@@ -212,9 +221,9 @@ class TestMultiplePoincareBallManifold:
         # Just make sure that things generated are on the manifold and that
         # if you generate two they are not equal.
         x = self.manifold.random_point()
-        np_testing.assert_array_less(np.linalg.norm(x, axis=-1), 1)
+        assert self.backend.all(self.backend.linalg_norm(x, axis=-1) < 1)
         y = self.manifold.random_point()
-        assert not np.array_equal(x, y)
+        assert self.backend.all(x != y)
 
     def test_random_tangent_vector(self):
         # Just make sure that things generated are in the tangent space and
@@ -223,33 +232,35 @@ class TestMultiplePoincareBallManifold:
         u = self.manifold.random_tangent_vector(x)
         v = self.manifold.random_tangent_vector(x)
 
-        assert not np.array_equal(u, v)
+        assert self.backend.all(u != v)
 
     def test_zero_vector(self):
         x = self.manifold.random_point()
         u = self.manifold.zero_vector(x)
-        np_testing.assert_allclose(np.linalg.norm(u), 0)
+        self.backend.assert_allclose(self.backend.linalg_norm(u), 0)
 
     def test_dist(self):
         x = self.manifold.random_point() / 2
         y = self.manifold.random_point() / 2
-        correct_dist = np.sum(
-            np.arccosh(
+        correct_dist = self.backend.sum(
+            self.backend.arccosh(
                 1
                 + 2
-                * np.linalg.norm(x - y, axis=-1) ** 2
-                / (1 - np.linalg.norm(x, axis=-1) ** 2)
-                / (1 - np.linalg.norm(y, axis=-1) ** 2)
+                * self.backend.linalg_norm(x - y, axis=-1) ** 2
+                / (1 - self.backend.linalg_norm(x, axis=-1) ** 2)
+                / (1 - self.backend.linalg_norm(y, axis=-1) ** 2)
             )
             ** 2
         )
-        np_testing.assert_allclose(correct_dist, self.manifold.dist(x, y) ** 2)
+        self.backend.assert_allclose(
+            correct_dist, self.manifold.dist(x, y) ** 2
+        )
 
     def test_euclidean_to_riemannian_gradient(self):
         # For now just test whether the method returns an array of the correct
         # shape.
         point = self.manifold.random_point()
-        euclidean_gradient = np.random.normal(size=point.shape)
+        euclidean_gradient = self.backend.random_normal(size=point.shape)
         riemannian_gradient = self.manifold.euclidean_to_riemannian_gradient(
             point, euclidean_gradient
         )
@@ -259,8 +270,8 @@ class TestMultiplePoincareBallManifold:
         # For now just test whether the method returns an array of the correct
         # shape.
         point = self.manifold.random_point()
-        euclidean_gradient = np.random.normal(size=point.shape)
-        euclidean_hessian = np.random.normal(size=point.shape)
+        euclidean_gradient = self.backend.random_normal(size=point.shape)
+        euclidean_hessian = self.backend.random_normal(size=point.shape)
         tangent_vector = self.manifold.random_tangent_vector(point)
         riemannian_hessian = self.manifold.euclidean_to_riemannian_hessian(
             point, euclidean_gradient, euclidean_hessian, tangent_vector
@@ -271,7 +282,9 @@ class TestMultiplePoincareBallManifold:
         x = self.manifold.random_point() / 2
         u = self.manifold.random_tangent_vector(x)
         y = self.manifold.retraction(x, u)
-        np_testing.assert_array_less(np.linalg.norm(y, axis=-1), 1 + 1e-10)
+        assert self.backend.all(
+            self.backend.linalg_norm(y, axis=-1) < 1 + 1e-10
+        )
 
     def test_mobius_addition(self):
         # test if Mobius addition is closed in the Poincare ball
@@ -280,13 +293,15 @@ class TestMultiplePoincareBallManifold:
         z = self.manifold.mobius_addition(x, y)
         # The norm of z may be slightly more than one because of
         # round-off errors.
-        np_testing.assert_array_less(np.linalg.norm(z, axis=-1), 1 + 1e-10)
+        assert self.backend.all(
+            self.backend.linalg_norm(z, axis=-1) < 1 + 1e-10
+        )
 
     def test_exp_log_inverse(self):
         x = self.manifold.random_point() / 2
         y = self.manifold.random_point() / 2
         explog = self.manifold.exp(x, self.manifold.log(x, y))
-        np_testing.assert_allclose(y, explog)
+        self.backend.assert_allclose(y, explog)
 
     def test_log_exp_inverse(self):
         x = self.manifold.random_point() / 2
@@ -294,12 +309,12 @@ class TestMultiplePoincareBallManifold:
         # numerical approximations
         u = self.manifold.random_tangent_vector(x) / self.manifold.dim
         logexp = self.manifold.log(x, self.manifold.exp(x, u))
-        np_testing.assert_allclose(u, logexp)
+        self.backend.assert_allclose(u, logexp)
 
     def test_pair_mean(self):
         x = self.manifold.random_point() / 2
         y = self.manifold.random_point() / 2
         z = self.manifold.pair_mean(x, y)
-        np_testing.assert_allclose(
+        self.backend.assert_allclose(
             self.manifold.dist(x, z), self.manifold.dist(y, z)
         )
