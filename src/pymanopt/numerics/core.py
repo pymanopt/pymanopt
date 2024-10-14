@@ -65,7 +65,7 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def allclose(
-        self, array_a: array_t, array_b: array_t
+        self, array_a: array_t, array_b: array_t, rtol: float, atol: float
     ) -> Optional[bool]:  # type:ignore
         pass
 
