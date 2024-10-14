@@ -48,8 +48,14 @@ class NumpyNumericsBackend(NumericsBackend):
     def all(self, array: np_array_t) -> bool:
         return np.all(array).item()
 
-    def allclose(self, array_a: np_array_t, array_b: np_array_t) -> bool:
-        return np.allclose(array_a, array_b)
+    def allclose(
+        self,
+        array_a: np_array_t,
+        array_b: np_array_t,
+        rtol: float = 1e-7,
+        atol: float = 1e-10,
+    ) -> bool:
+        return np.allclose(array_a, array_b, rtol, atol)
 
     def any(self, array: np_array_t) -> bool:
         return np.any(array).item()
@@ -76,11 +82,7 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.argsort(array)
 
     def array(self, array: array_t) -> np_array_t:  # type: ignore
-        return (
-            array
-            if isinstance(array, np.ndarray) and array.dtype == self.dtype
-            else np.asarray(array, dtype=self.dtype)
-        )
+        return np.asarray(array, dtype=self.dtype)
 
     def assert_allclose(
         self,
