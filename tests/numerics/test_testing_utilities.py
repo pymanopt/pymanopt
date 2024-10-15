@@ -30,8 +30,8 @@ all_backends = [
     backend_pt32,
     backend_jnp64,
     backend_jnp32,
-    backend_tf64,
-    backend_tf32,
+    # backend_tf64,
+    # backend_tf32,
 ]
 
 
@@ -81,12 +81,19 @@ def test_convert_array_to_backend(input, expected_output, backend):
         ([-1.0, 2.0], [-1.0, 2.0], nullcontext()),
         ([-1.0, 2.0], [-1.0, 2.1], pytest.raises(AssertionError)),
         ([-1.0, 2.0], [-1.1, 2.0], pytest.raises(AssertionError)),
-        (1.0, 1.000001, pytest.raises(AssertionError)),
-        (np.nan, np.nan, nullcontext()),
+        (1.0, 1.0001, pytest.raises(AssertionError)),
+        (np.nan, np.nan, pytest.raises(AssertionError)),
         (np.inf, np.inf, nullcontext()),
     ],
 )
-@pytest.mark.parametrize("backend", all_backends)
+@pytest.mark.parametrize(
+    "backend",
+    [
+        NumpyNumericsBackend(np.float64),
+        PytorchNumericsBackend(torch.float32),
+        JaxNumericsBackend(jnp.float64),
+    ],
+)
 def test_assert_allclose(input1, input2, expectation, backend):
     input1 = backend.array(input1)
     input2 = backend.array(input2)

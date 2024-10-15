@@ -111,15 +111,13 @@ class NumericsBackend(ABC):
     ) -> None:  # type: ignore
         pass
 
-    @not_implemented
     def assert_almost_equal(self, array_a: array_t, array_b: array_t) -> None:
-        pass
+        self.assert_allclose(array_a, array_b)
 
-    @not_implemented
     def assert_array_almost_equal(
         self, array_a: array_t, array_b: array_t
     ) -> None:
-        pass
+        self.assert_allclose(array_a, array_b)
 
     @not_implemented
     def assert_equal(
