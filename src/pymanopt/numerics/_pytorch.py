@@ -1,13 +1,28 @@
 from numbers import Number
-from typing import Optional, Sequence, Tuple
+from typing import Callable, Optional, Sequence, Tuple, Union
 
 import numpy as np
-import numpy.testing as np_testing
 import scipy.linalg
 import torch
 
 from pymanopt.numerics.array_t import array_t
 from pymanopt.numerics.core import NumericsBackend
+
+
+def elementary_math_function(
+    f: Callable[[torch.Tensor], Union[torch.Tensor, Number]],
+) -> Callable[[Union[torch.Tensor, Number]], Union[torch.Tensor, Number]]:
+    def inner(
+        self, x: Union[torch.Tensor, Number]
+    ) -> Union[torch.Tensor, Number]:
+        if isinstance(x, Number):
+            return f(self, self.array(x)).item()
+        else:
+            return f(self, x)
+
+    inner.__doc__ = f.__doc__
+    inner.__name__ = f.__name__
+    return inner
 
 
 class PytorchNumericsBackend(NumericsBackend):
@@ -44,11 +59,21 @@ class PytorchNumericsBackend(NumericsBackend):
     # Numerics functions
     ##############################################################################
 
+    @elementary_math_function
     def abs(self, array: torch.Tensor) -> torch.Tensor:
         return torch.abs(array)
 
     def all(self, array: torch.Tensor) -> bool:
         return bool(torch.all(array).item())
+
+    def allclose(
+        self,
+        array_a: torch.Tensor,
+        array_b: torch.Tensor,
+        rtol: float = 1e-7,
+        atol: float = 1e-10,
+    ) -> bool:
+        return torch.allclose(array_a, array_b, rtol=rtol, atol=atol)
 
     def any(self, array: torch.Tensor) -> bool:
         return bool(torch.any(array).item())
@@ -56,15 +81,19 @@ class PytorchNumericsBackend(NumericsBackend):
     def arange(self, *args: int) -> torch.Tensor:
         return torch.arange(*args)
 
+    @elementary_math_function
     def arccos(self, array: torch.Tensor) -> torch.Tensor:
         return torch.arccos(array)
 
+    @elementary_math_function
     def arccosh(self, array: torch.Tensor) -> torch.Tensor:
         return torch.arccosh(array)
 
+    @elementary_math_function
     def arctan(self, array: torch.Tensor) -> torch.Tensor:
         return torch.arctan(array)
 
+    @elementary_math_function
     def arctanh(self, array: torch.Tensor) -> torch.Tensor:
         return torch.arctanh(array)
 
@@ -75,11 +104,7 @@ class PytorchNumericsBackend(NumericsBackend):
         return torch.argsort(array)
 
     def array(self, array: array_t) -> torch.Tensor:  # type: ignore
-        return (
-            array
-            if isinstance(array, torch.Tensor) and array.dtype == self.dtype
-            else torch.as_tensor(array, dtype=self.dtype)
-        )
+        return torch.as_tensor(array, dtype=self.dtype)
 
     def assert_allclose(
         self,
@@ -88,35 +113,21 @@ class PytorchNumericsBackend(NumericsBackend):
         rtol: float = 1e-7,
         atol: float = 1e-10,
     ) -> None:
-        np_testing.assert_allclose(
-            array_a.cpu().detach().numpy(),
-            array_b.cpu().detach().numpy(),
+        torch.testing.assert_close(
+            self.array(array_a),
+            self.array(array_b),
             rtol=rtol,
             atol=atol,
-        )
-
-    def assert_almost_equal(
-        self, array_a: torch.Tensor | Number, array_b: torch.Tensor | Number
-    ) -> None:
-        # TODO: check if the intputs are tensors or floats
-        np_testing.assert_almost_equal(
-            array_a if isinstance(array_a, Number) else array_a.item(),
-            array_b if isinstance(array_b, Number) else array_b.item(),
-        )
-
-    def assert_array_almost_equal(
-        self, array_a: torch.Tensor, array_b: torch.Tensor
-    ) -> None:
-        np_testing.assert_array_almost_equal(
-            array_a.cpu().detach().numpy(), array_b.cpu().detach().numpy()
         )
 
     def block(self, arrays: list[torch.Tensor]) -> torch.Tensor:
         return torch.cat(arrays)
 
+    @elementary_math_function
     def conjugate(self, array: torch.Tensor) -> torch.Tensor:
         return torch.conj(array)
 
+    @elementary_math_function
     def cos(self, array: torch.Tensor) -> torch.Tensor:
         return torch.cos(array)
 
@@ -128,9 +139,10 @@ class PytorchNumericsBackend(NumericsBackend):
     ) -> torch.Tensor:
         return torch.diagonal(array, dim1=axis1, dim2=axis2)
 
-    def eps(self, dtype: torch.dtype) -> torch.Tensor:
-        return torch.finfo(dtype).eps
+    def eps(self) -> torch.Tensor:
+        return torch.finfo(self.dtype).eps
 
+    @elementary_math_function
     def exp(self, array: torch.Tensor) -> torch.Tensor:
         return torch.exp(array)
 
@@ -172,6 +184,7 @@ class PytorchNumericsBackend(NumericsBackend):
     def iscomlexobj(self, array: torch.Tensor) -> bool:
         return torch.is_complex(array)
 
+    @elementary_math_function
     def isnan(self, array: torch.Tensor) -> torch.Tensor:
         return torch.isnan(array)
 
@@ -210,7 +223,7 @@ class PytorchNumericsBackend(NumericsBackend):
 
         w, v = torch.linalg.eigh(array)
         w = torch.expand_dims(torch.exp(w), dim=-1)
-        expmA = v @ (w * torch.conjugate(v))
+        expmA = v @ (w * torch.conj(v))
         if torch.is_complex(array):
             return torch.real(expmA)
         return expmA
@@ -247,13 +260,13 @@ class PytorchNumericsBackend(NumericsBackend):
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         q, r = torch.linalg.qr(array)
         # Compute signs or unit-modulus phase of entries of diagonal of r.
-        s = torch.diagonal(r, dim1=-2, dim2=-1).copy()
+        s = torch.diagonal(r, dim1=-2, dim2=-1).clone()
         s[s == 0] = 1
         s = s / torch.abs(s)
         s = torch.unsqueeze(s, dim=-1)
         # normalize q and r to have either 1 or unit-modulus on the diagonal of r
         q = q * torch.transpose(s, -2, -1)
-        r = r * torch.conjugate(s)
+        r = r * torch.conj(s)
         return q, r
 
     def linalg_solve(
@@ -277,6 +290,7 @@ class PytorchNumericsBackend(NumericsBackend):
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         return torch.linalg.svd(array, *args, **kwargs)
 
+    @elementary_math_function
     def log(self, array: torch.Tensor) -> torch.Tensor:
         return torch.log(array)
 
@@ -293,8 +307,15 @@ class PytorchNumericsBackend(NumericsBackend):
         return torch.prod(array).item()
 
     def random_normal(
-        self, loc: float = 0.0, scale: float = 1.0, size: Sequence[int] = (1,)
+        self,
+        loc: float = 0.0,
+        scale: float = 1.0,
+        size: Union[int, Sequence[int]] = 1,
     ) -> torch.Tensor:
+        if not isinstance(size, Sequence):
+            size = (size,)
+        else:
+            size = tuple(size)
         return torch.normal(mean=loc, std=scale, size=size, dtype=self.dtype)
 
     def random_randn(self, *dims: int) -> torch.Tensor:
@@ -303,12 +324,15 @@ class PytorchNumericsBackend(NumericsBackend):
     def random_uniform(self, size: int) -> torch.Tensor:
         return torch.rand(size, dtype=self.dtype)
 
+    @elementary_math_function
     def real(self, array: torch.Tensor) -> torch.Tensor:
         return torch.real(array)
 
+    @elementary_math_function
     def sin(self, array: torch.Tensor) -> torch.Tensor:
         return torch.sin(array)
 
+    @elementary_math_function
     def sinc(self, array: torch.Tensor) -> torch.Tensor:
         return torch.sinc(array)
 
@@ -319,6 +343,7 @@ class PytorchNumericsBackend(NumericsBackend):
         # spacing is not implemented in PyTorch so we use the NumPy implementation
         return self.array(np.spacing(array.cpu().detach().numpy()))
 
+    @elementary_math_function
     def sqrt(self, array: torch.Tensor) -> torch.Tensor:
         return torch.sqrt(array)
 
@@ -330,9 +355,11 @@ class PytorchNumericsBackend(NumericsBackend):
     ) -> torch.Tensor:
         return torch.sum(array, *args, **kwargs)
 
+    @elementary_math_function
     def tan(self, array: torch.Tensor) -> torch.Tensor:
         return torch.tan(array)
 
+    @elementary_math_function
     def tanh(self, array: torch.Tensor) -> torch.Tensor:
         return torch.tanh(array)
 

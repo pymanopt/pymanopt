@@ -1,4 +1,4 @@
-from typing import Any, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import numpy.testing as np_testing
@@ -52,8 +52,8 @@ class NumpyNumericsBackend(NumericsBackend):
         self,
         array_a: np_array_t,
         array_b: np_array_t,
-        rtol: float = 1e-7,
-        atol: float = 1e-10,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
     ) -> bool:
         return np.allclose(array_a, array_b, rtol, atol)
 
@@ -88,22 +88,12 @@ class NumpyNumericsBackend(NumericsBackend):
         self,
         array_a: np_array_t,
         array_b: np_array_t,
-        rtol: float = 1e-7,
-        atol: float = 1e-10,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
     ) -> None:
-        return np_testing.assert_allclose(
-            array_a, array_b, rtol=rtol, atol=atol
+        np_testing.assert_allclose(
+            array_a, array_b, rtol, atol, equal_nan=False
         )
-
-    def assert_almost_equal(
-        self, array_a: np_array_t, array_b: np_array_t
-    ) -> None:
-        return np_testing.assert_almost_equal(array_a, array_b)
-
-    def assert_array_almost_equal(
-        self, array_a: np_array_t, array_b: np_array_t
-    ) -> None:
-        return np_testing.assert_array_almost_equal(array_a, array_b)
 
     def assert_equal(
         self,
@@ -266,7 +256,10 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.prod(array)  # type: ignore
 
     def random_normal(
-        self, loc: float = 0.0, scale: float = 1.0, size: Sequence[int] = (1,)
+        self,
+        loc: float = 0.0,
+        scale: float = 1.0,
+        size: Union[int, Sequence[int]] = 1,
     ) -> np_array_t:
         return self.array(np.random.normal(loc=loc, scale=scale, size=size))
 

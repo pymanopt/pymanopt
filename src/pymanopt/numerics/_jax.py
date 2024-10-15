@@ -1,4 +1,4 @@
-from typing import Any, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence, Tuple, Union
 
 import jax
 import jax.numpy as jnp
@@ -50,7 +50,7 @@ class JaxNumericsBackend(NumericsBackend):
         rtol: float = 1e-7,
         atol: float = 1e-10,
     ) -> bool:
-        return jnp.allclose(array_a, array_b)
+        return jnp.allclose(array_a, array_b, rtol=rtol, atol=atol).item()
 
     def any(self, array: jnp.ndarray) -> bool:
         return jnp.any(array).item()
@@ -86,7 +86,17 @@ class JaxNumericsBackend(NumericsBackend):
         rtol: float = 1e-7,
         atol: float = 1e-10,
     ) -> None:
-        assert self.allclose(array_a, array_b, rtol, atol)
+        def max_abs(x):
+            return jnp.max(jnp.abs(x))
+
+        assert self.allclose(array_a, array_b, rtol, atol), (
+            "Arrays are not almost equal.\n"
+            f"Max absolute difference: {jnp.max(jnp.abs(array_a - array_b))}"
+            f" (atol={atol})\n"
+            "Max relative difference: "
+            f"{max_abs(array_a - array_b) / max_abs(array_b)}"
+            f" (rtol={rtol})"
+        )
 
     def assert_almost_equal(
         self, array_a: jnp.ndarray, array_b: jnp.ndarray
@@ -203,7 +213,7 @@ class JaxNumericsBackend(NumericsBackend):
         return logmA
 
     def linalg_matrix_rank(self, array: jnp.ndarray) -> int:
-        return jnp.linalg.matrix_rank(array)
+        return jnp.linalg.matrix_rank(array).item()
 
     def linalg_norm(
         self, array: jnp.ndarray, *args: Any, **kwargs: Any
@@ -215,7 +225,8 @@ class JaxNumericsBackend(NumericsBackend):
 
         # Compute signs or unit-modulus phase of entries of diagonal of r.
         s = jnp.diagonal(r, axis1=-2, axis2=-1).copy()
-        s[s == 0] = 1
+        # s[s == 0] = 1
+        s = jnp.where(s == 0, 1, s)
         s = s / jnp.abs(s)
         s = jnp.expand_dims(s, axis=-1)
         # normalize q and r to have either 1 or unit-modulus on the diagonal of r
@@ -254,8 +265,15 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.prod(array)  # type: ignore
 
     def random_normal(
-        self, loc: float = 0.0, scale: float = 1.0, size: Sequence[int] = (1,)
+        self,
+        loc: float = 0.0,
+        scale: float = 1.0,
+        size: Union[int, Sequence[int]] = 1,
     ) -> jnp.ndarray:
+        if isinstance(size, int):
+            size = (size,)
+        else:
+            size = tuple(size)
         self._random_key, new_key = jax.random.split(self._random_key)
         return (
             scale
