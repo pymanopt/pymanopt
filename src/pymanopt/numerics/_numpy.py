@@ -156,7 +156,7 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.linalg.eigh(array)
 
     def linalg_eigvalsh(
-        self, array_x: np_array_t, array_y: Optional[array_t] = None
+        self, array_x: np_array_t, array_y: Optional[np_array_t] = None
     ) -> np_array_t:
         if array_y is None:
             return np.linalg.eigvalsh(array_x)
@@ -272,6 +272,11 @@ class NumpyNumericsBackend(NumericsBackend):
     def real(self, array: np_array_t) -> np_array_t:
         return np.real(array)
 
+    def reshape(
+        self, array: np.ndarray, newshape: Sequence[int]
+    ) -> np.ndarray:
+        return np.reshape(array, newshape)
+
     def sin(self, array: np_array_t) -> np_array_t:
         return np.sin(array)
 
@@ -310,9 +315,7 @@ class NumpyNumericsBackend(NumericsBackend):
     def tile(self, array: np_array_t, reps: int | Sequence[int]) -> np_array_t:
         return np.tile(array, reps)
 
-    def trace(
-        self, array: np_array_t, *args: tuple, **kwargs: dict
-    ) -> np_array_t:
+    def trace(self, array: np_array_t, *args, **kwargs) -> np_array_t:
         return np.trace(array, *args, **kwargs)  # type: ignore
 
     def transpose(self, array: np_array_t) -> np_array_t:

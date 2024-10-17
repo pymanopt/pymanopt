@@ -3,6 +3,7 @@ import warnings
 import jax.numpy as jnp
 import numpy as np
 import pytest
+import tensorflow as tf
 import torch
 
 from pymanopt.manifolds import (
@@ -14,6 +15,7 @@ from pymanopt.numerics import (
     JaxNumericsBackend,
     NumpyNumericsBackend,
     PytorchNumericsBackend,
+    TensorflowNumericsBackend,
 )
 
 
@@ -25,9 +27,11 @@ from pymanopt.numerics import (
         NumpyNumericsBackend(np.float64),
         PytorchNumericsBackend(torch.float64),
         JaxNumericsBackend(jnp.float64),
+        TensorflowNumericsBackend(tf.float64),
         NumpyNumericsBackend(np.float32),
         PytorchNumericsBackend(torch.float32),
         JaxNumericsBackend(jnp.float32),
+        TensorflowNumericsBackend(tf.float32),
     ]
 )
 def real_backend(request):
@@ -87,7 +91,7 @@ class TestSphereManifold:
 
         #  Compare the projections.
         self.backend.assert_allclose(
-            H - X * self.backend.trace(X.T @ H),
+            H - X * self.backend.trace(self.backend.transpose(X) @ H),
             self.manifold.projection(X, H),
             rtol=1e-6,
             atol=1e-6,
@@ -104,7 +108,7 @@ class TestSphereManifold:
 
         #  Compare the projections.
         self.backend.assert_allclose(
-            H - X * self.backend.trace(X.T @ H),
+            H - X * self.backend.trace(self.backend.transpose(X) @ H),
             self.manifold.euclidean_to_riemannian_gradient(X, H),
             rtol=1e-6,
             atol=1e-6,
@@ -331,7 +335,12 @@ class TestSphereSubspaceComplementIntersectionManifold:
         x = manifold.random_point()
         self.backend.assert_allclose(self.backend.linalg_norm(x), 1)
         self.backend.assert_allclose(
-            U.T @ x, self.backend.zeros(U.shape[1]), atol=1.5e-6, rtol=1e-6
+            self.backend.squeeze(
+                self.backend.transpose(U) @ self.backend.reshape(x, (-1, 1))
+            ),
+            self.backend.zeros(U.shape[1]),
+            atol=1.5e-6,
+            rtol=1e-6,
         )
 
 

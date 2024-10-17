@@ -30,8 +30,8 @@ all_backends = [
     backend_pt32,
     backend_jnp64,
     backend_jnp32,
-    # backend_tf64,
-    # backend_tf32,
+    backend_tf64,
+    backend_tf32,
 ]
 
 

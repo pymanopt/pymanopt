@@ -64,7 +64,7 @@ class PytorchNumericsBackend(NumericsBackend):
         return torch.abs(array)
 
     def all(self, array: torch.Tensor) -> bool:
-        return bool(torch.all(array).item())
+        return bool(torch.all(torch.tensor(array, dtype=bool)).item())
 
     def allclose(
         self,
@@ -76,7 +76,7 @@ class PytorchNumericsBackend(NumericsBackend):
         return torch.allclose(array_a, array_b, rtol=rtol, atol=atol)
 
     def any(self, array: torch.Tensor) -> bool:
-        return bool(torch.any(array).item())
+        return bool(torch.any(torch.tensor(array, dtype=bool)).item())
 
     def arange(self, *args: int) -> torch.Tensor:
         return torch.arange(*args)
@@ -121,6 +121,8 @@ class PytorchNumericsBackend(NumericsBackend):
         )
 
     def block(self, arrays: list[torch.Tensor]) -> torch.Tensor:
+        # TODO: implement actual block (where wr could give
+        # arbitrarily nested lists of arrays)
         return torch.cat(arrays)
 
     @elementary_math_function
@@ -327,6 +329,11 @@ class PytorchNumericsBackend(NumericsBackend):
     @elementary_math_function
     def real(self, array: torch.Tensor) -> torch.Tensor:
         return torch.real(array)
+
+    def reshape(
+        self, array: torch.Tensor, newshape: Sequence[int]
+    ) -> torch.Tensor:
+        return torch.reshape(array, newshape)
 
     @elementary_math_function
     def sin(self, array: torch.Tensor) -> torch.Tensor:

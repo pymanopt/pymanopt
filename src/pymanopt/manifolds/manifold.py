@@ -60,7 +60,9 @@ class Manifold(metaclass=abc.ABCMeta):
         backend: Optional[NumericsBackend] = None,
     ):
         if not isinstance(dimension, (int, np.integer)):
-            raise TypeError("Manifold dimension must be of type int")
+            raise TypeError(
+                f"Manifold dimension must be of type int, not {type(dimension)}"
+            )
         if dimension < 0:
             raise ValueError("Manifold dimension must be positive")
         if not isinstance(point_layout, (int, tuple, list)):

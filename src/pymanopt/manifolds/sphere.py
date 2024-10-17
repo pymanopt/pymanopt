@@ -147,15 +147,27 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
             )
 
     def projection(self, point, vector):
-        return self._subspace_projector @ super().projection(point, vector)
+        return self.backend.squeeze(
+            self._subspace_projector
+            @ self.backend.reshape(super().projection(point, vector), (-1, 1))
+        )
 
     def random_point(self):
         point = super().random_point()
-        return self._normalize(self._subspace_projector @ point)
+        return self._normalize(
+            self.backend.squeeze(
+                self._subspace_projector @ self.backend.reshape(point, (-1, 1))
+            )
+        )
 
     def random_tangent_vector(self, point):
         vector = super().random_tangent_vector(point)
-        return self._normalize(self._subspace_projector @ vector)
+        return self._normalize(
+            self.backend.squeeze(
+                self._subspace_projector
+                @ self.backend.reshape(vector, (-1, 1))
+            )
+        )
 
 
 @extend_docstring(DOCSTRING_NOTE)
@@ -182,7 +194,7 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         self._matrix = matrix
         m = matrix.shape[0]
         q, _ = backend.linalg_qr(matrix)
-        subspace_projector = q @ q.T
+        subspace_projector = q @ backend.transpose(q)
         subspace_dimension = backend.linalg_matrix_rank(subspace_projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors intersecting a "
@@ -196,7 +208,7 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         super().backend = backend
         self._matrix = backend.toarray(self._matrix)
         q, _ = backend.linalg_qr(self._matrix)
-        self._subspace_projector = q @ q.T
+        self._subspace_projector = q @ self.backend.transpose(q)
 
 
 @extend_docstring(DOCSTRING_NOTE)
@@ -225,7 +237,7 @@ class SphereSubspaceComplementIntersection(
         self._matrix = matrix
         m = matrix.shape[0]
         q, _ = backend.linalg_qr(matrix)
-        subspace_projector = backend.eye(m) - q @ q.T
+        subspace_projector = backend.eye(m) - q @ backend.transpose(q)
         subspace_dimension = backend.linalg_matrix_rank(subspace_projector)
         name = (
             f"Sphere manifold of {m}-dimensional vectors orthogonal "
@@ -239,4 +251,6 @@ class SphereSubspaceComplementIntersection(
         super().backend = backend
         self._matrix = backend.toarray(self._matrix)
         q, _ = backend.linalg_qr(self._matrix)
-        self._subspace_projector = backend.eye(self.dim) - q @ q.T
+        self._subspace_projector = backend.eye(
+            self.dim
+        ) - q @ self.backend.transpose(q)

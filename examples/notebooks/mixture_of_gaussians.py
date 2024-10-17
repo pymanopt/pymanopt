@@ -127,6 +127,7 @@ from pymanopt.optimizers import SteepestDescent
 # (1) Instantiate the manifold
 manifold = Product([SymmetricPositiveDefinite(D + 1, k=K), Euclidean(K - 1)])
 
+
 # (2) Define cost function
 # The parameters must be contained in a list theta.
 @pymanopt.function.autograd(manifold)
@@ -268,7 +269,6 @@ class LineSearchMoG:
             and step_count <= self.max_iterations
             and not reset
         ):
-
             # Reduce the step size
             alpha = self.contraction_factor * alpha
 
