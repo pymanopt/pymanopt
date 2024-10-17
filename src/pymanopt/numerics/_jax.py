@@ -41,7 +41,7 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.abs(array)
 
     def all(self, array: jnp.ndarray) -> bool:
-        return jnp.all(array).item()
+        return jnp.all(jnp.array(array, dtype=bool)).item()
 
     def allclose(
         self,
@@ -53,7 +53,7 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.allclose(array_a, array_b, rtol=rtol, atol=atol).item()
 
     def any(self, array: jnp.ndarray) -> bool:
-        return jnp.any(array).item()
+        return jnp.any(jnp.array(array, dtype=bool)).item()
 
     def arange(self, *args: int) -> jnp.ndarray:
         return jnp.arange(*args)
@@ -291,6 +291,11 @@ class JaxNumericsBackend(NumericsBackend):
 
     def real(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.real(array)
+
+    def reshape(
+        self, array: jnp.ndarray, newshape: Sequence[int]
+    ) -> jnp.ndarray:
+        return jnp.reshape(array, newshape)
 
     def sin(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.sin(array)

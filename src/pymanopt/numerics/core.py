@@ -35,11 +35,13 @@ class NumericsBackend(ABC):
         pass
 
     @property
+    @staticmethod
     @abstractmethod
     def DEFAULT_REAL_DTYPE(self):
         pass
 
     @property
+    @staticmethod
     @abstractmethod
     def DEFAULT_COMPLEX_DTYPE(self):
         pass
@@ -286,7 +288,7 @@ class NumericsBackend(ABC):
     @not_implemented
     def random_normal(
         self, loc: float, scale: float, size: Sequence[int]
-    ) -> array_t:
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -299,6 +301,14 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def real(self, array: array_t) -> array_t:  # type: ignore
+        pass
+
+    @not_implemented
+    def reshape(
+        self,
+        array: array_t,  # type: ignore
+        newshape: Sequence[int],
+    ) -> array_t:  # type: ignore
         pass
 
     # TODO: seterr

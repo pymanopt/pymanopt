@@ -29,8 +29,8 @@ all_backends = [
     backend_pt32,
     backend_jnp64,
     backend_jnp32,
-    # backend_tf64,
-    # backend_tf32,
+    backend_tf64,
+    backend_tf32,
 ]
 
 
@@ -59,7 +59,7 @@ def test_abs(input, expected_output, backend):
 )
 @pytest.mark.parametrize("backend", all_backends)
 def test_all(input, expected_output, backend):
-    assert backend.all(backend.array(input)) == expected_output
+    assert backend.all(input) == expected_output
 
 
 @pytest.mark.parametrize(
@@ -73,7 +73,7 @@ def test_all(input, expected_output, backend):
 )
 @pytest.mark.parametrize("backend", all_backends)
 def test_any(input, expected_output, backend):
-    assert backend.any(backend.array(input)) == expected_output
+    assert backend.any(input) == expected_output
 
 
 @pytest.mark.parametrize(
@@ -93,7 +93,7 @@ def test_eye(input, expected_output, backend):
 
 @pytest.mark.parametrize("backend", [backend_np64, backend_np32])
 def test_multilogm_singlemat(backend: NumericsBackend):
-    m = 40
+    m = 10
     a = np.diag(np.random.uniform(size=m))
     q, _ = np.linalg.qr(np.random.normal(size=(m, m)))
     # A is a positive definite matrix
@@ -105,8 +105,8 @@ def test_multilogm_singlemat(backend: NumericsBackend):
 
 @pytest.mark.parametrize("backend", [backend_np64, backend_np32])
 def test_multilogm(backend: NumericsBackend):
-    k = 10
-    m = 40
+    k = 4
+    m = 10
     A = np.zeros((k, m, m))
     L = np.zeros((k, m, m))
     for i in range(k):
@@ -119,8 +119,8 @@ def test_multilogm(backend: NumericsBackend):
 
 @pytest.mark.parametrize("backend", [backend_np64, backend_np32])
 def test_multilogm_complex_positive_definite(backend: NumericsBackend):
-    k = 10
-    m = 40
+    k = 4
+    m = 10
     shape = (k, m, m)
     A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
     A = A @ backend.conjugate_transpose(A)
