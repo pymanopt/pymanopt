@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Sequence, Tuple, Union, override
 
 import numpy as np
 import scipy
@@ -30,32 +30,57 @@ class TensorflowNumericsBackend(NumericsBackend):
         self._dtype = dtype
 
     @property
+    @override
     def dtype(self) -> tf.DType:
         return self._dtype
 
     @property
+    @override
     def is_dtype_real(self):
         return self.dtype in {tf.float32, tf.float64}
 
-    @property
-    def DEFAULT_REAL_DTYPE(self):
+    @override
+    @staticmethod
+    def DEFAULT_REAL_DTYPE():
         return tf.constant([1.0]).dtype
 
-    @property
-    def DEFAULT_COMPLEX_DTYPE(self):
+    @override
+    @staticmethod
+    def DEFAULT_COMPLEX_DTYPE():
         return tf.constant([1j]).dtype
 
-    def _complex_to_real_dtype(self, complex_dtype: tf.DType) -> tf.DType:
-        return tf.experimental.numpy.finfo(complex_dtype).dtype
-
+    @override
     def __repr__(self):
         return f"TensorflowNumericsBackend(dtype={self.dtype})"
+
+    @override
+    def to_real_backend(self) -> "TensorflowNumericsBackend":
+        if self.is_dtype_real:
+            return self
+        if self.dtype == tf.complex64:
+            return TensorflowNumericsBackend(dtype=tf.float32)
+        elif self.dtype == tf.complex128:
+            return TensorflowNumericsBackend(dtype=tf.float64)
+        else:
+            raise ValueError(f"dtype {self.dtype} is not supported")
+
+    @override
+    def to_complex_backend(self) -> "TensorflowNumericsBackend":
+        if not self.is_dtype_real:
+            return self
+        if self.dtype == tf.float32:
+            return TensorflowNumericsBackend(dtype=tf.complex64)
+        elif self.dtype == tf.float64:
+            return TensorflowNumericsBackend(dtype=tf.complex128)
+        else:
+            raise ValueError(f"dtype {self.dtype} is not supported")
 
     ##############################################################################
     # Numerics functions
     ##############################################################################
 
     @elementary_math_function
+    @override
     def abs(self, array: tf.Tensor) -> tf.Tensor:
         return tf.abs(array)
 
@@ -102,6 +127,8 @@ class TensorflowNumericsBackend(NumericsBackend):
         return tf.argsort(array)
 
     def array(self, array: array_t) -> tf.Tensor:  # type: ignore
+        if isinstance(array, tf.Tensor):
+            array = tf.cast(array, dtype=self.dtype)
         return tf.convert_to_tensor(array, dtype=self.dtype)
 
     def assert_allclose(
@@ -204,8 +231,8 @@ class TensorflowNumericsBackend(NumericsBackend):
         w, v = tf.linalg.eigh(array)
         w = tf.expand_dims(tf.exp(w), axis=-1)
         expmA = v @ (w * tf.linalg.adjoint(v))
-        if tf.is_real(array):
-            return tf.real(expmA)
+        if array.dtype in {tf.float32, tf.float64}:
+            return tf.math.real(expmA)
         return expmA
 
     def linalg_inv(self, array: tf.Tensor) -> tf.Tensor:
@@ -218,10 +245,10 @@ class TensorflowNumericsBackend(NumericsBackend):
             return tf.linalg.logm(array)
 
         w, v = tf.linalg.eigh(array)
-        w = tf.expand_dims(tf.log(w), axis=-1)
+        w = tf.expand_dims(tf.math.log(w), axis=-1)
         logmA = v @ (w * tf.linalg.adjoint(v))
-        if tf.is_real(array):
-            return tf.real(logmA)
+        if array.dtype in {tf.float32, tf.float64}:
+            return tf.math.real(logmA)
         return logmA
 
     def linalg_matrix_rank(self, array: tf.Tensor) -> int:
@@ -241,7 +268,7 @@ class TensorflowNumericsBackend(NumericsBackend):
         # Compute signs or unit-modulus phase of entries of diagonal of r.
         s = tf.identity(tf.linalg.diag_part(r))
         s = tf.where(tf.equal(s, 0.0), tf.ones_like(s), s)
-        s = s / tf.abs(s)
+        s = s / tf.cast(tf.abs(s), dtype=self.dtype)
         s = tf.expand_dims(s, axis=-1)
         # normalize q and r to have either 1 or unit-modulus on the diagonal of r
         q = q * self.transpose(s)
@@ -306,25 +333,13 @@ class TensorflowNumericsBackend(NumericsBackend):
                 self.dtype,
             )
 
-    def random_randn(self, *dims: int) -> tf.Tensor:
-        if self.is_dtype_real:
-            return self.random_normal(size=dims)
-        else:
-            real_dtype = tf.experimental.numpy.finfo(self.dtype).dtype
-            return tf.cast(
-                self.random_normal(size=dims), real_dtype
-            ) + 1j * tf.cast(self.random_normal(size=dims), real_dtype)
-
     def random_uniform(self, size: Optional[int] = None) -> tf.Tensor:
         if self.is_dtype_real:
             return tf.random.uniform(shape=size, dtype=self.dtype)
         else:
-            real_dtype = tf.experimental.numpy.finfo(self.dtype).dtype
             return tf.cast(
-                tf.random.uniform(shape=size, dtype=real_dtype), self.dtype
-            ) + 1j * tf.cast(
-                tf.random.uniform(shape=size, dtype=real_dtype), self.dtype
-            )
+                tf.random.uniform(shape=size), self.dtype
+            ) + 1j * tf.cast(tf.random.uniform(shape=size), self.dtype)
 
     @elementary_math_function
     def real(self, array: tf.Tensor) -> tf.Tensor:
@@ -388,9 +403,19 @@ class TensorflowNumericsBackend(NumericsBackend):
         return tf.concat(arrays, axis=0)
 
     def where(
-        self, condition: tf.Tensor, x: tf.Tensor, y: tf.Tensor
+        self,
+        condition: tf.Tensor,
+        x: Optional[tf.Tensor] = None,
+        y: Optional[tf.Tensor] = None,
     ) -> tf.Tensor:
-        return tf.where(condition, x, y)
+        if x is None and y is None:
+            return tf.where(condition)
+        elif x is not None and y is not None:
+            return tf.where(condition, x, y)
+        else:
+            raise ValueError(
+                f"Both x and y have to be specified but are respectively {x} and {y}"
+            )
 
     def zeros(self, shape: Sequence[int]) -> tf.Tensor:
         return tf.zeros(shape, dtype=self.dtype)

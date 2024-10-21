@@ -95,7 +95,7 @@ max-line-length = 79
 select = ["B", "B950", "C", "D", "E", "F", "W"]
 
 [tool.pyright]
-typeCheckingMode = "off"
+typeCheckingMode = "basic"
 venvPath = "."
 venv = ".venv"
 

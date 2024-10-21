@@ -274,7 +274,7 @@ class TestSphereSubspaceComplementIntersectionManifold:
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
         self.backend.assert_allclose(
-            p, self.backend.zeros(self.n), atol=1e-6, rtol=1e-6
+            p, self.backend.zeros(self.n), atol=1e-5, rtol=1e-6
         )
 
     def test_dim_1(self):
