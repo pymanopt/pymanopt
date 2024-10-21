@@ -91,29 +91,33 @@ def test_eye(input, expected_output, backend):
     backend.assert_allclose(output, expected_output)
 
 
-@pytest.mark.parametrize("backend", [backend_np64, backend_np32])
-def test_multilogm_singlemat(backend: NumericsBackend):
+@pytest.mark.parametrize(
+    "backend", [backend_np64, backend_np32, backend_jnp64, backend_pt64]
+)
+def test_logm(backend: NumericsBackend):
+    # test for a single matrix
     m = 10
-    a = np.diag(np.random.uniform(size=m))
-    q, _ = np.linalg.qr(np.random.normal(size=(m, m)))
+    a = backend.random_uniform(m)
+    q, _ = backend.linalg_qr(backend.random_normal(size=(m, m)))
     # A is a positive definite matrix
-    A = q @ a @ q.T
+    A = (q * a) @ q.T
+    logmA = backend.array(scipy.linalg.logm(np.asarray(A)))
     backend.assert_allclose(
-        backend.linalg_logm(A, positive_definite=True), scipy.linalg.logm(A)
+        backend.linalg_logm(A, positive_definite=True), logmA
     )
 
-
-@pytest.mark.parametrize("backend", [backend_np64, backend_np32])
-def test_multilogm(backend: NumericsBackend):
+    # test for several stacked matrices
     k = 4
     m = 10
-    A = np.zeros((k, m, m))
-    L = np.zeros((k, m, m))
-    for i in range(k):
-        a = np.diag(np.random.uniform(size=m))
-        q, _ = np.linalg.qr(np.random.normal(size=(m, m)))
-        A[i] = q @ a @ q.T
-        L[i] = scipy.linalg.logm(A[i])
+    A = []
+    L = []
+    for _ in range(k):
+        a = backend.random_uniform(size=m)
+        q, _ = backend.linalg_qr(backend.random_normal(size=(m, m)))
+        A.append((q * a) @ q.T)
+        L.append(backend.array(scipy.linalg.logm(np.asarray(A[-1]))))
+    A = backend.stack(A)
+    L = backend.stack(L)
     backend.assert_allclose(backend.linalg_logm(A, positive_definite=True), L)
 
 
@@ -130,3 +134,22 @@ def test_multilogm_complex_positive_definite(backend: NumericsBackend):
         backend.linalg_logm(A, positive_definite=True),
         backend.linalg_logm(A, positive_definite=False),
     )
+
+
+def test_conj():
+    real_backend: NumericsBackend = backend_np64
+    complex_backend: NumericsBackend = real_backend.to_complex_backend()
+    x = real_backend.random_randn(2, 2)
+    y = complex_backend.random_randn(2, 2)
+    for arr in [x, y]:
+        complex_backend.assert_allclose(
+            real_backend.transpose(arr), complex_backend.transpose(arr)
+        )
+        complex_backend.assert_allclose(
+            real_backend.conjugate_transpose(arr),
+            complex_backend.conjugate_transpose(arr),
+        )
+        print(real_backend.transpose(arr).dtype)
+        print(real_backend.conjugate_transpose(arr).dtype)
+        print(complex_backend.transpose(arr).dtype)
+        print(complex_backend.conjugate_transpose(arr).dtype)

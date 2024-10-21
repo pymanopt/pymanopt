@@ -201,13 +201,13 @@ class SpecialOrthogonalGroup(_UnitaryBase):
             point, _ = self.backend.linalg_qr(
                 self.backend.random_normal(size=(k, n, n))
             )
-            # Swap the first two columns of matrices where det(point) < 0 to
-            # flip the sign of their determinants.
-            negative_det, *_ = self.backend.where(
-                self.backend.linalg_det(point) < 0
-            )
-            negative_det = self.backend.expand_dims(negative_det, (-2, -1))
-            point[negative_det, :, [0, 1]] = point[negative_det, :, [1, 0]]
+            dets = self.backend.linalg_det(point)
+            if self.backend.any(dets < 0.0):
+                # Swap the first two columns of matrices where det(point) < 0 to
+                # flip the sign of their determinants.
+                negative_det, *_ = self.backend.where(dets < 0)
+                negative_det = self.backend.expand_dims(negative_det, (-2, -1))
+                point[negative_det, :, [0, 1]] = point[negative_det, :, [1, 0]]
         if k == 1:
             return point[0]
         return point

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Any, Optional, Sequence, Tuple
+from typing import Any, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import scipy.special
@@ -32,16 +32,14 @@ class NumericsBackend(ABC):
     def is_dtype_real(self):
         pass
 
-    @property
     @staticmethod
     @abstractmethod
-    def DEFAULT_REAL_DTYPE(self):
+    def DEFAULT_REAL_DTYPE():
         pass
 
-    @property
     @staticmethod
     @abstractmethod
-    def DEFAULT_COMPLEX_DTYPE(self):
+    def DEFAULT_COMPLEX_DTYPE():
         pass
 
     @abstractmethod
@@ -50,6 +48,14 @@ class NumericsBackend(ABC):
 
     def __eq__(self, other):
         return repr(self) == repr(other)
+
+    @abstractmethod
+    def to_complex_backend(self) -> "NumericsBackend":
+        pass
+
+    @abstractmethod
+    def to_real_backend(self) -> "NumericsBackend":
+        pass
 
     ##############################################################################
     # Numerics functions
@@ -107,15 +113,25 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def assert_allclose(
-        self, array_a: array_t, array_b: array_t, rtol: float, atol: float
-    ) -> None:  # type: ignore
+        self,
+        array_a: array_t,  # type: ignore
+        array_b: array_t,  # type: ignore
+        rtol: float = 1e-6,
+        atol: float = 1e-6,
+    ) -> None:
         pass
 
-    def assert_almost_equal(self, array_a: array_t, array_b: array_t) -> None:
+    def assert_almost_equal(
+        self,
+        array_a: array_t,  # type: ignore
+        array_b: array_t,  # type: ignore
+    ) -> None:
         self.assert_allclose(array_a, array_b)
 
     def assert_array_almost_equal(
-        self, array_a: array_t, array_b: array_t
+        self,
+        array_a: array_t,  # type: ignore
+        array_b: array_t,  # type: ignore
     ) -> None:
         self.assert_allclose(array_a, array_b)
 
@@ -135,7 +151,6 @@ class NumericsBackend(ABC):
     def conjugate(self, array: array_t) -> array_t:  # type: ignore
         pass
 
-    @not_implemented
     def conjugate_transpose(self, array: array_t) -> array_t:  # type: ignore
         return self.conjugate(self.transpose(array))
 
@@ -207,7 +222,11 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def linalg_expm(self, array: array_t, symmetric: bool = False) -> array_t:
+    def linalg_expm(
+        self,
+        array: array_t,  # type: ignore
+        symmetric: bool = False,
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -291,16 +310,20 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def random_normal(
-        self, loc: float, scale: float, size: Sequence[int]
+        self,
+        loc: float = 0.0,
+        scale: float = 1.0,
+        size: Union[int, Sequence[int], None] = None,
     ) -> array_t:  # type: ignore
         pass
 
-    @not_implemented
     def random_randn(self, *dims: int) -> array_t:  # type: ignore
-        pass
+        return self.random_normal(loc=0.0, scale=1.0, size=dims)
 
     @not_implemented
-    def random_uniform(self, size: Optional[int]) -> array_t:  # type: ignore
+    def random_uniform(
+        self, size: Union[int, Sequence[int], None] = None
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -369,6 +392,14 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
+    def stack(
+        self,
+        arrays: Sequence[array_t],  # type: ignore
+        axis: int = 0,
+    ) -> array_t:  # type: ignore
+        pass
+
+    @not_implemented
     def sum(
         self,
         array: array_t,  # type: ignore
@@ -397,12 +428,7 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def trace(
-        self,
-        array: array_t,  # type:ignore
-        *args: Any,
-        **kwargs: Any,
-    ) -> array_t:  # type: ignore
+    def trace(self, array: array_t) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -422,9 +448,9 @@ class NumericsBackend(ABC):
     @not_implemented
     def where(
         self,
-        condition: array_t,
-        x: array_t,
-        y: array_t,
+        condition: array_t,  # type: ignore
+        x: Optional[array_t],  # type: ignore
+        y: Optional[array_t],  # type: ignore
     ) -> array_t:  # type: ignore
         pass
 
