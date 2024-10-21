@@ -31,14 +31,18 @@ class ComplexCircle(RiemannianSubmanifold):
         super().__init__(name, n, backend=backend)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return (tangent_vector_a.conj() @ tangent_vector_b).real
+        return (
+            self.backend.conjugate(tangent_vector_a) @ tangent_vector_b
+        ).real
 
     def norm(self, point, tangent_vector):
         return self.backend.linalg.norm(tangent_vector)
 
     def dist(self, point_a, point_b):
         return self.backend.linalg.norm(
-            self.backend.arccos((point_a.conj() * point_b).real)
+            self.backend.arccos(
+                (self.backend.conjugate(point_a) * point_b).real
+            )
         )
 
     @property
@@ -46,7 +50,7 @@ class ComplexCircle(RiemannianSubmanifold):
         return self.backend.pi * self.backend.sqrt(self._dimension)
 
     def projection(self, point, vector):
-        return vector - (vector.conj() * point).real * point
+        return vector - (self.backend.conjugate(vector) * point).real * point
 
     to_tangent_space = projection
 
@@ -56,7 +60,8 @@ class ComplexCircle(RiemannianSubmanifold):
         return self.projection(
             point,
             euclidean_hessian
-            - (point * euclidean_gradient.conj()).real * tangent_vector,
+            - (point * self.backend.conjugate(euclidean_gradient)).real
+            * tangent_vector,
         )
 
     def exp(self, point, tangent_vector):
@@ -79,7 +84,9 @@ class ComplexCircle(RiemannianSubmanifold):
     def log(self, point_a, point_b):
         v = self.projection(point_a, point_b - point_a)
         abs_v = self.backend.abs(v)
-        di = self.backend.arccos((point_a.conj() * point_b).real)
+        di = self.backend.arccos(
+            (self.backend.conjugate(point_a) * point_b).real
+        )
         factors = di / abs_v
         factors[di <= 1e-6] = 1
         return v * factors

@@ -26,7 +26,7 @@ class _Euclidean(RiemannianSubmanifold):
         return float(
             self.backend.real(
                 self.backend.tensordot(
-                    tangent_vector_a.conj(),
+                    self.backend.conjugate(tangent_vector_a),
                     tangent_vector_b,
                     axes=tangent_vector_a.ndim,
                 )

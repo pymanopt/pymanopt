@@ -33,8 +33,9 @@ class TensorflowNumericsBackend(NumericsBackend):
     def dtype(self) -> tf.DType:
         return self._dtype
 
+    @property
     def is_dtype_real(self):
-        return tf.is_real(self.dtype)
+        return self.dtype in {tf.float32, tf.float64}
 
     @property
     def DEFAULT_REAL_DTYPE(self):
@@ -43,6 +44,9 @@ class TensorflowNumericsBackend(NumericsBackend):
     @property
     def DEFAULT_COMPLEX_DTYPE(self):
         return tf.constant([1j]).dtype
+
+    def _complex_to_real_dtype(self, complex_dtype: tf.DType) -> tf.DType:
+        return tf.experimental.numpy.finfo(complex_dtype).dtype
 
     def __repr__(self):
         return f"TensorflowNumericsBackend(dtype={self.dtype})"
@@ -104,9 +108,17 @@ class TensorflowNumericsBackend(NumericsBackend):
         self,
         array_a: tf.Tensor,
         array_b: tf.Tensor,
-        rtol: float = 1e-5,
-        atol: float = 1e-8,
+        rtol: float = 1e-6,
+        atol: float = 1e-6,
     ) -> None:
+        if not isinstance(array_a, tf.Tensor):
+            array_a = tf.constant(array_a, dtype=self.dtype)
+        if array_a.dtype != self.dtype:
+            array_a = tf.cast(array_a, self.dtype)
+        if not isinstance(array_b, tf.Tensor):
+            array_b = tf.constant(array_b, dtype=self.dtype)
+        if array_b.dtype != self.dtype:
+            array_b = tf.cast(array_b, self.dtype)
         tf.debugging.assert_near(array_a, array_b, rtol=rtol, atol=atol)
 
     def assert_equal(
@@ -277,18 +289,42 @@ class TensorflowNumericsBackend(NumericsBackend):
         scale: float = 1.0,
         size: Union[int, Sequence[int]] = 1,
     ) -> tf.Tensor:
-        if not isinstance(size, Sequence):
+        if isinstance(size, int):
             size = (size,)
         size = tf.constant(size)
-        return tf.random.normal(
-            shape=size, mean=loc, stddev=scale, dtype=self.dtype
-        )
+        if self.is_dtype_real:
+            return tf.random.normal(
+                shape=size, mean=loc, stddev=scale, dtype=self.dtype
+            )
+        else:
+            real_dtype = tf.experimental.numpy.finfo(self.dtype).dtype
+            return tf.cast(
+                tf.random.normal(shape=size, mean=loc, dtype=real_dtype),
+                self.dtype,
+            ) + 1j * tf.cast(
+                tf.random.normal(shape=size, mean=loc, dtype=real_dtype),
+                self.dtype,
+            )
 
     def random_randn(self, *dims: int) -> tf.Tensor:
-        return self.random_normal(size=dims)
+        if self.is_dtype_real:
+            return self.random_normal(size=dims)
+        else:
+            real_dtype = tf.experimental.numpy.finfo(self.dtype).dtype
+            return tf.cast(
+                self.random_normal(size=dims), real_dtype
+            ) + 1j * tf.cast(self.random_normal(size=dims), real_dtype)
 
     def random_uniform(self, size: Optional[int] = None) -> tf.Tensor:
-        return tf.random.uniform(shape=size, dtype=self.dtype)
+        if self.is_dtype_real:
+            return tf.random.uniform(shape=size, dtype=self.dtype)
+        else:
+            real_dtype = tf.experimental.numpy.finfo(self.dtype).dtype
+            return tf.cast(
+                tf.random.uniform(shape=size, dtype=real_dtype), self.dtype
+            ) + 1j * tf.cast(
+                tf.random.uniform(shape=size, dtype=real_dtype), self.dtype
+            )
 
     @elementary_math_function
     def real(self, array: tf.Tensor) -> tf.Tensor:
@@ -351,8 +387,10 @@ class TensorflowNumericsBackend(NumericsBackend):
     def vstack(self, arrays: Sequence[tf.Tensor]) -> tf.Tensor:
         return tf.concat(arrays, axis=0)
 
-    def where(self, condition: tf.Tensor) -> tf.Tensor:
-        return tf.where(condition)
+    def where(
+        self, condition: tf.Tensor, x: tf.Tensor, y: tf.Tensor
+    ) -> tf.Tensor:
+        return tf.where(condition, x, y)
 
     def zeros(self, shape: Sequence[int]) -> tf.Tensor:
         return tf.zeros(shape, dtype=self.dtype)

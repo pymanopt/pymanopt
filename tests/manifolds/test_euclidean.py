@@ -1,16 +1,14 @@
-import numpy as np
 import pytest
 
 from pymanopt.manifolds import ComplexEuclidean, Euclidean
-from pymanopt.numerics import NumpyNumericsBackend
 
 
 class TestEuclideanManifold:
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, real_numerics_backend):
         self.m = m = 10
         self.n = n = 5
-        self.backend = NumpyNumericsBackend()
+        self.backend = real_numerics_backend
         self.manifold = Euclidean(m, n, backend=self.backend)
 
     def test_dim(self):
@@ -34,7 +32,7 @@ class TestEuclideanManifold:
         y = e.random_tangent_vector(x)
         z = e.random_tangent_vector(x)
         self.backend.assert_allclose(
-            self.backend.real(self.backend.sum(y.conj() * z)),
+            self.backend.real(self.backend.sum(self.backend.conjugate(y) * z)),
             e.inner_product(x, y, z),
         )
 
@@ -71,9 +69,7 @@ class TestEuclideanManifold:
         e = self.manifold
         x = e.random_point()
         u = self.backend.random_normal(size=(self.m, self.n))
-        self.backend.assert_allclose(
-            self.backend.sqrt(self.backend.sum(u**2)), e.norm(x, u)
-        )
+        self.backend.assert_allclose(self.backend.linalg_norm(u), e.norm(x, u))
 
     def test_random_point(self):
         e = self.manifold
@@ -122,10 +118,10 @@ class TestEuclideanManifold:
 
 class TestComplexEuclideanManifold(TestEuclideanManifold):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, complex_numerics_backend):
         self.m = m = 10
         self.n = n = 5
-        self.backend = NumpyNumericsBackend(dtype=np.complex128)
+        self.backend = complex_numerics_backend
         self.manifold = ComplexEuclidean(m, n, backend=self.backend)
 
     def test_dim(self):
@@ -141,7 +137,7 @@ class TestComplexEuclideanManifold(TestEuclideanManifold):
         e = self.manifold
         x = e.random_point()
         y = e.random_point()
-        assert x.dtype == complex
+        assert x.dtype == self.backend.dtype
         assert x.shape == (self.m, self.n)
         # assert self.backend.linalg_norm(x - y) > 1e-6
         assert not self.backend.allclose(x, y)
@@ -151,7 +147,7 @@ class TestComplexEuclideanManifold(TestEuclideanManifold):
         x = e.random_point()
         u = e.random_tangent_vector(x)
         v = e.random_tangent_vector(x)
-        assert u.dtype == complex
+        assert u.dtype == self.backend.dtype
         assert u.shape == (self.m, self.n)
         self.backend.assert_allclose(self.backend.linalg_norm(u), 1)
         assert not self.backend.allclose(u, v)

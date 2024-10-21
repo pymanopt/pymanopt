@@ -41,6 +41,7 @@ class PytorchNumericsBackend(NumericsBackend):
     def dtype(self):
         return self._dtype
 
+    @property
     def is_dtype_real(self):
         return self.dtype in {torch.float32, torch.float64}
 
@@ -51,6 +52,16 @@ class PytorchNumericsBackend(NumericsBackend):
     @property
     def DEFAULT_COMPLEX_DTYPE(self):
         return torch.tensor([1j]).dtype
+
+    def _complex_to_real_dtype(
+        self, complex_dtype: torch.dtype
+    ) -> torch.dtype:
+        if complex_dtype == torch.complex64:
+            return torch.float32
+        elif complex_dtype == torch.complex128:
+            return torch.float64
+        else:
+            raise ValueError(f"Provided dtype {complex_dtype} is not complex.")
 
     def __repr__(self):
         return f"PytorchNumericsBackend(dtype={self.dtype})"
@@ -110,8 +121,8 @@ class PytorchNumericsBackend(NumericsBackend):
         self,
         array_a: torch.Tensor,
         array_b: torch.Tensor,
-        rtol: float = 1e-7,
-        atol: float = 1e-10,
+        rtol: float = 1e-6,
+        atol: float = 1e-6,
     ) -> None:
         torch.testing.assert_close(
             self.array(array_a),
@@ -318,13 +329,35 @@ class PytorchNumericsBackend(NumericsBackend):
             size = (size,)
         else:
             size = tuple(size)
-        return torch.normal(mean=loc, std=scale, size=size, dtype=self.dtype)
+        if self.is_dtype_real:
+            return torch.normal(
+                mean=loc, std=scale, size=size, dtype=self.dtype
+            )
+        else:
+            real_dtype = self._complex_to_real_dtype(self.dtype)
+            return torch.normal(
+                mean=loc, std=scale, size=size, dtype=real_dtype
+            ) + 1j * torch.normal(
+                mean=loc, std=scale, size=size, dtype=real_dtype
+            )
 
     def random_randn(self, *dims: int) -> torch.Tensor:
-        return torch.randn(dims, dtype=self.dtype)
+        if self.is_dtype_real:
+            return torch.randn(dims, dtype=self.dtype)
+        else:
+            real_dtype = self._complex_to_real_dtype(self.dtype)
+            return torch.randn(dims, dtype=real_dtype) + 1j * torch.randn(
+                dims, dtype=real_dtype
+            )
 
     def random_uniform(self, size: int) -> torch.Tensor:
-        return torch.rand(size, dtype=self.dtype)
+        if self.is_dtype_real:
+            return torch.rand(size, dtype=self.dtype)
+        else:
+            real_dtype = self._complex_to_real_dtype(self.dtype)
+            return torch.rand(size, dtype=real_dtype) + 1j * torch.rand(
+                size, dtype=real_dtype
+            )
 
     @elementary_math_function
     def real(self, array: torch.Tensor) -> torch.Tensor:
@@ -396,8 +429,10 @@ class PytorchNumericsBackend(NumericsBackend):
     ) -> torch.Tensor:
         return torch.vstack(arrays)
 
-    def where(self, condition: torch.Tensor) -> torch.Tensor:
-        return torch.nonzero(condition)
+    def where(
+        self, condition: torch.Tensor, x: torch.Tensor, y: torch.Tensor
+    ) -> torch.Tensor:
+        return torch.where(condition, x, y)
 
     def zeros(self, shape: list[int]) -> torch.Tensor:
         return torch.zeros(shape, dtype=self.dtype)

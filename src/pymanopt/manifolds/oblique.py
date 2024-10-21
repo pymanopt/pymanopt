@@ -36,13 +36,14 @@ class Oblique(RiemannianSubmanifold):
         return self.backend.linalg_norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        XY = (point_a * point_b).sum(0)
-        XY[XY > 1] = 1
+        XY = self.backend.sum(point_a * point_b, 0)
+        # XY[XY > 1] = 1
+        XY = self.backend.where(XY > 1, 1, XY)
         return self.backend.linalg_norm(self.backend.arccos(XY))
 
     def projection(self, point, vector):
         return vector - point * (
-            (point * vector).sum(0)[self.backend.newaxis, :]
+            self.backend.sum(point * vector, 0)[self.backend.newaxis, :]
         )
 
     to_tangent_space = projection
@@ -52,11 +53,13 @@ class Oblique(RiemannianSubmanifold):
     ):
         PXehess = self.projection(point, euclidean_hessian)
         return PXehess - tangent_vector * (
-            (point * euclidean_gradient).sum(0)[self.backend.newaxis, :]
+            self.backend.sum(point * euclidean_gradient, 0)[
+                self.backend.newaxis, :
+            ]
         )
 
     def exp(self, point, tangent_vector):
-        norm = self.backend.sqrt((tangent_vector**2).sum(0))[
+        norm = self.backend.sqrt(self.backend.sum(tangent_vector**2, 0))[
             self.backend.newaxis, :
         ]
         target_point = point * self.backend.cos(
@@ -69,8 +72,10 @@ class Oblique(RiemannianSubmanifold):
 
     def log(self, point_a, point_b):
         vector = self.projection(point_a, point_b - point_a)
-        distances = self.backend.arccos((point_a * point_b).sum(0))
-        norms = self.backend.sqrt((vector**2).sum(0)).real
+        distances = self.backend.arccos(self.backend.sum(point_a * point_b, 0))
+        norms = self.backend.real(
+            self.backend.sqrt(self.backend.sum(vector**2, 0))
+        )
         # Try to avoid zero-division when both distances and norms are almost
         # zero.
         epsilon = self.backend.eps()

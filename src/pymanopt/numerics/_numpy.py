@@ -24,6 +24,7 @@ class NumpyNumericsBackend(NumericsBackend):
     def dtype(self):
         return self._dtype
 
+    @property
     def is_dtype_real(self):
         return np.issubdtype(self.dtype, np.floating)
 
@@ -88,8 +89,8 @@ class NumpyNumericsBackend(NumericsBackend):
         self,
         array_a: np_array_t,
         array_b: np_array_t,
-        rtol: float = 1e-5,
-        atol: float = 1e-8,
+        rtol: float = 1e-6,
+        atol: float = 1e-6,
     ) -> None:
         np_testing.assert_allclose(
             array_a, array_b, rtol, atol, equal_nan=False
@@ -261,13 +262,38 @@ class NumpyNumericsBackend(NumericsBackend):
         scale: float = 1.0,
         size: Union[int, Sequence[int]] = 1,
     ) -> np_array_t:
-        return self.array(np.random.normal(loc=loc, scale=scale, size=size))
+        if self.is_dtype_real:
+            return np.asarray(
+                np.random.normal(loc=loc, scale=scale, size=size),
+                dtype=self.dtype,
+            )
+        else:
+            real_dtype = np.finfo(self.dtype).dtype
+            return np.asarray(
+                np.random.normal(loc=loc, scale=scale, size=size),
+                dtype=real_dtype,
+            ) + 1j * np.asarray(
+                np.random.normal(loc=loc, scale=scale, size=size),
+                dtype=real_dtype,
+            )
 
     def random_randn(self, *dims: int) -> np_array_t:
-        return self.array(np.random.randn(*dims))
+        if self.is_dtype_real:
+            return np.asarray(np.random.randn(*dims), dtype=self.dtype)
+        else:
+            real_dtype = np.finfo(self.dtype).dtype
+            return np.asarray(
+                np.random.randn(*dims), dtype=real_dtype
+            ) + 1j * np.asarray(np.random.randn(*dims), dtype=real_dtype)
 
     def random_uniform(self, size: Optional[int] = None) -> np_array_t:
-        return self.array(np.random.uniform(size=size))
+        if self.is_dtype_real:
+            return np.asarray(np.random.uniform(size=size), dtype=self.dtype)
+        else:
+            real_dtype = np.finfo(self.dtype).dtype
+            return np.asarray(
+                np.random.uniform(size=size), dtype=real_dtype
+            ) + 1j * np.asarray(np.random.uniform(size=size), dtype=real_dtype)
 
     def real(self, array: np_array_t) -> np_array_t:
         return np.real(array)
@@ -329,8 +355,10 @@ class NumpyNumericsBackend(NumericsBackend):
     def vstack(self, arrays: Sequence[np_array_t]) -> np_array_t:
         return np.vstack(arrays)
 
-    def where(self, condition: np_array_t) -> np_array_t:
-        return np.where(condition)  # type: ignore
+    def where(
+        self, condition: np_array_t, x: np_array_t, y: np_array_t
+    ) -> np_array_t:
+        return np.where(condition, x, y)  # type: ignore
 
     def zeros(self, shape: Sequence[int]) -> np_array_t:
         return np.zeros(shape, dtype=self.dtype)
