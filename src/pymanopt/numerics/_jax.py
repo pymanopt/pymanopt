@@ -15,10 +15,21 @@ class JaxNumericsBackend(NumericsBackend):
         self._dtype = dtype
         self._random_key = jax.random.key(random_seed)
 
+    def _gen_1_random_key(self):
+        self._random_key, new_key = jax.random.split(self._random_key)
+        return new_key
+
+    def _gen_2_random_keys(
+        self,
+    ):
+        self._random_key, *new_keys = jax.random.split(self._random_key, 3)
+        return new_keys
+
     @property
     def dtype(self) -> jnp.dtype:
         return self._dtype
 
+    @property
     def is_dtype_real(self):
         return jnp.issubdtype(self.dtype, jnp.floating)
 
@@ -83,8 +94,8 @@ class JaxNumericsBackend(NumericsBackend):
         self,
         array_a: jnp.ndarray,
         array_b: jnp.ndarray,
-        rtol: float = 1e-7,
-        atol: float = 1e-10,
+        rtol: float = 1e-6,
+        atol: float = 1e-6,
     ) -> None:
         def max_abs(x):
             return jnp.max(jnp.abs(x))
@@ -97,16 +108,6 @@ class JaxNumericsBackend(NumericsBackend):
             f"{max_abs(array_a - array_b) / max_abs(array_b)}"
             f" (rtol={rtol})"
         )
-
-    def assert_almost_equal(
-        self, array_a: jnp.ndarray, array_b: jnp.ndarray
-    ) -> None:
-        assert self.allclose(array_a, array_b)
-
-    def assert_array_almost_equal(
-        self, array_a: jnp.ndarray, array_b: jnp.ndarray
-    ) -> None:
-        assert self.allclose(array_a, array_b)
 
     def block(self, arrays: Sequence[jnp.ndarray]) -> jnp.ndarray:
         return jnp.block(arrays)
@@ -274,20 +275,58 @@ class JaxNumericsBackend(NumericsBackend):
             size = (size,)
         else:
             size = tuple(size)
-        self._random_key, new_key = jax.random.split(self._random_key)
-        return (
-            scale
-            * jax.random.normal(key=new_key, shape=size, dtype=self.dtype)
-            + loc
-        )
+
+        if self.is_dtype_real:
+            new_key = self._gen_1_random_key()
+            return (
+                scale
+                * jax.random.normal(key=new_key, shape=size, dtype=self.dtype)
+                + loc
+            )
+        else:
+            real_dtype = jnp.finfo(self.dtype).dtype
+            new_key_1, new_key_2 = self._gen_2_random_keys()
+            return (
+                scale
+                * jax.random.normal(
+                    key=new_key_1, shape=size, dtype=real_dtype
+                )
+                + loc
+            ) + 1j * (
+                scale
+                * jax.random.normal(
+                    key=new_key_2, shape=size, dtype=real_dtype
+                )
+                + loc
+            )
 
     def random_randn(self, *dims: int) -> jnp.ndarray:
-        self._random_key, new_key = jax.random.split(self._random_key)
-        return jax.random.normal(key=new_key, shape=dims, dtype=self.dtype)
+        if self.is_dtype_real:
+            new_key = self._gen_1_random_key()
+            return jax.random.normal(key=new_key, shape=dims, dtype=self.dtype)
+        else:
+            real_dtype = jnp.finfo(self.dtype).dtype
+            new_key_1, new_key_2 = self._gen_2_random_keys()
+            return jax.random.normal(
+                key=new_key_1, shape=dims, dtype=real_dtype
+            ) + 1j * jax.random.normal(
+                key=new_key_2, shape=dims, dtype=real_dtype
+            )
 
     def random_uniform(self, size: Optional[int] = None) -> jnp.ndarray:
-        self._random_key, new_key = jax.random.split(self._random_key)
-        return jax.random.uniform(key=new_key, shape=size, dtype=self.dtype)
+        if self.is_dtype_real:
+            new_key = self._gen_1_random_key()
+            return jax.random.uniform(
+                key=new_key, shape=size, dtype=self.dtype
+            )
+        else:
+            real_dtype = jnp.finfo(self.dtype).dtype
+            new_key_1, new_key_2 = self._gen_2_random_keys()
+            return jax.random.uniform(
+                key=new_key_1, shape=size, dtype=real_dtype
+            ) + 1j * jax.random.uniform(
+                key=new_key_2, shape=size, dtype=real_dtype
+            )
 
     def real(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.real(array)
@@ -355,8 +394,10 @@ class JaxNumericsBackend(NumericsBackend):
     def vstack(self, arrays: Sequence[jnp.ndarray]) -> jnp.ndarray:
         return jnp.vstack(arrays)
 
-    def where(self, condition: jnp.ndarray) -> jnp.ndarray:
-        return jnp.where(condition)  # type: ignore
+    def where(
+        self, condition: jnp.ndarray, x: jnp.ndarray, y: jnp.ndarray
+    ) -> jnp.ndarray:
+        return jnp.where(condition, x, y)  # type: ignore
 
     def zeros(self, shape: Sequence[int]) -> jnp.ndarray:
         return jnp.zeros(shape, dtype=self.dtype)

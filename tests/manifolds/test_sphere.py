@@ -1,51 +1,22 @@
 import warnings
 
-import jax.numpy as jnp
-import numpy as np
 import pytest
-import tensorflow as tf
-import torch
 
 from pymanopt.manifolds import (
     Sphere,
     SphereSubspaceComplementIntersection,
     SphereSubspaceIntersection,
 )
-from pymanopt.numerics import (
-    JaxNumericsBackend,
-    NumpyNumericsBackend,
-    PytorchNumericsBackend,
-    TensorflowNumericsBackend,
-)
-
-
-# from pymanopt.tools import testing
-
-
-@pytest.fixture(
-    params=[
-        NumpyNumericsBackend(np.float64),
-        PytorchNumericsBackend(torch.float64),
-        JaxNumericsBackend(jnp.float64),
-        TensorflowNumericsBackend(tf.float64),
-        NumpyNumericsBackend(np.float32),
-        PytorchNumericsBackend(torch.float32),
-        JaxNumericsBackend(jnp.float32),
-        TensorflowNumericsBackend(tf.float32),
-    ]
-)
-def real_backend(request):
-    return request.param
 
 
 class TestSphereManifold:
     @pytest.fixture(
         autouse=True,
     )
-    def setup(self, real_backend):
+    def setup(self, real_numerics_backend):
         self.m = m = 100
         self.n = n = 50
-        self.backend = real_backend
+        self.backend = real_numerics_backend
         self.manifold = Sphere(m, n, backend=self.backend)
 
         # For automatic testing of euclidean_to_riemannian_hessian
@@ -211,9 +182,9 @@ class TestSphereManifold:
 
 class TestSphereSubspaceIntersectionManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_backend):
+    def setup(self, real_numerics_backend):
         self.n = 2
-        self.backend = real_backend
+        self.backend = real_numerics_backend
         # Defines the 1-sphere intersected with the 1-dimensional subspace
         # passing through (1, 1) / sqrt(2). This creates a 0-dimensional
         # manifold as it only consists of isolated points in R^2.
@@ -273,9 +244,9 @@ class TestSphereSubspaceIntersectionManifold:
 
 class TestSphereSubspaceComplementIntersectionManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_backend):
+    def setup(self, real_numerics_backend):
         self.n = 2
-        self.backend = real_backend
+        self.backend = real_numerics_backend
         # Define the 1-sphere intersected with the 1-dimensional subspace
         # orthogonal to the line passing through (1, 1) / sqrt(2). This creates
         # a 0-dimensional manifold as it only consits of isolated points in

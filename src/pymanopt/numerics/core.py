@@ -8,17 +8,14 @@ import scipy.special
 from pymanopt.numerics.array_t import array_t
 
 
+__all__ = ["NumericsBackend"]
+
+
 def not_implemented(function):
     @wraps(function)
-    def inner(*arguments):
-        if isinstance(arguments[0], Sequence):
-            type_str = f"Sequence[{type(arguments[0][0])}]"
-        else:
-            type_str = str(type(arguments[0]))
-        raise TypeError(
-            f"Function '{function.__name__}' not implemented for arguments of "
-            f"type '{type(arguments[0])}'"
-            f"type '{type_str}'."
+    def inner(self, *args, **kwargs):
+        raise NotImplementedError(
+            f"Function '{function.__name__}' not implemented for backend {self}"
         )
 
     return inner
@@ -30,6 +27,7 @@ class NumericsBackend(ABC):
     def dtype(self):
         pass
 
+    @property
     @abstractmethod
     def is_dtype_real(self):
         pass
@@ -263,6 +261,12 @@ class NumericsBackend(ABC):
     def logspace(self, *args: int) -> array_t:  # type: ignore
         pass
 
+    def matvec(self, A: array_t, x: array_t) -> array_t:  # type: ignore
+        pass
+
+    def matmul(self, A: array_t, B: array_t) -> array_t:  # type: ignore
+        pass
+
     def multieye(self, k: int, n: int) -> array_t:  # type: ignore
         return self.tile(self.eye(n), (k, 1, 1))
 
@@ -416,7 +420,12 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def where(self, condition: array_t) -> array_t:  # type: ignore
+    def where(
+        self,
+        condition: array_t,
+        x: array_t,
+        y: array_t,
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented

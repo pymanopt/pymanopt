@@ -147,6 +147,9 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
             )
 
     def projection(self, point, vector):
+        # before:
+        # return self._subspace_projector @ super().projection(point, vector)
+        # after:
         return self.backend.squeeze(
             self._subspace_projector
             @ self.backend.reshape(super().projection(point, vector), (-1, 1))
