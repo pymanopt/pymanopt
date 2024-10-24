@@ -21,11 +21,6 @@ def geodesic(point_a, point_b, alpha: float, backend: NumericsBackend):
     return c @ powm @ backend.conjugate_transpose(c)
 
 
-@pytest.fixture(params=[1, 3])
-def product_dimension(request) -> int:
-    return request.param
-
-
 class TestSymmetricPositiveDefiniteManifold:
     @pytest.fixture(autouse=True)
     def setup(

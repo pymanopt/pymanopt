@@ -5,11 +5,6 @@ from pymanopt.numerics import NumericsBackend
 from pymanopt.tools import testing
 
 
-@pytest.fixture(params=[1, 3])
-def product_dimension(request) -> int:
-    return request.param
-
-
 class TestStiefelManifold:
     @pytest.fixture(autouse=True)
     def setup(
