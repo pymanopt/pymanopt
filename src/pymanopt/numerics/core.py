@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Any, Optional, TypeVar, Union
+from typing import Optional, TypeVar, Union
 
 import numpy as np
 import scipy.special
@@ -422,8 +422,8 @@ class NumericsBackend(ABC):
     def sum(
         self,
         array: array_t,  # type: ignore
-        *args: Any,
-        **kwargs: Any,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
     ) -> array_t:  # type: ignore
         pass
 

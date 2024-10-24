@@ -346,8 +346,13 @@ class NumpyNumericsBackend(NumericsBackend):
     ) -> np_array_t:
         return np.stack(arrays)
 
-    def sum(self, array: np_array_t, *args: Any, **kwargs: Any) -> np_array_t:
-        return np.sum(array, *args, **kwargs)  # type: ignore
+    def sum(
+        self,
+        array: np_array_t,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
+    ) -> np_array_t:
+        return np.sum(array, axis=axis, keepdims=keepdims)  # type: ignore
 
     def tan(self, array: np_array_t) -> np_array_t:
         return np.tan(array)

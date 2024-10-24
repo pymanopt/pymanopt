@@ -64,7 +64,7 @@ class PoincareBall(Manifold):
         return self.backend.tensordot(
             tangent_vector_a,
             tangent_vector_b * factor**2,
-            axes=tangent_vector_a.ndim,
+            axes=self.backend.ndim(tangent_vector_a),
         )
 
     def projection(self, point, vector):
