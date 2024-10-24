@@ -311,6 +311,10 @@ class NumericsBackend(ABC):
     def ones(self, shape: TupleOrList[int]) -> array_t:  # type: ignore
         pass
 
+    @not_implemented
+    def ones_bool(self, shape: TupleOrList[int]) -> array_t:  # type: ignore
+        pass
+
     pi = np.pi
 
     #   - np.polyfit
@@ -466,6 +470,10 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def zeros(self, shape: TupleOrList[int]) -> array_t:  # type: ignore
+        pass
+
+    @not_implemented
+    def zeros_bool(self, shape: TupleOrList[int]) -> array_t:  # type: ignore
         pass
 
     @not_implemented
