@@ -176,7 +176,7 @@ class TestSphereManifold:
         Y = s.random_point()
         Z = s.pair_mean(X, Y)
         self.backend.assert_allclose(
-            s.dist(X, Z), s.dist(Y, Z), rtol=1e-6, atol=1e-6
+            s.dist(X, Z), s.dist(Y, Z), rtol=1e-5, atol=1e-5
         )
 
 

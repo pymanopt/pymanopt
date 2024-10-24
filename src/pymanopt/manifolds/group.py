@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 import scipy.special
 
@@ -13,11 +13,15 @@ class _UnitaryBase(RiemannianSubmanifold):
 
     def __init__(
         self,
-        name,
-        dimension,
-        retraction,
+        name: str,
+        n: int,
+        k: int,
+        dimension: int,
+        retraction: Literal["qr", "polar"],
         backend: Optional[NumericsBackend] = None,
     ):
+        self._k = k
+        self._n = n
         super().__init__(name, dimension, backend=backend)
 
         try:
@@ -25,11 +29,19 @@ class _UnitaryBase(RiemannianSubmanifold):
         except AttributeError:
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
+    @property
+    def k(self) -> int:
+        return self._k
+
+    @property
+    def n(self) -> int:
+        return self._n
+
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.tensordot(
             self.backend.conjugate(tangent_vector_a),
             tangent_vector_b,
-            axes=tangent_vector_a.ndim,
+            self.backend.ndim(tangent_vector_a),
         )
 
     def norm(self, point, tangent_vector):
@@ -37,13 +49,13 @@ class _UnitaryBase(RiemannianSubmanifold):
 
     @property
     def typical_dist(self):
-        return self.backend.pi * self.backend.sqrt(self._n * self._k)
+        return self.backend.pi * self.backend.sqrt(self.n * self.k)
 
     def dist(self, point_a, point_b):
         return self.norm(point_a, self.log(point_a, point_b))
 
     def projection(self, point, vector):
-        return self.backend.skew(
+        return self.backend.skewh(
             self.backend.conjugate_transpose(point) @ vector
         )
 
@@ -66,13 +78,10 @@ class _UnitaryBase(RiemannianSubmanifold):
         return self._retraction(point, tangent_vector)
 
     def _retraction_qr(self, point, tangent_vector):
-        Y = point + point @ tangent_vector
-        q, _ = self.backend.linalg_qr(Y)
-        return q
+        return self.backend.linalg_qr(point + point @ tangent_vector)[0]
 
     def _retraction_polar(self, point, tangent_vector):
-        Y = point + point @ tangent_vector
-        u, _, vt = self.backend.linalg_svd(Y)
+        u, _, vt = self.backend.linalg_svd(point + point @ tangent_vector)
         return u @ vt
 
     def exp(self, point, tangent_vector):
@@ -86,10 +95,12 @@ class _UnitaryBase(RiemannianSubmanifold):
         )
 
     def zero_vector(self, point):
-        zero = self.backend.zeros((self._k, self._n, self._n))
-        if self._k == 1:
-            return zero[0]
-        return zero
+        bk = self.backend
+        return (
+            bk.zeros((self.n, self.n))
+            if self.k == 1
+            else bk.zeros((self.k, self.n, self.n))
+        )
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a
@@ -97,33 +108,32 @@ class _UnitaryBase(RiemannianSubmanifold):
     def pair_mean(self, point_a, point_b):
         return self.exp(point_a, self.log(point_a, point_b) / 2)
 
-    def _random_skew_symmetric_matrix(self, n, k):
-        if n == 1:
-            return self.backend.zeros((k, 1, 1))
-        vector = self._random_upper_triangular_matrix(n, k)
-        return vector - self.backend.transpose(vector)
+    # def _random_skew_symmetric_matrix(self, n, k):
+    #     if n == 1:
+    #         return self.backend.zeros((k, 1, 1))
+    #     vector = self._random_upper_triangular_matrix(n, k)
+    #     return vector - self.backend.transpose(vector)
 
-    def _random_symmetric_matrix(self, n, k):
-        if n == 1:
-            return self.backend.random_normal(size=(k, 1, 1))
-        vector = self._random_upper_triangular_matrix(n, k)
-        vector = vector + self.backend.transpose(vector)
-        # The diagonal elements get scaled by a factor of 2 by the previous
-        # operation so re-draw them so every entry of the returned matrix follows a
-        # standard normal distribution.
-        indices = self.backend.arange(n)
-        vector[:, indices, indices] = self.backend.random_normal(size=(k, n))
-        return vector
+    # def _random_symmetric_matrix(self, n, k):
+    #     bk = self.backend
+    #     if n == 1:
+    #         return bk.random_normal(size=(k, 1, 1))
+    #     vector = self._random_upper_triangular_matrix(n, k)
+    #     vector = vector + bk.transpose(vector)
+    #     # The diagonal elements get scaled by a factor of 2 by the previous
+    #     # operation so re-draw them so every entry of the returned matrix follows a
+    #     # standard normal distribution.
+    #     indices = bk.arange(n)
+    #     vector[:, indices, indices] = bk.random_normal(size=(k, n))
+    #     return vector
 
-    def _random_upper_triangular_matrix(self, n, k):
-        if n < 2:
-            raise ValueError("Matrix dimension cannot be less than 2")
-        indices = self.backend.triu_indices(n, 1)
-        vector = self.backend.zeros((k, n, n))
-        vector[(slice(None), *indices)] = self.backend.random_normal(
-            size=(k, n * (n - 1) // 2)
-        )
-        return vector
+    # def _random_upper_triangular_matrix(self, n, k):
+    #     if n < 2:
+    #         raise ValueError("Matrix dimension cannot be less than 2")
+    #     bk = self.backend
+    #     return bk.where(
+    #         bk.triu(bk.ones_bool((n, n))), bk.random_normal(size=(n, n)), 0.0
+    #     )
 
 
 DOCSTRING_NOTE = """
@@ -178,12 +188,9 @@ class SpecialOrthogonalGroup(_UnitaryBase):
         n: int,
         *,
         k: int = 1,
-        retraction: str = "qr",
+        retraction: Literal["qr", "polar"] = "qr",
         backend: Optional[NumericsBackend] = None,
     ):
-        self._n = n
-        self._k = k
-
         if k == 1:
             name = f"Special orthogonal group SO({n})"
         elif k > 1:
@@ -191,31 +198,34 @@ class SpecialOrthogonalGroup(_UnitaryBase):
         else:
             raise ValueError("k must be an integer no less than 1.")
         dimension = int(k * scipy.special.comb(n, 2))
-        super().__init__(name, dimension, retraction, backend=backend)
+        super().__init__(name, n, k, dimension, retraction, backend=backend)
 
     def random_point(self):
-        n, k = self._n, self._k
+        bk = self.backend
+        n, k = self.n, self.k
         if n == 1:
-            point = self.backend.ones((k, 1, 1))
+            point = bk.ones((k, 1, 1))
         else:
-            point, _ = self.backend.linalg_qr(
-                self.backend.random_normal(size=(k, n, n))
-            )
-            dets = self.backend.linalg_det(point)
-            if self.backend.any(dets < 0.0):
+            point, _ = bk.linalg_qr(bk.random_normal(size=(k, n, n)))
+            dets = bk.linalg_det(point)
+            if bk.any(dets < 0.0):
                 # Swap the first two columns of matrices where det(point) < 0 to
                 # flip the sign of their determinants.
-                negative_det, *_ = self.backend.where(dets < 0)
-                negative_det = self.backend.expand_dims(negative_det, (-2, -1))
-                point[negative_det, :, [0, 1]] = point[negative_det, :, [1, 0]]
-        if k == 1:
-            return point[0]
-        return point
+                point = bk.where(
+                    bk.reshape(dets, (-1, 1, 1)) < 0.0,
+                    bk.concatenate((point[:, :, [1, 0]], point[:, :, 2:]), 2),
+                    point,
+                )
+        return point[0] if k == 1 else point
 
     def random_tangent_vector(self, point):
-        vector = self._random_skew_symmetric_matrix(self._n, self._k)
-        if self._k == 1:
-            vector = vector[0]
+        vector = self.backend.skew(
+            self.backend.random_normal(
+                size=(self.n, self.n)
+                if self.k == 1
+                else (self.k, self.n, self.n)
+            )
+        )
         return vector / self.norm(point, vector)
 
 
@@ -248,12 +258,14 @@ class UnitaryGroup(_UnitaryBase):
     its Lie algebra representation to the embedding space representation.
     """
 
+    IS_COMPLEX = True
+
     def __init__(
         self,
         n: int,
         *,
         k: int = 1,
-        retraction: str = "qr",
+        retraction: Literal["qr", "polar"] = "qr",
         backend: Optional[NumericsBackend] = None,
     ):
         self._n = n
@@ -266,30 +278,21 @@ class UnitaryGroup(_UnitaryBase):
         else:
             raise ValueError("k must be an integer no less than 1.")
         dimension = int(k * n**2)
-        super().__init__(name, dimension, retraction, backend=backend)
+        super().__init__(name, n, k, dimension, retraction, backend=backend)
 
     def random_point(self):
-        n, k = self._n, self._k
+        bk = self.backend
+        n, k = self.n, self.k
         if n == 1:
-            point = self.backend.ones((k, 1, 1)) + 1j * self.backend.ones(
-                (k, 1, 1)
-            )
-            point /= self.backend.abs(point)
+            point = bk.ones((k, 1, 1))
         else:
-            point, _ = self.backend.linalg_qr(
-                self.backend.random_normal(size=(k, n, n))
-                + 1j * self.backend.random_normal(size=(k, n, n))
-            )
-        if k == 1:
-            return point[0]
-        return point
+            point, _ = bk.linalg_qr(bk.random_normal(size=(k, n, n)))
+        return point[0] if k == 1 else point
 
     def random_tangent_vector(self, point):
+        bk = self.backend
         n, k = self._n, self._k
-        vector = (
-            self._random_skew_symmetric_matrix(n, k)
-            + 1j * self._random_symmetric_matrix(n, k)
-        ) / self.backend.sqrt(2)
-        if k == 1:
-            vector = vector[0]
+        vector = bk.skewh(
+            bk.random_normal(size=(n, n) if k == 1 else (k, n, n))
+        )
         return vector / self.norm(point, vector)

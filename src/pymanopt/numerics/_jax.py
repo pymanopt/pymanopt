@@ -294,6 +294,9 @@ class JaxNumericsBackend(NumericsBackend):
     def ones(self, shape: TupleOrList[int]) -> jnp.ndarray:
         return jnp.ones(shape, self.dtype)
 
+    def ones_bool(self, shape: TupleOrList[int]) -> jnp.ndarray:
+        return jnp.ones(shape, bool)
+
     def prod(self, array: jnp.ndarray) -> float:
         return jnp.prod(array)  # type: ignore
 
@@ -305,11 +308,8 @@ class JaxNumericsBackend(NumericsBackend):
     ) -> jnp.ndarray:
         if isinstance(size, int):
             size = [size]
-        elif isinstance(size, TupleOrList):
-            size = list(size)
         elif size is None:
             size = ()
-
         if self.is_dtype_real:
             new_key = self._gen_1_random_key()
             return (
@@ -339,8 +339,6 @@ class JaxNumericsBackend(NumericsBackend):
     ) -> jnp.ndarray:
         if isinstance(size, int):
             size = (size,)
-        elif isinstance(size, TupleOrList):
-            size = list(size)
         elif size is None:
             size = ()
 
@@ -445,6 +443,9 @@ class JaxNumericsBackend(NumericsBackend):
 
     def zeros(self, shape: TupleOrList[int]) -> jnp.ndarray:
         return jnp.zeros(shape, dtype=self.dtype)
+
+    def zeros_bool(self, shape: TupleOrList[int]) -> jnp.ndarray:
+        return jnp.zeros(shape, bool)
 
     def zeros_like(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.zeros_like(array, dtype=self.dtype)

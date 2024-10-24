@@ -238,8 +238,6 @@ class NumpyNumericsBackend(NumericsBackend):
 
     def linalg_qr(self, array: np_array_t) -> tuple[np_array_t, np_array_t]:
         q, r = np.linalg.qr(array)
-
-        return q, r
         # Compute signs or unit-modulus phase of entries of diagonal of r.
         s = np.diagonal(r, axis1=-2, axis2=-1).copy()
         s[s == 0] = 1
@@ -276,6 +274,9 @@ class NumpyNumericsBackend(NumericsBackend):
 
     def ones(self, shape: TupleOrList[int]) -> np_array_t:
         return np.ones(shape, self.dtype)
+
+    def ones_bool(self, shape: TupleOrList[int]) -> np_array_t:
+        return np.ones(shape, bool)
 
     def prod(self, array: np_array_t) -> float:
         return np.prod(array)  # type: ignore
@@ -397,6 +398,9 @@ class NumpyNumericsBackend(NumericsBackend):
 
     def zeros(self, shape: TupleOrList[int]) -> np_array_t:
         return np.zeros(shape, dtype=self.dtype)
+
+    def zeros_bool(self, shape: TupleOrList[int]) -> np_array_t:
+        return np.zeros(shape, bool)
 
     def zeros_like(self, array: np_array_t) -> np_array_t:
         return np.zeros_like(array, dtype=self.dtype)

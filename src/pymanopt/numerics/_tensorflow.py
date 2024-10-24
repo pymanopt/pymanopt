@@ -301,6 +301,9 @@ class TensorflowNumericsBackend(NumericsBackend):
     def ones(self, shape: TupleOrList[int]) -> tf.Tensor:
         return tf.ones(shape, dtype=self.dtype)
 
+    def ones_bool(self, shape: TupleOrList[int]) -> tf.Tensor:
+        return tf.ones(shape, dtype=tf.bool)
+
     def prod(self, array: tf.Tensor) -> float:
         return tf.reduce_prod(array).numpy().item()
 
@@ -414,6 +417,9 @@ class TensorflowNumericsBackend(NumericsBackend):
 
     def zeros(self, shape: TupleOrList[int]) -> tf.Tensor:
         return tf.zeros(shape, dtype=self.dtype)
+
+    def zeros_bool(self, shape: TupleOrList[int]) -> tf.Tensor:
+        return tf.zeros(shape, tf.bool)
 
     def zeros_like(self, array: tf.Tensor) -> tf.Tensor:
         return tf.zeros_like(array, dtype=self.dtype)

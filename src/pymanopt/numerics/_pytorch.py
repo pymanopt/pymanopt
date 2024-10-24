@@ -349,6 +349,9 @@ class PytorchNumericsBackend(NumericsBackend):
     def ones(self, shape: TupleOrList[int]) -> torch.Tensor:
         return torch.ones(shape, dtype=self.dtype)
 
+    def ones_bool(self, shape: TupleOrList[int]) -> torch.Tensor:
+        return torch.ones(shape, dtype=torch.bool)
+
     def prod(self, array: torch.Tensor) -> float:
         return torch.prod(array).item()
 
@@ -359,12 +362,12 @@ class PytorchNumericsBackend(NumericsBackend):
         size: Union[int, TupleOrList[int], None] = None,
     ) -> torch.Tensor:
         # pre-process the size
-        if size is None:
-            new_size = (1,)
-        elif not isinstance(size, TupleOrList):
+        if isinstance(size, int):
             new_size = (size,)
+        elif size is None:
+            new_size = (1,)
         else:
-            new_size = tuple(size)
+            new_size = size
         # sample
         if self.is_dtype_real:
             samples = torch.normal(
@@ -384,12 +387,12 @@ class PytorchNumericsBackend(NumericsBackend):
         self, size: Union[int, TupleOrList[int], None] = None
     ) -> Union[torch.Tensor, Number]:
         # pre-process the size
-        if size is None:
-            new_size = (1,)
-        elif not isinstance(size, TupleOrList):
+        if isinstance(size, int):
             new_size = (size,)
+        elif size is None:
+            new_size = (1,)
         else:
-            new_size = tuple(size)
+            new_size = size
         # elif not instance
         if self.is_dtype_real:
             samples = torch.rand(new_size, dtype=self.dtype)
@@ -495,6 +498,9 @@ class PytorchNumericsBackend(NumericsBackend):
 
     def zeros(self, shape: list[int]) -> torch.Tensor:
         return torch.zeros(shape, dtype=self.dtype)
+
+    def zeros_bool(self, shape: TupleOrList[int]) -> torch.Tensor:
+        return torch.zeros(shape, dtype=torch.bool)
 
     def zeros_like(self, array: torch.Tensor) -> torch.Tensor:
         return torch.zeros_like(array, dtype=self.dtype)
