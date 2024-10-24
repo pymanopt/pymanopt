@@ -154,11 +154,6 @@ class PytorchNumericsBackend(NumericsBackend):
             atol=atol,
         )
 
-    def block(self, arrays: list[torch.Tensor]) -> torch.Tensor:
-        # TODO: implement actual block (where wr could give
-        # arbitrarily nested lists of arrays)
-        return torch.cat(arrays)
-
     def concatenate(
         self, arrays: TupleOrList[torch.Tensor], axis: int = 0
     ) -> torch.Tensor:

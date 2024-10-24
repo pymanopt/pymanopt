@@ -132,9 +132,6 @@ class JaxNumericsBackend(NumericsBackend):
             f" (rtol={rtol})"
         )
 
-    def block(self, arrays: TupleOrList[jnp.ndarray]) -> jnp.ndarray:
-        return jnp.block(arrays)
-
     def concatenate(
         self, arrays: TupleOrList[jnp.ndarray], axis: int = 0
     ) -> jnp.ndarray:

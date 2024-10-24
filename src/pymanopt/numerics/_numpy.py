@@ -124,9 +124,6 @@ class NumpyNumericsBackend(NumericsBackend):
     ) -> None:
         return np_testing.assert_equal(array_a, array_b)
 
-    def block(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
-        return np.block(arrays)
-
     def concatenate(
         self, arrays: TupleOrList[np.ndarray], axis: int = 0
     ) -> np.ndarray:

@@ -26,7 +26,7 @@ def product_dimension(request) -> int:
     return request.param
 
 
-class TestMultiSymmetricPositiveDefiniteManifold:
+class TestSymmetricPositiveDefiniteManifold:
     @pytest.fixture(autouse=True)
     def setup(
         self, real_numerics_backend: NumericsBackend, product_dimension: int
@@ -246,8 +246,8 @@ class TestMultiSymmetricPositiveDefiniteManifold:
         )
 
 
-class TestMultiHermitianPositiveDefiniteManifold(
-    TestMultiSymmetricPositiveDefiniteManifold
+class TestHermitianPositiveDefiniteManifold(
+    TestSymmetricPositiveDefiniteManifold
 ):
     @pytest.fixture(autouse=True)
     def setup(
@@ -263,8 +263,8 @@ class TestMultiHermitianPositiveDefiniteManifold(
         assert self.manifold.dim == self.k * self.n * (self.n + 1)
 
 
-class TestMultiSpecialHermitianPositiveDefiniteManifold(
-    TestMultiHermitianPositiveDefiniteManifold
+class TestSpecialHermitianPositiveDefiniteManifold(
+    TestHermitianPositiveDefiniteManifold
 ):
     @pytest.fixture(autouse=True)
     def setup(
