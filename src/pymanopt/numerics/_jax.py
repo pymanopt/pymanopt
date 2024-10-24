@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Optional, Union, override
+from typing import Any, Optional, Union
 
 import jax
 import jax.numpy as jnp
@@ -29,21 +29,17 @@ class JaxNumericsBackend(NumericsBackend):
         return new_keys
 
     @property
-    @override
     def dtype(self) -> jnp.dtype:
         return self._dtype
 
     @property
-    @override
     def is_dtype_real(self):
         return jnp.issubdtype(self.dtype, jnp.floating)
 
-    @override
     @staticmethod
     def DEFAULT_REAL_DTYPE():
         return jnp.array([1.0]).dtype
 
-    @override
     @staticmethod
     def DEFAULT_COMPLEX_DTYPE():
         return jnp.array([1j]).dtype
@@ -51,7 +47,6 @@ class JaxNumericsBackend(NumericsBackend):
     def __repr__(self):
         return f"JaxNumericsBackend(dtype={self.dtype})"
 
-    @override
     def to_real_backend(self) -> "JaxNumericsBackend":
         if self.is_dtype_real:
             return self
@@ -62,7 +57,6 @@ class JaxNumericsBackend(NumericsBackend):
         else:
             raise ValueError(f"dtype {self.dtype} is not supported")
 
-    @override
     def to_complex_backend(self) -> "JaxNumericsBackend":
         if not self.is_dtype_real:
             return self
@@ -77,15 +71,12 @@ class JaxNumericsBackend(NumericsBackend):
     # Numerics functions
     ##############################################################################
 
-    @override
     def abs(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.abs(array)
 
-    @override
     def all(self, array: jnp.ndarray) -> bool:
         return jnp.all(jnp.array(array, dtype=bool)).item()
 
-    @override
     def allclose(
         self,
         array_a: jnp.ndarray,
@@ -95,43 +86,33 @@ class JaxNumericsBackend(NumericsBackend):
     ) -> bool:
         return jnp.allclose(array_a, array_b, rtol=rtol, atol=atol).item()
 
-    @override
     def any(self, array: jnp.ndarray) -> bool:
         return jnp.any(jnp.array(array, dtype=bool)).item()
 
-    @override
     def arange(self, *args: int) -> jnp.ndarray:
         return jnp.arange(*args)
 
-    @override
     def arccos(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.arccos(array)
 
-    @override
     def arccosh(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.arccosh(array)
 
-    @override
     def arctan(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.arctan(array)
 
-    @override
     def arctanh(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.arctanh(array)
 
-    @override
     def argmin(self, array: jnp.ndarray):
         return jnp.argmin(array)
 
-    @override
     def argsort(self, array: jnp.ndarray):
         return jnp.argsort(array)
 
-    @override
     def array(self, array: array_t) -> jnp.ndarray:  # type: ignore
         return jnp.asarray(array, dtype=self.dtype)
 
-    @override
     def assert_allclose(
         self,
         array_a: jnp.ndarray,
@@ -151,75 +132,63 @@ class JaxNumericsBackend(NumericsBackend):
             f" (rtol={rtol})"
         )
 
-    @override
     def block(self, arrays: TupleOrList[jnp.ndarray]) -> jnp.ndarray:
         return jnp.block(arrays)
 
-    @override
+    def concatenate(
+        self, arrays: TupleOrList[jnp.ndarray], axis: int = 0
+    ) -> jnp.ndarray:
+        return jnp.concatenate(arrays, axis)
+
     def conjugate(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.conjugate(array)
 
-    @override
     def cos(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.cos(array)
 
-    @override
     def diag(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.diag(array)
 
-    @override
     def diagonal(
         self, array: jnp.ndarray, axis1: int, axis2: int
     ) -> jnp.ndarray:
         return jnp.diagonal(array, axis1, axis2)
 
-    @override
     def eps(self) -> float:
         return jnp.finfo(self.dtype).eps
 
-    @override
     def exp(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.exp(array)
 
-    @override
     def expand_dims(self, array: jnp.ndarray, axis: int) -> jnp.ndarray:
         return jnp.expand_dims(array, axis)
 
-    @override
     def eye(self, size: int) -> jnp.ndarray:
         return jnp.eye(size, dtype=self.dtype)
 
-    @override
     def hstack(self, arrays: TupleOrList[jnp.ndarray]) -> jnp.ndarray:
         return jnp.hstack(arrays)
 
-    @override
     def iscomplexobj(self, array: jnp.ndarray) -> bool:
         return jnp.iscomplexobj(array)
 
-    @override
     def isnan(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.isnan(array)
 
-    @override
     def isrealobj(self, array: jnp.ndarray) -> bool:
         return jnp.isrealobj(array)
 
-    @override
     def linalg_cholesky(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.linalg.cholesky(array)
 
-    @override
     def linalg_det(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.linalg.det(array)
 
-    @override
     def linalg_eigh(
         self, array: jnp.ndarray
     ) -> tuple[jnp.ndarray, jnp.ndarray]:
         return jnp.linalg.eigh(array)
 
-    @override
     def linalg_eigvalsh(
         self, array_x: jnp.ndarray, array_y: Optional[jnp.ndarray] = None
     ) -> jnp.ndarray:
@@ -235,7 +204,6 @@ class JaxNumericsBackend(NumericsBackend):
                 dtype=self.dtype,
             )
 
-    @override
     def linalg_expm(
         self, array: jnp.ndarray, symmetric: bool = False
     ) -> jnp.ndarray:
@@ -257,11 +225,9 @@ class JaxNumericsBackend(NumericsBackend):
             return jnp.real(expmA)
         return expmA
 
-    @override
     def linalg_inv(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.linalg.inv(array)
 
-    @override
     def linalg_logm(
         self, array: jnp.ndarray, positive_definite: bool = False
     ) -> jnp.ndarray:
@@ -280,17 +246,14 @@ class JaxNumericsBackend(NumericsBackend):
             return jnp.real(logmA)
         return logmA
 
-    @override
     def linalg_matrix_rank(self, array: jnp.ndarray) -> int:
         return jnp.linalg.matrix_rank(array).item()
 
-    @override
     def linalg_norm(
         self, array: jnp.ndarray, *args: Any, **kwargs: Any
     ) -> jnp.ndarray:
         return jnp.linalg.norm(array, *args, **kwargs)  # type: ignore
 
-    @override
     def linalg_qr(self, array: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
         q, r = jnp.linalg.qr(array)
 
@@ -304,45 +267,36 @@ class JaxNumericsBackend(NumericsBackend):
         r = r * jnp.conjugate(s)
         return q, r
 
-    @override
     def linalg_solve(
         self, array_a: jnp.ndarray, array_b: jnp.ndarray
     ) -> jnp.ndarray:
         return jnp.linalg.solve(array_a, array_b)
 
-    @override
     def linalg_solve_continuous_lyapunov(
         self, array_a: jnp.ndarray, array_q: jnp.ndarray
     ) -> jnp.ndarray:
         return jscipy.linalg.solve_continuous_lyapunov(array_a, array_q)
 
-    @override
     def linalg_svd(
         self, array: jnp.ndarray, *args: Any, **kwargs: Any
     ) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
         return jnp.linalg.svd(array, *args, **kwargs)
 
-    @override
     def log(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.log(array)
 
-    @override
     def logspace(self, *args: int) -> jnp.ndarray:
         return jnp.logspace(*args, dtype=self.dtype)
 
-    @override
     def ndim(self, array: jnp.ndarray) -> int:
         return array.ndim
 
-    @override
     def ones(self, shape: TupleOrList[int]) -> jnp.ndarray:
         return jnp.ones(shape, self.dtype)
 
-    @override
     def prod(self, array: jnp.ndarray) -> float:
         return jnp.prod(array)  # type: ignore
 
-    @override
     def random_normal(
         self,
         loc: float = 0.0,
@@ -380,7 +334,6 @@ class JaxNumericsBackend(NumericsBackend):
                 + loc
             )
 
-    @override
     def random_uniform(
         self, size: Union[int, TupleOrList[int], None] = None
     ) -> jnp.ndarray:
@@ -405,73 +358,58 @@ class JaxNumericsBackend(NumericsBackend):
                 key=new_key_2, shape=size, dtype=real_dtype
             )
 
-    @override
     def real(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.real(array)
 
-    @override
     def reshape(
         self, array: jnp.ndarray, newshape: TupleOrList[int]
     ) -> jnp.ndarray:
         return jnp.reshape(array, newshape)
 
-    @override
     def sin(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.sin(array)
 
-    @override
     def sinc(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.sinc(array)
 
-    @override
     def sort(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.sort(array)
 
-    @override
     def spacing(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.spacing(array)  # type: ignore
 
-    @override
     def sqrt(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.sqrt(array)
 
-    @override
     def squeeze(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.squeeze(array)
 
-    @override
     def stack(
         self, arrays: TupleOrList[jnp.ndarray], axis: int = 0
     ) -> jnp.ndarray:
         return jnp.stack(arrays, axis)
 
-    @override
     def sum(
         self, array: jnp.ndarray, *args: Any, **kwargs: Any
     ) -> jnp.ndarray:
         return jnp.sum(array, *args, **kwargs)  # type: ignore
 
-    @override
     def tan(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.tan(array)
 
-    @override
     def tanh(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.tanh(array)
 
-    @override
     def tensordot(
         self, a: jnp.ndarray, b: jnp.ndarray, axes: int = 2
     ) -> jnp.ndarray:
         return jnp.tensordot(a, b, axes=axes)
 
-    @override
     def tile(
         self, array: jnp.ndarray, reps: int | TupleOrList[int]
     ) -> jnp.ndarray:
         return jnp.tile(array, reps)
 
-    @override
     def trace(self, array: jnp.ndarray) -> Union[Number, jnp.ndarray]:
         return (
             jnp.trace(array).item()
@@ -479,21 +417,17 @@ class JaxNumericsBackend(NumericsBackend):
             else jnp.trace(array, axis1=-2, axis2=-1)
         )
 
-    @override
     def transpose(self, array: jnp.ndarray) -> jnp.ndarray:
         new_shape = list(range(self.ndim(array)))
         new_shape[-1], new_shape[-2] = new_shape[-2], new_shape[-1]
         return jnp.transpose(array, new_shape)
 
-    @override
     def triu(self, array: jnp.ndarray, k: int = 0) -> jnp.ndarray:
         return jnp.triu(array, k)
 
-    @override
     def vstack(self, arrays: TupleOrList[jnp.ndarray]) -> jnp.ndarray:
         return jnp.vstack(arrays)
 
-    @override
     def where(
         self,
         condition: jnp.ndarray,
@@ -509,10 +443,8 @@ class JaxNumericsBackend(NumericsBackend):
                 f"Both x and y have to be specified but are respectively {x} and {y}"
             )
 
-    @override
     def zeros(self, shape: TupleOrList[int]) -> jnp.ndarray:
         return jnp.zeros(shape, dtype=self.dtype)
 
-    @override
     def zeros_like(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.zeros_like(array, dtype=self.dtype)

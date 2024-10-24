@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Optional, Union, override
+from typing import Any, Optional, Union
 
 import numpy as np
 import numpy.testing as np_testing
@@ -22,30 +22,24 @@ class NumpyNumericsBackend(NumericsBackend):
         self._dtype = dtype
 
     @property
-    @override
     def dtype(self):
         return self._dtype
 
     @property
-    @override
     def is_dtype_real(self):
         return np.issubdtype(self.dtype, np.floating)
 
-    @override
     @staticmethod
     def DEFAULT_REAL_DTYPE():
         return np.array([1.0]).dtype
 
-    @override
     @staticmethod
     def DEFAULT_COMPLEX_DTYPE():
         return np.array([1j]).dtype
 
-    @override
     def __repr__(self):
         return f"NumpyNumericsBackend(dtype={self.dtype})"
 
-    @override
     def to_real_backend(self) -> "NumpyNumericsBackend":
         if self.is_dtype_real:
             return self
@@ -56,7 +50,6 @@ class NumpyNumericsBackend(NumericsBackend):
         else:
             raise ValueError(f"dtype {self.dtype} is not supported")
 
-    @override
     def to_complex_backend(self) -> "NumpyNumericsBackend":
         if not self.is_dtype_real:
             return self
@@ -71,15 +64,12 @@ class NumpyNumericsBackend(NumericsBackend):
     # Numerics functions
     ##############################################################################
 
-    @override
     def abs(self, array: np_array_t) -> np_array_t:
         return np.abs(array)
 
-    @override
     def all(self, array: np_array_t) -> bool:
         return np.all(array).item()
 
-    @override
     def allclose(
         self,
         array_a: np_array_t,
@@ -89,43 +79,33 @@ class NumpyNumericsBackend(NumericsBackend):
     ) -> bool:
         return np.allclose(array_a, array_b, rtol, atol)
 
-    @override
     def any(self, array: np_array_t) -> bool:
         return np.any(array).item()
 
-    @override
     def arange(self, *args: int) -> np_array_t:
         return np.arange(*args)
 
-    @override
     def arccos(self, array: np_array_t) -> np_array_t:
         return np.arccos(array)
 
-    @override
     def arccosh(self, array: np_array_t) -> np_array_t:
         return np.arccosh(array)
 
-    @override
     def arctan(self, array: np_array_t) -> np_array_t:
         return np.arctan(array)
 
-    @override
     def arctanh(self, array: np_array_t) -> np_array_t:
         return np.arctanh(array)
 
-    @override
     def argmin(self, array: np_array_t):
         return np.argmin(array)
 
-    @override
     def argsort(self, array: np_array_t):
         return np.argsort(array)
 
-    @override
     def array(self, array: array_t) -> np_array_t:  # type: ignore
         return np.asarray(array, dtype=self.dtype)
 
-    @override
     def assert_allclose(
         self,
         array_a: np_array_t,
@@ -137,7 +117,6 @@ class NumpyNumericsBackend(NumericsBackend):
             array_a, array_b, rtol, atol, equal_nan=False
         )
 
-    @override
     def assert_equal(
         self,
         array_a: np_array_t,
@@ -145,7 +124,6 @@ class NumpyNumericsBackend(NumericsBackend):
     ) -> None:
         return np_testing.assert_equal(array_a, array_b)
 
-    @override
     def block(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
         return np.block(arrays)
 
@@ -154,69 +132,53 @@ class NumpyNumericsBackend(NumericsBackend):
     ) -> np.ndarray:
         return np.concatenate(arrays, axis)
 
-    @override
     def conjugate(self, array: np_array_t) -> np_array_t:
         return np.conjugate(array)
 
-    @override
     def cos(self, array: np_array_t) -> np_array_t:
         return np.cos(array)
 
-    @override
     def diag(self, array: np_array_t) -> np_array_t:
         return np.diag(array)
 
-    @override
     def diagonal(
         self, array: np_array_t, axis1: int, axis2: int
     ) -> np_array_t:
         return np.diagonal(array, axis1, axis2)
 
-    @override
     def eps(self) -> float:
         return np.finfo(self.dtype).eps
 
-    @override
     def exp(self, array: np_array_t) -> np_array_t:
         return np.exp(array)
 
-    @override
     def expand_dims(self, array: np_array_t, axis: int) -> np_array_t:
         return np.expand_dims(array, axis)
 
-    @override
     def eye(self, size: int) -> np_array_t:
         return np.eye(size, dtype=self.dtype)
 
-    @override
     def hstack(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
         return np.hstack(arrays)
 
-    @override
     def iscomplexobj(self, array: np_array_t) -> bool:
         return np.iscomplexobj(array)
 
-    @override
     def isnan(self, array: np_array_t) -> np_array_t:
         return np.isnan(array)
 
-    @override
     def isrealobj(self, array: np_array_t) -> bool:
         return np.isrealobj(array)
 
-    @override
     def linalg_cholesky(self, array: np_array_t) -> np_array_t:
         return np.linalg.cholesky(array)
 
-    @override
     def linalg_det(self, array: np_array_t) -> np_array_t:
         return np.linalg.det(array)
 
-    @override
     def linalg_eigh(self, array: np_array_t) -> tuple[np_array_t, np_array_t]:
         return np.linalg.eigh(array)
 
-    @override
     def linalg_eigvalsh(
         self, array_x: np_array_t, array_y: Optional[np_array_t] = None
     ) -> np_array_t:
@@ -227,7 +189,6 @@ class NumpyNumericsBackend(NumericsBackend):
                 scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
             )(array_x, array_y)
 
-    @override
     def linalg_expm(
         self, array: np_array_t, symmetric: bool = False
     ) -> np_array_t:
@@ -249,11 +210,9 @@ class NumpyNumericsBackend(NumericsBackend):
             return np.real(expmA)
         return expmA
 
-    @override
     def linalg_inv(self, array: np_array_t) -> np_array_t:
         return np.linalg.inv(array)
 
-    @override
     def linalg_logm(
         self, array: np_array_t, positive_definite: bool = False
     ) -> np_array_t:
@@ -269,17 +228,14 @@ class NumpyNumericsBackend(NumericsBackend):
             return np.real(logmA)
         return logmA
 
-    @override
     def linalg_matrix_rank(self, array: np_array_t) -> int:
         return np.linalg.matrix_rank(array)
 
-    @override
     def linalg_norm(
         self, array: np_array_t, *args: Any, **kwargs: Any
     ) -> np_array_t:
         return np.linalg.norm(array, *args, **kwargs)  # type: ignore
 
-    @override
     def linalg_qr(self, array: np_array_t) -> tuple[np_array_t, np_array_t]:
         q, r = np.linalg.qr(array)
 
@@ -294,45 +250,36 @@ class NumpyNumericsBackend(NumericsBackend):
         r = r * np.conjugate(s)
         return q, r
 
-    @override
     def linalg_solve(
         self, array_a: np_array_t, array_b: np_array_t
     ) -> np_array_t:
         return np.linalg.solve(array_a, array_b)
 
-    @override
     def linalg_solve_continuous_lyapunov(
         self, array_a: np_array_t, array_q: np_array_t
     ) -> np_array_t:
         return scipy.linalg.solve_continuous_lyapunov(array_a, array_q)
 
-    @override
     def linalg_svd(
         self, array: np_array_t, *args: Any, **kwargs: Any
     ) -> tuple[np_array_t, np_array_t, np_array_t]:
         return np.linalg.svd(array, *args, **kwargs)
 
-    @override
     def log(self, array: np_array_t) -> np_array_t:
         return np.log(array)
 
-    @override
     def logspace(self, *args: int) -> np_array_t:
         return np.logspace(*args, dtype=self.dtype)
 
-    @override
     def ndim(self, array: np_array_t) -> int:
         return array.ndim
 
-    @override
     def ones(self, shape: TupleOrList[int]) -> np_array_t:
         return np.ones(shape, self.dtype)
 
-    @override
     def prod(self, array: np_array_t) -> float:
         return np.prod(array)  # type: ignore
 
-    @override
     def random_normal(
         self,
         loc: float = 0.0,
@@ -354,7 +301,6 @@ class NumpyNumericsBackend(NumericsBackend):
                 dtype=real_dtype,
             )
 
-    @override
     def random_uniform(
         self, size: Union[int, TupleOrList[int], None] = None
     ) -> np_array_t:
@@ -366,71 +312,56 @@ class NumpyNumericsBackend(NumericsBackend):
                 np.random.uniform(size=size), dtype=real_dtype
             ) + 1j * np.asarray(np.random.uniform(size=size), dtype=real_dtype)
 
-    @override
     def real(self, array: np_array_t) -> np_array_t:
         return np.real(array)
 
-    @override
     def reshape(
         self, array: np.ndarray, newshape: TupleOrList[int]
     ) -> np.ndarray:
         return np.reshape(array, newshape)
 
-    @override
     def sin(self, array: np_array_t) -> np_array_t:
         return np.sin(array)
 
-    @override
     def sinc(self, array: np_array_t) -> np_array_t:
         return np.sinc(array)
 
-    @override
     def sort(self, array: np_array_t) -> np_array_t:
         return np.sort(array)
 
-    @override
     def spacing(self, array: np_array_t) -> np_array_t:
         return np.spacing(array)  # type: ignore
 
-    @override
     def sqrt(self, array: np_array_t) -> np_array_t:
         return np.sqrt(array)
 
-    @override
     def squeeze(self, array: np_array_t) -> np_array_t:
         return np.squeeze(array)
 
-    @override
     def stack(
         self, arrays: TupleOrList[np_array_t], axis: int = 0
     ) -> np_array_t:
         return np.stack(arrays)
 
-    @override
     def sum(self, array: np_array_t, *args: Any, **kwargs: Any) -> np_array_t:
         return np.sum(array, *args, **kwargs)  # type: ignore
 
-    @override
     def tan(self, array: np_array_t) -> np_array_t:
         return np.tan(array)
 
-    @override
     def tanh(self, array: np_array_t) -> np_array_t:
         return np.tanh(array)
 
-    @override
     def tensordot(
         self, a: np_array_t, b: np_array_t, axes: int = 2
     ) -> np_array_t:
         return np.tensordot(a, b, axes=axes)
 
-    @override
     def tile(
         self, array: np_array_t, reps: int | TupleOrList[int]
     ) -> np_array_t:
         return np.tile(array, reps)
 
-    @override
     def trace(self, array: np_array_t) -> Union[np_array_t, Number]:
         return (
             np.trace(array).item()
@@ -438,21 +369,17 @@ class NumpyNumericsBackend(NumericsBackend):
             else np.trace(array, axis1=-2, axis2=-1)
         )
 
-    @override
     def transpose(self, array: np_array_t) -> np_array_t:
         new_shape = list(range(self.ndim(array)))
         new_shape[-1], new_shape[-2] = new_shape[-2], new_shape[-1]
         return np.transpose(array, new_shape)
 
-    @override
     def triu(self, array: np_array_t, k: int = 0) -> np_array_t:
         return np.triu(array, k)
 
-    @override
     def vstack(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
         return np.vstack(arrays)
 
-    @override
     def where(
         self,
         condition: np_array_t,
@@ -468,10 +395,8 @@ class NumpyNumericsBackend(NumericsBackend):
                 f"Both x and y have to be specified but are respectively {x} and {y}"
             )
 
-    @override
     def zeros(self, shape: TupleOrList[int]) -> np_array_t:
         return np.zeros(shape, dtype=self.dtype)
 
-    @override
     def zeros_like(self, array: np_array_t) -> np_array_t:
         return np.zeros_like(array, dtype=self.dtype)

@@ -153,6 +153,7 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def concatenate(
+        self,
         arrays: TupleOrList[array_t],  # type: ignore
         axis: int = 0,
     ) -> array_t:  # type: ignore

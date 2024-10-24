@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Callable, Optional, Union, override
+from typing import Any, Callable, Optional, Union
 
 import numpy as np
 import scipy
@@ -32,30 +32,24 @@ class TensorflowNumericsBackend(NumericsBackend):
         self._dtype = dtype
 
     @property
-    @override
     def dtype(self) -> tf.DType:
         return self._dtype
 
     @property
-    @override
     def is_dtype_real(self):
         return self.dtype in {tf.float32, tf.float64}
 
-    @override
     @staticmethod
     def DEFAULT_REAL_DTYPE():
         return tf.constant([1.0]).dtype
 
-    @override
     @staticmethod
     def DEFAULT_COMPLEX_DTYPE():
         return tf.constant([1j]).dtype
 
-    @override
     def __repr__(self):
         return f"TensorflowNumericsBackend(dtype={self.dtype})"
 
-    @override
     def to_real_backend(self) -> "TensorflowNumericsBackend":
         if self.is_dtype_real:
             return self
@@ -66,7 +60,6 @@ class TensorflowNumericsBackend(NumericsBackend):
         else:
             raise ValueError(f"dtype {self.dtype} is not supported")
 
-    @override
     def to_complex_backend(self) -> "TensorflowNumericsBackend":
         if not self.is_dtype_real:
             return self
@@ -82,7 +75,6 @@ class TensorflowNumericsBackend(NumericsBackend):
     ##############################################################################
 
     @elementary_math_function
-    @override
     def abs(self, array: tf.Tensor) -> tf.Tensor:
         return tf.abs(array)
 
