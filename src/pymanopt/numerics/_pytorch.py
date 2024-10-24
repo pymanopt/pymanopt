@@ -327,9 +327,14 @@ class PytorchNumericsBackend(NumericsBackend):
         )
 
     def linalg_svd(
-        self, array: torch.Tensor, *args: tuple, **kwargs: dict
+        self,
+        array: torch.Tensor,
+        full_matrices: bool = True,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        return torch.linalg.svd(array, *args, **kwargs)
+        return torch.linalg.svd(array, full_matrices=full_matrices)
+
+    def linalg_svdvals(self, array: torch.Tensor) -> torch.Tensor:
+        return torch.linalg.svdvals(array)
 
     @elementary_math_function
     def log(self, array: torch.Tensor) -> torch.Tensor:

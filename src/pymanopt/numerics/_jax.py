@@ -272,12 +272,21 @@ class JaxNumericsBackend(NumericsBackend):
     def linalg_solve_continuous_lyapunov(
         self, array_a: jnp.ndarray, array_q: jnp.ndarray
     ) -> jnp.ndarray:
-        return jscipy.linalg.solve_continuous_lyapunov(array_a, array_q)
+        return jnp.asarray(
+            scipy.linalg.solve_continuous_lyapunov(
+                np.asarray(array_a), np.asarray(array_q)
+            )
+        )
 
     def linalg_svd(
-        self, array: jnp.ndarray, *args: Any, **kwargs: Any
+        self,
+        array: jnp.ndarray,
+        full_matrices: bool = True,
     ) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
-        return jnp.linalg.svd(array, *args, **kwargs)
+        return jnp.linalg.svd(array, full_matrices=full_matrices)  # type: ignore
+
+    def linalg_svdvals(self, array: jnp.ndarray) -> jnp.ndarray:
+        return jnp.linalg.svdvals(array)
 
     def log(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.log(array)

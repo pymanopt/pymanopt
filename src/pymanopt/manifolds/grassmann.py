@@ -78,12 +78,11 @@ class Grassmann(_GrassmannBase):
         super().__init__(name, dimension, backend=backend)
 
     def dist(self, point_a, point_b):
-        s = self.backend.linalg_svd(
-            self.backend.transpose(point_a) @ point_b, compute_uv=False
-        )
-        s[s > 1] = 1
-        s = self.backend.arccos(s)
-        return self.backend.linalg_norm(s)
+        bk = self.backend
+        s = bk.linalg_svdvals(bk.transpose(point_a) @ point_b)
+        s = bk.where(s > 1.0, 1.0, s)
+        s = bk.arccos(s)
+        return bk.linalg_norm(s)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.tensordot(
@@ -141,15 +140,12 @@ class Grassmann(_GrassmannBase):
         return q
 
     def log(self, point_a, point_b):
-        ytx = self.backend.transpose(point_b) @ point_a
-        At = self.backend.transpose(point_b) - ytx @ self.backend.transpose(
-            point_a
-        )
-        Bt = self.backend.linalg_solve(ytx, At)
-        u, s, vt = self.backend.linalg_svd(
-            self.backend.transpose(Bt), full_matrices=False
-        )
-        arctan_s = self.backend.expand_dims(self.backend.arctan(s), -2)
+        bk = self.backend
+        ytx = bk.transpose(point_b) @ point_a
+        At = bk.transpose(point_b) - ytx @ bk.transpose(point_a)
+        Bt = bk.linalg_solve(ytx, At)
+        u, s, vt = bk.linalg_svd(bk.transpose(Bt), full_matrices=False)
+        arctan_s = bk.expand_dims(bk.arctan(s), -2)
         return (u * arctan_s) @ vt
 
 
@@ -204,20 +200,21 @@ class ComplexGrassmann(_GrassmannBase):
         super().__init__(name, dimension, backend=backend)
 
     def dist(self, point_a, point_b):
-        s = self.backend.linalg_svd(
-            self.backend.conjugate_transpose(point_a) @ point_b,
-            compute_uv=False,
+        bk = self.backend
+        s = bk.linalg_svdvals(
+            bk.conjugate_transpose(point_a) @ point_b,
         )
-        s[s > 1] = 1
-        s = self.backend.arccos(s)
-        return self.backend.linalg_norm(self.backend.real(s))
+        s = bk.where(s > 1.0, 1.0, s)
+        s = bk.arccos(s)
+        return bk.linalg_norm(self.backend.real(s))
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return self.backend.real(
-            self.backend.tensordot(
-                self.backend.conjugate(tangent_vector_a),
+        bk = self.backend
+        return bk.real(
+            bk.tensordot(
+                bk.conjugate(tangent_vector_a),
                 tangent_vector_b,
-                axes=tangent_vector_a.ndim,
+                bk.ndim(tangent_vector_a),
             )
         )
 
@@ -248,16 +245,13 @@ class ComplexGrassmann(_GrassmannBase):
     def random_point(self):
         q, _ = self.backend.linalg_qr(
             self.backend.random_normal(size=(self._k, self._n, self._p))
-            + 1j * self.backend.random_normal(size=(self._k, self._n, self._p))
         )
         if self._k == 1:
             return q[0]
         return q
 
     def random_tangent_vector(self, point):
-        tangent_vector = self.backend.random_normal(
-            size=point.shape
-        ) + 1j * self.backend.random_normal(size=point.shape)
+        tangent_vector = self.backend.random_normal(size=point.shape)
         tangent_vector = self.projection(point, tangent_vector)
         return tangent_vector / self.backend.linalg_norm(tangent_vector)
 

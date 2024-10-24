@@ -260,7 +260,11 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def linalg_solve(self, array_a: array_t, array_b: array_t) -> array_t:
+    def linalg_solve(
+        self,
+        array_a: array_t,  # type: ignore
+        array_b: array_t,  # type: ignore
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -275,9 +279,12 @@ class NumericsBackend(ABC):
     def linalg_svd(
         self,
         array: array_t,  # type: ignore
-        *args,
-        **kwargs,
+        full_matrices: bool = True,
     ) -> tuple[array_t, array_t, array_t]:  # type: ignore
+        pass
+
+    @not_implemented
+    def linalg_svdvals(self, array: array_t) -> array_t:  # type: ignore
         pass
 
     @not_implemented
