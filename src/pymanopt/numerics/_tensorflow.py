@@ -1,22 +1,24 @@
 from numbers import Number
-from typing import Any, Callable, Optional, Sequence, Tuple, Union, override
+from typing import Any, Callable, Optional, Union, override
 
 import numpy as np
 import scipy
 import tensorflow as tf
 
 from pymanopt.numerics.array_t import array_t
-from pymanopt.numerics.core import NumericsBackend
+from pymanopt.numerics.core import NumericsBackend, TupleOrList
 
 
 def elementary_math_function(
-    f: Callable[[tf.Tensor], Union[tf.Tensor, Number]],
+    f: Callable[["TensorflowNumericsBackend", tf.Tensor], tf.Tensor],
 ) -> Callable[[Union[tf.Tensor, Number]], Union[tf.Tensor, Number]]:
-    def inner(self, x: Union[tf.Tensor, Number]) -> Union[tf.Tensor, Number]:
-        if isinstance(x, Number):
-            return f(self, self.array(x)).numpy().item()
-        else:
+    def inner(
+        self: "TensorflowNumericsBackend", x: Union[tf.Tensor, Number]
+    ) -> Union[tf.Tensor, Number]:
+        if isinstance(x, tf.Tensor):
             return f(self, x)
+        else:
+            return f(self, self.array(x)).numpy().item()
 
     inner.__doc__ = f.__doc__
     inner.__name__ = f.__name__
@@ -155,7 +157,7 @@ class TensorflowNumericsBackend(NumericsBackend):
     ) -> None:
         tf.debugging.assert_equal(array_a, array_b)
 
-    def block(self, arrays: Sequence[tf.Tensor]) -> tf.Tensor:
+    def block(self, arrays: TupleOrList[tf.Tensor]) -> tf.Tensor:
         # TODO: implement actual block (where wr could give
         # arbitrarily nested lists of arrays)
         return tf.concat(arrays, axis=0)
@@ -188,7 +190,7 @@ class TensorflowNumericsBackend(NumericsBackend):
     def eye(self, size: int) -> tf.Tensor:
         return tf.eye(size, dtype=self.dtype)
 
-    def hstack(self, arrays: Sequence[tf.Tensor]) -> tf.Tensor:
+    def hstack(self, arrays: TupleOrList[tf.Tensor]) -> tf.Tensor:
         return tf.concat(arrays, axis=1)
 
     def iscomplexobj(self, array: tf.Tensor) -> bool:
@@ -207,7 +209,7 @@ class TensorflowNumericsBackend(NumericsBackend):
     def linalg_det(self, array: tf.Tensor) -> tf.Tensor:
         return tf.linalg.det(array)
 
-    def linalg_eigh(self, array: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+    def linalg_eigh(self, array: tf.Tensor) -> tuple[tf.Tensor, tf.Tensor]:
         return tf.linalg.eigh(array)
 
     def linalg_eigvalsh(
@@ -291,7 +293,7 @@ class TensorflowNumericsBackend(NumericsBackend):
 
     def linalg_svd(
         self, array: tf.Tensor, *args, **kwargs
-    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
+    ) -> tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
         return tf.linalg.svd(array, *args, **kwargs)
 
     @elementary_math_function
@@ -304,7 +306,7 @@ class TensorflowNumericsBackend(NumericsBackend):
     def ndim(self, array: tf.Tensor) -> int:
         return array.shape.rank
 
-    def ones(self, shape: Sequence[int]) -> tf.Tensor:
+    def ones(self, shape: TupleOrList[int]) -> tf.Tensor:
         return tf.ones(shape, dtype=self.dtype)
 
     def prod(self, array: tf.Tensor) -> float:
@@ -314,7 +316,7 @@ class TensorflowNumericsBackend(NumericsBackend):
         self,
         loc: float = 0.0,
         scale: float = 1.0,
-        size: Union[int, Sequence[int]] = 1,
+        size: Union[int, TupleOrList[int]] = 1,
     ) -> tf.Tensor:
         if isinstance(size, int):
             size = (size,)
@@ -345,7 +347,9 @@ class TensorflowNumericsBackend(NumericsBackend):
     def real(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.real(array)
 
-    def reshape(self, array: tf.Tensor, newshape: Sequence[int]) -> tf.Tensor:
+    def reshape(
+        self, array: tf.Tensor, newshape: TupleOrList[int]
+    ) -> tf.Tensor:
         return tf.reshape(array, newshape)
 
     @elementary_math_function
@@ -369,9 +373,6 @@ class TensorflowNumericsBackend(NumericsBackend):
     def sum(self, array: tf.Tensor, *args: Any, **kwargs: Any) -> tf.Tensor:
         return tf.reduce_sum(array, *args, **kwargs)
 
-    def sym(self, array: tf.Tensor) -> tf.Tensor:
-        return 0.5 * (array + self.transpose(array))
-
     @elementary_math_function
     def tan(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.tan(array)
@@ -385,7 +386,9 @@ class TensorflowNumericsBackend(NumericsBackend):
     ) -> tf.Tensor:
         return tf.tensordot(a, b, axes=axes)
 
-    def tile(self, array: tf.Tensor, reps: int | Sequence[int]) -> tf.Tensor:
+    def tile(
+        self, array: tf.Tensor, reps: int | TupleOrList[int]
+    ) -> tf.Tensor:
         return tf.tile(array, reps)
 
     def trace(self, array: tf.Tensor, *args, **kwargs) -> tf.Tensor:
@@ -396,10 +399,10 @@ class TensorflowNumericsBackend(NumericsBackend):
         perm[-1], perm[-2] = perm[-2], perm[-1]
         return tf.transpose(array, perm)
 
-    def triu_indices(self, n: int, k: int = 0) -> tf.Tensor:
-        return self.array(np.triu_indices(n, k))
+    def triu(self, array: tf.Tensor, k: int = 0) -> tf.Tensor:
+        return tf.experimental.numpy.triu(array, k)
 
-    def vstack(self, arrays: Sequence[tf.Tensor]) -> tf.Tensor:
+    def vstack(self, arrays: TupleOrList[tf.Tensor]) -> tf.Tensor:
         return tf.concat(arrays, axis=0)
 
     def where(
@@ -417,7 +420,7 @@ class TensorflowNumericsBackend(NumericsBackend):
                 f"Both x and y have to be specified but are respectively {x} and {y}"
             )
 
-    def zeros(self, shape: Sequence[int]) -> tf.Tensor:
+    def zeros(self, shape: TupleOrList[int]) -> tf.Tensor:
         return tf.zeros(shape, dtype=self.dtype)
 
     def zeros_like(self, array: tf.Tensor) -> tf.Tensor:

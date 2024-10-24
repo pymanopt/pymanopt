@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Optional, Sequence, Tuple, Union, override
+from typing import Any, Optional, Union, override
 
 import numpy as np
 import numpy.testing as np_testing
@@ -8,7 +8,7 @@ import scipy
 import scipy.linalg
 
 from pymanopt.numerics.array_t import array_t
-from pymanopt.numerics.core import NumericsBackend
+from pymanopt.numerics.core import NumericsBackend, TupleOrList
 
 
 np_array_t = np.ndarray
@@ -146,8 +146,13 @@ class NumpyNumericsBackend(NumericsBackend):
         return np_testing.assert_equal(array_a, array_b)
 
     @override
-    def block(self, arrays: Sequence[np_array_t]) -> np_array_t:
+    def block(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
         return np.block(arrays)
+
+    def concatenate(
+        self, arrays: TupleOrList[np.ndarray], axis: int = 0
+    ) -> np.ndarray:
+        return np.concatenate(arrays, axis)
 
     @override
     def conjugate(self, array: np_array_t) -> np_array_t:
@@ -184,7 +189,7 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.eye(size, dtype=self.dtype)
 
     @override
-    def hstack(self, arrays: Sequence[np_array_t]) -> np_array_t:
+    def hstack(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
         return np.hstack(arrays)
 
     @override
@@ -208,7 +213,7 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.linalg.det(array)
 
     @override
-    def linalg_eigh(self, array: np_array_t) -> Tuple[np_array_t, np_array_t]:
+    def linalg_eigh(self, array: np_array_t) -> tuple[np_array_t, np_array_t]:
         return np.linalg.eigh(array)
 
     @override
@@ -275,7 +280,7 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.linalg.norm(array, *args, **kwargs)  # type: ignore
 
     @override
-    def linalg_qr(self, array: np_array_t) -> Tuple[np_array_t, np_array_t]:
+    def linalg_qr(self, array: np_array_t) -> tuple[np_array_t, np_array_t]:
         q, r = np.linalg.qr(array)
 
         return q, r
@@ -304,7 +309,7 @@ class NumpyNumericsBackend(NumericsBackend):
     @override
     def linalg_svd(
         self, array: np_array_t, *args: Any, **kwargs: Any
-    ) -> Tuple[np_array_t, np_array_t, np_array_t]:
+    ) -> tuple[np_array_t, np_array_t, np_array_t]:
         return np.linalg.svd(array, *args, **kwargs)
 
     @override
@@ -320,7 +325,7 @@ class NumpyNumericsBackend(NumericsBackend):
         return array.ndim
 
     @override
-    def ones(self, shape: Sequence[int]) -> np_array_t:
+    def ones(self, shape: TupleOrList[int]) -> np_array_t:
         return np.ones(shape, self.dtype)
 
     @override
@@ -332,7 +337,7 @@ class NumpyNumericsBackend(NumericsBackend):
         self,
         loc: float = 0.0,
         scale: float = 1.0,
-        size: Union[int, Sequence[int], None] = None,
+        size: Union[int, TupleOrList[int], None] = None,
     ) -> np_array_t:
         if self.is_dtype_real:
             return np.asarray(
@@ -351,7 +356,7 @@ class NumpyNumericsBackend(NumericsBackend):
 
     @override
     def random_uniform(
-        self, size: Union[int, Sequence[int], None] = None
+        self, size: Union[int, TupleOrList[int], None] = None
     ) -> np_array_t:
         if self.is_dtype_real:
             return np.asarray(np.random.uniform(size=size), dtype=self.dtype)
@@ -367,7 +372,7 @@ class NumpyNumericsBackend(NumericsBackend):
 
     @override
     def reshape(
-        self, array: np.ndarray, newshape: Sequence[int]
+        self, array: np.ndarray, newshape: TupleOrList[int]
     ) -> np.ndarray:
         return np.reshape(array, newshape)
 
@@ -396,7 +401,9 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.squeeze(array)
 
     @override
-    def stack(self, arrays: Sequence[np_array_t], axis: int = 0) -> np_array_t:
+    def stack(
+        self, arrays: TupleOrList[np_array_t], axis: int = 0
+    ) -> np_array_t:
         return np.stack(arrays)
 
     @override
@@ -418,7 +425,9 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.tensordot(a, b, axes=axes)
 
     @override
-    def tile(self, array: np_array_t, reps: int | Sequence[int]) -> np_array_t:
+    def tile(
+        self, array: np_array_t, reps: int | TupleOrList[int]
+    ) -> np_array_t:
         return np.tile(array, reps)
 
     @override
@@ -436,11 +445,11 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.transpose(array, new_shape)
 
     @override
-    def triu_indices(self, n: int, k: int = 0) -> np_array_t:
-        return np.triu_indices(n, k)
+    def triu(self, array: np_array_t, k: int = 0) -> np_array_t:
+        return np.triu(array, k)
 
     @override
-    def vstack(self, arrays: Sequence[np_array_t]) -> np_array_t:
+    def vstack(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
         return np.vstack(arrays)
 
     @override
@@ -449,7 +458,7 @@ class NumpyNumericsBackend(NumericsBackend):
         condition: np_array_t,
         x: Optional[np_array_t] = None,
         y: Optional[np_array_t] = None,
-    ):
+    ) -> Union[np_array_t, tuple[np_array_t, ...]]:
         if x is None and y is None:
             return np.where(condition)
         elif x is not None and y is not None:
@@ -460,7 +469,7 @@ class NumpyNumericsBackend(NumericsBackend):
             )
 
     @override
-    def zeros(self, shape: Sequence[int]) -> np_array_t:
+    def zeros(self, shape: TupleOrList[int]) -> np_array_t:
         return np.zeros(shape, dtype=self.dtype)
 
     @override
