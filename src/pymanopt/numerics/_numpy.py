@@ -256,9 +256,14 @@ class NumpyNumericsBackend(NumericsBackend):
         return scipy.linalg.solve_continuous_lyapunov(array_a, array_q)
 
     def linalg_svd(
-        self, array: np_array_t, *args: Any, **kwargs: Any
+        self,
+        array: np_array_t,
+        full_matrices: bool = True,
     ) -> tuple[np_array_t, np_array_t, np_array_t]:
-        return np.linalg.svd(array, *args, **kwargs)
+        return np.linalg.svd(array, full_matrices=full_matrices)
+
+    def linalg_svdvals(self, array: np.ndarray) -> np.ndarray:
+        return np.linalg.svd(array, compute_uv=False)
 
     def log(self, array: np_array_t) -> np_array_t:
         return np.log(array)
