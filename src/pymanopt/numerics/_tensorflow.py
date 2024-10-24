@@ -149,11 +149,6 @@ class TensorflowNumericsBackend(NumericsBackend):
     ) -> None:
         tf.debugging.assert_equal(array_a, array_b)
 
-    def block(self, arrays: TupleOrList[tf.Tensor]) -> tf.Tensor:
-        # TODO: implement actual block (where wr could give
-        # arbitrarily nested lists of arrays)
-        return tf.concat(arrays, axis=0)
-
     @elementary_math_function
     def conjugate(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.conj(array)

@@ -72,6 +72,18 @@ class Stiefel(RiemannianSubmanifold):
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
     @property
+    def n(self) -> int:
+        return self._n
+
+    @property
+    def p(self) -> int:
+        return self._p
+
+    @property
+    def k(self) -> int:
+        return self._k
+
+    @property
     def typical_dist(self):
         return self.backend.sqrt(self._p * self._k)
 
@@ -127,29 +139,31 @@ class Stiefel(RiemannianSubmanifold):
         return self.projection(point_b, tangent_vector_a)
 
     def exp(self, point, tangent_vector):
-        pt_tv = self.backend.transpose(point) @ tangent_vector
-        if self._k == 1:
-            identity = self.backend.eye(self._p)
-        else:
-            identity = self.backend.multieye(self._k, self._p)
+        bk = self.backend
+        pt_tv = bk.transpose(point) @ tangent_vector
+        identity = bk.squeeze(bk.multieye(self.k, self.p))
 
-        a = self.backend.block([point, tangent_vector])
-        b = self.backend.linalg_expm(
-            self.backend.block(
+        a = bk.concatenate([point, tangent_vector], -1)
+        b = bk.linalg_expm(
+            bk.concatenate(
                 [
-                    [
-                        pt_tv,
-                        -self.backend.transpose(tangent_vector)
-                        @ tangent_vector,
-                    ],
-                    [identity, pt_tv],
-                ]
+                    bk.concatenate(
+                        [
+                            pt_tv,
+                            -bk.transpose(tangent_vector) @ tangent_vector,
+                        ],
+                        -1,
+                    ),
+                    bk.concatenate([identity, pt_tv], -1),
+                ],
+                -2,
             )
-        )[..., : self._p]
-        c = self.backend.linalg_expm(-pt_tv)
+        )[..., : self.p]
+        c = bk.linalg_expm(-pt_tv)
+        # breakpoint()
         return a @ (b @ c)
 
     def zero_vector(self, point):
-        if self._k == 1:
-            return self.backend.zeros((self._n, self._p))
-        return self.backend.zeros((self._k, self._n, self._p))
+        return self.backend.squeeze(
+            self.backend.zeros((self.k, self.n, self.p))
+        )

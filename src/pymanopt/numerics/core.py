@@ -148,10 +148,6 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def block(self, arrays: TupleOrList[array_t]) -> array_t:  # type: ignore
-        pass
-
-    @not_implemented
     def concatenate(
         self,
         arrays: TupleOrList[array_t],  # type: ignore
