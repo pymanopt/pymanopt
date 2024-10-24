@@ -1,18 +1,16 @@
 from numbers import Number
-from typing import Callable, Optional, Sequence, Tuple, Union, override
+from typing import Callable, Optional, Union, override
 
 import numpy as np
 import scipy.linalg
 import torch
 
 from pymanopt.numerics.array_t import array_t
-from pymanopt.numerics.core import NumericsBackend
+from pymanopt.numerics.core import NumericsBackend, TupleOrList
 
 
 def elementary_math_function(
-    f: Callable[
-        ["PytorchNumericsBackend", torch.Tensor], Union[torch.Tensor, Number]
-    ],
+    f: Callable[["PytorchNumericsBackend", torch.Tensor], torch.Tensor],
 ) -> Callable[
     ["PytorchNumericsBackend", Union[torch.Tensor, Number]],
     Union[torch.Tensor, Number],
@@ -182,6 +180,11 @@ class PytorchNumericsBackend(NumericsBackend):
         # arbitrarily nested lists of arrays)
         return torch.cat(arrays)
 
+    def concatenate(
+        self, arrays: TupleOrList[torch.Tensor], axis: int = 0
+    ) -> torch.Tensor:
+        return torch.cat(arrays, axis)
+
     @elementary_math_function
     @override
     def conjugate(self, array: torch.Tensor) -> torch.Tensor:
@@ -273,7 +276,7 @@ class PytorchNumericsBackend(NumericsBackend):
     @override
     def linalg_eigh(
         self, array: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         return torch.linalg.eigh(array)
 
     @override
@@ -343,7 +346,7 @@ class PytorchNumericsBackend(NumericsBackend):
     @override
     def linalg_qr(
         self, array: torch.Tensor
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         q, r = torch.linalg.qr(array)
         # Compute signs or unit-modulus phase of entries of diagonal of r.
         s = torch.diagonal(r, dim1=-2, dim2=-1).clone()
@@ -376,7 +379,7 @@ class PytorchNumericsBackend(NumericsBackend):
     @override
     def linalg_svd(
         self, array: torch.Tensor, *args: tuple, **kwargs: dict
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         return torch.linalg.svd(array, *args, **kwargs)
 
     @elementary_math_function
@@ -393,7 +396,7 @@ class PytorchNumericsBackend(NumericsBackend):
         return array.ndim
 
     @override
-    def ones(self, shape: Sequence[int]) -> torch.Tensor:
+    def ones(self, shape: TupleOrList[int]) -> torch.Tensor:
         return torch.ones(shape, dtype=self.dtype)
 
     @override
@@ -405,12 +408,12 @@ class PytorchNumericsBackend(NumericsBackend):
         self,
         loc: float = 0.0,
         scale: float = 1.0,
-        size: Union[int, Sequence[int], None] = None,
+        size: Union[int, TupleOrList[int], None] = None,
     ) -> torch.Tensor:
         # pre-process the size
         if size is None:
             new_size = (1,)
-        elif not isinstance(size, Sequence):
+        elif not isinstance(size, TupleOrList):
             new_size = (size,)
         else:
             new_size = tuple(size)
@@ -431,12 +434,12 @@ class PytorchNumericsBackend(NumericsBackend):
 
     @override
     def random_uniform(
-        self, size: Union[int, Sequence[int], None] = None
+        self, size: Union[int, TupleOrList[int], None] = None
     ) -> Union[torch.Tensor, Number]:
         # pre-process the size
         if size is None:
             new_size = (1,)
-        elif not isinstance(size, Sequence):
+        elif not isinstance(size, TupleOrList):
             new_size = (size,)
         else:
             new_size = tuple(size)
@@ -458,7 +461,7 @@ class PytorchNumericsBackend(NumericsBackend):
 
     @override
     def reshape(
-        self, array: torch.Tensor, newshape: Sequence[int]
+        self, array: torch.Tensor, newshape: TupleOrList[int]
     ) -> torch.Tensor:
         return torch.reshape(array, newshape)
 
@@ -492,7 +495,7 @@ class PytorchNumericsBackend(NumericsBackend):
 
     @override
     def stack(
-        self, arrays: Sequence[torch.Tensor], axis: int = 0
+        self, arrays: TupleOrList[torch.Tensor], axis: int = 0
     ) -> torch.Tensor:
         return torch.stack(tuple(arrays), dim=axis)
 
@@ -520,7 +523,7 @@ class PytorchNumericsBackend(NumericsBackend):
 
     @override
     def tile(
-        self, array: torch.Tensor, reps: int | Sequence[int]
+        self, array: torch.Tensor, reps: int | TupleOrList[int]
     ) -> torch.Tensor:
         return torch.tile(array, [reps] if isinstance(reps, int) else reps)
 
@@ -537,12 +540,12 @@ class PytorchNumericsBackend(NumericsBackend):
         return torch.transpose(array, -2, -1)
 
     @override
-    def triu_indices(self, n: int, k: int = 0) -> torch.Tensor:
-        return torch.triu_indices(n, k)
+    def triu(self, array: torch.Tensor, k: int = 0) -> torch.Tensor:
+        return torch.triu(array, k)
 
     @override
     def vstack(
-        self, arrays: Tuple[torch.Tensor] | list[torch.Tensor]
+        self, arrays: tuple[torch.Tensor] | list[torch.Tensor]
     ) -> torch.Tensor:
         return torch.vstack(arrays)
 

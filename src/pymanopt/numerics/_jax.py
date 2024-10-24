@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Optional, Sequence, Tuple, Union, override
+from typing import Any, Optional, Union, override
 
 import jax
 import jax.numpy as jnp
@@ -8,7 +8,7 @@ import numpy as np
 import scipy.linalg
 
 from pymanopt.numerics.array_t import array_t
-from pymanopt.numerics.core import NumericsBackend
+from pymanopt.numerics.core import NumericsBackend, TupleOrList
 
 
 class JaxNumericsBackend(NumericsBackend):
@@ -152,7 +152,7 @@ class JaxNumericsBackend(NumericsBackend):
         )
 
     @override
-    def block(self, arrays: Sequence[jnp.ndarray]) -> jnp.ndarray:
+    def block(self, arrays: TupleOrList[jnp.ndarray]) -> jnp.ndarray:
         return jnp.block(arrays)
 
     @override
@@ -190,7 +190,7 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.eye(size, dtype=self.dtype)
 
     @override
-    def hstack(self, arrays: Sequence[jnp.ndarray]) -> jnp.ndarray:
+    def hstack(self, arrays: TupleOrList[jnp.ndarray]) -> jnp.ndarray:
         return jnp.hstack(arrays)
 
     @override
@@ -216,7 +216,7 @@ class JaxNumericsBackend(NumericsBackend):
     @override
     def linalg_eigh(
         self, array: jnp.ndarray
-    ) -> Tuple[jnp.ndarray, jnp.ndarray]:
+    ) -> tuple[jnp.ndarray, jnp.ndarray]:
         return jnp.linalg.eigh(array)
 
     @override
@@ -291,7 +291,7 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.linalg.norm(array, *args, **kwargs)  # type: ignore
 
     @override
-    def linalg_qr(self, array: jnp.ndarray) -> Tuple[jnp.ndarray, jnp.ndarray]:
+    def linalg_qr(self, array: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
         q, r = jnp.linalg.qr(array)
 
         # Compute signs or unit-modulus phase of entries of diagonal of r.
@@ -319,7 +319,7 @@ class JaxNumericsBackend(NumericsBackend):
     @override
     def linalg_svd(
         self, array: jnp.ndarray, *args: Any, **kwargs: Any
-    ) -> Tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
+    ) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
         return jnp.linalg.svd(array, *args, **kwargs)
 
     @override
@@ -335,7 +335,7 @@ class JaxNumericsBackend(NumericsBackend):
         return array.ndim
 
     @override
-    def ones(self, shape: Sequence[int]) -> jnp.ndarray:
+    def ones(self, shape: TupleOrList[int]) -> jnp.ndarray:
         return jnp.ones(shape, self.dtype)
 
     @override
@@ -347,11 +347,11 @@ class JaxNumericsBackend(NumericsBackend):
         self,
         loc: float = 0.0,
         scale: float = 1.0,
-        size: Union[int, Sequence[int], None] = None,
+        size: Union[int, TupleOrList[int], None] = None,
     ) -> jnp.ndarray:
         if isinstance(size, int):
             size = [size]
-        elif isinstance(size, Sequence):
+        elif isinstance(size, TupleOrList):
             size = list(size)
         elif size is None:
             size = ()
@@ -382,11 +382,11 @@ class JaxNumericsBackend(NumericsBackend):
 
     @override
     def random_uniform(
-        self, size: Union[int, Sequence[int], None] = None
+        self, size: Union[int, TupleOrList[int], None] = None
     ) -> jnp.ndarray:
         if isinstance(size, int):
             size = (size,)
-        elif isinstance(size, Sequence):
+        elif isinstance(size, TupleOrList):
             size = list(size)
         elif size is None:
             size = ()
@@ -411,7 +411,7 @@ class JaxNumericsBackend(NumericsBackend):
 
     @override
     def reshape(
-        self, array: jnp.ndarray, newshape: Sequence[int]
+        self, array: jnp.ndarray, newshape: TupleOrList[int]
     ) -> jnp.ndarray:
         return jnp.reshape(array, newshape)
 
@@ -441,7 +441,7 @@ class JaxNumericsBackend(NumericsBackend):
 
     @override
     def stack(
-        self, arrays: Sequence[jnp.ndarray], axis: int = 0
+        self, arrays: TupleOrList[jnp.ndarray], axis: int = 0
     ) -> jnp.ndarray:
         return jnp.stack(arrays, axis)
 
@@ -467,7 +467,7 @@ class JaxNumericsBackend(NumericsBackend):
 
     @override
     def tile(
-        self, array: jnp.ndarray, reps: int | Sequence[int]
+        self, array: jnp.ndarray, reps: int | TupleOrList[int]
     ) -> jnp.ndarray:
         return jnp.tile(array, reps)
 
@@ -486,11 +486,11 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.transpose(array, new_shape)
 
     @override
-    def triu_indices(self, n: int, k: int = 0) -> jnp.ndarray:
-        return jnp.triu_indices(n, k)
+    def triu(self, array: jnp.ndarray, k: int = 0) -> jnp.ndarray:
+        return jnp.triu(array, k)
 
     @override
-    def vstack(self, arrays: Sequence[jnp.ndarray]) -> jnp.ndarray:
+    def vstack(self, arrays: TupleOrList[jnp.ndarray]) -> jnp.ndarray:
         return jnp.vstack(arrays)
 
     @override
@@ -499,7 +499,7 @@ class JaxNumericsBackend(NumericsBackend):
         condition: jnp.ndarray,
         x: Optional[jnp.ndarray] = None,
         y: Optional[jnp.ndarray] = None,
-    ) -> jnp.ndarray:
+    ) -> Union[jnp.ndarray, tuple[jnp.ndarray, ...]]:
         if x is None and y is None:
             return jnp.where(condition)
         elif x is not None and y is not None:
@@ -510,7 +510,7 @@ class JaxNumericsBackend(NumericsBackend):
             )
 
     @override
-    def zeros(self, shape: Sequence[int]) -> jnp.ndarray:
+    def zeros(self, shape: TupleOrList[int]) -> jnp.ndarray:
         return jnp.zeros(shape, dtype=self.dtype)
 
     @override

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Any, Optional, Sequence, Tuple, Union
+from typing import Any, Optional, TypeVar, Union
 
 import numpy as np
 import scipy.special
@@ -8,7 +8,7 @@ import scipy.special
 from pymanopt.numerics.array_t import array_t
 
 
-__all__ = ["NumericsBackend"]
+__all__ = ["NumericsBackend", "TupleOrList"]
 
 
 def not_implemented(function):
@@ -19,6 +19,10 @@ def not_implemented(function):
         )
 
     return inner
+
+
+T = TypeVar("T")
+TupleOrList = Union[list[T], tuple[T, ...]]
 
 
 class NumericsBackend(ABC):
@@ -144,7 +148,14 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def block(self, arrays: Sequence[array_t]) -> array_t:  # type: ignore
+    def block(self, arrays: TupleOrList[array_t]) -> array_t:  # type: ignore
+        pass
+
+    @not_implemented
+    def concatenate(
+        arrays: TupleOrList[array_t],  # type: ignore
+        axis: int = 0,
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -183,7 +194,7 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def hstack(self, arrays: Sequence[array_t]) -> array_t:  # type: ignore
+    def hstack(self, arrays: TupleOrList[array_t]) -> array_t:  # type: ignore
         pass
 
     def herm(self, array: array_t) -> array_t:  # type: ignore
@@ -210,7 +221,7 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def linalg_eigh(self, array: array_t) -> Tuple[array_t, array_t]:  # type: ignore
+    def linalg_eigh(self, array: array_t) -> tuple[array_t, array_t]:  # type: ignore
         pass
 
     @not_implemented
@@ -269,7 +280,7 @@ class NumericsBackend(ABC):
         array: array_t,  # type: ignore
         *args,
         **kwargs,
-    ) -> Tuple[array_t, array_t, array_t]:  # type: ignore
+    ) -> tuple[array_t, array_t, array_t]:  # type: ignore
         pass
 
     @not_implemented
@@ -296,7 +307,7 @@ class NumericsBackend(ABC):
     newaxis = None
 
     @not_implemented
-    def ones(self, shape: Sequence[int]) -> array_t:  # type: ignore
+    def ones(self, shape: TupleOrList[int]) -> array_t:  # type: ignore
         pass
 
     pi = np.pi
@@ -313,7 +324,7 @@ class NumericsBackend(ABC):
         self,
         loc: float = 0.0,
         scale: float = 1.0,
-        size: Union[int, Sequence[int], None] = None,
+        size: Union[int, TupleOrList[int], None] = None,
     ) -> array_t:  # type: ignore
         pass
 
@@ -322,7 +333,7 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def random_uniform(
-        self, size: Union[int, Sequence[int], None] = None
+        self, size: Union[int, TupleOrList[int], None] = None
     ) -> array_t:  # type: ignore
         pass
 
@@ -334,7 +345,7 @@ class NumericsBackend(ABC):
     def reshape(
         self,
         array: array_t,  # type: ignore
-        newshape: Sequence[int],
+        newshape: TupleOrList[int],
     ) -> array_t:  # type: ignore
         pass
 
@@ -394,7 +405,7 @@ class NumericsBackend(ABC):
     @not_implemented
     def stack(
         self,
-        arrays: Sequence[array_t],  # type: ignore
+        arrays: TupleOrList[array_t],  # type: ignore
         axis: int = 0,
     ) -> array_t:  # type: ignore
         pass
@@ -424,7 +435,7 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def tile(self, array: array_t, reps: int | Sequence[int]) -> array_t:
+    def tile(self, array: array_t, reps: int | TupleOrList[int]) -> array_t:
         pass
 
     @not_implemented
@@ -436,13 +447,11 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def triu_indices(self, n: int, k: int = 0) -> array_t:  # type: ignore
+    def triu(self, array: array_t, k: int = 0) -> array_t:  # type:ignore
         pass
 
-    #   - np.vectorize
-
     @not_implemented
-    def vstack(self, arrays: Sequence[array_t]) -> array_t:  # type: ignore
+    def vstack(self, arrays: TupleOrList[array_t]) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -451,11 +460,11 @@ class NumericsBackend(ABC):
         condition: array_t,  # type: ignore
         x: Optional[array_t],  # type: ignore
         y: Optional[array_t],  # type: ignore
-    ) -> array_t:  # type: ignore
+    ) -> Union[array_t, tuple[array_t, ...]]:  # type: ignore
         pass
 
     @not_implemented
-    def zeros(self, shape: Sequence[int]) -> array_t:  # type: ignore
+    def zeros(self, shape: TupleOrList[int]) -> array_t:  # type: ignore
         pass
 
     @not_implemented
