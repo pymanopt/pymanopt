@@ -61,3 +61,8 @@ def complex_numerics_backend(request) -> NumericsBackend:
 @pytest.fixture(params=_REAL_NUMERICS_BACKENDS + _COMPLEX_NUMERICS_BACKENDS)
 def all_numerics_backend(request) -> NumericsBackend:
     return request.param
+
+
+@pytest.fixture(params=[1, 3])
+def product_dimension(request) -> int:
+    return request.param
