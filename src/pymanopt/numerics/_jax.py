@@ -394,9 +394,12 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.stack(arrays, axis)
 
     def sum(
-        self, array: jnp.ndarray, *args: Any, **kwargs: Any
+        self,
+        array: jnp.ndarray,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
     ) -> jnp.ndarray:
-        return jnp.sum(array, *args, **kwargs)  # type: ignore
+        return jnp.sum(array, axis=axis, keepdims=keepdims)
 
     def tan(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.tan(array)

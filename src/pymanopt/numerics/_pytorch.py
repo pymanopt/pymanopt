@@ -441,9 +441,12 @@ class PytorchNumericsBackend(NumericsBackend):
         return torch.stack(tuple(arrays), dim=axis)
 
     def sum(
-        self, array: torch.Tensor, *args: tuple, **kwargs: dict
+        self,
+        array: torch.Tensor,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
     ) -> torch.Tensor:
-        return torch.sum(array, *args, **kwargs)
+        return torch.sum(array, dim=axis, keepdim=keepdims)
 
     @elementary_math_function
     def tan(self, array: torch.Tensor) -> torch.Tensor:
