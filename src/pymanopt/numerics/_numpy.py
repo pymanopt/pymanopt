@@ -11,13 +11,10 @@ from pymanopt.numerics.array_t import array_t
 from pymanopt.numerics.core import NumericsBackend, TupleOrList
 
 
-np_array_t = np.ndarray
-
-
 class NumpyNumericsBackend(NumericsBackend):
-    _dtype: np.dtype
+    _dtype: type  # np.dtype
 
-    def __init__(self, dtype: np.dtype = np.float64):
+    def __init__(self, dtype=np.float64):
         assert dtype in {np.float32, np.float64, np.complex64, np.complex128}
         self._dtype = dtype
 
@@ -64,52 +61,52 @@ class NumpyNumericsBackend(NumericsBackend):
     # Numerics functions
     ##############################################################################
 
-    def abs(self, array: np_array_t) -> np_array_t:
+    def abs(self, array: np.ndarray) -> np.ndarray:
         return np.abs(array)
 
-    def all(self, array: np_array_t) -> bool:
+    def all(self, array: np.ndarray) -> bool:
         return np.all(array).item()
 
     def allclose(
         self,
-        array_a: np_array_t,
-        array_b: np_array_t,
+        array_a: np.ndarray,
+        array_b: np.ndarray,
         rtol: float = 1e-5,
         atol: float = 1e-8,
     ) -> bool:
         return np.allclose(array_a, array_b, rtol, atol)
 
-    def any(self, array: np_array_t) -> bool:
+    def any(self, array: np.ndarray) -> bool:
         return np.any(array).item()
 
-    def arange(self, *args: int) -> np_array_t:
+    def arange(self, *args: int) -> np.ndarray:
         return np.arange(*args)
 
-    def arccos(self, array: np_array_t) -> np_array_t:
+    def arccos(self, array: np.ndarray) -> np.ndarray:
         return np.arccos(array)
 
-    def arccosh(self, array: np_array_t) -> np_array_t:
+    def arccosh(self, array: np.ndarray) -> np.ndarray:
         return np.arccosh(array)
 
-    def arctan(self, array: np_array_t) -> np_array_t:
+    def arctan(self, array: np.ndarray) -> np.ndarray:
         return np.arctan(array)
 
-    def arctanh(self, array: np_array_t) -> np_array_t:
+    def arctanh(self, array: np.ndarray) -> np.ndarray:
         return np.arctanh(array)
 
-    def argmin(self, array: np_array_t):
+    def argmin(self, array: np.ndarray):
         return np.argmin(array)
 
-    def argsort(self, array: np_array_t):
+    def argsort(self, array: np.ndarray):
         return np.argsort(array)
 
-    def array(self, array: array_t) -> np_array_t:  # type: ignore
+    def array(self, array: array_t) -> np.ndarray:  # type: ignore
         return np.asarray(array, dtype=self.dtype)
 
     def assert_allclose(
         self,
-        array_a: np_array_t,
-        array_b: np_array_t,
+        array_a: np.ndarray,
+        array_b: np.ndarray,
         rtol: float = 1e-6,
         atol: float = 1e-6,
     ) -> None:
@@ -119,8 +116,8 @@ class NumpyNumericsBackend(NumericsBackend):
 
     def assert_equal(
         self,
-        array_a: np_array_t,
-        array_b: np_array_t,
+        array_a: np.ndarray,
+        array_b: np.ndarray,
     ) -> None:
         return np_testing.assert_equal(array_a, array_b)
 
@@ -129,56 +126,56 @@ class NumpyNumericsBackend(NumericsBackend):
     ) -> np.ndarray:
         return np.concatenate(arrays, axis)
 
-    def conjugate(self, array: np_array_t) -> np_array_t:
+    def conjugate(self, array: np.ndarray) -> np.ndarray:
         return np.conjugate(array)
 
-    def cos(self, array: np_array_t) -> np_array_t:
+    def cos(self, array: np.ndarray) -> np.ndarray:
         return np.cos(array)
 
-    def diag(self, array: np_array_t) -> np_array_t:
+    def diag(self, array: np.ndarray) -> np.ndarray:
         return np.diag(array)
 
     def diagonal(
-        self, array: np_array_t, axis1: int, axis2: int
-    ) -> np_array_t:
+        self, array: np.ndarray, axis1: int, axis2: int
+    ) -> np.ndarray:
         return np.diagonal(array, axis1, axis2)
 
     def eps(self) -> float:
-        return np.finfo(self.dtype).eps
+        return float(np.finfo(self.dtype).eps)
 
-    def exp(self, array: np_array_t) -> np_array_t:
+    def exp(self, array: np.ndarray) -> np.ndarray:
         return np.exp(array)
 
-    def expand_dims(self, array: np_array_t, axis: int) -> np_array_t:
+    def expand_dims(self, array: np.ndarray, axis: int) -> np.ndarray:
         return np.expand_dims(array, axis)
 
-    def eye(self, size: int) -> np_array_t:
+    def eye(self, size: int) -> np.ndarray:
         return np.eye(size, dtype=self.dtype)
 
-    def hstack(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
+    def hstack(self, arrays: TupleOrList[np.ndarray]) -> np.ndarray:
         return np.hstack(arrays)
 
-    def iscomplexobj(self, array: np_array_t) -> bool:
+    def iscomplexobj(self, array: np.ndarray) -> bool:
         return np.iscomplexobj(array)
 
-    def isnan(self, array: np_array_t) -> np_array_t:
+    def isnan(self, array: np.ndarray) -> np.ndarray:
         return np.isnan(array)
 
-    def isrealobj(self, array: np_array_t) -> bool:
+    def isrealobj(self, array: np.ndarray) -> bool:
         return np.isrealobj(array)
 
-    def linalg_cholesky(self, array: np_array_t) -> np_array_t:
+    def linalg_cholesky(self, array: np.ndarray) -> np.ndarray:
         return np.linalg.cholesky(array)
 
-    def linalg_det(self, array: np_array_t) -> np_array_t:
+    def linalg_det(self, array: np.ndarray) -> np.ndarray:
         return np.linalg.det(array)
 
-    def linalg_eigh(self, array: np_array_t) -> tuple[np_array_t, np_array_t]:
+    def linalg_eigh(self, array: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         return np.linalg.eigh(array)
 
     def linalg_eigvalsh(
-        self, array_x: np_array_t, array_y: Optional[np_array_t] = None
-    ) -> np_array_t:
+        self, array_x: np.ndarray, array_y: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         if array_y is None:
             return np.linalg.eigvalsh(array_x)
         else:
@@ -187,8 +184,8 @@ class NumpyNumericsBackend(NumericsBackend):
             )(array_x, array_y)
 
     def linalg_expm(
-        self, array: np_array_t, symmetric: bool = False
-    ) -> np_array_t:
+        self, array: np.ndarray, symmetric: bool = False
+    ) -> np.ndarray:
         if not symmetric:
             # Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked
             # matrices.
@@ -207,12 +204,12 @@ class NumpyNumericsBackend(NumericsBackend):
             return np.real(expmA)
         return expmA
 
-    def linalg_inv(self, array: np_array_t) -> np_array_t:
+    def linalg_inv(self, array: np.ndarray) -> np.ndarray:
         return np.linalg.inv(array)
 
     def linalg_logm(
-        self, array: np_array_t, positive_definite: bool = False
-    ) -> np_array_t:
+        self, array: np.ndarray, positive_definite: bool = False
+    ) -> np.ndarray:
         if not positive_definite:
             return np.vectorize(scipy.linalg.logm, signature="(m,m)->(m,m)")(
                 array
@@ -225,15 +222,15 @@ class NumpyNumericsBackend(NumericsBackend):
             return np.real(logmA)
         return logmA
 
-    def linalg_matrix_rank(self, array: np_array_t) -> int:
+    def linalg_matrix_rank(self, array: np.ndarray) -> int:
         return np.linalg.matrix_rank(array)
 
     def linalg_norm(
-        self, array: np_array_t, *args: Any, **kwargs: Any
-    ) -> np_array_t:
+        self, array: np.ndarray, *args: Any, **kwargs: Any
+    ) -> np.ndarray:
         return np.linalg.norm(array, *args, **kwargs)  # type: ignore
 
-    def linalg_qr(self, array: np_array_t) -> tuple[np_array_t, np_array_t]:
+    def linalg_qr(self, array: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         q, r = np.linalg.qr(array)
         # Compute signs or unit-modulus phase of entries of diagonal of r.
         s = np.diagonal(r, axis1=-2, axis2=-1).copy()
@@ -246,41 +243,41 @@ class NumpyNumericsBackend(NumericsBackend):
         return q, r
 
     def linalg_solve(
-        self, array_a: np_array_t, array_b: np_array_t
-    ) -> np_array_t:
+        self, array_a: np.ndarray, array_b: np.ndarray
+    ) -> np.ndarray:
         return np.linalg.solve(array_a, array_b)
 
     def linalg_solve_continuous_lyapunov(
-        self, array_a: np_array_t, array_q: np_array_t
-    ) -> np_array_t:
+        self, array_a: np.ndarray, array_q: np.ndarray
+    ) -> np.ndarray:
         return scipy.linalg.solve_continuous_lyapunov(array_a, array_q)
 
     def linalg_svd(
         self,
-        array: np_array_t,
+        array: np.ndarray,
         full_matrices: bool = True,
-    ) -> tuple[np_array_t, np_array_t, np_array_t]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         return np.linalg.svd(array, full_matrices=full_matrices)
 
     def linalg_svdvals(self, array: np.ndarray) -> np.ndarray:
         return np.linalg.svd(array, compute_uv=False)
 
-    def log(self, array: np_array_t) -> np_array_t:
+    def log(self, array: np.ndarray) -> np.ndarray:
         return np.log(array)
 
-    def logspace(self, *args: int) -> np_array_t:
+    def logspace(self, *args: int) -> np.ndarray:
         return np.logspace(*args, dtype=self.dtype)
 
-    def ndim(self, array: np_array_t) -> int:
+    def ndim(self, array: np.ndarray) -> int:
         return array.ndim
 
-    def ones(self, shape: TupleOrList[int]) -> np_array_t:
+    def ones(self, shape: TupleOrList[int]) -> np.ndarray:
         return np.ones(shape, self.dtype)
 
-    def ones_bool(self, shape: TupleOrList[int]) -> np_array_t:
+    def ones_bool(self, shape: TupleOrList[int]) -> np.ndarray:
         return np.ones(shape, bool)
 
-    def prod(self, array: np_array_t) -> float:
+    def prod(self, array: np.ndarray) -> float:
         return np.prod(array)  # type: ignore
 
     def random_normal(
@@ -288,7 +285,7 @@ class NumpyNumericsBackend(NumericsBackend):
         loc: float = 0.0,
         scale: float = 1.0,
         size: Union[int, TupleOrList[int], None] = None,
-    ) -> np_array_t:
+    ) -> np.ndarray:
         if self.is_dtype_real:
             return np.asarray(
                 np.random.normal(loc=loc, scale=scale, size=size),
@@ -306,7 +303,7 @@ class NumpyNumericsBackend(NumericsBackend):
 
     def random_uniform(
         self, size: Union[int, TupleOrList[int], None] = None
-    ) -> np_array_t:
+    ) -> np.ndarray:
         if self.is_dtype_real:
             return np.asarray(np.random.uniform(size=size), dtype=self.dtype)
         else:
@@ -315,7 +312,7 @@ class NumpyNumericsBackend(NumericsBackend):
                 np.random.uniform(size=size), dtype=real_dtype
             ) + 1j * np.asarray(np.random.uniform(size=size), dtype=real_dtype)
 
-    def real(self, array: np_array_t) -> np_array_t:
+    def real(self, array: np.ndarray) -> np.ndarray:
         return np.real(array)
 
     def reshape(
@@ -323,77 +320,77 @@ class NumpyNumericsBackend(NumericsBackend):
     ) -> np.ndarray:
         return np.reshape(array, newshape)
 
-    def sin(self, array: np_array_t) -> np_array_t:
+    def sin(self, array: np.ndarray) -> np.ndarray:
         return np.sin(array)
 
-    def sinc(self, array: np_array_t) -> np_array_t:
+    def sinc(self, array: np.ndarray) -> np.ndarray:
         return np.sinc(array)
 
-    def sort(self, array: np_array_t) -> np_array_t:
+    def sort(self, array: np.ndarray, descending: bool = False) -> np.ndarray:
         return np.sort(array)
 
-    def spacing(self, array: np_array_t) -> np_array_t:
+    def spacing(self, array: np.ndarray) -> np.ndarray:
         return np.spacing(array)  # type: ignore
 
-    def sqrt(self, array: np_array_t) -> np_array_t:
+    def sqrt(self, array: np.ndarray) -> np.ndarray:
         return np.sqrt(array)
 
-    def squeeze(self, array: np_array_t) -> np_array_t:
+    def squeeze(self, array: np.ndarray) -> np.ndarray:
         return np.squeeze(array)
 
     def stack(
-        self, arrays: TupleOrList[np_array_t], axis: int = 0
-    ) -> np_array_t:
+        self, arrays: TupleOrList[np.ndarray], axis: int = 0
+    ) -> np.ndarray:
         return np.stack(arrays)
 
     def sum(
         self,
-        array: np_array_t,
+        array: np.ndarray,
         axis: Union[int, TupleOrList[int], None] = None,
         keepdims: bool = False,
-    ) -> np_array_t:
+    ) -> np.ndarray:
         return np.sum(array, axis=axis, keepdims=keepdims)  # type: ignore
 
-    def tan(self, array: np_array_t) -> np_array_t:
+    def tan(self, array: np.ndarray) -> np.ndarray:
         return np.tan(array)
 
-    def tanh(self, array: np_array_t) -> np_array_t:
+    def tanh(self, array: np.ndarray) -> np.ndarray:
         return np.tanh(array)
 
     def tensordot(
-        self, a: np_array_t, b: np_array_t, axes: int = 2
-    ) -> np_array_t:
+        self, a: np.ndarray, b: np.ndarray, axes: int = 2
+    ) -> np.ndarray:
         return np.tensordot(a, b, axes=axes)
 
     def tile(
-        self, array: np_array_t, reps: int | TupleOrList[int]
-    ) -> np_array_t:
+        self, array: np.ndarray, reps: int | TupleOrList[int]
+    ) -> np.ndarray:
         return np.tile(array, reps)
 
-    def trace(self, array: np_array_t) -> Union[np_array_t, Number]:
+    def trace(self, array: np.ndarray) -> Union[np.ndarray, Number]:
         return (
             np.trace(array).item()
             if array.ndim == 2
             else np.trace(array, axis1=-2, axis2=-1)
         )
 
-    def transpose(self, array: np_array_t) -> np_array_t:
+    def transpose(self, array: np.ndarray) -> np.ndarray:
         new_shape = list(range(self.ndim(array)))
         new_shape[-1], new_shape[-2] = new_shape[-2], new_shape[-1]
         return np.transpose(array, new_shape)
 
-    def triu(self, array: np_array_t, k: int = 0) -> np_array_t:
+    def triu(self, array: np.ndarray, k: int = 0) -> np.ndarray:
         return np.triu(array, k)
 
-    def vstack(self, arrays: TupleOrList[np_array_t]) -> np_array_t:
+    def vstack(self, arrays: TupleOrList[np.ndarray]) -> np.ndarray:
         return np.vstack(arrays)
 
     def where(
         self,
-        condition: np_array_t,
-        x: Optional[np_array_t] = None,
-        y: Optional[np_array_t] = None,
-    ) -> Union[np_array_t, tuple[np_array_t, ...]]:
+        condition: np.ndarray,
+        x: Optional[np.ndarray] = None,
+        y: Optional[np.ndarray] = None,
+    ) -> Union[np.ndarray, tuple[np.ndarray, ...]]:
         if x is None and y is None:
             return np.where(condition)
         elif x is not None and y is not None:
@@ -403,11 +400,11 @@ class NumpyNumericsBackend(NumericsBackend):
                 f"Both x and y have to be specified but are respectively {x} and {y}"
             )
 
-    def zeros(self, shape: TupleOrList[int]) -> np_array_t:
+    def zeros(self, shape: TupleOrList[int]) -> np.ndarray:
         return np.zeros(shape, dtype=self.dtype)
 
-    def zeros_bool(self, shape: TupleOrList[int]) -> np_array_t:
+    def zeros_bool(self, shape: TupleOrList[int]) -> np.ndarray:
         return np.zeros(shape, bool)
 
-    def zeros_like(self, array: np_array_t) -> np_array_t:
+    def zeros_like(self, array: np.ndarray) -> np.ndarray:
         return np.zeros_like(array, dtype=self.dtype)

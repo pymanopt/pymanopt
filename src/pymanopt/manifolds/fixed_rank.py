@@ -1,7 +1,7 @@
 import collections
 from typing import Optional
 
-from pymanopt.manifolds.manifold import RiemannianSubmanifold
+from pymanopt.manifolds.manifold import Manifold, RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
 from pymanopt.numerics import NumericsBackend
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
@@ -38,7 +38,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
     0)``.
     The matrix ``M`` (of size ``k x k``) is arbitrary.
     Such a structure corresponds to the tangent vector ``Z = u @ M @ vt + Up @
-    vt + u * Vp.T`` in the ambient space of ``m x n`` matrices at a point ``(u,
+    vt + u @ Vp.T`` in the ambient space of ``m x n`` matrices at a point ``(u,
     s, vt)``.
 
     The chosen geometry yields a Riemannian submanifold of the embedding
@@ -68,7 +68,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         dimension = (m + n - k) * k
         super().__init__(name, dimension, point_layout=3, backend=backend)
 
-    @RiemannianSubmanifold.backend.setter
+    @Manifold.backend.setter
     def _(self, backend: NumericsBackend):
         self._backend = backend
         self._stiefel_m.backend = backend
@@ -79,7 +79,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         return self.dim
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return self.backend.sum(
+        return sum(
             [
                 self.backend.tensordot(a, b)
                 for (a, b) in zip(tangent_vector_a, tangent_vector_b)
@@ -111,9 +111,13 @@ class FixedRankEmbedded(RiemannianSubmanifold):
             in the ambient space, or else a tuple ``(U, S, V)`` where ``U @ S @
             V`` is in the ambient space (of low-rank matrices).
         """
-        ZV = self._apply_ambient(vector, point[2].T)
+        if isinstance(vector, (list, tuple)):
+            vector = vector[0] @ vector[1] @ vector[2].T
+        # ZV = self._apply_ambient(vector, point[2].T)
+        ZV = vector @ point[2].T
         UtZV = point[0].T @ ZV
-        ZtU = self._apply_ambient_transpose(vector, point[0])
+        # ZtU = self._apply_ambient_transpose(vector, point[0])
+        ZtU = vector.T @ point[0]
 
         Up = ZV - point[0] @ UtZV
         M = UtZV
@@ -177,7 +181,9 @@ class FixedRankEmbedded(RiemannianSubmanifold):
 
     def random_point(self):
         u = self._stiefel_m.random_point()
-        s = self.backend.sort(self.backend.random_uniform(size=self._k))[::-1]
+        s = self.backend.sort(
+            self.backend.random_uniform(size=self._k), descending=True
+        )
         vt = self._stiefel_n.random_point().T
         return _FixedRankPoint(u, s, vt)
 
@@ -210,10 +216,11 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         )
 
     def zero_vector(self, point):
+        bk = self.backend
         return _FixedRankTangentVector(
-            self.backend.zeros((self._m, self._k)),
-            self.backend.zeros((self._k, self._k)),
-            self.backend.zeros((self._n, self._k)),
+            bk.zeros((self._m, self._k)),
+            bk.zeros((self._k, self._k)),
+            bk.zeros((self._n, self._k)),
         )
 
 

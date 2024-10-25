@@ -376,11 +376,13 @@ class JaxNumericsBackend(NumericsBackend):
     def sinc(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.sinc(array)
 
-    def sort(self, array: jnp.ndarray) -> jnp.ndarray:
-        return jnp.sort(array)
+    def sort(
+        self, array: jnp.ndarray, descending: bool = False
+    ) -> jnp.ndarray:
+        return jnp.sort(array, descending=descending)
 
     def spacing(self, array: jnp.ndarray) -> jnp.ndarray:
-        return jnp.spacing(array)  # type: ignore
+        return jnp.asarray(np.spacing(np.asarray(array)))
 
     def sqrt(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.sqrt(array)

@@ -421,9 +421,12 @@ class PytorchNumericsBackend(NumericsBackend):
     def sinc(self, array: torch.Tensor) -> torch.Tensor:
         return torch.sinc(array)
 
-    def sort(self, array: torch.Tensor) -> torch.Tensor:
-        return torch.sort(array).values
+    def sort(
+        self, array: torch.Tensor, descending: bool = False
+    ) -> torch.Tensor:
+        return torch.sort(array, descending=descending).values
 
+    @elementary_math_function
     def spacing(self, array: torch.Tensor) -> torch.Tensor:
         # spacing is not implemented in PyTorch so we use the NumPy implementation
         return self.array(np.spacing(array.cpu().detach().numpy()))

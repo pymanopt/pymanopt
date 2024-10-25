@@ -5,7 +5,7 @@ from .array_t import (
     SUPPORTED_NUMERICS_BACKENDS,
     array_t,
 )
-from .core import NumericsBackend
+from .core import DummyNumericsBackend, NumericsBackend
 
 
 __all__ = [
@@ -13,6 +13,7 @@ __all__ = [
     "AVAILABLE_NUMERICS_BACKENDS",
     "array_t",
     "NumericsBackend",
+    "DummyNumericsBackend",
 ]
 
 for backend in AVAILABLE_NUMERICS_BACKENDS:

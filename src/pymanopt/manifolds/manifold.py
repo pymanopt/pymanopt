@@ -1,11 +1,11 @@
 import abc
 import functools
 import warnings
-from typing import Optional, Sequence, Union
+from typing import Sequence, Union
 
 import numpy as np
 
-from pymanopt.numerics import NumericsBackend, array_t
+from pymanopt.numerics import DummyNumericsBackend, NumericsBackend, array_t
 
 
 def raise_not_implemented_error(method):
@@ -16,7 +16,7 @@ def raise_not_implemented_error(method):
             f"implementation for '{method.__name__}'"
         )
 
-    wrapper.RAISE_NOT_IMPLEMENTED = True
+    setattr(wrapper, "__raise_not_implemented_error__", True)  # noqa: B010
     return wrapper
 
 
@@ -57,7 +57,7 @@ class Manifold(metaclass=abc.ABCMeta):
         name: str,
         dimension: int,
         point_layout: Union[int, Sequence[int]] = 1,
-        backend: Optional[NumericsBackend] = None,
+        backend: NumericsBackend = DummyNumericsBackend(),  # noqa: B008
     ):
         if not isinstance(dimension, (int, np.integer)):
             raise TypeError(
@@ -106,8 +106,8 @@ class Manifold(metaclass=abc.ABCMeta):
         """
         return self._point_layout
 
-    """ Whether the manifold is complex-valued or not. """
     IS_COMPLEX = False
+    """ Whether the manifold is complex-valued or not. """
 
     @property
     def backend(self) -> NumericsBackend:
@@ -115,7 +115,7 @@ class Manifold(metaclass=abc.ABCMeta):
         return self._backend
 
     @backend.setter
-    def _(self, backend: NumericsBackend):
+    def backend(self, backend: NumericsBackend):
         self._backend = backend
 
     def set_backend_with_default_dtype(self, backend_type: type):
@@ -162,9 +162,9 @@ class Manifold(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def inner_product(
         self,
-        point: array_t,
-        tangent_vector_a: array_t,
-        tangent_vector_b: array_t,
+        point: array_t,  # type: ignore
+        tangent_vector_a: array_t,  # type: ignore
+        tangent_vector_b: array_t,  # type: ignore
     ) -> float:
         """Inner product between tangent vectors at a point on the manifold.
 
@@ -323,7 +323,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     def has_exp(self):
-        return not hasattr(self.exp, "RAISE_NOT_IMPLEMENTED")
+        return not hasattr(self.exp, "__raise_not_implemented_error__")
 
     @raise_not_implemented_error
     def log(self, point_a, point_b):
@@ -344,7 +344,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     def has_log(self):
-        return not hasattr(self.log, "RAISE_NOT_IMPLEMENTED")
+        return not hasattr(self.log, "__raise_not_implemented_error__")
 
     @raise_not_implemented_error
     def transport(self, point_a, point_b, tangent_vector_a):
