@@ -8,7 +8,7 @@ import scipy.special
 from pymanopt.numerics.array_t import array_t
 
 
-__all__ = ["NumericsBackend", "TupleOrList"]
+__all__ = ["NumericsBackend", "DummyNumericsBackend", "TupleOrList"]
 
 
 def not_implemented(function):
@@ -75,7 +75,11 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def allclose(
-        self, array_a: array_t, array_b: array_t, rtol: float, atol: float
+        self,
+        array_a: array_t,  # type: ignore
+        array_b: array_t,  # type: ignore
+        rtol: float,
+        atol: float,  # type: ignore
     ) -> Optional[bool]:  # type:ignore
         pass
 
@@ -171,7 +175,12 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def diagonal(self, array: array_t, axis1: int, axis2: int) -> array_t:
+    def diagonal(
+        self,
+        array: array_t,  # type: ignore
+        axis1: int,
+        axis2: int,
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -247,8 +256,10 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def linalg_logm(
-        self, array: array_t, positive_definite: bool = False
-    ) -> array_t:
+        self,
+        array: array_t,  # type: ignore
+        positive_definite: bool = False,
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -392,7 +403,11 @@ class NumericsBackend(ABC):
         return 0.5 * (array - self.conjugate_transpose(array))
 
     @not_implemented
-    def sort(self, array: array_t) -> array_t:  # type: ignore
+    def sort(
+        self,
+        array: array_t,  # type: ignore
+        descending: bool = False,
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -439,11 +454,20 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def tensordot(self, a: array_t, b: array_t, axes: int) -> array_t:  # type: ignore
+    def tensordot(
+        self,
+        a: array_t,  # type: ignore
+        b: array_t,  # type: ignore
+        axes: int = 2,
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
-    def tile(self, array: array_t, reps: int | TupleOrList[int]) -> array_t:
+    def tile(
+        self,
+        array: array_t,  # type: ignore
+        reps: int | TupleOrList[int],
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -482,3 +506,38 @@ class NumericsBackend(ABC):
     @not_implemented
     def zeros_like(self, array: array_t) -> array_t:  # type: ignore
         pass
+
+
+class DummyNumericsBackend(NumericsBackend):
+    """Dummy implementation of NumericsBackend, only used as a default in manifolds.
+
+    This class should not be used directly.
+    """
+
+    @property
+    def dtype(self):
+        pass
+
+    @property
+    def is_dtype_real(self):
+        pass
+
+    @staticmethod
+    def DEFAULT_REAL_DTYPE():
+        pass
+
+    @staticmethod
+    def DEFAULT_COMPLEX_DTYPE():
+        pass
+
+    def __repr__(self):
+        return "DummyNumericsBackend"
+
+    def __eq__(self, other):
+        return repr(self) == repr(other)
+
+    def to_complex_backend(self) -> "NumericsBackend":
+        return self
+
+    def to_real_backend(self) -> "NumericsBackend":
+        return self
