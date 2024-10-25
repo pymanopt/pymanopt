@@ -47,15 +47,27 @@ class TestGrassmannManifold:
         )
 
     def test_projection(self):
+        bk = self.backend
         # Construct a random point X on the manifold.
         X = self.manifold.random_point()
 
         # Construct a vector H in the ambient space.
-        H = self.backend.random_normal(size=(self.k, self.n, self.p))
+        H = bk.squeeze(bk.random_normal(size=(self.k, self.n, self.p)))
+        Hproj = self.manifold.projection(X, H)
 
         # Compare the projections.
-        Hproj = H - X @ self.backend.conjugate_transpose(X) @ H
-        self.backend.assert_allclose(Hproj, self.manifold.projection(X, H))
+        Hproj_alternative = H - X @ bk.conjugate_transpose(X) @ H
+        bk.assert_allclose(Hproj_alternative, Hproj)
+
+        # Check that projecting twice gives the same result as projecting once.
+        Hprojproj = self.manifold.projection(X, Hproj)
+        bk.assert_allclose(Hproj, Hprojproj)
+
+        # Check the projected tangent vector is orthogonal to point
+        bk.assert_allclose(
+            bk.conjugate_transpose(X) @ Hproj,
+            bk.squeeze(bk.zeros((self.k, self.p, self.p))),
+        )
 
     def test_retraction(self):
         bk = self.backend
