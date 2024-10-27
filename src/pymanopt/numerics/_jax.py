@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Optional, Union
+from typing import Literal, Optional, Union
 
 import jax
 import jax.numpy as jnp
@@ -247,9 +247,13 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.linalg.matrix_rank(array).item()
 
     def linalg_norm(
-        self, array: jnp.ndarray, *args: Any, **kwargs: Any
+        self,
+        array: jnp.ndarray,
+        ord: Union[int, Literal["fro"], None] = None,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
     ) -> jnp.ndarray:
-        return jnp.linalg.norm(array, *args, **kwargs)  # type: ignore
+        return jnp.linalg.norm(array, ord=ord, axis=axis, keepdims=keepdims)
 
     def linalg_qr(self, array: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
         q, r = jnp.linalg.qr(array)

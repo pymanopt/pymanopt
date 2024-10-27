@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Literal, Optional, Union
 
 import numpy as np
 import scipy
@@ -244,13 +244,15 @@ class TensorflowNumericsBackend(NumericsBackend):
         return tf.linalg.matrix_rank(array).numpy().item()
 
     def linalg_norm(
-        self, array: tf.Tensor, *args: Any, **kwargs: Any
+        self,
+        array: tf.Tensor,
+        ord: Union[int, Literal["fro"], None] = None,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
     ) -> tf.Tensor:
-        if len(args) > 0 and args[0] == "fro":
-            args = ("euclidean",) + args[1:]
-        elif kwargs.get("ord", None) == "fro":
-            kwargs["ord"] = "euclidean"
-        return tf.norm(array, *args, **kwargs)
+        if ord == "fro" or ord is None:
+            ord = "euclidean"  # type: ignore
+        return tf.norm(array, ord=ord, axis=axis, keepdims=keepdims)
 
     def linalg_qr(self, array: tf.Tensor) -> tf.Tensor:
         q, r = tf.linalg.qr(array)

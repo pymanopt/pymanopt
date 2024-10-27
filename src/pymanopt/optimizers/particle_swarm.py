@@ -128,7 +128,11 @@ class ParticleSwarm(Optimizer):
         while True:
             iteration += 1
 
-            column_printer.print_row([iteration, cost_evaluations, fbest])
+            column_printer.print_row(
+                # we have to convert to float because these can possibly be
+                # torch tensors, which are not formmatable by the printer
+                [iteration, cost_evaluations, float(fbest)]
+            )
 
             # FIXME(nkoep): This only makes sense once we provide a custom
             #               callback mechanism that actually checks 'xi'.

@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import pymanopt
 
 
-key = jax.random.PRNGKey(42)
+key = jax.random.key(42)
 
 dim = 3
 manifold = pymanopt.manifolds.Sphere(dim)

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Optional, TypeVar, Union
+from typing import Literal, Optional, TypeVar, Union
 
 import numpy as np
 import scipy.special
@@ -31,6 +31,9 @@ TupleOrList = Union[list[T], tuple[T, ...]]
 
 
 class NumericsBackend(ABC):
+    # somehow it silences the warning "variable not allowed in type annotation"
+    array_t = array_t
+
     @property
     @abstractmethod
     def dtype(self):
@@ -84,7 +87,7 @@ class NumericsBackend(ABC):
         array_a: array_t,  # type: ignore
         array_b: array_t,  # type: ignore
         rtol: float,
-        atol: float,  # type: ignore
+        atol: float,
     ) -> Optional[bool]:  # type:ignore
         pass
 
@@ -268,7 +271,13 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def linalg_norm(self, array: array_t, *args, **kwargs) -> array_t:  # type: ignore
+    def linalg_norm(
+        self,
+        array: array_t,
+        ord: Union[int, Literal["fro"], None] = None,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
+    ) -> array_t:  # type: ignore
         pass
 
     @not_implemented
@@ -305,6 +314,10 @@ class NumericsBackend(ABC):
 
     @not_implemented
     def log(self, array: array_t) -> array_t:  # type: ignore
+        pass
+
+    @not_implemented
+    def logical_not(self, array: array_t) -> array_t:  # type: ignore
         pass
 
     @not_implemented

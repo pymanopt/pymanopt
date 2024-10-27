@@ -1,7 +1,4 @@
 import functools
-import warnings
-
-import numpy as np
 
 
 try:
@@ -21,36 +18,39 @@ class PyTorchBackend(Backend):
 
     @staticmethod
     def is_available():
-        return torch is not None and torch.__version__ >= "0.4.1"
+        return torch is not None and torch.__version__ >= "1.0.0"
 
-    @staticmethod
-    def _from_numpy(array: np.ndarray):
-        """Wrap numpy ndarray ``array`` in a torch tensor.
+    # @staticmethod
+    # def _from_numpy(array: np.ndarray):
+    #     """Wrap numpy ndarray ``array`` in a torch tensor.
 
-        Since torch does not support negative strides, we create a copy of the
-        array to reset the strides in that case.
-        """
-        strides = np.array(array.strides)
-        if np.any(strides < 0):
-            warnings.warn(
-                "PyTorch does not support numpy arrays with negative strides. "
-                "Copying array to normalize strides."
-            )
-            array = array.copy()
-        return torch.from_numpy(array)
+    #     Since torch does not support negative strides, we create a copy of the
+    #     array to reset the strides in that case.
+    #     """
+    #     strides = np.array(array.strides)
+    #     if np.any(strides < 0):
+    #         warnings.warn(
+    #             "PyTorch does not support numpy arrays with negative strides. "
+    #             "Copying array to normalize strides."
+    #         )
+    #         array = array.copy()
+    #     return torch.from_numpy(array)
 
     @Backend._assert_backend_available
     def prepare_function(self, function):
         @functools.wraps(function)
         def wrapper(*args):
-            return function(*map(self._from_numpy, args)).numpy()
+            # return function(*map(self._from_numpy, args)).numpy()
+            return function(*args)
 
         return wrapper
 
     def _sanitize_gradient(self, tensor):
         if tensor.grad is None:
-            return torch.zeros_like(tensor).numpy()
-        return tensor.grad.numpy()
+            # return torch.zeros_like(tensor).numpy()
+            return torch.zeros_like(tensor)
+        # return tensor.grad.numpy()
+        return tensor.grad
 
     def _sanitize_gradients(self, tensors):
         return list(map(self._sanitize_gradient, tensors))
@@ -59,7 +59,9 @@ class PyTorchBackend(Backend):
     def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
             arguments = [
-                self._from_numpy(arg).requires_grad_() for arg in args
+                # self._from_numpy(arg).requires_grad_() for arg in args
+                arg.requires_grad_()
+                for arg in args
             ]
             function(*arguments).backward()
             return self._sanitize_gradients(arguments)
@@ -72,7 +74,8 @@ class PyTorchBackend(Backend):
     def generate_hessian_operator(self, function, num_arguments):
         def hessian_vector_product(*args):
             arguments, vectors = bisect_sequence(
-                list(map(self._from_numpy, args))
+                args
+                # list(map(self._from_numpy, args))
             )
             arguments = [argument.requires_grad_() for argument in arguments]
             gradients = autograd.grad(
