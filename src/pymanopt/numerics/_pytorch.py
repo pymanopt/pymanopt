@@ -493,7 +493,7 @@ class PytorchNumericsBackend(NumericsBackend):
         return torch.tensordot(a, b, dims=axes)
 
     def tile(
-        self, array: torch.Tensor, reps: int | TupleOrList[int]
+        self, array: torch.Tensor, reps: Union[int, TupleOrList[int]]
     ) -> torch.Tensor:
         return torch.tile(array, [reps] if isinstance(reps, int) else reps)
 
@@ -511,7 +511,7 @@ class PytorchNumericsBackend(NumericsBackend):
         return torch.triu(array, k)
 
     def vstack(
-        self, arrays: tuple[torch.Tensor] | list[torch.Tensor]
+        self, arrays: Union[tuple[torch.Tensor], list[torch.Tensor]]
     ) -> torch.Tensor:
         return torch.vstack(arrays)
 

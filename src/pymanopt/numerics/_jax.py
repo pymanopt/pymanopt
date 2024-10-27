@@ -430,7 +430,7 @@ class JaxNumericsBackend(NumericsBackend):
         return jnp.tensordot(a, b, axes=axes)
 
     def tile(
-        self, array: jnp.ndarray, reps: int | TupleOrList[int]
+        self, array: jnp.ndarray, reps: Union[int, TupleOrList[int]]
     ) -> jnp.ndarray:
         return jnp.tile(array, reps)
 

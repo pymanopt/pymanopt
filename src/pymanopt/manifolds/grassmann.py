@@ -65,13 +65,14 @@ class Grassmann(_GrassmannBase):
             raise ValueError(
                 f"Need n >= p >= 1. Values supplied were n = {n} and p = {p}"
             )
-        if k < 1:
-            raise ValueError(f"Need k >= 1. Value supplied was k = {k}")
 
         if k == 1:
             name = f"Grassmann manifold Gr({n}, {p})"
         elif k >= 2:
             name = f"Product Grassmann manifold Gr({n}, {p})^{k}"
+        else:
+            raise ValueError(f"Invalid value for k: {k} (should be >= 1)")
+
         dimension = int(k * (n * p - p**2))
         super().__init__(name, dimension, backend=backend)
 
@@ -187,13 +188,14 @@ class ComplexGrassmann(_GrassmannBase):
             raise ValueError(
                 f"Need n >= p >= 1. Values supplied were n = {n} and p = {p}"
             )
-        if k < 1:
-            raise ValueError(f"Need k >= 1. Value supplied was k = {k}")
 
         if k == 1:
             name = f"Complex Grassmann manifold Gr({n}, {p})"
         elif k >= 2:
             name = f"Product complex Grassmann manifold Gr({n}, {p})^{k}"
+        else:
+            raise ValueError(f"Invalid value for k: {k} (should be >= 1)")
+
         dimension = int(2 * k * (n * p - p**2))
         super().__init__(name, dimension, backend=backend)
 

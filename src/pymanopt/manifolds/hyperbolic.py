@@ -46,13 +46,13 @@ class PoincareBall(Manifold):
 
         if n < 1:
             raise ValueError(f"Need n >= 1. Value given was n = {n}")
-        if k < 1:
-            raise ValueError(f"Need k >= 1. Value given was k = {k}")
 
         if k == 1:
             name = f"Poincare ball B({n})"
         elif k >= 2:
             name = f"Poincare ball B({n})^{k}"
+        else:
+            raise ValueError(f"Invalid value for k: {k} (should be >= 1)")
 
         dimension = k * n
         super().__init__(name, dimension, backend=backend)
