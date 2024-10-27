@@ -5,7 +5,7 @@ on:
     branches:
       - master
     tags:
-      - '*.*.*'
+      - "*.*.*"
   pull_request:
     branches:
       - master
@@ -17,10 +17,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up python 3.8
+      - name: Set up python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: 3.12
           cache: pip
           cache-dependency-path: pyproject.toml
 
