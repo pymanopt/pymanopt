@@ -1,10 +1,8 @@
-from typing import Optional
-
 from pymanopt.manifolds.manifold import (
     RiemannianSubmanifold,
     raise_not_implemented_error,
 )
-from pymanopt.numerics import NumericsBackend
+from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class _PositiveDefiniteBase(RiemannianSubmanifold):
@@ -14,7 +12,7 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         n: int,
         k: int,
         dimension: int,
-        backend: Optional[NumericsBackend] = None,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         self._k = k
         self._n = n
@@ -37,37 +35,18 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         return bk.linalg_norm(
             bk.linalg_logm(bk.linalg_solve(point_a, point_b))
         )
-        # c = bk.linalg_cholesky(point_a)
-        # c_inv = bk.linalg_inv(c)
-        # logm = bk.linalg_logm(
-        #     # c_inv @ point_b @ bk.conjugate_transpose(c_inv),
-        #     bk.linalg_solve(point_a, point_b),
-        #     positive_definite=True,
-        # )
-        # return bk.linalg_norm(logm)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         bk = self.backend
-        return bk.real(
-            bk.tensordot(
-                bk.conjugate(bk.linalg_solve(point, tangent_vector_a)),
-                bk.linalg_solve(point, tangent_vector_b),
-                bk.ndim(point),
-            )
+        p_inv_tv_a = bk.linalg_solve(point, tangent_vector_a)
+        p_inv_tv_b = (
+            p_inv_tv_a
+            if tangent_vector_a is tangent_vector_b
+            else bk.linalg_solve(point, tangent_vector_b)
         )
-
-        # p_inv_tv_a = bk.linalg_solve(point, tangent_vector_a)
-        # if tangent_vector_a is tangent_vector_b:
-        #     p_inv_tv_b = p_inv_tv_a
-        # else:
-        #     p_inv_tv_b = bk.linalg_solve(point, tangent_vector_b)
-        # return bk.real(
-        #     bk.tensordot(
-        #         p_inv_tv_a,
-        #         bk.conjugate_transpose(p_inv_tv_b),
-        #         axes=bk.ndim(point),
-        #     )
-        # )
+        return bk.real(
+            bk.tensordot(bk.conjugate(p_inv_tv_a), p_inv_tv_b, bk.ndim(point))
+        )
 
     def projection(self, point, vector):
         return self.backend.herm(vector)
@@ -126,18 +105,6 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
     def log(self, point_a, point_b):
         bk = self.backend
         return point_a @ bk.linalg_logm(bk.linalg_solve(point_a, point_b))
-        # p, d = bk.linalg_eigh(point_a)
-        # xsqrt = p @ (bk.sqrt(d) * bk.conjugate_transpose(p))
-        # xsqrt_inv = p @ (bk.conjugate_transpose(p) / bk.sqrt(d))
-        # return xsqrt @ bk.linalg_logm(xsqrt_inv @ point_b @ xsqrt_inv) @ xsqrt
-
-        # c = bk.linalg_cholesky(point_a)
-        # c_inv = bk.linalg_inv(c)
-        # logm = bk.linalg_logm(
-        #     c_inv @ point_b @ bk.conjugate_transpose(c_inv),
-        #     positive_definite=True,
-        # )
-        # return c @ logm @ bk.conjugate_transpose(c)
 
     def zero_vector(self, point):
         bk = self.backend
@@ -167,7 +134,11 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
     """
 
     def __init__(
-        self, n: int, *, k: int = 1, backend: Optional[NumericsBackend] = None
+        self,
+        n: int,
+        *,
+        k: int = 1,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         if k == 1:
             name = f"Manifold of symmetric positive definite {n}x{n} matrices"
@@ -198,7 +169,11 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
     IS_COMPLEX = True
 
     def __init__(
-        self, n: int, *, k: int = 1, backend: Optional[NumericsBackend] = None
+        self,
+        n: int,
+        *,
+        k: int = 1,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         if k == 1:
             name = f"Manifold of Hermitian positive definite {n}x{n} matrices"
@@ -226,7 +201,11 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
     IS_COMPLEX = True
 
     def __init__(
-        self, n: int, *, k: int = 1, backend: Optional[NumericsBackend] = None
+        self,
+        n: int,
+        *,
+        k: int = 1,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         if k == 1:
             name = f"Manifold of special Hermitian positive definite {n}x{n} matrices"

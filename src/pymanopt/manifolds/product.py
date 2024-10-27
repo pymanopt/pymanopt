@@ -1,11 +1,15 @@
 import functools
 import warnings
-from typing import Optional, Sequence
+from typing import Sequence
 
 import numpy as np
 
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.numerics import NumericsBackend
+from pymanopt.numerics import (
+    DummyNumericsBackend,
+    DummyNumericsBackendSingleton,
+    NumericsBackend,
+)
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
@@ -24,17 +28,8 @@ class Product(Manifold):
     def __init__(
         self,
         manifolds: Sequence[Manifold],
-        backend: Optional[NumericsBackend] = None,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
-        # if backend is None:
-        #     backend = manifolds[0].backend
-        #     for manifold in manifolds[1:]:
-        #         if manifold.backend != backend:
-        #             raise ValueError(
-        #                 "All manifolds must have the same backend "
-        #                 f"(got {manifold.backend} and {backend})"
-        #             )
-
         for manifold in manifolds:
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
@@ -54,6 +49,14 @@ class Product(Manifold):
         warnings.warn(
             "Setting backend of Product manifold is not supported. "
             "One should directly set the backend of each underlying manifold."
+        )
+
+    def has_dummy_backend(self) -> bool:
+        return any(
+            [
+                isinstance(manifold.backend, DummyNumericsBackend)
+                for manifold in self.manifolds
+            ]
         )
 
     def set_backend_with_default_dtype(self, backend_type: type):
