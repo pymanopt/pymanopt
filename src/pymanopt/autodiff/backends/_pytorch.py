@@ -40,16 +40,13 @@ class PyTorchBackend(Backend):
     def prepare_function(self, function):
         @functools.wraps(function)
         def wrapper(*args):
-            # return function(*map(self._from_numpy, args)).numpy()
             return function(*args)
 
         return wrapper
 
     def _sanitize_gradient(self, tensor):
         if tensor.grad is None:
-            # return torch.zeros_like(tensor).numpy()
             return torch.zeros_like(tensor)
-        # return tensor.grad.numpy()
         return tensor.grad
 
     def _sanitize_gradients(self, tensors):
@@ -58,11 +55,7 @@ class PyTorchBackend(Backend):
     @Backend._assert_backend_available
     def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
-            arguments = [
-                # self._from_numpy(arg).requires_grad_() for arg in args
-                arg.requires_grad_()
-                for arg in args
-            ]
+            arguments = [arg.requires_grad_() for arg in args]
             function(*arguments).backward()
             return self._sanitize_gradients(arguments)
 

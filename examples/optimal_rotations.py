@@ -38,7 +38,7 @@ def create_cost_and_derivates(manifold, ABt, backend):
             return -ABt
 
     elif backend == "pytorch":
-        ABt_ = torch.from_numpy(ABt)
+        ABt_ = torch.from_numpy(ABt).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
@@ -88,6 +88,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     X = optimizer.run(problem).point
 
     if not quiet:
+        if backend == "pytorch":
+            X = X.detach().numpy()
+
         Xopt = np.array([compute_optimal_solution(ABtk) for ABtk in ABt])
         print("Frobenius norm error:", np.linalg.norm(Xopt - X))
 

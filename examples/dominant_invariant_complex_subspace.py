@@ -42,7 +42,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return -2 * matrix @ H
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix)
+        matrix_ = torch.from_numpy(matrix).to(torch.complex64)
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
@@ -88,6 +88,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     if quiet:
         return
+
+    if backend == "pytorch":
+        estimated_spanning_set = estimated_spanning_set.detach().numpy()
 
     eigenvalues, eigenvectors = np.linalg.eig(matrix)
     column_indices = np.argsort(eigenvalues)[-subspace_dimension:]

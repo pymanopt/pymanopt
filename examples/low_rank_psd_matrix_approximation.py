@@ -42,7 +42,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return 4 * ((Y @ U.T + U @ Y.T) @ Y + (Y @ Y.T - matrix) @ U)
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix)
+        matrix_ = torch.from_numpy(matrix).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(Y):
@@ -86,6 +86,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     if quiet:
         return
+
+    if backend == "pytorch":
+        low_rank_factor_estimate = low_rank_factor_estimate.detach().numpy()
 
     print("Rank of target matrix:", np.linalg.matrix_rank(matrix))
     matrix_estimate = low_rank_factor_estimate @ low_rank_factor_estimate.T

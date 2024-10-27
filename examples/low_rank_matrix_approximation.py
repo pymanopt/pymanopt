@@ -46,7 +46,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return gu, gs, gvt
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix)
+        matrix_ = torch.from_numpy(matrix).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(u, s, vt):
@@ -86,6 +86,12 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         singular_values,
         right_singular_vectors,
     ) = optimizer.run(problem).point
+
+    if backend == "pytorch":
+        left_singular_vectors = left_singular_vectors.detach().numpy()
+        singular_values = singular_values.detach().numpy()
+        right_singular_vectors = right_singular_vectors.detach().numpy()
+
     low_rank_approximation = (
         left_singular_vectors
         @ np.diag(singular_values)

@@ -18,6 +18,8 @@ from pymanopt.numerics import (  # TensorflowNumericsBackend,
 
 matplotlib.use("Agg")
 
+torch.autograd.set_detect_anomaly(True)
+
 
 @pytest.fixture(autouse=True)
 def initialize_test_state():
