@@ -283,7 +283,7 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
-    def linalg_qr(self, array: array_t) -> array_t:  # type: ignore
+    def linalg_qr(self, array: array_t) -> tuple[array_t, array_t]:  # type: ignore
         pass
 
     @not_implemented
@@ -497,7 +497,7 @@ class NumericsBackend(ABC):
     def tile(
         self,
         array: array_t,  # type: ignore
-        reps: int | TupleOrList[int],
+        reps: Union[int, TupleOrList[int]],
     ) -> array_t:  # type: ignore
         pass
 

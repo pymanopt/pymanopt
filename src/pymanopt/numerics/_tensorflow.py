@@ -379,7 +379,7 @@ class TensorflowNumericsBackend(NumericsBackend):
         return tf.tensordot(a, b, axes=axes)
 
     def tile(
-        self, array: tf.Tensor, reps: int | TupleOrList[int]
+        self, array: tf.Tensor, reps: Union[int, TupleOrList[int]]
     ) -> tf.Tensor:
         return tf.tile(array, reps)
 

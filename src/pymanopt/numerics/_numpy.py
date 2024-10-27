@@ -396,7 +396,7 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.tensordot(a, b, axes=axes)
 
     def tile(
-        self, array: np.ndarray, reps: int | TupleOrList[int]
+        self, array: np.ndarray, reps: Union[int, TupleOrList[int]]
     ) -> np.ndarray:
         return np.tile(array, reps)
 

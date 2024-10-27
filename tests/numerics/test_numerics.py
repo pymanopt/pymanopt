@@ -35,7 +35,7 @@ all_backends = [
 
 
 @pytest.mark.parametrize(
-    "input, expected_output",
+    "inp, expected_output",
     [
         ([-1.0, 0.0, 1.0], [1.0, 0.0, 1.0]),
         ([1, 0, 1], [1, 0, 1]),
@@ -43,14 +43,14 @@ all_backends = [
     ],
 )
 @pytest.mark.parametrize("backend", all_backends)
-def test_abs(input, expected_output, backend):
+def test_abs(inp, expected_output, backend):
     backend.assert_allclose(
-        backend.abs(backend.array(input)), backend.array(expected_output)
+        backend.abs(backend.array(inp)), backend.array(expected_output)
     )
 
 
 @pytest.mark.parametrize(
-    "input, expected_output",
+    "inp, expected_output",
     [
         ([True, False, True], False),
         ([True, True, True], True),
@@ -58,12 +58,12 @@ def test_abs(input, expected_output, backend):
     ],
 )
 @pytest.mark.parametrize("backend", all_backends)
-def test_all(input, expected_output, backend):
-    assert backend.all(input) == expected_output
+def test_all(inp, expected_output, backend):
+    assert backend.all(inp) == expected_output
 
 
 @pytest.mark.parametrize(
-    "input, expected_output",
+    "inp, expected_output",
     [
         ([False, False, False], False),
         ([True, False, True], True),
@@ -72,20 +72,20 @@ def test_all(input, expected_output, backend):
     ],
 )
 @pytest.mark.parametrize("backend", all_backends)
-def test_any(input, expected_output, backend):
-    assert backend.any(input) == expected_output
+def test_any(inp, expected_output, backend):
+    assert backend.any(inp) == expected_output
 
 
 @pytest.mark.parametrize(
-    "input, expected_output",
+    "inp, expected_output",
     [
         (2, [[1.0, 0.0], [0.0, 1.0]]),
         (3, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
     ],
 )
 @pytest.mark.parametrize("backend", all_backends)
-def test_eye(input, expected_output, backend):
-    output = backend.eye(input)
+def test_eye(inp, expected_output, backend):
+    output = backend.eye(inp)
     expected_output = backend.array(expected_output)
     assert output.dtype == expected_output.dtype
     backend.assert_allclose(output, expected_output)

@@ -53,8 +53,11 @@ class Positive(Manifold):
 
         if k == 1:
             name = f"Manifold of positive {m}x{n} matrices"
-        else:
+        elif k >= 2:
             name = f"Product manifold of {k} positive {m}x{n} matrices"
+        else:
+            raise ValueError(f"Invalid value for k: {k} (should be >= 1)")
+
         dimension = int(k * m * n)
         super().__init__(name, dimension, backend=backend)
 
