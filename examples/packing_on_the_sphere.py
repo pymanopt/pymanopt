@@ -2,14 +2,14 @@ import autograd.numpy as np
 import jax.numpy as jnp
 import tensorflow as tf
 import torch
-from _tools import ExampleRunner
 
 import pymanopt
+from examples._tools import ExampleRunner
 from pymanopt.manifolds import Elliptope
 from pymanopt.optimizers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("autograd", "jax", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("jax", "pytorch", "tensorflow")
 
 
 def create_cost(manifold, epsilon, backend):
