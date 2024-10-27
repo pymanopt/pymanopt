@@ -9,7 +9,7 @@ from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.optimizers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, matrix, backend):
@@ -102,7 +102,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         print()
         print(low_rank_solution)
         print()
-        print(f"Rank-{rank} approximation:")
+        print(f"Rank-{rank} approximation: ")
         print()
         print(low_rank_approximation)
         print()

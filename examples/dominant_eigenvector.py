@@ -1,4 +1,5 @@
-import autograd.numpy as np
+# import autograd.numpy as np
+import numpy as np
 import tensorflow as tf
 import torch
 
@@ -8,7 +9,7 @@ from pymanopt.manifolds import Sphere
 from pymanopt.optimizers import SteepestDescent
 
 
-SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, matrix, backend):
@@ -37,11 +38,11 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return -2 * matrix @ x
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix)
+        matrix_ = torch.from_numpy(matrix).to(dtype=torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(x):
-            return -x.t() @ matrix_ @ x
+            return -x.reshape(1, -1) @ matrix_ @ x.reshape(-1, 1)
 
     elif backend == "tensorflow":
 
@@ -73,6 +74,15 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     if quiet:
         return
+
+    if backend == "pytorch":
+        estimated_dominant_eigenvector = (
+            estimated_dominant_eigenvector.cpu().detach().numpy()
+        )
+    elif backend == "jax":
+        estimated_dominant_eigenvector = np.asarray(
+            estimated_dominant_eigenvector
+        )
 
     # Calculate the actual solution by a conventional eigenvalue decomposition.
     eigenvalues, eigenvectors = np.linalg.eig(matrix)

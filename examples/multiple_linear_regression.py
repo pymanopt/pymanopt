@@ -9,7 +9,7 @@ from pymanopt.manifolds import Euclidean
 from pymanopt.optimizers import TrustRegions
 
 
-SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, samples, targets, backend):
