@@ -56,7 +56,7 @@ def create_cost_and_derivates(manifold, samples, backend):
             )
 
     elif backend == "pytorch":
-        samples_ = torch.from_numpy(samples)
+        samples_ = torch.from_numpy(samples).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(w):
@@ -101,6 +101,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     if quiet:
         return
+
+    if backend == "pytorch":
+        estimated_span_matrix = estimated_span_matrix.detach().numpy()
 
     estimated_projector = estimated_span_matrix @ estimated_span_matrix.T
 

@@ -38,7 +38,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return X - matrix
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix)
+        matrix_ = torch.from_numpy(matrix).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
@@ -76,6 +76,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     if quiet:
         return
+
+    if backend == "pytorch":
+        Xopt = Xopt.detach().numpy()
 
     # Calculate the actual solution by normalizing the columns of matrix.
     X = matrix / np.linalg.norm(matrix, axis=0)[np.newaxis, :]

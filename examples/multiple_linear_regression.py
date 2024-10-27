@@ -42,8 +42,8 @@ def create_cost_and_derivates(manifold, samples, targets, backend):
             return 2 * samples.T @ samples @ vector
 
     elif backend == "pytorch":
-        samples_ = torch.from_numpy(samples)
-        targets_ = torch.from_numpy(targets)
+        samples_ = torch.from_numpy(samples).to(torch.float32)
+        targets_ = torch.from_numpy(targets).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(weights):
@@ -87,6 +87,9 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
         estimated_weights = optimizer.run(problem).point
         if not quiet:
+            if backend == "pytorch":
+                estimated_weights = estimated_weights.detach().numpy()
+
             print(f"Run {k + 1}")
             print(
                 "Weights found by pymanopt (top) / "

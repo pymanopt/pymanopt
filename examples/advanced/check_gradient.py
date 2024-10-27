@@ -39,7 +39,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return -2 * matrix @ x
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix)
+        matrix_ = torch.from_numpy(matrix).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(x):

@@ -51,9 +51,10 @@
 
 # Ported to pymanopt by Jamie Townsend. January 2016.
 
-import time
+# flake8: noqa E231
 
-import numpy as np
+import time
+from math import inf, isnan, nan, sqrt
 
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 
@@ -126,7 +127,7 @@ class TrustRegions(Optimizer):
             try:
                 Delta_bar = manifold.typical_dist
             except NotImplementedError:
-                Delta_bar = np.sqrt(manifold.dim)
+                Delta_bar = sqrt(manifold.dim)
         if Delta0 is None:
             Delta0 = Delta_bar / 8
 
@@ -164,7 +165,7 @@ class TrustRegions(Optimizer):
         if self._verbosity >= 1:
             print("Optimizing...")
         if self._verbosity >= 2:
-            print(f"{' ':44s}f: {fx:+.6e}   |grad|: {norm_grad:.6e}")
+            print(f"{' ':44s}f: {fx:+.6e}   " f"|grad|: {norm_grad:.6e}")
 
         self._initialize_log()
 
@@ -184,7 +185,7 @@ class TrustRegions(Optimizer):
                 eta = 1e-6 * manifold.random_tangent_vector(x)
                 # Must be inside trust region
                 while manifold.norm(x, eta) > Delta:
-                    eta = np.sqrt(np.sqrt(np.spacing(1))) * eta
+                    eta = sqrt(sqrt(manifold.backend.spacing(1))) * eta
 
             # Solve TR subproblem approximately
             eta, Heta, numit, stop_inner = self._truncated_conjugate_gradient(
@@ -286,7 +287,11 @@ class TrustRegions(Optimizer):
             # but not under scaling of f. For abs(fx) > 1, the opposite holds.
             # This should not alarm us, as this heuristic only triggers at the
             # very last iterations if very fine convergence is demanded.
-            rho_reg = max(1, abs(fx)) * np.spacing(1) * self.rho_regularization
+            rho_reg = (
+                max(1, abs(fx))
+                * manifold.backend.spacing(1)
+                * self.rho_regularization
+            )
             rhonum = rhonum + rho_reg
             rhoden = rhoden + rho_reg
 
@@ -330,19 +335,19 @@ class TrustRegions(Optimizer):
                     "rho is NaN! Forcing a radius decrease. This should "
                     "not happen."
                 )
-                rho = np.nan
+                rho = nan
 
             # Choose the new TR radius based on the model performance
             trstr = "   "
             # If the actual decrease is smaller than 1/4 of the predicted
             # decrease, then reduce the TR radius.
-            if rho < 1.0 / 4 or not model_decreased or np.isnan(rho):
+            if rho < 1.0 / 4 or not model_decreased or isnan(rho):
                 trstr = "TR-"
                 Delta = Delta / 4
                 consecutive_TRplus = 0
                 consecutive_TRminus = consecutive_TRminus + 1
                 if consecutive_TRminus >= 5 and self._verbosity >= 1:
-                    consecutive_TRminus = -np.inf
+                    consecutive_TRminus = -inf
                     print(
                         " +++ Detected many consecutive TR- (radius "
                         "decreases)."
@@ -368,7 +373,7 @@ class TrustRegions(Optimizer):
                 consecutive_TRminus = 0
                 consecutive_TRplus = consecutive_TRplus + 1
                 if consecutive_TRplus >= 5 and self._verbosity >= 1:
-                    consecutive_TRplus = -np.inf
+                    consecutive_TRplus = -inf
                     print(
                         " +++ Detected many consecutive TR+ (radius "
                         "increases)."
@@ -457,7 +462,7 @@ class TrustRegions(Optimizer):
             e_Pe = inner(x, eta, eta)
 
         r_r = inner(x, r, r)
-        norm_r = np.sqrt(r_r)
+        norm_r = sqrt(r_r)
         norm_r0 = norm_r
 
         # Precondition the residual
@@ -524,7 +529,7 @@ class TrustRegions(Optimizer):
                 #  ed = <eta,delta>_prec,x
                 #  dd = <delta,delta>_prec,x
                 tau = (
-                    -e_Pd + np.sqrt(e_Pd * e_Pd + d_Pd * (Delta**2 - e_Pe))
+                    -e_Pd + sqrt(e_Pd * e_Pd + d_Pd * (Delta**2 - e_Pe))
                 ) / d_Pd
 
                 eta = eta + tau * delta
@@ -576,7 +581,7 @@ class TrustRegions(Optimizer):
 
             # Compute new norm of r.
             r_r = inner(x, r, r)
-            norm_r = np.sqrt(r_r)
+            norm_r = sqrt(r_r)
 
             # Check kappa/theta stopping criterion.
             # Note that it is somewhat arbitrary whether to check this stopping

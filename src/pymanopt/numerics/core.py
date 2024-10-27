@@ -34,6 +34,8 @@ class NumericsBackend(ABC):
     # somehow it silences the warning "variable not allowed in type annotation"
     array_t = array_t
 
+    _dtype: type
+
     @property
     @abstractmethod
     def dtype(self):
@@ -317,6 +319,10 @@ class NumericsBackend(ABC):
         pass
 
     @not_implemented
+    def log10(self, array: array_t) -> array_t:  # type: ignore
+        pass
+
+    @not_implemented
     def logical_not(self, array: array_t) -> array_t:  # type: ignore
         pass
 
@@ -349,8 +355,15 @@ class NumericsBackend(ABC):
 
     pi = np.pi
 
-    #   - np.polyfit
-    #   - np.polyval
+    @not_implemented
+    def polyfit(
+        self, x: array_t, y: array_t, deg: int = 1, full: bool = False
+    ) -> Union[array_t, tuple[array_t, array_t]]:
+        pass
+
+    @not_implemented
+    def polyval(self, p: array_t, x: array_t) -> array_t:
+        pass
 
     @not_implemented
     def prod(self, array: array_t) -> float:  # type: ignore

@@ -284,6 +284,9 @@ class NumpyNumericsBackend(NumericsBackend):
     def log(self, array: np.ndarray) -> np.ndarray:
         return np.log(array)
 
+    def log10(self, array: np.ndarray) -> np.ndarray:
+        return np.log10(array)
+
     def logical_not(self, array: np.ndarray) -> np.ndarray:
         return np.logical_not(array)
 
@@ -298,6 +301,14 @@ class NumpyNumericsBackend(NumericsBackend):
 
     def ones_bool(self, shape: TupleOrList[int]) -> np.ndarray:
         return np.ones(shape, bool)
+
+    def polyfit(
+        self, x: np.ndarray, y: np.ndarray, deg: int = 1, full: bool = False
+    ) -> Union[np.ndarray, tuple[np.ndarray, np.ndarray]]:
+        return np.polyfit(x, y, deg, full=full)
+
+    def polyval(self, p: np.ndarray, x: np.ndarray) -> np.ndarray:
+        return np.polyval(p, x)
 
     def prod(self, array: np.ndarray) -> float:
         return np.prod(array)  # type: ignore
@@ -363,7 +374,7 @@ class NumpyNumericsBackend(NumericsBackend):
     def stack(
         self, arrays: TupleOrList[np.ndarray], axis: int = 0
     ) -> np.ndarray:
-        return np.stack(arrays)
+        return np.stack(arrays, axis=axis)
 
     def sum(
         self,

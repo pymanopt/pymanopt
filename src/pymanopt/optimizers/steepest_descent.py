@@ -1,7 +1,6 @@
 import time
 from copy import deepcopy
-
-import numpy as np
+from math import log10
 
 from pymanopt.optimizers.line_search import BackTrackingLineSearcher
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
@@ -67,7 +66,7 @@ class SteepestDescent(Optimizer):
         if self._verbosity >= 1:
             print("Optimizing...")
         if self._verbosity >= 2:
-            iteration_format_length = int(np.log10(self._max_iterations)) + 1
+            iteration_format_length = int(log10(self._max_iterations)) + 1
             column_printer = printer.ColumnPrinter(
                 columns=[
                     ("Iteration", f"{iteration_format_length}d"),
