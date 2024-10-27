@@ -72,10 +72,15 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         super().__init__(name, dimension, point_layout=3, backend=backend)
 
     @Manifold.backend.setter
-    def _(self, backend: NumericsBackend):
+    def backend(self, backend: NumericsBackend):
         self._backend = backend
         self._stiefel_m.backend = backend
         self._stiefel_n.backend = backend
+
+    def set_backend_with_default_dtype(self, backend_type: type):
+        super().set_backend_with_default_dtype(backend_type)
+        self._stiefel_m.set_backend_with_default_dtype(backend_type)
+        self._stiefel_n.set_backend_with_default_dtype(backend_type)
 
     @property
     def typical_dist(self):

@@ -96,7 +96,11 @@ class SteepestDescent(Optimizer):
             grad = gradient(x)
             gradient_norm = manifold.norm(x, grad)
 
-            column_printer.print_row([iteration, cost, gradient_norm])
+            column_printer.print_row(
+                # we have to convert to float because these can possibly be
+                # torch tensors, which are not formmatable by the printer
+                [iteration, float(cost), float(gradient_norm)]
+            )
 
             self._add_log_entry(
                 iteration=iteration,

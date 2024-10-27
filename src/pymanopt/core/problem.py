@@ -11,6 +11,8 @@ from pymanopt.autodiff.backends import (
     PyTorchBackend,
     TensorFlowBackend,
 )
+
+# TODO: make these imports work when some backends are not available
 from pymanopt.numerics import (
     JaxNumericsBackend,
     NumpyNumericsBackend,
@@ -77,16 +79,17 @@ class Problem:
         ):
             self._validate_function(function, name)
 
-        if manifold.backend is None:
+        if manifold.has_dummy_backend():
             if isinstance(cost.backend, NumPyBackend):
-                # manifold.backend = NumpyNumericsBackend()
                 manifold.set_backend_with_default_dtype(NumpyNumericsBackend)
             elif isinstance(cost.backend, PyTorchBackend):
-                manifold.backend = PytorchNumericsBackend()
+                manifold.set_backend_with_default_dtype(PytorchNumericsBackend)
             elif isinstance(cost.backend, JaxBackend):
-                manifold.backend = JaxNumericsBackend()
+                manifold.set_backend_with_default_dtype(JaxNumericsBackend)
             elif isinstance(cost.backend, TensorFlowBackend):
-                manifold.backend = TensorflowNumericsBackend()
+                manifold.set_backend_with_default_dtype(
+                    TensorflowNumericsBackend
+                )
             else:
                 raise ValueError(
                     f"Backend '{cost.backend}' is not supported by Pymanopt"
@@ -129,9 +132,9 @@ class Problem:
         self._riemannian_hessian = riemannian_hessian
 
         if preconditioner is None:
-
-            def preconditioner(point, tangent_vector):
-                return tangent_vector
+            preconditioner = (
+                lambda point, tangent_vector: tangent_vector
+            )  # noqa: E731
 
         self.preconditioner = preconditioner
 

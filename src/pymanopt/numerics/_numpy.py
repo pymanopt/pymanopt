@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Optional, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 import numpy.testing as np_testing
@@ -15,7 +15,22 @@ class NumpyNumericsBackend(NumericsBackend):
     _dtype: type  # np.dtype
 
     def __init__(self, dtype=np.float64):
-        assert dtype in {np.float32, np.float64, np.complex64, np.complex128}
+        assert (
+            dtype == np.float32
+            or dtype == np.float64
+            or dtype == np.complex64
+            or dtype == np.complex128
+        ), f"dtype {dtype} is not supported"
+        # assert dtype in {
+        #     np.dtype("float32"),
+        #     np.dtype("float64"),
+        #     np.dtype("complex64"),
+        #     np.dtype("complex128"),
+        #     np.float32,
+        #     np.float64,
+        #     np.complex64,
+        #     np.complex128,
+        # }, f"dtype {dtype} is not supported"
         self._dtype = dtype
 
     @property
@@ -226,9 +241,13 @@ class NumpyNumericsBackend(NumericsBackend):
         return np.linalg.matrix_rank(array)
 
     def linalg_norm(
-        self, array: np.ndarray, *args: Any, **kwargs: Any
-    ) -> np.ndarray:
-        return np.linalg.norm(array, *args, **kwargs)  # type: ignore
+        self,
+        array: np.ndarray,
+        ord: Union[int, Literal["fro"], None] = None,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
+    ) -> Union[np.ndarray, Number]:
+        return np.linalg.norm(array, ord=ord, axis=axis, keepdims=keepdims)
 
     def linalg_qr(self, array: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         q, r = np.linalg.qr(array)
@@ -264,6 +283,9 @@ class NumpyNumericsBackend(NumericsBackend):
 
     def log(self, array: np.ndarray) -> np.ndarray:
         return np.log(array)
+
+    def logical_not(self, array: np.ndarray) -> np.ndarray:
+        return np.logical_not(array)
 
     def logspace(self, *args: int) -> np.ndarray:
         return np.logspace(*args, dtype=self.dtype)

@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Callable, Optional, Union
+from typing import Callable, Literal, Optional, Union
 
 import numpy as np
 import scipy.linalg
@@ -292,9 +292,16 @@ class PytorchNumericsBackend(NumericsBackend):
         return logmA
 
     def linalg_norm(
-        self, array: torch.Tensor, *args: tuple, **kwargs: dict
+        self,
+        array: torch.Tensor,
+        ord: Union[int, Literal["fro"], None] = None,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
     ) -> torch.Tensor:
-        return torch.linalg.norm(array, *args, **kwargs)
+        norm = torch.linalg.norm(array, ord=ord, axis=axis, keepdim=keepdims)
+        if axis is None:
+            return norm.item()
+        return norm
 
     def linalg_qr(
         self, array: torch.Tensor
