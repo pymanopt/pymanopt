@@ -1,9 +1,8 @@
 import collections
-from typing import Optional
 
 from pymanopt.manifolds.manifold import Manifold, RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
-from pymanopt.numerics import NumericsBackend
+from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
@@ -56,7 +55,11 @@ class FixedRankEmbedded(RiemannianSubmanifold):
     """
 
     def __init__(
-        self, m: int, n: int, k: int, backend: Optional[NumericsBackend] = None
+        self,
+        m: int,
+        n: int,
+        k: int,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         self._m = m
         self._n = n

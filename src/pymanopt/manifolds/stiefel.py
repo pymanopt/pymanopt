@@ -1,7 +1,5 @@
-from typing import Optional
-
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import NumericsBackend
+from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class Stiefel(RiemannianSubmanifold):
@@ -45,7 +43,7 @@ class Stiefel(RiemannianSubmanifold):
         *,
         k: int = 1,
         retraction: str = "qr",
-        backend: Optional[NumericsBackend] = None,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         self._n = n
         self._p = p

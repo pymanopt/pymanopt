@@ -1,7 +1,5 @@
-from typing import Optional
-
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import NumericsBackend
+from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class ComplexCircle(RiemannianSubmanifold):
@@ -22,7 +20,9 @@ class ComplexCircle(RiemannianSubmanifold):
 
     IS_COMPLEX = True
 
-    def __init__(self, n=1, backend: Optional[NumericsBackend] = None):
+    def __init__(
+        self, n=1, backend: NumericsBackend = DummyNumericsBackendSingleton
+    ):
         self._n = n
         if n == 1:
             name = "Complex circle S^1"
@@ -36,10 +36,10 @@ class ComplexCircle(RiemannianSubmanifold):
         ).real
 
     def norm(self, point, tangent_vector):
-        return self.backend.linalg.norm(tangent_vector)
+        return self.backend.linalg_norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        return self.backend.linalg.norm(
+        return self.backend.linalg_norm(
             self.backend.arccos(
                 (self.backend.conjugate(point_a) * point_b).real
             )

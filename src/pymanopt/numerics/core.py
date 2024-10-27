@@ -8,7 +8,12 @@ import scipy.special
 from pymanopt.numerics.array_t import array_t
 
 
-__all__ = ["NumericsBackend", "DummyNumericsBackend", "TupleOrList"]
+__all__ = [
+    "NumericsBackend",
+    "DummyNumericsBackend",
+    "DummyNumericsBackendSingleton",
+    "TupleOrList",
+]
 
 
 def not_implemented(function):
@@ -541,3 +546,6 @@ class DummyNumericsBackend(NumericsBackend):
 
     def to_real_backend(self) -> "NumericsBackend":
         return self
+
+
+DummyNumericsBackendSingleton = DummyNumericsBackend()

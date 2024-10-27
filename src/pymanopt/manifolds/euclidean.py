@@ -1,10 +1,9 @@
 import math
-from typing import Optional
 
 import numpy as np
 
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import NumericsBackend
+from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class _Euclidean(RiemannianSubmanifold):
@@ -13,7 +12,7 @@ class _Euclidean(RiemannianSubmanifold):
         name,
         dimension,
         *shape,
-        backend: Optional[NumericsBackend] = None,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         self._shape = shape
         super().__init__(name, dimension, backend=backend)
@@ -90,7 +89,11 @@ class Euclidean(_Euclidean):
         corresponding to the usual tensor dot product.
     """
 
-    def __init__(self, *shape: int, backend: Optional[NumericsBackend] = None):
+    def __init__(
+        self,
+        *shape: int,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
+    ):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
@@ -128,7 +131,9 @@ class ComplexEuclidean(_Euclidean):
 
     IS_COMPLEX = True
 
-    def __init__(self, *shape, backend: Optional[NumericsBackend] = None):
+    def __init__(
+        self, *shape, backend: NumericsBackend = DummyNumericsBackendSingleton
+    ):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
@@ -171,7 +176,10 @@ class Symmetric(_Euclidean):
     """
 
     def __init__(
-        self, n: int, k: int = 1, backend: Optional[NumericsBackend] = None
+        self,
+        n: int,
+        k: int = 1,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         if k == 1:
             shape = (n, n)
@@ -216,7 +224,9 @@ class SkewSymmetric(_Euclidean):
         ``n x n`` matrices represented as arrays of shape ``(k, n, n)``.
     """
 
-    def __init__(self, n, k=1, backend: Optional[NumericsBackend] = None):
+    def __init__(
+        self, n, k=1, backend: NumericsBackend = DummyNumericsBackendSingleton
+    ):
         if k == 1:
             shape = (n, n)
             name = f"Manifold of {n}x{n} skew-symmetric matrices"

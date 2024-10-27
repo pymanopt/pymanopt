@@ -5,7 +5,12 @@ from typing import Sequence, Union
 
 import numpy as np
 
-from pymanopt.numerics import DummyNumericsBackend, NumericsBackend, array_t
+from pymanopt.numerics import (
+    DummyNumericsBackend,
+    DummyNumericsBackendSingleton,
+    NumericsBackend,
+    array_t,
+)
 
 
 def raise_not_implemented_error(method):
@@ -57,7 +62,7 @@ class Manifold(metaclass=abc.ABCMeta):
         name: str,
         dimension: int,
         point_layout: Union[int, Sequence[int]] = 1,
-        backend: NumericsBackend = DummyNumericsBackend(),  # noqa: B008
+        backend: NumericsBackend = DummyNumericsBackendSingleton,  # noqa: B008
     ):
         if not isinstance(dimension, (int, np.integer)):
             raise TypeError(
@@ -118,6 +123,9 @@ class Manifold(metaclass=abc.ABCMeta):
     def backend(self, backend: NumericsBackend):
         self._backend = backend
 
+    def has_dummy_backend(self) -> bool:
+        return isinstance(self.backend, DummyNumericsBackend)
+
     def set_backend_with_default_dtype(self, backend_type: type):
         """Set the manifold's backend based on a default.
 
@@ -126,11 +134,11 @@ class Manifold(metaclass=abc.ABCMeta):
         for the corresponding dtype (e.g. for real numbers, NumPy defaults to
         float64 whereas PyTorch defaults to float32).
         """
-        assert issubclass(type, NumericsBackend)
+        assert issubclass(backend_type, NumericsBackend)
         self.backend = backend_type(
-            backend_type.DEFAULT_COMPLEX_DTYPE
+            backend_type.DEFAULT_COMPLEX_DTYPE()
             if self.IS_COMPLEX
-            else backend_type.DEFAULT_REAL_DTYPE
+            else backend_type.DEFAULT_REAL_DTYPE()
         )
 
     @property

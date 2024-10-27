@@ -1,7 +1,5 @@
-from typing import Optional
-
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.numerics import NumericsBackend
+from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class _GrassmannBase(Manifold):
@@ -57,7 +55,7 @@ class Grassmann(_GrassmannBase):
         p: int,
         *,
         k: int = 1,
-        backend: Optional[NumericsBackend] = None,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         self._n = n
         self._p = p
@@ -179,7 +177,7 @@ class ComplexGrassmann(_GrassmannBase):
         p: int,
         *,
         k: int = 1,
-        backend: Optional[NumericsBackend] = None,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
     ):
         self._n = n
         self._p = p

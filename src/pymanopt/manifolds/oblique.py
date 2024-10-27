@@ -1,5 +1,5 @@
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import NumericsBackend
+from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class Oblique(RiemannianSubmanifold):
@@ -16,7 +16,12 @@ class Oblique(RiemannianSubmanifold):
         n: The number of columns of each matrix.
     """
 
-    def __init__(self, m: int, n: int, backend: NumericsBackend = None):
+    def __init__(
+        self,
+        m: int,
+        n: int,
+        backend: NumericsBackend = DummyNumericsBackendSingleton,
+    ):
         self._m = m
         self._n = n
         name = f"Oblique manifold OB({m}, {n})"
