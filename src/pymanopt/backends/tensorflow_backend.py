@@ -60,12 +60,9 @@ class TensorFlowBackend(Backend):
             arguments, vectors = bisect_sequence(
                 list(map(self._from_numpy, args))
             )
-            with (
-                tf.GradientTape() as tape,
-                tf.autodiff.ForwardAccumulator(
-                    arguments, vectors
-                ) as accumulator,
-            ):
+            with tf.GradientTape() as tape, tf.autodiff.ForwardAccumulator(
+                arguments, vectors
+            ) as accumulator:
                 for argument in arguments:
                     tape.watch(argument)
                 gradients = tape.gradient(function(*arguments), arguments)

@@ -1,5 +1,5 @@
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class Stiefel(RiemannianSubmanifold):
@@ -43,7 +43,7 @@ class Stiefel(RiemannianSubmanifold):
         *,
         k: int = 1,
         retraction: str = "qr",
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._n = n
         self._p = p

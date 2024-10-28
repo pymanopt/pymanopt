@@ -1,12 +1,12 @@
 import pytest
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds import FixedRankEmbedded
-from pymanopt.numerics import NumericsBackend
 
 
 class TestFixedRankEmbeddedManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend: NumericsBackend):
+    def setup(self, real_numerics_backend: Backend):
         self.m = m = 10
         self.n = n = 5
         self.k = k = 3

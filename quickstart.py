@@ -1,3 +1,5 @@
+import sys
+
 import jax
 import jax.numpy as jnp
 
@@ -14,7 +16,7 @@ matrix = 0.5 * (matrix + matrix.T)
 
 
 @pymanopt.function.jax(manifold)
-def cost(point):
+def cost(point: jnp.ndarray):
     return -point @ matrix @ point
 
 
@@ -30,3 +32,10 @@ dominant_eigenvector = eigenvectors[:, eigenvalues.argmax()]
 
 print("Dominant eigenvector:", dominant_eigenvector)
 print("Pymanopt solution:", result.point)
+assert isinstance(result.point, jnp.ndarray)
+
+
+# print(sys.modules)
+for key, value in sys.modules.items():
+    if "torch" in key:
+        print(key, value)

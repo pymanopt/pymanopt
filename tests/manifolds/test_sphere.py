@@ -238,7 +238,7 @@ class TestSphereSubspaceIntersectionManifold:
 #     def setup(self):
 #         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
 #         self.manifold = SphereSubspaceIntersection(
-#             span_matrix, backend=NumpyNumericsBackend()
+#             span_matrix, backend=NumpyBackend()
 #         )
 
 
@@ -320,5 +320,5 @@ class TestSphereSubspaceComplementIntersectionManifold:
 #     def setup(self):
 #         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
 #         self.manifold = SphereSubspaceComplementIntersection(
-#             span_matrix, backend=NumpyNumericsBackend()
+#             span_matrix, backend=NumpyBackend()
 #         )

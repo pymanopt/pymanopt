@@ -1,5 +1,5 @@
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class Positive(Manifold):
@@ -40,7 +40,7 @@ class Positive(Manifold):
         *,
         k: int = 1,
         use_parallel_transport: bool = False,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._m = m
         self._n = n

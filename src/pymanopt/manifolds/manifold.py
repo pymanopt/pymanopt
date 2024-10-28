@@ -5,12 +5,7 @@ from typing import Sequence, Union
 
 import numpy as np
 
-from pymanopt.numerics import (
-    DummyNumericsBackend,
-    DummyNumericsBackendSingleton,
-    NumericsBackend,
-    array_t,
-)
+from pymanopt.backends import Backend, DummyBackendSingleton
 
 
 def raise_not_implemented_error(method):
@@ -62,7 +57,7 @@ class Manifold(metaclass=abc.ABCMeta):
         name: str,
         dimension: int,
         point_layout: Union[int, Sequence[int]] = 1,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,  # noqa: B008
+        backend: Backend = DummyBackendSingleton,  # noqa: B008
     ):
         if not isinstance(dimension, (int, np.integer)):
             raise TypeError(
@@ -115,16 +110,16 @@ class Manifold(metaclass=abc.ABCMeta):
     """ Whether the manifold is complex-valued or not. """
 
     @property
-    def backend(self) -> NumericsBackend:
+    def backend(self) -> Backend:
         """The numerics backend used by the manifold."""
         return self._backend
 
     @backend.setter
-    def backend(self, backend: NumericsBackend):
+    def backend(self, backend: Backend):
         self._backend = backend
 
     def has_dummy_backend(self) -> bool:
-        return isinstance(self.backend, DummyNumericsBackend)
+        return self.backend == DummyBackendSingleton
 
     def set_backend_with_default_dtype(self, backend_type: type):
         """Set the manifold's backend based on a default.
@@ -134,7 +129,7 @@ class Manifold(metaclass=abc.ABCMeta):
         for the corresponding dtype (e.g. for real numbers, NumPy defaults to
         float64 whereas PyTorch defaults to float32).
         """
-        assert issubclass(backend_type, NumericsBackend)
+        assert issubclass(backend_type, Backend)
         self.backend = backend_type(
             backend_type.DEFAULT_COMPLEX_DTYPE()
             if self.IS_COMPLEX
@@ -169,10 +164,7 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def inner_product(
-        self,
-        point: array_t,  # type: ignore
-        tangent_vector_a: array_t,  # type: ignore
-        tangent_vector_b: array_t,  # type: ignore
+        self, point, tangent_vector_a, tangent_vector_b
     ) -> float:
         """Inner product between tangent vectors at a point on the manifold.
 

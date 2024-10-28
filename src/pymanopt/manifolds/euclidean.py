@@ -2,8 +2,8 @@ import math
 
 import numpy as np
 
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class _Euclidean(RiemannianSubmanifold):
@@ -12,7 +12,7 @@ class _Euclidean(RiemannianSubmanifold):
         name,
         dimension,
         *shape,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._shape = shape
         super().__init__(name, dimension, backend=backend)
@@ -92,7 +92,7 @@ class Euclidean(_Euclidean):
     def __init__(
         self,
         *shape: int,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
@@ -108,7 +108,7 @@ class Euclidean(_Euclidean):
         super().__init__(name, dimension, *shape, backend=backend)
 
         @RiemannianSubmanifold.backend.setter
-        def _(self, backend: NumericsBackend):
+        def _(self, backend: Backend):
             assert backend.is_dtype_real()
             super().backend = backend
 
@@ -131,9 +131,7 @@ class ComplexEuclidean(_Euclidean):
 
     IS_COMPLEX = True
 
-    def __init__(
-        self, *shape, backend: NumericsBackend = DummyNumericsBackendSingleton
-    ):
+    def __init__(self, *shape, backend: Backend = DummyBackendSingleton):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
@@ -148,7 +146,7 @@ class ComplexEuclidean(_Euclidean):
         super().__init__(name, dimension, *shape, backend=backend)
 
     @RiemannianSubmanifold.backend.setter
-    def _(self, backend: NumericsBackend):
+    def _(self, backend: Backend):
         assert not backend.is_dtype_real()
         super().backend = backend
 
@@ -179,7 +177,7 @@ class Symmetric(_Euclidean):
         self,
         n: int,
         k: int = 1,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         if k == 1:
             shape = (n, n)
@@ -224,9 +222,7 @@ class SkewSymmetric(_Euclidean):
         ``n x n`` matrices represented as arrays of shape ``(k, n, n)``.
     """
 
-    def __init__(
-        self, n, k=1, backend: NumericsBackend = DummyNumericsBackendSingleton
-    ):
+    def __init__(self, n, k=1, backend: Backend = DummyBackendSingleton):
         if k == 1:
             shape = (n, n)
             name = f"Manifold of {n}x{n} skew-symmetric matrices"

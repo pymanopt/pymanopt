@@ -1,14 +1,12 @@
 import pytest
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds import ComplexGrassmann, Grassmann
-from pymanopt.numerics import NumericsBackend
 
 
 class TestGrassmannManifold:
     @pytest.fixture(autouse=True)
-    def setup(
-        self, real_numerics_backend: NumericsBackend, product_dimension: int
-    ):
+    def setup(self, real_numerics_backend: Backend, product_dimension: int):
         self.n = n = 5
         self.p = p = 2
         self.k = k = product_dimension
@@ -163,9 +161,7 @@ class TestGrassmannManifold:
 
 class TestComplexGrassmannManifold(TestGrassmannManifold):
     @pytest.fixture(autouse=True)
-    def setup(
-        self, complex_numerics_backend: NumericsBackend, product_dimension: int
-    ):
+    def setup(self, complex_numerics_backend: Backend, product_dimension: int):
         self.n = n = 5
         self.p = p = 2
         self.k = k = product_dimension

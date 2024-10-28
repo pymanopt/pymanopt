@@ -1,5 +1,5 @@
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class ComplexCircle(RiemannianSubmanifold):
@@ -20,9 +20,7 @@ class ComplexCircle(RiemannianSubmanifold):
 
     IS_COMPLEX = True
 
-    def __init__(
-        self, n=1, backend: NumericsBackend = DummyNumericsBackendSingleton
-    ):
+    def __init__(self, n=1, backend: Backend = DummyBackendSingleton):
         self._n = n
         if n == 1:
             name = "Complex circle S^1"
