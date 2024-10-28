@@ -1,12 +1,12 @@
 import pytest
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds import SpecialOrthogonalGroup, UnitaryGroup
-from pymanopt.numerics import NumericsBackend
 
 
 class TestSpecialOrthogonalGroup:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend: NumericsBackend):
+    def setup(self, real_numerics_backend: Backend):
         self.n = n = 10
         self.k = k = 3
         self.backend = real_numerics_backend
@@ -80,7 +80,7 @@ class TestSpecialOrthogonalGroup:
 
 class TestUnitaryGroup:
     @pytest.fixture(autouse=True)
-    def setup(self, complex_numerics_backend: NumericsBackend):
+    def setup(self, complex_numerics_backend: Backend):
         self.n = n = 10
         self.k = k = 3
         self.backend = complex_numerics_backend

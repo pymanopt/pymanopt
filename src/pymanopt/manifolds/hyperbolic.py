@@ -1,5 +1,5 @@
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class PoincareBall(Manifold):
@@ -39,7 +39,7 @@ class PoincareBall(Manifold):
         n: int,
         *,
         k: int = 1,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._n = n
         self._k = k

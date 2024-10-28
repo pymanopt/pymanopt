@@ -3,25 +3,21 @@
 import functools
 from typing import Callable, Optional
 
-import numpy as np
-
-from pymanopt.autodiff.backends import (
-    JaxBackend,
-    NumPyBackend,
-    PyTorchBackend,
-    TensorFlowBackend,
-)
-
 # TODO: make these imports work when some backends are not available
-from pymanopt.numerics import (
-    JaxNumericsBackend,
-    NumpyNumericsBackend,
-    PytorchNumericsBackend,
-    TensorflowNumericsBackend,
-)
+# from pymanopt.autodiff.backends._jax import JaxBackend
+# from pymanopt.autodiff.backends._numpy import NumPyBackend
+# from pymanopt.autodiff.backends._pytorch import PyTorchBackend
+# from pymanopt.autodiff.backends._tensorflow import TensorFlowBackend
+from pymanopt.function import Function
+from pymanopt.manifolds.manifold import Manifold
 
-from ..autodiff import Function
-from ..manifolds.manifold import Manifold
+
+# from pymanopt.numerics import (
+#     JaxNumericsBackend,
+#     NumpyNumericsBackend,
+#     PytorchNumericsBackend,
+#     TensorflowNumericsBackend,
+# )
 
 
 class Problem:
@@ -79,21 +75,38 @@ class Problem:
         ):
             self._validate_function(function, name)
 
+        # if manifold.has_dummy_backend():
+        #     if isinstance(cost.backend, NumPyBackend):
+        #         manifold.set_backend_with_default_dtype(NumpyNumericsBackend)
+        #     elif isinstance(cost.backend, PyTorchBackend):
+        #         manifold.set_backend_with_default_dtype(PytorchNumericsBackend)
+        #     elif isinstance(cost.backend, JaxBackend):
+        #         manifold.set_backend_with_default_dtype(JaxNumericsBackend)
+        #     elif isinstance(cost.backend, TensorFlowBackend):
+        #         manifold.set_backend_with_default_dtype(
+        #             TensorflowNumericsBackend
+        #         )
+        #     else:
+        #         raise ValueError(
+        #             f"Backend '{cost.backend}' is not supported by Pymanopt"
+        #         )
+        # else:
+        #     if isinstance(cost.backend, NumPyBackend):
+        #         assert isinstance(manifold.backend, NumpyNumericsBackend)
+        #     elif isinstance(cost.backend, PyTorchBackend):
+        #         assert isinstance(manifold.backend, PytorchNumericsBackend)
+        #     elif isinstance(cost.backend, JaxBackend):
+        #         assert isinstance(manifold.backend, JaxNumericsBackend)
+        #     elif isinstance(cost.backend, TensorFlowBackend):
+        #         assert isinstance(manifold.backend, TensorflowNumericsBackend)
+        #     else:
+        #         raise ValueError(
+        #             f"Backend '{cost.backend}' is not supported by Pymanopt"
+        #         )
         if manifold.has_dummy_backend():
-            if isinstance(cost.backend, NumPyBackend):
-                manifold.set_backend_with_default_dtype(NumpyNumericsBackend)
-            elif isinstance(cost.backend, PyTorchBackend):
-                manifold.set_backend_with_default_dtype(PytorchNumericsBackend)
-            elif isinstance(cost.backend, JaxBackend):
-                manifold.set_backend_with_default_dtype(JaxNumericsBackend)
-            elif isinstance(cost.backend, TensorFlowBackend):
-                manifold.set_backend_with_default_dtype(
-                    TensorflowNumericsBackend
-                )
-            else:
-                raise ValueError(
-                    f"Backend '{cost.backend}' is not supported by Pymanopt"
-                )
+            manifold.set_backend_with_default_dtype(type(cost.backend))
+        else:
+            assert isinstance(manifold.backend, type(cost.backend))
 
         if euclidean_gradient is not None and riemannian_gradient is not None:
             raise ValueError(
@@ -173,7 +186,7 @@ class Problem:
         """
         assert all((isinstance(group, int) for group in signature))
 
-        num_return_values = np.sum(signature)
+        num_return_values = sum(signature)
 
         @functools.wraps(function)
         def wrapper(*args, **kwargs):

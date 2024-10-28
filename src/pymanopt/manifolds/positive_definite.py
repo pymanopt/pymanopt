@@ -1,8 +1,8 @@
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import (
     RiemannianSubmanifold,
     raise_not_implemented_error,
 )
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class _PositiveDefiniteBase(RiemannianSubmanifold):
@@ -12,7 +12,7 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         n: int,
         k: int,
         dimension: int,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._k = k
         self._n = n
@@ -138,7 +138,7 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
         n: int,
         *,
         k: int = 1,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         if k == 1:
             name = f"Manifold of symmetric positive definite {n}x{n} matrices"
@@ -173,7 +173,7 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
         n: int,
         *,
         k: int = 1,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         if k == 1:
             name = f"Manifold of Hermitian positive definite {n}x{n} matrices"
@@ -205,7 +205,7 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         n: int,
         *,
         k: int = 1,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         if k == 1:
             name = f"Manifold of special Hermitian positive definite {n}x{n} matrices"

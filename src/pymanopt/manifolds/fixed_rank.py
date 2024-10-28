@@ -1,8 +1,8 @@
 import collections
 
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import Manifold, RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
@@ -59,7 +59,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         m: int,
         n: int,
         k: int,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._m = m
         self._n = n
@@ -72,7 +72,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         super().__init__(name, dimension, point_layout=3, backend=backend)
 
     @Manifold.backend.setter
-    def backend(self, backend: NumericsBackend):
+    def backend(self, backend: Backend):
         self._backend = backend
         self._stiefel_m.backend = backend
         self._stiefel_n.backend = backend

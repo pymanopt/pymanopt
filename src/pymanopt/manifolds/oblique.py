@@ -1,5 +1,5 @@
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 
 
 class Oblique(RiemannianSubmanifold):
@@ -20,7 +20,7 @@ class Oblique(RiemannianSubmanifold):
         self,
         m: int,
         n: int,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._m = m
         self._n = n

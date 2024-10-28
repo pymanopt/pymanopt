@@ -1,8 +1,8 @@
 import pytest
 
 import pymanopt
+from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.manifolds import Euclidean, Grassmann, Product, Sphere
-from pymanopt.numerics import NumpyNumericsBackend
 
 
 # TODO: test setting backends
@@ -13,7 +13,7 @@ class TestProductManifold:
     def setup(self):
         self.m = m = 100
         self.n = n = 50
-        self.backend = NumpyNumericsBackend()
+        self.backend = NumpyBackend()
         self.euclidean = Euclidean(m, n, backend=self.backend)
         self.sphere = Sphere(n, backend=self.backend)
         self.manifold = Product([self.euclidean, self.sphere])

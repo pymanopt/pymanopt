@@ -1,7 +1,7 @@
 import pytest
 
+from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.manifolds import Positive
-from pymanopt.numerics import NumpyNumericsBackend
 
 
 class TestPositiveVectors:
@@ -10,7 +10,7 @@ class TestPositiveVectors:
         self.m = m = 3
         self.n = n = 1
         self.k = k = 2
-        self.backend = NumpyNumericsBackend()
+        self.backend = NumpyBackend()
         self.manifold = Positive(m, n, k=k, backend=self.backend)
 
     def test_inner_product(self):

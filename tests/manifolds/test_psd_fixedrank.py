@@ -2,8 +2,8 @@
 import pytest
 import scipy.stats
 
+from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.manifolds import PSDFixedRank
-from pymanopt.numerics import NumpyNumericsBackend
 
 
 class TestPSDFixedRankManifold:
@@ -11,7 +11,7 @@ class TestPSDFixedRankManifold:
     def setup(self):
         self.n = 50
         self.k = 10
-        self.backend = NumpyNumericsBackend()
+        self.backend = NumpyBackend()
         self.manifold = PSDFixedRank(self.n, self.k, backend=self.backend)
 
     # def test_dim(self):

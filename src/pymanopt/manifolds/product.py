@@ -4,12 +4,8 @@ from typing import Sequence
 
 import numpy as np
 
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.numerics import (
-    DummyNumericsBackend,
-    DummyNumericsBackendSingleton,
-    NumericsBackend,
-)
 from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
 
 
@@ -28,7 +24,7 @@ class Product(Manifold):
     def __init__(
         self,
         manifolds: Sequence[Manifold],
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         for manifold in manifolds:
             if isinstance(manifold, Product):
@@ -45,7 +41,7 @@ class Product(Manifold):
         )
 
     @Manifold.backend.setter
-    def backend(self, backend: NumericsBackend):
+    def backend(self, backend: Backend):
         warnings.warn(
             "Setting backend of Product manifold is not supported. "
             "One should directly set the backend of each underlying manifold."
@@ -54,7 +50,7 @@ class Product(Manifold):
     def has_dummy_backend(self) -> bool:
         return any(
             [
-                isinstance(manifold.backend, DummyNumericsBackend)
+                manifold.backend == DummyBackendSingleton
                 for manifold in self.manifolds
             ]
         )

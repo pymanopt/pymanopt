@@ -1,12 +1,9 @@
 import math
 import warnings
 
+from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import (
-    DummyNumericsBackendSingleton,
-    NumericsBackend,
-    NumpyNumericsBackend,
-)
 from pymanopt.tools import extend_docstring
 
 
@@ -16,7 +13,7 @@ class _SphereBase(RiemannianSubmanifold):
         *shape,
         name,
         dimension,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         if len(shape) == 0:
             raise TypeError("Need at least one dimension.")
@@ -112,7 +109,7 @@ class Sphere(_SphereBase):
     def __init__(
         self,
         *shape: int,
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
@@ -196,7 +193,7 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     def __init__(
         self,
         matrix,
-        backend: NumericsBackend = NumpyNumericsBackend(),  # noqa: B008
+        backend: Backend = NumpyBackend(),  # noqa: B008
     ):
         # TODO: MATRIX SHOULD ALREADY BE IN A CERTAIN BACKEND,
         # RAISE EXCEPTION IF NOT CONSISTENT WITH SPECIFIED BACKEND
@@ -214,7 +211,7 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         super().__init__(name, dimension, matrix, subspace_projector, backend)
 
     @RiemannianSubmanifold.backend.setter
-    def _(self, backend: NumericsBackend):
+    def _(self, backend: Backend):
         super().backend = backend
         self._matrix = backend.toarray(self._matrix)
         q, _ = backend.linalg_qr(self._matrix)
@@ -239,7 +236,7 @@ class SphereSubspaceComplementIntersection(
     def __init__(
         self,
         matrix,
-        backend: NumericsBackend = NumpyNumericsBackend(),  # noqa: B008
+        backend: Backend = NumpyBackend(),  # noqa: B008
     ):
         if backend is None:
             raise ValueError("A backend must always be specified")
@@ -257,7 +254,7 @@ class SphereSubspaceComplementIntersection(
         super().__init__(name, dimension, matrix, subspace_projector, backend)
 
     @RiemannianSubmanifold.backend.setter
-    def _(self, backend: NumericsBackend):
+    def _(self, backend: Backend):
         super().backend = backend
         self._matrix = backend.toarray(self._matrix)
         q, _ = backend.linalg_qr(self._matrix)

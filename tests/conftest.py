@@ -8,12 +8,10 @@ import pytest
 import tensorflow as tf
 import torch
 
-from pymanopt.numerics import (  # TensorflowNumericsBackend,
-    JaxNumericsBackend,
-    NumericsBackend,
-    NumpyNumericsBackend,
-    PytorchNumericsBackend,
-)
+from pymanopt.backends import Backend
+from pymanopt.backends.jax_backend import JaxBackend
+from pymanopt.backends.numpy_backend import NumpyBackend
+from pymanopt.backends.pytorch_backend import PytorchBackend
 
 
 matplotlib.use("Agg")
@@ -32,36 +30,36 @@ def initialize_test_state():
 
 
 _REAL_NUMERICS_BACKENDS = [
-    NumpyNumericsBackend(np.float64),
-    PytorchNumericsBackend(torch.float64),
-    JaxNumericsBackend(jnp.float64),
-    # TensorflowNumericsBackend(tf.float64),
-    NumpyNumericsBackend(np.float32),
-    PytorchNumericsBackend(torch.float32),
-    JaxNumericsBackend(jnp.float32),
-    # TensorflowNumericsBackend(tf.float32),
+    NumpyBackend(np.float64),
+    PytorchBackend(torch.float64),
+    JaxBackend(jnp.float64),
+    # TensorflowBackend(tf.float64),
+    NumpyBackend(np.float32),
+    PytorchBackend(torch.float32),
+    JaxBackend(jnp.float32),
+    # TensorflowBackend(tf.float32),
 ]
 
 _COMPLEX_NUMERICS_BACKENDS = [
-    NumpyNumericsBackend(np.complex128),
-    PytorchNumericsBackend(torch.complex128),
-    JaxNumericsBackend(jnp.complex128),
-    # TensorflowNumericsBackend(tf.complex128),
+    NumpyBackend(np.complex128),
+    PytorchBackend(torch.complex128),
+    JaxBackend(jnp.complex128),
+    # TensorflowBackend(tf.complex128),
 ]
 
 
 @pytest.fixture(params=_REAL_NUMERICS_BACKENDS)
-def real_numerics_backend(request) -> NumericsBackend:
+def real_numerics_backend(request) -> Backend:
     return request.param
 
 
 @pytest.fixture(params=_COMPLEX_NUMERICS_BACKENDS)
-def complex_numerics_backend(request) -> NumericsBackend:
+def complex_numerics_backend(request) -> Backend:
     return request.param
 
 
 @pytest.fixture(params=_REAL_NUMERICS_BACKENDS + _COMPLEX_NUMERICS_BACKENDS)
-def all_numerics_backend(request) -> NumericsBackend:
+def all_numerics_backend(request) -> Backend:
     return request.param
 
 

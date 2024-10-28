@@ -1,15 +1,13 @@
 import pytest
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds import Stiefel
-from pymanopt.numerics import NumericsBackend
 from pymanopt.tools import testing
 
 
 class TestStiefelManifold:
     @pytest.fixture(autouse=True)
-    def setup(
-        self, real_numerics_backend: NumericsBackend, product_dimension: int
-    ):
+    def setup(self, real_numerics_backend: Backend, product_dimension: int):
         self.m = m = 10
         self.n = n = 3
         self.k = k = product_dimension

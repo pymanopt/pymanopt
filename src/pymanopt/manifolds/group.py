@@ -2,8 +2,8 @@ from typing import Literal
 
 import scipy.special
 
+from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
-from pymanopt.numerics import DummyNumericsBackendSingleton, NumericsBackend
 from pymanopt.tools import extend_docstring
 
 
@@ -18,7 +18,7 @@ class _UnitaryBase(RiemannianSubmanifold):
         k: int,
         dimension: int,
         retraction: Literal["qr", "polar"],
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._k = k
         self._n = n
@@ -189,7 +189,7 @@ class SpecialOrthogonalGroup(_UnitaryBase):
         *,
         k: int = 1,
         retraction: Literal["qr", "polar"] = "qr",
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         if k == 1:
             name = f"Special orthogonal group SO({n})"
@@ -266,7 +266,7 @@ class UnitaryGroup(_UnitaryBase):
         *,
         k: int = 1,
         retraction: Literal["qr", "polar"] = "qr",
-        backend: NumericsBackend = DummyNumericsBackendSingleton,
+        backend: Backend = DummyBackendSingleton,
     ):
         self._n = n
         self._k = k

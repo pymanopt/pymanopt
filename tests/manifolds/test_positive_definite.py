@@ -1,14 +1,14 @@
 import pytest
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds import (
     HermitianPositiveDefinite,
     SpecialHermitianPositiveDefinite,
     SymmetricPositiveDefinite,
 )
-from pymanopt.numerics.core import NumericsBackend
 
 
-def geodesic(point_a, point_b, alpha: float, backend: NumericsBackend):
+def geodesic(point_a, point_b, alpha: float, backend: Backend):
     if alpha < 0 or 1 < alpha:
         raise ValueError("Exponent must be in [0,1]")
     c = backend.linalg_cholesky(point_a)
@@ -23,9 +23,7 @@ def geodesic(point_a, point_b, alpha: float, backend: NumericsBackend):
 
 class TestSymmetricPositiveDefiniteManifold:
     @pytest.fixture(autouse=True)
-    def setup(
-        self, real_numerics_backend: NumericsBackend, product_dimension: int
-    ):
+    def setup(self, real_numerics_backend: Backend, product_dimension: int):
         self.n = n = 10
         self.k = k = product_dimension
         self.point_shape = (k, n, n) if k > 1 else (n, n)
@@ -245,9 +243,7 @@ class TestHermitianPositiveDefiniteManifold(
     TestSymmetricPositiveDefiniteManifold
 ):
     @pytest.fixture(autouse=True)
-    def setup(
-        self, complex_numerics_backend: NumericsBackend, product_dimension: int
-    ):
+    def setup(self, complex_numerics_backend: Backend, product_dimension: int):
         self.n = n = 10
         self.k = k = product_dimension
         self.point_shape = (k, n, n) if k > 1 else (n, n)
@@ -262,9 +258,7 @@ class TestSpecialHermitianPositiveDefiniteManifold(
     TestHermitianPositiveDefiniteManifold
 ):
     @pytest.fixture(autouse=True)
-    def setup(
-        self, complex_numerics_backend: NumericsBackend, product_dimension: int
-    ):
+    def setup(self, complex_numerics_backend: Backend, product_dimension: int):
         self.n = n = 10
         self.k = k = product_dimension
         self.point_shape = (k, n, n) if k > 1 else (n, n)

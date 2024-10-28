@@ -1,14 +1,12 @@
 import pytest
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds import PoincareBall
-from pymanopt.numerics import NumericsBackend
 
 
 class TestPoincareBallManifold:
     @pytest.fixture(autouse=True)
-    def setup(
-        self, real_numerics_backend: NumericsBackend, product_dimension: int
-    ):
+    def setup(self, real_numerics_backend: Backend, product_dimension: int):
         self.n = 50
         self.k = product_dimension
         self.backend = real_numerics_backend
