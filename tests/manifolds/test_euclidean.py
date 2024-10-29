@@ -5,10 +5,10 @@ from pymanopt.manifolds import ComplexEuclidean, Euclidean
 
 class TestEuclideanManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend):
+    def setup(self, real_backend):
         self.m = m = 10
         self.n = n = 5
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = Euclidean(m, n, backend=self.backend)
 
     def test_dim(self):
@@ -118,10 +118,10 @@ class TestEuclideanManifold:
 
 class TestComplexEuclideanManifold(TestEuclideanManifold):
     @pytest.fixture(autouse=True)
-    def setup(self, complex_numerics_backend):
+    def setup(self, complex_backend):
         self.m = m = 10
         self.n = n = 5
-        self.backend = complex_numerics_backend
+        self.backend = complex_backend
         self.manifold = ComplexEuclidean(m, n, backend=self.backend)
 
     def test_dim(self):

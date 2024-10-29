@@ -5,10 +5,10 @@ from pymanopt.manifolds import Oblique
 
 class TestObliqueManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend):
+    def setup(self, real_backend):
         self.m = m = 100
         self.n = n = 50
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = Oblique(m, n, backend=self.backend)
 
     # def test_dim(self):

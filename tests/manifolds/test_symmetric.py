@@ -6,10 +6,10 @@ from pymanopt.manifolds import Symmetric
 
 class TestSymmetricManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend):
+    def setup(self, real_backend):
         self.n = n = 10
         self.k = k = 5
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = Symmetric(n, k, backend=self.backend)
 
     def test_dim(self):

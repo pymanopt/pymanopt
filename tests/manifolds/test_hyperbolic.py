@@ -6,10 +6,10 @@ from pymanopt.manifolds import PoincareBall
 
 class TestPoincareBallManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend: Backend, product_dimension: int):
+    def setup(self, real_backend: Backend, product_dimension: int):
         self.n = 50
         self.k = product_dimension
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = PoincareBall(self.n, k=self.k, backend=self.backend)
 
     def test_dim(self):

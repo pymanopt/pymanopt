@@ -22,7 +22,7 @@ class NumpyBackend(Backend):
     ##########################################################################
     array_t = np.ndarray
 
-    def __init__(self, dtype=np.float64):
+    def __init__(self, dtype: type = np.float64):
         assert (
             dtype == np.float32
             or dtype == np.float64

@@ -13,10 +13,10 @@ class TestSphereManifold:
     @pytest.fixture(
         autouse=True,
     )
-    def setup(self, real_numerics_backend):
+    def setup(self, real_backend):
         self.m = m = 100
         self.n = n = 50
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = Sphere(m, n, backend=self.backend)
 
         # For automatic testing of euclidean_to_riemannian_hessian
@@ -182,9 +182,9 @@ class TestSphereManifold:
 
 class TestSphereSubspaceIntersectionManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend):
+    def setup(self, real_backend):
         self.n = 2
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         # Defines the 1-sphere intersected with the 1-dimensional subspace
         # passing through (1, 1) / sqrt(2). This creates a 0-dimensional
         # manifold as it only consists of isolated points in R^2.
@@ -244,9 +244,9 @@ class TestSphereSubspaceIntersectionManifold:
 
 class TestSphereSubspaceComplementIntersectionManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend):
+    def setup(self, real_backend):
         self.n = 2
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         # Define the 1-sphere intersected with the 1-dimensional subspace
         # orthogonal to the line passing through (1, 1) / sqrt(2). This creates
         # a 0-dimensional manifold as it only consits of isolated points in

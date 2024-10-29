@@ -6,10 +6,10 @@ from pymanopt.manifolds import SpecialOrthogonalGroup, UnitaryGroup
 
 class TestSpecialOrthogonalGroup:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend: Backend):
+    def setup(self, real_backend: Backend):
         self.n = n = 10
         self.k = k = 3
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.so_product = SpecialOrthogonalGroup(n, k=k, backend=self.backend)
         self.so = SpecialOrthogonalGroup(n, backend=self.backend)
         self.so_polar = SpecialOrthogonalGroup(
@@ -80,10 +80,10 @@ class TestSpecialOrthogonalGroup:
 
 class TestUnitaryGroup:
     @pytest.fixture(autouse=True)
-    def setup(self, complex_numerics_backend: Backend):
+    def setup(self, complex_backend: Backend):
         self.n = n = 10
         self.k = k = 3
-        self.backend = complex_numerics_backend
+        self.backend = complex_backend
         self.product_manifold = UnitaryGroup(n, k=k, backend=self.backend)
         self.unitary_group = UnitaryGroup(n, backend=self.backend)
         self.unitary_group_polar = UnitaryGroup(
