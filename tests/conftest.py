@@ -9,9 +9,13 @@ import tensorflow as tf
 import torch
 
 from pymanopt.backends import Backend
+from pymanopt.backends.autograd_backend import AutogradBackend
 from pymanopt.backends.jax_backend import JaxBackend
 from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.backends.pytorch_backend import PytorchBackend
+
+
+# from pymanopt.backends.tensorflow_backend import TensorflowBackend
 
 
 matplotlib.use("Agg")
@@ -31,10 +35,12 @@ def initialize_test_state():
 
 _REAL_NUMERICS_BACKENDS = [
     NumpyBackend(np.float64),
+    AutogradBackend(anp.float64),
     PytorchBackend(torch.float64),
     JaxBackend(jnp.float64),
     # TensorflowBackend(tf.float64),
     NumpyBackend(np.float32),
+    AutogradBackend(anp.float32),
     PytorchBackend(torch.float32),
     JaxBackend(jnp.float32),
     # TensorflowBackend(tf.float32),
@@ -42,6 +48,7 @@ _REAL_NUMERICS_BACKENDS = [
 
 _COMPLEX_NUMERICS_BACKENDS = [
     NumpyBackend(np.complex128),
+    AutogradBackend(anp.complex128),
     PytorchBackend(torch.complex128),
     JaxBackend(jnp.complex128),
     # TensorflowBackend(tf.complex128),

@@ -9,7 +9,7 @@ from pymanopt.manifolds import Elliptope
 from pymanopt.optimizers import ConjugateGradient
 
 
-SUPPORTED_BACKENDS = ("jax", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("autograd", "jax", "pytorch", "tensorflow")
 
 
 def create_cost(manifold, epsilon, backend):

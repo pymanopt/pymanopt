@@ -1,9 +1,9 @@
 import functools
 
 import autograd
-import autograd.numpy as np
+import numpy as np
 
-from pymanopt.backends.backend import Backend
+from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.tools import (
     bisect_sequence,
     unpack_singleton_sequence_return_value,
@@ -18,36 +18,13 @@ def conjugate_result(function):
     return wrapper
 
 
-class AutogradBackend(Backend):
+class AutogradBackend(NumpyBackend):
     ##########################################################################
     # Common attributes, properties and methods
     ##########################################################################
-    array_t = np.ndarray
 
-    def __init__(self, dtype=np.float64):
-        assert (
-            dtype == np.float32
-            or dtype == np.float64
-            or dtype == np.complex64
-            or dtype == np.complex128
-        ), f"dtype {dtype} is not supported"
-        self._dtype = dtype
-
-    @property
-    def dtype(self):
-        return self._dtype
-
-    @property
-    def is_dtype_real(self):
-        return np.issubdtype(self.dtype, np.floating)
-
-    @staticmethod
-    def DEFAULT_REAL_DTYPE():
-        return np.array([1.0]).dtype
-
-    @staticmethod
-    def DEFAULT_COMPLEX_DTYPE():
-        return np.array([1j]).dtype
+    def __init__(self, dtype: type = np.float64):
+        super().__init__(dtype)
 
     def __repr__(self):
         return f"AutogradBackend(dtype={self.dtype})"

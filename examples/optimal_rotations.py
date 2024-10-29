@@ -9,7 +9,7 @@ from pymanopt.manifolds import SpecialOrthogonalGroup
 from pymanopt.optimizers import SteepestDescent
 
 
-SUPPORTED_BACKENDS = ("jax", "numpy", "pytorch", "tensorflow")
+SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
 def create_cost_and_derivates(manifold, ABt, backend):
