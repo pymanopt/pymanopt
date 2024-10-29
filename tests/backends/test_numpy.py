@@ -7,7 +7,7 @@ import pymanopt
 from . import _backend_tests
 
 
-class TestNumPyBackend:
+class TestNumpyBackend:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.n = 10

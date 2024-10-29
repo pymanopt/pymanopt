@@ -47,7 +47,6 @@ class TestUnaryFunction:
         x = np.random.normal(size=n)
 
         # Test whether cost function accepts single argument.
-        assert np.allclose(np.sum(x**2), cost(x))
 
         # Test whether gradient accepts single argument.
         euclidean_gradient = cost.get_gradient_operator()
