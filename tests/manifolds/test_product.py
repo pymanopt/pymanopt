@@ -95,19 +95,19 @@ class TestProductManifold:
         X = s.random_point()
         Y = s.random_point()
         Yexplog = s.exp(X, tangent_vector=s.log(X, Y))
-        self.backend.assert_almost_equal(s.dist(point_a=Y, point_b=Yexplog), 0)
+        self.backend.assert_allclose(s.dist(point_a=Y, point_b=Yexplog), 0)
 
     def test_log_exp_inverse(self):
         s = self.manifold
         X = s.random_point()
         U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
-        self.backend.assert_array_almost_equal(U[0], Ulogexp[0])
-        self.backend.assert_array_almost_equal(U[1], Ulogexp[1])
+        self.backend.assert_allclose(U[0], Ulogexp[0])
+        self.backend.assert_allclose(U[1], Ulogexp[1])
 
     def test_pair_mean(self):
         s = self.manifold
         X = s.random_point()
         Y = s.random_point()
         Z = s.pair_mean(X, Y)
-        self.backend.assert_array_almost_equal(s.dist(X, Z), s.dist(Y, Z))
+        self.backend.assert_allclose(s.dist(X, Z), s.dist(Y, Z))

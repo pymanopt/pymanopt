@@ -15,7 +15,9 @@ from pymanopt.tools import (
 
 def elementary_math_function(
     f: Callable[["TensorflowBackend", tf.Tensor], tf.Tensor],
-) -> Callable[[Union[tf.Tensor, Number]], Union[tf.Tensor, Number]]:
+) -> Callable[
+    ["TensorflowBackend", Union[tf.Tensor, Number]], Union[tf.Tensor, Number]
+]:
     def inner(
         self: "TensorflowBackend", x: Union[tf.Tensor, Number]
     ) -> Union[tf.Tensor, Number]:
@@ -33,6 +35,7 @@ class TensorflowBackend(Backend):
     ##########################################################################
     # Common attributes, properties and methods
     ##########################################################################
+    array_t = tf.Tensor  # type: ignore
     _dtype: tf.DType
 
     def __init__(self, dtype=tf.float64):
@@ -370,6 +373,15 @@ class TensorflowBackend(Backend):
         return tf.experimental.numpy.logspace(
             start, stop, num, dtype=self.dtype
         )
+
+    def matvec(self, A: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
+        assert A.ndim >= 2
+        if x.ndim == A.ndim - 1:
+            return self.squeeze(A @ tf.expand_dims(x, -1))
+        return tf.matmul(A, x)
+
+    def matmul(self, A: tf.Tensor, B: tf.Tensor) -> tf.Tensor:
+        return tf.matmul(A, B)
 
     def ndim(self, array: tf.Tensor) -> int:
         return array.shape.rank

@@ -20,7 +20,7 @@ class NumpyBackend(Backend):
     ##########################################################################
     # Common attributes, properties and methods
     ##########################################################################
-    array_t = np.ndarray
+    array_t = np.ndarray  # type: ignore
 
     def __init__(self, dtype: type = np.float64):
         assert (

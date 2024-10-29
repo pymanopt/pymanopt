@@ -37,7 +37,7 @@ class PytorchBackend(Backend):
     ##########################################################################
     # Common attributes, properties and methods
     ##########################################################################
-    array_t = torch.Tensor
+    array_t = torch.Tensor  # type: ignore
     _dtype: torch.dtype
 
     def __init__(self, dtype=torch.float64):
@@ -160,7 +160,7 @@ class PytorchBackend(Backend):
         return torch.abs(array)
 
     def all(self, array: torch.Tensor) -> bool:
-        return bool(torch.all(torch.tensor(array, dtype=bool)).item())
+        return bool(torch.all(torch.tensor(array, dtype=torch.bool)).item())
 
     def allclose(
         self,
@@ -172,7 +172,7 @@ class PytorchBackend(Backend):
         return torch.allclose(array_a, array_b, rtol=rtol, atol=atol)
 
     def any(self, array: torch.Tensor) -> bool:
-        return bool(torch.any(torch.tensor(array, dtype=bool)).item())
+        return bool(torch.any(torch.tensor(array, dtype=torch.bool)).item())
 
     def arange(
         self,
@@ -246,7 +246,7 @@ class PytorchBackend(Backend):
     ) -> torch.Tensor:
         return torch.diagonal(array, dim1=axis1, dim2=axis2)
 
-    def eps(self) -> torch.Tensor:
+    def eps(self) -> float:
         return torch.finfo(self.dtype).eps
 
     @elementary_math_function
