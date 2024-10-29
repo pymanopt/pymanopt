@@ -147,7 +147,7 @@ class PoincareBall(Manifold):
             tangent_vector
             * (
                 self.backend.tanh(norm_point * factor / 2)
-                / (norm_point + (norm_point == 0))
+                / (norm_point + self.backend.array(norm_point == 0.0))
             ),
         )
 

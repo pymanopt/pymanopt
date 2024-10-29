@@ -19,7 +19,9 @@ TupleOrList = Union[list[T], tuple[T, ...]]
 
 
 class ArrayProtocol(Protocol):
-    def __getitem__(self, key: Union[int, slice]) -> "ArrayProtocol":
+    def __getitem__(
+        self, idx: Union[int, slice, tuple[Union[int, slice], ...]]
+    ) -> "ArrayProtocol":
         ...
 
     def __len__(self) -> int:
@@ -44,6 +46,15 @@ class ArrayProtocol(Protocol):
 
     @property
     def shape(self) -> tuple[int, ...]:
+        ...
+
+    def __eq__(self, other: "Union[int, float, ArrayProtocol]") -> bool:
+        ...
+
+    def __leq__(self, other: "Union[int, float, ArrayProtocol]") -> bool:
+        ...
+
+    def __geq__(self, other: "Union[int, float, ArrayProtocol]") -> bool:
         ...
 
 

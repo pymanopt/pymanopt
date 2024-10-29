@@ -96,13 +96,23 @@ class FixedRankEmbedded(RiemannianSubmanifold):
 
     def _apply_ambient(self, vector, matrix):
         if isinstance(vector, (list, tuple)):
-            return vector[0] @ vector[1] @ vector[2].T @ matrix
+            return (
+                vector[0]
+                @ vector[1]
+                @ self.backend.transpose(vector[2])
+                @ matrix
+            )
         return vector @ matrix
 
     def _apply_ambient_transpose(self, vector, matrix):
         if isinstance(vector, (list, tuple)):
-            return vector[2] @ vector[1] @ vector[0].T @ matrix
-        return vector.T @ matrix
+            return (
+                vector[2]
+                @ vector[1]
+                @ self.backend.transpose(vector[0])
+                @ matrix
+            )
+        return self.backend.transpose(vector) @ matrix
 
     def projection(self, point, vector):
         """Project vector in the ambient space to the tangent space.
@@ -119,31 +129,33 @@ class FixedRankEmbedded(RiemannianSubmanifold):
             in the ambient space, or else a tuple ``(U, S, V)`` where ``U @ S @
             V`` is in the ambient space (of low-rank matrices).
         """
+        bk = self.backend
         if isinstance(vector, (list, tuple)):
-            vector = vector[0] @ vector[1] @ vector[2].T
+            vector = vector[0] @ vector[1] @ bk.transpose(vector[2])
         # ZV = self._apply_ambient(vector, point[2].T)
-        ZV = vector @ point[2].T
-        UtZV = point[0].T @ ZV
+        ZV = vector @ bk.transpose(point[2])
+        UtZV = bk.transpose(point[0]) @ ZV
         # ZtU = self._apply_ambient_transpose(vector, point[0])
-        ZtU = vector.T @ point[0]
+        ZtU = bk.transpose(vector) @ point[0]
 
         Up = ZV - point[0] @ UtZV
         M = UtZV
-        Vp = ZtU - point[2].T @ UtZV.T
+        Vp = ZtU - bk.transpose(point[2]) @ bk.transpose(UtZV)
 
         return _FixedRankTangentVector(Up, M, Vp)
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
+        bk = self.backend
         u, s, vt = point
         du, ds, dvt = euclidean_gradient
 
-        utdu = u.T @ du
+        utdu = bk.transpose(u) @ du
         uutdu = u @ utdu
         Up = (du - uutdu) / s
 
-        vtdv = vt @ dvt.T
-        vvtdv = vt.T @ vtdv
-        Vp = (dvt.T - vvtdv) / s
+        vtdv = vt @ bk.transpose(dvt)
+        vvtdv = bk.transpose(vt) @ vtdv
+        Vp = (bk.transpose(dvt) - vvtdv) / s
 
         identity = self.backend.eye(self._k)
         f = 1 / (
@@ -153,34 +165,33 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         )
 
         M = (
-            f * (utdu - utdu.T) * s
-            + s[:, self.backend.newaxis] * f * (vtdv - vtdv.T)
+            f * (utdu - bk.transpose(utdu)) * s
+            + s[:, self.backend.newaxis] * f * (vtdv - bk.transpose(vtdv))
             + self.backend.diag(ds)
         )
 
         return _FixedRankTangentVector(Up, M, Vp)
 
     def retraction(self, point, tangent_vector):
+        bk = self.backend
         u, s, vt = point
         du, ds, dvt = tangent_vector
 
-        Qu, Ru = self.backend.linalg_qr(du)
-        Qv, Rv = self.backend.linalg_qr(dvt)
-        T = self.backend.vstack(
+        Qu, Ru = bk.linalg_qr(du)
+        Qv, Rv = bk.linalg_qr(dvt)
+        T = bk.vstack(
             (
-                self.backend.hstack((self.backend.diag(s) + ds, Rv.T)),
-                self.backend.hstack(
-                    (Ru, self.backend.zeros((self._k, self._k)))
-                ),
+                bk.hstack((bk.diag(s) + ds, bk.transpose(Rv))),
+                bk.hstack((Ru, bk.zeros((self._k, self._k)))),
             )
         )
         # Numpy svd outputs St as a 1d vector, not a matrix.
-        Ut, St, Vt = self.backend.linalg_svd(T, full_matrices=False)
+        Ut, St, Vt = bk.linalg_svd(T, full_matrices=False)
 
-        U = self.backend.hstack((u, Qu)) @ Ut[:, : self._k]
-        S = St[: self._k] + self.backend.spacing(1)
-        V = self.backend.hstack((vt.T, Qv)) @ Vt.T[:, : self._k]
-        return _FixedRankPoint(U, S, V.T)
+        U = bk.hstack((u, Qu)) @ Ut[:, : self._k]
+        S = St[: self._k] + bk.spacing(1)
+        V = bk.hstack((bk.transpose(vt), Qv)) @ bk.transpose(Vt)[:, : self._k]
+        return _FixedRankPoint(U, S, bk.transpose(V))
 
     def norm(self, point, tangent_vector):
         return self.backend.sqrt(
@@ -188,23 +199,24 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         )
 
     def random_point(self):
+        bk = self.backend
         u = self._stiefel_m.random_point()
-        s = self.backend.sort(
-            self.backend.random_uniform(size=self._k), descending=True
-        )
-        vt = self._stiefel_n.random_point().T
+        s = bk.sort(bk.random_uniform(size=self._k), descending=True)
+        vt = bk.transpose(self._stiefel_n.random_point())
         return _FixedRankPoint(u, s, vt)
 
     def to_tangent_space(self, point, vector):
+        bk = self.backend
         u, _, vt = point
-        Up = vector.Up - u @ u.T @ vector.Up
-        Vp = vector.Vp - vt.T @ vt @ vector.Vp
+        Up = vector.Up - u @ bk.transpose(u) @ vector.Up
+        Vp = vector.Vp - bk.transpose(vt) @ vt @ vector.Vp
         return _FixedRankTangentVector(Up, vector.M, Vp)
 
     def random_tangent_vector(self, point):
-        Up = self.backend.random_normal(size=(self._m, self._k))
-        Vp = self.backend.random_normal(size=(self._n, self._k))
-        M = self.backend.random_normal(size=(self._k, self._k))
+        bk = self.backend
+        Up = bk.random_normal(size=(self._m, self._k))
+        Vp = bk.random_normal(size=(self._n, self._k))
+        M = bk.random_normal(size=(self._k, self._k))
 
         tangent_vector = self.to_tangent_space(
             point, _FixedRankTangentVector(Up, M, Vp)
@@ -212,10 +224,11 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         return tangent_vector / self.norm(point, tangent_vector)
 
     def embedding(self, point, tangent_vector):
+        bk = self.backend
         u, _, vt = point
-        U = self.backend.hstack((u @ tangent_vector.M + tangent_vector.Up, u))
-        S = self.backend.eye(2 * self._k)
-        V = self.backend.hstack(([vt.T, tangent_vector.Vp]))
+        U = bk.hstack((u @ tangent_vector.M + tangent_vector.Up, u))
+        S = bk.eye(2 * self._k)
+        V = bk.hstack(([bk.transpose(vt), tangent_vector.Vp]))
         return U, S, V
 
     def transport(self, point_a, point_b, tangent_vector_a):

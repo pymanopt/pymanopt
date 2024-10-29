@@ -41,8 +41,8 @@ class TestFixedRankEmbeddedManifold:
         a = e.random_tangent_vector(x)
         b = e.random_tangent_vector(x)
         # First embed in the ambient space
-        A = x[0] @ a[1] @ x[2] + a[0] @ x[2] + x[0] @ a[2].T
-        B = x[0] @ b[1] @ x[2] + b[0] @ x[2] + x[0] @ b[2].T
+        A = x[0] @ a[1] @ x[2] + a[0] @ x[2] + x[0] @ bk.transpose(a[2])
+        B = x[0] @ b[1] @ x[2] + b[0] @ x[2] + x[0] @ bk.transpose(b[2])
         bk.assert_allclose(bk.sum(A * B), e.inner_product(x, a, b))
 
     def test_proj_range(self):
@@ -54,10 +54,12 @@ class TestFixedRankEmbeddedManifold:
         g = m.projection(x, v)
         # Check that g is a true tangent vector
         bk.assert_allclose(
-            g[0].T @ x[0], bk.zeros((self.k, self.k)), atol=1e-6
+            bk.transpose(g[0]) @ x[0], bk.zeros((self.k, self.k)), atol=1e-6
         )
         bk.assert_allclose(
-            g[2].T @ x[2].T, bk.zeros((self.k, self.k)), atol=1e-6
+            bk.transpose(g[2]) @ bk.transpose(x[2]),
+            bk.zeros((self.k, self.k)),
+            atol=1e-6,
         )
 
     def test_projection(self):
@@ -76,8 +78,8 @@ class TestFixedRankEmbeddedManifold:
         # Return to the ambient representation
         g = m.embedding(x, g)
         g_disp = m.embedding(x, g_disp)
-        g = g[0] @ g[1] @ g[2].T
-        g_disp = g_disp[0] @ g_disp[1] @ g_disp[2].T
+        g = g[0] @ g[1] @ bk.transpose(g[2])
+        g_disp = g_disp[0] @ g_disp[1] @ bk.transpose(g_disp[2])
 
         assert bk.linalg_norm(g - v) < bk.linalg_norm(g_disp - v)
 
@@ -108,8 +110,12 @@ class TestFixedRankEmbeddedManifold:
         assert x[0].shape == (self.m, self.k)
         assert x[1].shape == (self.k,)
         assert x[2].shape == (self.k, self.n)
-        bk.assert_allclose(x[0].T @ x[0], bk.eye(self.k), atol=1e-6)
-        bk.assert_allclose(x[2] @ x[2].T, bk.eye(self.k), atol=1e-6)
+        bk.assert_allclose(
+            bk.transpose(x[0]) @ x[0], bk.eye(self.k), atol=1e-6
+        )
+        bk.assert_allclose(
+            x[2] @ bk.transpose(x[2]), bk.eye(self.k), atol=1e-6
+        )
 
         y = e.random_point()
         assert bk.linalg_norm(x[0] - y[0]) > 1e-6
@@ -133,9 +139,9 @@ class TestFixedRankEmbeddedManifold:
         z = bk.random_normal(size=(self.m, self.n))
 
         # Set u, s, v so that z = u @ s @ v.T
-        u, s, v = bk.linalg_svd(z, full_matrices=False)
+        u, s, vt = bk.linalg_svd(z, full_matrices=False)
         s = bk.diag(s)
-        v = v.T
+        v = bk.transpose(vt)
 
         w = bk.random_normal(size=(self.n, self.n))
 
@@ -148,14 +154,18 @@ class TestFixedRankEmbeddedManifold:
         z = bk.random_normal(size=(self.n, self.m))
 
         # Set u, s, v so that z = u @ s @ v.T
-        u, s, v = bk.linalg_svd(z, full_matrices=False)
+        u, s, vt = bk.linalg_svd(z, full_matrices=False)
         s = bk.diag(s)
-        v = v.T
+        v = bk.transpose(vt)
 
         w = bk.random_normal(size=(self.n, self.n))
 
-        bk.assert_allclose(z.T @ w, m._apply_ambient_transpose(z, w))
-        bk.assert_allclose(z.T @ w, m._apply_ambient_transpose((u, s, v), w))
+        bk.assert_allclose(
+            bk.transpose(z) @ w, m._apply_ambient_transpose(z, w)
+        )
+        bk.assert_allclose(
+            bk.transpose(z) @ w, m._apply_ambient_transpose((u, s, v), w)
+        )
 
     def test_embedding(self):
         bk = self.backend
@@ -163,11 +173,13 @@ class TestFixedRankEmbeddedManifold:
         x = m.random_point()
         z = m.random_tangent_vector(x)
 
-        z_ambient = x[0] @ z[1] @ x[2] + z[0] @ x[2] + x[0] @ z[2].T
+        z_ambient = (
+            x[0] @ z[1] @ x[2] + z[0] @ x[2] + x[0] @ bk.transpose(z[2])
+        )
 
         u, s, v = m.embedding(x, z)
 
-        bk.assert_allclose(z_ambient, u @ s @ v.T)
+        bk.assert_allclose(z_ambient, u @ s @ bk.transpose(v))
 
     def test_euclidean_to_riemannian_hessian(self):
         pass
@@ -181,15 +193,19 @@ class TestFixedRankEmbeddedManifold:
 
         y = self.manifold.retraction(x, u)
 
-        bk.assert_allclose(y[0].T @ y[0], bk.eye(self.k), atol=1e-6)
-        bk.assert_allclose(y[2] @ y[2].T, bk.eye(self.k), atol=1e-6)
+        bk.assert_allclose(
+            bk.transpose(y[0]) @ y[0], bk.eye(self.k), atol=1e-6
+        )
+        bk.assert_allclose(
+            y[2] @ bk.transpose(y[2]), bk.eye(self.k), atol=1e-6
+        )
 
         u = u * 1e-6
         y = self.manifold.retraction(x, u)
         y = y[0] @ bk.diag(y[1]) @ y[2]
 
         u = self.manifold.embedding(x, u)
-        u = u[0] @ u[1] @ u[2].T
+        u = u[0] @ u[1] @ bk.transpose(u[2])
         x = x[0] @ bk.diag(x[1]) @ x[2]
 
         bk.assert_allclose(y, x + u, atol=1e-5)
@@ -209,13 +225,23 @@ class TestFixedRankEmbeddedManifold:
         ds = bk.random_normal(size=self.k)
         dvt = bk.random_normal(size=(self.k, self.n))
 
-        Up = (bk.eye(self.m) - u @ u.T) @ du @ bk.linalg_inv(bk.diag(s))
+        Up = (
+            (bk.eye(self.m) - u @ bk.transpose(u))
+            @ du
+            @ bk.linalg_inv(bk.diag(s))
+        )
         M = (
-            f * (u.T @ du - du.T @ u) @ bk.diag(s)
-            + bk.diag(s) @ f * (vt @ dvt.T - dvt @ vt.T)
+            f * (bk.transpose(u) @ du - bk.transpose(du) @ u) @ bk.diag(s)
+            + bk.diag(s)
+            @ f
+            * (vt @ bk.transpose(dvt) - dvt @ bk.transpose(vt))
             + bk.diag(ds)
         )
-        Vp = (bk.eye(self.n) - vt.T @ vt) @ dvt.T @ bk.linalg_inv(bk.diag(s))
+        Vp = (
+            (bk.eye(self.n) - bk.transpose(vt) @ vt)
+            @ bk.transpose(dvt)
+            @ bk.linalg_inv(bk.diag(s))
+        )
 
         up, m, vp = m.euclidean_to_riemannian_gradient(x, (du, ds, dvt))
 
@@ -234,13 +260,15 @@ class TestFixedRankEmbeddedManifold:
         assert u[1].shape == (self.k, self.k)
         assert u[2].shape == (self.n, self.k)
         bk.assert_allclose(
-            u[0].T @ x[0], bk.zeros((self.k, self.k)), atol=1e-6
+            bk.transpose(u[0]) @ x[0], bk.zeros((self.k, self.k)), atol=1e-6
         )
         bk.assert_allclose(
-            u[2].T @ x[2].T, bk.zeros((self.k, self.k)), atol=1e-6
+            bk.transpose(u[2]) @ bk.transpose(x[2]),
+            bk.zeros((self.k, self.k)),
+            atol=1e-6,
         )
 
         v = e.random_tangent_vector(x)
 
-        bk.assert_almost_equal(e.norm(x, u), 1)
+        bk.assert_allclose(e.norm(x, u), 1.0)
         assert e.norm(x, u - v) > 1e-6

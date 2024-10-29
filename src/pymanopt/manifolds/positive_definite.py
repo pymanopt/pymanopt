@@ -72,7 +72,9 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
     def random_point(self):
         bk = self.backend
         # Generate eigenvalues between 1 and 2.
-        d = 1.0 + bk.to_real_backend().random_uniform(size=(self.k, self.n, 1))
+        d = bk.array(
+            1.0 + bk.to_real_backend().random_uniform(size=(self.k, self.n, 1))
+        )
         # Generate a unitary matrix (with eigenvector columns).
         q, _ = bk.linalg_qr(bk.random_normal(size=(self.n, self.n)))
         # Create a matrix from the eigenvalues and eigenvectors.
@@ -226,7 +228,9 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
 
         # Unit determinant.
         shape = (k, 1, 1) if k > 1 else (1, 1)
-        det = (self.backend.linalg_det(point) ** (1 / n)).reshape(shape)
+        det = self.backend.reshape(
+            self.backend.linalg_det(point) ** (1 / n), shape
+        )
         return point / det
 
     def random_tangent_vector(self, point):
@@ -272,7 +276,9 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         # Normalize them. (This is not necessary, but it is good for numerical
         # stability.)
         shape = (self.k, 1, 1) if self.k > 1 else (1, 1)
-        det = (self.backend.linalg_det(e) ** (1 / self.n)).reshape(shape)
+        det = self.backend.reshape(
+            self.backend.linalg_det(e) ** (1 / self.n), shape
+        )
         return e / det
 
     def retraction(self, point, tangent_vector):
