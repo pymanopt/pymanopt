@@ -229,6 +229,11 @@ class TensorflowBackend(Backend):
     ) -> None:
         tf.debugging.assert_equal(array_a, array_b)
 
+    def concatenate(
+        self, arrays: TupleOrList[tf.Tensor], axis: int = 0
+    ) -> tf.Tensor:
+        return tf.concat(arrays, axis)
+
     @elementary_math_function
     def conjugate(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.conj(array)
@@ -261,7 +266,7 @@ class TensorflowBackend(Backend):
         return tf.concat(arrays, axis=1)
 
     def iscomplexobj(self, array: tf.Tensor) -> bool:
-        return tf.is_complex(array)
+        return tf.experimental.numpy.iscomplex(array)
 
     @elementary_math_function
     def isnan(self, array: tf.Tensor) -> tf.Tensor:
@@ -363,7 +368,8 @@ class TensorflowBackend(Backend):
     def linalg_svd(
         self, array: tf.Tensor, *args, **kwargs
     ) -> tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
-        return tf.linalg.svd(array, *args, **kwargs)
+        s, u, v = tf.linalg.svd(array, *args, **kwargs)
+        return u, s, self.conjugate_transpose(v)
 
     @elementary_math_function
     def log(self, array: tf.Tensor) -> tf.Tensor:
@@ -382,6 +388,9 @@ class TensorflowBackend(Backend):
 
     def matmul(self, A: tf.Tensor, B: tf.Tensor) -> tf.Tensor:
         return tf.matmul(A, B)
+
+    def multieye(self, k: int, n: int) -> tf.Tensor:
+        return tf.eye(n, batch_shape=[k], dtype=self.dtype)
 
     def ndim(self, array: tf.Tensor) -> int:
         return array.shape.rank
@@ -419,6 +428,9 @@ class TensorflowBackend(Backend):
             )
 
     def random_uniform(self, size: Optional[int] = None) -> tf.Tensor:
+        if isinstance(size, int):
+            size = (size,)
+        size = tf.constant(size)
         if self.is_dtype_real:
             return tf.random.uniform(shape=size, dtype=self.dtype)
         else:
@@ -443,8 +455,15 @@ class TensorflowBackend(Backend):
     def sinc(self, array: tf.Tensor) -> tf.Tensor:
         return tf.experimental.numpy.sinc(array)
 
-    def sort(self, array: tf.Tensor) -> tf.Tensor:
-        return tf.sort(array)
+    def sort(self, array: tf.Tensor, descending: bool = False) -> tf.Tensor:
+        return tf.sort(
+            array, direction="DESCENDING" if descending else "ASCENDING"
+        )
+
+    def spacing(self, array: tf.Tensor) -> tf.Tensor:
+        if not isinstance(array, tf.Tensor):
+            array = tf.constant(array, dtype=self.dtype)
+        return tf.convert_to_tensor(np.spacing(array.numpy()))
 
     @elementary_math_function
     def sqrt(self, array: tf.Tensor) -> tf.Tensor:

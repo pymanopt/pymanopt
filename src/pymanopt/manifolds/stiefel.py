@@ -114,8 +114,9 @@ class Stiefel(RiemannianSubmanifold):
         return point
 
     def _retraction_polar(self, point, tangent_vector):
+        bk = self.backend
         Y = point + tangent_vector
-        u, _, vt = self.backend.linalg_svd(Y, full_matrices=False)
+        u, _, vt = bk.linalg_svd(Y, full_matrices=False)
         return u @ vt
 
     def norm(self, point, tangent_vector):
