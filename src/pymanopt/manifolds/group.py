@@ -106,34 +106,7 @@ class _UnitaryBase(RiemannianSubmanifold):
         return tangent_vector_a
 
     def pair_mean(self, point_a, point_b):
-        return self.exp(point_a, self.log(point_a, point_b) / 2)
-
-    # def _random_skew_symmetric_matrix(self, n, k):
-    #     if n == 1:
-    #         return self.backend.zeros((k, 1, 1))
-    #     vector = self._random_upper_triangular_matrix(n, k)
-    #     return vector - self.backend.transpose(vector)
-
-    # def _random_symmetric_matrix(self, n, k):
-    #     bk = self.backend
-    #     if n == 1:
-    #         return bk.random_normal(size=(k, 1, 1))
-    #     vector = self._random_upper_triangular_matrix(n, k)
-    #     vector = vector + bk.transpose(vector)
-    #     # The diagonal elements get scaled by a factor of 2 by the previous
-    #     # operation so re-draw them so every entry of the returned matrix follows a
-    #     # standard normal distribution.
-    #     indices = bk.arange(n)
-    #     vector[:, indices, indices] = bk.random_normal(size=(k, n))
-    #     return vector
-
-    # def _random_upper_triangular_matrix(self, n, k):
-    #     if n < 2:
-    #         raise ValueError("Matrix dimension cannot be less than 2")
-    #     bk = self.backend
-    #     return bk.where(
-    #         bk.triu(bk.ones_bool((n, n))), bk.random_normal(size=(n, n)), 0.0
-    #     )
+        return self.exp(point_a, self.log(point_a, point_b) / 2.0)
 
 
 DOCSTRING_NOTE = """
@@ -268,9 +241,6 @@ class UnitaryGroup(_UnitaryBase):
         retraction: Literal["qr", "polar"] = "qr",
         backend: Backend = DummyBackendSingleton,
     ):
-        self._n = n
-        self._k = k
-
         if k == 1:
             name = f"Unitary group U({n})"
         elif k > 1:

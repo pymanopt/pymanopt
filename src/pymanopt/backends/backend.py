@@ -28,13 +28,22 @@ class ArrayProtocol(Protocol):
     def __add__(self, other: "ArrayProtocol") -> "ArrayProtocol":
         ...
 
-    def __mul__(self, other: "float | ArrayProtocol") -> "ArrayProtocol":
+    def __mul__(self, other: "int | float | ArrayProtocol") -> "ArrayProtocol":
         ...
 
-    def __rmul__(self, other: "float| ArrayProtocol") -> "ArrayProtocol":
+    def __rmul__(
+        self, other: "int | float | ArrayProtocol"
+    ) -> "ArrayProtocol":
+        ...
+
+    def __matmul__(self, other: "ArrayProtocol") -> "ArrayProtocol":
         ...
 
     def __sub__(self, other: "ArrayProtocol") -> "ArrayProtocol":
+        ...
+
+    @property
+    def shape(self) -> tuple[int, ...]:
         ...
 
 
@@ -393,10 +402,10 @@ class Backend(ABC):
         ...
 
     def matvec(self, A: array_t, x: array_t) -> array_t:
-        ...
+        return A @ x
 
     def matmul(self, A: array_t, B: array_t) -> array_t:
-        ...
+        return A @ B
 
     def multieye(self, k: int, n: int) -> array_t:
         return self.tile(self.eye(n), (k, 1, 1))

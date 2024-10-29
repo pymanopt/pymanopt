@@ -44,7 +44,7 @@ class JaxBackend(Backend):
     ##########################################################################
     # Common attributes, properties and methods
     ##########################################################################
-    array_t = jnp.ndarray
+    array_t = jnp.ndarray  # type: ignore
     _dtype: jnp.dtype
 
     def __init__(self, dtype=jnp.float64, random_seed: int = 42):

@@ -141,7 +141,11 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
         self._subspace_projector = subspace_projector
         super().__init__(n, name=name, dimension=dimension, backend=backend)
 
-    def _validate_span_matrix(self, matrix):
+    def _validate_span_matrix(self, matrix, backend: Backend):
+        if not isinstance(matrix, backend.array_t):
+            raise ValueError(
+                f"The span matrix must be of type {backend.array_t}"
+            )
         if len(matrix.shape) != 2:
             raise ValueError("Input array must be 2-dimensional")
         num_rows, num_columns = matrix.shape
@@ -151,30 +155,37 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
             )
 
     def projection(self, point, vector):
-        # before:
-        # return self._subspace_projector @ super().projection(point, vector)
-        # after:
-        return self.backend.squeeze(
-            self._subspace_projector
-            @ self.backend.reshape(super().projection(point, vector), (-1, 1))
+        return self.backend.matvec(
+            self._subspace_projector, super().projection(point, vector)
         )
 
     def random_point(self):
-        point = super().random_point()
         return self._normalize(
-            self.backend.squeeze(
-                self._subspace_projector @ self.backend.reshape(point, (-1, 1))
+            self.backend.matvec(
+                self._subspace_projector, super().random_point()
             )
         )
+        # point = super().random_point()
+        # return self._normalize(
+        #     self.backend.squeeze(
+        #         self._subspace_projector @ self.backend.reshape(point, (-1, 1))
+        #     )
+        # )
 
     def random_tangent_vector(self, point):
-        vector = super().random_tangent_vector(point)
         return self._normalize(
-            self.backend.squeeze(
-                self._subspace_projector
-                @ self.backend.reshape(vector, (-1, 1))
+            self.backend.matvec(
+                self._subspace_projector(),
+                super().random_tangent_vector(point),
             )
         )
+        # vector = super().random_tangent_vector(point)
+        # return self._normalize(
+        #     self.backend.squeeze(
+        #         self._subspace_projector
+        #         @ self.backend.reshape(vector, (-1, 1))
+        #     )
+        # )
 
 
 @extend_docstring(DOCSTRING_NOTE)
@@ -195,9 +206,11 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         matrix,
         backend: Backend = NumpyBackend(),  # noqa: B008
     ):
-        # TODO: MATRIX SHOULD ALREADY BE IN A CERTAIN BACKEND,
-        # RAISE EXCEPTION IF NOT CONSISTENT WITH SPECIFIED BACKEND
-        self._validate_span_matrix(matrix)
+        if backend is None:
+            raise ValueError(
+                f"A backend must always be specified for class {__class__.__name__}"
+            )
+        self._validate_span_matrix(matrix, backend)
         self._matrix = matrix
         m = matrix.shape[0]
         q, _ = backend.linalg_qr(matrix)
@@ -213,7 +226,7 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     @RiemannianSubmanifold.backend.setter
     def _(self, backend: Backend):
         super().backend = backend
-        self._matrix = backend.toarray(self._matrix)
+        self._matrix = backend.array(self._matrix)
         q, _ = backend.linalg_qr(self._matrix)
         self._subspace_projector = q @ self.backend.transpose(q)
 
@@ -239,8 +252,10 @@ class SphereSubspaceComplementIntersection(
         backend: Backend = NumpyBackend(),  # noqa: B008
     ):
         if backend is None:
-            raise ValueError("A backend must always be specified")
-        self._validate_span_matrix(matrix)
+            raise ValueError(
+                f"A backend must always be specified for class {__class__.__name__}"
+            )
+        self._validate_span_matrix(matrix, backend)
         self._matrix = matrix
         m = matrix.shape[0]
         q, _ = backend.linalg_qr(matrix)
