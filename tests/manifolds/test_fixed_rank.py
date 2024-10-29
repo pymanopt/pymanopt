@@ -6,11 +6,11 @@ from pymanopt.manifolds import FixedRankEmbedded
 
 class TestFixedRankEmbeddedManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend: Backend):
+    def setup(self, real_backend: Backend):
         self.m = m = 10
         self.n = n = 5
         self.k = k = 3
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = FixedRankEmbedded(m, n, k, backend=self.backend)
 
         # u, s, vt = self.manifold.random_point()

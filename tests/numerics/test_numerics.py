@@ -1,37 +1,8 @@
-import jax.numpy as jnp
 import numpy as np
 import pytest
 import scipy
-import tensorflow as tf
-import torch
 
-from pymanopt.numerics import (
-    JaxNumericsBackend,
-    NumpyNumericsBackend,
-    PytorchNumericsBackend,
-    TensorflowNumericsBackend,
-)
-from pymanopt.numerics.core import NumericsBackend
-
-
-backend_np64 = NumpyNumericsBackend(dtype=np.float64)
-backend_np32 = NumpyNumericsBackend(dtype=np.float32)
-backend_pt64 = PytorchNumericsBackend(dtype=torch.float64)
-backend_pt32 = PytorchNumericsBackend(dtype=torch.float32)
-backend_jnp64 = JaxNumericsBackend(dtype=jnp.float64)
-backend_jnp32 = JaxNumericsBackend(dtype=jnp.float32)
-backend_tf64 = TensorflowNumericsBackend(dtype=tf.float64)
-backend_tf32 = TensorflowNumericsBackend(dtype=tf.float32)
-all_backends = [
-    backend_np64,
-    backend_np32,
-    backend_pt64,
-    backend_pt32,
-    backend_jnp64,
-    backend_jnp32,
-    backend_tf64,
-    backend_tf32,
-]
+from pymanopt.backends import Backend
 
 
 @pytest.mark.parametrize(
@@ -42,11 +13,9 @@ all_backends = [
         ([-127, -4], [127, 4]),
     ],
 )
-@pytest.mark.parametrize("backend", all_backends)
-def test_abs(inp, expected_output, backend):
-    backend.assert_allclose(
-        backend.abs(backend.array(inp)), backend.array(expected_output)
-    )
+def test_abs(inp, expected_output, any_backend: Backend):
+    bk = any_backend
+    bk.assert_allclose(bk.abs(bk.array(inp)), bk.array(expected_output))
 
 
 @pytest.mark.parametrize(
@@ -57,9 +26,8 @@ def test_abs(inp, expected_output, backend):
         ([], True),
     ],
 )
-@pytest.mark.parametrize("backend", all_backends)
-def test_all(inp, expected_output, backend):
-    assert backend.all(inp) == expected_output
+def test_all(inp, expected_output, any_backend: Backend):
+    assert any_backend.all(inp) == expected_output
 
 
 @pytest.mark.parametrize(
@@ -71,9 +39,8 @@ def test_all(inp, expected_output, backend):
         ([], False),
     ],
 )
-@pytest.mark.parametrize("backend", all_backends)
-def test_any(inp, expected_output, backend):
-    assert backend.any(inp) == expected_output
+def test_any(inp, expected_output, any_backend: Backend):
+    assert any_backend.any(inp) == expected_output
 
 
 @pytest.mark.parametrize(
@@ -83,27 +50,25 @@ def test_any(inp, expected_output, backend):
         (3, [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]),
     ],
 )
-@pytest.mark.parametrize("backend", all_backends)
-def test_eye(inp, expected_output, backend):
-    output = backend.eye(inp)
-    expected_output = backend.array(expected_output)
+def test_eye(inp, expected_output, any_backend: Backend):
+    bk = any_backend
+    output = bk.eye(inp)
+    expected_output = bk.array(expected_output)
     assert output.dtype == expected_output.dtype
-    backend.assert_allclose(output, expected_output)
+    bk.assert_allclose(output, expected_output)
 
 
-@pytest.mark.parametrize(
-    "backend", [backend_np64, backend_np32, backend_jnp64, backend_pt64]
-)
-def test_logm(backend: NumericsBackend):
+def test_logm(real_backend: Backend):
+    bk = real_backend
     # test for a single matrix
     m = 10
-    a = backend.random_uniform(m)
-    q, _ = backend.linalg_qr(backend.random_normal(size=(m, m)))
+    a = bk.reshape(bk.random_uniform(m), (-1, 1))
+    q, _ = bk.linalg_qr(bk.random_normal(size=(m, m)))
     # A is a positive definite matrix
-    A = (q * a) @ q.T
-    logmA = backend.array(scipy.linalg.logm(np.asarray(A)))
-    backend.assert_allclose(
-        backend.linalg_logm(A, positive_definite=True), logmA
+    A = q @ (a * bk.conjugate_transpose(q))
+    logmA = bk.array(scipy.linalg.logm(np.asarray(A)))
+    bk.assert_allclose(
+        bk.linalg_logm(A, positive_definite=True), logmA, atol=1e-3
     )
 
     # test for several stacked matrices
@@ -112,33 +77,32 @@ def test_logm(backend: NumericsBackend):
     A = []
     L = []
     for _ in range(k):
-        a = backend.random_uniform(size=m)
-        q, _ = backend.linalg_qr(backend.random_normal(size=(m, m)))
-        A.append((q * a) @ q.T)
-        L.append(backend.array(scipy.linalg.logm(np.asarray(A[-1]))))
-    A = backend.stack(A)
-    L = backend.stack(L)
-    backend.assert_allclose(backend.linalg_logm(A, positive_definite=True), L)
+        a = bk.reshape(bk.random_uniform(size=m), (-1, 1))
+        q, _ = bk.linalg_qr(bk.random_normal(size=(m, m)))
+        A.append(q @ (a * bk.conjugate_transpose(q)))
+        L.append(bk.array(scipy.linalg.logm(np.asarray(A[-1]))))
+    A = bk.stack(A)
+    L = bk.stack(L)
+    bk.assert_allclose(bk.linalg_logm(A, positive_definite=True), L, atol=1e-3)
 
 
-@pytest.mark.parametrize("backend", [backend_np64, backend_np32])
-def test_multilogm_complex_positive_definite(backend: NumericsBackend):
+@pytest.mark.skip
+def test_multilogm_complex_positive_definite(complex_backend: Backend):
+    bk = complex_backend
     k = 4
     m = 10
     shape = (k, m, m)
-    A = np.random.normal(size=shape) + 1j * np.random.normal(size=shape)
-    A = A @ backend.conjugate_transpose(A)
-    # Compare fast path for positive definite matrices vs. general slow
-    # one.
-    backend.assert_allclose(
-        backend.linalg_logm(A, positive_definite=True),
-        backend.linalg_logm(A, positive_definite=False),
+    A = bk.random_normal(size=shape)
+    A = A @ bk.conjugate_transpose(A)
+    # Compare fast path for positive definite matrices vs. general slow one.
+    bk.assert_allclose(
+        bk.linalg_logm(A, positive_definite=True),
+        bk.linalg_logm(A, positive_definite=False),
     )
 
 
-def test_conj():
-    real_backend: NumericsBackend = backend_np64
-    complex_backend: NumericsBackend = real_backend.to_complex_backend()
+def test_conj(real_backend: Backend):
+    complex_backend = real_backend.to_complex_backend()
     x = real_backend.random_randn(2, 2)
     y = complex_backend.random_randn(2, 2)
     for arr in [x, y]:

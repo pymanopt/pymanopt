@@ -72,3 +72,6 @@ manopt-*
 
 # setuptools-scm
 src/pymanopt/_version.py
+
+# package managers
+*.lock

@@ -6,12 +6,12 @@ from pymanopt.manifolds import ComplexGrassmann, Grassmann
 
 class TestGrassmannManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend: Backend, product_dimension: int):
+    def setup(self, real_backend: Backend, product_dimension: int):
         self.n = n = 5
         self.p = p = 2
         self.k = k = product_dimension
         self.point_shape = (k, n, p) if k > 1 else (n, p)
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = Grassmann(n, p, k=k, backend=self.backend)
 
         self.projection = (
@@ -161,12 +161,12 @@ class TestGrassmannManifold:
 
 class TestComplexGrassmannManifold(TestGrassmannManifold):
     @pytest.fixture(autouse=True)
-    def setup(self, complex_numerics_backend: Backend, product_dimension: int):
+    def setup(self, complex_backend: Backend, product_dimension: int):
         self.n = n = 5
         self.p = p = 2
         self.k = k = product_dimension
         self.point_shape = (k, n, p) if k > 1 else (n, p)
-        self.backend = complex_numerics_backend
+        self.backend = complex_backend
         self.manifold = ComplexGrassmann(n, p, k=k, backend=self.backend)
 
         self.projection = lambda x, u: u - x @ x.T @ u

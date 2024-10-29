@@ -7,12 +7,12 @@ from pymanopt.tools import testing
 
 class TestStiefelManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend: Backend, product_dimension: int):
+    def setup(self, real_backend: Backend, product_dimension: int):
         self.m = m = 10
         self.n = n = 3
         self.k = k = product_dimension
         # self.point_shape = (k, n, n) if k > 1 else (n, n)
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = Stiefel(
             m, n, k=k, retraction="qr", backend=self.backend
         )

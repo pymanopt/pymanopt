@@ -23,11 +23,11 @@ def geodesic(point_a, point_b, alpha: float, backend: Backend):
 
 class TestSymmetricPositiveDefiniteManifold:
     @pytest.fixture(autouse=True)
-    def setup(self, real_numerics_backend: Backend, product_dimension: int):
+    def setup(self, real_backend: Backend, product_dimension: int):
         self.n = n = 10
         self.k = k = product_dimension
         self.point_shape = (k, n, n) if k > 1 else (n, n)
-        self.backend = real_numerics_backend
+        self.backend = real_backend
         self.manifold = SymmetricPositiveDefinite(n, k=k, backend=self.backend)
 
     def test_dim(self):
@@ -243,11 +243,11 @@ class TestHermitianPositiveDefiniteManifold(
     TestSymmetricPositiveDefiniteManifold
 ):
     @pytest.fixture(autouse=True)
-    def setup(self, complex_numerics_backend: Backend, product_dimension: int):
+    def setup(self, complex_backend: Backend, product_dimension: int):
         self.n = n = 10
         self.k = k = product_dimension
         self.point_shape = (k, n, n) if k > 1 else (n, n)
-        self.backend = complex_numerics_backend
+        self.backend = complex_backend
         self.manifold = HermitianPositiveDefinite(n, k=k, backend=self.backend)
 
     def test_dim(self):
@@ -258,12 +258,12 @@ class TestSpecialHermitianPositiveDefiniteManifold(
     TestHermitianPositiveDefiniteManifold
 ):
     @pytest.fixture(autouse=True)
-    def setup(self, complex_numerics_backend: Backend, product_dimension: int):
+    def setup(self, complex_backend: Backend, product_dimension: int):
         self.n = n = 10
         self.k = k = product_dimension
         self.point_shape = (k, n, n) if k > 1 else (n, n)
         self.det_shape = (k,) if k > 1 else ()
-        self.backend = complex_numerics_backend
+        self.backend = complex_backend
         self.manifold = SpecialHermitianPositiveDefinite(
             n, k=k, backend=self.backend
         )

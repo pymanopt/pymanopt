@@ -15,9 +15,6 @@ from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.backends.pytorch_backend import PytorchBackend
 
 
-# from pymanopt.backends.tensorflow_backend import TensorflowBackend
-
-
 matplotlib.use("Agg")
 
 torch.autograd.set_detect_anomaly(True)
@@ -33,7 +30,7 @@ def initialize_test_state():
     tf.random.set_seed(seed)
 
 
-_REAL_NUMERICS_BACKENDS = [
+_REAL_BACKENDS = [
     NumpyBackend(np.float64),
     AutogradBackend(anp.float64),
     PytorchBackend(torch.float64),
@@ -46,7 +43,7 @@ _REAL_NUMERICS_BACKENDS = [
     # TensorflowBackend(tf.float32),
 ]
 
-_COMPLEX_NUMERICS_BACKENDS = [
+_COMPLEX_BACKENDS = [
     NumpyBackend(np.complex128),
     AutogradBackend(anp.complex128),
     PytorchBackend(torch.complex128),
@@ -55,18 +52,18 @@ _COMPLEX_NUMERICS_BACKENDS = [
 ]
 
 
-@pytest.fixture(params=_REAL_NUMERICS_BACKENDS)
-def real_numerics_backend(request) -> Backend:
+@pytest.fixture(params=_REAL_BACKENDS)
+def real_backend(request) -> Backend:
     return request.param
 
 
-@pytest.fixture(params=_COMPLEX_NUMERICS_BACKENDS)
-def complex_numerics_backend(request) -> Backend:
+@pytest.fixture(params=_COMPLEX_BACKENDS)
+def complex_backend(request) -> Backend:
     return request.param
 
 
-@pytest.fixture(params=_REAL_NUMERICS_BACKENDS + _COMPLEX_NUMERICS_BACKENDS)
-def all_numerics_backend(request) -> Backend:
+@pytest.fixture(params=_REAL_BACKENDS + _COMPLEX_BACKENDS)
+def any_backend(request) -> Backend:
     return request.param
 
 

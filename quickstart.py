@@ -34,8 +34,6 @@ print("Dominant eigenvector:", dominant_eigenvector)
 print("Pymanopt solution:", result.point)
 assert isinstance(result.point, jnp.ndarray)
 
-
-# print(sys.modules)
-for key, value in sys.modules.items():
-    if "torch" in key:
-        print(key, value)
+for key in sys.modules.keys():
+    if key.startswith(("torch", "tensorflow", "autograd")):
+        print(f"WARNING: Imported {key}")
