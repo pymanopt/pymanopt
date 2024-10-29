@@ -31,7 +31,11 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Development Status :: 5 - Production/Stable",
 ]
-dependencies = ["numpy>=1.16.0", "scipy>=1.0,!=1.10.*,!=1.11.*,!=1.12.*"]
+dependencies = [
+    "numpy>=1.16.0",
+    "scipy>=1.0,!=1.10.*,!=1.11.*,!=1.12.*",
+    "packaging",
+]
 [project.urls]
 homepage = "https://pymanopt.org"
 
