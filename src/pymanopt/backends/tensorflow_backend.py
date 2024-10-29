@@ -163,8 +163,17 @@ class TensorflowBackend(Backend):
     def any(self, array: tf.Tensor) -> bool:
         return tf.reduce_any(tf.constant(array, dtype=tf.bool)).numpy().item()
 
-    def arange(self, *args: int) -> tf.Tensor:
-        return tf.range(*args, dtype=self.dtype)
+    def arange(
+        self,
+        start: int,
+        stop: Optional[int] = None,
+        step: Optional[int] = None,
+    ) -> tf.Tensor:
+        if stop is None:
+            return tf.range(start)
+        if step is None:
+            return tf.range(start, stop)
+        return tf.range(start, stop, step)
 
     @elementary_math_function
     def arccos(self, array: tf.Tensor) -> tf.Tensor:
@@ -357,8 +366,10 @@ class TensorflowBackend(Backend):
     def log(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.log(array)
 
-    def logspace(self, *args: int) -> tf.Tensor:
-        return tf.experimental.numpy.logspace(*args, dtype=self.dtype)
+    def logspace(self, start: float, stop: float, num: int) -> tf.Tensor:
+        return tf.experimental.numpy.logspace(
+            start, stop, num, dtype=self.dtype
+        )
 
     def ndim(self, array: tf.Tensor) -> int:
         return array.shape.rank

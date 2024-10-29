@@ -38,7 +38,6 @@ class PytorchBackend(Backend):
     # Common attributes, properties and methods
     ##########################################################################
     array_t = torch.Tensor
-
     _dtype: torch.dtype
 
     def __init__(self, dtype=torch.float64):
@@ -175,8 +174,17 @@ class PytorchBackend(Backend):
     def any(self, array: torch.Tensor) -> bool:
         return bool(torch.any(torch.tensor(array, dtype=bool)).item())
 
-    def arange(self, *args: int) -> torch.Tensor:
-        return torch.arange(*args)
+    def arange(
+        self,
+        start: int,
+        stop: Optional[int] = None,
+        step: Optional[int] = None,
+    ) -> torch.Tensor:
+        if stop is None:
+            return torch.arange(start)
+        if step is None:
+            return torch.arange(start, stop)
+        return torch.arange(start, stop, step)
 
     @elementary_math_function
     def arccos(self, array: torch.Tensor) -> torch.Tensor:
@@ -414,8 +422,8 @@ class PytorchBackend(Backend):
     def log10(self, array: torch.Tensor) -> torch.Tensor:
         return torch.log10(array)
 
-    def logspace(self, *args: int) -> torch.Tensor:
-        return torch.logspace(*args, dtype=self.dtype)
+    def logspace(self, start: float, stop: float, num: int) -> torch.Tensor:
+        return torch.logspace(start, stop, num, dtype=self.dtype)
 
     def ndim(self, array: torch.Tensor) -> int:
         return array.ndim
