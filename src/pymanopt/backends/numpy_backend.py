@@ -102,8 +102,13 @@ class NumpyBackend(Backend):
     def any(self, array: np.ndarray) -> bool:
         return np.any(array).item()
 
-    def arange(self, *args: int) -> np.ndarray:
-        return np.arange(*args)
+    def arange(
+        self,
+        start: int,
+        stop: Optional[int] = None,
+        step: Optional[int] = None,
+    ) -> np.ndarray:
+        return np.arange(start, stop, step)
 
     def arccos(self, array: np.ndarray) -> np.ndarray:
         return np.arccos(array)
@@ -212,7 +217,7 @@ class NumpyBackend(Backend):
         if not symmetric:
             # Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked
             # matrices.
-            if pv.parse(scipy.version.version) >= pv.parse("1.9.0"):
+            if pv.parse(scipy.__version__) >= pv.parse("1.9.0"):
                 scipy_expm = scipy.linalg.expm
             else:
                 scipy_expm = np.vectorize(
@@ -298,8 +303,8 @@ class NumpyBackend(Backend):
     def logical_not(self, array: np.ndarray) -> np.ndarray:
         return np.logical_not(array)
 
-    def logspace(self, *args: int) -> np.ndarray:
-        return np.logspace(*args, dtype=self.dtype)
+    def logspace(self, start: float, stop: float, num: int) -> np.ndarray:
+        return np.logspace(start, stop, num, dtype=self.dtype)
 
     def ndim(self, array: np.ndarray) -> int:
         return array.ndim
@@ -313,7 +318,7 @@ class NumpyBackend(Backend):
     def polyfit(
         self, x: np.ndarray, y: np.ndarray, deg: int = 1, full: bool = False
     ) -> Union[np.ndarray, tuple[np.ndarray, np.ndarray]]:
-        return np.polyfit(x, y, deg, full=full)
+        return np.polyfit(x, y, deg, full=full)  # type: ignore
 
     def polyval(self, p: np.ndarray, x: np.ndarray) -> np.ndarray:
         return np.polyval(p, x)

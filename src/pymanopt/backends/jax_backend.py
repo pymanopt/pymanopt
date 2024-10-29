@@ -41,12 +41,12 @@ def to_ndarray(function):
 
 
 class JaxBackend(Backend):
-    array_t = jnp.ndarray
-    _dtype: jnp.dtype
-
     ##########################################################################
     # Common attributes, properties and methods
     ##########################################################################
+    array_t = jnp.ndarray
+    _dtype: jnp.dtype
+
     def __init__(self, dtype=jnp.float64, random_seed: int = 42):
         self._dtype = dtype
         self._random_key = jax.random.key(random_seed)
@@ -156,8 +156,13 @@ class JaxBackend(Backend):
     def any(self, array: jnp.ndarray) -> bool:
         return jnp.any(jnp.array(array, dtype=bool)).item()
 
-    def arange(self, *args: int) -> jnp.ndarray:
-        return jnp.arange(*args)
+    def arange(
+        self,
+        start: int,
+        stop: Optional[int] = None,
+        step: Optional[int] = None,
+    ) -> jnp.ndarray:
+        return jnp.arange(start, stop, step)
 
     def arccos(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.arccos(array)
@@ -272,14 +277,6 @@ class JaxBackend(Backend):
         self, array: jnp.ndarray, symmetric: bool = False
     ) -> jnp.ndarray:
         if not symmetric:
-            # Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked
-            # matrices.
-            # if pv.parse(scipy.version.version) >= pv.parse("1.9.0"):
-            #     scipy_expm = scipy.linalg.expm
-            # else:
-            #     scipy_expm = jnp.vectorize(
-            #         scipy.linalg.expm, signature="(m,m)->(m,m)"
-            #     )
             return jscipy.linalg.expm(array)
 
         w, v = jnp.linalg.eigh(array)
@@ -365,8 +362,8 @@ class JaxBackend(Backend):
     def log10(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.log10(array)
 
-    def logspace(self, *args: int) -> jnp.ndarray:
-        return jnp.logspace(*args, dtype=self.dtype)
+    def logspace(self, start: float, stop: float, num: int) -> jnp.ndarray:
+        return jnp.logspace(start, stop, num, dtype=self.dtype)
 
     def ndim(self, array: jnp.ndarray) -> int:
         return array.ndim
