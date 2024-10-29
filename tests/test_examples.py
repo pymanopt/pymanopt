@@ -16,7 +16,7 @@ from examples import (
 from examples.advanced import check_gradient, check_hessian, check_retraction
 
 
-SUPPORTED_BACKENDS = {"numpy", "jax", "pytorch"}
+SUPPORTED_BACKENDS = {"numpy", "jax", "pytorch", "autograd"}
 
 
 class TestExamples:

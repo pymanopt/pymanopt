@@ -14,23 +14,13 @@ from pymanopt.numerics.core import NumericsBackend, TupleOrList
 class NumpyNumericsBackend(NumericsBackend):
     _dtype: type  # np.dtype
 
-    def __init__(self, dtype=np.float64):
+    def __init__(self, dtype: type = np.float64):
         assert (
             dtype == np.float32
             or dtype == np.float64
             or dtype == np.complex64
             or dtype == np.complex128
         ), f"dtype {dtype} is not supported"
-        # assert dtype in {
-        #     np.dtype("float32"),
-        #     np.dtype("float64"),
-        #     np.dtype("complex64"),
-        #     np.dtype("complex128"),
-        #     np.float32,
-        #     np.float64,
-        #     np.complex64,
-        #     np.complex128,
-        # }, f"dtype {dtype} is not supported"
         self._dtype = dtype
 
     @property
