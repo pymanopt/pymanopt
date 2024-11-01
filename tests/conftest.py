@@ -13,6 +13,7 @@ from pymanopt.backends.autograd_backend import AutogradBackend
 from pymanopt.backends.jax_backend import JaxBackend
 from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.backends.pytorch_backend import PytorchBackend
+from pymanopt.backends.tensorflow_backend import TensorflowBackend
 
 
 matplotlib.use("Agg")
@@ -24,7 +25,7 @@ torch.autograd.set_detect_anomaly(True)
 def initialize_test_state():
     seed = 1
     random.seed(seed)
-    anp.random.seed(seed)
+    anp.random.seed(seed)  # type: ignore
     np.random.seed(seed)
     torch.manual_seed(seed)
     tf.random.set_seed(seed)
@@ -32,23 +33,23 @@ def initialize_test_state():
 
 _REAL_BACKENDS = [
     NumpyBackend(np.float64),
-    AutogradBackend(anp.float64),
+    AutogradBackend(np.float64),
     PytorchBackend(torch.float64),
     JaxBackend(jnp.float64),
-    # TensorflowBackend(tf.float64),
+    TensorflowBackend(tf.float64),
     NumpyBackend(np.float32),
-    AutogradBackend(anp.float32),
+    AutogradBackend(np.float32),
     PytorchBackend(torch.float32),
     JaxBackend(jnp.float32),
-    # TensorflowBackend(tf.float32),
+    TensorflowBackend(tf.float32),
 ]
 
 _COMPLEX_BACKENDS = [
     NumpyBackend(np.complex128),
-    AutogradBackend(anp.complex128),
+    AutogradBackend(np.complex128),
     PytorchBackend(torch.complex128),
     JaxBackend(jnp.complex128),
-    # TensorflowBackend(tf.complex128),
+    TensorflowBackend(tf.complex128),
 ]
 
 

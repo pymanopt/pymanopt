@@ -197,7 +197,7 @@ class JaxBackend(Backend):
 
         assert self.allclose(array_a, array_b, rtol, atol), (
             "Arrays are not almost equal.\n"
-            f"Max absolute difference: {jnp.max(jnp.abs(array_a - array_b))}"
+            f"Max absolute difference: {max_abs(array_a - array_b)}"
             f" (atol={atol})\n"
             "Max relative difference: "
             f"{max_abs(array_a - array_b) / max_abs(array_b)}"
@@ -237,6 +237,9 @@ class JaxBackend(Backend):
 
     def hstack(self, arrays: TupleOrList[jnp.ndarray]) -> jnp.ndarray:
         return jnp.hstack(arrays)
+
+    def imag(self, array: jnp.ndarray) -> jnp.ndarray:
+        return jnp.imag(array)
 
     def iscomplexobj(self, array: jnp.ndarray) -> bool:
         return jnp.iscomplexobj(array)
@@ -293,11 +296,10 @@ class JaxBackend(Backend):
         self, array: jnp.ndarray, positive_definite: bool = False
     ) -> jnp.ndarray:
         if not positive_definite:
-            return jnp.asarray(
+            return self.array(
                 np.vectorize(scipy.linalg.logm, signature="(m,m)->(m,m)")(
                     np.asarray(array)
                 ),
-                dtype=self.dtype,
             )
 
         w, v = jnp.linalg.eigh(array)
@@ -324,7 +326,7 @@ class JaxBackend(Backend):
 
         # Compute signs or unit-modulus phase of entries of diagonal of r.
         s = jnp.diagonal(r, axis1=-2, axis2=-1).copy()
-        s = jnp.where(s == 0.0, 1.0, s)
+        s: jax.Array = jnp.where(s == 0.0, 1.0, s)
         s = s / jnp.abs(s)
         s = jnp.expand_dims(s, axis=-1)
         # normalize q and r to have either 1 or unit-modulus on the diagonal of r

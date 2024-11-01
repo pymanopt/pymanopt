@@ -13,6 +13,16 @@ from pymanopt.tools import (
 )
 
 
+# This allows to use multiple features present in numpy and other backends:
+# - tranpose of matrices with x.T
+# - type promotion between floats, ints and complex
+# - correct broadcasting for tensors with different ndims (in particular for
+#   matrix vector multiplication)
+# for more details see documentation:
+# https://www.tensorflow.org/api_docs/python/tf/experimental/numpy/experimental_enable_numpy_behavior
+tf.experimental.numpy.experimental_enable_numpy_behavior(prefer_float32=True)
+
+
 def elementary_math_function(
     f: Callable[["TensorflowBackend", tf.Tensor], tf.Tensor],
 ) -> Callable[
@@ -79,6 +89,14 @@ class TensorflowBackend(Backend):
             return TensorflowBackend(dtype=tf.complex128)
         else:
             raise ValueError(f"dtype {self.dtype} is not supported")
+
+    def _complex_to_real_dtype(self, complex_dtype: tf.DType) -> tf.DType:
+        if complex_dtype == tf.complex64:
+            return tf.float32
+        elif complex_dtype == tf.complex128:
+            return tf.float64
+        else:
+            raise ValueError(f"Provided dtype {complex_dtype} is not complex.")
 
     ##############################################################################
     # Autodiff methods
@@ -202,6 +220,8 @@ class TensorflowBackend(Backend):
 
     def array(self, array: Any) -> tf.Tensor:  # type: ignore
         if isinstance(array, tf.Tensor):
+            if self.is_dtype_real and self.iscomplexobj(array):
+                array = tf.math.real(array)
             array = tf.cast(array, dtype=self.dtype)
         return tf.convert_to_tensor(array, dtype=self.dtype)
 
@@ -212,15 +232,26 @@ class TensorflowBackend(Backend):
         rtol: float = 1e-6,
         atol: float = 1e-6,
     ) -> None:
-        if not isinstance(array_a, tf.Tensor):
-            array_a = tf.constant(array_a, dtype=self.dtype)
-        if array_a.dtype != self.dtype:
-            array_a = tf.cast(array_a, self.dtype)
-        if not isinstance(array_b, tf.Tensor):
-            array_b = tf.constant(array_b, dtype=self.dtype)
-        if array_b.dtype != self.dtype:
-            array_b = tf.cast(array_b, self.dtype)
-        tf.debugging.assert_near(array_a, array_b, rtol=rtol, atol=atol)
+        # if not isinstance(array_a, tf.Tensor):
+        #     array_a = tf.constant(array_a, dtype=self.dtype)
+        # if array_a.dtype != self.dtype:
+        #     array_a = tf.cast(array_a, self.dtype)
+        # if not isinstance(array_b, tf.Tensor):
+        #     array_b = tf.constant(array_b, dtype=self.dtype)
+        # if array_b.dtype != self.dtype:
+        #     array_b = tf.cast(array_b, self.dtype)
+        # tf.debugging.assert_near(array_a, array_b, rtol=rtol, atol=atol)
+        def max_abs(x):
+            return tf.math.reduce_max(tf.abs(x))
+
+        assert self.allclose(array_a, array_b, rtol, atol), (
+            "Arrays are not almost equal.\n"
+            f"Max absolute difference: {max_abs(array_a - array_b)}"
+            f" (atol={atol})\n"
+            "Max relative difference: "
+            f"{max_abs(array_a - array_b) / max_abs(array_b)}"
+            f" (rtol={rtol})"
+        )
 
     def assert_equal(
         self,
@@ -265,15 +296,18 @@ class TensorflowBackend(Backend):
     def hstack(self, arrays: TupleOrList[tf.Tensor]) -> tf.Tensor:
         return tf.concat(arrays, axis=1)
 
+    def imag(self, array: tf.Tensor) -> tf.Tensor:
+        return tf.math.imag(array)
+
     def iscomplexobj(self, array: tf.Tensor) -> bool:
-        return tf.experimental.numpy.iscomplex(array)
+        return tf.experimental.numpy.iscomplexobj(array)
 
     @elementary_math_function
     def isnan(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.is_nan(array)
 
     def isrealobj(self, array: tf.Tensor) -> bool:
-        return not tf.is_complex(array)
+        return tf.experimental.numpy.isrealobj(array)
 
     def linalg_cholesky(self, array: tf.Tensor) -> tf.Tensor:
         return tf.linalg.cholesky(array)
@@ -282,13 +316,14 @@ class TensorflowBackend(Backend):
         return tf.linalg.det(array)
 
     def linalg_eigh(self, array: tf.Tensor) -> tuple[tf.Tensor, tf.Tensor]:
-        return tf.linalg.eigh(array)
+        w, u = tf.linalg.eigh(array)
+        return tf.math.real(w), u
 
     def linalg_eigvalsh(
         self, array_x: tf.Tensor, array_y: Optional[tf.Tensor] = None
     ) -> tf.Tensor:
         if array_y is None:
-            return tf.linalg.eigvalsh(array_x)
+            return tf.math.real(tf.linalg.eigvalsh(array_x))
         else:
             return self.array(
                 np.vectorize(
@@ -316,7 +351,9 @@ class TensorflowBackend(Backend):
         self, array: tf.Tensor, positive_definite: bool = False
     ) -> tf.Tensor:
         if not positive_definite:
-            return tf.linalg.logm(array)
+            return self.array(
+                tf.linalg.logm(self.to_complex_backend().array(array))
+            )
 
         w, v = tf.linalg.eigh(array)
         w = tf.expand_dims(tf.math.log(w), axis=-1)
@@ -337,7 +374,9 @@ class TensorflowBackend(Backend):
     ) -> tf.Tensor:
         if ord == "fro" or ord is None:
             ord = "euclidean"  # type: ignore
-        return tf.norm(array, ord=ord, axis=axis, keepdims=keepdims)
+        return tf.math.real(
+            tf.norm(array, ord=ord, axis=axis, keepdims=keepdims)
+        )
 
     def linalg_qr(self, array: tf.Tensor) -> tf.Tensor:
         q, r = tf.linalg.qr(array)
@@ -355,6 +394,10 @@ class TensorflowBackend(Backend):
         self, array_a: tf.Tensor, array_b: tf.Tensor
     ) -> tf.Tensor:
         return tf.linalg.solve(array_a, array_b)
+        # if array_b.ndim < array_a.ndim:
+        #     array_b = tf.expand_dims(array_b, -1)
+        # sol = tf.linalg.solve(array_a, array_b)
+        # return sol[..., 0] if array_b.ndim < array_a.ndim else sol
 
     def linalg_solve_continuous_lyapunov(
         self, array_a: tf.Tensor, array_q: tf.Tensor
@@ -366,10 +409,13 @@ class TensorflowBackend(Backend):
         )
 
     def linalg_svd(
-        self, array: tf.Tensor, *args, **kwargs
+        self, array: tf.Tensor, full_matrices: bool = True
     ) -> tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
-        s, u, v = tf.linalg.svd(array, *args, **kwargs)
+        s, u, v = tf.linalg.svd(array, full_matrices=full_matrices)
         return u, s, self.conjugate_transpose(v)
+
+    def linalg_svdvals(self, array: tf.Tensor) -> tf.Tensor:
+        return tf.linalg.svd(array, compute_uv=False)
 
     @elementary_math_function
     def log(self, array: tf.Tensor) -> tf.Tensor:
@@ -410,33 +456,52 @@ class TensorflowBackend(Backend):
         scale: float = 1.0,
         size: Union[int, TupleOrList[int]] = 1,
     ) -> tf.Tensor:
+        # pre-process the size
         if isinstance(size, int):
-            size = (size,)
-        size = tf.constant(size)
+            new_size = (size,)
+        elif size is None:
+            new_size = (1,)
+        else:
+            new_size = size
+        new_size = tf.constant(new_size)
+        # sample
         if self.is_dtype_real:
-            return tf.random.normal(
-                shape=size, mean=loc, stddev=scale, dtype=self.dtype
+            samples = tf.random.normal(
+                shape=new_size, mean=loc, stddev=scale, dtype=self.dtype
             )
         else:
-            real_dtype = tf.experimental.numpy.finfo(self.dtype).dtype
-            return tf.cast(
-                tf.random.normal(shape=size, mean=loc, dtype=real_dtype),
+            real_dtype = self._complex_to_real_dtype(self.dtype)
+            samples = tf.cast(
+                tf.random.normal(shape=new_size, mean=loc, dtype=real_dtype),
                 self.dtype,
             ) + 1j * tf.cast(
-                tf.random.normal(shape=size, mean=loc, dtype=real_dtype),
+                tf.random.normal(shape=new_size, mean=loc, dtype=real_dtype),
                 self.dtype,
             )
+        # post-process
+        return samples.numpy().item() if size is None else samples
 
     def random_uniform(self, size: Optional[int] = None) -> tf.Tensor:
+        # pre-process the size
         if isinstance(size, int):
-            size = (size,)
-        size = tf.constant(size)
-        if self.is_dtype_real:
-            return tf.random.uniform(shape=size, dtype=self.dtype)
+            new_size = (size,)
+        elif size is None:
+            new_size = (1,)
         else:
-            return tf.cast(
-                tf.random.uniform(shape=size), self.dtype
-            ) + 1j * tf.cast(tf.random.uniform(shape=size), self.dtype)
+            new_size = size
+        new_size = tf.constant(new_size)
+        # sample
+        if self.is_dtype_real:
+            samples = tf.random.uniform(shape=new_size, dtype=self.dtype)
+        else:
+            real_dtype = self._complex_to_real_dtype(self.dtype)
+            samples = tf.cast(
+                tf.random.uniform(shape=new_size, dtype=real_dtype), self.dtype
+            ) + 1j * tf.cast(
+                tf.random.uniform(shape=new_size, dtype=real_dtype), self.dtype
+            )
+        # post-process
+        return samples.numpy().item() if size is None else samples
 
     @elementary_math_function
     def real(self, array: tf.Tensor) -> tf.Tensor:
@@ -472,8 +537,14 @@ class TensorflowBackend(Backend):
     def squeeze(self, array: tf.Tensor) -> tf.Tensor:
         return tf.squeeze(array)
 
-    def sum(self, array: tf.Tensor, *args: Any, **kwargs: Any) -> tf.Tensor:
-        return tf.reduce_sum(array, *args, **kwargs)
+    def sum(
+        self,
+        array: tf.Tensor,
+        axis: Union[int, TupleOrList[int], None] = None,
+        keepdims: bool = False,
+    ) -> tf.Tensor:
+        # assert axis is None and not keepdims
+        return tf.reduce_sum(array, axis=axis, keepdims=keepdims)
 
     @elementary_math_function
     def tan(self, array: tf.Tensor) -> tf.Tensor:
@@ -493,8 +564,12 @@ class TensorflowBackend(Backend):
     ) -> tf.Tensor:
         return tf.tile(array, reps)
 
-    def trace(self, array: tf.Tensor, *args, **kwargs) -> tf.Tensor:
-        return tf.linalg.trace(array, *args, **kwargs)
+    def trace(self, array: tf.Tensor) -> tf.Tensor:
+        return (
+            tf.linalg.trace(array).numpy().item()
+            if array.ndim == 2
+            else tf.linalg.trace(array)
+        )
 
     def transpose(self, array: tf.Tensor) -> tf.Tensor:
         perm = list(range(self.ndim(array)))

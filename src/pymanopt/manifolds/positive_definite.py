@@ -32,8 +32,8 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
 
     def dist(self, point_a, point_b):
         bk = self.backend
-        return bk.linalg_norm(
-            bk.linalg_logm(bk.linalg_solve(point_a, point_b))
+        return bk.real(
+            bk.linalg_norm(bk.linalg_logm(bk.linalg_solve(point_a, point_b)))
         )
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
@@ -88,7 +88,6 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
             if self.k == 1
             else bk.random_randn(self.k, self.n, self.n)
         )
-        assert self.norm(point, tangent_vector) > 1e-8
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):

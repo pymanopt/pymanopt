@@ -41,6 +41,9 @@ class ArrayProtocol(Protocol):
     def __matmul__(self, other: "ArrayProtocol") -> "ArrayProtocol":
         ...
 
+    def __div__(self, other: "ArrayProtocol") -> "ArrayProtocol":
+        ...
+
     def __sub__(self, other: "ArrayProtocol") -> "ArrayProtocol":
         ...
 
@@ -48,13 +51,13 @@ class ArrayProtocol(Protocol):
     def shape(self) -> tuple[int, ...]:
         ...
 
-    def __eq__(self, other: "Union[int, float, ArrayProtocol]") -> bool:
+    def __eq__(self, other: "Union[int, float,ArrayProtocol]") -> bool:
         ...
 
-    def __leq__(self, other: "Union[int, float, ArrayProtocol]") -> bool:
+    def __leq__(self, other: "Union[int, float,ArrayProtocol]") -> bool:
         ...
 
-    def __geq__(self, other: "Union[int, float, ArrayProtocol]") -> bool:
+    def __geq__(self, other: "Union[int, float,ArrayProtocol]") -> bool:
         ...
 
 
@@ -231,9 +234,11 @@ class Backend(ABC):
     ) -> None:
         ...
 
+    # TODO: remove this method
     def assert_almost_equal(self, array_a: array_t, array_b: array_t) -> None:
         self.assert_allclose(array_a, array_b)
 
+    # TODO: remove this method
     def assert_array_almost_equal(
         self, array_a: array_t, array_b: array_t
     ) -> None:
@@ -297,6 +302,10 @@ class Backend(ABC):
 
     def herm(self, array: array_t) -> array_t:
         return 0.5 * (array + self.conjugate_transpose(array))
+
+    @not_implemented
+    def imag(self, array: array_t) -> array_t:
+        ...
 
     @not_implemented
     def iscomplexobj(self, array: array_t) -> bool:

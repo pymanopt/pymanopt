@@ -69,6 +69,7 @@ docs = [
 ]
 ci = ["build==0.8.0", "pip==22.3.1", "setuptools==66.1.0", "wheel==0.38.4"]
 all = ["pymanopt[backends,dev]"]
+
 [tool.setuptools_scm]
 write_to = "src/pymanopt/_version.py"
 

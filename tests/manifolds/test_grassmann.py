@@ -62,10 +62,7 @@ class TestGrassmannManifold:
         bk.assert_allclose(Hproj, Hprojproj)
 
         # Check the projected tangent vector is orthogonal to point
-        bk.assert_allclose(
-            bk.conjugate_transpose(X) @ Hproj,
-            bk.squeeze(bk.zeros((self.k, self.p, self.p))),
-        )
+        bk.assert_allclose(bk.conjugate_transpose(X) @ Hproj, 0.0)
 
     def test_retraction(self):
         bk = self.backend
@@ -112,7 +109,7 @@ class TestGrassmannManifold:
         U = self.manifold.random_tangent_vector(X)
         bk.assert_allclose(
             bk.sym(bk.conjugate_transpose(X) @ U),
-            bk.squeeze(bk.zeros((self.k, self.p, self.p))),
+            0.0,
         )
         V = self.manifold.random_tangent_vector(X)
         assert bk.linalg_norm(U - V) > 1e-6
@@ -135,7 +132,7 @@ class TestGrassmannManifold:
         v = s.log(x, y)
         # Check that the manifold difference between the tangent vectors u and
         # v is 0
-        self.backend.assert_allclose(0, self.manifold.norm(x, u - v))
+        self.backend.assert_allclose(self.manifold.norm(x, u - v), 0.0)
 
     # def test_euclidean_to_riemannian_hessian(self):
     #     # Test this function at some randomly generated point.

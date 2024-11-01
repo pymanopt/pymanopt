@@ -17,16 +17,16 @@ from pymanopt.tools import (
 def elementary_math_function(
     f: Callable[["PytorchBackend", torch.Tensor], torch.Tensor],
 ) -> Callable[
-    ["PytorchBackend", Union[torch.Tensor, Number]],
-    Union[torch.Tensor, Number],
+    ["PytorchBackend", Union[torch.Tensor, float, complex]],
+    Union[torch.Tensor, float, complex],
 ]:
     def inner(
-        self, x: Union[torch.Tensor, Number]
-    ) -> Union[torch.Tensor, Number]:
-        if isinstance(x, Number):
-            return f(self, self.array(x)).item()
-        else:
+        self, x: Union[torch.Tensor, float, complex]
+    ) -> Union[torch.Tensor, float, complex]:
+        if isinstance(x, torch.Tensor):
             return f(self, x)
+        else:
+            return f(self, self.array(x)).item()
 
     inner.__doc__ = f.__doc__
     inner.__name__ = f.__name__
@@ -160,19 +160,32 @@ class PytorchBackend(Backend):
         return torch.abs(array)
 
     def all(self, array: torch.Tensor) -> bool:
-        return bool(torch.all(torch.tensor(array, dtype=torch.bool)).item())
+        return bool(torch.all(array).item())
 
     def allclose(
         self,
         array_a: torch.Tensor,
         array_b: torch.Tensor,
-        rtol: float = 1e-7,
-        atol: float = 1e-10,
+        rtol: float = 1e-6,
+        atol: float = 1e-6,
     ) -> bool:
+        if not isinstance(array_a, torch.Tensor):
+            array_a = self.array(array_a)
+        if not isinstance(array_b, torch.Tensor):
+            array_b = self.array(array_b)
+        if array_a.numel() == 1 and array_b.numel() != 1:
+            array_a = torch.full_like(array_b, array_a.item())
+        elif array_b.numel() == 1 and array_a.numel() != 1:
+            array_b = torch.full_like(array_a, array_b.item())
+        elif array_a.shape != array_b.shape:
+            raise ValueError(
+                f"Arrays with shapes {array_a.shape} and {array_b.shape} "
+                "cannot be compared."
+            )
         return torch.allclose(array_a, array_b, rtol=rtol, atol=atol)
 
     def any(self, array: torch.Tensor) -> bool:
-        return bool(torch.any(torch.tensor(array, dtype=torch.bool)).item())
+        return bool(torch.any(array).item())
 
     def arange(
         self,
@@ -209,6 +222,21 @@ class PytorchBackend(Backend):
         return torch.argsort(array)
 
     def array(self, array: Any) -> torch.Tensor:  # type: ignore
+        if self.is_dtype_real and (
+            (
+                isinstance(array, torch.Tensor)
+                and self.iscomplexobj(array)
+                and not self.allclose(torch.imag(array), 0.0)
+            )
+            or (
+                isinstance(array, np.ndarray)
+                and np.iscomplexobj(array)
+                and not np.allclose(np.imag(array), 0.0, atol=1e-5)
+            )
+        ):
+            raise ValueError(
+                "Complex Tensors should not be converted to real tensors"
+            )
         return torch.as_tensor(array, dtype=self.dtype)
 
     def assert_allclose(
@@ -218,11 +246,17 @@ class PytorchBackend(Backend):
         rtol: float = 1e-6,
         atol: float = 1e-6,
     ) -> None:
-        torch.testing.assert_close(
-            self.array(array_a),
-            self.array(array_b),
-            rtol=rtol,
-            atol=atol,
+        def max_abs(x):
+            return torch.max(torch.abs(x))
+
+        array_a, array_b = self.array(array_a), self.array(array_b)
+        assert self.allclose(array_a, array_b, rtol, atol), (
+            "Arrays are not almost equal.\n"
+            f"Max absolute difference: {max_abs(array_a - array_b)}"
+            f" (atol={atol})\n"
+            "Max relative difference: "
+            f"{max_abs(array_a - array_b) / max_abs(array_b)}"
+            f" (rtol={rtol})"
         )
 
     def concatenate(
@@ -287,6 +321,13 @@ class PytorchBackend(Backend):
 
     def hstack(self, arrays: list[torch.Tensor]) -> torch.Tensor:
         return torch.hstack(arrays)
+
+    def imag(self, array: torch.Tensor) -> torch.Tensor:
+        return (
+            torch.imag(array)
+            if self.iscomplexobj(array)
+            else self.to_real_backend().zeros_like(array)
+        )
 
     def iscomplexobj(self, array: torch.Tensor) -> bool:
         return array.dtype in {torch.complex64, torch.complex128}

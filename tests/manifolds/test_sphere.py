@@ -208,9 +208,7 @@ class TestSphereSubspaceIntersectionManifold:
         p = self.manifold.projection(x, h)
         # Since the manifold is 0-dimensional, the tangent at each point is
         # simply the 0-dimensional space {0}.
-        self.backend.assert_allclose(
-            p, self.backend.zeros(self.n), rtol=1e-6, atol=1e-6
-        )
+        self.backend.assert_allclose(p, 0.0, rtol=1e-6, atol=1e-6)
 
     def test_dim_1(self):
         U = self.backend.vstack(
