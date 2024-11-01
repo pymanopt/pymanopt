@@ -183,6 +183,9 @@ class NumpyBackend(Backend):
     def hstack(self, arrays: TupleOrList[np.ndarray]) -> np.ndarray:
         return np.hstack(arrays)
 
+    def imag(self, array: np.ndarray) -> np.ndarray:
+        return np.imag(array)
+
     def iscomplexobj(self, array: np.ndarray) -> bool:
         return np.iscomplexobj(array)
 

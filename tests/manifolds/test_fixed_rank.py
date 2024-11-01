@@ -53,13 +53,9 @@ class TestFixedRankEmbeddedManifold:
 
         g = m.projection(x, v)
         # Check that g is a true tangent vector
+        bk.assert_allclose(bk.transpose(g[0]) @ x[0], 0.0, atol=1e-6)
         bk.assert_allclose(
-            bk.transpose(g[0]) @ x[0], bk.zeros((self.k, self.k)), atol=1e-6
-        )
-        bk.assert_allclose(
-            bk.transpose(g[2]) @ bk.transpose(x[2]),
-            bk.zeros((self.k, self.k)),
-            atol=1e-6,
+            bk.transpose(g[2]) @ bk.transpose(x[2]), 0.0, atol=1e-6
         )
 
     def test_projection(self):
@@ -259,13 +255,9 @@ class TestFixedRankEmbeddedManifold:
         assert u[0].shape == (self.m, self.k)
         assert u[1].shape == (self.k, self.k)
         assert u[2].shape == (self.n, self.k)
+        bk.assert_allclose(bk.transpose(u[0]) @ x[0], 0.0, atol=1e-6)
         bk.assert_allclose(
-            bk.transpose(u[0]) @ x[0], bk.zeros((self.k, self.k)), atol=1e-6
-        )
-        bk.assert_allclose(
-            bk.transpose(u[2]) @ bk.transpose(x[2]),
-            bk.zeros((self.k, self.k)),
-            atol=1e-6,
+            bk.transpose(u[2]) @ bk.transpose(x[2]), 0.0, atol=1e-6
         )
 
         v = e.random_tangent_vector(x)

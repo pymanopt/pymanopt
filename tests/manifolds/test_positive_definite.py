@@ -262,7 +262,6 @@ class TestSpecialHermitianPositiveDefiniteManifold(
         self.n = n = 10
         self.k = k = product_dimension
         self.point_shape = (k, n, n) if k > 1 else (n, n)
-        self.det_shape = (k,) if k > 1 else ()
         self.backend = complex_backend
         self.manifold = SpecialHermitianPositiveDefinite(
             n, k=k, backend=self.backend
@@ -288,7 +287,7 @@ class TestSpecialHermitianPositiveDefiniteManifold(
         w = bk.linalg_eigvalsh(x)
         assert bk.all(w > 0.0)
         # Check unit determinant.
-        bk.assert_allclose(bk.linalg_det(x), bk.ones(self.det_shape))
+        bk.assert_allclose(bk.linalg_det(x), 1.0)
         # Check randomness.
         y = manifold.random_point()
         assert bk.linalg_norm(x - y) > 1e-3
@@ -302,11 +301,7 @@ class TestSpecialHermitianPositiveDefiniteManifold(
         u = manifold.random_tangent_vector(x)
         bk.assert_allclose(bk.conjugate_transpose(u), u)
         #
-        bk.assert_allclose(
-            bk.trace(bk.linalg_solve(x, u)),
-            bk.zeros(self.det_shape),
-            atol=1e-7,
-        )
+        bk.assert_allclose(bk.trace(bk.linalg_solve(x, u)), 0.0, atol=1e-7)
         # Check unit norm.
         bk.assert_allclose(1.0, manifold.norm(x, u))
 
@@ -324,18 +319,14 @@ class TestSpecialHermitianPositiveDefiniteManifold(
         # Check hermitian symmetry.
         bk.assert_allclose(p, bk.conjugate_transpose(p))
         #
-        bk.assert_allclose(
-            bk.trace(bk.linalg_solve(x, p)),
-            bk.zeros(self.det_shape),
-            atol=1e-7,
-        )
+        bk.assert_allclose(bk.trace(bk.linalg_solve(x, p)), 0.0, atol=1e-7)
         # Check invariance of projection
         bk.assert_allclose(p, manifold.projection(x, p))
 
     def test_euclidean_to_riemannian_gradient(self):
         manifold = self.manifold
         x = manifold.random_point()
-        u = self.backend.random_normal(size=(self.k, self.n, self.n))
+        u = self.backend.random_normal(size=self.point_shape)
         self.backend.assert_allclose(
             manifold.euclidean_to_riemannian_gradient(x, u),
             manifold.projection(x, x @ u @ x),
@@ -362,7 +353,7 @@ class TestSpecialHermitianPositiveDefiniteManifold(
 
         # Check unit determinant
         d = bk.linalg_det(e)
-        bk.assert_allclose(d, bk.ones(self.det_shape))
+        bk.assert_allclose(d, 1.0)
 
         u = u * 1e-6
         bk.assert_allclose(manifold.exp(x, u), x + u)
@@ -386,7 +377,7 @@ class TestSpecialHermitianPositiveDefiniteManifold(
 
         # Check unit determinant
         d = bk.linalg_det(y)
-        bk.assert_allclose(d, bk.ones(self.det_shape))
+        bk.assert_allclose(d, 1.0)
 
         u = u * 1e-6
         bk.assert_allclose(manifold.retraction(x, u), x + u)

@@ -72,10 +72,7 @@ class TestStiefelManifold:
         # two then they are not equal.
         X = self.manifold.random_point()
         U = self.manifold.random_tangent_vector(X)
-        bk.assert_allclose(
-            bk.sym(bk.transpose(X) @ U),
-            bk.squeeze(bk.zeros((self.k, self.n, self.n))),
-        )
+        bk.assert_allclose(bk.sym(bk.transpose(X) @ U), 0.0)
         V = self.manifold.random_tangent_vector(X)
         assert bk.linalg_norm(U - V) > 1e-6
 

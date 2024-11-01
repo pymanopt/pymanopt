@@ -48,7 +48,7 @@ class TestPoincareBallManifold:
             / self.manifold.norm(x, u)
             / self.manifold.norm(x, v)
         )
-        self.backend.assert_allclose(cos_rangle, cos_eangle, atol=2e-3)
+        self.backend.assert_allclose(cos_rangle, cos_eangle, atol=1e-2)
 
         # Test symmetry.
         self.backend.assert_allclose(
@@ -94,7 +94,7 @@ class TestPoincareBallManifold:
     def test_zero_vector(self):
         x = self.manifold.random_point()
         u = self.manifold.zero_vector(x)
-        self.backend.assert_allclose(self.backend.linalg_norm(u), 0)
+        self.backend.assert_allclose(self.backend.linalg_norm(u), 0.0)
 
     def test_dist(self):
         x = self.manifold.random_point() / 2

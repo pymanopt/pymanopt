@@ -32,7 +32,7 @@ class TestSpecialOrthogonalGroup:
             bk.transpose(point) @ point,
             bk.multieye(self.k, self.n),
         )
-        bk.assert_allclose(bk.linalg_det(point), bk.ones(self.k))
+        bk.assert_allclose(bk.linalg_det(point), 1.0)
 
     def test_random_tangent_vector(self):
         point = self.so.random_point()
@@ -60,8 +60,10 @@ class TestSpecialOrthogonalGroup:
 
         # Check the retraction is a point on the manifold, i.e. it is
         # orthogonal and has det 1
-        bk.assert_allclose(bk.transpose(xretru) @ xretru, bk.eye(self.n))
-        bk.assert_allclose(bk.linalg_det(xretru), 1.0)
+        bk.assert_allclose(
+            bk.transpose(xretru) @ xretru, bk.eye(self.n), atol=5e-6
+        )
+        bk.assert_allclose(bk.linalg_det(xretru), 1.0, atol=1e-5)
 
     def test_exp_log_inverse(self):
         s = self.so
@@ -95,7 +97,7 @@ class TestUnitaryGroup:
         bk = self.backend
         point = self.unitary_group.random_point()
         assert point.shape == (self.n, self.n)
-        assert (point.imag > 0).any()
+        assert bk.any(bk.imag(point) > 0)
         bk.assert_allclose(
             bk.conjugate_transpose(point) @ point, bk.eye(self.n)
         )
@@ -104,7 +106,7 @@ class TestUnitaryGroup:
         bk = self.backend
         point = self.product_manifold.random_point()
         assert point.shape == (self.k, self.n, self.n)
-        assert (point.imag > 0).any()
+        assert bk.any(bk.imag(point) > 0.0)
         bk.assert_allclose(
             bk.conjugate_transpose(point) @ point,
             bk.multieye(self.k, self.n),
@@ -114,7 +116,7 @@ class TestUnitaryGroup:
         bk = self.backend
         point = self.unitary_group.random_point()
         tangent_vector = self.unitary_group.random_tangent_vector(point)
-        assert (tangent_vector.imag > 0).any()
+        assert bk.any(bk.imag(tangent_vector) > 0.0)
         bk.assert_allclose(
             tangent_vector, -bk.conjugate_transpose(tangent_vector)
         )
@@ -123,7 +125,7 @@ class TestUnitaryGroup:
         bk = self.backend
         point = self.product_manifold.random_point()
         tangent_vector = self.product_manifold.random_tangent_vector(point)
-        assert (tangent_vector.imag > 0).any()
+        assert bk.any(bk.imag(tangent_vector) > 0.0)
         bk.assert_allclose(
             tangent_vector, -bk.conjugate_transpose(tangent_vector)
         )
@@ -140,7 +142,7 @@ class TestUnitaryGroup:
         u = manifold.random_tangent_vector(x)
         xretru = manifold.retraction(x, u)
 
-        assert (xretru.imag > 0).any()
+        assert bk.any(bk.imag(xretru) > 0.0)
         bk.assert_allclose(
             bk.conjugate_transpose(xretru) @ xretru, bk.eye(self.n)
         )

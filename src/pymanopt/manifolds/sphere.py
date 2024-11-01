@@ -155,37 +155,17 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
             )
 
     def projection(self, point, vector):
-        return self.backend.matvec(
-            self._subspace_projector, super().projection(point, vector)
-        )
+        return self._subspace_projector @ super().projection(point, vector)
 
     def random_point(self):
         return self._normalize(
-            self.backend.matvec(
-                self._subspace_projector, super().random_point()
-            )
+            self._subspace_projector @ super().random_point()
         )
-        # point = super().random_point()
-        # return self._normalize(
-        #     self.backend.squeeze(
-        #         self._subspace_projector @ self.backend.reshape(point, (-1, 1))
-        #     )
-        # )
 
     def random_tangent_vector(self, point):
         return self._normalize(
-            self.backend.matvec(
-                self._subspace_projector(),
-                super().random_tangent_vector(point),
-            )
+            self._subspace_projector @ super().random_tangent_vector(point)
         )
-        # vector = super().random_tangent_vector(point)
-        # return self._normalize(
-        #     self.backend.squeeze(
-        #         self._subspace_projector
-        #         @ self.backend.reshape(vector, (-1, 1))
-        #     )
-        # )
 
 
 @extend_docstring(DOCSTRING_NOTE)
