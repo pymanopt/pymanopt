@@ -103,19 +103,21 @@ class PytorchBackend(Backend):
     def prepare_function(self, function):
         return function
 
+    def _sanitize_argument(self, arg: torch.Tensor):
+        arg.requires_grad_()
+        arg.grad = None
+        return arg
+
     def _sanitize_gradient(self, tensor):
         if tensor.grad is None:
             return torch.zeros_like(tensor)
         return tensor.grad
 
-    def _sanitize_gradients(self, tensors):
-        return list(map(self._sanitize_gradient, tensors))
-
     def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
-            arguments = [arg.requires_grad_() for arg in args]
+            arguments = list(map(self._sanitize_argument, args))
             function(*arguments).backward(retain_graph=True)
-            return self._sanitize_gradients(arguments)
+            return list(map(self._sanitize_gradient, arguments))
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
@@ -124,7 +126,7 @@ class PytorchBackend(Backend):
     def generate_hessian_operator(self, function, num_arguments):
         def hessian_vector_product(*args):
             arguments, vectors = bisect_sequence(args)
-            arguments = [argument.requires_grad_() for argument in arguments]
+            arguments = list(map(self._sanitize_argument, arguments))
             gradients = autograd.grad(
                 function(*arguments),
                 arguments,
@@ -138,7 +140,7 @@ class PytorchBackend(Backend):
                     gradient.conj(), vector, dims=gradient.ndim
                 ).real
             dot_product.backward(retain_graph=True)
-            return self._sanitize_gradients(arguments)
+            return list(map(self._sanitize_gradient, arguments))
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(
