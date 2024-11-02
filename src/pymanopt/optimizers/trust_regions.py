@@ -289,7 +289,7 @@ class TrustRegions(Optimizer):
             # very last iterations if very fine convergence is demanded.
             rho_reg = (
                 max(1, abs(fx))
-                * manifold.backend.spacing(1)
+                * manifold.backend.eps()
                 * self.rho_regularization
             )
             rhonum = rhonum + rho_reg

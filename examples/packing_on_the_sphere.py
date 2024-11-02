@@ -96,6 +96,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     if backend == "pytorch":
         Yopt = Yopt.detach().numpy()
+    elif backend == "tensorflow":
+        Yopt = Yopt.numpy()
 
     Xopt = Yopt @ Yopt.T
     maxdot = np.triu(Xopt, 1).max()

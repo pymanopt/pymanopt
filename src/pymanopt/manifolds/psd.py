@@ -266,14 +266,16 @@ class Elliptope(Manifold, RetrAsExpMixin):
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        scaling_grad = (euclidean_gradient * point).sum(axis=1)
+        bk = self.backend
+        scaling_grad = bk.sum(euclidean_gradient * point, axis=1)
         hess = (
             euclidean_hessian
             - tangent_vector * scaling_grad[:, self.backend.newaxis]
         )
-        scaling_hess = (
-            tangent_vector * euclidean_gradient + point * euclidean_hessian
-        ).sum(axis=1)
+        scaling_hess = bk.sum(
+            tangent_vector * euclidean_gradient + point * euclidean_hessian,
+            axis=1,
+        )
         hess -= point * scaling_hess[:, self.backend.newaxis]
         return self.projection(point, hess)
 
@@ -296,8 +298,9 @@ class Elliptope(Manifold, RetrAsExpMixin):
         )
 
     def _project_rows(self, point, vector):
-        inner_products = (point * vector).sum(axis=1)
-        return vector - point * inner_products[:, self.backend.newaxis]
+        bk = self.backend
+        inner_products = bk.sum(point * vector, axis=1)
+        return vector - point * inner_products[:, bk.newaxis]
 
     def zero_vector(self, point):
         return self.backend.zeros((self._n, self._k))

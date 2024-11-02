@@ -19,8 +19,10 @@ TupleOrList = Union[list[T], tuple[T, ...]]
 
 
 class ArrayProtocol(Protocol):
+    IndexType = Union[int, slice, None]
+
     def __getitem__(
-        self, idx: Union[int, slice, tuple[Union[int, slice], ...]]
+        self, idx: Union[IndexType, tuple[IndexType, ...]]
     ) -> "ArrayProtocol":
         ...
 
@@ -530,10 +532,6 @@ class Backend(ABC):
         array: array_t,
         descending: bool = False,
     ) -> array_t:
-        ...
-
-    @not_implemented
-    def spacing(self, array: array_t) -> array_t:
         ...
 
     def special_comb(self, n: int, k: int):

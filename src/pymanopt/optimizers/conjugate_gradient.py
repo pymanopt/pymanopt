@@ -23,7 +23,7 @@ def _beta_fletcher_reeves(
     oldgrad,
     descent_direction,
 ):
-    return newgradPnewgrad / gradPgrad
+    return float(newgradPnewgrad / gradPgrad)
 
 
 def _beta_polak_ribiere(
@@ -42,7 +42,7 @@ def _beta_polak_ribiere(
     descent_direction,
 ):
     ip_diff = manifold.inner_product(newx, Pnewgrad, newgrad - oldgrad)
-    return max(0, ip_diff / gradPgrad)
+    return float(max(0, ip_diff / gradPgrad))
 
 
 def _beta_hestenes_stiefel(
@@ -69,7 +69,7 @@ def _beta_hestenes_stiefel(
         )
     except ZeroDivisionError:
         beta = 1
-    return beta
+    return float(beta)
 
 
 def _beta_hager_zhang(
@@ -101,7 +101,7 @@ def _beta_hager_zhang(
     beta = numerator / denominator
     descent_direction_norm = manifold.norm(newx, descent_direction)
     eta_HZ = -1 / (descent_direction_norm * min(0.01, gradient_norm))
-    return max(beta, eta_HZ)
+    return float(max(beta, eta_HZ))
 
 
 def _beta_liu_storey(
@@ -124,7 +124,7 @@ def _beta_liu_storey(
     denominator = -manifold.inner_product(x, grad, descent_direction)
     beta_ls = ip_diff / denominator
     beta_cd = newgradPnewgrad / denominator
-    return max(0, min(beta_ls, beta_cd))
+    return float(max(0.0, min(beta_ls, beta_cd)))
 
 
 BETA_RULES = {

@@ -45,6 +45,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return -x.reshape(1, -1) @ matrix_ @ x.reshape(-1, 1)
 
     elif backend == "tensorflow":
+        matrix = tf.constant(matrix, dtype=tf.float32)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(x):
@@ -79,10 +80,12 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         estimated_dominant_eigenvector = (
             estimated_dominant_eigenvector.cpu().detach().numpy()
         )
-    elif backend == "jax":
-        estimated_dominant_eigenvector = np.asarray(
-            estimated_dominant_eigenvector
-        )
+    # elif backend == "jax":
+    #     estimated_dominant_eigenvector = np.asarray(
+    #         estimated_dominant_eigenvector
+    #     )
+    elif backend == "tensorflow":
+        estimated_dominant_eigenvector = estimated_dominant_eigenvector.numpy()
 
     # Calculate the actual solution by a conventional eigenvalue decomposition.
     eigenvalues, eigenvectors = np.linalg.eig(matrix)
