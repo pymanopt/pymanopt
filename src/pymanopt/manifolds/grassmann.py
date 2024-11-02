@@ -3,9 +3,35 @@ from pymanopt.manifolds.manifold import Manifold
 
 
 class _GrassmannBase(Manifold):
+    def __init__(
+        self,
+        name: str,
+        n: int,
+        p: int,
+        k: int,
+        dimension: int,
+        backend: Backend = DummyBackendSingleton,
+    ):
+        self._n = n
+        self._p = p
+        self._k = k
+        super().__init__(name, dimension, backend=backend)
+
+    @property
+    def n(self) -> int:
+        return self._n
+
+    @property
+    def p(self) -> int:
+        return self._p
+
+    @property
+    def k(self) -> int:
+        return self._k
+
     @property
     def typical_dist(self):
-        return self.backend.sqrt(self._p * self._k)
+        return self.backend.sqrt(self.p * self.k)
 
     def norm(self, point, tangent_vector):
         return self.backend.linalg_norm(tangent_vector)
@@ -14,8 +40,8 @@ class _GrassmannBase(Manifold):
         return self.projection(point_b, tangent_vector_a)
 
     def zero_vector(self, point):
-        zero = self.backend.zeros((self._k, self._n, self._p))
-        if self._k == 1:
+        zero = self.backend.zeros((self.k, self.n, self.p))
+        if self.k == 1:
             return zero[0]
         return zero
 
@@ -57,10 +83,6 @@ class Grassmann(_GrassmannBase):
         k: int = 1,
         backend: Backend = DummyBackendSingleton,
     ):
-        self._n = n
-        self._p = p
-        self._k = k
-
         if n < p or p < 1:
             raise ValueError(
                 f"Need n >= p >= 1. Values supplied were n = {n} and p = {p}"
@@ -74,7 +96,7 @@ class Grassmann(_GrassmannBase):
             raise ValueError(f"Invalid value for k: {k} (should be >= 1)")
 
         dimension = int(k * (n * p - p**2))
-        super().__init__(name, dimension, backend=backend)
+        super().__init__(name, n, p, k, dimension, backend=backend)
 
     def dist(self, point_a, point_b):
         bk = self.backend
@@ -112,9 +134,9 @@ class Grassmann(_GrassmannBase):
 
     def random_point(self):
         q, _ = self.backend.linalg_qr(
-            self.backend.random_normal(size=(self._k, self._n, self._p))
+            self.backend.random_normal(size=(self.k, self.n, self.p))
         )
-        if self._k == 1:
+        if self.k == 1:
             return q[0]
         return q
 
@@ -180,10 +202,6 @@ class ComplexGrassmann(_GrassmannBase):
         k: int = 1,
         backend: Backend = DummyBackendSingleton,
     ):
-        self._n = n
-        self._p = p
-        self._k = k
-
         if n < p or p < 1:
             raise ValueError(
                 f"Need n >= p >= 1. Values supplied were n = {n} and p = {p}"
@@ -197,7 +215,7 @@ class ComplexGrassmann(_GrassmannBase):
             raise ValueError(f"Invalid value for k: {k} (should be >= 1)")
 
         dimension = int(2 * k * (n * p - p**2))
-        super().__init__(name, dimension, backend=backend)
+        super().__init__(name, n, p, k, dimension, backend=backend)
 
     def dist(self, point_a, point_b):
         bk = self.backend
@@ -244,9 +262,9 @@ class ComplexGrassmann(_GrassmannBase):
 
     def random_point(self):
         q, _ = self.backend.linalg_qr(
-            self.backend.random_normal(size=(self._k, self._n, self._p))
+            self.backend.random_normal(size=(self.k, self.n, self.p))
         )
-        if self._k == 1:
+        if self.k == 1:
             return q[0]
         return q
 
