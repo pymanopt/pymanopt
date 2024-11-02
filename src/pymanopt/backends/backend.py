@@ -1,66 +1,15 @@
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import (
-    Callable,
-    Literal,
-    Optional,
-    Protocol,
-    TypeAlias,
-    TypeVar,
-    Union,
-)
+from typing import Callable, Literal, Optional, Protocol, TypeVar, Union
 
 import numpy as np
 import scipy.special
 
 
+__all__ = ["TupleOrList", "Backend", "DummyBackendSingleton"]
+
 T = TypeVar("T")
 TupleOrList = Union[list[T], tuple[T, ...]]
-
-
-class ArrayProtocol(Protocol):
-    IndexType = Union[int, slice, None]
-
-    def __getitem__(
-        self, idx: Union[IndexType, tuple[IndexType, ...]]
-    ) -> "ArrayProtocol":
-        ...
-
-    def __len__(self) -> int:
-        ...
-
-    def __add__(self, other: "ArrayProtocol") -> "ArrayProtocol":
-        ...
-
-    def __mul__(self, other: "int | float | ArrayProtocol") -> "ArrayProtocol":
-        ...
-
-    def __rmul__(
-        self, other: "int | float | ArrayProtocol"
-    ) -> "ArrayProtocol":
-        ...
-
-    def __matmul__(self, other: "ArrayProtocol") -> "ArrayProtocol":
-        ...
-
-    def __div__(self, other: "ArrayProtocol") -> "ArrayProtocol":
-        ...
-
-    def __sub__(self, other: "ArrayProtocol") -> "ArrayProtocol":
-        ...
-
-    @property
-    def shape(self) -> tuple[int, ...]:
-        ...
-
-    def __eq__(self, other: "Union[int, float,ArrayProtocol]") -> bool:
-        ...
-
-    def __leq__(self, other: "Union[int, float,ArrayProtocol]") -> bool:
-        ...
-
-    def __geq__(self, other: "Union[int, float,ArrayProtocol]") -> bool:
-        ...
 
 
 def not_implemented(function):
@@ -79,8 +28,73 @@ class Backend(ABC):
     ##########################################################################
     # Common attributes, properties and methods
     ##########################################################################
-    array_t: TypeAlias = ArrayProtocol
     _dtype: type
+
+    class array_t(Protocol):
+        """Array type used for static type checks.
+
+        It is supposed to represent either a numpy array, or a jax array, or a
+        torch tensor, or a tensorflow tensor.
+        """
+
+        IndexType = Union[int, slice, None]
+
+        def __getitem__(
+            self, idx: Union[IndexType, tuple[IndexType, ...]]
+        ) -> "Backend.array_t":
+            ...
+
+        def __len__(self) -> int:
+            ...
+
+        def __add__(self, other: "Backend.array_t") -> "Backend.array_t":
+            ...
+
+        def __mul__(
+            self, other: "int | float | Backend.array_t"
+        ) -> "Backend.array_t":
+            ...
+
+        def __rmul__(
+            self, other: "int | float | Backend.array_t"
+        ) -> "Backend.array_t":
+            ...
+
+        def __matmul__(self, other: "Backend.array_t") -> "Backend.array_t":
+            ...
+
+        def __div__(self, other: "Backend.array_t") -> "Backend.array_t":
+            ...
+
+        def __sub__(self, other: "Backend.array_t") -> "Backend.array_t":
+            ...
+
+        @property
+        def shape(self) -> tuple[int, ...]:
+            ...
+
+        def __eq__(self, other: "Union[int, float, Backend.array_t]") -> bool:
+            ...
+
+        def __leq__(
+            self, other: "Union[int, float, Backend.array_t]"
+        ) -> "Backend.array_t":
+            ...
+
+        def __geq__(
+            self, other: "Union[int, float, Backend.array_t]"
+        ) -> "Backend.array_t":
+            ...
+
+        def __lt__(
+            self, other: "Union[int, float, Backend.array_t]"
+        ) -> "Backend.array_t":
+            ...
+
+        def __gt__(
+            self, other: "Union[int, float, Backend.array_t]"
+        ) -> "Backend.array_t":
+            ...
 
     @property
     @abstractmethod
