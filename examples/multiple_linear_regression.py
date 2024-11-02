@@ -42,14 +42,16 @@ def create_cost_and_derivates(manifold, samples, targets, backend):
             return 2 * samples.T @ samples @ vector
 
     elif backend == "pytorch":
-        samples_ = torch.from_numpy(samples).to(torch.float32)
-        targets_ = torch.from_numpy(targets).to(torch.float32)
+        samples = torch.from_numpy(samples).to(torch.float32)
+        targets = torch.from_numpy(targets).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(weights):
-            return torch.norm(targets_ - samples_ @ weights) ** 2
+            return torch.norm(targets - samples @ weights) ** 2
 
     elif backend == "tensorflow":
+        samples = tf.constant(samples, dtype=tf.float32)
+        targets = tf.constant(targets, dtype=tf.float32)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(weights):
@@ -89,6 +91,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         if not quiet:
             if backend == "pytorch":
                 estimated_weights = estimated_weights.detach().numpy()
+            elif backend == "tensorflow":
+                estimated_weights = estimated_weights.numpy()
 
             print(f"Run {k + 1}")
             print(

@@ -1,4 +1,3 @@
-import functools
 from numbers import Number
 from typing import Any, Callable, Literal, Optional, Union
 
@@ -102,11 +101,7 @@ class PytorchBackend(Backend):
     # Autodiff methods
     ##############################################################################
     def prepare_function(self, function):
-        @functools.wraps(function)
-        def wrapper(*args):
-            return function(*args)
-
-        return wrapper
+        return function
 
     def _sanitize_gradient(self, tensor):
         if tensor.grad is None:
@@ -485,8 +480,10 @@ class PytorchBackend(Backend):
         assert x.ndim == y.ndim == 1
         x = torch.stack([x**i for i in range(deg + 1)], dim=-1)
         p = torch.linalg.lstsq(x, y).solution
+        if not full:
+            return p
         res = torch.sum((y - x @ p) ** 2)
-        return p, res if full else p
+        return p, res
 
     def polyval(self, p: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
         assert x.ndim == p.ndim == 1
@@ -565,11 +562,6 @@ class PytorchBackend(Backend):
         self, array: torch.Tensor, descending: bool = False
     ) -> torch.Tensor:
         return torch.sort(array, descending=descending).values
-
-    @elementary_math_function
-    def spacing(self, array: torch.Tensor) -> torch.Tensor:
-        # spacing is not implemented in PyTorch so we use the NumPy implementation
-        return self.array(np.spacing(array.cpu().detach().numpy()))
 
     @elementary_math_function
     def sqrt(self, array: torch.Tensor) -> torch.Tensor:

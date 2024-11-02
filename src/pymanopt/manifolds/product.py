@@ -6,7 +6,35 @@ import numpy as np
 
 from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
+from pymanopt.tools import ArraySequenceMixin, return_as_class_instance
+
+
+class _ProductTangentVector(ArraySequenceMixin, list):
+    @return_as_class_instance(unpack=False)
+    def __add__(self, other):
+        if len(self) != len(other):
+            raise ValueError("Arguments must be same length")
+        return [v + other[k] for k, v in enumerate(self)]
+
+    @return_as_class_instance(unpack=False)
+    def __sub__(self, other):
+        if len(self) != len(other):
+            raise ValueError("Arguments must be same length")
+        return [v - other[k] for k, v in enumerate(self)]
+
+    @return_as_class_instance(unpack=False)
+    def __mul__(self, other):
+        return [other * val for val in self]
+
+    __rmul__ = __mul__
+
+    @return_as_class_instance(unpack=False)
+    def __truediv__(self, other):
+        return [val / other for val in self]
+
+    @return_as_class_instance(unpack=False)
+    def __neg__(self):
+        return [-val for val in self]
 
 
 class Product(Manifold):
@@ -157,31 +185,3 @@ class Product(Manifold):
         return self._dispatch("zero_vector", reduction=_ProductTangentVector)(
             point
         )
-
-
-class _ProductTangentVector(ndarraySequenceMixin, list):
-    @return_as_class_instance(unpack=False)
-    def __add__(self, other):
-        if len(self) != len(other):
-            raise ValueError("Arguments must be same length")
-        return [v + other[k] for k, v in enumerate(self)]
-
-    @return_as_class_instance(unpack=False)
-    def __sub__(self, other):
-        if len(self) != len(other):
-            raise ValueError("Arguments must be same length")
-        return [v - other[k] for k, v in enumerate(self)]
-
-    @return_as_class_instance(unpack=False)
-    def __mul__(self, other):
-        return [other * val for val in self]
-
-    __rmul__ = __mul__
-
-    @return_as_class_instance(unpack=False)
-    def __truediv__(self, other):
-        return [val / other for val in self]
-
-    @return_as_class_instance(unpack=False)
-    def __neg__(self):
-        return [-val for val in self]

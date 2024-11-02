@@ -1,4 +1,3 @@
-import functools
 from numbers import Number
 from typing import Any, Callable, Literal, Optional, Union
 
@@ -102,34 +101,24 @@ class TensorflowBackend(Backend):
     # Autodiff methods
     ##############################################################################
 
-    @staticmethod
-    def _from_numpy(array):
-        """Wrap numpy ndarray ``array`` in a tensorflow tensor."""
-        return tf.constant(array)
-
     def _sanitize_gradient(self, tensor, grad):
         if grad is None:
-            return np.zeros_like(tensor.numpy())
-        return grad.numpy()
+            return tf.zeros_like(tensor)
+        return grad
 
     def _sanitize_gradients(self, tensors, grads):
         return list(map(self._sanitize_gradient, tensors, grads))
 
     def prepare_function(self, function):
-        @functools.wraps(function)
-        def wrapper(*args):
-            return function(*map(self._from_numpy, args)).numpy()
-
-        return wrapper
+        return function
 
     def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
-            arguments = list(map(self._from_numpy, args))
             with tf.GradientTape() as tape:
-                for argument in arguments:
-                    tape.watch(argument)
-                gradients = tape.gradient(function(*arguments), arguments)
-            return self._sanitize_gradients(arguments, gradients)
+                for arg in args:
+                    tape.watch(arg)
+                gradients = tape.gradient(function(*args), args)
+                return self._sanitize_gradients(args, gradients)
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
@@ -137,9 +126,7 @@ class TensorflowBackend(Backend):
 
     def generate_hessian_operator(self, function, num_arguments):
         def hessian_vector_product(*args):
-            arguments, vectors = bisect_sequence(
-                list(map(self._from_numpy, args))
-            )
+            arguments, vectors = bisect_sequence(args)
             with (
                 tf.GradientTape() as tape,
                 tf.autodiff.ForwardAccumulator(
@@ -421,6 +408,10 @@ class TensorflowBackend(Backend):
     def log(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.log(array)
 
+    @elementary_math_function
+    def log10(self, array: tf.Tensor) -> tf.Tensor:
+        return tf.math.log(array) / tf.math.log(tf.constant(10.0))
+
     def logspace(self, start: float, stop: float, num: int) -> tf.Tensor:
         return tf.experimental.numpy.logspace(
             start, stop, num, dtype=self.dtype
@@ -446,6 +437,25 @@ class TensorflowBackend(Backend):
 
     def ones_bool(self, shape: TupleOrList[int]) -> tf.Tensor:
         return tf.ones(shape, dtype=tf.bool)
+
+    def polyfit(
+        self,
+        x: tf.Tensor,
+        y: tf.Tensor,
+        deg: int = 1,
+        full: bool = False,
+    ) -> Union[tf.Tensor, tuple[tf.Tensor, tf.Tensor]]:
+        assert x.ndim == y.ndim == 1
+        x = tf.stack([x**i for i in range(deg + 1)], axis=-1)
+        p = tf.squeeze(tf.linalg.lstsq(x, tf.reshape(y, (-1, 1))))
+        if not full:
+            return p
+        res = tf.reduce_sum((y - x @ p) ** 2)
+        return p, res
+
+    def polyval(self, p: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
+        assert x.ndim == p.ndim == 1
+        return tf.stack([x**i for i in range(p.shape[0])], axis=-1) @ p
 
     def prod(self, array: tf.Tensor) -> float:
         return tf.reduce_prod(array).numpy().item()
@@ -525,17 +535,17 @@ class TensorflowBackend(Backend):
             array, direction="DESCENDING" if descending else "ASCENDING"
         )
 
-    def spacing(self, array: tf.Tensor) -> tf.Tensor:
-        if not isinstance(array, tf.Tensor):
-            array = tf.constant(array, dtype=self.dtype)
-        return tf.convert_to_tensor(np.spacing(array.numpy()))
-
     @elementary_math_function
     def sqrt(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.sqrt(array)
 
     def squeeze(self, array: tf.Tensor) -> tf.Tensor:
         return tf.squeeze(array)
+
+    def stack(
+        self, arrays: TupleOrList[tf.Tensor], axis: int = 0
+    ) -> tf.Tensor:
+        return tf.stack(arrays, axis=axis)
 
     def sum(
         self,

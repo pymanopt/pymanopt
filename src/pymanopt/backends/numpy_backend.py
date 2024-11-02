@@ -378,9 +378,6 @@ class NumpyBackend(Backend):
     def sort(self, array: np.ndarray, descending: bool = False) -> np.ndarray:
         return np.sort(array)
 
-    def spacing(self, array: np.ndarray) -> np.ndarray:
-        return np.spacing(array)  # type: ignore
-
     def sqrt(self, array: np.ndarray) -> np.ndarray:
         return np.sqrt(array)
 

@@ -42,15 +42,16 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return X @ (H.T @ X + X.T @ H) + H @ (X.T @ X - matrix)
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix).to(torch.float32)
+        matrix = torch.from_numpy(matrix).to(torch.float32)
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
             return (
-                0.25 * torch.norm(torch.transpose(X, 1, 0) @ X - matrix_) ** 2
+                0.25 * torch.norm(torch.transpose(X, 1, 0) @ X - matrix) ** 2
             )
 
     elif backend == "tensorflow":
+        matrix = tf.constant(matrix, dtype=tf.float32)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):
@@ -88,6 +89,8 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     if backend == "pytorch":
         X = X.detach().numpy()
+    elif backend == "tensorflow":
+        X = X.numpy()
 
     C = X.T @ X
     print("Diagonal elements:", np.diag(C))

@@ -1,9 +1,48 @@
-import collections
+from collections import namedtuple
 
 from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import Manifold, RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
-from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
+from pymanopt.tools import ArraySequenceMixin, return_as_class_instance
+
+
+class _ArrayNamedTupleMixin(ArraySequenceMixin):
+    @return_as_class_instance(unpack=True)
+    def __neg__(self):
+        return [-x for x in self]  # type: ignore
+
+    @return_as_class_instance(unpack=True)
+    def __add__(self, other):
+        return [x + y for x, y in zip(self, other)]  # type: ignore
+
+    @return_as_class_instance(unpack=True)
+    def __sub__(self, other):
+        return [x - y for x, y in zip(self, other)]  # type: ignore
+
+    @return_as_class_instance(unpack=True)
+    def __mul__(self, other):
+        if isinstance(other, self.__class__):
+            return [x * y for x, y in zip(self, other)]  # type: ignore
+        return [other * x for x in self]  # type: ignore
+
+    __rmul__ = __mul__
+
+    @return_as_class_instance(unpack=True)
+    def __truediv__(self, other):
+        return [x / y for x, y in zip(self, other)]  # type: ignore
+
+
+class _FixedRankPoint(
+    _ArrayNamedTupleMixin, namedtuple("_FixedRankPointTuple", ("u", "s", "vt"))
+):
+    pass
+
+
+class _FixedRankTangentVector(
+    _ArrayNamedTupleMixin,
+    namedtuple("_FixedRankTangentVectorTuple", ("Up", "M", "Vp")),
+):
+    pass
 
 
 class FixedRankEmbedded(RiemannianSubmanifold):
@@ -189,7 +228,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         Ut, St, Vt = bk.linalg_svd(T, full_matrices=False)
 
         U = bk.hstack((u, Qu)) @ Ut[:, : self._k]
-        S = St[: self._k] + bk.spacing(1)
+        S = St[: self._k] + bk.eps()
         V = bk.hstack((bk.transpose(vt), Qv)) @ bk.transpose(Vt)[:, : self._k]
         return _FixedRankPoint(U, S, bk.transpose(V))
 
@@ -243,43 +282,3 @@ class FixedRankEmbedded(RiemannianSubmanifold):
             bk.zeros((self._k, self._k)),
             bk.zeros((self._n, self._k)),
         )
-
-
-class _ndarraySequence(ndarraySequenceMixin):
-    @return_as_class_instance
-    def __mul__(self, other):
-        return [other * s for s in self]
-
-    __rmul__ = __mul__
-
-    @return_as_class_instance
-    def __truediv__(self, other):
-        return [val / other for val in self]
-
-    @return_as_class_instance
-    def __neg__(self):
-        return [-val for val in self]
-
-
-class _FixedRankPoint(
-    _ndarraySequence,
-    collections.namedtuple(
-        "_FixedRankPointTuple", field_names=("u", "s", "vt")
-    ),
-):
-    pass
-
-
-class _FixedRankTangentVector(
-    _ndarraySequence,
-    collections.namedtuple(
-        "_FixedRankTangentVectorTuple", field_names=("Up", "M", "Vp")
-    ),
-):
-    @return_as_class_instance
-    def __add__(self, other):
-        return [s + o for (s, o) in zip(self, other)]
-
-    @return_as_class_instance
-    def __sub__(self, other):
-        return [s - o for (s, o) in zip(self, other)]
