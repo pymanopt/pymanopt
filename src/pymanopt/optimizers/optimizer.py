@@ -1,3 +1,4 @@
+# flake8: noqa E231
 import abc
 import collections
 import time

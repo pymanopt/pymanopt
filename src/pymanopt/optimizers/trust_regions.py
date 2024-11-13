@@ -56,6 +56,7 @@
 import time
 from math import inf, isnan, nan, sqrt
 
+from pymanopt.core.problem import Problem
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 
 
@@ -107,7 +108,7 @@ class TrustRegions(Optimizer):
 
     def run(
         self,
-        problem,
+        problem: Problem,
         *,
         initial_point=None,
         mininner=1,
@@ -139,6 +140,7 @@ class TrustRegions(Optimizer):
         if initial_point is None:
             x = manifold.random_point()
         else:
+            assert isinstance(initial_point, manifold.backend.array_t)
             x = initial_point
 
         # Initializations
@@ -165,7 +167,7 @@ class TrustRegions(Optimizer):
         if self._verbosity >= 1:
             print("Optimizing...")
         if self._verbosity >= 2:
-            print(f"{' ':44s}f: {fx:+.6e}   " f"|grad|: {norm_grad:.6e}")
+            print(f"{' ':44s}f: {fx:+.6e}   |grad|: {norm_grad:.6e}")
 
         self._initialize_log()
 

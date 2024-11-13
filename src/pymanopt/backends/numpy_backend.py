@@ -21,6 +21,11 @@ class NumpyBackend(Backend):
     # Common attributes, properties and methods
     ##########################################################################
     array_t = np.ndarray  # type: ignore
+    # numpy dtypes follow a very complex hierarchy, and there doesn't seem
+    # to exist a single super class they all inherit from. In particular:
+    # np.float32, np.complex128 and others are classes. np.dtype("float32"),
+    # np.dtype("complex128") and others are not.
+    _dtype: type
 
     def __init__(self, dtype: type = np.float64):
         assert (

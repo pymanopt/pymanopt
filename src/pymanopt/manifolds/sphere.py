@@ -138,6 +138,7 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
                 "points"
             )
         self._matrix = matrix
+        self._validate_span_matrix(matrix, backend)
         self._subspace_projector = subspace_projector
         super().__init__(n, name=name, dimension=dimension, backend=backend)
 
@@ -190,8 +191,6 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
             raise ValueError(
                 f"A backend must always be specified for class {__class__.__name__}"
             )
-        self._validate_span_matrix(matrix, backend)
-        self._matrix = matrix
         m = matrix.shape[0]
         q, _ = backend.linalg_qr(matrix)
         subspace_projector = q @ backend.transpose(q)
@@ -235,8 +234,6 @@ class SphereSubspaceComplementIntersection(
             raise ValueError(
                 f"A backend must always be specified for class {__class__.__name__}"
             )
-        self._validate_span_matrix(matrix, backend)
-        self._matrix = matrix
         m = matrix.shape[0]
         q, _ = backend.linalg_qr(matrix)
         subspace_projector = backend.eye(m) - q @ backend.transpose(q)
@@ -251,7 +248,7 @@ class SphereSubspaceComplementIntersection(
     @RiemannianSubmanifold.backend.setter
     def _(self, backend: Backend):
         super().backend = backend
-        self._matrix = backend.toarray(self._matrix)
+        self._matrix = backend.array(self._matrix)
         q, _ = backend.linalg_qr(self._matrix)
         self._subspace_projector = backend.eye(
             self.dim
