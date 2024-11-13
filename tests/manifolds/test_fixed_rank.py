@@ -41,8 +41,8 @@ class TestFixedRankEmbeddedManifold:
         a = e.random_tangent_vector(x)
         b = e.random_tangent_vector(x)
         # First embed in the ambient space
-        A = x[0] @ a[1] @ x[2] + a[0] @ x[2] + x[0] @ bk.transpose(a[2])
-        B = x[0] @ b[1] @ x[2] + b[0] @ x[2] + x[0] @ bk.transpose(b[2])
+        A = x.u @ a.M @ x.vt + a.Up @ x.vt + x.u @ bk.transpose(a.Vp)
+        B = x.u @ b.M @ x.vt + b.Up @ x.vt + x.u @ bk.transpose(b.Vp)
         bk.assert_allclose(bk.sum(A * B), e.inner_product(x, a, b))
 
     def test_proj_range(self):
@@ -126,7 +126,7 @@ class TestFixedRankEmbeddedManifold:
         u = s.random_tangent_vector(x)
         A = s.transport(x, y, u)
         B = s.projection(y, s.embedding(x, u))
-        diff = [A[k] - B[k] for k in range(len(A))]
+        diff = A - B
         bk.assert_almost_equal(s.norm(y, diff), 0)
 
     def test_apply_ambient(self):

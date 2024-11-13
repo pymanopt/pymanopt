@@ -55,6 +55,11 @@ class Backend(ABC):
         ) -> "Backend.array_t":
             ...
 
+        def __radd__(
+            self, other: "Union[int, float, Backend.array_t]"
+        ) -> "Backend.array_t":
+            ...
+
         def __mul__(
             self, other: "Union[int, float, Backend.array_t]"
         ) -> "Backend.array_t":
