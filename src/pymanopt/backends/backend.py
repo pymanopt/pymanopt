@@ -1,6 +1,14 @@
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Callable, Literal, Optional, Protocol, TypeVar, Union
+from typing import (
+    Callable,
+    Literal,
+    Optional,
+    Protocol,
+    TypeVar,
+    Union,
+    runtime_checkable,
+)
 
 import numpy as np
 import scipy.special
@@ -30,6 +38,7 @@ class Backend(ABC):
     ##########################################################################
     _dtype: type
 
+    @runtime_checkable
     class array_t(Protocol):
         """Array type used for static type checks.
 
@@ -86,6 +95,9 @@ class Backend(ABC):
         def __sub__(self, other: "Backend.array_t") -> "Backend.array_t":
             ...
 
+        def __pow__(self, exponent: int) -> "Backend.array_t":
+            ...
+
         @property
         def shape(self) -> tuple[int, ...]:
             ...
@@ -111,6 +123,10 @@ class Backend(ABC):
         def __gt__(
             self, other: "Union[int, float, Backend.array_t]"
         ) -> "Backend.array_t":
+            ...
+
+        @property
+        def T(self) -> "Backend.array_t":
             ...
 
     @property
