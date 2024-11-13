@@ -1,7 +1,8 @@
 import functools
 
 import autograd
-import numpy as np
+import autograd.numpy as anp
+from numpy import complex64, complex128, float32, float64
 
 from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.tools import (
@@ -13,7 +14,7 @@ from pymanopt.tools import (
 def conjugate_result(function):
     @functools.wraps(function)
     def wrapper(*args, **kwargs):
-        return list(map(np.conj, function(*args, **kwargs)))
+        return list(map(anp.conj, function(*args, **kwargs)))  # type: ignore
 
     return wrapper
 
@@ -23,7 +24,7 @@ class AutogradBackend(NumpyBackend):
     # Common attributes, properties and methods
     ##########################################################################
 
-    def __init__(self, dtype: type = np.float64):
+    def __init__(self, dtype: type = float64):
         super().__init__(dtype)
 
     def __repr__(self):
@@ -32,20 +33,20 @@ class AutogradBackend(NumpyBackend):
     def to_real_backend(self) -> "AutogradBackend":
         if self.is_dtype_real:
             return self
-        if self.dtype == np.complex64:
-            return AutogradBackend(dtype=np.float32)
-        elif self.dtype == np.complex128:
-            return AutogradBackend(dtype=np.float64)
+        if self.dtype == complex64:
+            return AutogradBackend(dtype=float32)
+        elif self.dtype == complex128:
+            return AutogradBackend(dtype=float64)
         else:
             raise ValueError(f"dtype {self.dtype} is not supported")
 
     def to_complex_backend(self) -> "AutogradBackend":
         if not self.is_dtype_real:
             return self
-        if self.dtype == np.float32:
-            return AutogradBackend(dtype=np.complex64)
-        elif self.dtype == np.float64:
-            return AutogradBackend(dtype=np.complex128)
+        if self.dtype == float32:
+            return AutogradBackend(dtype=complex64)
+        elif self.dtype == float64:
+            return AutogradBackend(dtype=complex128)
         else:
             raise ValueError(f"dtype {self.dtype} is not supported")
 
@@ -71,9 +72,9 @@ class AutogradBackend(NumpyBackend):
         def vector_dot_gradient(*args):
             *arguments, vectors = args
             gradients = gradient(*arguments)
-            return np.sum(
+            return anp.sum(
                 [
-                    np.real(np.tensordot(gradient, vector, axes=vector.ndim))
+                    anp.real(anp.tensordot(gradient, vector, axes=vector.ndim))
                     for gradient, vector in zip(gradients, vectors)
                 ]
             )
@@ -96,3 +97,11 @@ class AutogradBackend(NumpyBackend):
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(wrapper)
         return wrapper
+
+    ##############################################################################
+    # Numerics functions
+    ##############################################################################
+
+    # Since autograd thinly wraps numpy, all the classical numpy functions can
+    # be used directly on arrays produced by autograd as long as the results are
+    # not used in autodiff (which is the case for these numerics functions).

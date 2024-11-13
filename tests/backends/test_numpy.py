@@ -3,6 +3,7 @@ import pytest
 from numpy import testing as np_testing
 
 import pymanopt
+from pymanopt.backends.numpy_backend import NumpyBackend
 
 from . import _backend_tests
 
@@ -10,19 +11,18 @@ from . import _backend_tests
 class TestNumpyBackend:
     @pytest.fixture(autouse=True)
     def setup(self):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=3, backend=NumpyBackend()
+        )
         self.n = 10
 
-        @pymanopt.function.numpy(
-            _backend_tests.manifold_factory(point_layout=3)
-        )
+        @pymanopt.function.numpy(self.manifold)
         def nary_cost(x, y):
             return np.sum(x * y)
 
         self.cost = self.nary_cost = nary_cost
 
-        @pymanopt.function.numpy(
-            _backend_tests.manifold_factory(point_layout=3)
-        )
+        @pymanopt.function.numpy(self.manifold)
         def nested_nary_cost(x, y, z):
             return np.sum(x**2 * y + 3 * z)
 

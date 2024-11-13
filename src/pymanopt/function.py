@@ -1,14 +1,5 @@
 __all__ = ["Function", "autograd", "jax", "numpy", "pytorch", "tensorflow"]
 
-# from pymanopt.autodiff.backends import (
-#     autograd,
-#     jax,
-#     numpy,
-#     pytorch,
-#     tensorflow,
-# )
-
-
 import inspect
 from importlib import import_module
 from typing import Any, Callable
@@ -55,55 +46,6 @@ class Function:
 
     def __call__(self, *args, **kwargs):
         return self._function(*args, **kwargs)
-
-
-# def backend_decorator_factory(
-#     backend_cls,
-# ) -> typing.Callable[[Manifold], typing.Callable[[typing.Callable], Function]]:
-#     """Create function decorator for a backend.
-
-#     Function to create a backend decorator that is used to annotate a
-#     callable::
-
-#         decorator = backend_decorator_factory(backend_cls)
-
-#         @decorator(manifold)
-#         def function(x):
-#             ...
-
-#     Args:
-#         backend_cls: a class implementing the backend interface defined by
-#             :class:`pymanopt.autodiff.backend._backend._Backend`.
-
-#     Returns:
-#         A new backend decorator.
-#     """
-
-#     def decorator(manifold: Manifold) -> typing.Callable:
-#         if not isinstance(manifold, Manifold):
-#             raise TypeError(
-#                 "Backend decorator requires a manifold instance, got "
-#                 f"{manifold}"
-#             )
-
-#         def inner(function: typing.Callable) -> Function:
-#             argspec = inspect.getfullargspec(function)
-#             if (
-#                 (argspec.args and argspec.varargs)
-#                 or not (argspec.args or argspec.varargs)
-#                 or (argspec.varkw or argspec.kwonlyargs)
-#             ):
-#                 raise ValueError(
-#                     "Decorated function must only accept positional arguments "
-#                     "or a variable-length argument like *x"
-#                 )
-#             return Function(
-#                 function=function, manifold=manifold, backend=backend_cls()
-#             )
-
-#         return inner
-
-#     return decorator
 
 
 def _only_one_true(*args):

@@ -2,13 +2,18 @@ import pytest
 import tensorflow as tf
 
 import pymanopt
+from pymanopt.backends.tensorflow_backend import TensorflowBackend
 
 from . import _backend_tests
 
 
 class TestUnaryFunction(_backend_tests.TestUnaryFunction):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(x):
             return tf.reduce_sum(x**2)
@@ -18,7 +23,12 @@ class TestUnaryFunction(_backend_tests.TestUnaryFunction):
 
 class TestUnaryComplexFunction(_backend_tests.TestUnaryComplexFunction):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout,
+            backend=TensorflowBackend(tf.complex128),
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(x):
             return tf.math.real(tf.reduce_sum(x**2))
@@ -28,7 +38,11 @@ class TestUnaryComplexFunction(_backend_tests.TestUnaryComplexFunction):
 
 class TestUnaryVarargFunction(_backend_tests.TestUnaryFunction):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(*x):
             (x,) = x
@@ -39,7 +53,11 @@ class TestUnaryVarargFunction(_backend_tests.TestUnaryFunction):
 
 class TestNaryFunction(_backend_tests.TestNaryFunction):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(x, y):
             return tf.tensordot(x, y, axes=1)
@@ -49,7 +67,11 @@ class TestNaryFunction(_backend_tests.TestNaryFunction):
 
 class TestNaryVarargFunction(_backend_tests.TestNaryFunction):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(*args):
             return tf.tensordot(*args, axes=1)
@@ -59,7 +81,11 @@ class TestNaryVarargFunction(_backend_tests.TestNaryFunction):
 
 class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(x, y, z):
             return tf.reduce_sum(x**2 + y + z**3)
@@ -69,7 +95,11 @@ class TestNaryParameterGrouping(_backend_tests.TestNaryParameterGrouping):
 
 class TestVector(_backend_tests.TestVector):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(X):
             return tf.exp(tf.reduce_sum(X**2))
@@ -79,7 +109,11 @@ class TestVector(_backend_tests.TestVector):
 
 class TestMatrix(_backend_tests.TestMatrix):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(X):
             return tf.exp(tf.reduce_sum(X**2))
@@ -89,7 +123,11 @@ class TestMatrix(_backend_tests.TestMatrix):
 
 class TestTensor3(_backend_tests.TestTensor3):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(X):
             return tf.exp(tf.reduce_sum(X**2))
@@ -99,7 +137,11 @@ class TestTensor3(_backend_tests.TestTensor3):
 
 class TestMixed(_backend_tests.TestMixed):
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, pre_setup):
+        self.manifold = _backend_tests.manifold_factory(
+            point_layout=self.point_layout, backend=TensorflowBackend()
+        )
+
         @pymanopt.function.tensorflow(self.manifold)
         def cost(x, y, z):
             return (
