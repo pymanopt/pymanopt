@@ -212,7 +212,10 @@ class TestSphereSubspaceIntersectionManifold:
 
     def test_dim_1(self):
         U = self.backend.vstack(
-            (self.backend.eye(2), self.backend.zeros((1, 2)))
+            (
+                self.backend.eye(2),
+                self.backend.zeros((1, 2)),
+            )
         )
         manifold = SphereSubspaceIntersection(U, backend=self.backend)
         # U spans the x-y plane, therefore the manifold consists of the

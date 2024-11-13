@@ -29,7 +29,9 @@ class _ArrayNamedTupleMixin(ArraySequenceMixin):
 
     @return_as_class_instance(unpack=True)
     def __truediv__(self, other):
-        return [x / y for x, y in zip(self, other)]  # type: ignore
+        if isinstance(other, self.__class__):
+            return [x / y for x, y in zip(self, other)]  # type: ignore
+        return [x / other for x in self]  # type: ignore
 
 
 class _FixedRankPoint(
@@ -127,10 +129,8 @@ class FixedRankEmbedded(RiemannianSubmanifold):
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return sum(
-            [
-                self.backend.tensordot(a, b)
-                for (a, b) in zip(tangent_vector_a, tangent_vector_b)
-            ]
+            self.backend.tensordot(a, b)
+            for (a, b) in zip(tangent_vector_a, tangent_vector_b)
         )
 
     def _apply_ambient(self, vector, matrix):
@@ -251,7 +251,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         Vp = vector.Vp - bk.transpose(vt) @ vt @ vector.Vp
         return _FixedRankTangentVector(Up, vector.M, Vp)
 
-    def random_tangent_vector(self, point):
+    def random_tangent_vector(self, point) -> _FixedRankTangentVector:
         bk = self.backend
         Up = bk.random_normal(size=(self._m, self._k))
         Vp = bk.random_normal(size=(self._n, self._k))

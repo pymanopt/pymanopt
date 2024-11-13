@@ -157,7 +157,7 @@ class PytorchBackend(Backend):
         return torch.abs(array)
 
     def all(self, array: torch.Tensor) -> bool:
-        return bool(torch.all(array).item())
+        return bool(torch.all(torch.as_tensor(array, dtype=torch.bool)).item())
 
     def allclose(
         self,
@@ -182,7 +182,7 @@ class PytorchBackend(Backend):
         return torch.allclose(array_a, array_b, rtol=rtol, atol=atol)
 
     def any(self, array: torch.Tensor) -> bool:
-        return bool(torch.any(array).item())
+        return bool(torch.any(torch.as_tensor(array, dtype=torch.bool)).item())
 
     def arange(
         self,
