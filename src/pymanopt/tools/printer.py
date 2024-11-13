@@ -1,4 +1,5 @@
-from typing import Any, Iterable, List, Optional, Tuple
+# flake8: noqa E231
+from typing import Any, Iterable, List, Optional
 
 
 class VoidPrinter:
@@ -42,21 +43,21 @@ class ColumnPrinter(VoidPrinter):
         column_widths: Tuple of calculated column widths.
     """
 
-    column_names: Tuple[str]
-    column_formatters: Tuple[str]
+    column_names: tuple[str, ...]
+    column_formatters: tuple[str, ...]
     column_padding: int
-    column_widths: Tuple[str]
+    column_widths: tuple[int, ...]
 
     def __init__(
         self,
         *,
-        columns: List[Tuple[str, str]],
+        columns: List[tuple[str, str]],
         placeholder_values: Optional[List[Any]] = None,
         column_padding: int = 4,
     ):
         self.column_names, format_strings = map(tuple, zip(*columns))
         self.column_formatters = tuple(
-            [f"{{value:{format_string}}}" for format_string in format_strings]
+            f"{{value:{format_string}}}" for format_string in format_strings
         )
         self.column_padding = column_padding
 
@@ -64,18 +65,16 @@ class ColumnPrinter(VoidPrinter):
         if placeholder_values is None:
             placeholder_values = [0] * len(self.column_names)
         self.column_widths = tuple(
-            [
-                max(
-                    len(column),
-                    len(formatter.format(value=value)),
-                )
-                + self.column_padding
-                for column, formatter, value in zip(
-                    self.column_names,
-                    self.column_formatters,
-                    placeholder_values,
-                )
-            ]
+            max(
+                len(column),
+                len(formatter.format(value=value)),
+            )
+            + self.column_padding
+            for column, formatter, value in zip(
+                self.column_names,
+                self.column_formatters,
+                placeholder_values,
+            )
         )
 
     def print_header(self):

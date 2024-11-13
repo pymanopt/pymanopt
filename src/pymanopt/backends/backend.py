@@ -47,23 +47,35 @@ class Backend(ABC):
         def __len__(self) -> int:
             ...
 
-        def __add__(self, other: "Backend.array_t") -> "Backend.array_t":
+        def __neg__(self) -> "Backend.array_t":
+            ...
+
+        def __add__(
+            self, other: "Union[int, float, Backend.array_t]"
+        ) -> "Backend.array_t":
             ...
 
         def __mul__(
-            self, other: "int | float | Backend.array_t"
+            self, other: "Union[int, float, Backend.array_t]"
         ) -> "Backend.array_t":
             ...
 
         def __rmul__(
-            self, other: "int | float | Backend.array_t"
+            self, other: "Union[int, float, Backend.array_t]"
         ) -> "Backend.array_t":
             ...
 
         def __matmul__(self, other: "Backend.array_t") -> "Backend.array_t":
             ...
 
-        def __div__(self, other: "Backend.array_t") -> "Backend.array_t":
+        def __div__(
+            self, other: "Union[int, float, Backend.array_t]"
+        ) -> "Backend.array_t":
+            ...
+
+        def __truediv__(
+            self, other: "Union[int, float, Backend.array_t]"
+        ) -> "Backend.array_t":
             ...
 
         def __sub__(self, other: "Backend.array_t") -> "Backend.array_t":
@@ -297,7 +309,7 @@ class Backend(ABC):
         ...
 
     @not_implemented
-    def eps(self, dtype) -> float:
+    def eps(self) -> float:
         ...
 
     @not_implemented
