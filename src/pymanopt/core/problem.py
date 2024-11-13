@@ -65,7 +65,7 @@ class Problem:
         if manifold.has_dummy_backend():
             manifold.set_backend_with_default_dtype(type(cost.backend))
         else:
-            assert isinstance(manifold.backend, type(cost.backend))
+            assert manifold.is_backend_compatible(type(cost.backend))
 
         if euclidean_gradient is not None and riemannian_gradient is not None:
             raise ValueError(

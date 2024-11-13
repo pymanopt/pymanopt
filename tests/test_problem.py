@@ -4,6 +4,7 @@ import tensorflow as tf
 from numpy import testing as np_testing
 
 import pymanopt
+from pymanopt.backends.tensorflow_backend import TensorflowBackend
 from pymanopt.manifolds import Product, Sphere, Stiefel
 from pymanopt.optimizers import TrustRegions
 
@@ -12,7 +13,7 @@ class TestProblem:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.n = 15
-        self.manifold = Sphere(self.n)
+        self.manifold = Sphere(self.n, backend=TensorflowBackend())
 
         @pymanopt.function.tensorflow(self.manifold)
         def cost(X):
@@ -22,7 +23,7 @@ class TestProblem:
 
     def test_prepare(self):
         problem = pymanopt.Problem(self.manifold, self.cost)
-        x = np.random.normal(size=self.n)
+        x = tf.random.normal([self.n])
         np_testing.assert_allclose(
             2 * x * np.exp(np.sum(x**2)), problem.euclidean_gradient(x)
         )
@@ -34,7 +35,7 @@ class TestProblem:
 
     def test_vararg_cost_on_product(self):
         shape = (3, 3)
-        manifold = Product([Stiefel(*shape)] * 2)
+        manifold = Product([Stiefel(*shape, backend=TensorflowBackend())] * 2)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(*args):

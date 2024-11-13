@@ -136,6 +136,9 @@ class Manifold(metaclass=abc.ABCMeta):
             else backend_type.DEFAULT_REAL_DTYPE()
         )
 
+    def is_backend_compatible(self, backend_type: type) -> bool:
+        return isinstance(self.backend, backend_type)
+
     @property
     def num_values(self) -> int:
         """Total number of values representing a point on the manifold."""
