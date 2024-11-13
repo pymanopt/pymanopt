@@ -1,8 +1,8 @@
-import autograd.numpy as np
-import numpy.testing as np_testing
+import autograd.numpy as anp
 import pytest
 
 import pymanopt
+from pymanopt.backends.autograd_backend import AutogradBackend
 from pymanopt.manifolds import Euclidean, FixedRankEmbedded, Product
 
 
@@ -12,13 +12,14 @@ class TestProblemBackendInterface:
         self.m = m = 20
         self.n = n = 10
         self.rank = rank = 3
+        self.backend = AutogradBackend()
 
-        A = np.random.normal(size=(m, n))
+        A = anp.random.normal(size=(m, n))
         self.manifold = Product([FixedRankEmbedded(m, n, rank), Euclidean(n)])
 
         @pymanopt.function.autograd(self.manifold)
         def cost(u, s, vt, x):
-            return np.linalg.norm(((u * s) @ vt - A) @ x) ** 2
+            return anp.linalg.norm(((u * s) @ vt - A) @ x) ** 2
 
         self.cost = cost
         self.gradient = self.cost.get_gradient_operator()
@@ -51,7 +52,7 @@ class TestProblemBackendInterface:
         cost = self.problem.cost
         X = self.manifold.random_point()
         (u, s, vt), x = X
-        np_testing.assert_allclose(cost(X), self.cost(u, s, vt, x))
+        self.backend.assert_allclose(cost(X), self.cost(u, s, vt, x))
 
     def test_problem_gradient_operator(self):
         X = self.manifold.random_point()
@@ -59,7 +60,7 @@ class TestProblemBackendInterface:
         G = self.problem.euclidean_gradient(X)
         (gu, gs, gvt), gx = G
         for ga, gb in zip((gu, gs, gvt, gx), self.gradient(u, s, vt, x)):
-            np_testing.assert_allclose(ga, gb)
+            self.backend.assert_allclose(ga, gb)
 
     def test_problem_hessian_operator(self):
         ehess = self.problem.euclidean_hessian
@@ -74,4 +75,4 @@ class TestProblemBackendInterface:
         for ha, hb in zip(
             (hu, hs, hvt, hx), self.hessian(u, s, vt, x, a, b, c, d)
         ):
-            np_testing.assert_allclose(ha, hb)
+            self.backend.assert_allclose(ha, hb)

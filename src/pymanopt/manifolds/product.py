@@ -58,14 +58,27 @@ class Product(Manifold):
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
 
+        # check all manifolds have the same backend type
+        # TODO: should we also enforce same precision? (32 vs 64)
+        first_type = type(manifolds[0].backend)
+        for manifold in manifolds[1:]:
+            if type(manifold.backend) is not first_type:
+                raise ValueError(
+                    "All manifolds in a product must have the same backend type"
+                )
+
         self.manifolds = tuple(manifolds)
         manifold_names = " x ".join([str(manifold) for manifold in manifolds])
         name = f"Product manifold: {manifold_names}"
 
         dimension = np.sum([manifold.dim for manifold in manifolds])
         point_layout = tuple(manifold.point_layout for manifold in manifolds)
+        # TODO: set a backend to be able to accss
         super().__init__(
-            name, dimension, point_layout=point_layout, backend=None
+            name,
+            dimension,
+            point_layout=point_layout,
+            backend=manifolds[0].backend,
         )
 
     @Manifold.backend.setter
@@ -77,15 +90,19 @@ class Product(Manifold):
 
     def has_dummy_backend(self) -> bool:
         return any(
-            [
-                manifold.backend == DummyBackendSingleton
-                for manifold in self.manifolds
-            ]
+            manifold.backend == DummyBackendSingleton
+            for manifold in self.manifolds
         )
 
     def set_backend_with_default_dtype(self, backend_type: type):
         for manifold in self.manifolds:
             manifold.set_backend_with_default_dtype(backend_type)
+
+    def is_backend_compatible(self, backend_type: type) -> bool:
+        return all(
+            manifold.is_backend_compatible(backend_type)
+            for manifold in self.manifolds
+        )
 
     @property
     def typical_dist(self):
