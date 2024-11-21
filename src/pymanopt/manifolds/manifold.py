@@ -124,7 +124,7 @@ class Manifold(metaclass=abc.ABCMeta):
         and dtype precision (single or double) and chooses real or complex
         based on the manifold type.
         """
-        self.backend = (
+        self._backend = (
             other_backend.to_complex_backend()
             if self.IS_COMPLEX
             else other_backend.to_real_backend()
