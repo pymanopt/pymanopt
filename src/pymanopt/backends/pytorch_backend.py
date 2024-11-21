@@ -1,3 +1,4 @@
+from functools import wraps
 from numbers import Number
 from typing import Any, Callable, Literal, Optional, Union
 
@@ -11,6 +12,14 @@ from pymanopt.tools import (
     bisect_sequence,
     unpack_singleton_sequence_return_value,
 )
+
+
+def conjugate_result(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        return list(map(torch.conj, function(*args, **kwargs)))  # type: ignore
+
+    return wrapper
 
 
 def elementary_math_function(
@@ -108,53 +117,36 @@ class PytorchBackend(Backend):
     ##############################################################################
     # Autodiff methods
     ##############################################################################
+    # TODO: remove this function
     def prepare_function(self, function):
         return function
 
-    def _sanitize_argument(self, arg: torch.Tensor):
-        arg.requires_grad_()
-        arg.grad = None
-        return arg
-
-    def _sanitize_gradient(self, tensor):
-        if tensor.grad is None:
-            return torch.zeros_like(tensor)
-        return tensor.grad
-
-    def generate_gradient_operator(self, function, num_arguments):
-        def gradient(*args):
-            arguments = list(map(self._sanitize_argument, args))
-            function(*arguments).backward(retain_graph=True)
-            return list(map(self._sanitize_gradient, arguments))
+    def generate_gradient_operator(self, function, num_arguments) -> Callable:
+        @conjugate_result
+        def gradient(*args: torch.Tensor):
+            for arg in args:
+                arg.requires_grad_(True)
+            f = function(*args)
+            grads = autograd.grad(f, args)  # type: ignore
+            for arg in args:
+                arg.requires_grad_(False)
+            return grads
 
         if num_arguments == 1:
             return unpack_singleton_sequence_return_value(gradient)
+
         return gradient
 
     def generate_hessian_operator(self, function, num_arguments):
-        def hessian_vector_product(*args):
-            arguments, vectors = bisect_sequence(args)
-            arguments = list(map(self._sanitize_argument, arguments))
-            gradients = autograd.grad(
-                function(*arguments),
-                arguments,
-                create_graph=True,
-                allow_unused=True,
-                retain_graph=True,
-            )
-            dot_product: torch.Tensor = torch.tensor(0.0)
-            for gradient, vector in zip(gradients, vectors):
-                dot_product += torch.tensordot(
-                    gradient.conj(), vector, dims=gradient.ndim
-                ).real
-            dot_product.backward(retain_graph=True)
-            return list(map(self._sanitize_gradient, arguments))
+        @conjugate_result
+        def hvp(*inputs: torch.Tensor):
+            args, vectors = bisect_sequence(inputs)
+            return autograd.functional.hvp(function, args, vectors)[1]
 
         if num_arguments == 1:
-            return unpack_singleton_sequence_return_value(
-                hessian_vector_product
-            )
-        return hessian_vector_product
+            return unpack_singleton_sequence_return_value(hvp)
+
+        return hvp
 
     ##############################################################################
     # Numerics functions
