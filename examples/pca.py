@@ -9,6 +9,8 @@ from pymanopt.manifolds import Stiefel
 from pymanopt.optimizers import TrustRegions
 
 
+np.random.seed(127)
+
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -56,7 +58,7 @@ def create_cost_and_derivates(manifold, samples, backend):
             )
 
     elif backend == "pytorch":
-        samples = torch.from_numpy(samples).to(torch.float32)
+        samples = torch.from_numpy(samples)
 
         @pymanopt.function.pytorch(manifold)
         def cost(w):
@@ -64,7 +66,7 @@ def create_cost_and_derivates(manifold, samples, backend):
             return torch.norm(samples - samples @ projector) ** 2
 
     elif backend == "tensorflow":
-        samples = tf.constant(samples, dtype=tf.float32)
+        samples = tf.constant(samples)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(w):
@@ -82,7 +84,11 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     num_samples = 200
     num_components = 2
     samples = np.random.normal(size=(num_samples, dimension)) @ np.diag(
-        [3, 2, 1]
+        [
+            3,
+            2,
+            1,
+        ]
     )
     samples -= samples.mean(axis=0)
 

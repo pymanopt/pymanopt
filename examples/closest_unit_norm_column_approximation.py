@@ -9,6 +9,8 @@ from pymanopt.manifolds import Oblique
 from pymanopt.optimizers import ConjugateGradient
 
 
+np.random.seed(127)
+
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -38,14 +40,14 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return X - matrix
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix).to(torch.float32)
+        matrix_ = torch.from_numpy(matrix)
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
             return 0.5 * torch.sum((X - matrix_) ** 2)
 
     elif backend == "tensorflow":
-        matrix = tf.constant(matrix, dtype=tf.float32)
+        matrix = tf.constant(matrix)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):

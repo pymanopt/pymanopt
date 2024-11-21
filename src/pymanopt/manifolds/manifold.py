@@ -71,7 +71,7 @@ class Manifold(metaclass=abc.ABCMeta):
                 f"{type(point_layout)}"
             )
         if isinstance(point_layout, (tuple, list)):
-            if not all([num_arguments > 0 for num_arguments in point_layout]):
+            if not all(num_arguments > 0 for num_arguments in point_layout):
                 raise ValueError(
                     f"Invalid point layout {point_layout}: all values must be "
                     "positive"

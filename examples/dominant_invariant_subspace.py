@@ -9,6 +9,8 @@ from pymanopt.manifolds import Grassmann
 from pymanopt.optimizers import TrustRegions
 
 
+np.random.seed(127)
+
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -42,14 +44,14 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return -2 * matrix @ H
 
     elif backend == "pytorch":
-        matrix = torch.from_numpy(matrix).to(torch.float32)
+        matrix = torch.from_numpy(matrix)
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
             return -torch.tensordot(X, matrix @ X)
 
     elif backend == "tensorflow":
-        matrix = tf.constant(matrix, dtype=tf.float32)
+        matrix = tf.constant(matrix)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):

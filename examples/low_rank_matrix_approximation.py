@@ -9,6 +9,8 @@ from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.optimizers import ConjugateGradient
 
 
+np.random.seed(127)
+
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -46,7 +48,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return gu, gs, gvt
 
     elif backend == "pytorch":
-        matrix = torch.from_numpy(matrix).to(torch.float32)
+        matrix = torch.from_numpy(matrix)
 
         @pymanopt.function.pytorch(manifold)
         def cost(u, s, vt):
@@ -54,7 +56,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return torch.norm(X - matrix) ** 2
 
     elif backend == "tensorflow":
-        matrix = tf.constant(matrix, dtype=tf.float32)
+        matrix = tf.constant(matrix)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(u, s, vt):

@@ -9,6 +9,8 @@ from pymanopt.manifolds import Sphere
 from pymanopt.optimizers import SteepestDescent
 
 
+np.random.seed(127)
+
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -38,14 +40,14 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return -2 * matrix @ x
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix).to(dtype=torch.float32)
+        matrix_ = torch.from_numpy(matrix)
 
         @pymanopt.function.pytorch(manifold)
         def cost(x):
             return -x.reshape(1, -1) @ matrix_ @ x.reshape(-1, 1)
 
     elif backend == "tensorflow":
-        matrix = tf.constant(matrix, dtype=tf.float32)
+        matrix = tf.constant(matrix)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(x):

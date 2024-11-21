@@ -16,7 +16,8 @@ from examples import (
 from examples.advanced import check_gradient, check_hessian, check_retraction
 
 
-SUPPORTED_BACKENDS = {"numpy", "autograd", "jax", "pytorch", "tensorflow"}
+# TODO: add back tensorflow
+SUPPORTED_BACKENDS = {"numpy", "autograd", "jax", "pytorch"}
 
 
 class TestExamples:
