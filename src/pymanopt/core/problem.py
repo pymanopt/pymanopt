@@ -43,30 +43,39 @@ class Problem:
     def __init__(
         self,
         manifold: Manifold,
-        cost: Function,
+        cost: Callable,
         *,
-        euclidean_gradient: Optional[Function] = None,
-        riemannian_gradient: Optional[Function] = None,
-        euclidean_hessian: Optional[Function] = None,
-        riemannian_hessian: Optional[Function] = None,
+        euclidean_gradient: Optional[Callable] = None,
+        riemannian_gradient: Optional[Callable] = None,
+        euclidean_hessian: Optional[Callable] = None,
+        riemannian_hessian: Optional[Callable] = None,
         preconditioner: Optional[Callable] = None,
     ):
         self.manifold = manifold
 
-        self._validate_function(cost, "cost")
         for function, name in (
+            (cost, "cost"),
             (euclidean_gradient, "euclidean_gradient"),
             (euclidean_hessian, "euclidean_hessian"),
             (riemannian_gradient, "riemannian_gradient"),
             (riemannian_hessian, "riemannian_hessian"),
         ):
             if function is not None:
-                self._validate_function(function, name)
+                assert isinstance(
+                    function, Callable
+                ), f"Function {name} must be callable"
 
+        # check backend compatibility between manifold and cost function
+        assert isinstance(cost, Callable)
         if manifold.has_dummy_backend():
-            manifold.set_compatible_backend(cost.backend)
+            if isinstance(cost, Function):
+                manifold.set_compatible_backend(cost.backend)
+            else:
+                raise ValueError(
+                    "Neither cost nor manifold have a specified backend."
+                )
         else:
-            self._validate_function_backend(cost, "cost", manifold)
+            cost = self._validate_function_backend(cost, "cost", manifold)
 
         self._original_cost = cost
         self._cost = self._wrap_function(cost)
@@ -83,7 +92,7 @@ class Problem:
             )
 
         if euclidean_gradient is not None:
-            self._validate_function_backend(
+            euclidean_gradient = self._validate_function_backend(
                 euclidean_gradient, "euclidean_gradient", manifold
             )
             euclidean_gradient = self._wrap_gradient_operator(
@@ -91,7 +100,7 @@ class Problem:
             )
         self._euclidean_gradient = euclidean_gradient
         if euclidean_hessian is not None:
-            self._validate_function_backend(
+            euclidean_hessian = self._validate_function_backend(
                 euclidean_hessian, "euclidean_hessian", manifold
             )
             euclidean_hessian = self._wrap_hessian_operator(
@@ -100,7 +109,7 @@ class Problem:
         self._euclidean_hessian = euclidean_hessian
 
         if riemannian_gradient is not None:
-            self._validate_function_backend(
+            riemannian_gradient = self._validate_function_backend(
                 riemannian_gradient, "riemannian_gradient", manifold
             )
             riemannian_gradient = self._wrap_gradient_operator(
@@ -108,7 +117,7 @@ class Problem:
             )
         self._riemannian_gradient = riemannian_gradient
         if riemannian_hessian is not None:
-            self._validate_function_backend(
+            riemannian_hessian = self._validate_function_backend(
                 riemannian_hessian, "rimeannian_hessian", manifold
             )
             riemannian_hessian = self._wrap_hessian_operator(
@@ -136,13 +145,19 @@ class Problem:
 
     @staticmethod
     def _validate_function_backend(
-        function: Function, name: str, manifold: Manifold
+        function: Callable, name: str, manifold: Manifold
     ):
-        assert manifold.is_backend_compatible(function.backend), (
-            f"Function '{name}' has a backend {function.backend} "
-            "which is not compatible with the manifold's backend"
-            f" {manifold.backend}."
-        )
+        if isinstance(function, Function):
+            assert manifold.is_backend_compatible(function.backend), (
+                f"Function '{name}' has a backend {function.backend} "
+                "which is not compatible with the manifold's backend"
+                f" {manifold.backend}."
+            )
+            return function
+        else:
+            return Function(
+                function=function, manifold=manifold, backend=manifold.backend
+            )
 
     def _flatten_arguments(self, arguments, signature):
         assert len(arguments) == len(signature)
