@@ -5,7 +5,7 @@ import numpy as np
 import scipy
 import tensorflow as tf
 
-from pymanopt.backends.backend import Backend, TupleOrList
+from pymanopt.backends.backend import Backend, DTypePrecision, TupleOrList
 from pymanopt.tools import (
     bisect_sequence,
     unpack_singleton_sequence_return_value,
@@ -48,7 +48,18 @@ class TensorflowBackend(Backend):
     _dtype: tf.DType
 
     def __init__(self, dtype=tf.float64):
+        assert dtype in {
+            tf.float32,
+            tf.float64,
+            tf.complex64,
+            tf.complex128,
+        }, f"dtype {dtype} is not supported"
         self._dtype = dtype
+        self._dtype_precision = (
+            DTypePrecision.SINGLE
+            if dtype in {tf.float32, tf.complex64}
+            else DTypePrecision.DOUBLE
+        )
 
     @property
     def dtype(self) -> tf.DType:
@@ -60,11 +71,11 @@ class TensorflowBackend(Backend):
 
     @staticmethod
     def DEFAULT_REAL_DTYPE():
-        return tf.constant([1.0]).dtype
+        return tf.float64
 
     @staticmethod
     def DEFAULT_COMPLEX_DTYPE():
-        return tf.constant([1j]).dtype
+        return tf.complex128
 
     def __repr__(self):
         return f"TensorflowBackend(dtype={self.dtype})"

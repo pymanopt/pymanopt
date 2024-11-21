@@ -6,7 +6,7 @@ import scipy.linalg
 import torch
 from torch import autograd
 
-from pymanopt.backends.backend import Backend, TupleOrList
+from pymanopt.backends.backend import Backend, DTypePrecision, TupleOrList
 from pymanopt.tools import (
     bisect_sequence,
     unpack_singleton_sequence_return_value,
@@ -47,6 +47,11 @@ class PytorchBackend(Backend):
             torch.complex128,
         }
         self._dtype = dtype
+        self._dtype_precision = (
+            DTypePrecision.SINGLE
+            if dtype in {torch.float32, torch.complex64}
+            else DTypePrecision.DOUBLE
+        )
 
     @property
     def dtype(self):
@@ -58,11 +63,11 @@ class PytorchBackend(Backend):
 
     @staticmethod
     def DEFAULT_REAL_DTYPE():
-        return torch.tensor([1.0]).dtype
+        return torch.float64
 
     @staticmethod
     def DEFAULT_COMPLEX_DTYPE():
-        return torch.tensor([1j]).dtype
+        return torch.complex128
 
     def to_real_backend(self) -> "PytorchBackend":
         if self.is_dtype_real:
