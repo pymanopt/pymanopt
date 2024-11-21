@@ -53,19 +53,23 @@ class Problem:
     ):
         self.manifold = manifold
 
+        self._validate_function(cost, "cost")
         for function, name in (
-            (cost, "cost"),
             (euclidean_gradient, "euclidean_gradient"),
             (euclidean_hessian, "euclidean_hessian"),
             (riemannian_gradient, "riemannian_gradient"),
             (riemannian_hessian, "riemannian_hessian"),
         ):
-            self._validate_function(function, name)
+            if function is not None:
+                self._validate_function(function, name)
 
         if manifold.has_dummy_backend():
-            manifold.set_backend_with_default_dtype(type(cost.backend))
+            manifold.set_compatible_backend(cost.backend)
         else:
-            assert manifold.is_backend_compatible(type(cost.backend))
+            self._validate_function_backend(cost, "cost", manifold)
+
+        self._original_cost = cost
+        self._cost = self._wrap_function(cost)
 
         if euclidean_gradient is not None and riemannian_gradient is not None:
             raise ValueError(
@@ -78,26 +82,35 @@ class Problem:
                 "provided, not both"
             )
 
-        self._original_cost = cost
-        self._cost = self._wrap_function(cost)
-
         if euclidean_gradient is not None:
+            self._validate_function_backend(
+                euclidean_gradient, "euclidean_gradient", manifold
+            )
             euclidean_gradient = self._wrap_gradient_operator(
                 euclidean_gradient
             )
         self._euclidean_gradient = euclidean_gradient
         if euclidean_hessian is not None:
+            self._validate_function_backend(
+                euclidean_hessian, "euclidean_hessian", manifold
+            )
             euclidean_hessian = self._wrap_hessian_operator(
                 euclidean_hessian, embed_tangent_vectors=True
             )
         self._euclidean_hessian = euclidean_hessian
 
         if riemannian_gradient is not None:
+            self._validate_function_backend(
+                riemannian_gradient, "riemannian_gradient", manifold
+            )
             riemannian_gradient = self._wrap_gradient_operator(
                 riemannian_gradient
             )
         self._riemannian_gradient = riemannian_gradient
         if riemannian_hessian is not None:
+            self._validate_function_backend(
+                riemannian_hessian, "rimeannian_hessian", manifold
+            )
             riemannian_hessian = self._wrap_hessian_operator(
                 riemannian_hessian
             )
@@ -117,10 +130,19 @@ class Problem:
 
     @staticmethod
     def _validate_function(function, name):
-        if function is not None and not isinstance(function, Function):
-            raise ValueError(
-                f"Function '{name}' must be decorated with a backend decorator"
-            )
+        assert isinstance(
+            function, Function
+        ), f"Function '{name}' must be decorated with a backend decorator."
+
+    @staticmethod
+    def _validate_function_backend(
+        function: Function, name: str, manifold: Manifold
+    ):
+        assert manifold.is_backend_compatible(function.backend), (
+            f"Function '{name}' has a backend {function.backend} "
+            "which is not compatible with the manifold's backend"
+            f" {manifold.backend}."
+        )
 
     def _flatten_arguments(self, arguments, signature):
         assert len(arguments) == len(signature)
