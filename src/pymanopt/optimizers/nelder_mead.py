@@ -12,14 +12,12 @@ from pymanopt.optimizers.steepest_descent import SteepestDescent
 def compute_centroid(manifold, points):
     """Compute the centroid of `points` on the `manifold` as Karcher mean."""
 
-    @pymanopt.function.numpy(manifold)
     def objective(*y):
         if manifold.num_values == 1:
             (y,) = y
         return sum(manifold.dist(y, point) ** 2 for point in points) / 2
 
-    @pymanopt.function.numpy(manifold)
-    def gradient(*y):
+    def riemannian_gradient(*y):
         if manifold.num_values == 1:
             (y,) = y
         return -sum(
@@ -29,7 +27,7 @@ def compute_centroid(manifold, points):
 
     optimizer = SteepestDescent(max_iterations=15, verbosity=0)
     problem = pymanopt.Problem(
-        manifold, objective, riemannian_gradient=gradient
+        manifold, objective, riemannian_gradient=riemannian_gradient
     )
     return optimizer.run(problem).point
 
