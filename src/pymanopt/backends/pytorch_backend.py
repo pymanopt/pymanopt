@@ -1,4 +1,3 @@
-from functools import wraps
 from numbers import Number
 from typing import Any, Callable, Literal, Optional, Union
 
@@ -12,14 +11,6 @@ from pymanopt.tools import (
     bisect_sequence,
     unpack_singleton_sequence_return_value,
 )
-
-
-def conjugate_result(function):
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        return list(map(torch.conj, function(*args, **kwargs)))  # type: ignore
-
-    return wrapper
 
 
 def elementary_math_function(
@@ -122,12 +113,10 @@ class PytorchBackend(Backend):
         return function
 
     def generate_gradient_operator(self, function, num_arguments) -> Callable:
-        @conjugate_result
         def gradient(*args: torch.Tensor):
             for arg in args:
                 arg.requires_grad_(True)
-            f = function(*args)
-            grads = autograd.grad(f, args)  # type: ignore
+            grads = autograd.grad(function(*args), args)  # type: ignore
             for arg in args:
                 arg.requires_grad_(False)
             return grads
@@ -138,7 +127,6 @@ class PytorchBackend(Backend):
         return gradient
 
     def generate_hessian_operator(self, function, num_arguments):
-        @conjugate_result
         def hvp(*inputs: torch.Tensor):
             args, vectors = bisect_sequence(inputs)
             return autograd.functional.hvp(function, args, vectors)[1]

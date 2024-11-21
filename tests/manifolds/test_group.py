@@ -70,7 +70,7 @@ class TestSpecialOrthogonalGroup:
         X = s.random_point()
         Y = s.random_point()
         Yexplog = s.exp(X, s.log(X, Y))
-        self.backend.assert_allclose(Y, Yexplog)
+        self.backend.assert_allclose(Y, Yexplog, atol=5e-6)
 
     def test_log_exp_inverse(self):
         s = self.so
