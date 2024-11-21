@@ -1,7 +1,7 @@
 from collections import namedtuple
 
 from pymanopt.backends import Backend, DummyBackendSingleton
-from pymanopt.manifolds.manifold import Manifold, RiemannianSubmanifold
+from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
 from pymanopt.tools import ArraySequenceMixin, return_as_class_instance
 
@@ -112,16 +112,10 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         dimension = (m + n - k) * k
         super().__init__(name, dimension, point_layout=3, backend=backend)
 
-    @Manifold.backend.setter
-    def backend(self, backend: Backend):
-        self._backend = backend
-        self._stiefel_m.backend = backend
-        self._stiefel_n.backend = backend
-
-    def set_backend_with_default_dtype(self, backend_type: type):
-        super().set_backend_with_default_dtype(backend_type)
-        self._stiefel_m.set_backend_with_default_dtype(backend_type)
-        self._stiefel_n.set_backend_with_default_dtype(backend_type)
+    def set_compatible_backend(self, other_backend: Backend):
+        super().set_compatible_backend(other_backend)
+        self._stiefel_m.set_compatible_backend(other_backend)
+        self._stiefel_n.set_compatible_backend(other_backend)
 
     @property
     def typical_dist(self):

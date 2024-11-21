@@ -107,11 +107,6 @@ class Euclidean(_Euclidean):
         dimension = math.prod(shape)
         super().__init__(name, dimension, *shape, backend=backend)
 
-        @RiemannianSubmanifold.backend.setter
-        def _(self, backend: Backend):
-            assert backend.is_dtype_real()
-            super().backend = backend
-
 
 class ComplexEuclidean(_Euclidean):
     r"""Complex Euclidean manifold.
@@ -145,15 +140,8 @@ class ComplexEuclidean(_Euclidean):
         dimension = 2 * np.prod(shape)
         super().__init__(name, dimension, *shape, backend=backend)
 
-    @RiemannianSubmanifold.backend.setter
-    def _(self, backend: Backend):
-        assert not backend.is_dtype_real()
-        super().backend = backend
-
     def random_point(self):
-        return self.backend.random_randn(
-            *self._shape
-        ) + 1j * self.backend.random_randn(*self._shape)
+        return self.backend.random_randn(*self._shape)
 
     def zero_vector(self, point):
         return np.zeros(self._shape, dtype=complex)

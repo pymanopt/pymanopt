@@ -202,12 +202,12 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         dimension = subspace_dimension - 1
         super().__init__(name, dimension, matrix, subspace_projector, backend)
 
-    @RiemannianSubmanifold.backend.setter
-    def _(self, backend: Backend):
-        super().backend = backend
-        self._matrix = backend.array(self._matrix)
-        q, _ = backend.linalg_qr(self._matrix)
-        self._subspace_projector = q @ self.backend.transpose(q)
+    def set_compatible_backend(self, other_backend: Backend):
+        super().set_compatible_backend(other_backend)
+        bk = self.backend
+        self._matrix = bk.array(self._matrix)
+        q, _ = bk.linalg_qr(self._matrix)
+        self._subspace_projector = q @ bk.transpose(q)
 
 
 @extend_docstring(DOCSTRING_NOTE)

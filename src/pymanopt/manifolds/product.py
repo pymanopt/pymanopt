@@ -1,5 +1,4 @@
 import functools
-import warnings
 from typing import Sequence
 
 import numpy as np
@@ -52,19 +51,17 @@ class Product(Manifold):
     def __init__(
         self,
         manifolds: Sequence[Manifold],
-        backend: Backend = DummyBackendSingleton,
     ):
         for manifold in manifolds:
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
 
-        # check all manifolds have the same backend type
-        # TODO: should we also enforce same precision? (32 vs 64)
-        first_type = type(manifolds[0].backend)
+        # check all manifolds have compatible backends
+        first_backend = manifolds[0].backend
         for manifold in manifolds[1:]:
-            if type(manifold.backend) is not first_type:
+            if not manifold.is_backend_compatible(first_backend):
                 raise ValueError(
-                    "All manifolds in a product must have the same backend type"
+                    "All manifolds in a product must have compatible backends."
                 )
 
         self.manifolds = tuple(manifolds)
@@ -73,19 +70,11 @@ class Product(Manifold):
 
         dimension = np.sum([manifold.dim for manifold in manifolds])
         point_layout = tuple(manifold.point_layout for manifold in manifolds)
-        # TODO: set a backend to be able to accss
         super().__init__(
             name,
             dimension,
             point_layout=point_layout,
-            backend=manifolds[0].backend,
-        )
-
-    @Manifold.backend.setter
-    def backend(self, backend: Backend):
-        warnings.warn(
-            "Setting backend of Product manifold is not supported. "
-            "One should directly set the backend of each underlying manifold."
+            backend=manifolds[0].backend.to_real_backend(),
         )
 
     def has_dummy_backend(self) -> bool:
@@ -94,13 +83,13 @@ class Product(Manifold):
             for manifold in self.manifolds
         )
 
-    def set_backend_with_default_dtype(self, backend_type: type):
+    def set_compatible_backend(self, other_backend: Backend):
         for manifold in self.manifolds:
-            manifold.set_backend_with_default_dtype(backend_type)
+            manifold.set_compatible_backend(other_backend)
 
-    def is_backend_compatible(self, backend_type: type) -> bool:
+    def is_backend_compatible(self, other_backend: Backend) -> bool:
         return all(
-            manifold.is_backend_compatible(backend_type)
+            manifold.is_backend_compatible(other_backend)
             for manifold in self.manifolds
         )
 

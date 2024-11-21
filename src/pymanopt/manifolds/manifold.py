@@ -114,30 +114,27 @@ class Manifold(metaclass=abc.ABCMeta):
         """The numerics backend used by the manifold."""
         return self._backend
 
-    @backend.setter
-    def backend(self, backend: Backend):
-        self._backend = backend
-
     def has_dummy_backend(self) -> bool:
         return self.backend == DummyBackendSingleton
 
-    def set_backend_with_default_dtype(self, backend_type: type):
-        """Set the manifold's backend based on a default.
+    def set_compatible_backend(self, other_backend: Backend):
+        """Set the manifold's backend based on another backend.
 
-        This default depends on the provided backend type, the manifold's
-        :attr:`IS_COMPLEX` property and the default precision of the backend
-        for the corresponding dtype (e.g. for real numbers, NumPy defaults to
-        float64 whereas PyTorch defaults to float32).
+        It sets a backend with the same type (numpy, pytorch, etc.)
+        and dtype precision (single or double) and chooses real or complex
+        based on the manifold type.
         """
-        assert issubclass(backend_type, Backend)
-        self.backend = backend_type(
-            backend_type.DEFAULT_COMPLEX_DTYPE()
+        self.backend = (
+            other_backend.to_complex_backend()
             if self.IS_COMPLEX
-            else backend_type.DEFAULT_REAL_DTYPE()
+            else other_backend.to_real_backend()
         )
 
-    def is_backend_compatible(self, backend_type: type) -> bool:
-        return isinstance(self.backend, backend_type)
+    def is_backend_compatible(self, other_backend: Backend) -> bool:
+        return (
+            type(self.backend) is type(other_backend)
+            and self.backend.dtype_precision == other_backend.dtype_precision
+        )
 
     @property
     def num_values(self) -> int:
