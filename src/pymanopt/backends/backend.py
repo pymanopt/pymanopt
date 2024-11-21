@@ -509,16 +509,6 @@ class Backend(ABC):
     pi = np.pi
 
     @not_implemented
-    def polyfit(
-        self, x: array_t, y: array_t, deg: int = 1, full: bool = False
-    ) -> Union[array_t, tuple[array_t, array_t]]:
-        ...
-
-    @not_implemented
-    def polyval(self, p: array_t, x: array_t) -> array_t:
-        ...
-
-    @not_implemented
     def prod(self, array: array_t) -> float:
         ...
 

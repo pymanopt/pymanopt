@@ -460,25 +460,6 @@ class PytorchBackend(Backend):
     def ones_bool(self, shape: TupleOrList[int]) -> torch.Tensor:
         return torch.ones(shape, dtype=torch.bool)
 
-    def polyfit(
-        self,
-        x: torch.Tensor,
-        y: torch.Tensor,
-        deg: int = 1,
-        full: bool = False,
-    ) -> Union[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
-        assert x.ndim == y.ndim == 1
-        x = torch.stack([x**i for i in range(deg + 1)], dim=-1)
-        p = torch.linalg.lstsq(x, y).solution
-        if not full:
-            return p
-        res = torch.sum((y - x @ p) ** 2)
-        return p, res
-
-    def polyval(self, p: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
-        assert x.ndim == p.ndim == 1
-        return torch.stack([x**i for i in range(p.shape[0])], dim=-1) @ p
-
     def prod(self, array: torch.Tensor) -> float:
         return torch.prod(array).item()
 

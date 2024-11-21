@@ -382,14 +382,6 @@ class JaxBackend(Backend):
     def ones_bool(self, shape: TupleOrList[int]) -> jnp.ndarray:
         return jnp.ones(shape, bool)
 
-    def polyfit(
-        self, x: jnp.ndarray, y: jnp.ndarray, deg: int = 1, full: bool = False
-    ) -> Union[jnp.ndarray, tuple[jnp.ndarray, jnp.ndarray]]:
-        return jnp.polyfit(x, y, deg, full=full)  # type: ignore
-
-    def polyval(self, p: jnp.ndarray, x: jnp.ndarray) -> jnp.ndarray:
-        return jnp.polyval(p, x)
-
     def prod(self, array: jnp.ndarray) -> float:
         return jnp.prod(array)  # type: ignore
 
