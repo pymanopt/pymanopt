@@ -30,6 +30,8 @@ Bibliography
    379-402.
 .. [Mez2006] Mezzadri, Francesco. "How to generate random matrices from the
    classical compact groups." arXiv preprint math-ph/0609050 (2006).
+.. [SA2019] Sato, Hiroyuki, and Aihara, Kensuke. "Cholesky QR-based retraction on the
+   generalized Stiefel manifold." Computational Optimization and Applications 72 (2019): 293-308
 .. [SH2015] Sra, Suvrit, and Reshad Hosseini. "Conic geometric optimization on
    the manifold of positive definite matrices." SIAM Journal on Optimization
    25.1 (2015): 713-739.

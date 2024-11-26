@@ -44,6 +44,11 @@ Stiefel Manifold
 
 .. automodule:: pymanopt.manifolds.stiefel
 
+Generalized Stiefel Manifold
+----------------------------
+
+.. automodule:: pymanopt.manifolds.generalized_stiefel
+
 Grassmann Manifold
 ------------------
 
