@@ -49,11 +49,6 @@ class JaxBackend(Backend):
         ), f"dtype {dtype} is not supported"
         self._dtype = dtype
         self._random_key = jax.random.key(random_seed)
-        self._dtype_precision = (
-            DTypePrecision.SINGLE
-            if (dtype == jnp.float32 or dtype == jnp.complex64)
-            else DTypePrecision.DOUBLE
-        )
 
     def _gen_1_random_key(self):
         self._random_key, new_key = jax.random.split(self._random_key)
@@ -68,6 +63,14 @@ class JaxBackend(Backend):
     @property
     def dtype(self) -> jnp.dtype:
         return self._dtype
+
+    @property
+    def dtype_precision(self) -> DTypePrecision:
+        return (
+            DTypePrecision.SINGLE
+            if (self.dtype == jnp.float32 or self.dtype == jnp.complex64)
+            else DTypePrecision.DOUBLE
+        )
 
     @property
     def is_dtype_real(self):

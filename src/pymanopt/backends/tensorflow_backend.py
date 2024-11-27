@@ -55,15 +55,18 @@ class TensorflowBackend(Backend):
             tf.complex128,
         }, f"dtype {dtype} is not supported"
         self._dtype = dtype
-        self._dtype_precision = (
-            DTypePrecision.SINGLE
-            if dtype in {tf.float32, tf.complex64}
-            else DTypePrecision.DOUBLE
-        )
 
     @property
     def dtype(self) -> tf.DType:
         return self._dtype
+
+    @property
+    def dtype_precision(self) -> DTypePrecision:
+        return (
+            DTypePrecision.SINGLE
+            if (self.dtype == tf.float32 or self.dtype == tf.complex64)
+            else DTypePrecision.DOUBLE
+        )
 
     @property
     def is_dtype_real(self):

@@ -47,15 +47,18 @@ class PytorchBackend(Backend):
             torch.complex128,
         }
         self._dtype = dtype
-        self._dtype_precision = (
-            DTypePrecision.SINGLE
-            if dtype in {torch.float32, torch.complex64}
-            else DTypePrecision.DOUBLE
-        )
 
     @property
     def dtype(self):
         return self._dtype
+
+    @property
+    def dtype_precision(self) -> DTypePrecision:
+        return (
+            DTypePrecision.SINGLE
+            if (self.dtype == torch.float32 or self.dtype == torch.complex64)
+            else DTypePrecision.DOUBLE
+        )
 
     @property
     def is_dtype_real(self):

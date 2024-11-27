@@ -35,15 +35,18 @@ class NumpyBackend(Backend):
             or dtype == np.complex128
         ), f"dtype {dtype} is not supported"
         self._dtype = dtype
-        self._dtype_precision = (
-            DTypePrecision.SINGLE
-            if (dtype == np.float32 or dtype == np.complex64)
-            else DTypePrecision.DOUBLE
-        )
 
     @property
     def dtype(self):
         return self._dtype
+
+    @property
+    def dtype_precision(self) -> DTypePrecision:
+        return (
+            DTypePrecision.SINGLE
+            if (self.dtype == np.float32 or self.dtype == np.complex64)
+            else DTypePrecision.DOUBLE
+        )
 
     @property
     def is_dtype_real(self):

@@ -84,7 +84,7 @@ class Manifold(metaclass=abc.ABCMeta):
         self._name = name
         self._dimension = dimension
         self._point_layout = point_layout
-        self._backend = backend
+        self.set_compatible_backend(backend)
 
     def __str__(self):
         return self._name
@@ -129,6 +129,11 @@ class Manifold(metaclass=abc.ABCMeta):
             if self.IS_COMPLEX
             else other_backend.to_real_backend()
         )
+        if self._backend != other_backend:
+            warnings.warn(
+                f"Incompatible realness between manifold {self} and backend "
+                f"{other_backend}. Setting a compatible backend."
+            )
 
     def is_backend_compatible(self, other_backend: Backend) -> bool:
         return (

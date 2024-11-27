@@ -45,7 +45,6 @@ class Backend(ABC):
     # Common attributes, properties and methods
     ##########################################################################
     _dtype: type
-    _dtype_precision: DTypePrecision
 
     @runtime_checkable  # to be able to check isinstance(x, bk.array_t)
     class array_t(Protocol):
@@ -144,6 +143,7 @@ class Backend(ABC):
         ...
 
     @property
+    @abstractmethod
     def dtype_precision(self) -> DTypePrecision:
         ...
 
