@@ -699,6 +699,10 @@ class DummyBackend(Backend):
         ...
 
     @property
+    def dtype_precision(self):
+        ...
+
+    @property
     def is_dtype_real(self):
         ...
 

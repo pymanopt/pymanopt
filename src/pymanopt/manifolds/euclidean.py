@@ -144,7 +144,7 @@ class ComplexEuclidean(_Euclidean):
         return self.backend.random_randn(*self._shape)
 
     def zero_vector(self, point):
-        return np.zeros(self._shape, dtype=complex)
+        return self.backend.zeros(self._shape)
 
 
 class Symmetric(_Euclidean):
