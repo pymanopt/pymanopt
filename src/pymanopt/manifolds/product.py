@@ -84,6 +84,7 @@ class Product(Manifold):
         )
 
     def set_compatible_backend(self, other_backend: Backend):
+        super().set_compatible_backend(other_backend)
         for manifold in self.manifolds:
             manifold.set_compatible_backend(other_backend)
 
