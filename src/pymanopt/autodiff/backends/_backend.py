@@ -46,18 +46,6 @@ class Backend(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def prepare_function(self, function):
-        """Prepares a callable to be used with the backend.
-
-        Args:
-            function: A callable.
-
-        Returns:
-            A Python callable accepting and a ``numpy.ndarray`` and returning a
-            scalar.
-        """
-
-    @abc.abstractmethod
     def generate_gradient_operator(self, function, num_arguments):
         """Creates a function to compute gradients of a function.
 

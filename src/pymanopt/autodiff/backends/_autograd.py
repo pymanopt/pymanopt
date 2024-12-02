@@ -29,10 +29,6 @@ class AutogradBackend(Backend):
         return autograd is not None
 
     @Backend._assert_backend_available
-    def prepare_function(self, function):
-        return function
-
-    @Backend._assert_backend_available
     def generate_gradient_operator(self, function, num_arguments):
         gradient = conjugate_result(
             autograd.grad(function, argnum=list(range(num_arguments)))
