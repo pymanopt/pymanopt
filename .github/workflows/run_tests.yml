@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - master
+      - develop_backends
   push:
 
 jobs:
