@@ -10,7 +10,7 @@ from pymanopt.optimizers.steepest_descent import SteepestDescent
 
 
 def compute_centroid(manifold, points):
-    """Compute the centroid of `points` on the `manifold` as Karcher mean."""
+    """Compute the centroid of `points` on the `manifold` as intrinsic mean."""
 
     def objective(*y):
         if manifold.num_values == 1:

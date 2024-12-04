@@ -74,6 +74,9 @@ class Product(Manifold):
             name,
             dimension,
             point_layout=point_layout,
+            # here we arbitrarily use the real version of the backend since
+            # it won't be used for any computation, only possibly for settting
+            # the backend of a function
             backend=manifolds[0].backend.to_real_backend(),
         )
 

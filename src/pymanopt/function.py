@@ -86,6 +86,8 @@ def decorator_factory(
             backend = (
                 backend_type(dtype=dtype)
                 if dtype is not None
+                # by default use float64, which is fine for a function it only
+                # uses autodiff methods (which do not depend on realness)
                 else backend_type()
             )
             return Function(function=cost, manifold=manifold, backend=backend)
