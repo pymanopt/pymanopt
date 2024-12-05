@@ -7,7 +7,7 @@ except ImportError:
     plt = None
 
 
-def identify_linear_piece(x, y, window_length, bk):
+def identify_linear_piece(x, y, window_length):
     """Identify a segment of the curve (x, y) that appears to be linear.
 
     This function attempts to identify a contiguous segment of the curve
@@ -20,18 +20,18 @@ def identify_linear_piece(x, y, window_length, bk):
     """
     residues = []
     polys = []
-    for k in bk.arange(len(x) - window_length):
-        segment = bk.arange(k, k + window_length + 1)
-        poly, residuals, *_ = bk.polyfit(
+    for k in np.arange(len(x) - window_length):
+        segment = np.arange(k, k + window_length + 1)
+        poly, residuals, *_ = np.polyfit(
             x[segment], y[segment], deg=1, full=True
         )
         residues.append(residuals)
         polys.append(poly)
-    residues = bk.array(residues)
-    polys += [bk.zeros(2)] * window_length
-    polys = bk.stack(polys, axis=1)
-    best = bk.argmin(residues)
-    segment = bk.arange(best, best + window_length + 1)
+    residues = np.array(residues)
+    polys += [np.zeros(2)] * window_length
+    polys = np.stack(polys, axis=1)
+    best = np.argmin(residues)
+    segment = np.arange(best, best + window_length + 1)
     poly = polys[:, best]
     return segment, poly
 
@@ -47,7 +47,6 @@ def check_directional_derivative(
     test is based on a truncated Taylor series.
     Both x and d are optional and will be sampled at random if omitted.
     """
-    bk = problem.manifold.backend
     #  If x and / or d are not specified, pick them at random.
     if d is not None and x is None:
         raise ValueError(
@@ -61,15 +60,15 @@ def check_directional_derivative(
     # Compute the value of f at points on the geodesic (or approximation
     # of it) originating from x, along direction d, for step_sizes in a
     # large range given by h.
-    h = bk.logspace(-8, 0, 51)
+    h = np.logspace(-8, 0, 51)
     value = []
     for h_k in h:
         try:
             y = problem.manifold.exp(x, h_k * d)
         except NotImplementedError:
             y = problem.manifold.retraction(x, h_k * d)
-        value.append(problem.cost(y))
-    value = bk.array(value)
+        value.append(float(problem.cost(y)))
+    value = np.array(value)
 
     # Compute the value f0 of f at x and directional derivative at x along d.
     f0 = problem.cost(x)
@@ -79,13 +78,13 @@ def check_directional_derivative(
     if use_quadratic_model:
         hessd = problem.riemannian_hessian(x, d)
         d2f0 = problem.manifold.inner_product(x, hessd, d)
-        model = bk.polyval(bk.array([0.5 * d2f0, df0, f0]), h)
+        model = np.polyval(np.array([0.5 * d2f0, df0, f0]), h)
     else:
-        model = bk.polyval(bk.array([df0, f0]), h)
+        model = np.polyval(np.array([df0, f0]), h)
 
     # Compute the approximation error
-    error = bk.abs(model - value)
-    model_is_exact = bk.all(error < 1e-12)
+    error = np.abs(model - value)
+    model_is_exact = np.all(error < 1e-12)
     if model_is_exact:
         if use_quadratic_model:
             print(
@@ -101,10 +100,10 @@ def check_directional_derivative(
             )
         # The model is exact: all errors are (numerically) zero.
         # Fit line from all points, use log scale only in h.
-        segment = bk.arange(len(h))
-        poly = bk.polyfit(bk.log10(h), error, 1)
+        segment = np.arange(len(h))
+        poly = np.polyfit(np.log10(h), error, 1)
         # Set mean error in log scale for plot.
-        poly[-1] = bk.log10(poly[-1])
+        poly[-1] = np.log10(poly[-1])
     else:
         if use_quadratic_model:
             print(
@@ -124,9 +123,9 @@ def check_directional_derivative(
         # Despite not all coordinates of the model being close to the true
         # value, some entries of 'error' can be zero. To avoid numerical issues
         # we add an epsilon here.
-        eps = bk.eps()
+        eps = float(problem.manifold.backend.eps())
         segment, poly = identify_linear_piece(
-            bk.log10(h), bk.log10(error + eps), window_len, bk
+            np.log10(h), np.log10(error + eps), window_len
         )
     return h, error, segment, poly
 
@@ -295,7 +294,6 @@ def check_hessian(problem, point=None, tangent_vector=None):
 
 
 def check_retraction(manifold, point=None, tangent_vector=None):
-    bk = manifold.backend
     """Check order of agreement between a retraction and the exponential."""
     if plt is None:
         raise RuntimeError(
@@ -331,8 +329,8 @@ def check_retraction(manifold, point=None, tangent_vector=None):
 
     # Compare the retraction and the exponential over steps of varying
     # length, on a wide log-scale.
-    step_sizes = bk.logspace(-12, 0, 251)
-    errors = bk.zeros(step_sizes.shape)
+    step_sizes = np.logspace(-12, 0, 251)
+    errors = np.zeros(step_sizes.shape)
     for k, step_size in enumerate(step_sizes):
         errors[k] = manifold.dist(
             manifold.exp(point, step_size * tangent_vector),
@@ -343,7 +341,7 @@ def check_retraction(manifold, point=None, tangent_vector=None):
     # the error curve which is mostly linear.
     window_length = 10
     segment, poly = identify_linear_piece(
-        bk.log10(step_sizes), bk.log10(errors), window_length, bk
+        np.log10(step_sizes), np.log10(errors), window_length
     )
 
     print(
@@ -352,7 +350,7 @@ def check_retraction(manifold, point=None, tangent_vector=None):
         f"It appears the slope is: {poly[0]}.\n"
         "Note: if the implementation of the exponential map and the\n"
         "retraction are identical, this should be zero: "
-        f"{bk.linalg_norm(errors)}.\n"
+        f"{np.linalg.norm(errors)}.\n"
         "In that case, the slope test is irrelevant.",
     )
 
@@ -370,7 +368,7 @@ def check_retraction(manifold, point=None, tangent_vector=None):
 
     plt.loglog(
         step_sizes[segment],
-        10 ** bk.polyval(poly, bk.log10(step_sizes[segment])),
+        10 ** np.polyval(poly, np.log10(step_sizes[segment])),
         linewidth=3,
     )
     plt.xlabel("Step size multiplier t")

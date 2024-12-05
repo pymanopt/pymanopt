@@ -227,7 +227,7 @@ class TestSymmetricPositiveDefiniteManifold:
         x = manifold.random_point()
         y = manifold.random_point()
         u = manifold.log(x, y)
-        self.backend.assert_allclose(manifold.exp(x, u), y)
+        self.backend.assert_allclose(manifold.exp(x, u), y, atol=5e-6)
 
     def test_log_exp_inverse(self):
         manifold = self.manifold

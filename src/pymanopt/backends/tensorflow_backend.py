@@ -452,25 +452,6 @@ class TensorflowBackend(Backend):
     def ones_bool(self, shape: TupleOrList[int]) -> tf.Tensor:
         return tf.ones(shape, dtype=tf.bool)
 
-    def polyfit(
-        self,
-        x: tf.Tensor,
-        y: tf.Tensor,
-        deg: int = 1,
-        full: bool = False,
-    ) -> Union[tf.Tensor, tuple[tf.Tensor, tf.Tensor]]:
-        assert x.ndim == y.ndim == 1
-        x = tf.stack([x**i for i in range(deg + 1)], axis=-1)
-        p = tf.squeeze(tf.linalg.lstsq(x, tf.reshape(y, (-1, 1))))
-        if not full:
-            return p
-        res = tf.reduce_sum((y - x @ p) ** 2)
-        return p, res
-
-    def polyval(self, p: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
-        assert x.ndim == p.ndim == 1
-        return tf.stack([x**i for i in range(p.shape[0])], axis=-1) @ p
-
     def prod(self, array: tf.Tensor) -> float:
         return tf.reduce_prod(array).numpy().item()
 

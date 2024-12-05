@@ -331,14 +331,6 @@ class NumpyBackend(Backend):
     def ones_bool(self, shape: TupleOrList[int]) -> np.ndarray:
         return np.ones(shape, bool)
 
-    def polyfit(
-        self, x: np.ndarray, y: np.ndarray, deg: int = 1, full: bool = False
-    ) -> Union[np.ndarray, tuple[np.ndarray, np.ndarray]]:
-        return np.polyfit(x, y, deg, full=full)  # type: ignore
-
-    def polyval(self, p: np.ndarray, x: np.ndarray) -> np.ndarray:
-        return np.polyval(p, x)
-
     def prod(self, array: np.ndarray) -> float:
         return np.prod(array)  # type: ignore
 
