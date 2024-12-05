@@ -9,6 +9,8 @@ from pymanopt.manifolds import Euclidean
 from pymanopt.optimizers import TrustRegions
 
 
+np.random.seed(127)
+
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -42,16 +44,16 @@ def create_cost_and_derivates(manifold, samples, targets, backend):
             return 2 * samples.T @ samples @ vector
 
     elif backend == "pytorch":
-        samples = torch.from_numpy(samples).to(torch.float32)
-        targets = torch.from_numpy(targets).to(torch.float32)
+        samples = torch.from_numpy(samples)
+        targets = torch.from_numpy(targets)
 
         @pymanopt.function.pytorch(manifold)
         def cost(weights):
             return torch.norm(targets - samples @ weights) ** 2
 
     elif backend == "tensorflow":
-        samples = tf.constant(samples, dtype=tf.float32)
-        targets = tf.constant(targets, dtype=tf.float32)
+        samples = tf.constant(samples)
+        targets = tf.constant(targets)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(weights):
