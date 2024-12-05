@@ -8,7 +8,7 @@ import jax.scipy as jscipy
 import numpy as np
 import scipy.linalg
 
-from pymanopt.backends.backend import Backend, TupleOrList
+from pymanopt.backends.backend import Backend, DTypePrecision, TupleOrList
 from pymanopt.tools import (
     bisect_sequence,
     unpack_singleton_sequence_return_value,
@@ -41,6 +41,12 @@ class JaxBackend(Backend):
     _dtype: jnp.dtype
 
     def __init__(self, dtype=jnp.float64, random_seed: int = 42):
+        assert (
+            dtype == jnp.float32
+            or dtype == jnp.float64
+            or dtype == jnp.complex64
+            or dtype == jnp.complex128
+        ), f"dtype {dtype} is not supported"
         self._dtype = dtype
         self._random_key = jax.random.key(random_seed)
 
@@ -59,16 +65,24 @@ class JaxBackend(Backend):
         return self._dtype
 
     @property
+    def dtype_precision(self) -> DTypePrecision:
+        return (
+            DTypePrecision.SINGLE
+            if (self.dtype == jnp.float32 or self.dtype == jnp.complex64)
+            else DTypePrecision.DOUBLE
+        )
+
+    @property
     def is_dtype_real(self):
         return jnp.issubdtype(self.dtype, jnp.floating)
 
     @staticmethod
     def DEFAULT_REAL_DTYPE():
-        return jnp.array([1.0]).dtype
+        return jnp.float64
 
     @staticmethod
     def DEFAULT_COMPLEX_DTYPE():
-        return jnp.array([1j]).dtype
+        return jnp.complex128
 
     def __repr__(self):
         return f"JaxBackend(dtype={self.dtype})"

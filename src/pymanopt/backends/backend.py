@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 from functools import wraps
 from typing import (
     Callable,
@@ -14,7 +15,7 @@ import numpy as np
 import scipy.special
 
 
-__all__ = ["TupleOrList", "Backend", "DummyBackendSingleton"]
+__all__ = ["TupleOrList", "DTypePrecision", "Backend", "DummyBackendSingleton"]
 
 T = TypeVar("T")
 TupleOrList = Union[list[T], tuple[T, ...]]
@@ -30,6 +31,13 @@ def not_implemented(function):
     return inner
 
 
+class DTypePrecision(Enum):
+    """Enum for the dtype precision of the backend."""
+
+    SINGLE = 32
+    DOUBLE = 64
+
+
 class Backend(ABC):
     """Abstract base class defining the interface for autodiff backends."""
 
@@ -38,7 +46,7 @@ class Backend(ABC):
     ##########################################################################
     _dtype: type
 
-    @runtime_checkable
+    @runtime_checkable  # to be able to check isinstance(x, bk.array_t)
     class array_t(Protocol):
         """Array type used for static type checks.
 
@@ -132,6 +140,11 @@ class Backend(ABC):
     @property
     @abstractmethod
     def dtype(self) -> type:
+        ...
+
+    @property
+    @abstractmethod
+    def dtype_precision(self) -> DTypePrecision:
         ...
 
     @property
@@ -683,6 +696,10 @@ class DummyBackend(Backend):
 
     @property
     def dtype(self):
+        ...
+
+    @property
+    def dtype_precision(self):
         ...
 
     @property

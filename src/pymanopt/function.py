@@ -2,7 +2,7 @@ __all__ = ["Function", "autograd", "jax", "numpy", "pytorch", "tensorflow"]
 
 import inspect
 from importlib import import_module
-from typing import Any, Callable
+from typing import Any, Callable, Optional, Protocol
 
 from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold
@@ -52,11 +52,18 @@ def _only_one_true(*args):
     return sum(args) == 1
 
 
+class _ObjectiveFunctionDecorator(Protocol):
+    def __call__(
+        self, manifold: Manifold, dtype: Optional[Any] = None
+    ) -> Callable[[Callable[..., Any]], Function]:
+        ...
+
+
 def decorator_factory(
     module: str, backend_class: str
-) -> Callable[[Manifold], Callable[[Callable[..., Any]], Function]]:
+) -> _ObjectiveFunctionDecorator:
     def decorator(
-        manifold: Manifold,
+        manifold: Manifold, dtype: Optional[Any] = None
     ) -> Callable[[Callable[..., Any]], Function]:
         assert isinstance(manifold, Manifold)
 
@@ -70,12 +77,19 @@ def decorator_factory(
                 "Decorated function must only accept positional arguments "
                 "or a variable-length argument like *x"
             )
-            backend = getattr(
+            backend_type = getattr(
                 import_module(
                     f"pymanopt.backends.{module}",
                 ),
                 backend_class,
-            )()
+            )
+            backend = (
+                backend_type(dtype=dtype)
+                if dtype is not None
+                # by default use float64, which is fine for a function it only
+                # uses autodiff methods (which do not depend on realness)
+                else backend_type()
+            )
             return Function(function=cost, manifold=manifold, backend=backend)
 
         return inner

@@ -7,7 +7,7 @@ import packaging.version as pv
 import scipy
 import scipy.linalg
 
-from pymanopt.backends.backend import Backend, TupleOrList
+from pymanopt.backends.backend import Backend, DTypePrecision, TupleOrList
 
 
 def _raise_not_implemented_error(*args, **kwargs):
@@ -41,16 +41,24 @@ class NumpyBackend(Backend):
         return self._dtype
 
     @property
+    def dtype_precision(self) -> DTypePrecision:
+        return (
+            DTypePrecision.SINGLE
+            if (self.dtype == np.float32 or self.dtype == np.complex64)
+            else DTypePrecision.DOUBLE
+        )
+
+    @property
     def is_dtype_real(self):
         return np.issubdtype(self.dtype, np.floating)
 
     @staticmethod
     def DEFAULT_REAL_DTYPE():
-        return np.array([1.0]).dtype
+        return np.float64
 
     @staticmethod
     def DEFAULT_COMPLEX_DTYPE():
-        return np.array([1j]).dtype
+        return np.complex128
 
     def __repr__(self):
         return f"NumpyBackend(dtype={self.dtype})"

@@ -182,32 +182,39 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         matrix: Matrix whose columns span the intersecting subspace.
     """
 
+    @staticmethod
+    def _compute_subspace_projector(bk: Backend, matrix: Backend.array_t):
+        matrix = bk.array(matrix)
+        q, _ = bk.linalg_qr(matrix)
+        _subspace_projector = q @ q.T
+        return matrix, _subspace_projector
+
     def __init__(
         self,
         matrix,
         backend: Backend = NumpyBackend(),  # noqa: B008
     ):
-        if backend is None:
+        if backend == DummyBackendSingleton:
             raise ValueError(
                 f"A backend must always be specified for class {__class__.__name__}"
             )
-        m = matrix.shape[0]
-        q, _ = backend.linalg_qr(matrix)
-        subspace_projector = q @ backend.transpose(q)
+        matrix, subspace_projector = self._compute_subspace_projector(
+            backend, matrix
+        )
         subspace_dimension = backend.linalg_matrix_rank(subspace_projector)
         name = (
-            f"Sphere manifold of {m}-dimensional vectors intersecting a "
-            f"{subspace_dimension}-dimensional subspace"
+            f"Sphere manifold of {matrix.shape[0]}-dimensional vectors "
+            f"intersecting a {subspace_dimension}-dimensional subspace"
         )
         dimension = subspace_dimension - 1
         super().__init__(name, dimension, matrix, subspace_projector, backend)
 
-    @RiemannianSubmanifold.backend.setter
-    def _(self, backend: Backend):
-        super().backend = backend
-        self._matrix = backend.array(self._matrix)
-        q, _ = backend.linalg_qr(self._matrix)
-        self._subspace_projector = q @ self.backend.transpose(q)
+    def set_compatible_backend(self, other_backend: Backend):
+        super().set_compatible_backend(other_backend)
+        (
+            self._matrix,
+            self._subspace_projector,
+        ) = self._compute_subspace_projector(self.backend, self._matrix)
 
 
 @extend_docstring(DOCSTRING_NOTE)
@@ -225,31 +232,36 @@ class SphereSubspaceComplementIntersection(
         matrix: Matrix whose columns span the subspace.
     """
 
+    @staticmethod
+    def _compute_subspace_projector(bk: Backend, matrix: Backend.array_t):
+        matrix = bk.array(matrix)
+        q, _ = bk.linalg_qr(matrix)
+        _subspace_projector = bk.eye(matrix.shape[0]) - q @ q.T
+        return matrix, _subspace_projector
+
     def __init__(
         self,
         matrix,
         backend: Backend = NumpyBackend(),  # noqa: B008
     ):
-        if backend is None:
+        if backend == DummyBackendSingleton:
             raise ValueError(
                 f"A backend must always be specified for class {__class__.__name__}"
             )
-        m = matrix.shape[0]
-        q, _ = backend.linalg_qr(matrix)
-        subspace_projector = backend.eye(m) - q @ backend.transpose(q)
+        matrix, subspace_projector = self._compute_subspace_projector(
+            backend, matrix
+        )
         subspace_dimension = backend.linalg_matrix_rank(subspace_projector)
         name = (
-            f"Sphere manifold of {m}-dimensional vectors orthogonal "
+            f"Sphere manifold of {matrix.shape[0]}-dimensional vectors orthogonal "
             f"to a {subspace_dimension}-dimensional subspace"
         )
         dimension = subspace_dimension - 1
         super().__init__(name, dimension, matrix, subspace_projector, backend)
 
-    @RiemannianSubmanifold.backend.setter
-    def _(self, backend: Backend):
-        super().backend = backend
-        self._matrix = backend.array(self._matrix)
-        q, _ = backend.linalg_qr(self._matrix)
-        self._subspace_projector = backend.eye(
-            self.dim
-        ) - q @ self.backend.transpose(q)
+    def set_compatible_backend(self, other_backend: Backend):
+        super().set_compatible_backend(other_backend)
+        (
+            self._matrix,
+            self._subspace_projector,
+        ) = self._compute_subspace_projector(self.backend, self._matrix)

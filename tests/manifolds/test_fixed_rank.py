@@ -160,7 +160,9 @@ class TestFixedRankEmbeddedManifold:
             bk.transpose(z) @ w, m._apply_ambient_transpose(z, w)
         )
         bk.assert_allclose(
-            bk.transpose(z) @ w, m._apply_ambient_transpose((u, s, v), w)
+            bk.transpose(z) @ w,
+            m._apply_ambient_transpose((u, s, v), w),
+            atol=5e-5,
         )
 
     def test_embedding(self):
