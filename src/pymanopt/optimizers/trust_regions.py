@@ -31,11 +31,11 @@
 # finite-differences of the gradient. The resulting method is called
 # RTR-FD. Some convergence theory for it is available in this paper:
 # @incollection{boumal2015rtrfd
-# 	author={Boumal, N.},
-# 	title={Riemannian trust regions with finite-difference Hessian
+#   author={Boumal, N.},
+#   title={Riemannian trust regions with finite-difference Hessian
 #                      approximations are globally convergent},
-# 	year={2015},
-# 	booktitle={Geometric Science of Information}
+#   year={2015},
+#   booktitle={Geometric Science of Information}
 # }
 
 
@@ -151,6 +151,9 @@ class TrustRegions(Optimizer):
         fx = cost(x)
         fgradx = gradient(x)
         norm_grad = manifold.norm(x, fgradx)
+        # hess_vec_evals counts the number of Hessian-vector products used to reach
+        # an iteration from the previous one. For the initial point, this is zero.
+        hess_vec_evals = 0
 
         # Initialize the trust region radius
         Delta = Delta0
@@ -171,6 +174,17 @@ class TrustRegions(Optimizer):
         while True:
             iteration += 1
 
+            self._add_log_entry(
+                iteration=iteration,
+                point=x,
+                cost=fx,
+                gradient_norm=norm_grad,
+                hess_vec_evals=hess_vec_evals,
+            )
+
+            # Restart Hessian-vector calls counter for this iteration.
+            hess_vec_evals = 0
+
             # *************************
             # ** Begin TR Subproblem **
             # *************************
@@ -187,7 +201,7 @@ class TrustRegions(Optimizer):
                     eta = np.sqrt(np.sqrt(np.spacing(1))) * eta
 
             # Solve TR subproblem approximately
-            eta, Heta, numit, stop_inner = self._truncated_conjugate_gradient(
+            eta, Heta, numit, stop_inner, hess_vec_evals_tcg = self._truncated_conjugate_gradient(
                 problem,
                 x,
                 fgradx,
@@ -198,6 +212,7 @@ class TrustRegions(Optimizer):
                 mininner,
                 maxinner,
             )
+            hess_vec_evals += hess_vec_evals_tcg
 
             srstr = self.TCG_STOP_REASONS[stop_inner]
 
@@ -211,6 +226,7 @@ class TrustRegions(Optimizer):
                 used_cauchy = False
                 # Check the curvature
                 Hg = hess(x, fgradx)
+                hess_vec_evals += 1
                 g_Hg = manifold.inner_product(x, fgradx, Hg)
                 if g_Hg <= 0:
                     tau_c = 1
@@ -445,6 +461,7 @@ class TrustRegions(Optimizer):
         inner = manifold.inner_product
         hess = problem.riemannian_hessian
         preconditioner = problem.preconditioner
+        hess_vec_evals_tcg = 0
 
         if not self.use_rand:  # and therefore, eta == 0
             Heta = manifold.zero_vector(x)
@@ -453,6 +470,7 @@ class TrustRegions(Optimizer):
         else:  # and therefore, no preconditioner
             # eta (presumably) ~= 0 was provided by the caller.
             Heta = hess(x, eta)
+            hess_vec_evals_tcg += 1
             r = fgradx + Heta
             e_Pe = inner(x, eta, eta)
 
@@ -501,6 +519,7 @@ class TrustRegions(Optimizer):
         for j in range(int(maxinner)):
             # This call is the computationally intensive step
             Hdelta = hess(x, delta)
+            hess_vec_evals_tcg += 1
 
             # Compute curvature (often called kappa)
             d_Hd = inner(x, delta, Hdelta)
@@ -616,4 +635,4 @@ class TrustRegions(Optimizer):
             e_Pd = beta * (e_Pd + alpha * d_Pd)
             d_Pd = z_r + beta * beta * d_Pd
 
-        return eta, Heta, j, stop_tCG
+        return eta, Heta, j, stop_tCG, hess_vec_evals_tcg
