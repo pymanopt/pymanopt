@@ -151,7 +151,8 @@ class TrustRegions(Optimizer):
         fx = cost(x)
         fgradx = gradient(x)
         norm_grad = manifold.norm(x, fgradx)
-        # This represents the number of Hessian-vector products in each iteration.
+        # hess_vec_evals counts the number of Hessian-vector products used to reach
+        # an iteration from the previous one. For the initial point, this is zero.
         hess_vec_evals = 0
 
         # Initialize the trust region radius
