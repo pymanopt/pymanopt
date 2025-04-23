@@ -49,7 +49,7 @@ jobs:
 
   finish:
     needs: tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Upload coverage
         uses: coverallsapp/github-action@master

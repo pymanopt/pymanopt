@@ -19,7 +19,7 @@ jobs:
       versions: ${{ steps.build-matrix.outputs.versions }}
 
   docs:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: build-matrix
     strategy:
       # Make sure we never build docs in parallel in case we deploy new
