@@ -151,6 +151,7 @@ class TrustRegions(Optimizer):
         fx = cost(x)
         fgradx = gradient(x)
         norm_grad = manifold.norm(x, fgradx)
+        numit = 0
 
         # Initialize the trust region radius
         Delta = Delta0
@@ -176,6 +177,7 @@ class TrustRegions(Optimizer):
                 point=x,
                 cost=fx,
                 gradient_norm=norm_grad,
+                num_inner=numit,
             )
             # *************************
             # ** Begin TR Subproblem **
