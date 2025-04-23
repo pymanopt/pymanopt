@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-matrix:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Generate version matrix
         id: build-matrix
