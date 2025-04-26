@@ -1,4 +1,3 @@
-# flake8: noqa E231
 from typing import Any, Iterable, List, Optional
 
 
@@ -14,6 +13,7 @@ class VoidPrinter:
         Args:
             values: The values not to print.
         """
+        del values
 
 
 def print_list(values: List[str]):

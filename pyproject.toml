@@ -98,6 +98,14 @@ ignore = ["B024", "B027", "D1", "E203", "E501", "W503"]
 import_order_style = "pycharm"
 max-line-length = 79
 select = ["B", "B950", "C", "D", "E", "F", "W"]
+# TODO(nkoep): Remove these once migrated to ruff.
+per-file-ignores = [
+    "docs/conf.py:E231",
+    "src/pymanopt/optimizers/optimizer.py:E231",
+    "src/pymanopt/optimizers/nelder_mead.py:E231",
+    "src/pymanopt/optimizers/trust_regions.py:E221,E231",
+    "src/pymanopt/tools/printer.py:E231",
+]
 
 [tool.pyright]
 typeCheckingMode = "basic"

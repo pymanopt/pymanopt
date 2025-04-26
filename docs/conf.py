@@ -1,4 +1,3 @@
-# flake8: noqa E231
 import datetime
 import string
 
@@ -8,7 +7,7 @@ import pymanopt
 
 
 def setup(app):
-    def config_inited(app, config):
+    def config_inited(_, config):
         doc_version = config.doc_version
         if doc_version in ["latest", "stable"]:
             config.version = (

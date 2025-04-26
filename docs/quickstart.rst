@@ -29,7 +29,7 @@ If you are unfamiliar with these packages and you are unsure which to go for,
 we suggest to start with Autograd.
 Autograd wraps thinly around NumPy, and is very simple to use, particularly if
 you're already familiar with NumPy.
-To get the latest version of Pymanopt, install it via `pip` by specifying the 
+To get the latest version of Pymanopt, install it via `pip` by specifying the
 backend(s) you want to use among `autograd`, `jax`, `torch` and `tensorflow`,
 separated by a comma. For example:
 

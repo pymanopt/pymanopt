@@ -51,8 +51,6 @@
 
 # Ported to pymanopt by Jamie Townsend. January 2016.
 
-# flake8: noqa E231
-
 import time
 from math import inf, isnan, nan, sqrt
 
