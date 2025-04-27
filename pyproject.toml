@@ -102,6 +102,7 @@ select = ["B", "B950", "C", "D", "E", "F", "W"]
 # TODO(nkoep): Remove these once migrated to ruff.
 per-file-ignores = [
     "docs/conf.py:E231",
+    "examples/low_rank_matrix_approximation.py:E231",
     "src/pymanopt/optimizers/optimizer.py:E231",
     "src/pymanopt/optimizers/nelder_mead.py:E231",
     "src/pymanopt/optimizers/trust_regions.py:E221,E231",

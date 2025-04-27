@@ -114,7 +114,7 @@ class Problem:
         self._riemannian_gradient = riemannian_gradient
         if riemannian_hessian is not None:
             riemannian_hessian = self._validate_function_backend(
-                riemannian_hessian, "rimeannian_hessian", manifold
+                riemannian_hessian, "riemannian_hessian", manifold
             )
             riemannian_hessian = self._wrap_hessian_operator(
                 riemannian_hessian

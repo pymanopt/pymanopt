@@ -113,7 +113,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         print()
         print(low_rank_solution)
         print()
-        print(f"Rank-{rank} approximation: ")
+        print(f"Rank-{rank} approximation:")
         print()
         print(low_rank_approximation)
         print()

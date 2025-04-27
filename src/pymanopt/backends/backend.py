@@ -189,7 +189,7 @@ class Backend(ABC):
             function: A callable.
 
         Returns:
-            A Python callable accepting and a ``numpy.ndarray`` and returning a
+            A Python callable accepting a ``numpy.ndarray`` and returning a
             scalar.
         """
 
