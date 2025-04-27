@@ -9,8 +9,6 @@ from pymanopt.manifolds import Sphere
 from pymanopt.optimizers import SteepestDescent
 
 
-np.random.seed(127)
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 

@@ -9,8 +9,6 @@ from pymanopt.manifolds import Oblique
 from pymanopt.optimizers import ConjugateGradient
 
 
-np.random.seed(127)
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 

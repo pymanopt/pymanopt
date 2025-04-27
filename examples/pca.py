@@ -9,8 +9,6 @@ from pymanopt.manifolds import Stiefel
 from pymanopt.optimizers import TrustRegions
 
 
-np.random.seed(127)
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
