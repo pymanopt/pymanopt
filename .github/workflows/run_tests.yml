@@ -6,6 +6,9 @@ on:
       - master
       - develop_backends
   push:
+    branches:
+      - master
+      - develop_backends
 
 jobs:
   tests:
