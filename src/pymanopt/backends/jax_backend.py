@@ -54,7 +54,8 @@ class JaxBackend(Backend):
         if n < 1:
             raise ValueError("Cannot generate less than 1 key")
         if n == 1:
-            self._random_key, new_keys = jax.random.split(self._random_key)
+            self._random_key, new_key = jax.random.split(self._random_key)
+            new_keys = (new_key,)
         else:
             self._random_key, *new_keys = jax.random.split(
                 self._random_key, n + 1
