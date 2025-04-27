@@ -41,7 +41,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -v --cov-report= --cov=src/pymanopt tests/
+          pytest --cov-report= --cov=src/pymanopt tests/
           coverage lcov -o coverage/lcov.info
 
       - name: Collect coverage
