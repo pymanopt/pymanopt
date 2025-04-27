@@ -78,33 +78,8 @@ case), define a problem instance which we pass the manifold and the cost
 function, and run the minimization problem using one of the available
 optimizers.
 
-.. code-block:: python
-
-    import autograd.numpy as anp
-    import pymanopt
-
-    anp.random.seed(42)
-
-    dim = 3
-    manifold = pymanopt.manifolds.Sphere(dim)
-
-    matrix = anp.random.normal(size=(dim, dim))
-    matrix = 0.5 * (matrix + matrix.T)
-
-    @pymanopt.function.autograd(manifold)
-    def cost(point):
-        return -point @ matrix @ point
-
-    problem = pymanopt.Problem(manifold, cost)
-
-    optimizer = pymanopt.optimizers.SteepestDescent()
-    result = optimizer.run(problem)
-
-    eigenvalues, eigenvectors = anp.linalg.eig(matrix)
-    dominant_eigenvector = eigenvectors[:, eigenvalues.argmax()]
-
-    print("Dominant eigenvector:", dominant_eigenvector)
-    print("Pymanopt solution:", result.point)
+.. literalinclude:: ../../quickstart.py
+   :language: python
 
 Running this example will produce (something like) the following:
 
@@ -113,37 +88,30 @@ Running this example will produce (something like) the following:
     Optimizing...
     Iteration    Cost                       Gradient norm
     ---------    -----------------------    --------------
-       1         +1.1041943339110254e+00    5.65626470e-01
-       2         +5.2849633289004561e-01    8.90742722e-01
-       3         -8.0741058657312559e-01    2.23937710e+00
-       4         -1.2667369971251594e+00    1.59671326e+00
-       5         -1.4100298597091836e+00    1.11228845e+00
-       6         -1.5219408277812505e+00    2.45507203e-01
-       7         -1.5269956262562046e+00    6.81712914e-02
-       8         -1.5273114803528709e+00    3.40941735e-02
-       9         -1.5273905588875487e+00    1.70222768e-02
-      10         -1.5274100956128560e+00    8.61140952e-03
-      11         -1.5274154319869837e+00    3.90706914e-03
-      12         -1.5274156215853507e+00    3.62943721e-03
-      13         -1.5274162595152783e+00    2.47643452e-03
-      14         -1.5274168030609154e+00    3.66398414e-04
-      15         -1.5274168133149475e+00    1.45210081e-04
-      16         -1.5274168150025758e+00    4.96142583e-05
-      17         -1.5274168150483476e+00    4.42317042e-05
-      18         -1.5274168151841643e+00    2.13915041e-05
-      19         -1.5274168152087644e+00    1.36422863e-05
-      20         -1.5274168152220804e+00    6.25780214e-06
-      21         -1.5274168152229037e+00    5.48381052e-06
-      22         -1.5274168152252021e+00    2.16996083e-06
-      23         -1.5274168152255774e+00    7.52279600e-07
-    Terminated - min grad norm reached after 23 iterations, 0.01 seconds.
+       1         -1.2503690275924836e-01    7.05048162e-01
+       2         -1.0431116420457707e+00    1.51569863e+00
+       3         -1.2458243811321195e+00    1.37636667e+00
+       4         -1.6286858265437518e+00    2.35101411e-01
+       5         -1.6313904350787611e+00    1.82139847e-01
+       6         -1.6349496764006330e+00    6.23255354e-02
+       7         -1.6350482449558597e+00    5.54214374e-02
+       8         -1.6353381478158906e+00    2.60793677e-02
+       9         -1.6353731802404177e+00    1.97764049e-02
+      10         -1.6354097505834411e+00    9.45411176e-03
+      11         -1.6354154571432260e+00    6.50360873e-03
+      12         -1.6354205179079946e+00    7.35994761e-04
+      13         -1.6354205808170219e+00    1.50461572e-04
+      14         -1.6354205830464705e+00    6.51456482e-05
+      15         -1.6354205835572466e+00    5.44513086e-06
+      16         -1.6354205835607958e+00    6.01426462e-07
+    Terminated - min grad norm reached after 16 iterations, 0.40 seconds.
 
-    Dominant eigenvector: [-0.78442334 -0.38225031 -0.48843088]
-    Pymanopt solution: [0.78442327 0.38225034 0.48843097]
+    Dominant eigenvector: [ 0.48812905  0.6259872  -0.60816944]
+    Pymanopt solution: [ 0.48812918  0.62598704 -0.60816949]
 
-Note that the direction of the "true" dominant eigenvector and the solution
-found by Pymanopt differ.
-This is not exactly surprising though.
+Note that depending on the random seed used in the example,
+the direction of the "true" dominant eigenvector and the
+solution found by Pymanopt can differ.
 Eigenvectors are not unique since every eigenpair :math:`(\lambda, \vmv)` still
 satisfies the eigenvalue equation :math:`\vmA \vmv = \lambda \vmv` if
 :math:`\vmv` is replaced by :math:`\alpha \vmv` for some :math:`\alpha \in \R

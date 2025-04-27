@@ -1,5 +1,3 @@
-import sys
-
 import jax
 import jax.numpy as jnp
 
@@ -11,12 +9,12 @@ key = jax.random.key(42)
 dim = 3
 manifold = pymanopt.manifolds.Sphere(dim)
 
-matrix = jax.random.normal(key, shape=(dim, dim))
+matrix = jax.random.normal(key, shape=[dim, dim])
 matrix = 0.5 * (matrix + matrix.T)
 
 
 @pymanopt.function.jax(manifold)
-def cost(point: jnp.ndarray):
+def cost(point):
     return -point @ matrix @ point
 
 
@@ -25,15 +23,8 @@ problem = pymanopt.Problem(manifold, cost)
 optimizer = pymanopt.optimizers.SteepestDescent()
 result = optimizer.run(problem)
 
-eigenvalues, eigenvectors = jnp.linalg.eig(matrix)
-eigenvalues = eigenvalues.real
-eigenvectors = eigenvectors.real
+eigenvalues, eigenvectors = map(jnp.real, jnp.linalg.eig(matrix))
 dominant_eigenvector = eigenvectors[:, eigenvalues.argmax()]
 
 print("Dominant eigenvector:", dominant_eigenvector)
 print("Pymanopt solution:", result.point)
-assert isinstance(result.point, jnp.ndarray)
-
-for key in sys.modules.keys():
-    if key.startswith(("torch", "tensorflow", "autograd")):
-        print(f"WARNING: Imported {key}")
