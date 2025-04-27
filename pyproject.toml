@@ -32,7 +32,7 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
 ]
 dependencies = [
-    "numpy>=1.16.0",
+    "numpy>=1.16.02,<2",
     "scipy>=1.0,!=1.10.*,!=1.11.*,!=1.12.*",
     "packaging",
 ]
