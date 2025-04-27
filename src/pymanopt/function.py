@@ -12,9 +12,6 @@ class Function:
     def __init__(
         self, *, function: Callable, manifold: Manifold, backend: Backend
     ):
-        if not callable(function):
-            raise TypeError(f"Object {function} is not callable")
-
         self._original_function = function
         self._backend = backend
         self._function = backend.prepare_function(function)

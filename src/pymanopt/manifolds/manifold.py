@@ -3,8 +3,6 @@ import functools
 import warnings
 from typing import Sequence, Union
 
-import numpy as np
-
 from pymanopt.backends import Backend, DummyBackendSingleton
 
 
@@ -59,10 +57,6 @@ class Manifold(metaclass=abc.ABCMeta):
         point_layout: Union[int, Sequence[int]] = 1,
         backend: Backend = DummyBackendSingleton,  # noqa: B008
     ):
-        if not isinstance(dimension, (int, np.integer)):
-            raise TypeError(
-                f"Manifold dimension must be of type int, not {type(dimension)}"
-            )
         if dimension < 0:
             raise ValueError("Manifold dimension must be positive")
         if not isinstance(point_layout, (int, tuple, list)):
@@ -107,7 +101,7 @@ class Manifold(metaclass=abc.ABCMeta):
         return self._point_layout
 
     IS_COMPLEX = False
-    """ Whether the manifold is complex-valued or not. """
+    """Whether the manifold is complex-valued or not."""
 
     @property
     def backend(self) -> Backend:
