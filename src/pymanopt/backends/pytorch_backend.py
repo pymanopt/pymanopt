@@ -109,9 +109,6 @@ class PytorchBackend(Backend):
     ##############################################################################
     # Autodiff methods
     ##############################################################################
-    # TODO: remove this function
-    def prepare_function(self, function):
-        return function
 
     def generate_gradient_operator(self, function, num_arguments) -> Callable:
         def gradient(*args: torch.Tensor):

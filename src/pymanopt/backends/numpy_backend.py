@@ -87,9 +87,6 @@ class NumpyBackend(Backend):
     # Autodiff methods
     ##############################################################################
 
-    def prepare_function(self, function):
-        return function
-
     generate_gradient_operator = _raise_not_implemented_error
     generate_hessian_operator = _raise_not_implemented_error
 

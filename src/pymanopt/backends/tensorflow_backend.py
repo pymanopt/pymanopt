@@ -124,9 +124,6 @@ class TensorflowBackend(Backend):
     def _sanitize_gradients(self, tensors, grads):
         return list(map(self._sanitize_gradient, tensors, grads))
 
-    def prepare_function(self, function):
-        return function
-
     def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
             with tf.GradientTape() as tape:

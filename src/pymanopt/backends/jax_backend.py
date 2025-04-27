@@ -113,9 +113,6 @@ class JaxBackend(Backend):
     # Autodiff methods
     ##############################################################################
 
-    def prepare_function(self, function):
-        return function
-
     def generate_gradient_operator(self, function, num_arguments):
         gradient = conjugate_result(
             jax.grad(function, argnums=range(num_arguments))

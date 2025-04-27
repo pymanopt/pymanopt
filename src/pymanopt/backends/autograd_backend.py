@@ -54,9 +54,6 @@ class AutogradBackend(NumpyBackend):
     # Autodiff methods
     ##############################################################################
 
-    def prepare_function(self, function):
-        return function
-
     def generate_gradient_operator(self, function, num_arguments):
         gradient = conjugate_result(
             autograd.grad(function, argnum=list(range(num_arguments)))

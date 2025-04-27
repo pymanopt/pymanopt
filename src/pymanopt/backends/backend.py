@@ -182,18 +182,6 @@ class Backend(ABC):
     ##############################################################################
 
     @abstractmethod
-    def prepare_function(self, function) -> Callable:
-        """Prepares a callable to be used with the backend.
-
-        Args:
-            function: A callable.
-
-        Returns:
-            A Python callable accepting a ``numpy.ndarray`` and returning a
-            scalar.
-        """
-
-    @abstractmethod
     def generate_gradient_operator(self, function, num_arguments) -> Callable:
         """Creates a function to compute gradients of a function.
 
@@ -705,9 +693,6 @@ class DummyBackend(Backend):
 
     def to_real_backend(self) -> "DummyBackend":
         return self
-
-    def prepare_function(self, function):
-        return super().prepare_function(function)
 
     def generate_gradient_operator(self, function, num_arguments):
         return super().generate_gradient_operator(function, num_arguments)
