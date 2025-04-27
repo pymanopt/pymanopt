@@ -1,4 +1,3 @@
-# import autograd.numpy as np
 import numpy as np
 import tensorflow as tf
 import torch
@@ -80,10 +79,6 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         estimated_dominant_eigenvector = (
             estimated_dominant_eigenvector.cpu().detach().numpy()
         )
-    # elif backend == "jax":
-    #     estimated_dominant_eigenvector = np.asarray(
-    #         estimated_dominant_eigenvector
-    #     )
     elif backend == "tensorflow":
         estimated_dominant_eigenvector = estimated_dominant_eigenvector.numpy()
 
