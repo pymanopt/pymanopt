@@ -2,7 +2,6 @@ from numbers import Number
 from typing import Any, Literal, Optional, Union
 
 import numpy as np
-import numpy.testing as np_testing
 import packaging.version as pv
 import scipy
 import scipy.linalg
@@ -152,16 +151,18 @@ class NumpyBackend(Backend):
         rtol: float = 1e-6,
         atol: float = 1e-6,
     ) -> None:
-        np_testing.assert_allclose(
-            array_a, array_b, rtol, atol, equal_nan=False
-        )
+        if not np.allclose(
+            array_a, array_b, rtol=rtol, atol=atol, equal_nan=False
+        ):
+            raise ValueError(f"Arrays are not close: {array_a} vs {array_b}")
 
     def assert_equal(
         self,
         array_a: np.ndarray,
         array_b: np.ndarray,
     ) -> None:
-        return np_testing.assert_equal(array_a, array_b)
+        if not np.array_equal(array_a, array_b):
+            raise ValueError(f"Arrays are not equal: {array_a} vs {array_b}")
 
     def concatenate(
         self, arrays: TupleOrList[np.ndarray], axis: int = 0

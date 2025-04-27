@@ -1,4 +1,4 @@
-from contextlib import nullcontext
+from contextlib import nullcontext as does_not_raise
 
 import jax.numpy as jnp
 import numpy as np
@@ -53,14 +53,14 @@ def test_convert_array_to_backend(input, expected_output, backend: Backend):
 
 
 @pytest.mark.parametrize(
-    "input1, input2, expectation",
+    "input1, input2, exception_context",
     [
-        ([-1.0, 2.0], [-1.0, 2.0], nullcontext()),
-        ([-1.0, 2.0], [-1.0, 2.1], pytest.raises(AssertionError)),
-        ([-1.0, 2.0], [-1.1, 2.0], pytest.raises(AssertionError)),
-        (1.0, 1.0001, pytest.raises(AssertionError)),
-        (np.nan, np.nan, pytest.raises(AssertionError)),
-        (np.inf, np.inf, nullcontext()),
+        ([-1.0, 2.0], [-1.0, 2.0], does_not_raise()),
+        ([-1.0, 2.0], [-1.0, 2.1], pytest.raises(ValueError)),
+        ([-1.0, 2.0], [-1.1, 2.0], pytest.raises(ValueError)),
+        (1.0, 1.0001, pytest.raises(ValueError)),
+        (np.nan, np.nan, pytest.raises(ValueError)),
+        (np.inf, np.inf, does_not_raise()),
     ],
 )
 @pytest.mark.parametrize(
@@ -71,8 +71,8 @@ def test_convert_array_to_backend(input, expected_output, backend: Backend):
         JaxBackend(jnp.float64),
     ],
 )
-def test_assert_allclose(input1, input2, expectation, backend: Backend):
+def test_assert_allclose(input1, input2, exception_context, backend: Backend):
     input1 = backend.array(input1)
     input2 = backend.array(input2)
-    with expectation:
+    with exception_context:
         backend.assert_allclose(input1, input2)

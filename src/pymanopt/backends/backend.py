@@ -296,16 +296,6 @@ class Backend(ABC):
     ) -> None:
         ...
 
-    # TODO: remove this method
-    def assert_almost_equal(self, array_a: array_t, array_b: array_t) -> None:
-        self.assert_allclose(array_a, array_b)
-
-    # TODO: remove this method
-    def assert_array_almost_equal(
-        self, array_a: array_t, array_b: array_t
-    ) -> None:
-        self.assert_allclose(array_a, array_b)
-
     @not_implemented
     def assert_equal(self, array_a: array_t, array_b: array_t) -> None:
         ...

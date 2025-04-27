@@ -234,15 +234,6 @@ class TensorflowBackend(Backend):
         rtol: float = 1e-6,
         atol: float = 1e-6,
     ) -> None:
-        # if not isinstance(array_a, tf.Tensor):
-        #     array_a = tf.constant(array_a, dtype=self.dtype)
-        # if array_a.dtype != self.dtype:
-        #     array_a = tf.cast(array_a, self.dtype)
-        # if not isinstance(array_b, tf.Tensor):
-        #     array_b = tf.constant(array_b, dtype=self.dtype)
-        # if array_b.dtype != self.dtype:
-        #     array_b = tf.cast(array_b, self.dtype)
-        # tf.debugging.assert_near(array_a, array_b, rtol=rtol, atol=atol)
         def max_abs(x):
             return tf.math.reduce_max(tf.abs(x))
 
@@ -261,7 +252,8 @@ class TensorflowBackend(Backend):
         array_a: tf.Tensor,
         array_b: tf.Tensor,
     ) -> None:
-        tf.debugging.assert_equal(array_a, array_b)
+        if not tf.reduce_all(tf.equal(array_a, array_b)):
+            raise ValueError(f"Arrays are not equal: {array_a} vs {array_b}")
 
     def concatenate(
         self, arrays: TupleOrList[tf.Tensor], axis: int = 0
