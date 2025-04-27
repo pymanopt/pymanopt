@@ -62,18 +62,17 @@ def decorator_factory(
     def decorator(
         manifold: Manifold, dtype: Optional[Any] = None
     ) -> Callable[[Callable[..., Any]], Function]:
-        assert isinstance(manifold, Manifold)
-
         def inner(cost: Callable[..., Any]) -> Function:
             argspec = inspect.getfullargspec(cost)
-            assert (
+            if not (
                 _only_one_true(bool(argspec.args), bool(argspec.varargs))
                 and not argspec.varkw
                 and not argspec.kwonlyargs
-            ), (
-                "Decorated function must only accept positional arguments "
-                "or a variable-length argument like *x"
-            )
+            ):
+                raise TypeError(
+                    "Decorated function must only accept positional arguments "
+                    "or a variable-length argument like *x"
+                )
             backend_type = getattr(
                 import_module(
                     f"pymanopt.backends.{module}",

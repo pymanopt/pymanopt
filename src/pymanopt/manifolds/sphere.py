@@ -130,7 +130,8 @@ class Sphere(_SphereBase):
 class _SphereSubspaceIntersectionManifold(_SphereBase):
     def __init__(self, name, dimension, matrix, subspace_projector, backend):
         m, n = subspace_projector.shape
-        assert m == n, "projection matrix is not square"
+        if m != n:
+            raise ValueError("Projection matrix is not square")
         if dimension == 0:
             warnings.warn(
                 "Intersected subspace is 1-dimensional. The manifold "

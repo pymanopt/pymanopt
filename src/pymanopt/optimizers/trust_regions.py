@@ -138,7 +138,6 @@ class TrustRegions(Optimizer):
         if initial_point is None:
             x = manifold.random_point()
         else:
-            assert isinstance(initial_point, manifold.backend.array_t)
             x = initial_point
 
         # Initializations

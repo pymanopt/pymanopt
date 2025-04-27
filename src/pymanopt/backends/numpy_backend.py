@@ -28,12 +28,13 @@ class NumpyBackend(Backend):
     _dtype: type
 
     def __init__(self, dtype: type = np.float64):
-        assert (
-            dtype == np.float32
-            or dtype == np.float64
-            or dtype == np.complex64
-            or dtype == np.complex128
-        ), f"dtype {dtype} is not supported"
+        if dtype not in {
+            np.float32,
+            np.float64,
+            np.complex64,
+            np.complex128,
+        }:
+            raise ValueError(f"dtype {dtype} is not supported")
         self._dtype = dtype
 
     @property

@@ -40,12 +40,13 @@ class PytorchBackend(Backend):
     _dtype: torch.dtype
 
     def __init__(self, dtype=torch.float64):
-        assert dtype in {
+        if dtype not in {
             torch.float32,
             torch.float64,
             torch.complex64,
             torch.complex128,
-        }
+        }:
+            raise ValueError(f"dtype {dtype} is not supported")
         self._dtype = dtype
 
     @property
@@ -211,7 +212,7 @@ class PytorchBackend(Backend):
             (
                 isinstance(array, torch.Tensor)
                 and self.iscomplexobj(array)
-                and not self.allclose(torch.imag(array), 0.0)
+                and not self.allclose(torch.imag(array), torch.tensor(0.0))
             )
             or (
                 isinstance(array, np.ndarray)
@@ -235,14 +236,15 @@ class PytorchBackend(Backend):
             return torch.max(torch.abs(x))
 
         array_a, array_b = self.array(array_a), self.array(array_b)
-        assert self.allclose(array_a, array_b, rtol, atol), (
-            "Arrays are not almost equal.\n"
-            f"Max absolute difference: {max_abs(array_a - array_b)}"
-            f" (atol={atol})\n"
-            "Max relative difference: "
-            f"{max_abs(array_a - array_b) / max_abs(array_b)}"
-            f" (rtol={rtol})"
-        )
+        if not self.allclose(array_a, array_b, rtol, atol):
+            raise ValueError(
+                "Arrays are not almost equal.\n"
+                f"Max absolute difference: {max_abs(array_a - array_b)}"
+                f" (atol={atol})\n"
+                "Max relative difference: "
+                f"{max_abs(array_a - array_b) / max_abs(array_b)}"
+                f" (rtol={rtol})"
+            )
 
     def concatenate(
         self, arrays: TupleOrList[torch.Tensor], axis: int = 0
@@ -469,14 +471,13 @@ class PytorchBackend(Backend):
         scale: float = 1.0,
         size: Union[int, TupleOrList[int], None] = None,
     ) -> torch.Tensor:
-        # pre-process the size
         if isinstance(size, int):
             new_size = (size,)
         elif size is None:
             new_size = (1,)
         else:
             new_size = size
-        # sample
+
         if self.is_dtype_real:
             samples = torch.normal(
                 mean=loc, std=scale, size=new_size, dtype=self.dtype
@@ -488,20 +489,19 @@ class PytorchBackend(Backend):
             ) + 1j * torch.normal(
                 mean=loc, std=scale, size=new_size, dtype=real_dtype
             )
-        # post-process
+
         return samples.item() if size is None else samples
 
     def random_uniform(
         self, size: Union[int, TupleOrList[int], None] = None
     ) -> Union[torch.Tensor, Number]:
-        # pre-process the size
         if isinstance(size, int):
             new_size = (size,)
         elif size is None:
             new_size = (1,)
         else:
             new_size = size
-        # elif not instance
+
         if self.is_dtype_real:
             samples = torch.rand(new_size, dtype=self.dtype)
         else:
@@ -509,7 +509,7 @@ class PytorchBackend(Backend):
             samples = torch.rand(new_size, dtype=real_dtype) + 1j * torch.rand(
                 new_size, dtype=real_dtype
             )
-        # post-process
+
         return samples.item() if size is None else samples
 
     @elementary_math_function
