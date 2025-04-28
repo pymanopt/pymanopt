@@ -24,9 +24,7 @@ class TestPSDFixedRankComplexManifold:
         point_a = self.manifold.random_point()
         U = scipy.stats.unitary_group.rvs(self.k)
         point_b = point_a @ U
-        self.backend.assert_almost_equal(
-            self.manifold.dist(point_a, point_b), 0
-        )
+        self.backend.assert_allclose(self.manifold.dist(point_a, point_b), 0)
 
     # def test_inner_product(self):
 
@@ -51,14 +49,14 @@ class TestPSDFixedRankComplexManifold:
         X = s.random_point()
         Y = s.random_point()
         Yexplog = s.exp(X, s.log(X, Y))
-        self.backend.assert_almost_equal(s.dist(Y, Yexplog), 0)
+        self.backend.assert_allclose(s.dist(Y, Yexplog), 0)
 
     def test_log_exp_inverse(self):
         s = self.manifold
         X = s.random_point()
         U = s.random_tangent_vector(X)
         Ulogexp = s.log(X, s.exp(X, U))
-        self.backend.assert_almost_equal(s.norm(X, U - Ulogexp), 0)
+        self.backend.assert_allclose(s.norm(X, U - Ulogexp), 0)
 
     # def test_pair_mean(self):
     # s = self.manifold

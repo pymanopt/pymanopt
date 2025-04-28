@@ -26,7 +26,7 @@ class TestStiefelManifold:
         )
 
     def test_typical_dist(self):
-        self.backend.assert_almost_equal(
+        self.backend.assert_allclose(
             self.manifold.typical_dist, self.backend.sqrt(self.n * self.k)
         )
 
@@ -100,7 +100,7 @@ class TestStiefelManifold:
         bk = self.backend
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
-        bk.assert_almost_equal(self.manifold.norm(x, u), bk.linalg_norm(u))
+        bk.assert_allclose(self.manifold.norm(x, u), bk.linalg_norm(u))
 
     def test_exp(self):
         bk = self.backend

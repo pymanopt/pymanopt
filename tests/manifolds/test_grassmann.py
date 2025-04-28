@@ -22,14 +22,14 @@ class TestGrassmannManifold:
         assert self.manifold.dim == self.k * (self.n * self.p - self.p**2)
 
     def test_typical_dist(self):
-        self.backend.assert_almost_equal(
+        self.backend.assert_allclose(
             self.manifold.typical_dist, self.backend.sqrt(self.p * self.k)
         )
 
     def test_dist(self):
         x = self.manifold.random_point()
         y = self.manifold.random_point()
-        self.backend.assert_almost_equal(
+        self.backend.assert_allclose(
             self.manifold.dist(x, y),
             self.manifold.norm(x, self.manifold.log(x, y)),
         )
@@ -85,7 +85,7 @@ class TestGrassmannManifold:
     def test_norm(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
-        self.backend.assert_almost_equal(
+        self.backend.assert_allclose(
             self.manifold.norm(x, u), self.backend.linalg_norm(u)
         )
 

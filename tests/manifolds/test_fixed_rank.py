@@ -97,7 +97,7 @@ class TestFixedRankEmbeddedManifold:
         e = self.manifold
         x = e.random_point()
         u = e.random_tangent_vector(x)
-        bk.assert_almost_equal(bk.sqrt(e.inner_product(x, u, u)), e.norm(x, u))
+        bk.assert_allclose(bk.sqrt(e.inner_product(x, u, u)), e.norm(x, u))
 
     def test_random_point(self):
         bk = self.backend
@@ -127,7 +127,7 @@ class TestFixedRankEmbeddedManifold:
         A = s.transport(x, y, u)
         B = s.projection(y, s.embedding(x, u))
         diff = A - B
-        bk.assert_almost_equal(s.norm(y, diff), 0)
+        bk.assert_allclose(s.norm(y, diff), 0)
 
     def test_apply_ambient(self):
         bk = self.backend
