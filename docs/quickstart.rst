@@ -78,7 +78,7 @@ case), define a problem instance which we pass the manifold and the cost
 function, and run the minimization problem using one of the available
 optimizers.
 
-.. literalinclude:: ../../quickstart.py
+.. literalinclude:: ../quickstart.py
    :language: python
 
 Running this example will produce (something like) the following:
