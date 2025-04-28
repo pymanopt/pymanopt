@@ -27,6 +27,7 @@ class TestUnaryComplexFunction(_backend_tests.TestUnaryComplexFunction):
         self.manifold = _backend_tests.manifold_factory(
             point_layout=self.point_layout,
             backend=PytorchBackend(torch.complex64),
+            is_complex=True,
         )
 
         @pymanopt.function.pytorch(self.manifold)

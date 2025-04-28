@@ -28,6 +28,7 @@ class TestUnaryComplexFunction(_backend_tests.TestUnaryComplexFunction):
         self.manifold = _backend_tests.manifold_factory(
             point_layout=self.point_layout,
             backend=AutogradBackend(np.complex128),
+            is_complex=True,
         )
 
         @pymanopt.function.autograd(self.manifold)

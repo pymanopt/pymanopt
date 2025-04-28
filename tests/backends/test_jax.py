@@ -25,7 +25,9 @@ class TestUnaryComplexFunction(_backend_tests.TestUnaryComplexFunction):
     @pytest.fixture(autouse=True)
     def setup(self, pre_setup):
         self.manifold = _backend_tests.manifold_factory(
-            point_layout=self.point_layout, backend=JaxBackend(jnp.complex128)
+            point_layout=self.point_layout,
+            backend=JaxBackend(jnp.complex128),
+            is_complex=True,
         )
 
         @pymanopt.function.jax(self.manifold)
