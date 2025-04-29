@@ -273,32 +273,6 @@ class PytorchBackend(Backend):
 
     def expand_dims(self, array: torch.Tensor, axis: int) -> torch.Tensor:
         return torch.unsqueeze(array, dim=axis)
-        # if isinstance(axis, int):
-        #     axis = [axis]
-        #
-        # # Normalize axis values for negative indices
-        # positive_axis = list()
-        # for ax in axis:
-        #     if ax >= 0:
-        #         positive_axis.append(ax)
-        # negative_axis = list()
-        # for ax in axis:
-        #     if ax < 0:
-        #         negative_axis.append(ax)
-        #
-        # # Sort the axis list
-        # positive_axis.sort()
-        # negative_axis.sort()
-        # negative_axis = negative_axis[::-1]
-        #
-        # for i in range(len(positive_axis)):
-        #     tensor = torch.unsqueeze(tensor, dim=positive_axis[i])
-        #
-        # for i in range(len(negative_axis)):
-        #     dim = tensor.ndim + negative_axis[i] + 1
-        #     tensor = torch.unsqueeze(tensor, dim=dim)
-        #
-        # return tensor
 
     def eye(self, size: int) -> torch.Tensor:
         return torch.eye(size, dtype=self.dtype)
