@@ -1,4 +1,4 @@
-from collections import namedtuple
+from typing import NamedTuple
 
 from pymanopt.backends import Backend, DummyBackendSingleton
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
@@ -34,15 +34,24 @@ class _ArrayNamedTupleMixin(ArraySequenceMixin):
         return [x / other for x in self]  # type: ignore
 
 
-class _FixedRankPoint(
-    _ArrayNamedTupleMixin, namedtuple("_FixedRankPointTuple", ("u", "s", "vt"))
-):
+class _FixedRankPointTuple(NamedTuple):
+    u: Backend.array_t
+    s: Backend.array_t
+    vt: Backend.array_t
+
+
+class _FixedRankPoint(_ArrayNamedTupleMixin, _FixedRankPointTuple):
     pass
 
 
+class _FixedRankTangentVectorTuple(NamedTuple):
+    Up: Backend.array_t
+    M: Backend.array_t
+    Vp: Backend.array_t
+
+
 class _FixedRankTangentVector(
-    _ArrayNamedTupleMixin,
-    namedtuple("_FixedRankTangentVectorTuple", ("Up", "M", "Vp")),
+    _ArrayNamedTupleMixin, _FixedRankTangentVectorTuple
 ):
     pass
 
@@ -165,10 +174,8 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         bk = self.backend
         if isinstance(vector, (list, tuple)):
             vector = vector[0] @ vector[1] @ bk.transpose(vector[2])
-        # ZV = self._apply_ambient(vector, point[2].T)
         ZV = vector @ bk.transpose(point[2])
         UtZV = bk.transpose(point[0]) @ ZV
-        # ZtU = self._apply_ambient_transpose(vector, point[0])
         ZtU = bk.transpose(vector) @ point[0]
 
         Up = ZV - point[0] @ UtZV
