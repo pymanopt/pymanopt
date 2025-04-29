@@ -297,7 +297,7 @@ class ConjugateGradient(Optimizer):
                 if self._verbosity >= 3:
                     print(
                         "Conjugate gradient info: got an ascent direction "
-                        f"(df0 = {df0:.2f}), "  # noqa: E231
+                        f"(df0 = {df0:.2f}), "
                         "reset to the (preconditioned) steepest descent "
                         "direction."
                     )
