@@ -386,10 +386,6 @@ class TensorflowBackend(Backend):
         self, array_a: tf.Tensor, array_b: tf.Tensor
     ) -> tf.Tensor:
         return tf.linalg.solve(array_a, array_b)
-        # if array_b.ndim < array_a.ndim:
-        #     array_b = tf.expand_dims(array_b, -1)
-        # sol = tf.linalg.solve(array_a, array_b)
-        # return sol[..., 0] if array_b.ndim < array_a.ndim else sol
 
     def linalg_solve_continuous_lyapunov(
         self, array_a: tf.Tensor, array_q: tf.Tensor
