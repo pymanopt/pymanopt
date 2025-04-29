@@ -1,6 +1,5 @@
 import pytest
 
-import pymanopt
 from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.manifolds import Euclidean, Grassmann, Product, Sphere
 
@@ -17,19 +16,6 @@ class TestProductManifold:
         self.euclidean = Euclidean(m, n, backend=self.backend)
         self.sphere = Sphere(n, backend=self.backend)
         self.manifold = Product([self.euclidean, self.sphere])
-
-        point = self.manifold.random_point()
-
-        @pymanopt.function.autograd(self.manifold)
-        def cost(*x):
-            return self.backend.sum(
-                [
-                    self.backend.linalg_norm(a - b) ** 2
-                    for a, b in zip(x, point)
-                ]
-            )
-
-        self.cost = cost
 
     def test_dim(self):
         self.backend.assert_equal(

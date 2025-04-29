@@ -23,7 +23,7 @@ torch.autograd.set_detect_anomaly(True)
 
 @pytest.fixture(autouse=True)
 def initialize_test_state():
-    seed = 42
+    seed = 43
     random.seed(seed)
     anp.random.seed(seed)  # type: ignore
     np.random.seed(seed)

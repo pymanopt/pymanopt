@@ -13,13 +13,6 @@ class TestFixedRankEmbeddedManifold:
         self.backend = real_backend
         self.manifold = FixedRankEmbedded(m, n, k, backend=self.backend)
 
-        # u, s, vt = self.manifold.random_point()
-        # matrix = (u * s) @ vt
-        # @pymanopt.function.autograd(self.manifold)
-        # def cost(u, s, vt):
-        #     return bk.linalg_norm((u * s) @ vt - matrix) ** 2
-        # self.cost = cost
-
     def test_dim(self):
         assert self.manifold.dim == (self.m + self.n - self.k) * self.k
 
