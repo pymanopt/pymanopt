@@ -1,16 +1,13 @@
-from typing import Literal
+from typing import Literal, Union
 
 import scipy.special
 
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools import extend_docstring
 
 
 class _UnitaryBase(RiemannianSubmanifold):
-    _n: int
-    _k: int
-
     def __init__(
         self,
         name: str,
@@ -18,24 +15,16 @@ class _UnitaryBase(RiemannianSubmanifold):
         k: int,
         dimension: int,
         retraction: Literal["qr", "polar"],
-        backend: Backend = DummyBackendSingleton,
+        backend: Union[Backend, None] = None,
     ):
-        self._k = k
-        self._n = n
+        self.n = n
+        self.k = k
         super().__init__(name, dimension, backend=backend)
 
         try:
             self._retraction = getattr(self, f"_retraction_{retraction}")
         except AttributeError:
             raise ValueError(f"Invalid retraction type '{retraction}'")
-
-    @property
-    def k(self) -> int:
-        return self._k
-
-    @property
-    def n(self) -> int:
-        return self._n
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.tensordot(
@@ -49,7 +38,7 @@ class _UnitaryBase(RiemannianSubmanifold):
 
     @property
     def typical_dist(self):
-        return self.backend.pi * self.backend.sqrt(self.n * self.k)
+        return self.backend.pi * (self.n * self.k) ** 0.5
 
     def dist(self, point_a, point_b):
         return self.norm(point_a, self.log(point_a, point_b))
@@ -162,7 +151,7 @@ class SpecialOrthogonalGroup(_UnitaryBase):
         *,
         k: int = 1,
         retraction: Literal["qr", "polar"] = "qr",
-        backend: Backend = DummyBackendSingleton,
+        backend: Union[Backend, None] = None,
     ):
         if k == 1:
             name = f"Special orthogonal group SO({n})"
@@ -239,7 +228,7 @@ class UnitaryGroup(_UnitaryBase):
         *,
         k: int = 1,
         retraction: Literal["qr", "polar"] = "qr",
-        backend: Backend = DummyBackendSingleton,
+        backend: Union[Backend, None] = None,
     ):
         if k == 1:
             name = f"Unitary group U({n})"
@@ -261,7 +250,7 @@ class UnitaryGroup(_UnitaryBase):
 
     def random_tangent_vector(self, point):
         bk = self.backend
-        n, k = self._n, self._k
+        n, k = self.n, self.k
         vector = bk.skewh(
             bk.random_normal(size=(n, n) if k == 1 else (k, n, n))
         )

@@ -50,7 +50,7 @@ def check_directional_derivative(
     #  If x and / or d are not specified, pick them at random.
     if d is not None and x is None:
         raise ValueError(
-            "If d is provided, x must be too, " "since d is tangent at x"
+            "If d is provided, x must be too, since d is tangent at x"
         )
     if x is None:
         x = problem.manifold.random_point()
@@ -182,7 +182,7 @@ def check_gradient(problem, x=None, d=None):
     else:
         residual = grad - projected_grad
         error = problem.manifold.norm(x, residual)
-        print(f"The residual should be close to 0: {error:g}.")  # noqa: E231
+        print(f"The residual should be close to 0: {error:g}.")
         print(
             "If it is far from 0, then the gradient is not in the tangent "
             "space."
@@ -246,10 +246,7 @@ def check_hessian(problem, point=None, tangent_vector=None):
     else:
         residual = hessian - projected_hessian
         error = problem.manifold.norm(point, residual)
-        print(
-            "The residual should be 0, or very close. "
-            f"Residual: {error:g}."  # noqa: E231
-        )
+        print(f"The residual should be 0, or very close. Residual: {error:g}.")
         print(
             "If it is far from 0, then the Hessian is not in the tangent "
             "space."
@@ -273,7 +270,7 @@ def check_hessian(problem, point=None, tangent_vector=None):
     )
     print(
         "The norm of the residual between H[a*d1 + b*d2] and a*H[d1] + "
-        f"b*H[d2] should be very close to 0: {error_norm:g}."  # noqa: E231
+        f"b*H[d2] should be very close to 0: {error_norm:g}."
     )
     print("If it is far from 0, then the Hessian is not a linear operator.")
     print()
@@ -288,7 +285,7 @@ def check_hessian(problem, point=None, tangent_vector=None):
     error = inner_product_a - inner_product_b
     print(
         "The difference <d1, H[d2]> - <H[d1], d2> should be close to zero: "
-        f"{inner_product_a:g} - {inner_product_b:g} = {error:g}."  # noqa: E231
+        f"{inner_product_a:g} - {inner_product_b:g} = {error:g}."
     )
     print("If it is far from 0 then the Hessian is not a symmetric operator.")
 

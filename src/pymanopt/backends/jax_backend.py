@@ -37,27 +37,29 @@ class JaxBackend(Backend):
     # Common attributes, properties and methods
     ##########################################################################
     array_t = jax.Array  # type: ignore
-    # array_t = jnp.ndarray  # type: ignore
     _dtype: jnp.dtype
 
     def __init__(self, dtype=jnp.float64, random_seed: int = 42):
-        assert (
-            dtype == jnp.float32
-            or dtype == jnp.float64
-            or dtype == jnp.complex64
-            or dtype == jnp.complex128
-        ), f"dtype {dtype} is not supported"
+        if dtype not in {
+            jnp.float32,
+            jnp.float64,
+            jnp.complex64,
+            jnp.complex128,
+        }:
+            raise ValueError(f"dtype {dtype} is not supported")
         self._dtype = dtype
         self._random_key = jax.random.key(random_seed)
 
-    def _gen_1_random_key(self):
-        self._random_key, new_key = jax.random.split(self._random_key)
-        return new_key
-
-    def _gen_2_random_keys(
-        self,
-    ):
-        self._random_key, *new_keys = jax.random.split(self._random_key, 3)
+    def _generate_random_keys(self, n=1):
+        if n < 1:
+            raise ValueError("Cannot generate less than 1 key")
+        if n == 1:
+            self._random_key, new_key = jax.random.split(self._random_key)
+            new_keys = (new_key,)
+        else:
+            self._random_key, *new_keys = jax.random.split(
+                self._random_key, n + 1
+            )
         return new_keys
 
     @property
@@ -110,9 +112,6 @@ class JaxBackend(Backend):
     ##############################################################################
     # Autodiff methods
     ##############################################################################
-
-    def prepare_function(self, function):
-        return function
 
     def generate_gradient_operator(self, function, num_arguments):
         gradient = conjugate_result(
@@ -201,14 +200,15 @@ class JaxBackend(Backend):
         def max_abs(x):
             return jnp.max(jnp.abs(x))
 
-        assert self.allclose(array_a, array_b, rtol, atol), (
-            "Arrays are not almost equal.\n"
-            f"Max absolute difference: {max_abs(array_a - array_b)}"
-            f" (atol={atol})\n"
-            "Max relative difference: "
-            f"{max_abs(array_a - array_b) / max_abs(array_b)}"
-            f" (rtol={rtol})"
-        )
+        if not self.allclose(array_a, array_b, rtol, atol):
+            raise ValueError(
+                "Arrays are not almost equal.\n"
+                f"Max absolute difference: {max_abs(array_a - array_b)}"
+                f" (atol={atol})\n"
+                "Max relative difference: "
+                f"{max_abs(array_a - array_b) / max_abs(array_b)}"
+                f" (rtol={rtol})"
+            )
 
     def concatenate(
         self, arrays: TupleOrList[jnp.ndarray], axis: int = 0
@@ -396,7 +396,7 @@ class JaxBackend(Backend):
         elif size is None:
             size = ()
         if self.is_dtype_real:
-            new_key = self._gen_1_random_key()
+            new_key, *_ = self._generate_random_keys()
             return (
                 scale
                 * jax.random.normal(key=new_key, shape=size, dtype=self.dtype)
@@ -404,7 +404,7 @@ class JaxBackend(Backend):
             )
         else:
             real_dtype = jnp.finfo(self.dtype).dtype
-            new_key_1, new_key_2 = self._gen_2_random_keys()
+            new_key_1, new_key_2 = self._generate_random_keys(n=2)
             return (
                 scale
                 * jax.random.normal(
@@ -428,13 +428,13 @@ class JaxBackend(Backend):
             size = ()
 
         if self.is_dtype_real:
-            new_key = self._gen_1_random_key()
+            new_key, *_ = self._generate_random_keys()
             return jax.random.uniform(
                 key=new_key, shape=size, dtype=self.dtype
             )
         else:
             real_dtype = jnp.finfo(self.dtype).dtype
-            new_key_1, new_key_2 = self._gen_2_random_keys()
+            new_key_1, new_key_2 = self._generate_random_keys(n=2)
             return jax.random.uniform(
                 key=new_key_1, shape=size, dtype=real_dtype
             ) + 1j * jax.random.uniform(

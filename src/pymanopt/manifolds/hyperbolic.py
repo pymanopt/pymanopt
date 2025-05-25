@@ -1,4 +1,6 @@
-from pymanopt.backends import Backend, DummyBackendSingleton
+from typing import Union
+
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold
 
 
@@ -35,14 +37,10 @@ class PoincareBall(Manifold):
     """
 
     def __init__(
-        self,
-        n: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
+        self, n: int, *, k: int = 1, backend: Union[Backend, None] = None
     ):
-        self._n = n
-        self._k = k
+        self.n = n
+        self.k = k
 
         if n < 1:
             raise ValueError(f"Need n >= 1. Value given was n = {n}")
@@ -80,13 +78,13 @@ class PoincareBall(Manifold):
         )
 
     def random_point(self):
-        array = self.backend.random_normal(size=(self._k, self._n))
+        array = self.backend.random_normal(size=(self.k, self.n))
         norm = self.backend.linalg_norm(array, axis=-1, keepdims=True)
-        radius = self.backend.random_uniform(size=(self._k, 1)) ** (
-            1.0 / self._n
+        radius = self.backend.random_uniform(size=(self.k, 1)) ** (
+            1.0 / self.n
         )
         point = array / norm * radius
-        if self._k == 1:
+        if self.k == 1:
             return point[0]
         return point
 

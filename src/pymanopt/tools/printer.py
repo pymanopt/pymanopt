@@ -1,4 +1,3 @@
-# flake8: noqa E231
 from typing import Any, Iterable, List, Optional
 
 

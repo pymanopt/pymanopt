@@ -1,4 +1,3 @@
-# import autograd.numpy as np
 import numpy as np
 import tensorflow as tf
 import torch
@@ -8,8 +7,6 @@ from examples._tools import ExampleRunner
 from pymanopt.manifolds import Sphere
 from pymanopt.optimizers import SteepestDescent
 
-
-np.random.seed(127)
 
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
@@ -82,10 +79,6 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         estimated_dominant_eigenvector = (
             estimated_dominant_eigenvector.cpu().detach().numpy()
         )
-    # elif backend == "jax":
-    #     estimated_dominant_eigenvector = np.asarray(
-    #         estimated_dominant_eigenvector
-    #     )
     elif backend == "tensorflow":
         estimated_dominant_eigenvector = estimated_dominant_eigenvector.numpy()
 

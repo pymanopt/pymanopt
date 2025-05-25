@@ -47,7 +47,7 @@ class TestPositiveVectors:
         x = self.manifold.random_point()
         y = self.manifold.random_point()
         u = self.manifold.log(x, y)
-        self.backend.assert_almost_equal(
+        self.backend.assert_allclose(
             self.manifold.norm(x, u), self.manifold.dist(x, y)
         )
 
@@ -56,14 +56,14 @@ class TestPositiveVectors:
         y = self.manifold.random_point()
         u = self.manifold.log(x, y)
         z = self.manifold.exp(x, u)
-        self.backend.assert_almost_equal(self.manifold.dist(y, z), 0)
+        self.backend.assert_allclose(self.manifold.dist(y, z), 0)
 
     def test_log_exp_inverse(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
         y = self.manifold.exp(x, u)
         v = self.manifold.log(x, y)
-        self.backend.assert_almost_equal(self.manifold.norm(x, u - v), 0)
+        self.backend.assert_allclose(self.manifold.norm(x, u - v), 0)
 
     def test_retraction(self):
         # Test that the result is on the manifold and that for small

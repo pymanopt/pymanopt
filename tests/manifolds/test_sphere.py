@@ -234,15 +234,6 @@ class TestSphereSubspaceIntersectionManifold:
         assert manifold.dim == dim
 
 
-# class TestSphereSubspaceIntersectionManifoldGradient:
-#     @pytest.fixture(autouse=True)
-#     def setup(self):
-#         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
-#         self.manifold = SphereSubspaceIntersection(
-#             span_matrix, backend=NumpyBackend()
-#         )
-
-
 class TestSphereSubspaceComplementIntersectionManifold:
     @pytest.fixture(autouse=True)
     def setup(self, real_backend):
@@ -314,12 +305,3 @@ class TestSphereSubspaceComplementIntersectionManifold:
             atol=1.5e-6,
             rtol=1e-6,
         )
-
-
-# class TestSphereSubspaceComplementIntersectionManifoldGradient:
-#     @pytest.fixture(autouse=True)
-#     def setup(self):
-#         span_matrix = pymanopt.manifolds.Stiefel(73, 37).random_point()
-#         self.manifold = SphereSubspaceComplementIntersection(
-#             span_matrix, backend=NumpyBackend()
-#         )

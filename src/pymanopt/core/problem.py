@@ -60,13 +60,9 @@ class Problem:
             (riemannian_gradient, "riemannian_gradient"),
             (riemannian_hessian, "riemannian_hessian"),
         ):
-            if function is not None:
-                assert isinstance(
-                    function, Callable
-                ), f"Function {name} must be callable"
+            if function is not None and not isinstance(function, Callable):
+                raise TypeError(f"Function {name} must be callable")
 
-        # check backend compatibility between manifold and cost function
-        assert isinstance(cost, Callable)
         if manifold.has_dummy_backend():
             if isinstance(cost, Function):
                 manifold.set_compatible_backend(cost.backend)
@@ -118,19 +114,22 @@ class Problem:
         self._riemannian_gradient = riemannian_gradient
         if riemannian_hessian is not None:
             riemannian_hessian = self._validate_function_backend(
-                riemannian_hessian, "rimeannian_hessian", manifold
+                riemannian_hessian, "riemannian_hessian", manifold
             )
             riemannian_hessian = self._wrap_hessian_operator(
                 riemannian_hessian
             )
         self._riemannian_hessian = riemannian_hessian
 
-        if preconditioner is None:
-            preconditioner = (
-                lambda point, tangent_vector: tangent_vector
-            )  # noqa: E731
+        if preconditioner is not None:
 
-        self.preconditioner = preconditioner
+            self.preconditioner = preconditioner
+        else:
+
+            def default_preconditioner(point, tangent_vector):
+                return tangent_vector
+
+            self.preconditioner = default_preconditioner
 
     def __setattr__(self, key, value):
         if hasattr(self, key) and key in ("manifold", "preconditioner"):
@@ -139,20 +138,22 @@ class Problem:
 
     @staticmethod
     def _validate_function(function, name):
-        assert isinstance(
-            function, Function
-        ), f"Function '{name}' must be decorated with a backend decorator."
+        if not isinstance(function, Function):
+            raise TypeError(
+                f"Function '{name}' must be decorated with a backend decorator."
+            )
 
     @staticmethod
     def _validate_function_backend(
         function: Callable, name: str, manifold: Manifold
     ):
         if isinstance(function, Function):
-            assert manifold.is_backend_compatible(function.backend), (
-                f"Function '{name}' has a backend {function.backend} "
-                "which is not compatible with the manifold's backend"
-                f" {manifold.backend}."
-            )
+            if not manifold.is_backend_compatible(function.backend):
+                raise ValueError(
+                    f"Function '{name}' has a backend {function.backend} "
+                    "which is not compatible with the manifold's backend"
+                    f" {manifold.backend}."
+                )
             return function
         else:
             return Function(
@@ -160,16 +161,24 @@ class Problem:
             )
 
     def _flatten_arguments(self, arguments, signature):
-        assert len(arguments) == len(signature)
+        if len(arguments) != len(signature):
+            raise ValueError("Arguments do not match function signature")
 
         flattened_arguments = []
         for i, group_size in enumerate(signature):
             argument = arguments[i]
             if group_size == 1:
-                assert not isinstance(argument, (list, tuple))
+                if isinstance(argument, (list, tuple)):
+                    raise TypeError(
+                        "Expected a single value, but got "
+                        f"{type(argument).__name__}"
+                    )
                 flattened_arguments.append(argument)
             else:
-                assert len(argument) == group_size
+                if len(argument) != group_size:
+                    raise ValueError(
+                        f"Expected {group_size} values, but got {len(argument)}"
+                    )
                 flattened_arguments.extend(argument)
         return flattened_arguments
 
@@ -180,7 +189,8 @@ class Problem:
         values of ``function`` according to the group sizes delineated by
         ``signature``.
         """
-        assert all((isinstance(group, int) for group in signature))
+        if not all(isinstance(group, int) for group in signature):
+            raise ValueError("All elements of signature must be integers")
 
         num_return_values = sum(signature)
 
@@ -216,7 +226,8 @@ class Problem:
 
             return wrapper
 
-        assert isinstance(point_layout, int)
+        if not isinstance(point_layout, int):
+            raise TypeError("Point layout must be an integer")
 
         if point_layout == 1:
 

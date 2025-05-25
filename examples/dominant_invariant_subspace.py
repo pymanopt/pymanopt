@@ -9,8 +9,6 @@ from pymanopt.manifolds import Grassmann
 from pymanopt.optimizers import TrustRegions
 
 
-np.random.seed(127)
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 

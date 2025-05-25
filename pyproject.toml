@@ -32,7 +32,7 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
 ]
 dependencies = [
-    "numpy>=1.16.0",
+    "numpy>=1.16.02,<2",
     "scipy>=1.0,!=1.10.*,!=1.11.*,!=1.12.*",
     "packaging",
 ]
@@ -60,10 +60,10 @@ dev = [
 ]
 docs = [
     "docutils==0.16",
-    "ipykernel==6.4.2",
-    "myst-parser==0.16.1",
+    "ipykernel==6.29.5",
+    "myst-parser==1.0",
     "nbsphinx==0.8.7",
-    "sphinx==4.2.0",
+    "sphinx==5.3",
     "sphinx_rtd_theme==1.0.0",
     "sphinxcontrib-katex==0.8.6",
 ]
@@ -98,6 +98,17 @@ ignore = ["B024", "B027", "D1", "E203", "E501", "W503"]
 import_order_style = "pycharm"
 max-line-length = 79
 select = ["B", "B950", "C", "D", "E", "F", "W"]
+# TODO(nkoep): Remove these once migrated to ruff.
+per-file-ignores = [
+    "docs/conf.py:E231",
+    "examples/low_rank_matrix_approximation.py:E231",
+    "src/pymanopt/optimizers/conjugate_gradient.py:E231",
+    "src/pymanopt/optimizers/optimizer.py:E231",
+    "src/pymanopt/optimizers/nelder_mead.py:E231",
+    "src/pymanopt/optimizers/trust_regions.py:E221,E231",
+    "src/pymanopt/tools/diagnostics.py:E231",
+    "src/pymanopt/tools/printer.py:E231",
+]
 
 [tool.pyright]
 typeCheckingMode = "basic"

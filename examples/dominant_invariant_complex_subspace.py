@@ -1,15 +1,19 @@
-import autograd.numpy as np
+import autograd.numpy as anp
 import jax.numpy as jnp
+import numpy as np
 import tensorflow as tf
 import torch
 
 import pymanopt
 from examples._tools import ExampleRunner
+from pymanopt.backends.autograd_backend import AutogradBackend
+from pymanopt.backends.jax_backend import JaxBackend
+from pymanopt.backends.numpy_backend import NumpyBackend
+from pymanopt.backends.pytorch_backend import PytorchBackend
+from pymanopt.backends.tensorflow_backend import TensorflowBackend
 from pymanopt.manifolds import ComplexGrassmann
 from pymanopt.optimizers import TrustRegions
 
-
-np.random.seed(127)
 
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
@@ -19,19 +23,25 @@ def create_cost_and_derivates(manifold, matrix, backend):
 
     if backend == "autograd":
 
-        @pymanopt.function.autograd(manifold)
+        @pymanopt.function.autograd(
+            manifold, dtype=AutogradBackend.DEFAULT_COMPLEX_DTYPE()
+        )
         def cost(X):
-            return -np.real(np.trace(np.conj(X.T) @ matrix @ X))
+            return -anp.real(anp.trace(anp.conj(X.T) @ matrix @ X))
 
     elif backend == "jax":
 
-        @pymanopt.function.jax(manifold)
+        @pymanopt.function.jax(
+            manifold, dtype=JaxBackend.DEFAULT_COMPLEX_DTYPE()
+        )
         def cost(X):
             return -jnp.real(jnp.trace(jnp.conj(X.T) @ matrix @ X))
 
     elif backend == "numpy":
 
-        @pymanopt.function.numpy(manifold)
+        @pymanopt.function.numpy(
+            manifold, dtype=NumpyBackend.DEFAULT_COMPLEX_DTYPE()
+        )
         def cost(X):
             return -np.trace(X.T.conj() @ matrix @ X).real
 
@@ -46,17 +56,21 @@ def create_cost_and_derivates(manifold, matrix, backend):
     elif backend == "pytorch":
         matrix = torch.from_numpy(matrix)
 
-        @pymanopt.function.pytorch(manifold)
+        @pymanopt.function.pytorch(
+            manifold, dtype=PytorchBackend.DEFAULT_COMPLEX_DTYPE()
+        )
         def cost(X):
             return -torch.tensordot(X.conj(), matrix @ X).real
 
     elif backend == "tensorflow":
         matrix = tf.constant(matrix)
 
-        @pymanopt.function.tensorflow(manifold)
+        @pymanopt.function.tensorflow(
+            manifold, dtype=TensorflowBackend.DEFAULT_COMPLEX_DTYPE()
+        )
         def cost(X):
-            return -tf.math.real(
-                tf.tensordot(tf.math.conj(X), matrix @ X, axes=2)
+            return tf.negative(
+                tf.math.real(tf.tensordot(tf.math.conj(X), matrix @ X, axes=2))
             )
 
     else:

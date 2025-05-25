@@ -48,12 +48,13 @@ class TensorflowBackend(Backend):
     _dtype: tf.DType
 
     def __init__(self, dtype=tf.float64):
-        assert dtype in {
+        if dtype not in {
             tf.float32,
             tf.float64,
             tf.complex64,
             tf.complex128,
-        }, f"dtype {dtype} is not supported"
+        }:
+            raise ValueError(f"dtype {dtype} is not supported")
         self._dtype = dtype
 
     @property
@@ -122,9 +123,6 @@ class TensorflowBackend(Backend):
 
     def _sanitize_gradients(self, tensors, grads):
         return list(map(self._sanitize_gradient, tensors, grads))
-
-    def prepare_function(self, function):
-        return function
 
     def generate_gradient_operator(self, function, num_arguments):
         def gradient(*args):
@@ -233,33 +231,26 @@ class TensorflowBackend(Backend):
         rtol: float = 1e-6,
         atol: float = 1e-6,
     ) -> None:
-        # if not isinstance(array_a, tf.Tensor):
-        #     array_a = tf.constant(array_a, dtype=self.dtype)
-        # if array_a.dtype != self.dtype:
-        #     array_a = tf.cast(array_a, self.dtype)
-        # if not isinstance(array_b, tf.Tensor):
-        #     array_b = tf.constant(array_b, dtype=self.dtype)
-        # if array_b.dtype != self.dtype:
-        #     array_b = tf.cast(array_b, self.dtype)
-        # tf.debugging.assert_near(array_a, array_b, rtol=rtol, atol=atol)
         def max_abs(x):
             return tf.math.reduce_max(tf.abs(x))
 
-        assert self.allclose(array_a, array_b, rtol, atol), (
-            "Arrays are not almost equal.\n"
-            f"Max absolute difference: {max_abs(array_a - array_b)}"
-            f" (atol={atol})\n"
-            "Max relative difference: "
-            f"{max_abs(array_a - array_b) / max_abs(array_b)}"
-            f" (rtol={rtol})"
-        )
+        if not self.allclose(array_a, array_b, rtol, atol):
+            raise ValueError(
+                "Arrays are not almost equal.\n"
+                f"Max absolute difference: {max_abs(array_a - array_b)}"
+                f" (atol={atol})\n"
+                "Max relative difference: "
+                f"{max_abs(array_a - array_b) / max_abs(array_b)}"
+                f" (rtol={rtol})"
+            )
 
     def assert_equal(
         self,
         array_a: tf.Tensor,
         array_b: tf.Tensor,
     ) -> None:
-        tf.debugging.assert_equal(array_a, array_b)
+        if not tf.reduce_all(tf.equal(array_a, array_b)):
+            raise ValueError(f"Arrays are not equal: {array_a} vs {array_b}")
 
     def concatenate(
         self, arrays: TupleOrList[tf.Tensor], axis: int = 0
@@ -395,10 +386,6 @@ class TensorflowBackend(Backend):
         self, array_a: tf.Tensor, array_b: tf.Tensor
     ) -> tf.Tensor:
         return tf.linalg.solve(array_a, array_b)
-        # if array_b.ndim < array_a.ndim:
-        #     array_b = tf.expand_dims(array_b, -1)
-        # sol = tf.linalg.solve(array_a, array_b)
-        # return sol[..., 0] if array_b.ndim < array_a.ndim else sol
 
     def linalg_solve_continuous_lyapunov(
         self, array_a: tf.Tensor, array_q: tf.Tensor
@@ -432,7 +419,8 @@ class TensorflowBackend(Backend):
         )
 
     def matvec(self, A: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
-        assert A.ndim >= 2
+        if A.ndim < 2:
+            raise ValueError("Tensor must have at least have 2 dimension")
         if x.ndim == A.ndim - 1:
             return self.squeeze(A @ tf.expand_dims(x, -1))
         return tf.matmul(A, x)
@@ -548,7 +536,6 @@ class TensorflowBackend(Backend):
         axis: Union[int, TupleOrList[int], None] = None,
         keepdims: bool = False,
     ) -> tf.Tensor:
-        # assert axis is None and not keepdims
         return tf.reduce_sum(array, axis=axis, keepdims=keepdims)
 
     @elementary_math_function

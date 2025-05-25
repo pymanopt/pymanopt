@@ -1,4 +1,6 @@
-from pymanopt.backends import Backend, DummyBackendSingleton
+from typing import Union
+
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold
 
 
@@ -40,11 +42,11 @@ class Positive(Manifold):
         *,
         k: int = 1,
         use_parallel_transport: bool = False,
-        backend: Backend = DummyBackendSingleton,
+        backend: Union[Backend, None] = None,
     ):
-        self._m = m
-        self._n = n
-        self._k = k
+        self.m = m
+        self.n = n
+        self.k = k
 
         if use_parallel_transport:
             self._transport = self._parallel_transport
@@ -84,9 +86,9 @@ class Positive(Manifold):
 
     def random_point(self):
         point = self.backend.exp(
-            self.backend.random_normal(size=(self._k, self._m, self._n))
+            self.backend.random_normal(size=(self.k, self.m, self.n))
         )
-        if self._k == 1:
+        if self.k == 1:
             return point[0]
         return point
 

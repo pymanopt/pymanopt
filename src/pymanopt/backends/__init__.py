@@ -1,10 +1,10 @@
 import importlib
 from typing import TYPE_CHECKING, Any, Callable
 
-from .backend import Backend, DummyBackendSingleton  # noqa: F401
+from .backend import Backend, DummyBackend  # noqa: F401
 
 
-__all__ = ["Backend", "DummyBackendSingleton"]
+__all__ = ["Backend", "DummyBackend"]
 
 
 def attach(

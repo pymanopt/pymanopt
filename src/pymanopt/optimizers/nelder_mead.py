@@ -1,4 +1,3 @@
-# flake8: noqa E231
 import time
 
 import numpy as np

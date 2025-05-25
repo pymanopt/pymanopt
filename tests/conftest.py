@@ -31,7 +31,7 @@ def initialize_test_state():
     tf.random.set_seed(seed)
 
 
-_REAL_BACKENDS = [
+REAL_BACKENDS = (
     NumpyBackend(np.float64),
     AutogradBackend(np.float64),
     PytorchBackend(torch.float64),
@@ -42,28 +42,28 @@ _REAL_BACKENDS = [
     PytorchBackend(torch.float32),
     JaxBackend(jnp.float32),
     TensorflowBackend(tf.float32),
-]
+)
 
-_COMPLEX_BACKENDS = [
+COMPLEX_BACKENDS = (
     NumpyBackend(np.complex128),
     AutogradBackend(np.complex128),
     PytorchBackend(torch.complex128),
     JaxBackend(jnp.complex128),
     TensorflowBackend(tf.complex128),
-]
+)
 
 
-@pytest.fixture(params=_REAL_BACKENDS)
+@pytest.fixture(params=REAL_BACKENDS)
 def real_backend(request) -> Backend:
     return request.param
 
 
-@pytest.fixture(params=_COMPLEX_BACKENDS)
+@pytest.fixture(params=COMPLEX_BACKENDS)
 def complex_backend(request) -> Backend:
     return request.param
 
 
-@pytest.fixture(params=_REAL_BACKENDS + _COMPLEX_BACKENDS)
+@pytest.fixture(params=REAL_BACKENDS + COMPLEX_BACKENDS)
 def any_backend(request) -> Backend:
     return request.param
 

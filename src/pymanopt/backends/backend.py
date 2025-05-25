@@ -15,7 +15,7 @@ import numpy as np
 import scipy.special
 
 
-__all__ = ["TupleOrList", "DTypePrecision", "Backend", "DummyBackendSingleton"]
+__all__ = ["TupleOrList", "DTypePrecision", "Backend", "DummyBackend"]
 
 T = TypeVar("T")
 TupleOrList = Union[list[T], tuple[T, ...]]
@@ -182,18 +182,6 @@ class Backend(ABC):
     ##############################################################################
 
     @abstractmethod
-    def prepare_function(self, function) -> Callable:
-        """Prepares a callable to be used with the backend.
-
-        Args:
-            function: A callable.
-
-        Returns:
-            A Python callable accepting and a ``numpy.ndarray`` and returning a
-            scalar.
-        """
-
-    @abstractmethod
     def generate_gradient_operator(self, function, num_arguments) -> Callable:
         """Creates a function to compute gradients of a function.
 
@@ -295,16 +283,6 @@ class Backend(ABC):
         atol: float = 1e-6,
     ) -> None:
         ...
-
-    # TODO: remove this method
-    def assert_almost_equal(self, array_a: array_t, array_b: array_t) -> None:
-        self.assert_allclose(array_a, array_b)
-
-    # TODO: remove this method
-    def assert_array_almost_equal(
-        self, array_a: array_t, array_b: array_t
-    ) -> None:
-        self.assert_allclose(array_a, array_b)
 
     @not_implemented
     def assert_equal(self, array_a: array_t, array_b: array_t) -> None:
@@ -716,14 +694,8 @@ class DummyBackend(Backend):
     def to_real_backend(self) -> "DummyBackend":
         return self
 
-    def prepare_function(self, function):
-        return super().prepare_function(function)
-
     def generate_gradient_operator(self, function, num_arguments):
         return super().generate_gradient_operator(function, num_arguments)
 
     def generate_hessian_operator(self, function, num_arguments):
         return super().generate_hessian_operator(function, num_arguments)
-
-
-DummyBackendSingleton = DummyBackend()

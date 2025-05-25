@@ -22,9 +22,14 @@ __all__ = [
 
 
 def manifold_factory(
-    *, point_layout: Union[int, Sequence[int]], backend: Backend
+    *,
+    point_layout: Union[int, Sequence[int]],
+    backend: Backend,
+    is_complex: bool = False,
 ):
     class CustomManifold(Manifold):
+        IS_COMPLEX = is_complex
+
         def __init__(self):
             super().__init__(
                 name="Test manifold",

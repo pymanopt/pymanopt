@@ -1,4 +1,3 @@
-# flake8: noqa E231
 import datetime
 import string
 
@@ -8,7 +7,7 @@ import pymanopt
 
 
 def setup(app):
-    def config_inited(app, config):
+    def config_inited(_, config):
         doc_version = config.doc_version
         if doc_version in ["latest", "stable"]:
             config.version = (
@@ -47,7 +46,7 @@ extensions = [
     "sphinxcontrib.katex",
 ]
 master_doc = "index"
-language = None
+language = "en"
 
 # Output options
 html_theme = "sphinx_rtd_theme"
@@ -154,5 +153,4 @@ katex_options = (
     + r'"\\operatorname{tr}"'
     + "}"
 )
-print(f"Defined KaTeX macros:\n{katex_options}")
 latex_elements = {"preamble": latex_macros}

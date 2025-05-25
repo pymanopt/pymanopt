@@ -1,4 +1,3 @@
-# import autograd.numpy as self.backend
 import pytest
 
 from pymanopt.manifolds import Symmetric

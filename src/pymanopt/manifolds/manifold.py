@@ -3,9 +3,7 @@ import functools
 import warnings
 from typing import Sequence, Union
 
-import numpy as np
-
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend, DummyBackend
 
 
 def raise_not_implemented_error(method):
@@ -57,12 +55,8 @@ class Manifold(metaclass=abc.ABCMeta):
         name: str,
         dimension: int,
         point_layout: Union[int, Sequence[int]] = 1,
-        backend: Backend = DummyBackendSingleton,  # noqa: B008
+        backend: Union[Backend, None] = None,
     ):
-        if not isinstance(dimension, (int, np.integer)):
-            raise TypeError(
-                f"Manifold dimension must be of type int, not {type(dimension)}"
-            )
         if dimension < 0:
             raise ValueError("Manifold dimension must be positive")
         if not isinstance(point_layout, (int, tuple, list)):
@@ -84,6 +78,8 @@ class Manifold(metaclass=abc.ABCMeta):
         self._name = name
         self._dimension = dimension
         self._point_layout = point_layout
+        if backend is None:
+            backend = DummyBackend()
         self.set_compatible_backend(backend)
 
     def __str__(self):
@@ -94,6 +90,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """The dimension of the manifold."""
         return self._dimension
 
+    # TODO(nkoep): Turn this into a regular attribute.
     @property
     def point_layout(self):
         """The number of elements a point on a manifold consists of.
@@ -107,15 +104,16 @@ class Manifold(metaclass=abc.ABCMeta):
         return self._point_layout
 
     IS_COMPLEX = False
-    """ Whether the manifold is complex-valued or not. """
+    """Whether the manifold is complex-valued or not."""
 
+    # TODO(nkoep): Turn this into a regular attribute.
     @property
     def backend(self) -> Backend:
         """The numerics backend used by the manifold."""
         return self._backend
 
     def has_dummy_backend(self) -> bool:
-        return self.backend == DummyBackendSingleton
+        return isinstance(self.backend, DummyBackend)
 
     def set_compatible_backend(self, other_backend: Backend):
         """Set the manifold's backend based on another backend.
@@ -124,16 +122,17 @@ class Manifold(metaclass=abc.ABCMeta):
         and dtype precision (single or double) and chooses real or complex
         based on the manifold type.
         """
-        self._backend = (
+        new_backend = (
             other_backend.to_complex_backend()
             if self.IS_COMPLEX
             else other_backend.to_real_backend()
         )
-        if self._backend != other_backend:
+        if new_backend != other_backend:
             warnings.warn(
                 f"Incompatible realness between manifold {self} and backend "
                 f"{other_backend}. Setting a compatible backend."
             )
+        self._backend = new_backend
 
     def is_backend_compatible(self, other_backend: Backend) -> bool:
         return (
@@ -388,7 +387,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @raise_not_implemented_error
-    def to_tangent_space(self, point, vector):
+    def to_tangent_space(self, point, vector) -> Backend.array_t:
         """Re-tangentialize a vector.
 
         This method guarantees that ``vector`` is indeed a tangent vector
@@ -403,6 +402,7 @@ class Manifold(metaclass=abc.ABCMeta):
         Returns:
             The tangent vector at ``point`` closest to ``vector``.
         """
+        ...
 
     def embedding(self, point, tangent_vector):
         """Convert tangent vector to ambient space representation.

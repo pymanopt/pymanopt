@@ -2,7 +2,6 @@ from numbers import Number
 from typing import Any, Literal, Optional, Union
 
 import numpy as np
-import numpy.testing as np_testing
 import packaging.version as pv
 import scipy
 import scipy.linalg
@@ -28,12 +27,13 @@ class NumpyBackend(Backend):
     _dtype: type
 
     def __init__(self, dtype: type = np.float64):
-        assert (
-            dtype == np.float32
-            or dtype == np.float64
-            or dtype == np.complex64
-            or dtype == np.complex128
-        ), f"dtype {dtype} is not supported"
+        if dtype not in {
+            np.float32,
+            np.float64,
+            np.complex64,
+            np.complex128,
+        }:
+            raise ValueError(f"dtype {dtype} is not supported")
         self._dtype = dtype
 
     @property
@@ -86,9 +86,6 @@ class NumpyBackend(Backend):
     ##############################################################################
     # Autodiff methods
     ##############################################################################
-
-    def prepare_function(self, function):
-        return function
 
     generate_gradient_operator = _raise_not_implemented_error
     generate_hessian_operator = _raise_not_implemented_error
@@ -151,16 +148,18 @@ class NumpyBackend(Backend):
         rtol: float = 1e-6,
         atol: float = 1e-6,
     ) -> None:
-        np_testing.assert_allclose(
-            array_a, array_b, rtol, atol, equal_nan=False
-        )
+        if not np.allclose(
+            array_a, array_b, rtol=rtol, atol=atol, equal_nan=False
+        ):
+            raise ValueError(f"Arrays are not close: {array_a} vs {array_b}")
 
     def assert_equal(
         self,
         array_a: np.ndarray,
         array_b: np.ndarray,
     ) -> None:
-        return np_testing.assert_equal(array_a, array_b)
+        if not np.array_equal(array_a, array_b):
+            raise ValueError(f"Arrays are not equal: {array_a} vs {array_b}")
 
     def concatenate(
         self, arrays: TupleOrList[np.ndarray], axis: int = 0

@@ -12,34 +12,28 @@ class Function:
     def __init__(
         self, *, function: Callable, manifold: Manifold, backend: Backend
     ):
-        if not callable(function):
-            raise TypeError(f"Object {function} is not callable")
-
         self._original_function = function
-        self._backend = backend
-        self._function = backend.prepare_function(function)
+        self._function = function
         self._num_arguments = manifold.num_values
 
         self._gradient = None
         self._hessian = None
 
-    def __str__(self):
-        return f"Function <{self._backend}>"
+        self.backend = backend
 
-    @property
-    def backend(self):
-        return self._backend
+    def __str__(self):
+        return f"Function <{self.backend}>"
 
     def get_gradient_operator(self):
         if self._gradient is None:
-            self._gradient = self._backend.generate_gradient_operator(
+            self._gradient = self.backend.generate_gradient_operator(
                 self._original_function, self._num_arguments
             )
         return self._gradient
 
     def get_hessian_operator(self):
         if self._hessian is None:
-            self._hessian = self._backend.generate_hessian_operator(
+            self._hessian = self.backend.generate_hessian_operator(
                 self._original_function, self._num_arguments
             )
         return self._hessian
@@ -65,18 +59,17 @@ def decorator_factory(
     def decorator(
         manifold: Manifold, dtype: Optional[Any] = None
     ) -> Callable[[Callable[..., Any]], Function]:
-        assert isinstance(manifold, Manifold)
-
         def inner(cost: Callable[..., Any]) -> Function:
             argspec = inspect.getfullargspec(cost)
-            assert (
+            if not (
                 _only_one_true(bool(argspec.args), bool(argspec.varargs))
                 and not argspec.varkw
                 and not argspec.kwonlyargs
-            ), (
-                "Decorated function must only accept positional arguments "
-                "or a variable-length argument like *x"
-            )
+            ):
+                raise TypeError(
+                    "Decorated function must only accept positional arguments "
+                    "or a variable-length argument like *x"
+                )
             backend_type = getattr(
                 import_module(
                     f"pymanopt.backends.{module}",

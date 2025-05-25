@@ -3,7 +3,7 @@ from typing import Sequence
 
 import numpy as np
 
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold
 from pymanopt.tools import ArraySequenceMixin, return_as_class_instance
 
@@ -81,10 +81,7 @@ class Product(Manifold):
         )
 
     def has_dummy_backend(self) -> bool:
-        return any(
-            manifold.backend == DummyBackendSingleton
-            for manifold in self.manifolds
-        )
+        return any(manifold.has_dummy_backend() for manifold in self.manifolds)
 
     def set_compatible_backend(self, other_backend: Backend):
         super().set_compatible_backend(other_backend)

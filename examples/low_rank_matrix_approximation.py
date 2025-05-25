@@ -9,8 +9,6 @@ from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.optimizers import ConjugateGradient
 
 
-np.random.seed(127)
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -115,7 +113,7 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
         print()
         print(low_rank_solution)
         print()
-        print(f"Rank-{rank} approximation: ")
+        print(f"Rank-{rank} approximation:")
         print()
         print(low_rank_approximation)
         print()

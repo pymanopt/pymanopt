@@ -1,8 +1,8 @@
 import math
 import warnings
+from typing import Union
 
-from pymanopt.backends import Backend, DummyBackendSingleton
-from pymanopt.backends.numpy_backend import NumpyBackend
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools import extend_docstring
 
@@ -10,14 +10,14 @@ from pymanopt.tools import extend_docstring
 class _SphereBase(RiemannianSubmanifold):
     def __init__(
         self,
-        *shape,
+        *shape: int,
         name,
         dimension,
-        backend: Backend = DummyBackendSingleton,
+        backend: Union[Backend, None] = None,
     ):
         if len(shape) == 0:
             raise TypeError("Need at least one dimension.")
-        self._shape = shape
+        self.shape = shape
         super().__init__(name, dimension, backend=backend)
 
     @property
@@ -63,11 +63,11 @@ class _SphereBase(RiemannianSubmanifold):
         return factor * vector
 
     def random_point(self):
-        point = self.backend.random_normal(size=self._shape)
+        point = self.backend.random_normal(size=self.shape)
         return self._normalize(point)
 
     def random_tangent_vector(self, point):
-        vector = self.backend.random_normal(size=self._shape)
+        vector = self.backend.random_normal(size=self.shape)
         return self._normalize(self.projection(point, vector))
 
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -77,7 +77,7 @@ class _SphereBase(RiemannianSubmanifold):
         return self._normalize(point_a + point_b)
 
     def zero_vector(self, point):
-        return self.backend.zeros(self._shape)
+        return self.backend.zeros(self.shape)
 
     def _normalize(self, array):
         return array / self.backend.linalg_norm(array)
@@ -106,11 +106,7 @@ class Sphere(_SphereBase):
         shape: The shape of tensors.
     """
 
-    def __init__(
-        self,
-        *shape: int,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, *shape: int, backend: Union[Backend, None] = None):
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
         if len(shape) == 1:
@@ -130,7 +126,8 @@ class Sphere(_SphereBase):
 class _SphereSubspaceIntersectionManifold(_SphereBase):
     def __init__(self, name, dimension, matrix, subspace_projector, backend):
         m, n = subspace_projector.shape
-        assert m == n, "projection matrix is not square"
+        if m != n:
+            raise ValueError("Projection matrix is not square")
         if dimension == 0:
             warnings.warn(
                 "Intersected subspace is 1-dimensional. The manifold "
@@ -186,18 +183,10 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     def _compute_subspace_projector(bk: Backend, matrix: Backend.array_t):
         matrix = bk.array(matrix)
         q, _ = bk.linalg_qr(matrix)
-        _subspace_projector = q @ q.T
-        return matrix, _subspace_projector
+        subspace_projector = q @ q.T
+        return matrix, subspace_projector
 
-    def __init__(
-        self,
-        matrix,
-        backend: Backend = NumpyBackend(),  # noqa: B008
-    ):
-        if backend == DummyBackendSingleton:
-            raise ValueError(
-                f"A backend must always be specified for class {__class__.__name__}"
-            )
+    def __init__(self, matrix, backend: Backend):
         matrix, subspace_projector = self._compute_subspace_projector(
             backend, matrix
         )
@@ -236,18 +225,10 @@ class SphereSubspaceComplementIntersection(
     def _compute_subspace_projector(bk: Backend, matrix: Backend.array_t):
         matrix = bk.array(matrix)
         q, _ = bk.linalg_qr(matrix)
-        _subspace_projector = bk.eye(matrix.shape[0]) - q @ q.T
-        return matrix, _subspace_projector
+        subspace_projector = bk.eye(matrix.shape[0]) - q @ q.T
+        return matrix, subspace_projector
 
-    def __init__(
-        self,
-        matrix,
-        backend: Backend = NumpyBackend(),  # noqa: B008
-    ):
-        if backend == DummyBackendSingleton:
-            raise ValueError(
-                f"A backend must always be specified for class {__class__.__name__}"
-            )
+    def __init__(self, matrix, backend: Backend):
         matrix, subspace_projector = self._compute_subspace_projector(
             backend, matrix
         )

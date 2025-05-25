@@ -1,4 +1,6 @@
-from pymanopt.backends import Backend, DummyBackendSingleton
+from typing import Union
+
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import (
     RiemannianSubmanifold,
     raise_not_implemented_error,
@@ -12,23 +14,15 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         n: int,
         k: int,
         dimension: int,
-        backend: Backend = DummyBackendSingleton,
+        backend: Union[Backend, None] = None,
     ):
-        self._k = k
-        self._n = n
+        self.k = k
+        self.n = n
         super().__init__(name, dimension, backend=backend)
 
     @property
-    def k(self) -> int:
-        return self._k
-
-    @property
-    def n(self) -> int:
-        return self._n
-
-    @property
     def typical_dist(self):
-        return self.backend.sqrt(self.dim)
+        return self.dim**0.5
 
     def dist(self, point_a, point_b):
         bk = self.backend
@@ -135,11 +129,7 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
     """
 
     def __init__(
-        self,
-        n: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
+        self, n: int, *, k: int = 1, backend: Union[Backend, None] = None
     ):
         if k == 1:
             name = f"Manifold of symmetric positive definite {n}x{n} matrices"
@@ -170,11 +160,7 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
     IS_COMPLEX = True
 
     def __init__(
-        self,
-        n: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
+        self, n: int, *, k: int = 1, backend: Union[Backend, None] = None
     ):
         if k == 1:
             name = f"Manifold of Hermitian positive definite {n}x{n} matrices"
@@ -202,11 +188,7 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
     IS_COMPLEX = True
 
     def __init__(
-        self,
-        n: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
+        self, n: int, *, k: int = 1, backend: Union[Backend, None] = None
     ):
         if k == 1:
             name = f"Manifold of special Hermitian positive definite {n}x{n} matrices"
@@ -219,8 +201,8 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         super().__init__(name, n, k, dimension, backend=backend)
 
     def random_point(self):
-        n = self._n
-        k = self._k
+        n = self.n
+        k = self.k
 
         # Generate point on the HPD manifold.
         point = super().random_point()
@@ -281,8 +263,8 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         return e / det
 
     def retraction(self, point, tangent_vector):
-        n = self._n
-        k = self._k
+        n = self.n
+        k = self.k
 
         # Compute retraction on HPD.
         r = super().retraction(point, tangent_vector)
