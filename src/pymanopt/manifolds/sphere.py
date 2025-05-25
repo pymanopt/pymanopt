@@ -183,8 +183,8 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
     def _compute_subspace_projector(bk: Backend, matrix: Backend.array_t):
         matrix = bk.array(matrix)
         q, _ = bk.linalg_qr(matrix)
-        _subspace_projector = q @ q.T
-        return matrix, _subspace_projector
+        subspace_projector = q @ q.T
+        return matrix, subspace_projector
 
     def __init__(self, matrix, backend: Backend):
         matrix, subspace_projector = self._compute_subspace_projector(
@@ -225,8 +225,8 @@ class SphereSubspaceComplementIntersection(
     def _compute_subspace_projector(bk: Backend, matrix: Backend.array_t):
         matrix = bk.array(matrix)
         q, _ = bk.linalg_qr(matrix)
-        _subspace_projector = bk.eye(matrix.shape[0]) - q @ q.T
-        return matrix, _subspace_projector
+        subspace_projector = bk.eye(matrix.shape[0]) - q @ q.T
+        return matrix, subspace_projector
 
     def __init__(self, matrix, backend: Backend):
         matrix, subspace_projector = self._compute_subspace_projector(

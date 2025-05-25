@@ -90,6 +90,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """The dimension of the manifold."""
         return self._dimension
 
+    # TODO(nkoep): Turn this into a regular attribute.
     @property
     def point_layout(self):
         """The number of elements a point on a manifold consists of.
@@ -105,6 +106,7 @@ class Manifold(metaclass=abc.ABCMeta):
     IS_COMPLEX = False
     """Whether the manifold is complex-valued or not."""
 
+    # TODO(nkoep): Turn this into a regular attribute.
     @property
     def backend(self) -> Backend:
         """The numerics backend used by the manifold."""

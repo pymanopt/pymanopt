@@ -17,8 +17,8 @@ class _UnitaryBase(RiemannianSubmanifold):
         retraction: Literal["qr", "polar"],
         backend: Union[Backend, None] = None,
     ):
-        self.k = k
         self.n = n
+        self.k = k
         super().__init__(name, dimension, backend=backend)
 
         try:

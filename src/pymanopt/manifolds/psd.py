@@ -9,12 +9,12 @@ class _PSDFixedRank(Manifold):
         self, n, k, name, dimension, backend: Union[Backend, None] = None
     ):
         self.n = n
-        self.n = k
+        self.k = k
         super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return 10 + self.n
+        return 10 + self.k
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.real(
@@ -62,7 +62,7 @@ class _PSDFixedRank(Manifold):
         return point_b @ u @ vh - point_a
 
     def random_point(self):
-        return self.backend.random_normal(size=(self.n, self.n))
+        return self.backend.random_normal(size=(self.n, self.k))
 
     def random_tangent_vector(self, point):
         random_vector = self.random_point()
@@ -76,7 +76,7 @@ class _PSDFixedRank(Manifold):
         return array / self.backend.linalg_norm(array)
 
     def zero_vector(self, point):
-        return self.backend.zeros((self.n, self.n))
+        return self.backend.zeros((self.n, self.k))
 
 
 class PSDFixedRank(_PSDFixedRank):
@@ -168,8 +168,8 @@ class PSDFixedRankComplex(_PSDFixedRank):
 
     def random_point(self):
         return self.backend.random_normal(
-            size=(self.n, self.n)
-        ) + 1j * self.backend.random_normal(size=(self.n, self.n))
+            size=(self.n, self.k)
+        ) + 1j * self.backend.random_normal(size=(self.n, self.k))
 
 
 class Elliptope(Manifold, RetrAsExpMixin):
