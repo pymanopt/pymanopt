@@ -79,6 +79,11 @@ exclude = ["tests*"]
 
 [tool.black]
 include = '\.py$'
+extend-exclude = '''
+/(
+    src/pymanopt/_version.py
+)/
+'''
 line-length = 79
 
 [tool.isort]
@@ -89,6 +94,7 @@ line_length = 79
 multi_line_output = 3
 profile = "pycharm"
 use_parentheses = true
+extend_skip = ["src/pymanopt/_version.py"]
 
 [tool.flake8]
 application_import_names = "pymanopt"
