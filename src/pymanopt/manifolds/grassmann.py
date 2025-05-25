@@ -14,26 +14,14 @@ class _GrassmannBase(Manifold):
         dimension: int,
         backend: Union[Backend, None] = None,
     ):
-        self._n = n
-        self._p = p
-        self._k = k
+        self.n = n
+        self.p = p
+        self.k = k
         super().__init__(name, dimension, backend=backend)
 
     @property
-    def n(self) -> int:
-        return self._n
-
-    @property
-    def p(self) -> int:
-        return self._p
-
-    @property
-    def k(self) -> int:
-        return self._k
-
-    @property
     def typical_dist(self):
-        return self.backend.sqrt(self.p * self.k)
+        return (self.p * self.k) ** 0.5
 
     def norm(self, point, tangent_vector):
         return self.backend.linalg_norm(tangent_vector)

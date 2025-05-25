@@ -16,21 +16,13 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         dimension: int,
         backend: Union[Backend, None] = None,
     ):
-        self._k = k
-        self._n = n
+        self.k = k
+        self.n = n
         super().__init__(name, dimension, backend=backend)
 
     @property
-    def k(self) -> int:
-        return self._k
-
-    @property
-    def n(self) -> int:
-        return self._n
-
-    @property
     def typical_dist(self):
-        return self.backend.sqrt(self.dim)
+        return self.dim**0.5
 
     def dist(self, point_a, point_b):
         bk = self.backend
@@ -209,8 +201,8 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         super().__init__(name, n, k, dimension, backend=backend)
 
     def random_point(self):
-        n = self._n
-        k = self._k
+        n = self.n
+        k = self.k
 
         # Generate point on the HPD manifold.
         point = super().random_point()
@@ -271,8 +263,8 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         return e / det
 
     def retraction(self, point, tangent_vector):
-        n = self._n
-        k = self._k
+        n = self.n
+        k = self.k
 
         # Compute retraction on HPD.
         r = super().retraction(point, tangent_vector)

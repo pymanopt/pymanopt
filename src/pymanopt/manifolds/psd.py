@@ -8,13 +8,13 @@ class _PSDFixedRank(Manifold):
     def __init__(
         self, n, k, name, dimension, backend: Union[Backend, None] = None
     ):
-        self._n = n
-        self._k = k
+        self.n = n
+        self.n = k
         super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return 10 + self._k
+        return 10 + self.n
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.real(
@@ -62,7 +62,7 @@ class _PSDFixedRank(Manifold):
         return point_b @ u @ vh - point_a
 
     def random_point(self):
-        return self.backend.random_normal(size=(self._n, self._k))
+        return self.backend.random_normal(size=(self.n, self.n))
 
     def random_tangent_vector(self, point):
         random_vector = self.random_point()
@@ -76,7 +76,7 @@ class _PSDFixedRank(Manifold):
         return array / self.backend.linalg_norm(array)
 
     def zero_vector(self, point):
-        return self.backend.zeros((self._n, self._k))
+        return self.backend.zeros((self.n, self.n))
 
 
 class PSDFixedRank(_PSDFixedRank):
@@ -168,8 +168,8 @@ class PSDFixedRankComplex(_PSDFixedRank):
 
     def random_point(self):
         return self.backend.random_normal(
-            size=(self._n, self._k)
-        ) + 1j * self.backend.random_normal(size=(self._n, self._k))
+            size=(self.n, self.n)
+        ) + 1j * self.backend.random_normal(size=(self.n, self.n))
 
 
 class Elliptope(Manifold, RetrAsExpMixin):
@@ -216,8 +216,8 @@ class Elliptope(Manifold, RetrAsExpMixin):
     """
 
     def __init__(self, n, k, backend: Union[Backend, None] = None):
-        self._n = n
-        self._k = k
+        self.n = n
+        self.k = k
 
         name = (
             f"Quotient manifold of {n}x{n} psd matrices of rank {k} "
@@ -228,7 +228,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
 
     @property
     def typical_dist(self):
-        return 10 * self._k
+        return 10 * self.k
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.tensordot(
@@ -273,7 +273,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
 
     def random_point(self):
         return self._normalize_rows(
-            self.backend.random_normal(size=(self._n, self._k))
+            self.backend.random_normal(size=(self.n, self.k))
         )
 
     def random_tangent_vector(self, point):
@@ -295,4 +295,4 @@ class Elliptope(Manifold, RetrAsExpMixin):
         return vector - point * inner_products[:, bk.newaxis]
 
     def zero_vector(self, point):
-        return self.backend.zeros((self._n, self._k))
+        return self.backend.zeros((self.n, self.k))

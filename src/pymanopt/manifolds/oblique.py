@@ -19,15 +19,15 @@ class Oblique(RiemannianSubmanifold):
     """
 
     def __init__(self, m: int, n: int, backend: Union[Backend, None] = None):
-        self._m = m
-        self._n = n
+        self.m = m
+        self.n = n
         name = f"Oblique manifold OB({m}, {n})"
         dimension = (m - 1) * n
         super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return self.backend.pi * self.backend.sqrt(self._n)
+        return self.backend.pi * self.backend.sqrt(self.n)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.tensordot(
@@ -86,7 +86,7 @@ class Oblique(RiemannianSubmanifold):
 
     def random_point(self):
         return self._normalize_columns(
-            self.backend.random_normal(size=(self._m, self._n))
+            self.backend.random_normal(size=(self.m, self.n))
         )
 
     def random_tangent_vector(self, point):
@@ -101,7 +101,7 @@ class Oblique(RiemannianSubmanifold):
         return self._normalize_columns(point_a + point_b)
 
     def zero_vector(self, point):
-        return self.backend.zeros((self._m, self._n))
+        return self.backend.zeros((self.m, self.n))
 
     def _normalize_columns(self, array):
         return (

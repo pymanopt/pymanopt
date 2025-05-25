@@ -9,11 +9,15 @@ from pymanopt.tools import extend_docstring
 
 class _SphereBase(RiemannianSubmanifold):
     def __init__(
-        self, *shape, name, dimension, backend: Union[Backend, None] = None
+        self,
+        *shape: int,
+        name,
+        dimension,
+        backend: Union[Backend, None] = None,
     ):
         if len(shape) == 0:
             raise TypeError("Need at least one dimension.")
-        self._shape = shape
+        self.shape = shape
         super().__init__(name, dimension, backend=backend)
 
     @property
@@ -59,11 +63,11 @@ class _SphereBase(RiemannianSubmanifold):
         return factor * vector
 
     def random_point(self):
-        point = self.backend.random_normal(size=self._shape)
+        point = self.backend.random_normal(size=self.shape)
         return self._normalize(point)
 
     def random_tangent_vector(self, point):
-        vector = self.backend.random_normal(size=self._shape)
+        vector = self.backend.random_normal(size=self.shape)
         return self._normalize(self.projection(point, vector))
 
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -73,7 +77,7 @@ class _SphereBase(RiemannianSubmanifold):
         return self._normalize(point_a + point_b)
 
     def zero_vector(self, point):
-        return self.backend.zeros(self._shape)
+        return self.backend.zeros(self.shape)
 
     def _normalize(self, array):
         return array / self.backend.linalg_norm(array)

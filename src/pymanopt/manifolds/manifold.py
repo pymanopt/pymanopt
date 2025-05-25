@@ -385,7 +385,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @raise_not_implemented_error
-    def to_tangent_space(self, point, vector):
+    def to_tangent_space(self, point, vector) -> Backend.array_t:
         """Re-tangentialize a vector.
 
         This method guarantees that ``vector`` is indeed a tangent vector
@@ -400,6 +400,7 @@ class Manifold(metaclass=abc.ABCMeta):
         Returns:
             The tangent vector at ``point`` closest to ``vector``.
         """
+        ...
 
     def embedding(self, point, tangent_vector):
         """Convert tangent vector to ambient space representation.

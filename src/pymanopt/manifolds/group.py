@@ -8,9 +8,6 @@ from pymanopt.tools import extend_docstring
 
 
 class _UnitaryBase(RiemannianSubmanifold):
-    _n: int
-    _k: int
-
     def __init__(
         self,
         name: str,
@@ -20,22 +17,14 @@ class _UnitaryBase(RiemannianSubmanifold):
         retraction: Literal["qr", "polar"],
         backend: Union[Backend, None] = None,
     ):
-        self._k = k
-        self._n = n
+        self.k = k
+        self.n = n
         super().__init__(name, dimension, backend=backend)
 
         try:
             self._retraction = getattr(self, f"_retraction_{retraction}")
         except AttributeError:
             raise ValueError(f"Invalid retraction type '{retraction}'")
-
-    @property
-    def k(self) -> int:
-        return self._k
-
-    @property
-    def n(self) -> int:
-        return self._n
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.tensordot(
@@ -49,7 +38,7 @@ class _UnitaryBase(RiemannianSubmanifold):
 
     @property
     def typical_dist(self):
-        return self.backend.pi * self.backend.sqrt(self.n * self.k)
+        return self.backend.pi * (self.n * self.k) ** 0.5
 
     def dist(self, point_a, point_b):
         return self.norm(point_a, self.log(point_a, point_b))
@@ -261,7 +250,7 @@ class UnitaryGroup(_UnitaryBase):
 
     def random_tangent_vector(self, point):
         bk = self.backend
-        n, k = self._n, self._k
+        n, k = self.n, self.k
         vector = bk.skewh(
             bk.random_normal(size=(n, n) if k == 1 else (k, n, n))
         )

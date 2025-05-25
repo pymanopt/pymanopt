@@ -47,9 +47,9 @@ class Stiefel(RiemannianSubmanifold):
         retraction: str = "qr",
         backend: Union[Backend, None] = None,
     ):
-        self._n = n
-        self._p = p
-        self._k = k
+        self.n = n
+        self.p = p
+        self.k = k
 
         # Check that n is greater than or equal to p
         if n < p or p < 1:
@@ -73,20 +73,8 @@ class Stiefel(RiemannianSubmanifold):
             raise ValueError(f"Invalid retraction type '{retraction}'")
 
     @property
-    def n(self) -> int:
-        return self._n
-
-    @property
-    def p(self) -> int:
-        return self._p
-
-    @property
-    def k(self) -> int:
-        return self._k
-
-    @property
     def typical_dist(self):
-        return self.backend.sqrt(self._p * self._k)
+        return (self.p * self.k) ** 0.5
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.tensordot(
@@ -126,9 +114,9 @@ class Stiefel(RiemannianSubmanifold):
 
     def random_point(self):
         point, _ = self.backend.linalg_qr(
-            self.backend.random_normal(size=(self._k, self._n, self._p))
+            self.backend.random_normal(size=(self.k, self.n, self.p))
         )
-        if self._k == 1:
+        if self.k == 1:
             return point[0]
         return point
 
@@ -162,7 +150,6 @@ class Stiefel(RiemannianSubmanifold):
             )
         )[..., : self.p]
         c = bk.linalg_expm(-pt_tv)
-        # breakpoint()
         return a @ (b @ c)
 
     def zero_vector(self, point):
