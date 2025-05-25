@@ -1,6 +1,6 @@
 from typing import NamedTuple
 
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.manifolds.stiefel import Stiefel
 from pymanopt.tools import ArraySequenceMixin, return_as_class_instance
@@ -104,13 +104,7 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         * The second-order retraction follows results presented in [AM2012]_.
     """
 
-    def __init__(
-        self,
-        m: int,
-        n: int,
-        k: int,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, m: int, n: int, k: int, backend: Backend | None = None):
         self._m = m
         self._n = n
         self._k = k

@@ -1,16 +1,9 @@
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
 
 
 class _PSDFixedRank(Manifold):
-    def __init__(
-        self,
-        n,
-        k,
-        name,
-        dimension,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, n, k, name, dimension, backend: Backend | None = None):
         self._n = n
         self._k = k
         super().__init__(name, dimension, backend=backend)
@@ -120,12 +113,7 @@ class PSDFixedRank(_PSDFixedRank):
         in [JBA+2010]_.
     """
 
-    def __init__(
-        self,
-        n: int,
-        k: int,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, n: int, k: int, backend: Backend | None = None):
         name = f"Quotient manifold of {n}x{n} psd matrices of rank {k}"
         dimension = int(k * n - k * (k - 1) / 2)
         super().__init__(n, k, name, dimension, backend=backend)
@@ -169,7 +157,7 @@ class PSDFixedRankComplex(_PSDFixedRank):
 
     IS_COMPLEX = True
 
-    def __init__(self, n, k, backend: Backend = DummyBackendSingleton):
+    def __init__(self, n, k, backend: Backend | None = None):
         name = f"Quotient manifold of Hermitian {n}x{n} matrices of rank {k}"
         dimension = 2 * k * n - k * k
         super().__init__(n, k, name, dimension, backend=backend)
@@ -223,7 +211,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         The geometry is taken from [JBA+2010]_.
     """
 
-    def __init__(self, n, k, backend: Backend = DummyBackendSingleton):
+    def __init__(self, n, k, backend: Backend | None = None):
         self._n = n
         self._k = k
 

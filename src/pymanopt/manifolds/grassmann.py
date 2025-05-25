@@ -1,4 +1,4 @@
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold
 
 
@@ -10,7 +10,7 @@ class _GrassmannBase(Manifold):
         p: int,
         k: int,
         dimension: int,
-        backend: Backend = DummyBackendSingleton,
+        backend: Backend | None = None,
     ):
         self._n = n
         self._p = p
@@ -76,12 +76,7 @@ class Grassmann(_GrassmannBase):
     """
 
     def __init__(
-        self,
-        n: int,
-        p: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
+        self, n: int, p: int, *, k: int = 1, backend: Backend | None = None
     ):
         if n < p or p < 1:
             raise ValueError(
@@ -195,12 +190,7 @@ class ComplexGrassmann(_GrassmannBase):
     IS_COMPLEX = True
 
     def __init__(
-        self,
-        n: int,
-        p: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
+        self, n: int, p: int, *, k: int = 1, backend: Backend | None = None
     ):
         if n < p or p < 1:
             raise ValueError(

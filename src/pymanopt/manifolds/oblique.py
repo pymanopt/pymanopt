@@ -1,4 +1,4 @@
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
@@ -16,12 +16,7 @@ class Oblique(RiemannianSubmanifold):
         n: The number of columns of each matrix.
     """
 
-    def __init__(
-        self,
-        m: int,
-        n: int,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, m: int, n: int, backend: Backend | None = None):
         self._m = m
         self._n = n
         name = f"Oblique manifold OB({m}, {n})"

@@ -1,4 +1,4 @@
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold
 
 
@@ -34,13 +34,7 @@ class PoincareBall(Manifold):
         k: The number of elements in the product of Poincare balls.
     """
 
-    def __init__(
-        self,
-        n: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, n: int, *, k: int = 1, backend: Backend | None = None):
         self._n = n
         self._k = k
 

@@ -1,4 +1,4 @@
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import (
     RiemannianSubmanifold,
     raise_not_implemented_error,
@@ -12,7 +12,7 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
         n: int,
         k: int,
         dimension: int,
-        backend: Backend = DummyBackendSingleton,
+        backend: Backend | None = None,
     ):
         self._k = k
         self._n = n
@@ -134,13 +134,7 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
         The second-order retraction is taken from [JVV2012]_.
     """
 
-    def __init__(
-        self,
-        n: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, n: int, *, k: int = 1, backend: Backend | None = None):
         if k == 1:
             name = f"Manifold of symmetric positive definite {n}x{n} matrices"
         else:
@@ -169,13 +163,7 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
 
     IS_COMPLEX = True
 
-    def __init__(
-        self,
-        n: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, n: int, *, k: int = 1, backend: Backend | None = None):
         if k == 1:
             name = f"Manifold of Hermitian positive definite {n}x{n} matrices"
         else:
@@ -201,13 +189,7 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
 
     IS_COMPLEX = True
 
-    def __init__(
-        self,
-        n: int,
-        *,
-        k: int = 1,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, n: int, *, k: int = 1, backend: Backend | None = None):
         if k == 1:
             name = f"Manifold of special Hermitian positive definite {n}x{n} matrices"
         else:

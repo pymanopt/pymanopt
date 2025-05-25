@@ -15,7 +15,7 @@ import numpy as np
 import scipy.special
 
 
-__all__ = ["TupleOrList", "DTypePrecision", "Backend", "DummyBackendSingleton"]
+__all__ = ["TupleOrList", "DTypePrecision", "Backend", "DummyBackend"]
 
 T = TypeVar("T")
 TupleOrList = Union[list[T], tuple[T, ...]]
@@ -699,6 +699,3 @@ class DummyBackend(Backend):
 
     def generate_hessian_operator(self, function, num_arguments):
         return super().generate_hessian_operator(function, num_arguments)
-
-
-DummyBackendSingleton = DummyBackend()

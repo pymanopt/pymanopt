@@ -2,17 +2,13 @@ import math
 
 import numpy as np
 
-from pymanopt.backends import Backend, DummyBackendSingleton
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
 class _Euclidean(RiemannianSubmanifold):
     def __init__(
-        self,
-        name,
-        dimension,
-        *shape,
-        backend: Backend = DummyBackendSingleton,
+        self, name, dimension, *shape, backend: Backend | None = None
     ):
         self._shape = shape
         super().__init__(name, dimension, backend=backend)
@@ -89,11 +85,7 @@ class Euclidean(_Euclidean):
         corresponding to the usual tensor dot product.
     """
 
-    def __init__(
-        self,
-        *shape: int,
-        backend: Backend = DummyBackendSingleton,
-    ):
+    def __init__(self, *shape: int, backend: Backend | None = None):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
@@ -126,7 +118,7 @@ class ComplexEuclidean(_Euclidean):
 
     IS_COMPLEX = True
 
-    def __init__(self, *shape, backend: Backend = DummyBackendSingleton):
+    def __init__(self, *shape, backend: Backend | None = None):
         if len(shape) == 0:
             raise TypeError("Need shape parameters")
         if len(shape) == 1:
@@ -165,7 +157,7 @@ class Symmetric(_Euclidean):
         self,
         n: int,
         k: int = 1,
-        backend: Backend = DummyBackendSingleton,
+        backend: Backend | None = None,
     ):
         if k == 1:
             shape = (n, n)
@@ -210,7 +202,7 @@ class SkewSymmetric(_Euclidean):
         ``n x n`` matrices represented as arrays of shape ``(k, n, n)``.
     """
 
-    def __init__(self, n, k=1, backend: Backend = DummyBackendSingleton):
+    def __init__(self, n, k=1, backend: Backend | None = None):
         if k == 1:
             shape = (n, n)
             name = f"Manifold of {n}x{n} skew-symmetric matrices"
