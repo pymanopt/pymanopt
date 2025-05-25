@@ -1,5 +1,6 @@
 import math
 import warnings
+from typing import Union
 
 from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
@@ -8,7 +9,7 @@ from pymanopt.tools import extend_docstring
 
 class _SphereBase(RiemannianSubmanifold):
     def __init__(
-        self, *shape, name, dimension, backend: Backend | None = None
+        self, *shape, name, dimension, backend: Union[Backend, None] = None
     ):
         if len(shape) == 0:
             raise TypeError("Need at least one dimension.")
@@ -101,7 +102,7 @@ class Sphere(_SphereBase):
         shape: The shape of tensors.
     """
 
-    def __init__(self, *shape: int, backend: Backend | None = None):
+    def __init__(self, *shape: int, backend: Union[Backend, None] = None):
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
         if len(shape) == 1:

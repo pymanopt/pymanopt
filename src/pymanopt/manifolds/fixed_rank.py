@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
@@ -104,7 +104,9 @@ class FixedRankEmbedded(RiemannianSubmanifold):
         * The second-order retraction follows results presented in [AM2012]_.
     """
 
-    def __init__(self, m: int, n: int, k: int, backend: Backend | None = None):
+    def __init__(
+        self, m: int, n: int, k: int, backend: Union[Backend, None] = None
+    ):
         self._m = m
         self._n = n
         self._k = k

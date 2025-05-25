@@ -1,3 +1,5 @@
+from typing import Union
+
 from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
@@ -43,7 +45,7 @@ class Stiefel(RiemannianSubmanifold):
         *,
         k: int = 1,
         retraction: str = "qr",
-        backend: Backend | None = None,
+        backend: Union[Backend, None] = None,
     ):
         self._n = n
         self._p = p

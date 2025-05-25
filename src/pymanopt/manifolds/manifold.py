@@ -55,7 +55,7 @@ class Manifold(metaclass=abc.ABCMeta):
         name: str,
         dimension: int,
         point_layout: Union[int, Sequence[int]] = 1,
-        backend: Backend | None = None,
+        backend: Union[Backend, None] = None,
     ):
         if dimension < 0:
             raise ValueError("Manifold dimension must be positive")
