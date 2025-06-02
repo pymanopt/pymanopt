@@ -131,9 +131,11 @@ class Optimizer(metaclass=abc.ABCMeta):
                 "max_cost_evaluations": self._max_cost_evaluations,
             },
             "optimizer_parameters": optimizer_parameters,
-            "iterations": collections.defaultdict(list)
-            if self._log_verbosity >= 1
-            else None,
+            "iterations": (
+                collections.defaultdict(list)
+                if self._log_verbosity >= 1
+                else None
+            ),
         }
 
     def _add_log_entry(self, *, iteration, point, cost, **kwargs):

@@ -10,9 +10,9 @@ def setup(app):
     def config_inited(app, config):
         doc_version = config.doc_version
         if doc_version in ["latest", "stable"]:
-            config.version = (
-                config.release
-            ) = f"{doc_version} ({config.version})"
+            config.version = config.release = (
+                f"{doc_version} ({config.version})"
+            )
         config.html_context["doc_version"] = doc_version
         config.html_context["doc_versions"] = (
             config.doc_versions.split(",") or []
