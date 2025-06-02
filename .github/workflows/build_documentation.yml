@@ -48,6 +48,7 @@ jobs:
       - name: Checkout target
         id: checkout
         run: |
+          echo "Checking out version: ${{ matrix.version }}"
           if ${{ matrix.version == 'latest' }}; then
             sha=$(git rev-parse --short ${{ github.sha }})
             git checkout ${{ github.sha }}
