@@ -81,12 +81,6 @@ docs = [
   "sphinx_rtd_theme>=1.3.0",
   "sphinxcontrib-katex>=0.13.18",
 ]
-ci = [
-  "build>=1.2.0",
-  "pip>=24.0.0",
-  "setuptools>=80.0.0",
-  "wheel>=0.40.0",
-]
 all = [
   "pymanopt[backends,dev]",
 ]
