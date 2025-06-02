@@ -1,5 +1,5 @@
 [build-system]
-requires = ["pip==22.3.1", "setuptools>=66.1.0", "setuptools-scm[toml]>=6.2"]
+requires = ["pip", "setuptools", "setuptools-scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -60,32 +60,32 @@ backends = [
   "pymanopt[autograd,jax,tensorflow,torch]",
 ]
 dev = [
-  "black[jupyter]==22.3.0",
-  "flake8==5.0.4",
-  "flake8-bugbear==22.12.6",
-  "flake8-docstrings==1.6.0",
-  "flake8-import-order==0.18.2",
-  "flake8-pyproject==1.2.2",
-  "isort==5.11.5",
+  "black[jupyter]",
+  "flake8",
+  "flake8-bugbear",
+  "flake8-docstrings",
+  "flake8-import-order",
+  "flake8-pyproject",
+  "isort",
   "matplotlib",
   "pre-commit",
-  "pytest==7.2.0",
-  "pytest-cov==4.0.0",
+  "pytest",
+  "pytest-cov",
 ]
 docs = [
-  "docutils==0.16",
-  "ipykernel==6.4.2",
-  "myst-parser==0.16.1",
-  "nbsphinx==0.8.7",
-  "sphinx==4.2.0",
-  "sphinx_rtd_theme==1.0.0",
-  "sphinxcontrib-katex==0.8.6",
+  "docutils",
+  "ipykernel",
+  "myst-parser",
+  "nbsphinx",
+  "sphinx",
+  "sphinx_rtd_theme",
+  "sphinxcontrib-katex",
 ]
 ci = [
-  "build==0.8.0",
-  "pip==22.3.1",
-  "setuptools==66.1.0",
-  "wheel==0.38.4",
+  "build",
+  "pip",
+  "setuptools",
+  "wheel",
 ]
 all = [
   "pymanopt[backends,dev]",
@@ -102,13 +102,12 @@ include = '\.py$'
 line-length = 79
 
 [tool.isort]
-ensure_newline_before_comments = true
-force_grid_wrap = 0
-include_trailing_comma = true
+profile = "black"
 line_length = 79
-multi_line_output = 3
-profile = "pycharm"
-use_parentheses = true
+filter_files = true
+skip = [
+  "src/pymanopt/_version.py",
+]
 
 [tool.flake8]
 application_import_names = "pymanopt"
