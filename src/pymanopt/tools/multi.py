@@ -2,7 +2,6 @@ import numpy as np
 import scipy.linalg
 import scipy.version
 
-
 # Scipy 1.9.0 added support for calling scipy.linalg.expm on stacked matrices.
 if scipy.version.version >= "1.9.0":
     scipy_expm = scipy.linalg.expm

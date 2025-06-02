@@ -9,7 +9,6 @@ from pymanopt import Problem
 from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_gradient
 
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 

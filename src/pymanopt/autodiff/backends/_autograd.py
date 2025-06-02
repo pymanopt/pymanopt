@@ -1,6 +1,5 @@
 import functools
 
-
 try:
     import autograd
 except ImportError:

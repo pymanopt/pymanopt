@@ -2,7 +2,6 @@ from examples._tools import ExampleRunner
 from pymanopt.manifolds import Positive
 from pymanopt.tools.diagnostics import check_retraction
 
-
 SUPPORTED_BACKENDS = ("numpy",)
 
 

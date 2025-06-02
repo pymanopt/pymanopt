@@ -8,7 +8,6 @@ from examples._tools import ExampleRunner
 from pymanopt.manifolds import Stiefel
 from pymanopt.optimizers import TrustRegions
 
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 

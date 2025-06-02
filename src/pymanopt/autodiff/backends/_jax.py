@@ -2,7 +2,6 @@ import functools
 
 import numpy as np
 
-
 try:
     import jax
 except ImportError:

@@ -7,7 +7,6 @@ import pytest
 import tensorflow as tf
 import torch
 
-
 matplotlib.use("Agg")
 
 
