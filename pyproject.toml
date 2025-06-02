@@ -120,3 +120,6 @@ ignore = ["B024", "B027", "D1", "E203", "E501", "W503"]
 import_order_style = "pycharm"
 max-line-length = 79
 select = ["B", "B950", "C", "D", "E", "F", "W"]
+per-file-ignores = [
+  "examples/*:F811",
+]
