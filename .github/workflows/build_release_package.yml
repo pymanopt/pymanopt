@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up python 3.8
+      - name: Set up python 3.12
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: "3.12"
           cache: pip
           cache-dependency-path: pyproject.toml
 
