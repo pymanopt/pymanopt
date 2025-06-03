@@ -119,6 +119,18 @@ class TestUnitaryGroup:
             tangent_vector, -multihconj(tangent_vector)
         )
 
+    def test_projection(self):
+        point = self.manifold.random_point()
+
+        # Construct a vector in the ambient space.
+        vector = np.random.normal(size=(self.k, self.n, self.n)) + 1j*np.random.normal(size=(self.k, self.n, self.n))
+        tangent_vector = self.manifold.projection(point, vector)
+
+        # Test that the result is tangent to the manifold
+        np_testing.assert_almost_equal(
+            tangent_vector, -multihconj(tangent_vector)
+        )
+
     @pytest.mark.parametrize(
         "manifold_attribute", ["unitary_group", "unitary_group_polar"]
     )
