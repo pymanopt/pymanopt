@@ -3,7 +3,7 @@ import numpy.testing as np_testing
 import pytest
 
 from pymanopt.manifolds import SpecialOrthogonalGroup, UnitaryGroup
-from pymanopt.tools.multi import multieye, multihconj, multitransp
+from pymanopt.tools.multi import multieye, multihconj, multitransp, multiskewh
 
 
 class TestSpecialOrthogonalGroup:
@@ -115,6 +115,18 @@ class TestUnitaryGroup:
         point = self.product_manifold.random_point()
         tangent_vector = self.product_manifold.random_tangent_vector(point)
         assert (tangent_vector.imag > 0).any()
+        np_testing.assert_almost_equal(
+            tangent_vector, -multihconj(tangent_vector)
+        )
+    
+    def test_projection(self):
+        # Construct a random point X on the manifold.
+        point = self.manifold.random_point()
+
+        # Construct a vector H in the ambient space.
+        vector = np.random.normal(size=(self.k, self.n, self.n)) + 1j*np.random.normal(size=(self.k, self.n, self.n))
+        tangent_vector = self.manifold.projection(point, vector)
+
         np_testing.assert_almost_equal(
             tangent_vector, -multihconj(tangent_vector)
         )

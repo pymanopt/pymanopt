@@ -45,7 +45,7 @@ class _UnitaryBase(RiemannianSubmanifold):
         return self.norm(point_a, self.log(point_a, point_b))
 
     def projection(self, point, vector):
-        return multiskew(multihconj(point) @ vector)
+        return multiskewh(multihconj(point) @ vector)
 
     def to_tangent_space(self, point, vector):
         return multiskewh(vector)
