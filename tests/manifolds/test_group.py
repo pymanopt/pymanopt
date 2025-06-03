@@ -120,13 +120,13 @@ class TestUnitaryGroup:
         )
     
     def test_projection(self):
-        # Construct a random point X on the manifold.
         point = self.manifold.random_point()
 
-        # Construct a vector H in the ambient space.
+        # Construct a vector in the ambient space.
         vector = np.random.normal(size=(self.k, self.n, self.n)) + 1j*np.random.normal(size=(self.k, self.n, self.n))
         tangent_vector = self.manifold.projection(point, vector)
 
+        # Test that the result is tangent to the manifold
         np_testing.assert_almost_equal(
             tangent_vector, -multihconj(tangent_vector)
         )
