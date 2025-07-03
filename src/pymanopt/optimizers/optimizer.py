@@ -106,6 +106,11 @@ class Optimizer(metaclass=abc.ABCMeta):
                 f"Terminated - min grad norm reached after {iteration} "
                 f"iterations, {run_time:.2f} seconds."
             )
+        elif np.isnan(gradient_norm):
+            reason = (
+                f"Terminated - gradient norm is NaN after {iteration} "
+                f"iterations, {run_time:.2f} seconds."
+            )
         elif step_size < self._min_step_size:
             reason = (
                 f"Terminated - min step_size reached after {iteration} "
