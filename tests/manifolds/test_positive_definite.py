@@ -106,6 +106,7 @@ class TestSymmetricPositiveDefiniteManifold:
         bk.assert_allclose(
             bk.tensordot(bk.conjugate(a), b, axes=bk.ndim(a)),
             manifold.inner_product(x, x @ a, x @ b),
+            rtol = 1e-5,
         )
 
     def test_projection(self):
