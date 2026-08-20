@@ -23,4 +23,4 @@
 - Rewrite core/manifolds
   - in JAX with jit support, or
   - using a backend abstraction as in `geomstats` (potentially shared with
-    `geomstats`)
+    `geomstats`) 

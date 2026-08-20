@@ -1,33 +1,40 @@
+import math
 import warnings
+from typing import Union
 
-import numpy as np
-
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 from pymanopt.tools import extend_docstring
 
 
 class _SphereBase(RiemannianSubmanifold):
-    def __init__(self, *shape, name, dimension):
+    def __init__(
+        self,
+        *shape: int,
+        name,
+        dimension,
+        backend: Union[Backend, None] = None,
+    ):
         if len(shape) == 0:
             raise TypeError("Need at least one dimension.")
-        self._shape = shape
-        super().__init__(name, dimension)
+        self.shape = shape
+        super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return np.pi
+        return self.backend.pi
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return self.backend.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return self.backend.linalg_norm(tangent_vector)
 
     def dist(self, point_a, point_b):
         inner = max(min(self.inner_product(point_a, point_a, point_b), 1), -1)
-        return np.arccos(inner)
+        return self.backend.arccos(inner)
 
     def projection(self, point, vector):
         return vector - self.inner_product(point, point, vector) * point
@@ -41,7 +48,9 @@ class _SphereBase(RiemannianSubmanifold):
 
     def exp(self, point, tangent_vector):
         norm = self.norm(point, tangent_vector)
-        return point * np.cos(norm) + tangent_vector * np.sinc(norm / np.pi)
+        return point * self.backend.cos(
+            norm
+        ) + tangent_vector * self.backend.sinc(norm / self.backend.pi)
 
     def retraction(self, point, tangent_vector):
         return self._normalize(point + tangent_vector)
@@ -49,16 +58,16 @@ class _SphereBase(RiemannianSubmanifold):
     def log(self, point_a, point_b):
         vector = self.projection(point_a, point_b - point_a)
         distance = self.dist(point_a, point_b)
-        epsilon = np.finfo(np.float64).eps
+        epsilon = self.backend.eps()
         factor = (distance + epsilon) / (self.norm(point_a, vector) + epsilon)
         return factor * vector
 
     def random_point(self):
-        point = np.random.normal(size=self._shape)
+        point = self.backend.random_normal(size=self.shape)
         return self._normalize(point)
 
     def random_tangent_vector(self, point):
-        vector = np.random.normal(size=self._shape)
+        vector = self.backend.random_normal(size=self.shape)
         return self._normalize(self.projection(point, vector))
 
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -68,10 +77,10 @@ class _SphereBase(RiemannianSubmanifold):
         return self._normalize(point_a + point_b)
 
     def zero_vector(self, point):
-        return np.zeros(self._shape)
+        return self.backend.zeros(self.shape)
 
     def _normalize(self, array):
-        return array / np.linalg.norm(array)
+        return array / self.backend.linalg_norm(array)
 
 
 DOCSTRING_NOTE = """
@@ -97,7 +106,7 @@ class Sphere(_SphereBase):
         shape: The shape of tensors.
     """
 
-    def __init__(self, *shape: int):
+    def __init__(self, *shape: int, backend: Union[Backend, None] = None):
         if len(shape) == 0:
             raise TypeError("Need shape parameters.")
         if len(shape) == 1:
@@ -108,24 +117,33 @@ class Sphere(_SphereBase):
             name = f"Sphere manifold of {m}x{n} matrices"
         else:
             name = f"Sphere manifold of shape {shape} tensors"
-        dimension = np.prod(shape) - 1
-        super().__init__(*shape, name=name, dimension=dimension)
+        dimension = math.prod(shape) - 1
+        super().__init__(
+            *shape, name=name, dimension=dimension, backend=backend
+        )
 
 
 class _SphereSubspaceIntersectionManifold(_SphereBase):
-    def __init__(self, projector, name, dimension):
-        m, n = projector.shape
-        assert m == n, "projection matrix is not square"
+    def __init__(self, name, dimension, matrix, subspace_projector, backend):
+        m, n = subspace_projector.shape
+        if m != n:
+            raise ValueError("Projection matrix is not square")
         if dimension == 0:
             warnings.warn(
                 "Intersected subspace is 1-dimensional. The manifold "
                 "therefore has dimension 0 as it only consists of isolated "
                 "points"
             )
-        self._subspace_projector = projector
-        super().__init__(n, name=name, dimension=dimension)
+        self._matrix = matrix
+        self._validate_span_matrix(matrix, backend)
+        self._subspace_projector = subspace_projector
+        super().__init__(n, name=name, dimension=dimension, backend=backend)
 
-    def _validate_span_matrix(self, matrix):
+    def _validate_span_matrix(self, matrix, backend: Backend):
+        if not isinstance(matrix, backend.array_t):
+            raise ValueError(
+                f"The span matrix must be of type {backend.array_t}"
+            )
         if len(matrix.shape) != 2:
             raise ValueError("Input array must be 2-dimensional")
         num_rows, num_columns = matrix.shape
@@ -138,12 +156,14 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
         return self._subspace_projector @ super().projection(point, vector)
 
     def random_point(self):
-        point = super().random_point()
-        return self._normalize(self._subspace_projector @ point)
+        return self._normalize(
+            self._subspace_projector @ super().random_point()
+        )
 
     def random_tangent_vector(self, point):
-        vector = super().random_tangent_vector(point)
-        return self._normalize(self._subspace_projector @ vector)
+        return self._normalize(
+            self._subspace_projector @ super().random_tangent_vector(point)
+        )
 
 
 @extend_docstring(DOCSTRING_NOTE)
@@ -159,18 +179,31 @@ class SphereSubspaceIntersection(_SphereSubspaceIntersectionManifold):
         matrix: Matrix whose columns span the intersecting subspace.
     """
 
-    def __init__(self, matrix):
-        self._validate_span_matrix(matrix)
-        m = matrix.shape[0]
-        q, _ = np.linalg.qr(matrix)
-        projector = q @ q.T
-        subspace_dimension = np.linalg.matrix_rank(projector)
+    @staticmethod
+    def _compute_subspace_projector(bk: Backend, matrix: Backend.array_t):
+        matrix = bk.array(matrix)
+        q, _ = bk.linalg_qr(matrix)
+        subspace_projector = q @ q.T
+        return matrix, subspace_projector
+
+    def __init__(self, matrix, backend: Backend):
+        matrix, subspace_projector = self._compute_subspace_projector(
+            backend, matrix
+        )
+        subspace_dimension = backend.linalg_matrix_rank(subspace_projector)
         name = (
-            f"Sphere manifold of {m}-dimensional vectors intersecting a "
-            f"{subspace_dimension}-dimensional subspace"
+            f"Sphere manifold of {matrix.shape[0]}-dimensional vectors "
+            f"intersecting a {subspace_dimension}-dimensional subspace"
         )
         dimension = subspace_dimension - 1
-        super().__init__(projector, name, dimension)
+        super().__init__(name, dimension, matrix, subspace_projector, backend)
+
+    def set_compatible_backend(self, other_backend: Backend):
+        super().set_compatible_backend(other_backend)
+        (
+            self._matrix,
+            self._subspace_projector,
+        ) = self._compute_subspace_projector(self.backend, self._matrix)
 
 
 @extend_docstring(DOCSTRING_NOTE)
@@ -188,15 +221,28 @@ class SphereSubspaceComplementIntersection(
         matrix: Matrix whose columns span the subspace.
     """
 
-    def __init__(self, matrix):
-        self._validate_span_matrix(matrix)
-        m = matrix.shape[0]
-        q, _ = np.linalg.qr(matrix)
-        projector = np.eye(m) - q @ q.T
-        subspace_dimension = np.linalg.matrix_rank(projector)
+    @staticmethod
+    def _compute_subspace_projector(bk: Backend, matrix: Backend.array_t):
+        matrix = bk.array(matrix)
+        q, _ = bk.linalg_qr(matrix)
+        subspace_projector = bk.eye(matrix.shape[0]) - q @ q.T
+        return matrix, subspace_projector
+
+    def __init__(self, matrix, backend: Backend):
+        matrix, subspace_projector = self._compute_subspace_projector(
+            backend, matrix
+        )
+        subspace_dimension = backend.linalg_matrix_rank(subspace_projector)
         name = (
-            f"Sphere manifold of {m}-dimensional vectors orthogonal "
+            f"Sphere manifold of {matrix.shape[0]}-dimensional vectors orthogonal "
             f"to a {subspace_dimension}-dimensional subspace"
         )
         dimension = subspace_dimension - 1
-        super().__init__(projector, name, dimension)
+        super().__init__(name, dimension, matrix, subspace_projector, backend)
+
+    def set_compatible_backend(self, other_backend: Backend):
+        super().set_compatible_backend(other_backend)
+        (
+            self._matrix,
+            self._subspace_projector,
+        ) = self._compute_subspace_projector(self.backend, self._matrix)

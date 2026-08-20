@@ -1,5 +1,6 @@
-import numpy as np
+from typing import Union
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold
 
 
@@ -41,10 +42,11 @@ class Positive(Manifold):
         *,
         k: int = 1,
         use_parallel_transport: bool = False,
+        backend: Union[Backend, None] = None,
     ):
-        self._m = m
-        self._n = n
-        self._k = k
+        self.m = m
+        self.n = n
+        self.k = k
 
         if use_parallel_transport:
             self._transport = self._parallel_transport
@@ -53,17 +55,20 @@ class Positive(Manifold):
 
         if k == 1:
             name = f"Manifold of positive {m}x{n} matrices"
-        else:
+        elif k >= 2:
             name = f"Product manifold of {k} positive {m}x{n} matrices"
+        else:
+            raise ValueError(f"Invalid value for k: {k} (should be >= 1)")
+
         dimension = int(k * m * n)
-        super().__init__(name, dimension)
+        super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return np.sqrt(self.dim)
+        return self.backend.sqrt(self.dim)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return self.backend.tensordot(
             tangent_vector_a / point,
             tangent_vector_b / point,
             axes=tangent_vector_a.ndim,
@@ -75,26 +80,30 @@ class Positive(Manifold):
     to_tangent_space = projection
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return self.backend.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
     def random_point(self):
-        point = np.exp(np.random.normal(size=(self._k, self._m, self._n)))
-        if self._k == 1:
+        point = self.backend.exp(
+            self.backend.random_normal(size=(self.k, self.m, self.n))
+        )
+        if self.k == 1:
             return point[0]
         return point
 
     def random_tangent_vector(self, point):
-        vector = np.random.normal(size=point.shape) * point
+        vector = self.backend.random_normal(size=point.shape) * point
         return vector / self.norm(point, vector)
 
     def zero_vector(self, point):
-        return np.zeros(point.shape)
+        return self.backend.zeros(point.shape)
 
     def dist(self, point_a, point_b):
-        log_ratio = np.log(point_a) - np.log(point_b)
-        return np.sqrt(np.tensordot(log_ratio, log_ratio, axes=point_a.ndim))
+        log_ratio = self.backend.log(point_a) - self.backend.log(point_b)
+        return self.backend.sqrt(
+            self.backend.tensordot(log_ratio, log_ratio, axes=point_a.ndim)
+        )
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return euclidean_gradient * point**2
@@ -108,10 +117,12 @@ class Positive(Manifold):
         )
 
     def exp(self, point, tangent_vector):
-        return point * np.exp(tangent_vector / point)
+        return point * self.backend.exp(tangent_vector / point)
 
     def log(self, point_a, point_b):
-        return point_a * (np.log(point_b) - np.log(point_a))
+        return point_a * (
+            self.backend.log(point_b) - self.backend.log(point_a)
+        )
 
     def retraction(self, point, tangent_vector):
         return point + tangent_vector + tangent_vector**2 / point / 2

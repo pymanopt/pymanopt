@@ -3,7 +3,7 @@ import functools
 import warnings
 from typing import Sequence, Union
 
-import numpy as np
+from pymanopt.backends import Backend, DummyBackend
 
 
 def raise_not_implemented_error(method):
@@ -14,6 +14,7 @@ def raise_not_implemented_error(method):
             f"implementation for '{method.__name__}'"
         )
 
+    setattr(wrapper, "__raise_not_implemented_error__", True)  # noqa: B010
     return wrapper
 
 
@@ -54,9 +55,8 @@ class Manifold(metaclass=abc.ABCMeta):
         name: str,
         dimension: int,
         point_layout: Union[int, Sequence[int]] = 1,
+        backend: Union[Backend, None] = None,
     ):
-        if not isinstance(dimension, (int, np.integer)):
-            raise TypeError("Manifold dimension must be of type int")
         if dimension < 0:
             raise ValueError("Manifold dimension must be positive")
         if not isinstance(point_layout, (int, tuple, list)):
@@ -65,7 +65,7 @@ class Manifold(metaclass=abc.ABCMeta):
                 f"{type(point_layout)}"
             )
         if isinstance(point_layout, (tuple, list)):
-            if not all([num_arguments > 0 for num_arguments in point_layout]):
+            if not all(num_arguments > 0 for num_arguments in point_layout):
                 raise ValueError(
                     f"Invalid point layout {point_layout}: all values must be "
                     "positive"
@@ -78,6 +78,9 @@ class Manifold(metaclass=abc.ABCMeta):
         self._name = name
         self._dimension = dimension
         self._point_layout = point_layout
+        if backend is None:
+            backend = DummyBackend()
+        self.set_compatible_backend(backend)
 
     def __str__(self):
         return self._name
@@ -87,6 +90,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """The dimension of the manifold."""
         return self._dimension
 
+    # TODO(nkoep): Turn this into a regular attribute.
     @property
     def point_layout(self):
         """The number of elements a point on a manifold consists of.
@@ -98,6 +102,43 @@ class Manifold(metaclass=abc.ABCMeta):
         tuples/lists contain.
         """
         return self._point_layout
+
+    IS_COMPLEX = False
+    """Whether the manifold is complex-valued or not."""
+
+    # TODO(nkoep): Turn this into a regular attribute.
+    @property
+    def backend(self) -> Backend:
+        """The numerics backend used by the manifold."""
+        return self._backend
+
+    def has_dummy_backend(self) -> bool:
+        return isinstance(self.backend, DummyBackend)
+
+    def set_compatible_backend(self, other_backend: Backend):
+        """Set the manifold's backend based on another backend.
+
+        It sets a backend with the same type (numpy, pytorch, etc.)
+        and dtype precision (single or double) and chooses real or complex
+        based on the manifold type.
+        """
+        new_backend = (
+            other_backend.to_complex_backend()
+            if self.IS_COMPLEX
+            else other_backend.to_real_backend()
+        )
+        if new_backend != other_backend:
+            warnings.warn(
+                f"Incompatible realness between manifold {self} and backend "
+                f"{other_backend}. Setting a compatible backend."
+            )
+        self._backend = new_backend
+
+    def is_backend_compatible(self, other_backend: Backend) -> bool:
+        return (
+            type(self.backend) is type(other_backend)
+            and self.backend.dtype_precision == other_backend.dtype_precision
+        )
 
     @property
     def num_values(self) -> int:
@@ -127,10 +168,7 @@ class Manifold(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def inner_product(
-        self,
-        point: np.ndarray,
-        tangent_vector_a: np.ndarray,
-        tangent_vector_b: np.ndarray,
+        self, point, tangent_vector_a, tangent_vector_b
     ) -> float:
         """Inner product between tangent vectors at a point on the manifold.
 
@@ -288,6 +326,9 @@ class Manifold(metaclass=abc.ABCMeta):
             along a geodesic in the direction of ``tangent_vector``.
         """
 
+    def has_exp(self):
+        return not hasattr(self.exp, "__raise_not_implemented_error__")
+
     @raise_not_implemented_error
     def log(self, point_a, point_b):
         """Computes the logarithmic map on the manifold.
@@ -305,6 +346,9 @@ class Manifold(metaclass=abc.ABCMeta):
         Returns:
             A tangent vector in the tangent space at ``point_a``.
         """
+
+    def has_log(self):
+        return not hasattr(self.log, "__raise_not_implemented_error__")
 
     @raise_not_implemented_error
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -343,7 +387,7 @@ class Manifold(metaclass=abc.ABCMeta):
         """
 
     @raise_not_implemented_error
-    def to_tangent_space(self, point, vector):
+    def to_tangent_space(self, point, vector) -> Backend.array_t:
         """Re-tangentialize a vector.
 
         This method guarantees that ``vector`` is indeed a tangent vector
@@ -358,6 +402,7 @@ class Manifold(metaclass=abc.ABCMeta):
         Returns:
             The tangent vector at ``point`` closest to ``vector``.
         """
+        ...
 
     def embedding(self, point, tangent_vector):
         """Convert tangent vector to ambient space representation.

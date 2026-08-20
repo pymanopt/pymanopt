@@ -3,8 +3,37 @@ from typing import Sequence
 
 import numpy as np
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold
-from pymanopt.tools import ndarraySequenceMixin, return_as_class_instance
+from pymanopt.tools import ArraySequenceMixin, return_as_class_instance
+
+
+class _ProductTangentVector(ArraySequenceMixin, list):
+    @return_as_class_instance(unpack=False)
+    def __add__(self, other):
+        if len(self) != len(other):
+            raise ValueError("Arguments must be same length")
+        return [v + other[k] for k, v in enumerate(self)]
+
+    @return_as_class_instance(unpack=False)
+    def __sub__(self, other):
+        if len(self) != len(other):
+            raise ValueError("Arguments must be same length")
+        return [v - other[k] for k, v in enumerate(self)]
+
+    @return_as_class_instance(unpack=False)
+    def __mul__(self, other):
+        return [other * val for val in self]
+
+    __rmul__ = __mul__
+
+    @return_as_class_instance(unpack=False)
+    def __truediv__(self, other):
+        return [val / other for val in self]
+
+    @return_as_class_instance(unpack=False)
+    def __neg__(self):
+        return [-val for val in self]
 
 
 class Product(Manifold):
@@ -19,17 +48,51 @@ class Product(Manifold):
         manifolds: The collection of manifolds in the product.
     """
 
-    def __init__(self, manifolds: Sequence[Manifold]):
+    def __init__(
+        self,
+        manifolds: Sequence[Manifold],
+    ):
         for manifold in manifolds:
             if isinstance(manifold, Product):
                 raise ValueError("Nested product manifolds are not supported")
+
+        # check all manifolds have compatible backends
+        first_backend = manifolds[0].backend
+        for manifold in manifolds[1:]:
+            if not manifold.is_backend_compatible(first_backend):
+                raise ValueError(
+                    "All manifolds in a product must have compatible backends."
+                )
+
         self.manifolds = tuple(manifolds)
         manifold_names = " x ".join([str(manifold) for manifold in manifolds])
         name = f"Product manifold: {manifold_names}"
 
         dimension = np.sum([manifold.dim for manifold in manifolds])
         point_layout = tuple(manifold.point_layout for manifold in manifolds)
-        super().__init__(name, dimension, point_layout=point_layout)
+        super().__init__(
+            name,
+            dimension,
+            point_layout=point_layout,
+            # here we arbitrarily use the real version of the backend since
+            # it won't be used for any computation, only possibly for settting
+            # the backend of a function
+            backend=manifolds[0].backend.to_real_backend(),
+        )
+
+    def has_dummy_backend(self) -> bool:
+        return any(manifold.has_dummy_backend() for manifold in self.manifolds)
+
+    def set_compatible_backend(self, other_backend: Backend):
+        super().set_compatible_backend(other_backend)
+        for manifold in self.manifolds:
+            manifold.set_compatible_backend(other_backend)
+
+    def is_backend_compatible(self, other_backend: Backend) -> bool:
+        return all(
+            manifold.is_backend_compatible(other_backend)
+            for manifold in self.manifolds
+        )
 
     @property
     def typical_dist(self):
@@ -129,31 +192,3 @@ class Product(Manifold):
         return self._dispatch("zero_vector", reduction=_ProductTangentVector)(
             point
         )
-
-
-class _ProductTangentVector(ndarraySequenceMixin, list):
-    @return_as_class_instance(unpack=False)
-    def __add__(self, other):
-        if len(self) != len(other):
-            raise ValueError("Arguments must be same length")
-        return [v + other[k] for k, v in enumerate(self)]
-
-    @return_as_class_instance(unpack=False)
-    def __sub__(self, other):
-        if len(self) != len(other):
-            raise ValueError("Arguments must be same length")
-        return [v - other[k] for k, v in enumerate(self)]
-
-    @return_as_class_instance(unpack=False)
-    def __mul__(self, other):
-        return [other * val for val in self]
-
-    __rmul__ = __mul__
-
-    @return_as_class_instance(unpack=False)
-    def __truediv__(self, other):
-        return [val / other for val in self]
-
-    @return_as_class_instance(unpack=False)
-    def __neg__(self):
-        return [-val for val in self]

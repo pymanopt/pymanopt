@@ -1,36 +1,43 @@
-import numpy as np
-import scipy.linalg
+from typing import Union
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import Manifold, RetrAsExpMixin
 
 
 class _PSDFixedRank(Manifold):
-    def __init__(self, n, k, name, dimension):
-        self._n = n
-        self._k = k
-        super().__init__(name, dimension)
+    def __init__(
+        self, n, k, name, dimension, backend: Union[Backend, None] = None
+    ):
+        self.n = n
+        self.k = k
+        super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return 10 + self._k
+        return 10 + self.k
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
-            tangent_vector_a.conj(),
-            tangent_vector_b,
-            axes=tangent_vector_a.ndim,
-        ).real
+        return self.backend.real(
+            self.backend.tensordot(
+                self.backend.conjugate(tangent_vector_a),
+                tangent_vector_b,
+                axes=tangent_vector_a.ndim,
+            )
+        )
 
     def dist(self, point_a, point_b):
         return self.norm(point_a, self.log(point_a, point_b))
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return self.backend.linalg_norm(tangent_vector)
 
     def projection(self, point, vector):
-        YtY = point.T.conj() @ point
-        AS = point.T.conj() @ vector - vector.T.conj() @ point
-        Omega = scipy.linalg.solve_continuous_lyapunov(YtY, AS)
+        YtY = self.backend.conjugate_transpose(point) @ point
+        AS = (
+            self.backend.conjugate_transpose(point) @ vector
+            - self.backend.conjugate_transpose(vector) @ point
+        )
+        Omega = self.backend.linalg_solve_continuous_lyapunov(YtY, AS)
         return vector - point @ Omega
 
     to_tangent_space = projection
@@ -49,11 +56,13 @@ class _PSDFixedRank(Manifold):
     retraction = exp
 
     def log(self, point_a, point_b):
-        u, _, vh = np.linalg.svd(point_b.T.conj() @ point_a)
+        u, _, vh = self.backend.linalg_svd(
+            self.backend.conjugate_transpose(point_b) @ point_a
+        )
         return point_b @ u @ vh - point_a
 
     def random_point(self):
-        return np.random.normal(size=(self._n, self._k))
+        return self.backend.random_normal(size=(self.n, self.k))
 
     def random_tangent_vector(self, point):
         random_vector = self.random_point()
@@ -64,10 +73,10 @@ class _PSDFixedRank(Manifold):
         return self.projection(point_b, tangent_vector_a)
 
     def _normalize(self, array):
-        return array / np.linalg.norm(array)
+        return array / self.backend.linalg_norm(array)
 
     def zero_vector(self, point):
-        return np.zeros((self._n, self._k))
+        return self.backend.zeros((self.n, self.k))
 
 
 class PSDFixedRank(_PSDFixedRank):
@@ -108,10 +117,10 @@ class PSDFixedRank(_PSDFixedRank):
         in [JBA+2010]_.
     """
 
-    def __init__(self, n: int, k: int):
+    def __init__(self, n: int, k: int, backend: Union[Backend, None] = None):
         name = f"Quotient manifold of {n}x{n} psd matrices of rank {k}"
         dimension = int(k * n - k * (k - 1) / 2)
-        super().__init__(n, k, name, dimension)
+        super().__init__(n, k, name, dimension, backend=backend)
 
 
 class PSDFixedRankComplex(_PSDFixedRank):
@@ -150,15 +159,17 @@ class PSDFixedRankComplex(_PSDFixedRank):
         in [Yat2013]_.
     """
 
-    def __init__(self, n, k):
+    IS_COMPLEX = True
+
+    def __init__(self, n, k, backend: Union[Backend, None] = None):
         name = f"Quotient manifold of Hermitian {n}x{n} matrices of rank {k}"
         dimension = 2 * k * n - k * k
-        super().__init__(n, k, name, dimension)
+        super().__init__(n, k, name, dimension, backend=backend)
 
     def random_point(self):
-        return np.random.normal(
-            size=(self._n, self._k)
-        ) + 1j * np.random.normal(size=(self._n, self._k))
+        return self.backend.random_normal(
+            size=(self.n, self.k)
+        ) + 1j * self.backend.random_normal(size=(self.n, self.k))
 
 
 class Elliptope(Manifold, RetrAsExpMixin):
@@ -204,28 +215,28 @@ class Elliptope(Manifold, RetrAsExpMixin):
         The geometry is taken from [JBA+2010]_.
     """
 
-    def __init__(self, n, k):
-        self._n = n
-        self._k = k
+    def __init__(self, n, k, backend: Union[Backend, None] = None):
+        self.n = n
+        self.k = k
 
         name = (
             f"Quotient manifold of {n}x{n} psd matrices of rank {k} "
             "with unit diagonal elements"
         )
         dimension = int(n * (k - 1) - k * (k - 1) / 2)
-        super().__init__(name, dimension)
+        super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return 10 * self._k
+        return 10 * self.k
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return np.tensordot(
+        return self.backend.tensordot(
             tangent_vector_a, tangent_vector_b, axes=tangent_vector_a.ndim
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return self.backend.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
@@ -233,7 +244,7 @@ class Elliptope(Manifold, RetrAsExpMixin):
         eta = self._project_rows(point, vector)
         YtY = point.T @ point
         AS = point.T @ eta - vector.T @ point
-        Omega = scipy.linalg.solve_continuous_lyapunov(YtY, -AS)
+        Omega = self.backend.linalg_solve_continuous_lyapunov(YtY, -AS)
         return eta - point @ (Omega - Omega.T) / 2
 
     to_tangent_space = projection
@@ -247,16 +258,23 @@ class Elliptope(Manifold, RetrAsExpMixin):
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        scaling_grad = (euclidean_gradient * point).sum(axis=1)
-        hess = euclidean_hessian - tangent_vector * scaling_grad[:, np.newaxis]
-        scaling_hess = (
-            tangent_vector * euclidean_gradient + point * euclidean_hessian
-        ).sum(axis=1)
-        hess -= point * scaling_hess[:, np.newaxis]
+        bk = self.backend
+        scaling_grad = bk.sum(euclidean_gradient * point, axis=1)
+        hess = (
+            euclidean_hessian
+            - tangent_vector * scaling_grad[:, self.backend.newaxis]
+        )
+        scaling_hess = bk.sum(
+            tangent_vector * euclidean_gradient + point * euclidean_hessian,
+            axis=1,
+        )
+        hess -= point * scaling_hess[:, self.backend.newaxis]
         return self.projection(point, hess)
 
     def random_point(self):
-        return self._normalize_rows(np.random.normal(size=(self._n, self._k)))
+        return self._normalize_rows(
+            self.backend.random_normal(size=(self.n, self.k))
+        )
 
     def random_tangent_vector(self, point):
         tangent_vector = self.projection(point, self.random_point())
@@ -266,11 +284,15 @@ class Elliptope(Manifold, RetrAsExpMixin):
         return self.projection(point_b, tangent_vector_a)
 
     def _normalize_rows(self, array):
-        return array / np.linalg.norm(array, axis=1)[:, np.newaxis]
+        return (
+            array
+            / self.backend.linalg_norm(array, axis=1)[:, self.backend.newaxis]
+        )
 
     def _project_rows(self, point, vector):
-        inner_products = (point * vector).sum(axis=1)
-        return vector - point * inner_products[:, np.newaxis]
+        bk = self.backend
+        inner_products = bk.sum(point * vector, axis=1)
+        return vector - point * inner_products[:, bk.newaxis]
 
     def zero_vector(self, point):
-        return np.zeros((self._n, self._k))
+        return self.backend.zeros((self.n, self.k))

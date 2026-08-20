@@ -3,10 +3,8 @@
 import functools
 from typing import Callable, Optional
 
-import numpy as np
-
-from ..autodiff import Function
-from ..manifolds.manifold import Manifold
+from pymanopt.function import Function
+from pymanopt.manifolds.manifold import Manifold
 
 
 class Problem:
@@ -45,12 +43,12 @@ class Problem:
     def __init__(
         self,
         manifold: Manifold,
-        cost: Function,
+        cost: Callable,
         *,
-        euclidean_gradient: Optional[Function] = None,
-        riemannian_gradient: Optional[Function] = None,
-        euclidean_hessian: Optional[Function] = None,
-        riemannian_hessian: Optional[Function] = None,
+        euclidean_gradient: Optional[Callable] = None,
+        riemannian_gradient: Optional[Callable] = None,
+        euclidean_hessian: Optional[Callable] = None,
+        riemannian_hessian: Optional[Callable] = None,
         preconditioner: Optional[Callable] = None,
     ):
         self.manifold = manifold
@@ -62,7 +60,21 @@ class Problem:
             (riemannian_gradient, "riemannian_gradient"),
             (riemannian_hessian, "riemannian_hessian"),
         ):
-            self._validate_function(function, name)
+            if function is not None and not isinstance(function, Callable):
+                raise TypeError(f"Function {name} must be callable")
+
+        if manifold.has_dummy_backend():
+            if isinstance(cost, Function):
+                manifold.set_compatible_backend(cost.backend)
+            else:
+                raise ValueError(
+                    "Neither cost nor manifold have a specified backend."
+                )
+        else:
+            cost = self._validate_function_backend(cost, "cost", manifold)
+
+        self._original_cost = cost
+        self._cost = self._wrap_function(cost)
 
         if euclidean_gradient is not None and riemannian_gradient is not None:
             raise ValueError(
@@ -75,37 +87,49 @@ class Problem:
                 "provided, not both"
             )
 
-        self._original_cost = cost
-        self._cost = self._wrap_function(cost)
-
         if euclidean_gradient is not None:
+            euclidean_gradient = self._validate_function_backend(
+                euclidean_gradient, "euclidean_gradient", manifold
+            )
             euclidean_gradient = self._wrap_gradient_operator(
                 euclidean_gradient
             )
         self._euclidean_gradient = euclidean_gradient
         if euclidean_hessian is not None:
+            euclidean_hessian = self._validate_function_backend(
+                euclidean_hessian, "euclidean_hessian", manifold
+            )
             euclidean_hessian = self._wrap_hessian_operator(
                 euclidean_hessian, embed_tangent_vectors=True
             )
         self._euclidean_hessian = euclidean_hessian
 
         if riemannian_gradient is not None:
+            riemannian_gradient = self._validate_function_backend(
+                riemannian_gradient, "riemannian_gradient", manifold
+            )
             riemannian_gradient = self._wrap_gradient_operator(
                 riemannian_gradient
             )
         self._riemannian_gradient = riemannian_gradient
         if riemannian_hessian is not None:
+            riemannian_hessian = self._validate_function_backend(
+                riemannian_hessian, "riemannian_hessian", manifold
+            )
             riemannian_hessian = self._wrap_hessian_operator(
                 riemannian_hessian
             )
         self._riemannian_hessian = riemannian_hessian
 
-        if preconditioner is None:
+        if preconditioner is not None:
 
-            def preconditioner(point, tangent_vector):
+            self.preconditioner = preconditioner
+        else:
+
+            def default_preconditioner(point, tangent_vector):
                 return tangent_vector
 
-        self.preconditioner = preconditioner
+            self.preconditioner = default_preconditioner
 
     def __setattr__(self, key, value):
         if hasattr(self, key) and key in ("manifold", "preconditioner"):
@@ -114,22 +138,47 @@ class Problem:
 
     @staticmethod
     def _validate_function(function, name):
-        if function is not None and not isinstance(function, Function):
-            raise ValueError(
-                f"Function '{name}' must be decorated with a backend decorator"
+        if not isinstance(function, Function):
+            raise TypeError(
+                f"Function '{name}' must be decorated with a backend decorator."
+            )
+
+    @staticmethod
+    def _validate_function_backend(
+        function: Callable, name: str, manifold: Manifold
+    ):
+        if isinstance(function, Function):
+            if not manifold.is_backend_compatible(function.backend):
+                raise ValueError(
+                    f"Function '{name}' has a backend {function.backend} "
+                    "which is not compatible with the manifold's backend"
+                    f" {manifold.backend}."
+                )
+            return function
+        else:
+            return Function(
+                function=function, manifold=manifold, backend=manifold.backend
             )
 
     def _flatten_arguments(self, arguments, signature):
-        assert len(arguments) == len(signature)
+        if len(arguments) != len(signature):
+            raise ValueError("Arguments do not match function signature")
 
         flattened_arguments = []
         for i, group_size in enumerate(signature):
             argument = arguments[i]
             if group_size == 1:
-                assert not isinstance(argument, (list, tuple))
+                if isinstance(argument, (list, tuple)):
+                    raise TypeError(
+                        "Expected a single value, but got "
+                        f"{type(argument).__name__}"
+                    )
                 flattened_arguments.append(argument)
             else:
-                assert len(argument) == group_size
+                if len(argument) != group_size:
+                    raise ValueError(
+                        f"Expected {group_size} values, but got {len(argument)}"
+                    )
                 flattened_arguments.extend(argument)
         return flattened_arguments
 
@@ -140,9 +189,10 @@ class Problem:
         values of ``function`` according to the group sizes delineated by
         ``signature``.
         """
-        assert all((isinstance(group, int) for group in signature))
+        if not all(isinstance(group, int) for group in signature):
+            raise ValueError("All elements of signature must be integers")
 
-        num_return_values = np.sum(signature)
+        num_return_values = sum(signature)
 
         @functools.wraps(function)
         def wrapper(*args, **kwargs):
@@ -176,7 +226,8 @@ class Problem:
 
             return wrapper
 
-        assert isinstance(point_layout, int)
+        if not isinstance(point_layout, int):
+            raise TypeError("Point layout must be an integer")
 
         if point_layout == 1:
 

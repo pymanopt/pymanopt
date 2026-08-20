@@ -1,5 +1,5 @@
-import autograd.numpy as np
 import jax.numpy as jnp
+import numpy as np
 import tensorflow as tf
 import torch
 
@@ -38,13 +38,14 @@ def create_cost_and_derivates(manifold, ABt, backend):
             return -ABt
 
     elif backend == "pytorch":
-        ABt_ = torch.from_numpy(ABt)
+        ABt = torch.from_numpy(ABt)
 
         @pymanopt.function.pytorch(manifold)
         def cost(X):
-            return -torch.tensordot(X, ABt_, dims=X.dim())
+            return -torch.tensordot(X, ABt, dims=X.dim())
 
     elif backend == "tensorflow":
+        ABt = tf.constant(ABt)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):
@@ -88,6 +89,11 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
     X = optimizer.run(problem).point
 
     if not quiet:
+        if backend == "pytorch":
+            X = X.detach().numpy()
+        elif backend == "tensorflow":
+            X = X.numpy()
+
         Xopt = np.array([compute_optimal_solution(ABtk) for ABtk in ABt])
         print("Frobenius norm error:", np.linalg.norm(Xopt - X))
 

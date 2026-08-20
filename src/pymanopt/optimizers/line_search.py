@@ -54,7 +54,6 @@ class BackTrackingLineSearcher:
             newf > f0 + self.sufficient_decrease * alpha * df0
             and step_count <= self.max_iterations
         ):
-
             # Reduce the step size
             alpha = self.contraction_factor * alpha
 
