@@ -25,8 +25,9 @@ class TestProblem:
         problem = pymanopt.Problem(self.manifold, self.cost)
         x = tf.random.normal([self.n])
         np_testing.assert_allclose(
-            2 * x * np.exp(np.sum(x**2)), problem.euclidean_gradient(x),
-            rtol = 2e-7,
+            2 * x * np.exp(np.sum(x**2)),
+            problem.euclidean_gradient(x),
+            rtol=2e-7,
         )
 
     def test_attribute_override(self):
