@@ -46,13 +46,6 @@ tensorflow = ["tensorflow>=2.0.0"]
 torch = ["torch>=1.0.0"]
 backends = ["pymanopt[autograd,jax,tensorflow,torch]"]
 dev = [
-    "black[jupyter]==22.3.0",
-    "flake8==5.0.4",
-    "flake8-bugbear==22.12.6",
-    "flake8-docstrings==1.6.0",
-    "flake8-import-order==0.18.2",
-    "flake8-pyproject==1.2.2",
-    "isort==5.11.5",
     "matplotlib",
     "pre-commit",
     "pytest==7.2.0",

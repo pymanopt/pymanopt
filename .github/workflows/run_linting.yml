@@ -9,24 +9,26 @@ jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v7
 
-      - name: Set up python 3.12
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v7
         with:
-          python-version: 3.12
-          cache: pip
-          cache-dependency-path: pyproject.toml
+          python-version: "3.12"
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: isort
+        if: success() || failure()
+        uses: pre-commit/action@v3
+        with:
+          extra_args: isort --all-files
 
-      - name: Install dependencies
-        run: pip install -e ".[dev,ci]"
+      - name: black
+        if: success() || failure()
+        uses: pre-commit/action@v3
+        with:
+          extra_args: black --all-files
 
-      - name: Run linting
-        run: |
-          isort --check .
-          black --check .
-          flake8
+      - name: flake8
+        if: success() || failure()
+        uses: pre-commit/action@v3
+        with:
+          extra_args: flake8 --all-files
