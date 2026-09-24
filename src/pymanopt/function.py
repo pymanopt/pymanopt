@@ -1,9 +1,97 @@
-__all__ = ["autograd", "jax", "numpy", "pytorch", "tensorflow"]
+__all__ = ["Function", "autograd", "jax", "numpy", "pytorch", "tensorflow"]
 
-from pymanopt.autodiff.backends import (
-    autograd,
-    jax,
-    numpy,
-    pytorch,
-    tensorflow,
-)
+import inspect
+from importlib import import_module
+from typing import Any, Callable, Optional, Protocol
+
+from pymanopt.backends import Backend
+from pymanopt.manifolds.manifold import Manifold
+
+
+class Function:
+    def __init__(
+        self, *, function: Callable, manifold: Manifold, backend: Backend
+    ):
+        self._original_function = function
+        self._function = function
+        self._num_arguments = manifold.num_values
+
+        self._gradient = None
+        self._hessian = None
+
+        self.backend = backend
+
+    def __str__(self):
+        return f"Function <{self.backend}>"
+
+    def get_gradient_operator(self):
+        if self._gradient is None:
+            self._gradient = self.backend.generate_gradient_operator(
+                self._original_function, self._num_arguments
+            )
+        return self._gradient
+
+    def get_hessian_operator(self):
+        if self._hessian is None:
+            self._hessian = self.backend.generate_hessian_operator(
+                self._original_function, self._num_arguments
+            )
+        return self._hessian
+
+    def __call__(self, *args, **kwargs):
+        return self._function(*args, **kwargs)
+
+
+def _only_one_true(*args):
+    return sum(args) == 1
+
+
+class _ObjectiveFunctionDecorator(Protocol):
+    def __call__(
+        self, manifold: Manifold, dtype: Optional[Any] = None
+    ) -> Callable[[Callable[..., Any]], Function]:
+        ...
+
+
+def decorator_factory(
+    module: str, backend_class: str
+) -> _ObjectiveFunctionDecorator:
+    def decorator(
+        manifold: Manifold, dtype: Optional[Any] = None
+    ) -> Callable[[Callable[..., Any]], Function]:
+        def inner(cost: Callable[..., Any]) -> Function:
+            argspec = inspect.getfullargspec(cost)
+            if not (
+                _only_one_true(bool(argspec.args), bool(argspec.varargs))
+                and not argspec.varkw
+                and not argspec.kwonlyargs
+            ):
+                raise TypeError(
+                    "Decorated function must only accept positional arguments "
+                    "or a variable-length argument like *x"
+                )
+            backend_type = getattr(
+                import_module(
+                    f"pymanopt.backends.{module}",
+                ),
+                backend_class,
+            )
+            backend = (
+                backend_type(dtype=dtype)
+                if dtype is not None
+                # by default use float64, which is fine for a function it only
+                # uses autodiff methods (which do not depend on realness)
+                else backend_type()
+            )
+            return Function(function=cost, manifold=manifold, backend=backend)
+
+        return inner
+
+    return decorator
+
+
+numpy = decorator_factory("numpy_backend", "NumpyBackend")
+jax = decorator_factory("jax_backend", "JaxBackend")
+pytorch = decorator_factory("pytorch_backend", "PytorchBackend")
+autograd = decorator_factory("autograd_backend", "AutogradBackend")
+tensorflow = decorator_factory("tensorflow_backend", "TensorflowBackend")

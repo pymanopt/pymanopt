@@ -2,7 +2,7 @@ import functools
 import typing
 
 
-class ndarraySequenceMixin:
+class ArraySequenceMixin:
     # The following attributes ensure that operations on sequences of
     # np.ndarrays with scalar numpy data types such as np.float64 don't attempt
     # to vectorize the scalar variable. Refer to

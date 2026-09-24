@@ -1,5 +1,10 @@
 import argparse
 
+import numpy as np
+
+
+np.random.seed(42)
+
 
 def _parse_arguments(name, backends):
     parser = argparse.ArgumentParser(name)

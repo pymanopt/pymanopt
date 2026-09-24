@@ -1,7 +1,6 @@
-import autograd.numpy as np
 import pytest
-from numpy import testing as np_testing
 
+from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.manifolds import Positive
 
 
@@ -11,7 +10,8 @@ class TestPositiveVectors:
         self.m = m = 3
         self.n = n = 1
         self.k = k = 2
-        self.manifold = Positive(m, n, k=k)
+        self.backend = NumpyBackend()
+        self.manifold = Positive(m, n, k=k, backend=self.backend)
 
     def test_inner_product(self):
         x = self.manifold.random_point()
@@ -40,14 +40,14 @@ class TestPositiveVectors:
         x = self.manifold.random_point()
         g = self.manifold.random_tangent_vector(x)
         h = self.manifold.random_tangent_vector(x)
-        assert (np.linalg.norm(g - h, axis=(1, 2)) > 1e-6).all()
+        assert (self.backend.linalg_norm(g - h, axis=(1, 2)) > 1e-6).all()
 
     def test_dist(self):
         # To implement norm of log(x, y)
         x = self.manifold.random_point()
         y = self.manifold.random_point()
         u = self.manifold.log(x, y)
-        np_testing.assert_almost_equal(
+        self.backend.assert_allclose(
             self.manifold.norm(x, u), self.manifold.dist(x, y)
         )
 
@@ -56,14 +56,14 @@ class TestPositiveVectors:
         y = self.manifold.random_point()
         u = self.manifold.log(x, y)
         z = self.manifold.exp(x, u)
-        np_testing.assert_almost_equal(self.manifold.dist(y, z), 0)
+        self.backend.assert_allclose(self.manifold.dist(y, z), 0)
 
     def test_log_exp_inverse(self):
         x = self.manifold.random_point()
         u = self.manifold.random_tangent_vector(x)
         y = self.manifold.exp(x, u)
         v = self.manifold.log(x, y)
-        np_testing.assert_almost_equal(self.manifold.norm(x, u - v), 0)
+        self.backend.assert_allclose(self.manifold.norm(x, u - v), 0)
 
     def test_retraction(self):
         # Test that the result is on the manifold and that for small
@@ -77,4 +77,4 @@ class TestPositiveVectors:
 
         u = u * 1e-6
         xretru = self.manifold.retraction(x, u)
-        np_testing.assert_allclose(xretru, x + u)
+        self.backend.assert_allclose(xretru, x + u)

@@ -1,53 +1,49 @@
-import numpy as np
+from typing import Union
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import (
     RiemannianSubmanifold,
     raise_not_implemented_error,
 )
-from pymanopt.tools.multi import (
-    multiexpm,
-    multihconj,
-    multiherm,
-    multilogm,
-    multiqr,
-    multitransp,
-)
 
 
 class _PositiveDefiniteBase(RiemannianSubmanifold):
-    def __init__(self, name, dimension, *shape):
-        self._shape = shape
-        super().__init__(name, dimension)
+    def __init__(
+        self,
+        name: str,
+        n: int,
+        k: int,
+        dimension: int,
+        backend: Union[Backend, None] = None,
+    ):
+        self.k = k
+        self.n = n
+        super().__init__(name, dimension, backend=backend)
 
     @property
     def typical_dist(self):
-        return np.sqrt(self.dim)
+        return self.dim**0.5
 
     def dist(self, point_a, point_b):
-        c = np.linalg.cholesky(point_a)
-        c_inv = np.linalg.inv(c)
-        logm = multilogm(
-            c_inv @ point_b @ multihconj(c_inv),
-            positive_definite=True,
+        bk = self.backend
+        return bk.real(
+            bk.linalg_norm(bk.linalg_logm(bk.linalg_solve(point_a, point_b)))
         )
-        return np.real(np.linalg.norm(logm))
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        p_inv_tv_a = np.linalg.solve(point, tangent_vector_a)
-        if tangent_vector_a is tangent_vector_b:
-            p_inv_tv_b = p_inv_tv_a
-        else:
-            p_inv_tv_b = np.linalg.solve(point, tangent_vector_b)
-        return np.real(
-            np.tensordot(
-                p_inv_tv_a,
-                multitransp(p_inv_tv_b),
-                axes=point.ndim,
-            )
+        bk = self.backend
+        p_inv_tv_a = bk.linalg_solve(point, tangent_vector_a)
+        p_inv_tv_b = (
+            p_inv_tv_a
+            if tangent_vector_a is tangent_vector_b
+            else bk.linalg_solve(point, tangent_vector_b)
+        )
+        return bk.real(
+            bk.tensordot(bk.conjugate(p_inv_tv_a), p_inv_tv_b, bk.ndim(point))
         )
 
     def projection(self, point, vector):
-        return multiherm(vector)
+        return self.backend.herm(vector)
 
     to_tangent_space = projection
 
@@ -57,69 +53,61 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        return point @ multiherm(euclidean_hessian) @ point + multiherm(
-            tangent_vector @ multiherm(euclidean_gradient) @ point
+        bk = self.backend
+        return point @ bk.herm(euclidean_hessian) @ point + bk.herm(
+            tangent_vector @ bk.herm(euclidean_gradient) @ point
         )
 
     def norm(self, point, tangent_vector):
-        return np.sqrt(
+        return self.backend.sqrt(
             self.inner_product(point, tangent_vector, tangent_vector)
         )
 
     def random_point(self):
+        bk = self.backend
         # Generate eigenvalues between 1 and 2.
-        d = 1.0 + np.random.uniform(size=(self._k, self._n, 1))
-
-        # Generate a unitary matrix.
-        q, _ = multiqr(
-            np.random.normal(size=(self._n, self._n))
-            + 1j * np.random.normal(size=(self._n, self._n))
+        d = bk.array(
+            1.0 + bk.to_real_backend().random_uniform(size=(self.k, self.n, 1))
         )
-        point = q @ (d * multihconj(q))
-        return point if self._k > 1 else point[0]
+        # Generate a unitary matrix (with eigenvector columns).
+        q, _ = bk.linalg_qr(bk.random_normal(size=(self.n, self.n)))
+        # Create a matrix from the eigenvalues and eigenvectors.
+        point = q @ (d * bk.conjugate_transpose(q))
+        return point if self.k > 1 else point[0]
 
     def random_tangent_vector(self, point):
-        k = self._k
-        n = self._n
-        if k == 1:
-            tangent_vector = np.random.randn(n, n)
-            if np.iscomplexobj(point):
-                tangent_vector = tangent_vector + 1j * np.random.randn(n, n)
-        else:
-            tangent_vector = np.random.randn(k, n, n)
-            if np.iscomplexobj(point):
-                tangent_vector = tangent_vector + 1j * np.random.randn(k, n, n)
-        tangent_vector = multiherm(tangent_vector)
+        bk = self.backend
+        tangent_vector = bk.herm(
+            bk.random_randn(self.n, self.n)
+            if self.k == 1
+            else bk.random_randn(self.k, self.n, self.n)
+        )
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
         return tangent_vector_a
 
     def exp(self, point, tangent_vector):
-        p_inv_tv = np.linalg.solve(point, tangent_vector)
-        return point @ multiexpm(p_inv_tv, symmetric=False)
+        bk = self.backend
+        return point @ bk.linalg_expm(bk.linalg_solve(point, tangent_vector))
 
     def retraction(self, point, tangent_vector):
-        p_inv_tv = np.linalg.solve(point, tangent_vector)
-        return multiherm(
+        p_inv_tv = self.backend.linalg_solve(point, tangent_vector)
+        return self.backend.herm(
             point + tangent_vector + tangent_vector @ p_inv_tv / 2
         )
 
     def log(self, point_a, point_b):
-        c = np.linalg.cholesky(point_a)
-        c_inv = np.linalg.inv(c)
-        logm = multilogm(
-            c_inv @ point_b @ multihconj(c_inv),
-            positive_definite=True,
-        )
-        return c @ logm @ multihconj(c)
+        bk = self.backend
+        return point_a @ bk.linalg_logm(bk.linalg_solve(point_a, point_b))
 
     def zero_vector(self, point):
-        k = self._k
-        n = self._n
-        if k == 1:
-            return np.zeros((n, n), dtype=point.dtype)
-        return np.zeros((k, n, n), dtype=point.dtype)
+        bk = self.backend
+        return (
+            bk.zeros((self.n, self.n))
+            if self.k == 1
+            else bk.zeros((self.k, self.n, self.n))
+        )
 
 
 class SymmetricPositiveDefinite(_PositiveDefiniteBase):
@@ -140,10 +128,9 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
         The second-order retraction is taken from [JVV2012]_.
     """
 
-    def __init__(self, n: int, *, k: int = 1):
-        self._n = n
-        self._k = k
-
+    def __init__(
+        self, n: int, *, k: int = 1, backend: Union[Backend, None] = None
+    ):
         if k == 1:
             name = f"Manifold of symmetric positive definite {n}x{n} matrices"
         else:
@@ -152,10 +139,10 @@ class SymmetricPositiveDefinite(_PositiveDefiniteBase):
                 f"symmetric positive definite {n}x{n} matrices"
             )
         dimension = int(k * n * (n + 1) / 2)
-        super().__init__(name, dimension)
+        super().__init__(name, n, k, dimension, backend=backend)
 
     def random_point(self):
-        return super().random_point().real
+        return self.backend.real(super().random_point())
 
 
 class HermitianPositiveDefinite(_PositiveDefiniteBase):
@@ -170,10 +157,11 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
         k: The number of elements in the product geometry.
     """
 
-    def __init__(self, n: int, *, k: int = 1):
-        self._n = n
-        self._k = k
+    IS_COMPLEX = True
 
+    def __init__(
+        self, n: int, *, k: int = 1, backend: Union[Backend, None] = None
+    ):
         if k == 1:
             name = f"Manifold of Hermitian positive definite {n}x{n} matrices"
         else:
@@ -182,7 +170,7 @@ class HermitianPositiveDefinite(_PositiveDefiniteBase):
                 f"Hermitian positive definite {n}x{n} matrices"
             )
         dimension = int(k * n * (n + 1))
-        super().__init__(name, dimension)
+        super().__init__(name, n, k, dimension, backend=backend)
 
 
 class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
@@ -197,10 +185,11 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         k: The number of elements in the product geometry.
     """
 
-    def __init__(self, n: int, *, k: int = 1):
-        self._n = n
-        self._k = k
+    IS_COMPLEX = True
 
+    def __init__(
+        self, n: int, *, k: int = 1, backend: Union[Backend, None] = None
+    ):
         if k == 1:
             name = f"Manifold of special Hermitian positive definite {n}x{n} matrices"
         else:
@@ -209,18 +198,20 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
                 f"Hermitian positive definite {n}x{n} matrices"
             )
         dimension = int(k * n * (n + 1) - k)
-        super().__init__(name, dimension)
+        super().__init__(name, n, k, dimension, backend=backend)
 
     def random_point(self):
-        n = self._n
-        k = self._k
+        n = self.n
+        k = self.k
 
         # Generate point on the HPD manifold.
         point = super().random_point()
 
         # Unit determinant.
         shape = (k, 1, 1) if k > 1 else (1, 1)
-        det = (np.linalg.det(point) ** (1 / n)).reshape(shape)
+        det = self.backend.reshape(
+            self.backend.linalg_det(point) ** (1 / n), shape
+        )
         return point / det
 
     def random_tangent_vector(self, point):
@@ -233,18 +224,17 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         return tangent_vector / self.norm(point, tangent_vector)
 
     def projection(self, point, vector):
-        n = self._n
-        k = self._k
+        bk = self.backend
 
         # Project matrix on tangent space of HPD.
         vector = super().projection(point, vector)
 
         # Project on tangent space of SHPD at x.
-        shape = (k, 1, 1) if k > 1 else (1, 1)
-        t = np.real(
-            np.trace(np.linalg.solve(point, vector), axis1=-2, axis2=-1)
-        ).reshape(shape)
-        return vector - (1 / n) * t * point
+        shape = (self.k, 1, 1) if self.k > 1 else (1, 1)
+        t = bk.reshape(
+            bk.real(bk.trace(bk.linalg_solve(point, vector))), shape
+        )
+        return vector - (1 / self.n) * t * point
 
     def euclidean_to_riemannian_gradient(self, point, euclidean_gradient):
         return self.projection(
@@ -261,28 +251,27 @@ class SpecialHermitianPositiveDefinite(_PositiveDefiniteBase):
         pass
 
     def exp(self, point, tangent_vector):
-        n = self._n
-        k = self._k
-
         # Compute exponential mapping on HPD.
         e = super().exp(point, tangent_vector)
 
         # Normalize them. (This is not necessary, but it is good for numerical
         # stability.)
-        shape = (k, 1, 1) if k > 1 else (1, 1)
-        det = (np.linalg.det(e) ** (1 / n)).reshape(shape)
+        shape = (self.k, 1, 1) if self.k > 1 else (1, 1)
+        det = self.backend.reshape(
+            self.backend.linalg_det(e) ** (1 / self.n), shape
+        )
         return e / det
 
     def retraction(self, point, tangent_vector):
-        n = self._n
-        k = self._k
+        n = self.n
+        k = self.k
 
         # Compute retraction on HPD.
         r = super().retraction(point, tangent_vector)
 
         # Unit determinant.
         shape = (k, 1, 1) if k > 1 else (1, 1)
-        det = (np.linalg.det(r) ** (1 / n)).reshape(shape)
+        det = (self.backend.linalg_det(r) ** (1 / n)).reshape(shape)
         return r / det
 
     def transport(self, point_a, point_b, tangent_vector_a):

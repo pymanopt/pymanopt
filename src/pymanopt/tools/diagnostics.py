@@ -18,15 +18,18 @@ def identify_linear_piece(x, y, window_length):
     output poly specifies a first order polynomial that best fits (x, y) over
     that segment (highest degree coefficients first).
     """
-    residues = np.zeros(len(x) - window_length)
-    polys = np.zeros((2, len(residues)))
-    for k in np.arange(len(residues)):
+    residues = []
+    polys = []
+    for k in np.arange(len(x) - window_length):
         segment = np.arange(k, k + window_length + 1)
         poly, residuals, *_ = np.polyfit(
             x[segment], y[segment], deg=1, full=True
         )
-        residues[k] = np.sqrt(residuals)
-        polys[:, k] = poly
+        residues.append(residuals)
+        polys.append(poly)
+    residues = np.array(residues)
+    polys += [np.zeros(2)] * window_length
+    polys = np.stack(polys, axis=1)
     best = np.argmin(residues)
     segment = np.arange(best, best + window_length + 1)
     poly = polys[:, best]
@@ -47,7 +50,7 @@ def check_directional_derivative(
     #  If x and / or d are not specified, pick them at random.
     if d is not None and x is None:
         raise ValueError(
-            "If d is provided, x must be too, " "since d is tangent at x"
+            "If d is provided, x must be too, since d is tangent at x"
         )
     if x is None:
         x = problem.manifold.random_point()
@@ -58,13 +61,14 @@ def check_directional_derivative(
     # of it) originating from x, along direction d, for step_sizes in a
     # large range given by h.
     h = np.logspace(-8, 0, 51)
-    value = np.zeros_like(h)
-    for k, h_k in enumerate(h):
+    value = []
+    for h_k in h:
         try:
             y = problem.manifold.exp(x, h_k * d)
         except NotImplementedError:
             y = problem.manifold.retraction(x, h_k * d)
-        value[k] = problem.cost(y)
+        value.append(float(problem.cost(y)))
+    value = np.array(value)
 
     # Compute the value f0 of f at x and directional derivative at x along d.
     f0 = problem.cost(x)
@@ -74,9 +78,9 @@ def check_directional_derivative(
     if use_quadratic_model:
         hessd = problem.riemannian_hessian(x, d)
         d2f0 = problem.manifold.inner_product(x, hessd, d)
-        model = np.polyval([0.5 * d2f0, df0, f0], h)
+        model = np.polyval(np.array([0.5 * d2f0, df0, f0]), h)
     else:
-        model = np.polyval([df0, f0], h)
+        model = np.polyval(np.array([df0, f0]), h)
 
     # Compute the approximation error
     error = np.abs(model - value)
@@ -119,7 +123,7 @@ def check_directional_derivative(
         # Despite not all coordinates of the model being close to the true
         # value, some entries of 'error' can be zero. To avoid numerical issues
         # we add an epsilon here.
-        eps = np.finfo(error.dtype).eps
+        eps = float(problem.manifold.backend.eps())
         segment, poly = identify_linear_piece(
             np.log10(h), np.log10(error + eps), window_len
         )
