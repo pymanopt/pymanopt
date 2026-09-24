@@ -17,18 +17,18 @@ jobs:
 
       - name: isort
         if: success() || failure()
-        uses: pre-commit/action@v3
+        uses: pre-commit/action@v3.0.1
         with:
           extra_args: isort --all-files
 
       - name: black
         if: success() || failure()
-        uses: pre-commit/action@v3
+        uses: pre-commit/action@v3.0.1
         with:
           extra_args: black --all-files
 
       - name: flake8
         if: success() || failure()
-        uses: pre-commit/action@v3
+        uses: pre-commit/action@v3.0.1
         with:
           extra_args: flake8 --all-files
