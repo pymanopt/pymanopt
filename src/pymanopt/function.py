@@ -49,8 +49,7 @@ def _only_one_true(*args):
 class _ObjectiveFunctionDecorator(Protocol):
     def __call__(
         self, manifold: Manifold, dtype: Optional[Any] = None
-    ) -> Callable[[Callable[..., Any]], Function]:
-        ...
+    ) -> Callable[[Callable[..., Any]], Function]: ...
 
 
 def decorator_factory(

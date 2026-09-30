@@ -8,7 +8,6 @@ from examples._tools import ExampleRunner
 from pymanopt.manifolds import FixedRankEmbedded
 from pymanopt.optimizers import ConjugateGradient
 
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 

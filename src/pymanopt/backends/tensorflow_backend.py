@@ -11,7 +11,6 @@ from pymanopt.tools import (
     unpack_singleton_sequence_return_value,
 )
 
-
 # This allows to use multiple features present in numpy and other backends:
 # - tranpose of matrices with x.T
 # - type promotion between floats, ints and complex

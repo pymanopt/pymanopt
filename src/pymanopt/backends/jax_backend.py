@@ -14,7 +14,6 @@ from pymanopt.tools import (
     unpack_singleton_sequence_return_value,
 )
 
-
 # for backward compatibility with older versions of jax
 try:
     from jax import config

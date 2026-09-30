@@ -3,7 +3,6 @@ import jax.numpy as jnp
 
 import pymanopt
 
-
 key = jax.random.key(42)
 
 dim = 3

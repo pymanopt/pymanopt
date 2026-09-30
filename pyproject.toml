@@ -85,7 +85,6 @@ force_grid_wrap = 0
 include_trailing_comma = true
 line_length = 79
 multi_line_output = 3
-profile = "pycharm"
 use_parentheses = true
 extend_skip = ["src/pymanopt/_version.py"]
 
@@ -93,14 +92,15 @@ extend_skip = ["src/pymanopt/_version.py"]
 application_import_names = "pymanopt"
 docstring-convention = "google"
 exclude = ["examples/notebooks/*.py", "build"]
-ignore = ["B024", "B027", "D1", "E203", "E501", "W503"]
+ignore = ["B024", "B027", "D1", "E203", "E501", "E704", "W503"]
 import_order_style = "pycharm"
 max-line-length = 79
 select = ["B", "B950", "C", "D", "E", "F", "W"]
 # TODO(nkoep): Remove these once migrated to ruff.
 per-file-ignores = [
     "docs/conf.py:E231",
-    "examples/low_rank_matrix_approximation.py:E231",
+    "examples/*.py:F811",
+    "examples/low_rank_matrix_approximation.py:E231,F811",
     "src/pymanopt/optimizers/conjugate_gradient.py:E231",
     "src/pymanopt/optimizers/optimizer.py:E231",
     "src/pymanopt/optimizers/nelder_mead.py:E231",

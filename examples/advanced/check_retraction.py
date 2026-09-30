@@ -3,7 +3,6 @@ from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.manifolds import Positive
 from pymanopt.tools.diagnostics import check_retraction
 
-
 SUPPORTED_BACKENDS = ("numpy",)
 
 

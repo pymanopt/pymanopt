@@ -183,9 +183,11 @@ class SpecialOrthogonalGroup(_UnitaryBase):
     def random_tangent_vector(self, point):
         vector = self.backend.skew(
             self.backend.random_normal(
-                size=(self.n, self.n)
-                if self.k == 1
-                else (self.k, self.n, self.n)
+                size=(
+                    (self.n, self.n)
+                    if self.k == 1
+                    else (self.k, self.n, self.n)
+                )
             )
         )
         return vector / self.norm(point, vector)

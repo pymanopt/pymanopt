@@ -132,7 +132,8 @@ class _SphereSubspaceIntersectionManifold(_SphereBase):
             warnings.warn(
                 "Intersected subspace is 1-dimensional. The manifold "
                 "therefore has dimension 0 as it only consists of isolated "
-                "points"
+                "points",
+                stacklevel=2,
             )
         self._matrix = matrix
         self._validate_span_matrix(matrix, backend)

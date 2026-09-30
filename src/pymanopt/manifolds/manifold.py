@@ -130,7 +130,8 @@ class Manifold(metaclass=abc.ABCMeta):
         if new_backend != other_backend:
             warnings.warn(
                 f"Incompatible realness between manifold {self} and backend "
-                f"{other_backend}. Setting a compatible backend."
+                f"{other_backend}. Setting a compatible backend.",
+                stacklevel=2,
             )
         self._backend = new_backend
 
@@ -497,6 +498,7 @@ class RetrAsExpMixin:
             f"Exponential map for manifold '{class_name}' not available. "
             "Using retraction instead.",
             RuntimeWarning,
+            stacklevel=2,
         )
         return self.retraction(point, tangent_vector)
 

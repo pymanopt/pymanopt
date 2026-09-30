@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from .backend import Backend, DummyBackend  # noqa: F401
 
-
 __all__ = ["Backend", "DummyBackend"]
 
 

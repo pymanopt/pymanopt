@@ -7,7 +7,6 @@ from examples._tools import ExampleRunner
 from pymanopt.manifolds import Sphere
 from pymanopt.optimizers import SteepestDescent
 
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 

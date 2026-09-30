@@ -15,7 +15,6 @@ from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.backends.pytorch_backend import PytorchBackend
 from pymanopt.backends.tensorflow_backend import TensorflowBackend
 
-
 matplotlib.use("Agg")
 
 torch.autograd.set_detect_anomaly(True)
