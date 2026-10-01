@@ -169,6 +169,4 @@ class TestComplexGrassmannManifold(TestGrassmannManifold):
         self.projection = lambda x, u: u - x @ x.T @ u
 
     def test_dim(self):
-        assert (
-            self.manifold.dim == self.k * (self.n * self.p - self.p**2) * 2
-        )
+        assert self.manifold.dim == self.k * (self.n * self.p - self.p**2) * 2

@@ -3,7 +3,6 @@ import pytest
 from pymanopt.backends.numpy_backend import NumpyBackend
 from pymanopt.manifolds import Euclidean, Grassmann, Product, Sphere
 
-
 # TODO: test setting backends
 
 

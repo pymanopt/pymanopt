@@ -14,7 +14,6 @@ from pymanopt.backends.tensorflow_backend import TensorflowBackend
 from pymanopt.manifolds import ComplexGrassmann
 from pymanopt.optimizers import TrustRegions
 
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 

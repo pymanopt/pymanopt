@@ -1,6 +1,5 @@
 import numpy as np
 
-
 try:
     import matplotlib.pyplot as plt
 except ImportError:

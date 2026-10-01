@@ -7,7 +7,6 @@ from pymanopt.backends import Backend
 from pymanopt.function import Function
 from pymanopt.manifolds.manifold import Manifold
 
-
 __all__ = [
     "manifold_factory",
     "TestUnaryFunction",
