@@ -35,10 +35,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up python 3.12
+      - name: Determine python version
+        id: python-version
+        run: |
+          if ${{ matrix.version == 'stable' }}; then
+            echo "version=3.8" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=3.12" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.12
+          python-version: ${{ steps.python-version.outputs.version }}
           cache: pip
           cache-dependency-path: pyproject.toml
 
