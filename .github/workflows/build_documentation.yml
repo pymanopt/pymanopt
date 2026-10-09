@@ -4,13 +4,15 @@ on:
   pull_request:
     branches:
       - master
+      - develop_backends
   push:
     branches:
       - master
+      - develop_backends
 
 jobs:
   build-matrix:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Generate version matrix
         id: build-matrix
@@ -19,7 +21,7 @@ jobs:
       versions: ${{ steps.build-matrix.outputs.versions }}
 
   docs:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: build-matrix
     strategy:
       # Make sure we never build docs in parallel in case we deploy new
@@ -33,10 +35,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up python 3.8
+      - name: Determine python version
+        id: python-version
+        run: |
+          if ${{ matrix.version == 'stable' }}; then
+            echo "version=3.8" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=3.12" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: ${{ steps.python-version.outputs.version }}
           cache: pip
           cache-dependency-path: pyproject.toml
 
@@ -62,7 +73,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
-          pip install -e ".[all,ci,docs]"
+          if ${{ matrix.version == 'stable' }}; then
+            pip install -e ".[autograd,tensorflow,torch,dev,ci,docs]"
+          else
+            pip install -e ".[all,ci,docs]"
+          fi
 
       - name: Run doctests
         run: sphinx-build -b doctest docs $(mktemp -d)
@@ -85,6 +100,6 @@ jobs:
           publish_branch: main
           publish_dir: website/docs/${{ matrix.version }}
           destination_dir: docs/${{ matrix.version }}
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
           commit_message: ${{ github.event.head_commit.message }}
