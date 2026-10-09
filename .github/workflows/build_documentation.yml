@@ -73,7 +73,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
-          pip install -e ".[all,ci,docs]"
+          if ${{ matrix.version == 'stable' }}; then
+            pip install -e ".[autograd,tensorflow,torch,dev,ci,docs]"
+          else
+            pip install -e ".[all,ci,docs]"
+          fi
 
       - name: Run doctests
         run: sphinx-build -b doctest docs $(mktemp -d)
