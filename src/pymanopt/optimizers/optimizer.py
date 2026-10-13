@@ -62,7 +62,7 @@ class Optimizer(metaclass=abc.ABCMeta):
         return type(self).__name__
 
     @abc.abstractmethod
-    def run(self, problem, *, initial_point=None, **kwargs) -> OptimizerResult:
+    def run(self, problem, *, initial_point=None) -> OptimizerResult:
         """Run an optimizer on a given optimization problem.
 
         Args:
@@ -71,8 +71,6 @@ class Optimizer(metaclass=abc.ABCMeta):
             initial_point: Initial point on the manifold.
                 If no value is provided then a starting point will be randomly
                 generated.
-            *args: Potential optimizer-specific positional arguments.
-            **kwargs: Potential optimizer-specific keyword arguments.
 
         Returns:
             The optimization result.
