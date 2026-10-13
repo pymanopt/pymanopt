@@ -402,15 +402,11 @@ class JaxBackend(Backend):
         new_key_1, new_key_2 = self._generate_random_keys(n=2)
         return (
             scale
-            * jax.random.normal(
-                key=new_key_1, shape=size, dtype=real_dtype
-            )
+            * jax.random.normal(key=new_key_1, shape=size, dtype=real_dtype)
             + loc
         ) + 1j * (
             scale
-            * jax.random.normal(
-                key=new_key_2, shape=size, dtype=real_dtype
-            )
+            * jax.random.normal(key=new_key_2, shape=size, dtype=real_dtype)
             + loc
         )
 

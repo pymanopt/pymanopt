@@ -212,10 +212,7 @@ class PytorchBackend(Backend):
         return False
 
     def array(self, array: Any) -> torch.Tensor:  # type: ignore
-        if (
-            self.is_dtype_real
-            and self._is_complex_with_nonzero_imag(array)
-        ):
+        if self.is_dtype_real and self._is_complex_with_nonzero_imag(array):
             raise ValueError(
                 "Complex Tensors should not be converted to real tensors"
             )

@@ -312,9 +312,9 @@ class TensorflowBackend(Backend):
         if array_y is None:
             return tf.math.real(tf.linalg.eigvalsh(array_x))
         return self.array(
-            np.vectorize(
-                scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
-            )(array_x.numpy(), array_y.numpy())
+            np.vectorize(scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)")(
+                array_x.numpy(), array_y.numpy()
+            )
         )
 
     def linalg_expm(

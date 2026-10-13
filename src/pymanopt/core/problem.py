@@ -237,7 +237,7 @@ class Problem:
             return single_argument_wrapper
 
         @functools.wraps(function)
-        def multiple_arguments_wrapper(*point):
+        def multiple_arguments_wrapper(point):
             return function(*point)
 
         return multiple_arguments_wrapper
