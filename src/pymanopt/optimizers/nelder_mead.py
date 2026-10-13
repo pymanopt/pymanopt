@@ -2,8 +2,8 @@ import time
 
 import numpy as np
 
-import pymanopt
 from pymanopt import tools
+from pymanopt.core.problem import Problem
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 from pymanopt.optimizers.steepest_descent import SteepestDescent
 
@@ -25,7 +25,7 @@ def compute_centroid(manifold, points):
         )
 
     optimizer = SteepestDescent(max_iterations=15, verbosity=0)
-    problem = pymanopt.Problem(
+    problem = Problem(
         manifold, objective, riemannian_gradient=riemannian_gradient
     )
     return optimizer.run(problem).point
@@ -162,7 +162,7 @@ class NelderMead(Optimizer):
 
             # If the reflected point is honorable, drop the worst point,
             # replace it by the reflected point and start a new iteration.
-            if costr >= costs[0] and costr < costs[-2]:
+            if costs[0] <= costr < costs[-2]:
                 if self._verbosity >= 2:
                     print("Reflection")
                 costs[-1] = costr
