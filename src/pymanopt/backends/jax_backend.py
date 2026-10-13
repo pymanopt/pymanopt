@@ -93,20 +93,18 @@ class JaxBackend(Backend):
             return self
         if self.dtype == jnp.complex64:
             return JaxBackend(dtype=jnp.float32)
-        elif self.dtype == jnp.complex128:
+        if self.dtype == jnp.complex128:
             return JaxBackend(dtype=jnp.float64)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     def to_complex_backend(self) -> "JaxBackend":
         if not self.is_dtype_real:
             return self
         if self.dtype == jnp.float32:
             return JaxBackend(dtype=jnp.complex64)
-        elif self.dtype == jnp.float64:
+        if self.dtype == jnp.float64:
             return JaxBackend(dtype=jnp.complex128)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     ##############################################################################
     # Autodiff methods
@@ -271,15 +269,14 @@ class JaxBackend(Backend):
     ) -> jnp.ndarray:
         if array_y is None:
             return jscipy.linalg.eigh(array_x, array_y, eigvals_only=True)
-        else:
-            # the generalized eigen value problem is only supported in scipy
-            # for the moment.
-            return jnp.asarray(
-                np.vectorize(
-                    pyfunc=scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
-                )(np.asarray(array_x), np.asarray(array_y)),
-                dtype=self.dtype,
-            )
+        # the generalized eigen value problem is only supported in scipy
+        # for the moment.
+        return jnp.asarray(
+            np.vectorize(
+                pyfunc=scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
+            )(np.asarray(array_x), np.asarray(array_y)),
+            dtype=self.dtype,
+        )
 
     def linalg_expm(
         self, array: jnp.ndarray, symmetric: bool = False
@@ -401,22 +398,21 @@ class JaxBackend(Backend):
                 * jax.random.normal(key=new_key, shape=size, dtype=self.dtype)
                 + loc
             )
-        else:
-            real_dtype = jnp.finfo(self.dtype).dtype
-            new_key_1, new_key_2 = self._generate_random_keys(n=2)
-            return (
-                scale
-                * jax.random.normal(
-                    key=new_key_1, shape=size, dtype=real_dtype
-                )
-                + loc
-            ) + 1j * (
-                scale
-                * jax.random.normal(
-                    key=new_key_2, shape=size, dtype=real_dtype
-                )
-                + loc
+        real_dtype = jnp.finfo(self.dtype).dtype
+        new_key_1, new_key_2 = self._generate_random_keys(n=2)
+        return (
+            scale
+            * jax.random.normal(
+                key=new_key_1, shape=size, dtype=real_dtype
             )
+            + loc
+        ) + 1j * (
+            scale
+            * jax.random.normal(
+                key=new_key_2, shape=size, dtype=real_dtype
+            )
+            + loc
+        )
 
     def random_uniform(
         self, size: Union[int, TupleOrList[int], None] = None
@@ -431,14 +427,13 @@ class JaxBackend(Backend):
             return jax.random.uniform(
                 key=new_key, shape=size, dtype=self.dtype
             )
-        else:
-            real_dtype = jnp.finfo(self.dtype).dtype
-            new_key_1, new_key_2 = self._generate_random_keys(n=2)
-            return jax.random.uniform(
-                key=new_key_1, shape=size, dtype=real_dtype
-            ) + 1j * jax.random.uniform(
-                key=new_key_2, shape=size, dtype=real_dtype
-            )
+        real_dtype = jnp.finfo(self.dtype).dtype
+        new_key_1, new_key_2 = self._generate_random_keys(n=2)
+        return jax.random.uniform(
+            key=new_key_1, shape=size, dtype=real_dtype
+        ) + 1j * jax.random.uniform(
+            key=new_key_2, shape=size, dtype=real_dtype
+        )
 
     def real(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.real(array)
@@ -520,12 +515,11 @@ class JaxBackend(Backend):
     ) -> Union[jnp.ndarray, tuple[jnp.ndarray, ...]]:
         if x is None and y is None:
             return jnp.where(condition)
-        elif x is not None and y is not None:
+        if x is not None and y is not None:
             return jnp.where(condition, x, y)
-        else:
-            raise ValueError(
-                f"Both x and y have to be specified but are respectively {x} and {y}"
-            )
+        raise ValueError(
+            f"Both x and y have to be specified but are respectively {x} and {y}"
+        )
 
     def zeros(self, shape: TupleOrList[int]) -> jnp.ndarray:
         return jnp.zeros(shape, dtype=self.dtype)

@@ -180,12 +180,11 @@ class NelderMead(Optimizer):
                     costs[-1] = coste
                     x[-1] = xe
                     continue
-                else:
-                    if self._verbosity >= 2:
-                        print("Reflection (failed expansion)")
-                    costs[-1] = costr
-                    x[-1] = xr
-                    continue
+                if self._verbosity >= 2:
+                    print("Reflection (failed expansion)")
+                costs[-1] = costr
+                x[-1] = xr
+                continue
 
             # If the reflected point is worse than the second to worst point,
             # contract.

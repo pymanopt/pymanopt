@@ -155,10 +155,9 @@ class Problem:
                     f" {manifold.backend}."
                 )
             return function
-        else:
-            return Function(
-                function=function, manifold=manifold, backend=manifold.backend
-            )
+        return Function(
+            function=function, manifold=manifold, backend=manifold.backend
+        )
 
     def _flatten_arguments(self, arguments, signature):
         if len(arguments) != len(signature):

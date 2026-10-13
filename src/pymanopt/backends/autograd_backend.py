@@ -35,20 +35,18 @@ class AutogradBackend(NumpyBackend):
             return self
         if self.dtype == complex64:
             return AutogradBackend(dtype=float32)
-        elif self.dtype == complex128:
+        if self.dtype == complex128:
             return AutogradBackend(dtype=float64)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     def to_complex_backend(self) -> "AutogradBackend":
         if not self.is_dtype_real:
             return self
         if self.dtype == float32:
             return AutogradBackend(dtype=complex64)
-        elif self.dtype == float64:
+        if self.dtype == float64:
             return AutogradBackend(dtype=complex128)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     ##############################################################################
     # Autodiff methods
