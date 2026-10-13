@@ -162,10 +162,9 @@ class ConjugateGradient(Optimizer):
         beta_rule: str = "HestenesStiefel",
         orth_value=np.inf,
         line_searcher=None,
-        *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         try:
             self._beta_update = BETA_RULES[beta_rule]

@@ -55,10 +55,9 @@ class NelderMead(Optimizer):
         reflection=1,
         expansion=2,
         contraction=0.5,
-        *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         self._max_cost_evaluations = max_cost_evaluations
         self._max_iterations = max_iterations
