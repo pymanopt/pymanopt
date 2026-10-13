@@ -44,7 +44,7 @@ class NumpyBackend(Backend):
     def dtype_precision(self) -> DTypePrecision:
         return (
             DTypePrecision.SINGLE
-            if (self.dtype == np.float32 or self.dtype == np.complex64)
+            if self.dtype in (np.float32, np.complex64)
             else DTypePrecision.DOUBLE
         )
 

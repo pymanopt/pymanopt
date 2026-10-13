@@ -63,7 +63,7 @@ class TensorflowBackend(Backend):
     def dtype_precision(self) -> DTypePrecision:
         return (
             DTypePrecision.SINGLE
-            if (self.dtype == tf.float32 or self.dtype == tf.complex64)
+            if self.dtype in (tf.float32, tf.complex64)
             else DTypePrecision.DOUBLE
         )
 

@@ -23,8 +23,8 @@ class _UnitaryBase(RiemannianSubmanifold):
 
         try:
             self._retraction = getattr(self, f"_retraction_{retraction}")
-        except AttributeError:
-            raise ValueError(f"Invalid retraction type '{retraction}'")
+        except AttributeError as exc:
+            raise ValueError(f"Invalid retraction type '{retraction}'") from exc
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         return self.backend.tensordot(

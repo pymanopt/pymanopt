@@ -231,16 +231,16 @@ class Problem:
         if point_layout == 1:
 
             @functools.wraps(function)
-            def wrapper(point):
+            def single_argument_wrapper(point):
                 return function(point)
 
-        else:
+            return single_argument_wrapper
 
-            @functools.wraps(function)
-            def wrapper(point):
-                return function(*point)
+        @functools.wraps(function)
+        def multiple_arguments_wrapper(*point):
+            return function(*point)
 
-        return wrapper
+        return multiple_arguments_wrapper
 
     def _wrap_gradient_operator(self, gradient):
         wrapped_gradient = self._wrap_function(gradient)
@@ -267,14 +267,18 @@ class Problem:
         elif point_layout == 1:
 
             @functools.wraps(hessian_operator)
-            def wrapper(point, vector):
+            def single_argument_wrapper(point, vector):
                 return hessian_operator(point, vector)
+
+            wrapper = single_argument_wrapper
 
         else:
 
             @functools.wraps(hessian_operator)
-            def wrapper(point, vector):
+            def multiple_arguments_wrapper(point, vector):
                 return hessian_operator(*point, *vector)
+
+            wrapper = multiple_arguments_wrapper
 
         if embed_tangent_vectors:
 

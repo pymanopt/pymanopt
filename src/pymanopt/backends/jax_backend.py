@@ -69,7 +69,7 @@ class JaxBackend(Backend):
     def dtype_precision(self) -> DTypePrecision:
         return (
             DTypePrecision.SINGLE
-            if (self.dtype == jnp.float32 or self.dtype == jnp.complex64)
+            if self.dtype in (jnp.float32, jnp.complex64)
             else DTypePrecision.DOUBLE
         )
 

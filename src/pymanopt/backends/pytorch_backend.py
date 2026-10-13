@@ -56,7 +56,7 @@ class PytorchBackend(Backend):
     def dtype_precision(self) -> DTypePrecision:
         return (
             DTypePrecision.SINGLE
-            if (self.dtype == torch.float32 or self.dtype == torch.complex64)
+            if self.dtype in (torch.float32, torch.complex64)
             else DTypePrecision.DOUBLE
         )
 
@@ -200,18 +200,21 @@ class PytorchBackend(Backend):
     def argsort(self, array: torch.Tensor):
         return torch.argsort(array)
 
+    def _is_complex_with_nonzero_imag(self, array: Any) -> bool:
+        if isinstance(array, torch.Tensor):
+            return self.iscomplexobj(array) and not self.allclose(
+                torch.imag(array), torch.tensor(0.0)
+            )
+        if isinstance(array, np.ndarray):
+            return np.iscomplexobj(array) and not np.allclose(
+                np.imag(array), 0.0, atol=1e-5
+            )
+        return False
+
     def array(self, array: Any) -> torch.Tensor:  # type: ignore
-        if self.is_dtype_real and (
-            (
-                isinstance(array, torch.Tensor)
-                and self.iscomplexobj(array)
-                and not self.allclose(torch.imag(array), torch.tensor(0.0))
-            )
-            or (
-                isinstance(array, np.ndarray)
-                and np.iscomplexobj(array)
-                and not np.allclose(np.imag(array), 0.0, atol=1e-5)
-            )
+        if (
+            self.is_dtype_real
+            and self._is_complex_with_nonzero_imag(array)
         ):
             raise ValueError(
                 "Complex Tensors should not be converted to real tensors"
