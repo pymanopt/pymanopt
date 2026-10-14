@@ -85,7 +85,6 @@ class TrustRegions(Optimizer):
         rho_prime=0.1,
         use_rand=False,
         rho_regularization=1e3,
-        *args,
         **kwargs,
     ):
         """Riemannian Trust-Regions algorithm.
@@ -95,7 +94,7 @@ class TrustRegions(Optimizer):
         Also included is the truncated (Steihaug-Toint) conjugate gradient
         algorithm.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         self.miniter = miniter
         self.kappa = kappa
@@ -168,6 +167,8 @@ class TrustRegions(Optimizer):
 
         self._initialize_log()
 
+        used_cauchy = False
+
         while True:
             iteration += 1
 
@@ -208,7 +209,6 @@ class TrustRegions(Optimizer):
             # consistently, or none of them have.
 
             if self.use_rand:
-                used_cauchy = False
                 # Check the curvature
                 Hg = hess(x, fgradx)
                 g_Hg = manifold.inner_product(x, fgradx, Hg)

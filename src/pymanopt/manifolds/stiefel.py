@@ -69,8 +69,10 @@ class Stiefel(RiemannianSubmanifold):
 
         try:
             self._retraction = getattr(self, f"_retraction_{retraction}")
-        except AttributeError:
-            raise ValueError(f"Invalid retraction type '{retraction}'")
+        except AttributeError as exc:
+            raise ValueError(
+                f"Invalid retraction type '{retraction}'"
+            ) from exc
 
     @property
     def typical_dist(self):

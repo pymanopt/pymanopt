@@ -24,8 +24,7 @@ def elementary_math_function(
     ) -> Union[torch.Tensor, float, complex]:
         if isinstance(x, torch.Tensor):
             return f(self, x)
-        else:
-            return f(self, self.array(x)).item()
+        return f(self, self.array(x)).item()
 
     inner.__doc__ = f.__doc__
     inner.__name__ = f.__name__
@@ -57,7 +56,7 @@ class PytorchBackend(Backend):
     def dtype_precision(self) -> DTypePrecision:
         return (
             DTypePrecision.SINGLE
-            if (self.dtype == torch.float32 or self.dtype == torch.complex64)
+            if self.dtype in (torch.float32, torch.complex64)
             else DTypePrecision.DOUBLE
         )
 
@@ -78,30 +77,27 @@ class PytorchBackend(Backend):
             return self
         if self.dtype == torch.complex64:
             return PytorchBackend(dtype=torch.float32)
-        elif self.dtype == torch.complex128:
+        if self.dtype == torch.complex128:
             return PytorchBackend(dtype=torch.float64)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     def to_complex_backend(self) -> "PytorchBackend":
         if not self.is_dtype_real:
             return self
         if self.dtype == torch.float32:
             return PytorchBackend(dtype=torch.complex64)
-        elif self.dtype == torch.float64:
+        if self.dtype == torch.float64:
             return PytorchBackend(dtype=torch.complex128)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     def _complex_to_real_dtype(
         self, complex_dtype: torch.dtype
     ) -> torch.dtype:
         if complex_dtype == torch.complex64:
             return torch.float32
-        elif complex_dtype == torch.complex128:
+        if complex_dtype == torch.complex128:
             return torch.float64
-        else:
-            raise ValueError(f"Provided dtype {complex_dtype} is not complex.")
+        raise ValueError(f"Provided dtype {complex_dtype} is not complex.")
 
     def __repr__(self):
         return f"PytorchBackend(dtype={self.dtype})"
@@ -204,19 +200,19 @@ class PytorchBackend(Backend):
     def argsort(self, array: torch.Tensor):
         return torch.argsort(array)
 
+    def _is_complex_with_nonzero_imag(self, array: Any) -> bool:
+        if isinstance(array, torch.Tensor):
+            return self.iscomplexobj(array) and not self.allclose(
+                torch.imag(array), torch.tensor(0.0)
+            )
+        if isinstance(array, np.ndarray):
+            return np.iscomplexobj(array) and not np.allclose(
+                np.imag(array), 0.0, atol=1e-5
+            )
+        return False
+
     def array(self, array: Any) -> torch.Tensor:  # type: ignore
-        if self.is_dtype_real and (
-            (
-                isinstance(array, torch.Tensor)
-                and self.iscomplexobj(array)
-                and not self.allclose(torch.imag(array), torch.tensor(0.0))
-            )
-            or (
-                isinstance(array, np.ndarray)
-                and np.iscomplexobj(array)
-                and not np.allclose(np.imag(array), 0.0, atol=1e-5)
-            )
-        ):
+        if self.is_dtype_real and self._is_complex_with_nonzero_imag(array):
             raise ValueError(
                 "Complex Tensors should not be converted to real tensors"
             )
@@ -313,15 +309,14 @@ class PytorchBackend(Backend):
     ) -> torch.Tensor:
         if array_y is None:
             return torch.linalg.eigvalsh(array_x)
-        else:
-            return torch.from_numpy(
-                np.vectorize(
-                    pyfunc=scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
-                )(
-                    array_x.cpu().detach().numpy(),
-                    array_y.cpu().detach().numpy(),
-                )
+        return torch.from_numpy(
+            np.vectorize(
+                pyfunc=scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
+            )(
+                array_x.cpu().detach().numpy(),
+                array_y.cpu().detach().numpy(),
             )
+        )
 
     def linalg_expm(
         self, array: torch.Tensor, symmetric: bool = False
@@ -569,12 +564,11 @@ class PytorchBackend(Backend):
     ) -> torch.Tensor:
         if x is None and y is None:
             return torch.where(condition)
-        elif x is not None and y is not None:
+        if x is not None and y is not None:
             return torch.where(condition, x, y)
-        else:
-            raise ValueError(
-                f"Both x and y have to be specified but are respectively {x} and {y}"
-            )
+        raise ValueError(
+            f"Both x and y have to be specified but are respectively {x} and {y}"
+        )
 
     def zeros(self, shape: list[int]) -> torch.Tensor:
         return torch.zeros(shape, dtype=self.dtype)

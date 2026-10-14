@@ -347,7 +347,9 @@ class Backend(ABC):
     def linalg_norm(
         self,
         array: array_t,
-        ord: Union[int, Literal["fro"], None] = None,
+        ord: Union[  # noqa: A002 pylint: disable=redefined-builtin
+            int, Literal["fro"], None
+        ] = None,  # noqa: A002 pylint: disable=redefined-builtin
         axis: Union[int, TupleOrList[int], None] = None,
         keepdims: bool = False,
     ) -> array_t: ...
@@ -594,7 +596,11 @@ class DummyBackend(Backend):
         return self
 
     def generate_gradient_operator(self, function, num_arguments):
-        return super().generate_gradient_operator(function, num_arguments)
+        raise NotImplementedError(
+            "DummyBackend provides no gradient operator generation"
+        )
 
     def generate_hessian_operator(self, function, num_arguments):
-        return super().generate_hessian_operator(function, num_arguments)
+        raise NotImplementedError(
+            "DummyBackend provides no Hessian operator generation"
+        )

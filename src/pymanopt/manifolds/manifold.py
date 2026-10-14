@@ -403,7 +403,6 @@ class Manifold(metaclass=abc.ABCMeta):
         Returns:
             The tangent vector at ``point`` closest to ``vector``.
         """
-        ...
 
     def embedding(self, point, tangent_vector):
         """Convert tangent vector to ambient space representation.

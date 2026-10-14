@@ -31,8 +31,7 @@ def elementary_math_function(
     ) -> Union[tf.Tensor, Number]:
         if isinstance(x, tf.Tensor):
             return f(self, x)
-        else:
-            return f(self, self.array(x)).numpy().item()
+        return f(self, self.array(x)).numpy().item()
 
     inner.__doc__ = f.__doc__
     inner.__name__ = f.__name__
@@ -64,7 +63,7 @@ class TensorflowBackend(Backend):
     def dtype_precision(self) -> DTypePrecision:
         return (
             DTypePrecision.SINGLE
-            if (self.dtype == tf.float32 or self.dtype == tf.complex64)
+            if self.dtype in (tf.float32, tf.complex64)
             else DTypePrecision.DOUBLE
         )
 
@@ -88,28 +87,25 @@ class TensorflowBackend(Backend):
             return self
         if self.dtype == tf.complex64:
             return TensorflowBackend(dtype=tf.float32)
-        elif self.dtype == tf.complex128:
+        if self.dtype == tf.complex128:
             return TensorflowBackend(dtype=tf.float64)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     def to_complex_backend(self) -> "TensorflowBackend":
         if not self.is_dtype_real:
             return self
         if self.dtype == tf.float32:
             return TensorflowBackend(dtype=tf.complex64)
-        elif self.dtype == tf.float64:
+        if self.dtype == tf.float64:
             return TensorflowBackend(dtype=tf.complex128)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     def _complex_to_real_dtype(self, complex_dtype: tf.DType) -> tf.DType:
         if complex_dtype == tf.complex64:
             return tf.float32
-        elif complex_dtype == tf.complex128:
+        if complex_dtype == tf.complex128:
             return tf.float64
-        else:
-            raise ValueError(f"Provided dtype {complex_dtype} is not complex.")
+        raise ValueError(f"Provided dtype {complex_dtype} is not complex.")
 
     ##############################################################################
     # Autodiff methods
@@ -315,12 +311,11 @@ class TensorflowBackend(Backend):
     ) -> tf.Tensor:
         if array_y is None:
             return tf.math.real(tf.linalg.eigvalsh(array_x))
-        else:
-            return self.array(
-                np.vectorize(
-                    scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
-                )(array_x.numpy(), array_y.numpy())
+        return self.array(
+            np.vectorize(scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)")(
+                array_x.numpy(), array_y.numpy()
             )
+        )
 
     def linalg_expm(
         self, array: tf.Tensor, symmetric: bool = False
@@ -581,12 +576,11 @@ class TensorflowBackend(Backend):
     ) -> tf.Tensor:
         if x is None and y is None:
             return tf.where(condition)
-        elif x is not None and y is not None:
+        if x is not None and y is not None:
             return tf.where(condition, x, y)
-        else:
-            raise ValueError(
-                f"Both x and y have to be specified but are respectively {x} and {y}"
-            )
+        raise ValueError(
+            f"Both x and y have to be specified but are respectively {x} and {y}"
+        )
 
     def zeros(self, shape: TupleOrList[int]) -> tf.Tensor:
         return tf.zeros(shape, dtype=self.dtype)

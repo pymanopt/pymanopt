@@ -44,7 +44,7 @@ class NumpyBackend(Backend):
     def dtype_precision(self) -> DTypePrecision:
         return (
             DTypePrecision.SINGLE
-            if (self.dtype == np.float32 or self.dtype == np.complex64)
+            if self.dtype in (np.float32, np.complex64)
             else DTypePrecision.DOUBLE
         )
 
@@ -68,20 +68,18 @@ class NumpyBackend(Backend):
             return self
         if self.dtype == np.complex64:
             return NumpyBackend(dtype=np.float32)
-        elif self.dtype == np.complex128:
+        if self.dtype == np.complex128:
             return NumpyBackend(dtype=np.float64)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     def to_complex_backend(self) -> "NumpyBackend":
         if not self.is_dtype_real:
             return self
         if self.dtype == np.float32:
             return NumpyBackend(dtype=np.complex64)
-        elif self.dtype == np.float64:
+        if self.dtype == np.float64:
             return NumpyBackend(dtype=np.complex128)
-        else:
-            raise ValueError(f"dtype {self.dtype} is not supported")
+        raise ValueError(f"dtype {self.dtype} is not supported")
 
     ##############################################################################
     # Autodiff methods
@@ -221,10 +219,9 @@ class NumpyBackend(Backend):
     ) -> np.ndarray:
         if array_y is None:
             return np.linalg.eigvalsh(array_x)
-        else:
-            return np.vectorize(
-                scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
-            )(array_x, array_y)
+        return np.vectorize(
+            scipy.linalg.eigvalsh, signature="(m,m),(m,m)->(m)"
+        )(array_x, array_y)
 
     def linalg_expm(
         self, array: np.ndarray, symmetric: bool = False
@@ -344,26 +341,24 @@ class NumpyBackend(Backend):
                 np.random.normal(loc=loc, scale=scale, size=size),
                 dtype=self.dtype,
             )
-        else:
-            real_dtype = np.finfo(self.dtype).dtype
-            return np.asarray(
-                np.random.normal(loc=loc, scale=scale, size=size),
-                dtype=real_dtype,
-            ) + 1j * np.asarray(
-                np.random.normal(loc=loc, scale=scale, size=size),
-                dtype=real_dtype,
-            )
+        real_dtype = np.finfo(self.dtype).dtype
+        return np.asarray(
+            np.random.normal(loc=loc, scale=scale, size=size),
+            dtype=real_dtype,
+        ) + 1j * np.asarray(
+            np.random.normal(loc=loc, scale=scale, size=size),
+            dtype=real_dtype,
+        )
 
     def random_uniform(
         self, size: Union[int, TupleOrList[int], None] = None
     ) -> np.ndarray:
         if self.is_dtype_real:
             return np.asarray(np.random.uniform(size=size), dtype=self.dtype)
-        else:
-            real_dtype = np.finfo(self.dtype).dtype
-            return np.asarray(
-                np.random.uniform(size=size), dtype=real_dtype
-            ) + 1j * np.asarray(np.random.uniform(size=size), dtype=real_dtype)
+        real_dtype = np.finfo(self.dtype).dtype
+        return np.asarray(
+            np.random.uniform(size=size), dtype=real_dtype
+        ) + 1j * np.asarray(np.random.uniform(size=size), dtype=real_dtype)
 
     def real(self, array: np.ndarray) -> np.ndarray:
         return np.real(array)
@@ -443,12 +438,11 @@ class NumpyBackend(Backend):
     ) -> Union[np.ndarray, tuple[np.ndarray, ...]]:
         if x is None and y is None:
             return np.where(condition)
-        elif x is not None and y is not None:
+        if x is not None and y is not None:
             return np.where(condition, x, y)
-        else:
-            raise ValueError(
-                f"Both x and y have to be specified but are respectively {x} and {y}"
-            )
+        raise ValueError(
+            f"Both x and y have to be specified but are respectively {x} and {y}"
+        )
 
     def zeros(self, shape: TupleOrList[int]) -> np.ndarray:
         return np.zeros(shape, dtype=self.dtype)

@@ -19,8 +19,8 @@ class SteepestDescent(Optimizer):
         line_searcher: The line search method.
     """
 
-    def __init__(self, line_searcher=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, line_searcher=None, **kwargs):
+        super().__init__(**kwargs)
 
         if line_searcher is None:
             self._line_searcher = BackTrackingLineSearcher()

@@ -162,18 +162,17 @@ class ConjugateGradient(Optimizer):
         beta_rule: str = "HestenesStiefel",
         orth_value=np.inf,
         line_searcher=None,
-        *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         try:
             self._beta_update = BETA_RULES[beta_rule]
-        except KeyError:
+        except KeyError as exc:
             raise ValueError(
                 f"Invalid beta rule '{beta_rule}'. Should be one of "
                 f"{list(BETA_RULES.keys())}."
-            )
+            ) from exc
         self._beta_rule = beta_rule
         self._orth_value = orth_value
 
