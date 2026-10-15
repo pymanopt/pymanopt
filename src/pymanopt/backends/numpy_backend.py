@@ -268,7 +268,9 @@ class NumpyBackend(Backend):
     def linalg_norm(
         self,
         array: np.ndarray,
-        ord: Union[int, Literal["fro"], None] = None,
+        ord: Union[
+            int, Literal["fro"], None
+        ] = None,  # noqa: A002 pylint: disable=redefined-builtin
         axis: Union[int, TupleOrList[int], None] = None,
         keepdims: bool = False,
     ) -> Union[np.ndarray, Number]:
