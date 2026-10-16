@@ -41,7 +41,7 @@ jobs:
           if ${{ matrix.version == 'stable' }}; then
             echo "version=3.11" >> "$GITHUB_OUTPUT"
           else
-            echo "version=3.14" >> "$GITHUB_OUTPUT"
+            echo "version=3.12" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up python
