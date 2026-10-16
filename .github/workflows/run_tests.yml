@@ -4,20 +4,24 @@ on:
   pull_request:
     branches:
       - master
+      - develop_backends
   push:
+    branches:
+      - master
+      - develop_backends
 
 jobs:
   tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version:
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
-          - "3.x"
+      fail-fast: false
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -37,7 +41,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest -v --cov-report= --cov=src/pymanopt tests/
+          pytest --cov-report= --cov=src/pymanopt tests/
           coverage lcov -o coverage/lcov.info
 
       - name: Collect coverage
@@ -49,7 +53,7 @@ jobs:
 
   finish:
     needs: tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Upload coverage
         uses: coverallsapp/github-action@master

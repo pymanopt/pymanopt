@@ -7,12 +7,12 @@ import pymanopt
 
 
 def setup(app):
-    def config_inited(app, config):
+    def config_inited(_, config):
         doc_version = config.doc_version
         if doc_version in ["latest", "stable"]:
-            config.version = (
-                config.release
-            ) = f"{doc_version} ({config.version})"
+            config.version = config.release = (
+                f"{doc_version} ({config.version})"
+            )
         config.html_context["doc_version"] = doc_version
         config.html_context["doc_versions"] = (
             config.doc_versions.split(",") or []
@@ -46,7 +46,7 @@ extensions = [
     "sphinxcontrib.katex",
 ]
 master_doc = "index"
-language = None
+language = "en"
 
 # Output options
 html_theme = "sphinx_rtd_theme"
@@ -153,5 +153,4 @@ katex_options = (
     + r'"\\operatorname{tr}"'
     + "}"
 )
-print(f"Defined KaTeX macros:\n{katex_options}")
 latex_elements = {"preamble": latex_macros}

@@ -1,5 +1,6 @@
-import numpy as np
+from typing import Union
 
+from pymanopt.backends import Backend
 from pymanopt.manifolds.manifold import RiemannianSubmanifold
 
 
@@ -19,29 +20,37 @@ class ComplexCircle(RiemannianSubmanifold):
         real plane.
     """
 
-    def __init__(self, n=1):
-        self._n = n
+    IS_COMPLEX = True
+
+    def __init__(self, n=1, backend: Union[Backend, None] = None):
+        self.n = n
         if n == 1:
             name = "Complex circle S^1"
         else:
             name = f"Product manifold of complex circles (S^1)^{n}"
-        super().__init__(name, n)
+        super().__init__(name, n, backend=backend)
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
-        return (tangent_vector_a.conj() @ tangent_vector_b).real
+        return (
+            self.backend.conjugate(tangent_vector_a) @ tangent_vector_b
+        ).real
 
     def norm(self, point, tangent_vector):
-        return np.linalg.norm(tangent_vector)
+        return self.backend.linalg_norm(tangent_vector)
 
     def dist(self, point_a, point_b):
-        return np.linalg.norm(np.arccos((point_a.conj() * point_b).real))
+        return self.backend.linalg_norm(
+            self.backend.arccos(
+                (self.backend.conjugate(point_a) * point_b).real
+            )
+        )
 
     @property
     def typical_dist(self):
-        return np.pi * np.sqrt(self._dimension)
+        return self.backend.pi * self.backend.sqrt(self._dimension)
 
     def projection(self, point, vector):
-        return vector - (vector.conj() * point).real * point
+        return vector - (self.backend.conjugate(vector) * point).real * point
 
     to_tangent_space = projection
 
@@ -51,18 +60,20 @@ class ComplexCircle(RiemannianSubmanifold):
         return self.projection(
             point,
             euclidean_hessian
-            - (point * euclidean_gradient.conj()).real * tangent_vector,
+            - (point * self.backend.conjugate(euclidean_gradient)).real
+            * tangent_vector,
         )
 
     def exp(self, point, tangent_vector):
-        tangent_vector_abs = np.abs(tangent_vector)
+        tangent_vector_abs = self.backend.abs(tangent_vector)
         mask = tangent_vector_abs > 0
-        not_mask = np.logical_not(mask)
-        tangent_vector_new = np.zeros(self._dimension)
-        tangent_vector_new[mask] = point[mask] * np.cos(
+        not_mask = self.backend.logical_not(mask)
+        tangent_vector_new = self.backend.zeros(self._dimension)
+        tangent_vector_new[mask] = point[mask] * self.backend.cos(
             tangent_vector_abs[mask]
         ) + tangent_vector[mask] * (
-            np.sin(tangent_vector_abs[mask]) / tangent_vector_abs[mask]
+            self.backend.sin(tangent_vector_abs[mask])
+            / tangent_vector_abs[mask]
         )
         tangent_vector_new[not_mask] = point[not_mask]
         return tangent_vector_new
@@ -72,8 +83,10 @@ class ComplexCircle(RiemannianSubmanifold):
 
     def log(self, point_a, point_b):
         v = self.projection(point_a, point_b - point_a)
-        abs_v = np.abs(v)
-        di = np.arccos((point_a.conj() * point_b).real)
+        abs_v = self.backend.abs(v)
+        di = self.backend.arccos(
+            (self.backend.conjugate(point_a) * point_b).real
+        )
         factors = di / abs_v
         factors[di <= 1e-6] = 1
         return v * factors
@@ -81,12 +94,14 @@ class ComplexCircle(RiemannianSubmanifold):
     def random_point(self):
         dimension = self._dimension
         return self._normalize(
-            np.random.normal(size=dimension)
-            + 1j * np.random.normal(size=dimension)
+            self.backend.random_normal(size=dimension)
+            + 1j * self.backend.random_normal(size=dimension)
         )
 
     def random_tangent_vector(self, point):
-        tangent_vector = np.random.normal(size=self._dimension) * 1j * point
+        tangent_vector = (
+            self.backend.random_normal(size=self._dimension) * 1j * point
+        )
         return tangent_vector / self.norm(point, tangent_vector)
 
     def transport(self, point_a, point_b, tangent_vector_a):
@@ -96,8 +111,7 @@ class ComplexCircle(RiemannianSubmanifold):
         return self._normalize(point_a + point_b)
 
     def zero_vector(self, point):
-        return np.zeros(self._dimension)
+        return self.backend.zeros(self._dimension)
 
-    @staticmethod
-    def _normalize(point):
-        return point / np.abs(point)
+    def _normalize(self, point):
+        return point / self.backend.abs(point)

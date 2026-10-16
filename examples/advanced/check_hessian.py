@@ -10,7 +10,6 @@ from pymanopt import Problem
 from pymanopt.manifolds import Sphere
 from pymanopt.tools.diagnostics import check_hessian
 
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -44,13 +43,14 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return -2 * matrix @ d
 
     elif backend == "pytorch":
-        matrix_ = torch.from_numpy(matrix)
+        matrix = torch.from_numpy(matrix)
 
         @pymanopt.function.pytorch(manifold)
         def cost(x):
-            return -x @ matrix_ @ x
+            return -x @ matrix @ x
 
     elif backend == "tensorflow":
+        matrix = tf.constant(matrix)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(x):

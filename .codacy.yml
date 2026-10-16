@@ -1,0 +1,15 @@
+---
+exclude_paths:
+  - "examples/**"
+  - "tests/**"
+
+# One-line abstract stubs (`def f(...) -> T: ...`) are enforced by black, which re-collapses
+# multi-line ellipsis bodies; E704 is also ignored in the flake8 config in pyproject.toml.
+tools:
+  - name: pycodestyle
+    check_path: true
+    extensions:
+      - ".py"
+    options:
+      ignore:
+        - "E704"
