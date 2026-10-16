@@ -48,8 +48,8 @@ backends = ["pymanopt[autograd,jax,tensorflow,torch]"]
 dev = [
     "matplotlib",
     "pre-commit",
-    "pytest==7.2.0",
-    "pytest-cov==4.0.0",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
 ]
 docs = [
     "docutils==0.16",
