@@ -14,25 +14,16 @@ repos:
         args:
           - --branch=master
       - id: trailing-whitespace
-  - repo: https://github.com/pycqa/isort
-    rev: 9.0.1
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1
     hooks:
-      - id: isort
-  - repo: https://github.com/psf/black
-    rev: 26.5.1
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/astral-sh/ty-pre-commit
+    rev: v0.0.88
     hooks:
-      - id: black
-        additional_dependencies: [".[jupyter]"]
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.3.0
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          - flake8-bugbear==26.9.9
-          - flake8-docstrings==1.7.0
-          - flake8-import-order==0.19.2
-          - flake8-pyproject==1.2.4
-          - setuptools<81
+      - id: ty
   - repo: https://github.com/mwouts/jupytext
     rev: v1.19.5
     hooks:

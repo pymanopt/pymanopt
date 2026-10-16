@@ -20,9 +20,8 @@ class TestSphereManifold:
         self.manifold = Sphere(m, n, backend=self.backend)
 
         # For automatic testing of euclidean_to_riemannian_hessian
-        self.projection = (
-            lambda x, u: u
-            - self.backend.tensordot(x, u, self.backend.ndim(u)) * x
+        self.projection = lambda x, u: (
+            u - self.backend.tensordot(x, u, self.backend.ndim(u)) * x
         )
 
     def test_dim(self):

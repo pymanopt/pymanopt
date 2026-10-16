@@ -122,7 +122,6 @@ class Problem:
         self._riemannian_hessian = riemannian_hessian
 
         if preconditioner is not None:
-
             self.preconditioner = preconditioner
         else:
 

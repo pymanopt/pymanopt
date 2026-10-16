@@ -70,45 +70,6 @@ write_to = "src/pymanopt/_version.py"
 where = ["src"]
 exclude = ["tests*"]
 
-[tool.black]
-include = '\.py$'
-extend-exclude = '''
-/(
-    src/pymanopt/_version.py
-)/
-'''
-line-length = 79
-
-[tool.isort]
-ensure_newline_before_comments = true
-force_grid_wrap = 0
-include_trailing_comma = true
-line_length = 79
-multi_line_output = 3
-use_parentheses = true
-extend_skip = ["src/pymanopt/_version.py"]
-
-[tool.flake8]
-application_import_names = "pymanopt"
-docstring-convention = "google"
-exclude = ["examples/notebooks/*.py", "build"]
-ignore = ["B024", "B027", "D1", "E203", "E501", "E704", "W503"]
-import_order_style = "pycharm"
-max-line-length = 79
-select = ["B", "B950", "C", "D", "E", "F", "W"]
-# TODO(nkoep): Remove these once migrated to ruff.
-per-file-ignores = [
-    "docs/conf.py:E231",
-    "examples/*.py:F811",
-    "examples/low_rank_matrix_approximation.py:E231,F811",
-    "src/pymanopt/optimizers/conjugate_gradient.py:E231",
-    "src/pymanopt/optimizers/optimizer.py:E231",
-    "src/pymanopt/optimizers/nelder_mead.py:E231",
-    "src/pymanopt/optimizers/trust_regions.py:E221,E231",
-    "src/pymanopt/tools/diagnostics.py:E231",
-    "src/pymanopt/tools/printer.py:E231",
-]
-
 [tool.pyright]
 typeCheckingMode = "basic"
 venvPath = "."
@@ -119,3 +80,82 @@ filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.ruff]
 line-length = 79
+extend-exclude = ["src/pymanopt/_version.py"]
+
+[tool.ruff.lint]
+select = [
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "D",  # pydocstyle
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    "I",  # isort
+    "W",  # pycodestyle warnings
+]
+ignore = [
+    "B024",  # abstract base class without abstract methods
+    "B027",  # abstract method without annotation in abstract base class
+    "B905",  # zip() without explicit strict parameter
+    "D1",  # missing docstrings
+    "D200",  # one-line docstring should fit on one line
+    "D205",  # missing blank line after docstring summary
+    "D212",  # multi-line docstring summary should start at the first line
+    "D411",  # missing blank line before docstring section
+    "D415",  # docstring first line should end with a period
+    "D417",  # missing argument description in docstring
+    "E203",  # whitespace before punctuation (black/ruff-format compat)
+    "E402",  # module import not at top of file (notebook-derived examples)
+    "E501",  # line too long
+]
+
+[tool.ruff.lint.per-file-ignores]
+"docs/conf.py" = ["E231"]
+"examples/*.py" = ["F811"]
+"src/pymanopt/optimizers/conjugate_gradient.py" = ["E231"]
+"src/pymanopt/optimizers/optimizer.py" = ["E231"]
+"src/pymanopt/optimizers/nelder_mead.py" = ["E231"]
+"src/pymanopt/optimizers/trust_regions.py" = ["E221", "E231"]
+"src/pymanopt/tools/diagnostics.py" = ["E231"]
+"src/pymanopt/tools/printer.py" = ["E231"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pymanopt"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ty.src]
+include = ["src", "tests"]
+exclude = ["src/pymanopt/_version.py"]
+
+[tool.ty.rules]
+# Gradual adoption: start relaxed, tighten per rule once resolved.
+# - empty-body / invalid-method-override: abstract backend stubs (`def f(...) -> T: ...`)
+# - unresolved-import: optional backend imports (torch, tensorflow) not installed in the lint env
+# - not-subscriptable / unresolved-attribute / invalid-argument-type: Optional-typed
+#   optimizer log and numpy-protocol interplay, needs real fixes before tightening
+# - ambiguous-protocol-member: backend.array_t protocol defines helper aliases in its body
+empty-body = "ignore"
+unresolved-import = "ignore"
+not-subscriptable = "ignore"
+unresolved-attribute = "ignore"
+invalid-argument-type = "ignore"
+invalid-method-override = "ignore"
+ambiguous-protocol-member = "ignore"
+# Stale blanket `# type: ignore` directives tolerated by pyright/mypy but flagged
+# by ty; removing them is a separate cleanup.
+unused-type-ignore-comment = "ignore"
+# numpy-protocol interplay in backend arithmetic (`array_t` union types);
+# needs typed-protocol rework before tightening.
+unsupported-operator = "ignore"
+invalid-return-type = "ignore"
+invalid-attribute-override = "ignore"
+invalid-property-type-override = "ignore"
+no-matching-overload = "ignore"
+
+# tests/test_problem.py asserts the runtime AttributeError guard on
+# attribute assignment; ty's static view of it is a spurious error.
+[[tool.ty.overrides]]
+include = ["tests/test_problem.py"]
+[tool.ty.overrides.rules]
+invalid-assignment = "ignore"

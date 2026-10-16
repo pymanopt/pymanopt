@@ -28,11 +28,13 @@ def attach(
 if TYPE_CHECKING:
     # This variable is only set to true in LSPs and type checkers and is
     # always false at runtime.
-    from . import autograd_backend  # noqa: F401
-    from . import jax_backend  # noqa: F401
-    from . import numpy_backend  # noqa: F401
-    from . import pytorch_backend  # noqa: F401
-    from . import tensorflow_backend  # noqa: F401
+    from . import (
+        autograd_backend,  # noqa: F401
+        jax_backend,  # noqa: F401
+        numpy_backend,  # noqa: F401
+        pytorch_backend,  # noqa: F401
+        tensorflow_backend,  # noqa: F401
+    )
 else:
     # Lazily load the backend implementation modules.
     __getattr__, __dir__, __all__ = attach(

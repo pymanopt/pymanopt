@@ -14,8 +14,8 @@ class TestGrassmannManifold:
         self.backend = real_backend
         self.manifold = Grassmann(n, p, k=k, backend=self.backend)
 
-        self.projection = (
-            lambda x, u: u - x @ self.backend.conjugate_transpose(x) @ u
+        self.projection = lambda x, u: (
+            u - x @ self.backend.conjugate_transpose(x) @ u
         )
 
     def test_dim(self):
