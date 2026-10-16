@@ -24,17 +24,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: pyproject.toml
-
-      - name: Checkout
-        uses: actions/checkout@v2
 
       - name: Install dependencies
         run: pip install -e ".[all,ci]"
@@ -45,7 +42,7 @@ jobs:
           coverage lcov -o coverage/lcov.info
 
       - name: Collect coverage
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ${{ matrix.python-version }}
@@ -56,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Upload coverage
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
