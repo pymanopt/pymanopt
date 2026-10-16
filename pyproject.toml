@@ -16,14 +16,14 @@ authors = [
 ]
 readme = "README.md"
 license = { text = "BSD 3-Clause License" }
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.11,<3.16"
 keywords = ["manifolds", "optimization", "automatic differentiation"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -32,8 +32,8 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
 ]
 dependencies = [
-    "numpy>=1.16.02,<2",
-    "scipy>=1.0,!=1.10.*,!=1.11.*,!=1.12.*",
+    "numpy>=2,<3",
+    "scipy>=1.13,<2",
     "packaging",
 ]
 [project.urls]
