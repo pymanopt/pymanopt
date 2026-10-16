@@ -236,9 +236,10 @@ class TestFixedRankEmbeddedManifold:
 
         up, m, vp = m.euclidean_to_riemannian_gradient(x, (du, ds, dvt))
 
-        bk.assert_allclose(Up, up)
-        bk.assert_allclose(M, m)
-        bk.assert_allclose(Vp, vp)
+        # Relax tolerances for float32 backends.
+        bk.assert_allclose(Up, up, atol=1e-5)
+        bk.assert_allclose(M, m, atol=1e-5)
+        bk.assert_allclose(Vp, vp, atol=1e-5)
 
     def test_random_tangent_vector(self):
         bk = self.backend
