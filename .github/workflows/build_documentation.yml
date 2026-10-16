@@ -58,16 +58,7 @@ jobs:
 
       - name: Checkout target
         id: checkout
-        run: |
-          if ${{ matrix.version == 'latest' }}; then
-            sha=$(git rev-parse --short ${{ github.sha }})
-            git checkout ${{ github.sha }}
-          elif ${{ matrix.version == 'stable' }}; then
-            tag=$(git tag | sort -V | tail -1)
-            git checkout tags/$tag
-          else
-            git checkout ${{ matrix.version }}
-          fi
+        run: git checkout ${{ github.sha }}
 
       - name: Install dependencies
         run: |
