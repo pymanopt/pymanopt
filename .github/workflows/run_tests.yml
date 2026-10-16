@@ -16,58 +16,36 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.9"
-          - "3.10"
           - "3.11"
           - "3.12"
           - "3.13"
           - "3.14"
-        include:
-          - python-version: "3.9"
-            check-placeholder: true
-          - python-version: "3.10"
-            check-placeholder: true
       fail-fast: false
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        if: ${{ !matrix.check-placeholder }}
 
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
-        if: ${{ !matrix.check-placeholder }}
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: pyproject.toml
 
-      - name: Skip notice (placeholder for required check)
-        if: ${{ matrix.check-placeholder }}
-        run: |
-          echo "Placeholder leg: python 3.9/3.10 were dropped from the support window"
-          echo "(requires-python >=3.11,<3.16). This job exists only so the required"
-          echo "status check 'tests (3.x)' keeps reporting until branch protection"
-          echo "is updated org-side. It runs no tests."
-          exit 0
-
       - name: Checkout
         uses: actions/checkout@v2
-        if: ${{ !matrix.check-placeholder }}
 
       - name: Install dependencies
         run: pip install -e ".[all,ci]"
-        if: ${{ !matrix.check-placeholder }}
 
       - name: Run tests
-        if: ${{ !matrix.check-placeholder }}
         run: |
           pytest --cov-report= --cov=src/pymanopt tests/
           coverage lcov -o coverage/lcov.info
 
       - name: Collect coverage
         uses: coverallsapp/github-action@master
-        if: ${{ !matrix.check-placeholder }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ${{ matrix.python-version }}
