@@ -28,8 +28,8 @@ def attach(
 if TYPE_CHECKING:
     # This variable is only set to true in LSPs and type checkers and is
     # always false at runtime.
-    from . import (
-        autograd_backend,  # noqa: F401
+    from . import (  # noqa: F401
+        autograd_backend,
         jax_backend,  # noqa: F401
         numpy_backend,  # noqa: F401
         pytorch_backend,  # noqa: F401
