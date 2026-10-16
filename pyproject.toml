@@ -16,14 +16,14 @@ authors = [
 ]
 readme = "README.md"
 license = { text = "BSD 3-Clause License" }
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.11,<3.16"
 keywords = ["manifolds", "optimization", "automatic differentiation"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -32,8 +32,8 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
 ]
 dependencies = [
-    "numpy>=1.16.02,<2",
-    "scipy>=1.0,!=1.10.*,!=1.11.*,!=1.12.*",
+    "numpy>=2,<3",
+    "scipy>=1.13,<2",
     "packaging",
 ]
 [project.urls]
@@ -48,16 +48,16 @@ backends = ["pymanopt[autograd,jax,tensorflow,torch]"]
 dev = [
     "matplotlib",
     "pre-commit",
-    "pytest==9.0.3",
-    "pytest-cov==4.0.0",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
 ]
 docs = [
-    "docutils==0.16",
-    "ipykernel==6.29.5",
-    "myst-parser==1.0",
-    "nbsphinx==0.8.7",
-    "sphinx==5.3",
-    "sphinx_rtd_theme==1.0.0",
+    "docutils==0.21.2",
+    "ipykernel==6.30.1",
+    "myst-parser==4.0.1",
+    "nbsphinx==0.9.7",
+    "sphinx==8.1.3",
+    "sphinx_rtd_theme==3.0.2",
     "sphinxcontrib-katex==0.8.6",
 ]
 ci = ["build==0.8.0", "pip==26.2", "setuptools==83.0.0", "wheel==0.38.4"]
