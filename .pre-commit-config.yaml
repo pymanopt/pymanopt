@@ -24,6 +24,7 @@ repos:
     rev: v0.0.88
     hooks:
       - id: ty
+        args: [--isolated]
   - repo: https://github.com/mwouts/jupytext
     rev: v1.19.5
     hooks:
