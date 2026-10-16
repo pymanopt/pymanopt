@@ -44,8 +44,10 @@ class Oblique(RiemannianSubmanifold):
         return self.backend.linalg_norm(self.backend.arccos(XY))
 
     def projection(self, point, vector):
-        return vector - point * (
-            self.backend.sum(point * vector, 0)[self.backend.newaxis, :]
+        return (
+            vector
+            - point
+            * (self.backend.sum(point * vector, 0)[self.backend.newaxis, :])
         )
 
     to_tangent_space = projection
@@ -54,10 +56,14 @@ class Oblique(RiemannianSubmanifold):
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
         PXehess = self.projection(point, euclidean_hessian)
-        return PXehess - tangent_vector * (
-            self.backend.sum(point * euclidean_gradient, 0)[
-                self.backend.newaxis, :
-            ]
+        return (
+            PXehess
+            - tangent_vector
+            * (
+                self.backend.sum(point * euclidean_gradient, 0)[
+                    self.backend.newaxis, :
+                ]
+            )
         )
 
     def exp(self, point, tangent_vector):

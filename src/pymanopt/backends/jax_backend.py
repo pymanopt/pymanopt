@@ -317,9 +317,7 @@ class JaxBackend(Backend):
     def linalg_norm(
         self,
         array: jnp.ndarray,
-        ord: Union[
-            int, Literal["fro"], None
-        ] = None,  # noqa: A002 pylint: disable=redefined-builtin
+        ord: Union[int, Literal["fro"], None] = None,  # noqa: A002 pylint: disable=redefined-builtin
         axis: Union[int, TupleOrList[int], None] = None,
         keepdims: bool = False,
     ) -> jnp.ndarray:

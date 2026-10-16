@@ -16,20 +16,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: isort
+      - name: ruff check
         if: success() || failure()
         uses: pre-commit/action@v3.0.1
         with:
-          extra_args: isort --all-files
+          extra_args: ruff-check --all-files
 
-      - name: black
+      - name: ruff format
         if: success() || failure()
         uses: pre-commit/action@v3.0.1
         with:
-          extra_args: black --all-files
+          extra_args: ruff-format --all-files
 
-      - name: flake8
+      - name: ty
         if: success() || failure()
         uses: pre-commit/action@v3.0.1
         with:
-          extra_args: flake8 --all-files
+          extra_args: ty --all-files
