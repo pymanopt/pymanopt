@@ -1,0 +1,10 @@
+.image.logo {
+  height: 175px;
+  width: 175px;
+}
+
+span.menu-title {
+  font-family: "Nunito", sans-serif;
+  font-size: 1.3em;
+  text-transform: uppercase;
+}
