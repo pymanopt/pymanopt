@@ -113,6 +113,14 @@ class TrustRegions(Optimizer):
         Delta_bar=None,
         Delta0=None,
     ) -> OptimizerResult:
+        """Run optimization, logging the initial point and completed steps.
+
+        With logging enabled, iteration 0 records the initial point with zero
+        Hessian-vector products. Each subsequent entry records the point after
+        a completed step and the number of Hessian-vector products used in that
+        step, including rejected steps. The final entry matches the result, so
+        the log contains ``result.iterations + 1`` entries.
+        """
         manifold = problem.manifold
 
         if maxinner is None:
@@ -169,19 +177,18 @@ class TrustRegions(Optimizer):
             print(f"{' ':44s}f: {fx:+.6e}   |grad|: {norm_grad:.6e}")
 
         self._initialize_log()
+        self._add_log_entry(
+            iteration=iteration,
+            point=x,
+            cost=fx,
+            gradient_norm=norm_grad,
+            hess_vec_evals=hess_vec_evals,
+        )
 
         used_cauchy = False
 
         while True:
             iteration += 1
-
-            self._add_log_entry(
-                iteration=iteration,
-                point=x,
-                cost=fx,
-                gradient_norm=norm_grad,
-                hess_vec_evals=hess_vec_evals,
-            )
 
             # Restart Hessian-vector calls counter for this iteration.
             hess_vec_evals = 0
@@ -435,6 +442,15 @@ class TrustRegions(Optimizer):
                 )
                 print(f"       f(x) : {fx:+e}     |grad| : {norm_grad:e}")
                 print(f"        rho : {rho:e}")
+
+            # Log every completed step, including rejected and final steps.
+            self._add_log_entry(
+                iteration=iteration,
+                point=x,
+                cost=fx,
+                gradient_norm=norm_grad,
+                hess_vec_evals=hess_vec_evals,
+            )
 
             # ** CHECK STOPPING criteria
             stopping_criterion = self._check_stopping_criterion(
