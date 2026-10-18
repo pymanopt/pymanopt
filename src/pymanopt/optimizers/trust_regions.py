@@ -31,11 +31,11 @@
 # finite-differences of the gradient. The resulting method is called
 # RTR-FD. Some convergence theory for it is available in this paper:
 # @incollection{boumal2015rtrfd
-# 	author={Boumal, N.},
-# 	title={Riemannian trust regions with finite-difference Hessian
+#   author={Boumal, N.},
+#   title={Riemannian trust regions with finite-difference Hessian
 #                      approximations are globally convergent},
-# 	year={2015},
-# 	booktitle={Geometric Science of Information}
+#   year={2015},
+#   booktitle={Geometric Science of Information}
 # }
 
 
@@ -52,9 +52,9 @@
 # Ported to pymanopt by Jamie Townsend. January 2016.
 
 import time
+from math import inf, isnan, nan, sqrt
 
-import numpy as np
-
+from pymanopt.core.problem import Problem
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
 
 
@@ -85,7 +85,6 @@ class TrustRegions(Optimizer):
         rho_prime=0.1,
         use_rand=False,
         rho_regularization=1e3,
-        *args,
         **kwargs,
     ):
         """Riemannian Trust-Regions algorithm.
@@ -95,7 +94,7 @@ class TrustRegions(Optimizer):
         Also included is the truncated (Steihaug-Toint) conjugate gradient
         algorithm.
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         self.miniter = miniter
         self.kappa = kappa
@@ -106,7 +105,7 @@ class TrustRegions(Optimizer):
 
     def run(
         self,
-        problem,
+        problem: Problem,
         *,
         initial_point=None,
         mininner=1,
@@ -126,7 +125,7 @@ class TrustRegions(Optimizer):
             try:
                 Delta_bar = manifold.typical_dist
             except NotImplementedError:
-                Delta_bar = np.sqrt(manifold.dim)
+                Delta_bar = sqrt(manifold.dim)
         if Delta0 is None:
             Delta0 = Delta_bar / 8
 
@@ -151,6 +150,9 @@ class TrustRegions(Optimizer):
         fx = cost(x)
         fgradx = gradient(x)
         norm_grad = manifold.norm(x, fgradx)
+        # hess_vec_evals counts the number of Hessian-vector products used to reach
+        # an iteration from the previous one. For the initial point, this is zero.
+        hess_vec_evals = 0
 
         # Initialize the trust region radius
         Delta = Delta0
@@ -168,8 +170,21 @@ class TrustRegions(Optimizer):
 
         self._initialize_log()
 
+        used_cauchy = False
+
         while True:
             iteration += 1
+
+            self._add_log_entry(
+                iteration=iteration,
+                point=x,
+                cost=fx,
+                gradient_norm=norm_grad,
+                hess_vec_evals=hess_vec_evals,
+            )
+
+            # Restart Hessian-vector calls counter for this iteration.
+            hess_vec_evals = 0
 
             # *************************
             # ** Begin TR Subproblem **
@@ -184,10 +199,10 @@ class TrustRegions(Optimizer):
                 eta = 1e-6 * manifold.random_tangent_vector(x)
                 # Must be inside trust region
                 while manifold.norm(x, eta) > Delta:
-                    eta = np.sqrt(np.sqrt(np.spacing(1))) * eta
+                    eta = sqrt(sqrt(manifold.backend.spacing(1))) * eta
 
             # Solve TR subproblem approximately
-            eta, Heta, numit, stop_inner = self._truncated_conjugate_gradient(
+            eta, Heta, numit, stop_inner, hess_vec_evals_tcg = self._truncated_conjugate_gradient(
                 problem,
                 x,
                 fgradx,
@@ -198,6 +213,7 @@ class TrustRegions(Optimizer):
                 mininner,
                 maxinner,
             )
+            hess_vec_evals += hess_vec_evals_tcg
 
             srstr = self.TCG_STOP_REASONS[stop_inner]
 
@@ -208,9 +224,9 @@ class TrustRegions(Optimizer):
             # consistently, or none of them have.
 
             if self.use_rand:
-                used_cauchy = False
                 # Check the curvature
                 Hg = hess(x, fgradx)
+                hess_vec_evals += 1
                 g_Hg = manifold.inner_product(x, fgradx, Hg)
                 if g_Hg <= 0:
                     tau_c = 1
@@ -286,7 +302,11 @@ class TrustRegions(Optimizer):
             # but not under scaling of f. For abs(fx) > 1, the opposite holds.
             # This should not alarm us, as this heuristic only triggers at the
             # very last iterations if very fine convergence is demanded.
-            rho_reg = max(1, abs(fx)) * np.spacing(1) * self.rho_regularization
+            rho_reg = (
+                max(1, abs(fx))
+                * manifold.backend.eps()
+                * self.rho_regularization
+            )
             rhonum = rhonum + rho_reg
             rhoden = rhoden + rho_reg
 
@@ -330,19 +350,19 @@ class TrustRegions(Optimizer):
                     "rho is NaN! Forcing a radius decrease. This should "
                     "not happen."
                 )
-                rho = np.nan
+                rho = nan
 
             # Choose the new TR radius based on the model performance
             trstr = "   "
             # If the actual decrease is smaller than 1/4 of the predicted
             # decrease, then reduce the TR radius.
-            if rho < 1.0 / 4 or not model_decreased or np.isnan(rho):
+            if rho < 1.0 / 4 or not model_decreased or isnan(rho):
                 trstr = "TR-"
                 Delta = Delta / 4
                 consecutive_TRplus = 0
                 consecutive_TRminus = consecutive_TRminus + 1
                 if consecutive_TRminus >= 5 and self._verbosity >= 1:
-                    consecutive_TRminus = -np.inf
+                    consecutive_TRminus = -inf
                     print(
                         " +++ Detected many consecutive TR- (radius "
                         "decreases)."
@@ -368,7 +388,7 @@ class TrustRegions(Optimizer):
                 consecutive_TRminus = 0
                 consecutive_TRplus = consecutive_TRplus + 1
                 if consecutive_TRplus >= 5 and self._verbosity >= 1:
-                    consecutive_TRplus = -np.inf
+                    consecutive_TRplus = -inf
                     print(
                         " +++ Detected many consecutive TR+ (radius "
                         "increases)."
@@ -445,6 +465,7 @@ class TrustRegions(Optimizer):
         inner = manifold.inner_product
         hess = problem.riemannian_hessian
         preconditioner = problem.preconditioner
+        hess_vec_evals_tcg = 0
 
         if not self.use_rand:  # and therefore, eta == 0
             Heta = manifold.zero_vector(x)
@@ -453,11 +474,12 @@ class TrustRegions(Optimizer):
         else:  # and therefore, no preconditioner
             # eta (presumably) ~= 0 was provided by the caller.
             Heta = hess(x, eta)
+            hess_vec_evals_tcg += 1
             r = fgradx + Heta
             e_Pe = inner(x, eta, eta)
 
         r_r = inner(x, r, r)
-        norm_r = np.sqrt(r_r)
+        norm_r = sqrt(r_r)
         norm_r0 = norm_r
 
         # Precondition the residual
@@ -501,6 +523,7 @@ class TrustRegions(Optimizer):
         for j in range(int(maxinner)):
             # This call is the computationally intensive step
             Hdelta = hess(x, delta)
+            hess_vec_evals_tcg += 1
 
             # Compute curvature (often called kappa)
             d_Hd = inner(x, delta, Hdelta)
@@ -524,7 +547,7 @@ class TrustRegions(Optimizer):
                 #  ed = <eta,delta>_prec,x
                 #  dd = <delta,delta>_prec,x
                 tau = (
-                    -e_Pd + np.sqrt(e_Pd * e_Pd + d_Pd * (Delta**2 - e_Pe))
+                    -e_Pd + sqrt(e_Pd * e_Pd + d_Pd * (Delta**2 - e_Pe))
                 ) / d_Pd
 
                 eta = eta + tau * delta
@@ -576,7 +599,7 @@ class TrustRegions(Optimizer):
 
             # Compute new norm of r.
             r_r = inner(x, r, r)
-            norm_r = np.sqrt(r_r)
+            norm_r = sqrt(r_r)
 
             # Check kappa/theta stopping criterion.
             # Note that it is somewhat arbitrary whether to check this stopping
@@ -616,4 +639,4 @@ class TrustRegions(Optimizer):
             e_Pd = beta * (e_Pd + alpha * d_Pd)
             d_Pd = z_r + beta * beta * d_Pd
 
-        return eta, Heta, j, stop_tCG
+        return eta, Heta, j, stop_tCG, hess_vec_evals_tcg

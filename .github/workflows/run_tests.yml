@@ -4,44 +4,48 @@ on:
   pull_request:
     branches:
       - master
+      - develop_backends
   push:
+    branches:
+      - master
+      - develop_backends
 
 jobs:
   tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version:
-          - "3.8"
-          - "3.9"
-          - "3.10"
           - "3.11"
           - "3.12"
-          - "3.x"
+          - "3.13"
+      fail-fast: false
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
 
       - name: Set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-          cache-dependency-path: pyproject.toml
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
 
       - name: Install dependencies
-        run: pip install -e ".[all,ci]"
+        run: uv sync --all-extras
 
       - name: Run tests
         run: |
-          pytest -v --cov-report= --cov=src/pymanopt tests/
-          coverage lcov -o coverage/lcov.info
+          uv run pytest --cov-report= --cov=src/pymanopt tests/
+          uv run coverage lcov -o coverage/lcov.info
 
       - name: Collect coverage
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ${{ matrix.python-version }}
@@ -49,10 +53,10 @@ jobs:
 
   finish:
     needs: tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Upload coverage
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true

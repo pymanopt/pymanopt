@@ -8,7 +8,6 @@ from examples._tools import ExampleRunner
 from pymanopt.manifolds import Oblique
 from pymanopt.optimizers import ConjugateGradient
 
-
 SUPPORTED_BACKENDS = ("autograd", "jax", "numpy", "pytorch", "tensorflow")
 
 
@@ -45,6 +44,7 @@ def create_cost_and_derivates(manifold, matrix, backend):
             return 0.5 * torch.sum((X - matrix_) ** 2)
 
     elif backend == "tensorflow":
+        matrix = tf.constant(matrix)
 
         @pymanopt.function.tensorflow(manifold)
         def cost(X):
@@ -76,6 +76,11 @@ def run(backend=SUPPORTED_BACKENDS[0], quiet=True):
 
     if quiet:
         return
+
+    if backend == "pytorch":
+        Xopt = Xopt.detach().numpy()
+    elif backend == "tensorflow":
+        Xopt = Xopt.numpy()
 
     # Calculate the actual solution by normalizing the columns of matrix.
     X = matrix / np.linalg.norm(matrix, axis=0)[np.newaxis, :]

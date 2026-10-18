@@ -28,10 +28,9 @@ class ParticleSwarm(Optimizer):
         population_size=None,
         nostalgia=1.4,
         social=1.4,
-        *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
         self._max_cost_evaluations = max_cost_evaluations
         self._max_iterations = max_iterations
@@ -128,7 +127,9 @@ class ParticleSwarm(Optimizer):
         while True:
             iteration += 1
 
-            column_printer.print_row([iteration, cost_evaluations, fbest])
+            column_printer.print_row(
+                [iteration, cost_evaluations, float(fbest)]
+            )
 
             # FIXME(nkoep): This only makes sense once we provide a custom
             #               callback mechanism that actually checks 'xi'.

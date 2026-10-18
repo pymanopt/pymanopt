@@ -2,20 +2,22 @@
 # ---
 # jupyter:
 #   jupytext:
-#     formats: ipynb,py
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.13.4
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.19.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
 #     name: python
 # ---
 
+# %% [markdown]
 # # Riemannian Optimization for Inference in MoG models
 
+# %% [markdown]
 # The Mixture of Gaussians (MoG) model assumes that datapoints $\mathbf{x}_i\in\mathbb{R}^d$ follow a distribution described by the following probability density function:
 #
 # $p(\mathbf{x}) = \sum_{m=1}^M \pi_m p_\mathcal{N}(\mathbf{x};\mathbf{\mu}_m,\mathbf{\Sigma}_m)$ where $\pi_m$ is the probability that the data point belongs to the $m^\text{th}$ mixture component and $p_\mathcal{N}(\mathbf{x};\mathbf{\mu}_m,\mathbf{\Sigma}_m)$ is the probability density function of a multivariate Gaussian distribution with mean $\mathbf{\mu}_m \in \mathbb{R}^d$ and psd covariance matrix $\mathbf{\Sigma}_m \in \{\mathbf{M}\in\mathbb{R}^{d\times d}: \mathbf{M}\succeq 0\}$.
@@ -30,13 +32,11 @@
 # and mixture probability vector $\boldsymbol{\pi}=\left[0.1, 0.6, 0.3\right]^\top$.
 # Let's generate $N=1000$ samples of that MoG model and scatter plot the samples:
 
-# +
+# %%
 import autograd.numpy as np
-
 
 np.set_printoptions(precision=2)
 import matplotlib.pyplot as plt
-
 
 # %matplotlib inline
 
@@ -81,8 +81,8 @@ for k in range(K):
     )
 plt.axis("equal")
 plt.show()
-# -
 
+# %% [markdown]
 # Given a data sample the de facto standard method to infer the parameters is the [expectation maximisation](https://en.wikipedia.org/wiki/Expectation-maximization_algorithm) (EM) algorithm that, in alternating so-called E and M steps, maximises the log-likelihood of the data.
 # In [arXiv:1506.07677](http://arxiv.org/pdf/1506.07677v1.pdf) Hosseini and Sra propose Riemannian optimisation as a powerful counterpart to EM. Importantly, they introduce a reparameterisation that leaves local optima of the log-likelihood unchanged while resulting in a geodesically convex optimisation problem over a product manifold $\prod_{m=1}^M\mathcal{PD}^{(d+1)\times(d+1)}$ of manifolds of $(d+1)\times(d+1)$ symmetric positive definite matrices.
 # The proposed method is on par with EM and shows less variability in running times.
@@ -110,9 +110,8 @@ plt.show()
 #
 # So let's infer the parameters of our toy example by Riemannian optimisation using Pymanopt:
 
-# +
+# %%
 import sys
-
 
 sys.path.insert(0, "../..")
 
@@ -123,9 +122,9 @@ from pymanopt import Problem
 from pymanopt.manifolds import Euclidean, Product, SymmetricPositiveDefinite
 from pymanopt.optimizers import SteepestDescent
 
-
 # (1) Instantiate the manifold
 manifold = Product([SymmetricPositiveDefinite(D + 1, k=K), Euclidean(K - 1)])
+
 
 # (2) Define cost function
 # The parameters must be contained in a list theta.
@@ -158,10 +157,11 @@ optimizer = SteepestDescent(verbosity=1)
 
 # let Pymanopt do the rest
 Xopt = optimizer.run(problem).point
-# -
 
+# %% [markdown]
 # Once Pymanopt has finished the optimisation we can obtain the inferred parameters as follows:
 
+# %%
 mu1hat = Xopt[0][0][0:2, 2:3]
 Sigma1hat = Xopt[0][0][:2, :2] - mu1hat @ mu1hat.T
 mu2hat = Xopt[0][1][0:2, 2:3]
@@ -171,10 +171,12 @@ Sigma3hat = Xopt[0][2][:2, :2] - mu3hat @ mu3hat.T
 pihat = np.exp(np.concatenate([Xopt[1], [0]], axis=0))
 pihat = pihat / np.sum(pihat)
 
+# %% [markdown]
 # And convince ourselves that the inferred parameters are close to the ground truth parameters.
 #
 # The ground truth parameters $\mathbf{\mu}_1, \mathbf{\Sigma}_1, \mathbf{\mu}_2, \mathbf{\Sigma}_2, \mathbf{\mu}_3, \mathbf{\Sigma}_3, \pi_1, \pi_2, \pi_3$:
 
+# %%
 print(mu[0])
 print(Sigma[0])
 print(mu[1])
@@ -185,8 +187,10 @@ print(pi[0])
 print(pi[1])
 print(pi[2])
 
+# %% [markdown]
 # And the inferred parameters $\hat{\mathbf{\mu}}_1, \hat{\mathbf{\Sigma}}_1, \hat{\mathbf{\mu}}_2, \hat{\mathbf{\Sigma}}_2, \hat{\mathbf{\mu}}_3, \hat{\mathbf{\Sigma}}_3, \hat{\pi}_1, \hat{\pi}_2, \hat{\pi}_3$:
 
+# %%
 print(mu1hat)
 print(Sigma1hat)
 print(mu2hat)
@@ -198,13 +202,16 @@ print(pihat[1])
 print(pihat[2])
 
 
+# %% [markdown]
 # Et voilà – this was a brief demonstration of how to do inference for MoG models by performing Manifold optimisation using Pymanopt.
 
+# %% [markdown]
 # ## When Things Go Astray
 #
 # A well-known problem when fitting parameters of a MoG model is that one Gaussian may collapse onto a single data point resulting in singular covariance matrices (cf. e.g. p. 434 in Bishop, C. M. "Pattern Recognition and Machine Learning." 2001). This problem can be avoided by the following heuristic: if a component's covariance matrix is close to being singular we reset its mean and covariance matrix. Using Pymanopt this can be accomplished by using an appropriate line search rule (based on [BackTrackingLineSearcher](https://github.com/pymanopt/pymanopt/blob/master/pymanopt/optimizers/line_search.py)) -- here we demonstrate this approach:
 
 
+# %%
 class LineSearchMoG:
     """
     Back-tracking line-search that checks for close to singular matrices.
@@ -268,7 +275,6 @@ class LineSearchMoG:
             and step_count <= self.max_iterations
             and not reset
         ):
-
             # Reduce the step size
             alpha = self.contraction_factor * alpha
 

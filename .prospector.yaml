@@ -25,3 +25,19 @@ pep257:
     - D415
     - D416
     - D417
+
+# Rules that fire on pymanopt's library code by design and are disabled
+# deliberately, not for lack of attention:
+# - too-many-arguments/locals/positional-arguments/statements/branches:
+#   optimizer and backend APIs mirror numpy/scipy signatures (e.g.
+#   np.linalg.norm) and TR-style optimizers are inherently branchy.
+# - unused-argument: abstract method stubs name their arguments to document
+#   the interface subclasses must implement.
+pylint:
+  disable:
+    - too-many-arguments
+    - too-many-locals
+    - too-many-positional-arguments
+    - too-many-statements
+    - too-many-branches
+    - unused-argument
