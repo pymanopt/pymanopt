@@ -29,7 +29,6 @@ __all__ = [
 from .complex_circle import ComplexCircle
 from .euclidean import ComplexEuclidean, Euclidean, SkewSymmetric, Symmetric
 from .fixed_rank import FixedRankEmbedded
-from .generalized_stiefel import GeneralizedStiefel
 from .grassmann import ComplexGrassmann, Grassmann
 from .group import SpecialOrthogonalGroup, UnitaryGroup
 from .hyperbolic import PoincareBall
@@ -48,3 +47,4 @@ from .sphere import (
     SphereSubspaceIntersection,
 )
 from .stiefel import Stiefel
+from .generalized_stiefel import GeneralizedStiefel
