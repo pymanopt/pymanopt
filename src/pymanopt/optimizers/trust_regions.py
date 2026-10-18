@@ -209,16 +209,18 @@ class TrustRegions(Optimizer):
                     eta = sqrt(sqrt(manifold.backend.spacing(1))) * eta
 
             # Solve TR subproblem approximately
-            eta, Heta, numit, stop_inner, hess_vec_evals_tcg = self._truncated_conjugate_gradient(
-                problem,
-                x,
-                fgradx,
-                eta,
-                Delta,
-                self.theta,
-                self.kappa,
-                mininner,
-                maxinner,
+            eta, Heta, numit, stop_inner, hess_vec_evals_tcg = (
+                self._truncated_conjugate_gradient(
+                    problem,
+                    x,
+                    fgradx,
+                    eta,
+                    Delta,
+                    self.theta,
+                    self.kappa,
+                    mininner,
+                    maxinner,
+                )
             )
             hess_vec_evals += hess_vec_evals_tcg
 
