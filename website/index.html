@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html class="has-navbar-fixed-top">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Pymanopt</title>
+
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="static/favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+
+    <!-- Style sheets -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Fonts -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap" rel="stylesheet">
+
+    <script>
+      // Make the burger menu functional.
+      document.addEventListener("DOMContentLoaded", () => {
+        const $navbarBurgers = Array.prototype.slice.call(
+          document.querySelectorAll(".navbar-burger"), 0
+        );
+        if ($navbarBurgers.length > 0) {
+          $navbarBurgers.forEach( el => {
+            el.addEventListener("click", () => {
+              const target = el.dataset.target;
+              const $target = document.getElementById(target);
+              el.classList.toggle("is-active");
+              $target.classList.toggle("is-active");
+            });
+          });
+        }
+      });
+    </script>
+  </head>
+  <body>
+
+  <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="">
+        <span class="menu-title">Pymanopt</span>
+      </a>
+
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="menu">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+
+    <div id="menu" class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item" href="docs">
+          Documentation
+        </a>
+
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link">
+            Companion Projects
+          </a>
+
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://manopt.org">
+              Manopt
+            </a>
+            <a class="navbar-item" href="https://manoptjl.org">
+              Manopt.jl
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="navbar-end">
+        <div class="navbar-item">
+          <div class="buttons">
+            <a class="button is-info"
+             href="https://github.com/pymanopt/pymanopt">
+              <ion-icon name="logo-github"></ion-icon>&nbsp;<span>GitHub</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero is-primary is-fullheight is-bold">
+    <div class="hero-body">
+      <div class="columns is-centered">
+        <div class="column is-one-third has-text-centered">
+          <figure class="image is-inline-block is-128x128 logo">
+            <img alt="logo" src="https://github.com/nkoep/pymanopt/raw/rework-documentation/docs/logo.png?raw=true">
+          </figure>
+        </div>
+        <div class="column is-two-thirds">
+          <p class="title">
+            Pymanopt
+          </p>
+          <p class="subtitle">
+            A Python toolbox for optimization on Riemannian manifolds with
+            support for automatic differentiation
+          </p>
+          <p>
+            Riemannian optimization is a powerful framework to tackle smooth
+            nonlinear optimization problems with structural constraints.
+            By encoding structural properties of a problem in the manifold
+            geometry, Riemannian optimization allows for elegant and convenient
+            enforcement of properties such as orthonormality, low-rankness or
+            positivity of solutions which is typically difficult to achieve via
+            classical methods.
+          </p>
+          <br/>
+          <p>
+            Pymanopt and its companion projects <a href="https://manopt.org"
+            class="is-italic">Manopt</a> (MATLAB) and <a
+            href="https://manpoptjl.org" class="is-italic">Manopt.jl</a>
+            (Julia) offer a wide variety of manifolds, optimization algorithms
+            and tools to efficiently solve nonlinear problems involving
+            manifold constraints.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </body>
+</html>

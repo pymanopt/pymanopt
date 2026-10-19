@@ -10,91 +10,86 @@ on:
       - master
       - develop_backends
 
-jobs:
-  build-matrix:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Generate version matrix
-        id: build-matrix
-        run: echo "versions=['stable', 'latest']" >> "$GITHUB_OUTPUT"
-    outputs:
-      versions: ${{ steps.build-matrix.outputs.versions }}
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
 
-  docs:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
     runs-on: ubuntu-latest
-    needs: build-matrix
-    strategy:
-      # Make sure we never build docs in parallel in case we deploy new
-      # versions to avoid potential race conditions while pushing to gh pages.
-      max-parallel: 1
-      matrix:
-        version: ${{ fromJSON(needs.build-matrix.outputs.versions) }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-
-      - name: Determine python version
-        id: python-version
-        run: |
-          if ${{ matrix.version == 'stable' }}; then
-            echo "version=3.11" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=3.12" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Set up python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ steps.python-version.outputs.version }}
+          python-version: "3.12"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v10.3.0
         with:
-          python-version: ${{ steps.python-version.outputs.version }}
+          python-version: "3.12"
           enable-cache: true
-
-      - name: Clone repository
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Checkout target
-        id: checkout
-        run: git checkout ${{ github.sha }}
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
-          if ${{ matrix.version == 'stable' }}; then
-            uv sync --extra autograd --extra tensorflow --extra torch --extra dev --extra ci --extra docs
-          else
-            uv sync --all-extras
-          fi
+          uv sync --all-extras
 
       - name: Run doctests
         run: uv run sphinx-build -b doctest docs $(mktemp -d)
 
-      - name: Build docs
+      - name: Build stable docs
         run: |
           uv run sphinx-build \
             -b html \
-            -D doc_version="${{ matrix.version }}" \
-            -D doc_versions="${{ join(fromJSON(needs.build-matrix.outputs.versions)) }}" \
+            -D doc_version="stable" \
+            -D doc_versions="stable,latest" \
             docs \
-            website/docs/${{ matrix.version }}
+            website/docs/stable
 
-      - name: Publish documentation
+      - name: Build latest docs
+        run: |
+          uv run sphinx-build \
+            -b html \
+            -D doc_version="latest" \
+            -D doc_versions="stable,latest" \
+            docs \
+            website/docs/latest
+
+      - name: Stage documentation
         if: ${{ github.ref == 'refs/heads/master' }}
-        uses: peaceiris/actions-gh-pages@v4
+        run: |
+          mkdir -p /tmp/pages/docs
+          cp -r website/index.html website/css website/static \
+            website/site.webmanifest website/favicon.ico \
+            website/.nojekyll website/CNAME /tmp/pages/
+          cp -r website/docs/stable /tmp/pages/docs/
+          cp -r website/docs/latest /tmp/pages/docs/
+
+      - name: Upload pages artifact
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: actions/upload-pages-artifact@v3
         with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          external_repository: pymanopt/pymanopt.github.io
-          publish_branch: main
-          publish_dir: website/docs/${{ matrix.version }}
-          destination_dir: docs/${{ matrix.version }}
-          user_name: "github-actions[bot]"
-          user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_message: ${{ github.event.head_commit.message }}
+          path: /tmp/pages
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
