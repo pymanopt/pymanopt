@@ -155,6 +155,13 @@ class ConjugateGradient(Optimizer):
 
     Notes:
         See [HZ2006]_ for details about Powell's restart strategy.
+
+        If logging is enabled (``log_verbosity >= 1``), the initial point is
+        logged as iteration 0 and every subsequent entry records the iterate
+        reached after a completed step, so the last entry corresponds to the
+        returned point. Besides the keys logged by every optimizer, each
+        entry contains the ``"gradient_norm"`` and the ``"step_size"`` of the
+        step that led to the logged point (``nan`` for iteration 0).
     """
 
     def __init__(
@@ -255,18 +262,20 @@ class ConjugateGradient(Optimizer):
         step_size = np.nan
         start_time = time.time()
 
+        # Log the initial point as iteration 0.
+        self._add_log_entry(
+            iteration=iteration,
+            point=x,
+            cost=cost,
+            gradient_norm=gradient_norm,
+            step_size=step_size,
+        )
+
         while True:
             iteration += 1
 
             column_printer.print_row(
                 [iteration, float(cost), float(gradient_norm)]
-            )
-
-            self._add_log_entry(
-                iteration=iteration,
-                point=x,
-                cost=cost,
-                gradient_norm=gradient_norm,
             )
 
             stopping_criterion = self._check_stopping_criterion(
@@ -352,6 +361,15 @@ class ConjugateGradient(Optimizer):
             Pgrad = Pnewgrad
             gradient_norm = newgradient_norm
             gradPgrad = newgradPnewgrad
+
+            # Log the new iterate.
+            self._add_log_entry(
+                iteration=iteration,
+                point=x,
+                cost=cost,
+                gradient_norm=gradient_norm,
+                step_size=step_size,
+            )
 
         return self._return_result(
             start_time=start_time,
