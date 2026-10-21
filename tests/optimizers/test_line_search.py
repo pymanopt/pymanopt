@@ -25,8 +25,9 @@ class TestConstantLineSearcher:
             objective, manifold, x, d, f0=None, df0=None
         )
 
-        assert returned_step_size == step_size
-        assert isinstance(returned_step_size, float)
+        np.testing.assert_allclose(
+            returned_step_size, step_size * manifold.norm(x, d)
+        )
         np.testing.assert_allclose(newx, manifold.retraction(x, step_size * d))
 
     def test_steepest_descent_with_constant_step(self):
@@ -55,8 +56,43 @@ class TestConstantLineSearcher:
         result = optimizer.run(problem, initial_point=initial_point)
 
         assert result.iterations == max_iterations
-        assert result.step_size == step_size
+        # The last step goes from x_{n-1} = (1 - t)^{n-1} x_0 along -x_{n-1}.
+        np.testing.assert_allclose(
+            result.step_size,
+            step_size
+            * (1 - step_size) ** (max_iterations - 1)
+            * np.linalg.norm(initial_point),
+        )
         np.testing.assert_allclose(
             result.point,
             (1 - step_size) ** max_iterations * initial_point,
         )
+
+    def test_min_step_size_stops_constant_step(self):
+        # The returned step size is the length of the step, so it shrinks
+        # with the gradient and the min_step_size criterion triggers.
+        manifold = Euclidean(3, backend=NumpyBackend())
+
+        def cost(x):
+            return float(0.5 * x @ x)
+
+        def euclidean_gradient(x):
+            return x
+
+        problem = Problem(
+            manifold, cost, euclidean_gradient=euclidean_gradient
+        )
+        optimizer = SteepestDescent(
+            line_searcher=ConstantLineSearcher(step_size=0.5),
+            max_iterations=1000,
+            min_gradient_norm=0,
+            min_step_size=1e-6,
+            verbosity=0,
+        )
+        result = optimizer.run(
+            problem, initial_point=np.array([1.0, -2.0, 3.0])
+        )
+
+        assert result.iterations < 1000
+        assert result.step_size < 1e-6
+        assert "step" in result.stopping_criterion

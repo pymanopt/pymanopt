@@ -150,7 +150,8 @@ class ConstantLineSearcher:
     The cost function is never evaluated by this line searcher.
 
     Args:
-        step_size: The constant factor multiplying the search direction.
+        step_size: The constant factor multiplying the search direction
+            (learning rate).
     """
 
     def __init__(self, step_size=1.0):
@@ -168,13 +169,13 @@ class ConstantLineSearcher:
             df0: Directional derivative at ``x`` along ``d`` (unused).
 
         Returns:
-            A tuple ``(step_size, newx)`` where ``step_size`` is the constant
-            step size and ``newx`` is the retraction of ``step_size * d`` at
-            ``x``. Unlike the other line searchers, the returned step size is
-            the factor multiplying ``d`` rather than the norm of the retracted
-            vector, so the ``min_step_size`` stopping criterion of the
-            optimizers compares against the constant step size.
+            A tuple ``(step_size, newx)`` where ``newx`` is the retraction of
+            ``self.step_size * d`` at ``x`` and ``step_size`` is the norm of
+            the step ``self.step_size * d``, as for the other line searchers
+            (so the ``min_step_size`` stopping criterion of the optimizers
+            applies to the length of the step taken).
         """
-        step_size = self.step_size
-        newx = manifold.retraction(x, step_size * d)
+        alpha = self.step_size
+        newx = manifold.retraction(x, alpha * d)
+        step_size = alpha * manifold.norm(x, d)
         return step_size, newx
