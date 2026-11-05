@@ -1,6 +1,6 @@
 import time
 from copy import deepcopy
-from math import log10
+from math import log10, nan
 
 from pymanopt.optimizers.line_search import BackTrackingLineSearcher
 from pymanopt.optimizers.optimizer import Optimizer, OptimizerResult
@@ -17,6 +17,15 @@ class SteepestDescent(Optimizer):
 
     Args:
         line_searcher: The line search method.
+
+    Notes:
+        If logging is enabled (``log_verbosity >= 1``), the initial point is
+        logged as iteration 0 and every subsequent entry records the iterate
+        reached after a completed step, so the log contains
+        ``result.iterations + 1`` entries and its last entry corresponds to
+        the returned point. Besides the keys logged by every optimizer, each
+        entry contains the ``"gradient_norm"`` and the ``"step_size"`` of the
+        step that led to the logged point (``nan`` for iteration 0).
     """
 
     def __init__(self, line_searcher=None, **kwargs):
@@ -83,27 +92,30 @@ class SteepestDescent(Optimizer):
             optimizer_parameters={"line_searcher": line_searcher}
         )
 
+        # Calculate cost, grad and gradient_norm at the initial point
+        cost = objective(x)
+        grad = gradient(x)
+        gradient_norm = manifold.norm(x, grad)
+        step_size = nan
+
         # Initialize iteration counter and timer
         iteration = 0
         start_time = time.time()
 
+        # Log the initial point as iteration 0
+        self._add_log_entry(
+            iteration=iteration,
+            point=x,
+            cost=cost,
+            gradient_norm=gradient_norm,
+            step_size=step_size,
+        )
+
         while True:
             iteration += 1
 
-            # Calculate new cost, grad and gradient_norm
-            cost = objective(x)
-            grad = gradient(x)
-            gradient_norm = manifold.norm(x, grad)
-
             column_printer.print_row(
                 [iteration, float(cost), float(gradient_norm)]
-            )
-
-            self._add_log_entry(
-                iteration=iteration,
-                point=x,
-                cost=cost,
-                gradient_norm=gradient_norm,
             )
 
             # Descent direction is minus the gradient
@@ -112,6 +124,20 @@ class SteepestDescent(Optimizer):
             # Perform line-search
             step_size, x = line_searcher.search(
                 objective, manifold, x, desc_dir, cost, -(gradient_norm**2)
+            )
+
+            # Calculate cost, grad and gradient_norm at the new iterate
+            cost = objective(x)
+            grad = gradient(x)
+            gradient_norm = manifold.norm(x, grad)
+
+            # Log every completed step, including the last one
+            self._add_log_entry(
+                iteration=iteration,
+                point=x,
+                cost=cost,
+                gradient_norm=gradient_norm,
+                step_size=step_size,
             )
 
             stopping_criterion = self._check_stopping_criterion(
@@ -130,7 +156,7 @@ class SteepestDescent(Optimizer):
         return self._return_result(
             start_time=start_time,
             point=x,
-            cost=objective(x),
+            cost=cost,
             iterations=iteration,
             stopping_criterion=stopping_criterion,
             cost_evaluations=iteration,

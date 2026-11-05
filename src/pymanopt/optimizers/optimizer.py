@@ -2,7 +2,7 @@ import abc
 import collections
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 
@@ -36,6 +36,16 @@ class Optimizer(metaclass=abc.ABCMeta):
             operates: 0 is silent, 2 is most verbose.
         log_verbosity: Level of information logged by the optimizer while it
             operates: 0 logs nothing, 1 logs information for each iteration.
+        log_callable: Optional user-defined function to record additional
+            quantities in the iteration log. Whenever an iteration is logged
+            (i.e., if ``log_verbosity >= 1``), it is called as
+            ``log_callable(point=point, cost=cost, iteration=iteration)`` and
+            must return a dictionary mapping names to values. Each value is
+            appended to the per-iteration log under its name, and the
+            wall-clock time spent in the call is recorded under
+            ``"log_time"`` so that it can be discounted from the timings in
+            ``"time"``. Names must not clash with the keys logged by the
+            optimizer itself.
     """
 
     def __init__(
@@ -47,6 +57,7 @@ class Optimizer(metaclass=abc.ABCMeta):
         max_cost_evaluations: int = 5000,
         verbosity: int = 2,
         log_verbosity: int = 0,
+        log_callable: Optional[Callable[..., Dict[str, Any]]] = None,
     ):
         self._max_time = max_time
         self._max_iterations = max_iterations
@@ -55,6 +66,7 @@ class Optimizer(metaclass=abc.ABCMeta):
         self._max_cost_evaluations = max_cost_evaluations
         self._verbosity = verbosity
         self._log_verbosity = log_verbosity
+        self._log_callable = log_callable
 
         self._log = None
 
@@ -139,9 +151,24 @@ class Optimizer(metaclass=abc.ABCMeta):
     def _add_log_entry(self, *, iteration, point, cost, **kwargs):
         if self._log_verbosity <= 0:
             return
-        self._log["iterations"]["time"].append(time.time())
-        self._log["iterations"]["iteration"].append(iteration)
-        self._log["iterations"]["point"].append(point)
-        self._log["iterations"]["cost"].append(cost)
-        for key, value in kwargs.items():
+        entry = {
+            "time": time.time(),
+            "iteration": iteration,
+            "point": point,
+            "cost": cost,
+            **kwargs,
+        }
+        if self._log_callable is not None:
+            user_entry = self._log_callable(
+                point=point, cost=cost, iteration=iteration
+            )
+            entry["log_time"] = time.time() - entry["time"]
+            clashes = entry.keys() & user_entry.keys()
+            if clashes:
+                raise ValueError(
+                    "Keys returned by 'log_callable' clash with keys logged "
+                    f"by the optimizer: {sorted(clashes)}."
+                )
+            entry.update(user_entry)
+        for key, value in entry.items():
             self._log["iterations"][key].append(value)
