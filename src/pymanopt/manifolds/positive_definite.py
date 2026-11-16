@@ -26,9 +26,14 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
 
     def dist(self, point_a, point_b):
         bk = self.backend
-        return bk.real(
-            bk.linalg_norm(bk.linalg_logm(bk.linalg_solve(point_a, point_b)))
+        # Cholesky whitening makes the generalized eigenvalue problem Hermitian.
+        cholesky_factor = bk.linalg_cholesky(point_a)
+        whitened_point = bk.linalg_solve(cholesky_factor, point_b)
+        whitened_point = bk.linalg_solve(
+            cholesky_factor, bk.conjugate_transpose(whitened_point)
         )
+        eigenvalues = bk.linalg_eigvalsh(bk.herm(whitened_point))
+        return bk.linalg_norm(bk.log(eigenvalues))
 
     def inner_product(self, point, tangent_vector_a, tangent_vector_b):
         bk = self.backend
@@ -38,8 +43,9 @@ class _PositiveDefiniteBase(RiemannianSubmanifold):
             if tangent_vector_a is tangent_vector_b
             else bk.linalg_solve(point, tangent_vector_b)
         )
+        # Compute the trace of the product without forming the matrix product.
         return bk.real(
-            bk.tensordot(bk.conjugate(p_inv_tv_a), p_inv_tv_b, bk.ndim(point))
+            bk.tensordot(bk.transpose(p_inv_tv_a), p_inv_tv_b, bk.ndim(point))
         )
 
     def projection(self, point, vector):
