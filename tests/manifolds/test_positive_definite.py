@@ -74,20 +74,19 @@ class TestSymmetricPositiveDefiniteManifold:
         )
 
         # Test congruence-invariance (see equation (6.5) in [Bha2007]).
-        a = bk.random_normal(size=(self.n, self.n))  # must be invertible
+        a = bk.random_normal(size=(self.n, self.n))
+        # Keep the change of basis well conditioned in single precision.
+        a = bk.eye(self.n) + 0.25 * a / bk.linalg_norm(a)
         assert bk.linalg_det(a) != 0.0
-        # axa = a @ x @ bk.conjugate_transpose(a)
-        # aya = a @ y @ bk.conjugate_transpose(a)
-
-        # bk.assert_allclose(
-        #     manifold.dist(x, y),
-        #     manifold.dist(
-        #         bk.conjugate_transpose(a) @ x @ a,
-        #         bk.conjugate_transpose(a) @ y @ a,
-        #     ),
-        #     rtol=1e-4,
-        #     atol=1e-4,
-        # )
+        bk.assert_allclose(
+            manifold.dist(x, y),
+            manifold.dist(
+                bk.conjugate_transpose(a) @ x @ a,
+                bk.conjugate_transpose(a) @ y @ a,
+            ),
+            rtol=1e-4,
+            atol=1e-4,
+        )
 
         # Test proportionality (see equation (6.12) in [Bha2007]).
         alpha = bk.to_real_backend().random_uniform()
@@ -103,10 +102,82 @@ class TestSymmetricPositiveDefiniteManifold:
         manifold = self.manifold
         x = manifold.random_point()
         a, b = bk.herm(bk.random_normal(size=(2,) + self.point_shape))
+        # Trace-free whitened tangents also belong to the special HPD manifold.
+        shape = (self.k, 1, 1) if self.k > 1 else (1, 1)
+        a = a - bk.reshape(bk.trace(a) / self.n, shape) * bk.eye(self.n)
+        b = b - bk.reshape(bk.trace(b) / self.n, shape) * bk.eye(self.n)
+        cholesky_factor = bk.linalg_cholesky(x)
+        cholesky_factor_h = bk.conjugate_transpose(cholesky_factor)
         bk.assert_allclose(
             bk.tensordot(bk.conjugate(a), b, axes=bk.ndim(a)),
-            manifold.inner_product(x, x @ a, x @ b),
+            manifold.inner_product(
+                x,
+                cholesky_factor @ a @ cholesky_factor_h,
+                cholesky_factor @ b @ cholesky_factor_h,
+            ),
             rtol=1e-5,
+        )
+
+    @pytest.fixture
+    def affine_geometry(self):
+        bk = self.backend
+        phase = 1.0 if bk.is_dtype_real else 1.0j
+
+        def array(data):
+            return bk.array(data if self.k == 1 else [data] * self.k)
+
+        manifold = type(self.manifold)(2, k=self.k, backend=bk)
+        point = array([[0.5, 0.0], [0.0, 2.0]])
+        tangent = array([[0.0, phase], [phase.conjugate(), 0.0]])
+        transform = array([[1.0, phase], [0.0, 1.0]])
+        return manifold, point, tangent, transform
+
+    def test_inner_product_affine_invariance(self, affine_geometry):
+        manifold, point, tangent, transform = affine_geometry
+        bk = self.backend
+        transform_h = bk.conjugate_transpose(transform)
+        bk.assert_allclose(
+            manifold.inner_product(point, tangent, tangent), 2 * self.k
+        )
+        bk.assert_allclose(
+            manifold.inner_product(
+                transform @ point @ transform_h,
+                transform @ tangent @ transform_h,
+                transform @ tangent @ transform_h,
+            ),
+            2 * self.k,
+        )
+
+    def test_euclidean_riemannian_gradient_duality(self, affine_geometry):
+        manifold, point, tangent, _ = affine_geometry
+        bk = self.backend
+        gradient = manifold.euclidean_to_riemannian_gradient(point, tangent)
+        bk.assert_allclose(
+            manifold.inner_product(point, gradient, tangent),
+            bk.real(
+                bk.tensordot(
+                    bk.conjugate(tangent), tangent, axes=bk.ndim(tangent)
+                )
+            ),
+        )
+
+    def test_distance_affine_invariance(self, affine_geometry):
+        manifold, point, _, transform = affine_geometry
+        bk = self.backend
+        identity = bk.eye(2)
+        if self.k > 1:
+            identity = bk.tile(identity, (self.k, 1, 1))
+        expected = (2 * self.k) ** 0.5 * bk.to_real_backend().log(
+            bk.to_real_backend().array(2.0)
+        )
+        bk.assert_allclose(manifold.dist(identity, point), expected)
+        transform_h = bk.conjugate_transpose(transform)
+        bk.assert_allclose(
+            manifold.dist(
+                transform @ identity @ transform_h,
+                transform @ point @ transform_h,
+            ),
+            expected,
         )
 
     def test_projection(self):
