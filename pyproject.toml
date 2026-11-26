@@ -54,8 +54,10 @@ dev = [
 docs = [
     "docutils==0.21.2",
     "ipykernel==6.30.1",
+    "matplotlib",
     "myst-parser==4.0.1",
     "nbsphinx==0.9.7",
+    "pymanopt[autograd]",
     "sphinx==8.1.3",
     "sphinx_rtd_theme==3.0.2",
     "sphinxcontrib-katex==0.8.6",
