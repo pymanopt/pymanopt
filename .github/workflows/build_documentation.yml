@@ -43,7 +43,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
-          uv sync --all-extras
+          uv sync --extra docs
 
       - name: Run doctests
         run: uv run sphinx-build -b doctest docs $(mktemp -d)
