@@ -97,7 +97,7 @@ class NelderMead(Optimizer):
             x = [manifold.random_point() for _ in range(num_points)]
         elif (
             tools.is_sequence(initial_point)
-            and len(initial_point) != num_points
+            and len(initial_point) == num_points
         ):
             x = initial_point
         else:
