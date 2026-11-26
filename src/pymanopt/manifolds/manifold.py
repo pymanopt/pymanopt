@@ -37,6 +37,9 @@ class Manifold(metaclass=abc.ABCMeta):
             :class:`pymanopt.manifolds.product.Product` manifold
             ``point_layout`` will be a compound sequence of point layouts of
             manifolds involved in the product.
+        backend: The backend used for computations on the manifold.
+            If omitted, the manifold adopts the backend of the cost function
+            when passed to :class:`pymanopt.core.problem.Problem`.
 
     Note:
         Not all methods are required by all optimizers.

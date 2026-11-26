@@ -22,7 +22,8 @@ particular manifold you would like to optimize over, please let us know.
 If you wish to implement your own manifold for Pymanopt, you will
 need to inherit from the abstract :class:`pymanopt.manifolds.manifold.Manifold`
 or :class:`pymanopt.manifolds.manifold.RiemannianSubmanifold` base
-class.
+class, and use ``self.backend`` instead of NumPy for all computations so that
+your manifold works with every :ref:`backend <Backends>`.
 
 Manifold
 --------

@@ -38,7 +38,11 @@ class DTypePrecision(Enum):
 
 
 class Backend(ABC):
-    """Abstract base class defining the interface for autodiff backends."""
+    """Abstract base class defining the interface for backends.
+
+    A backend provides automatic differentiation of cost functions and the
+    numerical functions used by manifolds.
+    """
 
     ##########################################################################
     # Common attributes, properties and methods
@@ -563,7 +567,7 @@ class Backend(ABC):
 
 
 class DummyBackend(Backend):
-    """Dummy implementation of NumericsBackend, only used as a default in manifolds.
+    """Placeholder backend of manifolds created without a backend.
 
     This class should not be used directly.
     """

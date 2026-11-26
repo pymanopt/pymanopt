@@ -1,4 +1,12 @@
-__all__ = ["Function", "autograd", "jax", "numpy", "pytorch", "tensorflow"]
+__all__ = [
+    "Function",
+    "decorator_factory",
+    "autograd",
+    "jax",
+    "numpy",
+    "pytorch",
+    "tensorflow",
+]
 
 import inspect
 from importlib import import_module
@@ -55,6 +63,18 @@ class _ObjectiveFunctionDecorator(Protocol):
 def decorator_factory(
     module: str, backend_class: str
 ) -> _ObjectiveFunctionDecorator:
+    """Create a backend decorator.
+
+    Args:
+        module: Name of the module defining the backend class, e.g.
+            ``"pymanopt.backends.jax_backend"``.
+            It is imported when a function is decorated.
+        backend_class: Name of the backend class in ``module``.
+
+    Returns:
+        A decorator taking a manifold and an optional ``dtype``.
+    """
+
     def decorator(
         manifold: Manifold, dtype: Optional[Any] = None
     ) -> Callable[[Callable[..., Any]], Function]:
@@ -70,9 +90,7 @@ def decorator_factory(
                     "or a variable-length argument like *x"
                 )
             backend_type = getattr(
-                import_module(
-                    f"pymanopt.backends.{module}",
-                ),
+                import_module(module),
                 backend_class,
             )
             backend = (
@@ -89,8 +107,14 @@ def decorator_factory(
     return decorator
 
 
-numpy = decorator_factory("numpy_backend", "NumpyBackend")
-jax = decorator_factory("jax_backend", "JaxBackend")
-pytorch = decorator_factory("pytorch_backend", "PytorchBackend")
-autograd = decorator_factory("autograd_backend", "AutogradBackend")
-tensorflow = decorator_factory("tensorflow_backend", "TensorflowBackend")
+numpy = decorator_factory("pymanopt.backends.numpy_backend", "NumpyBackend")
+jax = decorator_factory("pymanopt.backends.jax_backend", "JaxBackend")
+pytorch = decorator_factory(
+    "pymanopt.backends.pytorch_backend", "PytorchBackend"
+)
+autograd = decorator_factory(
+    "pymanopt.backends.autograd_backend", "AutogradBackend"
+)
+tensorflow = decorator_factory(
+    "pymanopt.backends.tensorflow_backend", "TensorflowBackend"
+)
