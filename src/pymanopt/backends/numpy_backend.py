@@ -176,7 +176,7 @@ class NumpyBackend(Backend):
     def diagonal(
         self, array: np.ndarray, axis1: int, axis2: int
     ) -> np.ndarray:
-        return np.diagonal(array, axis1, axis2)
+        return np.diagonal(array, axis1=axis1, axis2=axis2)
 
     def eps(self) -> float:
         return float(np.finfo(self.dtype).eps)
@@ -375,7 +375,8 @@ class NumpyBackend(Backend):
         return np.sinc(array)
 
     def sort(self, array: np.ndarray, descending: bool = False) -> np.ndarray:
-        return np.sort(array)
+        array = np.sort(array)
+        return np.flip(array, axis=-1) if descending else array
 
     def sqrt(self, array: np.ndarray) -> np.ndarray:
         return np.sqrt(array)

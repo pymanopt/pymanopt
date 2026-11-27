@@ -27,11 +27,11 @@ def elementary_math_function(
     ["TensorflowBackend", Union[tf.Tensor, Number]], Union[tf.Tensor, Number]
 ]:
     def inner(
-        self: "TensorflowBackend", x: Union[tf.Tensor, Number]
+        self: "TensorflowBackend", array: Union[tf.Tensor, Number]
     ) -> Union[tf.Tensor, Number]:
-        if isinstance(x, tf.Tensor):
-            return f(self, x)
-        return f(self, self.array(x)).numpy().item()
+        if isinstance(array, tf.Tensor):
+            return f(self, array)
+        return f(self, self.array(array)).numpy().item()
 
     inner.__doc__ = f.__doc__
     inner.__name__ = f.__name__
@@ -171,8 +171,10 @@ class TensorflowBackend(Backend):
         rtol: float = 1e-5,
         atol: float = 1e-8,
     ) -> bool:
-        return tf.reduce_all(
-            tf.abs(array_a - array_b) <= (atol + rtol * tf.abs(array_b))
+        return bool(
+            tf.reduce_all(
+                tf.abs(array_a - array_b) <= (atol + rtol * tf.abs(array_b))
+            )
         )
 
     def any(self, array: tf.Tensor) -> bool:
@@ -207,7 +209,7 @@ class TensorflowBackend(Backend):
         return tf.math.atanh(array)
 
     def argmin(self, array: tf.Tensor):
-        return tf.argmin(array)
+        return tf.experimental.numpy.argmin(array)
 
     def argsort(self, array: tf.Tensor):
         return tf.argsort(array)
@@ -261,11 +263,10 @@ class TensorflowBackend(Backend):
         return tf.math.cos(array)
 
     def diag(self, array: tf.Tensor) -> tf.Tensor:
-        return tf.linalg.diag(array)
+        return tf.experimental.numpy.diag(array)
 
     def diagonal(self, array: tf.Tensor, axis1: int, axis2: int) -> tf.Tensor:
-        # TODO: check correctness
-        return tf.linalg.diag_part(array)
+        return tf.experimental.numpy.diagonal(array, axis1=axis1, axis2=axis2)
 
     def eps(self) -> float:
         return tf.experimental.numpy.finfo(self.dtype).eps
@@ -281,7 +282,7 @@ class TensorflowBackend(Backend):
         return tf.eye(size, dtype=self.dtype)
 
     def hstack(self, arrays: TupleOrList[tf.Tensor]) -> tf.Tensor:
-        return tf.concat(arrays, axis=1)
+        return tf.experimental.numpy.hstack(arrays)
 
     def imag(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.imag(array)
@@ -349,7 +350,8 @@ class TensorflowBackend(Backend):
         return logmA
 
     def linalg_matrix_rank(self, array: tf.Tensor) -> int:
-        return tf.linalg.matrix_rank(array).numpy().item()
+        rank = tf.linalg.matrix_rank(array)
+        return rank.numpy().item() if rank.ndim == 0 else rank
 
     def linalg_norm(
         self,
@@ -407,17 +409,13 @@ class TensorflowBackend(Backend):
     def log10(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.log(array) / tf.math.log(tf.constant(10.0))
 
+    def logical_not(self, array: tf.Tensor) -> tf.Tensor:
+        return tf.logical_not(array)
+
     def logspace(self, start: float, stop: float, num: int) -> tf.Tensor:
         return tf.experimental.numpy.logspace(
             start, stop, num, dtype=self.dtype
         )
-
-    def matvec(self, A: tf.Tensor, x: tf.Tensor) -> tf.Tensor:
-        if A.ndim < 2:
-            raise ValueError("Tensor must have at least have 2 dimension")
-        if x.ndim == A.ndim - 1:
-            return self.squeeze(A @ tf.expand_dims(x, -1))
-        return tf.matmul(A, x)
 
     def matmul(self, A: tf.Tensor, B: tf.Tensor) -> tf.Tensor:
         return tf.matmul(A, B)
@@ -441,16 +439,15 @@ class TensorflowBackend(Backend):
         self,
         loc: float = 0.0,
         scale: float = 1.0,
-        size: Union[int, TupleOrList[int]] = 1,
+        size: Union[int, TupleOrList[int], None] = None,
     ) -> tf.Tensor:
         # pre-process the size
         if isinstance(size, int):
             new_size = (size,)
         elif size is None:
-            new_size = (1,)
+            new_size = ()
         else:
             new_size = size
-        new_size = tf.constant(new_size)
         # sample
         if self.is_dtype_real:
             samples = tf.random.normal(
@@ -459,24 +456,26 @@ class TensorflowBackend(Backend):
         else:
             real_dtype = self._complex_to_real_dtype(self.dtype)
             samples = tf.cast(
-                tf.random.normal(shape=new_size, mean=loc, dtype=real_dtype),
+                tf.random.normal(
+                    shape=new_size, mean=loc, stddev=scale, dtype=real_dtype
+                ),
                 self.dtype,
             ) + 1j * tf.cast(
-                tf.random.normal(shape=new_size, mean=loc, dtype=real_dtype),
+                tf.random.normal(
+                    shape=new_size, mean=loc, stddev=scale, dtype=real_dtype
+                ),
                 self.dtype,
             )
-        # post-process
-        return samples.numpy().item() if size is None else samples
+        return samples
 
     def random_uniform(self, size: Optional[int] = None) -> tf.Tensor:
         # pre-process the size
         if isinstance(size, int):
             new_size = (size,)
         elif size is None:
-            new_size = (1,)
+            new_size = ()
         else:
             new_size = size
-        new_size = tf.constant(new_size)
         # sample
         if self.is_dtype_real:
             samples = tf.random.uniform(shape=new_size, dtype=self.dtype)
@@ -487,8 +486,7 @@ class TensorflowBackend(Backend):
             ) + 1j * tf.cast(
                 tf.random.uniform(shape=new_size, dtype=real_dtype), self.dtype
             )
-        # post-process
-        return samples.numpy().item() if size is None else samples
+        return samples
 
     @elementary_math_function
     def real(self, array: tf.Tensor) -> tf.Tensor:
@@ -546,7 +544,7 @@ class TensorflowBackend(Backend):
     def tile(
         self, array: tf.Tensor, reps: Union[int, TupleOrList[int]]
     ) -> tf.Tensor:
-        return tf.tile(array, reps)
+        return tf.experimental.numpy.tile(array, reps)
 
     def trace(self, array: tf.Tensor) -> tf.Tensor:
         return (
@@ -564,16 +562,16 @@ class TensorflowBackend(Backend):
         return tf.experimental.numpy.triu(array, k)
 
     def vstack(self, arrays: TupleOrList[tf.Tensor]) -> tf.Tensor:
-        return tf.concat(arrays, axis=0)
+        return tf.experimental.numpy.vstack(arrays)
 
     def where(
         self,
         condition: tf.Tensor,
         x: Optional[tf.Tensor] = None,
         y: Optional[tf.Tensor] = None,
-    ) -> tf.Tensor:
+    ) -> Union[tf.Tensor, tuple[tf.Tensor, ...]]:
         if x is None and y is None:
-            return tf.where(condition)
+            return tuple(tf.experimental.numpy.nonzero(condition))
         if x is not None and y is not None:
             return tf.where(condition, x, y)
         raise ValueError(

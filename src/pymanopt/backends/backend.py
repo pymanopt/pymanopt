@@ -208,8 +208,8 @@ class Backend(ABC):
         self,
         array_a: array_t,
         array_b: array_t,
-        rtol: float,
-        atol: float,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
     ) -> bool:
         """Test closeness with rtol and atol, like :func:`numpy.allclose`."""
 
@@ -675,8 +675,8 @@ class Backend(ABC):
     def where(
         self,
         condition: array_t,
-        x: Optional[array_t],
-        y: Optional[array_t],
+        x: Optional[array_t] = None,
+        y: Optional[array_t] = None,
     ) -> Union[array_t, tuple[array_t, ...]]:
         """Select elements or find true indices, like :func:`numpy.where`.
 
