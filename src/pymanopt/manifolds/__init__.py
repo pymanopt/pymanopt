@@ -5,6 +5,7 @@ __all__ = [
     "Euclidean",
     "ComplexEuclidean",
     "FixedRankEmbedded",
+    "GeneralizedStiefel",
     "Grassmann",
     "HermitianPositiveDefinite",
     "SpecialHermitianPositiveDefinite",
@@ -46,3 +47,4 @@ from .sphere import (
     SphereSubspaceIntersection,
 )
 from .stiefel import Stiefel
+from .generalized_stiefel import GeneralizedStiefel
