@@ -30,13 +30,14 @@ strongly recommend, you need to setup your cost functions using either
 If you are unfamiliar with these packages and you are unsure which to go for,
 we suggest to start with JAX.
 Its ``jax.numpy`` module mirrors the NumPy API.
-To get the latest version of Pymanopt, install it via `pip` by specifying the
-backend(s) you want to use among `autograd`, `jax`, `torch` and `tensorflow`,
-separated by a comma. For example:
+To get the latest version of Pymanopt, install it via `uv` or `pip` by
+specifying the backend(s) you want to use among `autograd`, `jax`, `torch` and
+`tensorflow`, separated by a comma. For example:
 
 .. code-block:: bash
 
-    $ pip install "pymanopt[jax]" # or [autograd], [tensorflow], [torch]
+    $ uv add "pymanopt[jax]" # or [autograd], [tensorflow], [torch]
+    $ pip install "pymanopt[jax]"
 
 A Simple Example
 ----------------
