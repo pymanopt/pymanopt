@@ -150,8 +150,8 @@ class JaxBackend(Backend):
         self,
         array_a: jnp.ndarray,
         array_b: jnp.ndarray,
-        rtol: float = 1e-7,
-        atol: float = 1e-10,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
     ) -> bool:
         return jnp.allclose(array_a, array_b, rtol=rtol, atol=atol).item()
 
@@ -207,6 +207,14 @@ class JaxBackend(Backend):
                 f" (rtol={rtol})"
             )
 
+    def assert_equal(
+        self,
+        array_a: jnp.ndarray,
+        array_b: jnp.ndarray,
+    ) -> None:
+        if not jnp.array_equal(array_a, array_b):
+            raise ValueError(f"Arrays are not equal: {array_a} vs {array_b}")
+
     def concatenate(
         self, arrays: TupleOrList[jnp.ndarray], axis: int = 0
     ) -> jnp.ndarray:
@@ -224,7 +232,7 @@ class JaxBackend(Backend):
     def diagonal(
         self, array: jnp.ndarray, axis1: int, axis2: int
     ) -> jnp.ndarray:
-        return jnp.diagonal(array, axis1, axis2)
+        return jnp.diagonal(array, axis1=axis1, axis2=axis2)
 
     def eps(self) -> float:
         return jnp.finfo(self.dtype).eps
@@ -312,7 +320,8 @@ class JaxBackend(Backend):
         return logmA
 
     def linalg_matrix_rank(self, array: jnp.ndarray) -> int:
-        return jnp.linalg.matrix_rank(array).item()
+        rank = jnp.linalg.matrix_rank(array)
+        return rank.item() if rank.ndim == 0 else rank
 
     def linalg_norm(
         self,
@@ -365,6 +374,9 @@ class JaxBackend(Backend):
 
     def log10(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.log10(array)
+
+    def logical_not(self, array: jnp.ndarray) -> jnp.ndarray:
+        return jnp.logical_not(array)
 
     def logspace(self, start: float, stop: float, num: int) -> jnp.ndarray:
         return jnp.logspace(start, stop, num, dtype=self.dtype)

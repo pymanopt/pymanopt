@@ -20,11 +20,11 @@ def elementary_math_function(
     Union[torch.Tensor, float, complex],
 ]:
     def inner(
-        self, x: Union[torch.Tensor, float, complex]
+        self, array: Union[torch.Tensor, float, complex]
     ) -> Union[torch.Tensor, float, complex]:
-        if isinstance(x, torch.Tensor):
-            return f(self, x)
-        return f(self, self.array(x)).item()
+        if isinstance(array, torch.Tensor):
+            return f(self, array)
+        return f(self, self.array(array)).item()
 
     inner.__doc__ = f.__doc__
     inner.__name__ = f.__name__
@@ -145,22 +145,14 @@ class PytorchBackend(Backend):
         self,
         array_a: torch.Tensor,
         array_b: torch.Tensor,
-        rtol: float = 1e-6,
-        atol: float = 1e-6,
+        rtol: float = 1e-5,
+        atol: float = 1e-8,
     ) -> bool:
         if not isinstance(array_a, torch.Tensor):
             array_a = self.array(array_a)
         if not isinstance(array_b, torch.Tensor):
             array_b = self.array(array_b)
-        if array_a.numel() == 1 and array_b.numel() != 1:
-            array_a = torch.full_like(array_b, array_a.item())
-        elif array_b.numel() == 1 and array_a.numel() != 1:
-            array_b = torch.full_like(array_a, array_b.item())
-        elif array_a.shape != array_b.shape:
-            raise ValueError(
-                f"Arrays with shapes {array_a.shape} and {array_b.shape} "
-                "cannot be compared."
-            )
+        array_a, array_b = torch.broadcast_tensors(array_a, array_b)
         return torch.allclose(array_a, array_b, rtol=rtol, atol=atol)
 
     def any(self, array: torch.Tensor) -> bool:
@@ -200,22 +192,7 @@ class PytorchBackend(Backend):
     def argsort(self, array: torch.Tensor):
         return torch.argsort(array)
 
-    def _is_complex_with_nonzero_imag(self, array: Any) -> bool:
-        if isinstance(array, torch.Tensor):
-            return self.iscomplexobj(array) and not self.allclose(
-                torch.imag(array), torch.tensor(0.0)
-            )
-        if isinstance(array, np.ndarray):
-            return np.iscomplexobj(array) and not np.allclose(
-                np.imag(array), 0.0, atol=1e-5
-            )
-        return False
-
     def array(self, array: Any) -> torch.Tensor:  # type: ignore
-        if self.is_dtype_real and self._is_complex_with_nonzero_imag(array):
-            raise ValueError(
-                "Complex Tensors should not be converted to real tensors"
-            )
         return torch.as_tensor(array, dtype=self.dtype)
 
     def assert_allclose(
@@ -238,6 +215,14 @@ class PytorchBackend(Backend):
                 f"{max_abs(array_a - array_b) / max_abs(array_b)}"
                 f" (rtol={rtol})"
             )
+
+    def assert_equal(
+        self,
+        array_a: torch.Tensor,
+        array_b: torch.Tensor,
+    ) -> None:
+        if not torch.equal(array_a, array_b):
+            raise ValueError(f"Arrays are not equal: {array_a} vs {array_b}")
 
     def concatenate(
         self, arrays: TupleOrList[torch.Tensor], axis: int = 0
@@ -327,7 +312,7 @@ class PytorchBackend(Backend):
         w, v = torch.linalg.eigh(array)
         w = torch.unsqueeze(torch.exp(w), dim=-1)
         expmA = v @ (w * self.conjugate_transpose(v))
-        if torch.is_complex(array):
+        if self.isrealobj(array):
             return torch.real(expmA)
         return expmA
 
@@ -335,7 +320,8 @@ class PytorchBackend(Backend):
         return torch.linalg.inv(array)
 
     def linalg_matrix_rank(self, array: torch.Tensor) -> int:
-        return int(torch.linalg.matrix_rank(array))
+        rank = torch.linalg.matrix_rank(array)
+        return rank.item() if rank.ndim == 0 else rank
 
     def linalg_logm(
         self, array: torch.Tensor, positive_definite: bool = False
@@ -363,10 +349,7 @@ class PytorchBackend(Backend):
         axis: Union[int, TupleOrList[int], None] = None,
         keepdims: bool = False,
     ) -> torch.Tensor:
-        norm = torch.linalg.norm(array, ord=ord, axis=axis, keepdim=keepdims)
-        if axis is None:
-            return norm.item()
-        return norm
+        return torch.linalg.norm(array, ord=ord, axis=axis, keepdim=keepdims)
 
     def linalg_qr(
         self, array: torch.Tensor
@@ -416,6 +399,9 @@ class PytorchBackend(Backend):
     def log10(self, array: torch.Tensor) -> torch.Tensor:
         return torch.log10(array)
 
+    def logical_not(self, array: torch.Tensor) -> torch.Tensor:
+        return torch.logical_not(array)
+
     def logspace(self, start: float, stop: float, num: int) -> torch.Tensor:
         return torch.logspace(start, stop, num, dtype=self.dtype)
 
@@ -440,7 +426,7 @@ class PytorchBackend(Backend):
         if isinstance(size, int):
             new_size = (size,)
         elif size is None:
-            new_size = (1,)
+            new_size = ()
         else:
             new_size = size
 
@@ -456,15 +442,15 @@ class PytorchBackend(Backend):
                 mean=loc, std=scale, size=new_size, dtype=real_dtype
             )
 
-        return samples.item() if size is None else samples
+        return samples
 
     def random_uniform(
         self, size: Union[int, TupleOrList[int], None] = None
-    ) -> Union[torch.Tensor, Number]:
+    ) -> torch.Tensor:
         if isinstance(size, int):
             new_size = (size,)
         elif size is None:
-            new_size = (1,)
+            new_size = ()
         else:
             new_size = size
 
@@ -476,7 +462,7 @@ class PytorchBackend(Backend):
                 new_size, dtype=real_dtype
             )
 
-        return samples.item() if size is None else samples
+        return samples
 
     @elementary_math_function
     def real(self, array: torch.Tensor) -> torch.Tensor:
@@ -539,11 +525,7 @@ class PytorchBackend(Backend):
         return torch.tile(array, [reps] if isinstance(reps, int) else reps)
 
     def trace(self, array: torch.Tensor) -> Union[Number, torch.Tensor]:
-        return (
-            torch.trace(array)
-            if array.ndim == 2
-            else torch.einsum("ijj->i", array)
-        )
+        return torch.einsum("...ii->...", array)
 
     def transpose(self, array: torch.Tensor) -> torch.Tensor:
         return torch.transpose(array, -2, -1)
