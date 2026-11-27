@@ -138,3 +138,44 @@ class AdaptiveLineSearcher:
             self._oldalpha = 2 * alpha
 
         return step_size, newx
+
+
+class ConstantLineSearcher:
+    """Line search with a constant, user-defined step size.
+
+    No search is performed: every call moves from ``x`` to the retraction of
+    ``step_size * d``, where ``d`` is the search direction provided by the
+    optimizer. This allows, e.g., running
+    :class:`pymanopt.optimizers.SteepestDescent` with a fixed learning rate.
+    The cost function is never evaluated by this line searcher.
+
+    Args:
+        step_size: The constant factor multiplying the search direction
+            (learning rate).
+    """
+
+    def __init__(self, step_size=1.0):
+        self.step_size = float(step_size)
+
+    def search(self, objective, manifold, x, d, f0, df0):
+        """Take a step of constant size along the search direction.
+
+        Args:
+            objective: Objective function to optimize (unused).
+            manifold: The manifold to optimize over.
+            x: Starting point on the manifold.
+            d: Tangent vector at ``x``, i.e., a descent direction.
+            f0: Cost at ``x`` (unused).
+            df0: Directional derivative at ``x`` along ``d`` (unused).
+
+        Returns:
+            A tuple ``(step_size, newx)`` where ``newx`` is the retraction of
+            ``self.step_size * d`` at ``x`` and ``step_size`` is the norm of
+            the step ``self.step_size * d``, as for the other line searchers
+            (so the ``min_step_size`` stopping criterion of the optimizers
+            applies to the length of the step taken).
+        """
+        alpha = self.step_size
+        newx = manifold.retraction(x, alpha * d)
+        step_size = alpha * manifold.norm(x, d)
+        return step_size, newx
