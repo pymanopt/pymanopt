@@ -537,7 +537,7 @@ class Backend(ABC):
     def reshape(
         self,
         array: array_t,
-        newshape: TupleOrList[int],
+        shape: TupleOrList[int],
     ) -> array_t:
         """Reshape, preserving element order, like :func:`numpy.reshape`."""
 

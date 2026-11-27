@@ -494,10 +494,8 @@ class TensorflowBackend(Backend):
     def real(self, array: tf.Tensor) -> tf.Tensor:
         return tf.math.real(array)
 
-    def reshape(
-        self, array: tf.Tensor, newshape: TupleOrList[int]
-    ) -> tf.Tensor:
-        return tf.reshape(array, newshape)
+    def reshape(self, array: tf.Tensor, shape: TupleOrList[int]) -> tf.Tensor:
+        return tf.reshape(array, shape)
 
     @elementary_math_function
     def sin(self, array: tf.Tensor) -> tf.Tensor:
