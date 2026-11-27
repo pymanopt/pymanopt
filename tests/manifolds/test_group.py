@@ -4,6 +4,38 @@ from pymanopt.backends import Backend
 from pymanopt.manifolds import SpecialOrthogonalGroup, UnitaryGroup
 
 
+def check_euclidean_to_riemannian_hessian(manifold, backend):
+    # f(X) = ||X - B||^2 / 2 is const - Re tr(B^H X) on the group, so along
+    # X expm(tU) its second derivative at t = 0 is -Re tr(B^H X U^2).
+    bk = backend
+    n, k = manifold.n, manifold.k
+    point = manifold.random_point()
+    matrix = bk.random_normal(size=(n, n) if k == 1 else (k, n, n))
+    euclidean_gradient = point - matrix
+
+    def hessian(tangent_vector):
+        return manifold.euclidean_to_riemannian_hessian(
+            point,
+            euclidean_gradient,
+            manifold.embedding(point, tangent_vector),
+            tangent_vector,
+        )
+
+    u = manifold.random_tangent_vector(point)
+    v = manifold.random_tangent_vector(point)
+    second_derivative = -bk.real(
+        bk.tensordot(bk.conjugate(matrix), point @ u @ u, bk.ndim(u))
+    )
+    bk.assert_allclose(
+        bk.real(manifold.inner_product(point, hessian(u), u)),
+        second_derivative,
+    )
+    bk.assert_allclose(
+        bk.real(manifold.inner_product(point, hessian(u), v)),
+        bk.real(manifold.inner_product(point, u, hessian(v))),
+    )
+
+
 class TestSpecialOrthogonalGroup:
     @pytest.fixture(autouse=True)
     def setup(self, real_backend: Backend):
@@ -46,6 +78,12 @@ class TestSpecialOrthogonalGroup:
         tangent_vector = self.so_product.random_tangent_vector(point)
         self.backend.assert_allclose(
             tangent_vector, -self.backend.transpose(tangent_vector)
+        )
+
+    @pytest.mark.parametrize("manifold_attribute", ["so", "so_product"])
+    def test_euclidean_to_riemannian_hessian(self, manifold_attribute):
+        check_euclidean_to_riemannian_hessian(
+            getattr(self, manifold_attribute), self.backend
         )
 
     @pytest.mark.parametrize("manifold_attribute", ["so", "so_polar"])
@@ -128,6 +166,14 @@ class TestUnitaryGroup:
         assert bk.any(bk.imag(tangent_vector) > 0.0)
         bk.assert_allclose(
             tangent_vector, -bk.conjugate_transpose(tangent_vector)
+        )
+
+    @pytest.mark.parametrize(
+        "manifold_attribute", ["unitary_group", "product_manifold"]
+    )
+    def test_euclidean_to_riemannian_hessian(self, manifold_attribute):
+        check_euclidean_to_riemannian_hessian(
+            getattr(self, manifold_attribute), self.backend
         )
 
     @pytest.mark.parametrize(

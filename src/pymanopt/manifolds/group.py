@@ -59,7 +59,7 @@ class _UnitaryBase(RiemannianSubmanifold):
     def euclidean_to_riemannian_hessian(
         self, point, euclidean_gradient, euclidean_hessian, tangent_vector
     ):
-        Xt = self.backend.conjugate(point)
+        Xt = self.backend.conjugate_transpose(point)
         Xtegrad = Xt @ euclidean_gradient
         symXtegrad = self.backend.herm(Xtegrad)
         Xtehess = Xt @ euclidean_hessian
