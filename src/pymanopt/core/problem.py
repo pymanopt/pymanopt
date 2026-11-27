@@ -13,8 +13,9 @@ class Problem:
     Args:
         manifold: Manifold to optimize over.
         cost: A callable decorated with a decorator from
-            :mod:`pymanopt.functions` which takes a point on a manifold and
+            :mod:`pymanopt.function` which takes a point on a manifold and
             returns a real scalar.
+            The decorator may be omitted if ``manifold`` already has a backend.
             If any decorator other than :func:`pymanopt.function.numpy` is
             used, the gradient and Hessian functions are generated
             automatically if needed and no ``{euclidean,riemannian}_gradient``

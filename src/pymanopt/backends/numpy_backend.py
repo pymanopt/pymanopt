@@ -364,9 +364,9 @@ class NumpyBackend(Backend):
         return np.real(array)
 
     def reshape(
-        self, array: np.ndarray, newshape: TupleOrList[int]
+        self, array: np.ndarray, shape: TupleOrList[int]
     ) -> np.ndarray:
-        return np.reshape(array, newshape)
+        return np.reshape(array, shape)
 
     def sin(self, array: np.ndarray) -> np.ndarray:
         return np.sin(array)

@@ -483,9 +483,9 @@ class PytorchBackend(Backend):
         return torch.real(array)
 
     def reshape(
-        self, array: torch.Tensor, newshape: TupleOrList[int]
+        self, array: torch.Tensor, shape: TupleOrList[int]
     ) -> torch.Tensor:
-        return torch.reshape(array, newshape)
+        return torch.reshape(array, shape)
 
     @elementary_math_function
     def sin(self, array: torch.Tensor) -> torch.Tensor:

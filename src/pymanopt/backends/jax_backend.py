@@ -435,9 +435,9 @@ class JaxBackend(Backend):
         return jnp.real(array)
 
     def reshape(
-        self, array: jnp.ndarray, newshape: TupleOrList[int]
+        self, array: jnp.ndarray, shape: TupleOrList[int]
     ) -> jnp.ndarray:
-        return jnp.reshape(array, newshape)
+        return jnp.reshape(array, shape)
 
     def sin(self, array: jnp.ndarray) -> jnp.ndarray:
         return jnp.sin(array)

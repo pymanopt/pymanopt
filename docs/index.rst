@@ -37,6 +37,8 @@ publish work using Pymanopt:
    :caption: Getting Started
 
    quickstart.rst
+   backends.rst
+   upgrading.rst
    Examples <https://github.com/pymanopt/pymanopt/tree/master/examples>
    api-reference.rst
    CONTRIBUTING.md

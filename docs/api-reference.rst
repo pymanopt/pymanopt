@@ -7,7 +7,6 @@ API Reference
    :caption: Packages & Modules
 
    manifolds.rst
-   autodiff.rst
    problem.rst
    optimizers.rst
    tools.rst
